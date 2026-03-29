@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import Literal
+from typing import Any, Literal
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
@@ -37,12 +37,27 @@ class EndRequest(BaseModel):
     conversation_id: int = Field(ge=1)
 
 
+class StartResponse(BaseModel):
+    conversation_id: int
+    message: str
+    topic: str
+
+
+class MessageResponse(BaseModel):
+    message: str
+    feedback: dict[str, Any]
+
+
+class EndResponse(BaseModel):
+    summary: dict[str, Any]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_conversation_topics()
 
 
-@router.post("/start")
+@router.post("/start", response_model=StartResponse)
 async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session)):
     topics = get_conversation_topics()
     topic_data = next((t for t in topics if t["id"] == req.topic), None)
@@ -78,7 +93,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     }
 
 
-@router.post("/message")
+@router.post("/message", response_model=MessageResponse)
 async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
     if not conv:
@@ -125,7 +140,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     return {"message": ai_response, "feedback": feedback}
 
 
-@router.post("/end")
+@router.post("/end", response_model=EndResponse)
 async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(get_db_session)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
     if not conv:

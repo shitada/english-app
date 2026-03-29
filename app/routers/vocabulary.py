@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,6 +23,40 @@ router = APIRouter(prefix="/api/vocabulary", tags=["vocabulary"])
 class AnswerRequest(BaseModel):
     word_id: int = Field(ge=1)
     is_correct: bool
+
+
+class QuizQuestionItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    example_sentence: str
+    difficulty: int
+    wrong_options: list[str]
+
+
+class QuizResponse(BaseModel):
+    questions: list[QuizQuestionItem]
+
+
+class AnswerResponse(BaseModel):
+    word_id: int
+    is_correct: bool
+    new_level: int
+    next_review: str
+
+
+class ProgressItem(BaseModel):
+    word: str
+    topic: str
+    correct_count: int
+    incorrect_count: int
+    level: int
+    last_reviewed: str
+    next_review_at: str
+
+
+class ProgressResponse(BaseModel):
+    progress: list[ProgressItem]
 
 
 @router.get("/topics")
@@ -66,7 +101,7 @@ async def generate_quiz(
     return {"questions": words}
 
 
-@router.post("/answer")
+@router.post("/answer", response_model=AnswerResponse)
 async def submit_answer(
     req: AnswerRequest,
     db: aiosqlite.Connection = Depends(get_db_session),
@@ -79,7 +114,7 @@ async def submit_answer(
     return result
 
 
-@router.get("/progress")
+@router.get("/progress", response_model=ProgressResponse)
 async def get_progress(
     topic: str | None = None,
     db: aiosqlite.Connection = Depends(get_db_session),

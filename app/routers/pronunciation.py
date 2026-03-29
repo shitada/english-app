@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,7 +24,28 @@ class CheckRequest(BaseModel):
     user_transcription: str = Field(min_length=1)
 
 
-@router.get("/sentences")
+class SentenceItem(BaseModel):
+    text: str
+    topic: str
+
+
+class SentencesResponse(BaseModel):
+    sentences: list[SentenceItem]
+
+
+class AttemptItem(BaseModel):
+    reference_text: str
+    user_transcription: str
+    feedback: dict[str, Any] | None
+    score: float | None
+    created_at: str
+
+
+class HistoryResponse(BaseModel):
+    attempts: list[AttemptItem]
+
+
+@router.get("/sentences", response_model=SentencesResponse)
 async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
     sentences = await pron_dal.get_sentences_from_conversations(db)
     return {"sentences": sentences}
@@ -53,7 +75,7 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
     return feedback
 
 
-@router.get("/history")
+@router.get("/history", response_model=HistoryResponse)
 async def get_pronunciation_history(db: aiosqlite.Connection = Depends(get_db_session)):
     attempts = await pron_dal.get_history(db)
     return {"attempts": attempts}
