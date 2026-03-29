@@ -9,3 +9,4 @@ settings/
 certs/
 node_modules/
 frontend/dist/
+.vscode/
