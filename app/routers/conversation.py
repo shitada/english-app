@@ -9,7 +9,7 @@ import time
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt
 from app.copilot_client import get_copilot_service
@@ -23,16 +23,16 @@ router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
 
 class StartRequest(BaseModel):
-    topic: str
+    topic: str = Field(min_length=1)
 
 
 class MessageRequest(BaseModel):
-    conversation_id: int
-    content: str
+    conversation_id: int = Field(ge=1)
+    content: str = Field(min_length=1)
 
 
 class EndRequest(BaseModel):
-    conversation_id: int
+    conversation_id: int = Field(ge=1)
 
 
 @router.get("/topics")

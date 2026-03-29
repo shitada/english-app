@@ -6,7 +6,7 @@ import logging
 
 import aiosqlite
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.config import get_prompt
 from app.copilot_client import get_copilot_service
@@ -19,8 +19,8 @@ router = APIRouter(prefix="/api/pronunciation", tags=["pronunciation"])
 
 
 class CheckRequest(BaseModel):
-    reference_text: str
-    user_transcription: str
+    reference_text: str = Field(min_length=1)
+    user_transcription: str = Field(min_length=1)
 
 
 @router.get("/sentences")

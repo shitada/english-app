@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from app.config import get_vocabulary_topics, get_prompt
 from app.copilot_client import get_copilot_service
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/vocabulary", tags=["vocabulary"])
 
 
 class AnswerRequest(BaseModel):
-    word_id: int
+    word_id: int = Field(ge=1)
     is_correct: bool
 
 
@@ -32,7 +32,7 @@ async def list_topics():
 @router.get("/quiz")
 async def generate_quiz(
     topic: str,
-    count: int = 10,
+    count: int = Query(default=10, ge=1, le=50),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     existing = await vocab_dal.get_words_by_topic(db, topic)
