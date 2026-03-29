@@ -13,7 +13,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 
 ## [MEDIUM] Feature Improvements
 
-- [ ] Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary
+- [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)
 - [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
 - [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
 - [ ] Add conversation history review page — let users revisit past conversations and grammar feedback
