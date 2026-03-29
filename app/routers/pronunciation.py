@@ -45,6 +45,26 @@ class HistoryResponse(BaseModel):
     attempts: list[AttemptItem]
 
 
+class ScoreByDate(BaseModel):
+    date: str
+    avg_score: float
+    count: int
+
+
+class MostPracticed(BaseModel):
+    text: str
+    attempt_count: int
+    avg_score: float
+
+
+class PronunciationProgressResponse(BaseModel):
+    total_attempts: int
+    avg_score: float
+    best_score: float
+    scores_by_date: list[ScoreByDate]
+    most_practiced: list[MostPracticed]
+
+
 @router.get("/sentences", response_model=SentencesResponse)
 async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
     sentences = await pron_dal.get_sentences_from_conversations(db)
@@ -79,3 +99,9 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
 async def get_pronunciation_history(db: aiosqlite.Connection = Depends(get_db_session)):
     attempts = await pron_dal.get_history(db)
     return {"attempts": attempts}
+
+
+@router.get("/progress", response_model=PronunciationProgressResponse)
+async def get_pronunciation_progress(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get aggregate pronunciation progress statistics."""
+    return await pron_dal.get_progress(db)

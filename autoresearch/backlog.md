@@ -37,5 +37,5 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 ## [LOW] Infrastructure
 
 - [ ] Add database migration strategy — handle schema changes without data loss
-- [ ] Add health check endpoint — monitor service availability
+- [x] ✅ Add health check endpoint — monitor service availability (completed iteration #9)
 - [ ] Add rate limiting — prevent abuse of LLM endpoints

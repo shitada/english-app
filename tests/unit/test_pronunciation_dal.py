@@ -9,6 +9,7 @@ import pytest
 from app.dal.conversation import add_message, create_conversation
 from app.dal.pronunciation import (
     get_history,
+    get_progress,
     get_sentences_from_conversations,
     save_attempt,
 )
@@ -140,3 +141,53 @@ class TestGetHistory:
         history = await get_history(test_db)
         assert history[0]["score"] == 9.0
         assert history[0]["created_at"] is not None
+
+
+@pytest.mark.unit
+class TestGetProgress:
+    async def test_empty_database_returns_zeros(self, test_db):
+        progress = await get_progress(test_db)
+        assert progress["total_attempts"] == 0
+        assert progress["avg_score"] == 0
+        assert progress["best_score"] == 0
+        assert progress["scores_by_date"] == []
+        assert progress["most_practiced"] == []
+
+    async def test_single_attempt(self, test_db):
+        feedback = {"overall_score": 8}
+        await save_attempt(test_db, "Hello there.", "Hello there.", feedback, 8.0)
+        progress = await get_progress(test_db)
+        assert progress["total_attempts"] == 1
+        assert progress["avg_score"] == 8.0
+        assert progress["best_score"] == 8.0
+
+    async def test_multiple_attempts_computes_averages(self, test_db):
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Test one.", "Test one.", feedback, 6.0)
+        await save_attempt(test_db, "Test two.", "Test two.", feedback, 8.0)
+        await save_attempt(test_db, "Test three.", "Test three.", feedback, 10.0)
+        progress = await get_progress(test_db)
+        assert progress["total_attempts"] == 3
+        assert progress["avg_score"] == 8.0
+        assert progress["best_score"] == 10.0
+
+    async def test_most_practiced_ranking(self, test_db):
+        feedback = {"overall_score": 5}
+        # Practice sentence A 3 times
+        for _ in range(3):
+            await save_attempt(test_db, "Sentence A.", "Sentence A.", feedback, 7.0)
+        # Practice sentence B 1 time
+        await save_attempt(test_db, "Sentence B.", "Sentence B.", feedback, 8.0)
+        progress = await get_progress(test_db)
+        assert len(progress["most_practiced"]) == 2
+        assert progress["most_practiced"][0]["text"] == "Sentence A."
+        assert progress["most_practiced"][0]["attempt_count"] == 3
+
+    async def test_scores_by_date_has_entries(self, test_db):
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "Test.", "Test.", feedback, 7.0)
+        progress = await get_progress(test_db)
+        assert len(progress["scores_by_date"]) >= 1
+        assert "date" in progress["scores_by_date"][0]
+        assert "avg_score" in progress["scores_by_date"][0]
+        assert "count" in progress["scores_by_date"][0]

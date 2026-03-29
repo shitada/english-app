@@ -65,3 +65,57 @@ async def get_history(db: aiosqlite.Connection, limit: int = 20) -> list[dict[st
         }
         for r in rows
     ]
+
+
+async def get_progress(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get aggregate pronunciation progress stats."""
+
+    # Total attempts and scores
+    rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as total, AVG(score) as avg_score,
+                  MAX(score) as best_score
+           FROM pronunciation_attempts WHERE score IS NOT NULL"""
+    )
+    total = rows[0]["total"]
+    avg_score = round(rows[0]["avg_score"] or 0, 1)
+    best_score = rows[0]["best_score"] or 0
+
+    # Daily average scores for trend
+    daily_rows = await db.execute_fetchall(
+        """SELECT date(created_at) as day, AVG(score) as avg_score, COUNT(*) as count
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL
+           GROUP BY date(created_at)
+           ORDER BY day DESC
+           LIMIT 30"""
+    )
+    scores_by_date = [
+        {"date": r["day"], "avg_score": round(r["avg_score"], 1), "count": r["count"]}
+        for r in daily_rows
+    ]
+
+    # Most practiced sentences
+    sentence_rows = await db.execute_fetchall(
+        """SELECT reference_text, COUNT(*) as attempt_count,
+                  AVG(score) as avg_score
+           FROM pronunciation_attempts
+           GROUP BY reference_text
+           ORDER BY attempt_count DESC
+           LIMIT 5"""
+    )
+    most_practiced = [
+        {
+            "text": r["reference_text"],
+            "attempt_count": r["attempt_count"],
+            "avg_score": round(r["avg_score"] or 0, 1),
+        }
+        for r in sentence_rows
+    ]
+
+    return {
+        "total_attempts": total,
+        "avg_score": avg_score,
+        "best_score": best_score,
+        "scores_by_date": scores_by_date,
+        "most_practiced": most_practiced,
+    }
