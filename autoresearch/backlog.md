@@ -17,7 +17,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
 - [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
 - [ ] Add conversation history review page — let users revisit past conversations and grammar feedback
-- [ ] Add progress tracking for pronunciation — track improvement over time per sentence type
+- [x] ✅ Add progress tracking for pronunciation — track improvement over time per sentence type (completed iteration #10)
 
 ## [MEDIUM] Code Quality
 
