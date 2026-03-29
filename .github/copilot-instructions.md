@@ -52,6 +52,7 @@ cd frontend && npm run dev
 - **Error handling** — `HTTPException` for API errors
 - **JSON blob storage** — feedback/analysis stored as JSON TEXT columns in SQLite
 - **SM-2 spaced repetition** — vocabulary progress uses intervals [0,1,3,7,14,30,60]
+- **DB migrations** — when adding columns/tables to `SCHEMA` in `database.py`, also add corresponding `ALTER TABLE` statements to `_MIGRATIONS` list. `CREATE TABLE IF NOT EXISTS` does NOT update existing tables.
 
 ## Testing Conventions
 - Fixtures in `tests/conftest.py`: `test_db` (in-memory SQLite), `mock_copilot`, `client` (AsyncClient)

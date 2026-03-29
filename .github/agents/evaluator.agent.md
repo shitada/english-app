@@ -29,6 +29,7 @@ Score each dimension from 1-10:
 - Proper error handling (HTTPException, try/except where needed)
 - No security issues (SQL injection, XSS, etc.)
 - Appropriate use of types and type hints
+- **DB schema backward compatibility**: If `database.py` SCHEMA has new columns/tables, check that corresponding `ALTER TABLE` statements are added to `_MIGRATIONS`. If SCHEMA is changed but `_MIGRATIONS` is not updated, set code_quality to **3 or lower** — this WILL break existing deployments.
 - **10**: Exemplary code, could be a teaching example
 - **7**: Solid, production-ready code
 - **5**: Works but has minor style or quality issues
@@ -53,6 +54,7 @@ Score each dimension from 1-10:
 - Reduces coupling, follows separation of concerns
 - Changes are backward-compatible
 - Does not introduce tech debt
+- Schema changes include proper migrations (ALTER TABLE in `_MIGRATIONS`)
 - **10**: Significantly improves maintainability, excellent test coverage
 - **7**: Maintains or slightly improves maintainability
 - **5**: Neutral impact on maintainability

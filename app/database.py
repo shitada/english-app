@@ -68,6 +68,34 @@ CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(w
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
 """
 
+# ---------------------------------------------------------------------------
+# Migrations — each entry is an (description, SQL) tuple.
+# These handle schema changes for EXISTING databases where CREATE TABLE IF NOT
+# EXISTS will NOT add new columns. Add new migrations to the END of the list.
+# ---------------------------------------------------------------------------
+_MIGRATIONS: list[tuple[str, str]] = [
+    (
+        "add difficulty column to conversations",
+        "ALTER TABLE conversations ADD COLUMN difficulty TEXT NOT NULL DEFAULT 'intermediate'",
+    ),
+]
+
+
+async def _apply_migrations(db: aiosqlite.Connection) -> None:
+    """Apply pending migrations to an existing database.
+
+    Each migration is attempted independently. If it fails (e.g. column already
+    exists), the error is silently ignored — this makes migrations idempotent.
+    """
+    for desc, sql in _MIGRATIONS:
+        try:
+            await db.execute(sql)
+            logger.info("Migration applied: %s", desc)
+        except Exception:
+            # Already applied (e.g. "duplicate column name") — skip silently
+            pass
+    await db.commit()
+
 
 async def get_db() -> aiosqlite.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -95,5 +123,6 @@ async def init_db() -> None:
     try:
         await db.executescript(SCHEMA)
         await db.commit()
+        await _apply_migrations(db)
     finally:
         await db.close()

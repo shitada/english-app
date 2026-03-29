@@ -56,6 +56,7 @@ Implement the proposed change by editing the necessary files. Follow project con
 - Pydantic models for API request/response
 - Proper error handling with `HTTPException`
 - Add/update tests for any code changes
+- **If `database.py` SCHEMA is modified** (new columns, tables, indexes): you MUST also add the corresponding `ALTER TABLE` / `CREATE TABLE` / `CREATE INDEX` statements to the `_MIGRATIONS` list in `database.py`. `CREATE TABLE IF NOT EXISTS` does NOT update existing tables.
 
 Record timestamp after implementation:
 ```bash
@@ -90,6 +91,23 @@ Parse test results:
 - `tests_total`: total number of tests
 - `ts_check`: "pass" or "fail"
 
+### Step 5b — Smoke Test (if `database.py`, `routers/`, or `dal/` changed)
+
+Check whether the changed files include `database.py`, any file in `app/routers/`, or `app/dal/`:
+```bash
+git diff HEAD~1 --name-only | grep -E "database\.py|app/routers/|app/dal/"
+```
+
+If any match, run a live-server smoke test against the **real DB file** (`data/english_app.db`):
+
+```bash
+cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null; uv run python tests/smoke_test.py
+```
+
+The script starts the real server on port 8099, hits `/api/health`, `/api/conversation/topics`, `/api/pronunciation/sentences`, `/api/vocabulary/topics`, `/api/dashboard/stats`, and checks for non-5xx responses. It prints `SMOKE OK` or `SMOKE FAIL`.
+
+If smoke test fails → treat as test failure (discard the change).
+
 ### Step 6 — Evaluate
 Invoke the **evaluator** subagent. Pass it:
 - The proposal (title + description)
@@ -110,11 +128,13 @@ Save as `T4`. Calculate `evaluate_sec = T4 - T3` and `total_sec = T4 - T0`.
 **KEEP** if ALL of:
 - All tests pass (tests_passed == tests_total)
 - TypeScript check passes (ts_check == "pass")
+- Smoke test passes (if applicable)
 - Evaluator total_score >= 6.0
 
 **DISCARD** if ANY of:
 - Any test fails
 - TypeScript check fails
+- Smoke test fails
 - Evaluator total_score < 6.0
 
 If discarding:
@@ -169,3 +189,4 @@ After completing all 10 iterations (or reaching iteration 10), generate `autores
 5. **Keep changes small** — prefer focused, single-purpose changes over ambitious refactors
 6. **Test-first for iterations 1-2** — prioritize adding test coverage before feature work
 7. **Record timing** at every checkpoint (T0-T4) for performance tracking
+8. **Schema changes require migrations** — if `database.py` SCHEMA is modified, `_MIGRATIONS` must be updated and smoke test must pass

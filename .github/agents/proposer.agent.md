@@ -49,6 +49,7 @@ Evaluate the codebase from these angles (in priority order):
 - **Respect project conventions** — async/await, DAL separation, Pydantic models
 - **Must be testable** — every change should be verifiable by existing or new tests
 - **Do NOT modify config.yaml** unless explicitly about configuration
+- **Schema changes require migrations** — if the proposal adds/removes columns or tables in `database.py` SCHEMA, the description MUST include the corresponding `ALTER TABLE ADD COLUMN` statements to add to `_MIGRATIONS` in `database.py`. `CREATE TABLE IF NOT EXISTS` does NOT update existing tables. Failing to include migration statements will cause the smoke test to fail and the change will be discarded.
 
 ## Output Format
 
