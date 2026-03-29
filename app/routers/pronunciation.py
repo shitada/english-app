@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 import aiosqlite
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.config import get_prompt
@@ -37,10 +37,14 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         reference_text=req.reference_text,
         user_transcription=req.user_transcription,
     )
-    feedback = await copilot.ask_json(
-        "You are an English pronunciation coach. Return ONLY valid JSON.",
-        prompt,
-    )
+    try:
+        feedback = await copilot.ask_json(
+            "You are an English pronunciation coach. Return ONLY valid JSON.",
+            prompt,
+        )
+    except Exception as e:
+        logger.error("LLM error in check_pronunciation: %s", e)
+        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
 
     await pron_dal.save_attempt(
         db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),

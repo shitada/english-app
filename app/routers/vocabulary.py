@@ -53,10 +53,14 @@ async def generate_quiz(
     topic_label = get_topic_label(get_vocabulary_topics(), topic)
     copilot = get_copilot_service()
     prompt = get_prompt("vocabulary_quiz_generator").format(topic=topic_label, count=count)
-    result = await copilot.ask_json(
-        "You are an English vocabulary teacher. Return ONLY valid JSON.",
-        prompt,
-    )
+    try:
+        result = await copilot.ask_json(
+            "You are an English vocabulary teacher. Return ONLY valid JSON.",
+            prompt,
+        )
+    except Exception as e:
+        logger.error("LLM error in generate_quiz: %s", e)
+        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
 
     words = await vocab_dal.save_words(db, topic, result.get("questions", []))
     return {"questions": words}
