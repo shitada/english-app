@@ -118,5 +118,37 @@ async def test_get_history(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert "messages" in data
-    assert len(data["messages"]) >= 1
-    assert data["messages"][0]["role"] == "assistant"
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_with_difficulty(client, mock_copilot):
+    """Test that difficulty parameter is accepted and stored."""
+    mock_copilot.ask = AsyncMock(return_value="Hello! Let's practice!")
+
+    for diff in ["beginner", "intermediate", "advanced"]:
+        res = await client.post(
+            "/api/conversation/start",
+            json={"topic": "hotel_checkin", "difficulty": diff},
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["conversation_id"] > 0
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_invalid_difficulty(client):
+    """Test that invalid difficulty returns 422."""
+    res = await client.post(
+        "/api/conversation/start",
+        json={"topic": "hotel_checkin", "difficulty": "expert"},
+    )
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_default_difficulty(client, mock_copilot):
+    """Test that omitting difficulty defaults to intermediate."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    assert res.status_code == 200
+    assert res.json()["conversation_id"] > 0

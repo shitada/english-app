@@ -8,8 +8,10 @@ from typing import Any
 import aiosqlite
 
 
-async def create_conversation(db: aiosqlite.Connection, topic: str) -> int:
-    cursor = await db.execute("INSERT INTO conversations (topic) VALUES (?)", (topic,))
+async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate") -> int:
+    cursor = await db.execute(
+        "INSERT INTO conversations (topic, difficulty) VALUES (?, ?)", (topic, difficulty)
+    )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
 

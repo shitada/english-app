@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import time
+from typing import Literal
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
@@ -24,6 +25,7 @@ router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
 class StartRequest(BaseModel):
     topic: str = Field(min_length=1)
+    difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
 
 
 class MessageRequest(BaseModel):
@@ -46,14 +48,21 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     topic_data = next((t for t in topics if t["id"] == req.topic), None)
     topic_label = topic_data["label"] if topic_data else req.topic
 
-    conversation_id = await conv_dal.create_conversation(db, req.topic)
+    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty)
 
     copilot = get_copilot_service()
+
+    difficulty_instructions = {
+        "beginner": "\nIMPORTANT: Use simple vocabulary and short sentences (5-8 words). Speak slowly and clearly. If the user makes mistakes, gently correct them with the right phrase. Avoid idioms and complex grammar.",
+        "intermediate": "\nUse natural conversational English. Mix simple and moderate vocabulary. Correct significant grammar errors but keep the conversation flowing.",
+        "advanced": "\nUse natural, fluent English including idioms, phrasal verbs, and complex sentence structures. Challenge the user with nuanced vocabulary. Only correct subtle errors. Discuss topics in depth.",
+    }
+
     system = get_prompt("conversation_partner").format(
         scenario=topic_data.get("scenario", topic_label) if topic_data else topic_label,
         role=topic_data.get("scenario", "a conversation partner") if topic_data else "a conversation partner",
         goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
-    )
+    ) + difficulty_instructions[req.difficulty]
     try:
         opening = await copilot.ask(system, "Start the scenario. Greet the user in character.")
     except Exception as e:

@@ -21,6 +21,14 @@ const SCENARIOS = [
 
 const DURATION = 5 * 60; // 5 minutes in seconds
 
+type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: string }[] = [
+  { value: 'beginner', label: '🌱 Beginner', description: 'Simple vocabulary, short sentences' },
+  { value: 'intermediate', label: '📗 Intermediate', description: 'Natural conversation pace' },
+  { value: 'advanced', label: '🚀 Advanced', description: 'Idioms, complex grammar, nuanced' },
+];
+
 export default function Conversation() {
   const [phase, setPhase] = useState<'select' | 'chat' | 'summary'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -29,6 +37,7 @@ export default function Conversation() {
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [summary, setSummary] = useState<any>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -73,7 +82,7 @@ export default function Conversation() {
   const startConversation = async (topicId: string) => {
     setLoading(true);
     try {
-      const res = await api.startConversation(topicId);
+      const res = await api.startConversation(topicId, difficulty);
       setConversationId(res.conversation_id);
       setMessages([{ role: 'assistant', content: res.message }]);
       setPhase('chat');
@@ -151,18 +160,43 @@ export default function Conversation() {
             <div className="spinner" /> Setting up scenario...
           </div>
         ) : (
-          <div className="topic-grid">
-            {SCENARIOS.map((s) => (
-              <button
-                key={s.id}
-                className="topic-card"
-                onClick={() => startConversation(s.id)}
-              >
-                <h3>{s.emoji} {s.label}</h3>
-                <p>{s.description}</p>
-              </button>
-            ))}
-          </div>
+          <>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Difficulty Level</h3>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {DIFFICULTY_OPTIONS.map((d) => (
+                  <button
+                    key={d.value}
+                    onClick={() => setDifficulty(d.value)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      border: difficulty === d.value ? '2px solid var(--primary)' : '2px solid var(--border)',
+                      background: difficulty === d.value ? 'var(--primary)' : 'transparent',
+                      color: difficulty === d.value ? 'white' : 'var(--text)',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                    }}
+                    title={d.description}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="topic-grid">
+              {SCENARIOS.map((s) => (
+                <button
+                  key={s.id}
+                  className="topic-card"
+                  onClick={() => startConversation(s.id)}
+                >
+                  <h3>{s.emoji} {s.label}</h3>
+                  <p>{s.description}</p>
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
     );

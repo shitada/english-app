@@ -16,10 +16,10 @@ export const api = {
   getConversationTopics: () => request<{ id: string; label: string; description: string }[]>('/api/conversation/topics'),
 
   // Conversation
-  startConversation: (topic: string) =>
+  startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate') =>
     request<{ conversation_id: number; message: string; topic: string }>('/api/conversation/start', {
       method: 'POST',
-      body: JSON.stringify({ topic }),
+      body: JSON.stringify({ topic, difficulty }),
     }),
 
   sendMessage: (conversation_id: number, content: string) =>

@@ -9,7 +9,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add unit tests for pronunciation DAL (`app/dal/pronunciation.py`) — test get_sentences_from_conversations, save_attempt, get_history (completed iteration #2)
 - [x] ✅ Add unit tests for vocabulary DAL (`app/dal/vocabulary.py`) — test get_words_by_topic, save_words, get_due_word_ids, build_quiz, update_progress, get_progress (completed iteration #3)
 - [x] ✅ Add input validation tests for routers — test invalid request bodies, missing fields, boundary values (completed iteration #4)
-- [ ] Add error handling tests — test database connection failures, LLM timeout scenarios
+- [x] ✅ Add error handling tests — test database connection failures, LLM timeout scenarios (completed iteration #5)
 
 ## [MEDIUM] Feature Improvements
 

@@ -17,6 +17,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     topic TEXT NOT NULL,
+    difficulty TEXT NOT NULL DEFAULT 'intermediate',
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
     status TEXT NOT NULL DEFAULT 'active'
