@@ -4,17 +4,18 @@ from __future__ import annotations
 
 import logging
 import logging.handlers
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.config import load_config, get_logging_config
-from app.database import init_db
+from app.database import init_db, get_db_session
 from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
 
@@ -55,9 +56,13 @@ load_config()
 setup_logging()
 logger = logging.getLogger(__name__)
 
+_startup_time: float = 0.0
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global _startup_time
+    _startup_time = time.monotonic()
     logger.info("Initializing database...")
     await init_db()
     logger.info("Database ready.")
@@ -98,6 +103,31 @@ async def frontend_log(entry: FrontendLogEntry):
     lvl = getattr(logging, entry.level.upper(), logging.INFO)
     frontend_logger.log(lvl, "%s", entry.message)
     return {"ok": True}
+
+
+# Health check endpoint
+@app.get("/api/health")
+async def health_check():
+    """Check service health and database connectivity."""
+    uptime = round(time.monotonic() - _startup_time, 1) if _startup_time else 0.0
+    try:
+        async for db in get_db_session():
+            await db.execute("SELECT 1")
+            break
+        db_status = "ok"
+    except Exception as e:
+        logger.warning("Health check DB failure: %s", e)
+        db_status = "error"
+
+    status = "ok" if db_status == "ok" else "degraded"
+    response = {
+        "status": status,
+        "database": db_status,
+        "uptime_seconds": uptime,
+    }
+    if status == "degraded":
+        return JSONResponse(content=response, status_code=503)
+    return response
 
 
 # Register API routers

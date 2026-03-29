@@ -22,7 +22,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 ## [MEDIUM] Code Quality
 
 - [ ] Unify error handling patterns across routers — consistent HTTPException usage, error response schema
-- [ ] Add Pydantic response models for all endpoints — ensure consistent API response structure
+- [x] ✅ Add Pydantic response models for all endpoints — ensure consistent API response structure (completed iteration #8)
 - [x] ✅ Extract dashboard SQL queries into DAL module (completed iteration #7)
 - [ ] Extract common LLM interaction patterns — reduce duplication in router-level LLM calls
 - [ ] Add request/response logging middleware — structured logging for debugging API issues
