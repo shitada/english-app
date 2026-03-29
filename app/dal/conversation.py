@@ -1,0 +1,83 @@
+"""Data access layer for conversations and messages."""
+
+from __future__ import annotations
+
+import json
+from typing import Any
+
+import aiosqlite
+
+
+async def create_conversation(db: aiosqlite.Connection, topic: str) -> int:
+    cursor = await db.execute("INSERT INTO conversations (topic) VALUES (?)", (topic,))
+    await db.commit()
+    return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def add_message(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    role: str,
+    content: str,
+    feedback: dict[str, Any] | None = None,
+) -> int:
+    feedback_json = json.dumps(feedback) if feedback else None
+    cursor = await db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json) VALUES (?, ?, ?, ?)",
+        (conversation_id, role, content, feedback_json),
+    )
+    await db.commit()
+    return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def update_message_feedback(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    role: str,
+    content: str,
+    feedback: dict[str, Any],
+) -> None:
+    await db.execute(
+        """UPDATE messages SET feedback_json = ?
+           WHERE id = (
+               SELECT id FROM messages
+               WHERE conversation_id = ? AND role = ? AND content = ?
+               ORDER BY created_at DESC LIMIT 1
+           )""",
+        (json.dumps(feedback), conversation_id, role, content),
+    )
+
+
+async def get_active_conversation(db: aiosqlite.Connection, conversation_id: int) -> dict | None:
+    rows = await db.execute_fetchall(
+        "SELECT * FROM conversations WHERE id = ? AND status = 'active'",
+        (conversation_id,),
+    )
+    return dict(rows[0]) if rows else None
+
+
+async def get_conversation_history(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+) -> list[dict[str, Any]]:
+    rows = await db.execute_fetchall(
+        "SELECT role, content, feedback_json, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at",
+        (conversation_id,),
+    )
+    return [dict(r) for r in rows]
+
+
+async def format_history_text(db: aiosqlite.Connection, conversation_id: int) -> str:
+    rows = await db.execute_fetchall(
+        "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at",
+        (conversation_id,),
+    )
+    return "\n".join(f"{r['role']}: {r['content']}" for r in rows)
+
+
+async def end_conversation(db: aiosqlite.Connection, conversation_id: int) -> None:
+    await db.execute(
+        "UPDATE conversations SET status = 'ended', ended_at = datetime('now') WHERE id = ?",
+        (conversation_id,),
+    )
+    await db.commit()

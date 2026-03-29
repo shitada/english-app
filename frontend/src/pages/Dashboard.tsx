@@ -1,0 +1,79 @@
+import { useState, useEffect } from 'react';
+import { Flame, MessageSquare, Mic, BookOpen, Trophy } from 'lucide-react';
+import { api, type DashboardStats } from '../api';
+
+export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getDashboardStats()
+      .then(setStats)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="spinner" /> Loading stats...
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Failed to load dashboard.</p>;
+  }
+
+  return (
+    <div>
+      <h2 style={{ marginBottom: 24 }}>Dashboard</h2>
+
+      {/* Streak */}
+      <div className="card" style={{ textAlign: 'center', marginBottom: 24, background: stats.streak > 0 ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : undefined }}>
+        <Flame size={40} color={stats.streak > 0 ? '#f59e0b' : '#d1d5db'} />
+        <div style={{ fontSize: 48, fontWeight: 800, marginTop: 8 }}>{stats.streak}</div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
+          {stats.streak === 0 ? 'Start learning today!' : stats.streak === 1 ? 'Day streak! Keep it up!' : `Day streak! Amazing!`}
+        </p>
+      </div>
+
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <StatCard icon={<MessageSquare size={24} color="#6366f1" />} label="Conversations" value={stats.total_conversations} sub={`${stats.total_messages} messages sent`} />
+        <StatCard icon={<Mic size={24} color="#f59e0b" />} label="Shadowing" value={stats.total_pronunciation} sub={`Avg score: ${stats.avg_pronunciation_score}/10`} />
+        <StatCard icon={<BookOpen size={24} color="#10b981" />} label="Words Reviewed" value={stats.total_vocab_reviewed} sub={`${stats.vocab_mastered} mastered`} />
+        <StatCard icon={<Trophy size={24} color="#8b5cf6" />} label="Mastered" value={stats.vocab_mastered} sub="Level 3+" />
+      </div>
+
+      {/* Recent activity */}
+      {stats.recent_activity.length > 0 && (
+        <div className="card">
+          <h3 style={{ marginBottom: 12 }}>Recent Activity</h3>
+          {stats.recent_activity.map((a, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < stats.recent_activity.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <span style={{ fontSize: 18 }}>
+                {a.type === 'conversation' ? '💬' : '🎙️'}
+              </span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 14 }}>{a.detail}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{a.timestamp}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: number; sub: string }) {
+  return (
+    <div className="card" style={{ textAlign: 'center' }}>
+      <div style={{ marginBottom: 8 }}>{icon}</div>
+      <div style={{ fontSize: 32, fontWeight: 700 }}>{value}</div>
+      <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{label}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{sub}</p>
+    </div>
+  );
+}

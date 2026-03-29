@@ -1,0 +1,84 @@
+"""Vocabulary quiz API endpoints."""
+
+from __future__ import annotations
+
+import logging
+
+import aiosqlite
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+
+from app.config import get_vocabulary_topics, get_prompt
+from app.copilot_client import get_copilot_service
+from app.dal import vocabulary as vocab_dal
+from app.database import get_db_session
+from app.utils import get_topic_label
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/vocabulary", tags=["vocabulary"])
+
+
+class AnswerRequest(BaseModel):
+    word_id: int
+    is_correct: bool
+
+
+@router.get("/topics")
+async def list_topics():
+    return get_vocabulary_topics()
+
+
+@router.get("/quiz")
+async def generate_quiz(
+    topic: str,
+    count: int = 10,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    existing = await vocab_dal.get_words_by_topic(db, topic)
+
+    if len(existing) >= count:
+        due_ids = await vocab_dal.get_due_word_ids(db, topic, count)
+        words = []
+        for r in existing:
+            if r["id"] in due_ids:
+                words.insert(0, r)
+            else:
+                words.append(r)
+        words = words[:count]
+        all_meanings = [r["meaning"] for r in existing]
+        return {"questions": vocab_dal.build_quiz(words, all_meanings)}
+
+    # Generate new words via LLM
+    topic_label = get_topic_label(get_vocabulary_topics(), topic)
+    copilot = get_copilot_service()
+    prompt = get_prompt("vocabulary_quiz_generator").format(topic=topic_label, count=count)
+    result = await copilot.ask_json(
+        "You are an English vocabulary teacher. Return ONLY valid JSON.",
+        prompt,
+    )
+
+    words = await vocab_dal.save_words(db, topic, result.get("questions", []))
+    return {"questions": words}
+
+
+@router.post("/answer")
+async def submit_answer(
+    req: AnswerRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    word = await vocab_dal.get_word(db, req.word_id)
+    if not word:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    result = await vocab_dal.update_progress(db, req.word_id, req.is_correct)
+    return result
+
+
+@router.get("/progress")
+async def get_progress(
+    topic: str | None = None,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    progress = await vocab_dal.get_progress(db, topic)
+    return {"progress": progress}

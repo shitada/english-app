@@ -1,0 +1,166 @@
+"""Integration tests for vocabulary API endpoints."""
+
+import pytest
+from unittest.mock import AsyncMock
+
+
+@pytest.mark.asyncio
+async def test_list_vocabulary_topics(client):
+    res = await client.get("/api/vocabulary/topics")
+    assert res.status_code == 200
+    topics = res.json()
+    assert isinstance(topics, list)
+    assert len(topics) > 0
+    assert all("id" in t and "label" in t for t in topics)
+
+
+@pytest.mark.asyncio
+async def test_generate_quiz(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {
+                "word": "agenda",
+                "correct_meaning": "a list of items to be discussed at a meeting",
+                "wrong_options": ["a type of food", "a travel document", "a musical instrument"],
+                "example_sentence": "Let's review the agenda before the meeting.",
+                "difficulty": 1,
+            },
+            {
+                "word": "negotiate",
+                "correct_meaning": "to discuss something in order to reach an agreement",
+                "wrong_options": ["to ignore", "to celebrate", "to complain"],
+                "example_sentence": "We need to negotiate the contract terms.",
+                "difficulty": 2,
+            },
+        ]
+    })
+
+    res = await client.get("/api/vocabulary/quiz?topic=business&count=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert "questions" in data
+    assert len(data["questions"]) == 2
+    assert data["questions"][0]["word"] == "agenda"
+
+
+@pytest.mark.asyncio
+async def test_submit_correct_answer(client, mock_copilot):
+    # First generate a quiz to get word IDs
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{
+            "word": "deadline",
+            "correct_meaning": "a time limit",
+            "wrong_options": ["a type of line", "a greeting", "a dessert"],
+            "example_sentence": "The deadline is tomorrow.",
+            "difficulty": 1,
+        }]
+    })
+
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    # Submit correct answer
+    res = await client.post("/api/vocabulary/answer", json={
+        "word_id": word_id,
+        "is_correct": True,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_correct"] is True
+    assert data["new_level"] == 1  # First correct answer → level 1
+
+
+@pytest.mark.asyncio
+async def test_submit_incorrect_answer(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{
+            "word": "revenue",
+            "correct_meaning": "income earned by a business",
+            "wrong_options": ["a type of food", "an event", "a color"],
+            "example_sentence": "Our revenue increased this quarter.",
+            "difficulty": 2,
+        }]
+    })
+
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    res = await client.post("/api/vocabulary/answer", json={
+        "word_id": word_id,
+        "is_correct": False,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_correct"] is False
+    assert data["new_level"] == 0  # First incorrect answer → level 0
+
+
+@pytest.mark.asyncio
+async def test_submit_answer_nonexistent_word(client):
+    res = await client.post("/api/vocabulary/answer", json={
+        "word_id": 99999,
+        "is_correct": True,
+    })
+    assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_spaced_repetition_level_up(client, mock_copilot):
+    """Multiple correct answers should increase the level."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{
+            "word": "synergy",
+            "correct_meaning": "combined effort being greater than individual parts",
+            "wrong_options": ["energy drink", "a planet", "a disease"],
+            "example_sentence": "There is great synergy between our teams.",
+            "difficulty": 3,
+        }]
+    })
+
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    # Answer correctly 3 times
+    for i in range(3):
+        res = await client.post("/api/vocabulary/answer", json={
+            "word_id": word_id,
+            "is_correct": True,
+        })
+        assert res.status_code == 200
+
+    data = res.json()
+    assert data["new_level"] == 3
+
+
+@pytest.mark.asyncio
+async def test_get_progress(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{
+            "word": "milestone",
+            "correct_meaning": "an important event or stage",
+            "wrong_options": ["a rock", "a distance", "a tool"],
+            "example_sentence": "This is a major milestone.",
+            "difficulty": 1,
+        }]
+    })
+
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
+
+    res = await client.get("/api/vocabulary/progress?topic=business")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["progress"]) >= 1
+    assert data["progress"][0]["word"] == "milestone"
+
+
+@pytest.mark.asyncio
+async def test_frontend_log_endpoint(client):
+    res = await client.post("/api/log", json={
+        "level": "INFO",
+        "message": "[SpeechRecognition] test log from frontend",
+    })
+    assert res.status_code == 200
+    assert res.json()["ok"] is True

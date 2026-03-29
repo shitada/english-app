@@ -1,0 +1,33 @@
+[project]
+name = "english-app"
+version = "0.1.0"
+description = "English conversation practice app powered by GitHub Copilot SDK"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "github-copilot-sdk>=0.1.25",
+    "aiosqlite>=0.20",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.28",
+    "playwright>=1.49",
+    "pytest-playwright>=0.6",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (require DB, mock LLM)",
+    "e2e: End-to-end browser tests (require running server)",
+]
+
+# By default, exclude e2e tests (run them separately with: uv run pytest tests/e2e)
+addopts = "--ignore=tests/e2e"

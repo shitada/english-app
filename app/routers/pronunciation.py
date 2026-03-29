@@ -1,0 +1,55 @@
+"""Pronunciation check API endpoints."""
+
+from __future__ import annotations
+
+import logging
+
+import aiosqlite
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+
+from app.config import get_prompt
+from app.copilot_client import get_copilot_service
+from app.dal import pronunciation as pron_dal
+from app.database import get_db_session
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/pronunciation", tags=["pronunciation"])
+
+
+class CheckRequest(BaseModel):
+    reference_text: str
+    user_transcription: str
+
+
+@router.get("/sentences")
+async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
+    sentences = await pron_dal.get_sentences_from_conversations(db)
+    return {"sentences": sentences}
+
+
+@router.post("/check")
+async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+    copilot = get_copilot_service()
+
+    prompt = get_prompt("pronunciation_checker").format(
+        reference_text=req.reference_text,
+        user_transcription=req.user_transcription,
+    )
+    feedback = await copilot.ask_json(
+        "You are an English pronunciation coach. Return ONLY valid JSON.",
+        prompt,
+    )
+
+    await pron_dal.save_attempt(
+        db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),
+    )
+
+    return feedback
+
+
+@router.get("/history")
+async def get_pronunciation_history(db: aiosqlite.Connection = Depends(get_db_session)):
+    attempts = await pron_dal.get_history(db)
+    return {"attempts": attempts}
