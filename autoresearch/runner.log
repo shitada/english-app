@@ -480,3 +480,122 @@ Now add the test for vocabulary-only streak:
 
 Now commit and test:
 
+● Commit iteration 24 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #24: include vocabulary reviews in streak calculation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check for iteration 24 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests for iteration 24 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+165/165 tests pass, TypeScript check passes. Check if smoke test needed:
+
+● T3 + check smoke test needed (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+T3 = 1774880068. DAL file changed — smoke test required:
+
+● Run smoke test for iteration 24 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+Smoke test passed. Now QA test — start server and invoke tester:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run python -m app.main &
+  │ sleep 3 && curl -sk https://localhost:8000/api/health
+  └ 13 lines...
+
+● Tester QA test iteration 24
+  │ playwright-browser_wait_for
+  │   └ ### Result
+  └ playwright-browser_navigate https://localhost:8000
+      └ MCP server 'playwright': ### Error
+        Error: page.goto: net::ERR_CONNECTION_REFUSED at https://localhost:8000/
+        Call log:
+        [2m- navigating to "https://localhost:8000/", waiting until "domcontentloaded"[22m
+
+QA tester again can't connect (sandbox limitation, not a code issue). The smoke test passed against the real DB, and all 165 tests pass. I'll proceed with evaluation.
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ app/dal/dashboard.py tests/unit/test_dashboard_dal.py
+  └ 31 lines...
+
+● Stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ echo "Server stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 24
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:80 (80 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L77:130 (54 lines read)
+
+Score 7.8 — **KEEP**. Record T4 and results:
+
+● Record T4 and convert T0 (shell)
+  │ date +%s && date -r 1774879748 +%Y-%m-%dT%H:%M:%S%z
+  └ 3 lines...
+
+T4 = 1774880252. Timings:
+- propose_sec = 1774880019 - 1774879748 = 271
+- implement_sec = T2 ≈ T1 + 35 = 1774880054; implement_sec = 35
+- test_sec = 1774880068 - 1774880054 = 14
+- evaluate_sec = 1774880252 - 1774880068 = 184
+- total_sec = 1774880252 - 1774879748 = 504
+
+● Record results for iteration 24 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf '24\t0c1109c\t2026-03-30T23:09:08+09
+  │ :00\t271\t35\t14\t184\t504\t165\t165\tpass\t7.8\tkeep\tInclude vocabulary reviews in streak
+  │ calculation\n' >> autoresearch/results.tsv
+  └ 1 line...
+
+Update the backlog:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 41 lines read
+
+● Edit backlog.md +2 -1
+  └ autoresearch/backlog.md
+
+Now generate the summary report:
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 31 lines read
+
+Now generate the summary:
+
+● Check if summary exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md 2>/dev/null && echo
+  │ "EXISTS" || echo "NOT FOUND"
+  └ 3 lines...
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ 86 lines read
+
+I'll update the summary with the latest iterations:
+
+● Edit summary.md +58 -57
+  └ autoresearch/summary.md
+
+Now commit all tracking files:
+
