@@ -32,3 +32,9 @@ jobs:
 
       - name: Smoke test (real server + real DB)
         run: uv run python tests/smoke_test.py
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests (headless)
+        run: uv run pytest tests/e2e -v --timeout=120
