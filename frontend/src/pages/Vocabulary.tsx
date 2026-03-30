@@ -102,8 +102,10 @@ export default function Vocabulary() {
           Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
         </p>
         {loading ? (
-          <div className="loading">
-            <div className="spinner" /> Generating quiz...
+          <div className="topic-grid">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="skeleton skeleton-card" style={{ height: 100 }} />
+            ))}
           </div>
         ) : (
           <div className="topic-grid">

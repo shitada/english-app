@@ -23,7 +23,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 
 - [x] ✅ Unify error handling patterns across routers — consistent HTTPException usage via safe_llm_call helper (completed iteration #12)
 - [x] ✅ Extract common LLM interaction patterns — safe_llm_call reduces 5 try/except blocks to 1 helper (completed iteration #12)
-- [ ] Add request/response logging middleware — structured logging for debugging API issues
+- [x] ✅ Add request/response logging middleware — structured logging with timing, request IDs, log-level differentiation (completed iteration #18)
 
 ## [LOW] UX & Frontend
 

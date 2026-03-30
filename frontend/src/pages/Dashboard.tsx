@@ -15,8 +15,15 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="spinner" /> Loading stats...
+      <div>
+        <h2 style={{ marginBottom: 24 }}>Dashboard</h2>
+        <div className="skeleton skeleton-card" style={{ height: 120, marginBottom: 24 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton skeleton-card" />
+          ))}
+        </div>
+        <div className="skeleton skeleton-card" style={{ height: 200 }} />
       </div>
     );
   }
