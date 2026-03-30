@@ -62,6 +62,9 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
             SELECT created_at FROM messages WHERE role = 'user'
             UNION ALL
             SELECT created_at FROM pronunciation_attempts
+            UNION ALL
+            SELECT last_reviewed AS created_at FROM vocabulary_progress
+            WHERE last_reviewed IS NOT NULL
         ) ORDER BY d DESC
     """)
 

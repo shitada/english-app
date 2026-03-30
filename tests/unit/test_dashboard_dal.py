@@ -83,3 +83,11 @@ class TestGetStats:
         stats = await get_stats(test_db)
         types = {a["type"] for a in stats["recent_activity"]}
         assert "vocabulary" in types
+
+    async def test_streak_includes_vocabulary_only_days(self, test_db):
+        """Vocabulary-only activity should count toward the streak."""
+        questions = [{"word": "hello", "correct_meaning": "greeting"}]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        await update_progress(test_db, words[0]["id"], True)
+        stats = await get_stats(test_db)
+        assert stats["streak"] >= 1

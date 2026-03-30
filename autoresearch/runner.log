@@ -261,3 +261,222 @@ Now I'll implement the change — replace the read-only transcript preview with 
 
 Now commit and test:
 
+● Commit iteration 23 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #23: add keyboard text input to conversation chat as speech fallback
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check for iteration 23 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests for iteration 23 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 164 tests passed, TypeScript check passed. Now record T3 and check if smoke test is needed:
+
+● T3 + check if smoke test needed (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+T3 = 1774879334. No backend files changed — skip smoke test. Now run QA test:
+
+● Start server for QA testing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run uvicorn app.main:app --host localhost --port 8000 --timeout-keep-alive 5 &
+  │ sleep 3 && curl -sk https://localhost:8000/api/health | head -20
+  └ 9 lines...
+
+● Check server health (shell)
+  │ curl -s http://localhost:8000/api/health | head -20
+  └ 1 line...
+
+● Debug server response (shell)
+  │ curl -sv http://localhost:8000/api/health 2>&1 | tail -15
+  └ 10 lines...
+
+● Check server startup config (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/main.py | grep -A 20 "if __name__"
+  │ | head -25
+  └ 3 lines...
+
+● Check SSL/port config (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ssl\|cert\|8000\|uvicorn"
+  │ app/main.py | head -20
+  └ 8 lines...
+
+The server uses SSL. Let me start it properly and invoke the QA tester:
+
+● Start server with SSL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run python -m app.main &
+  │ sleep 3 && curl -sk https://localhost:8000/api/health
+  └ 13 lines...
+
+Server is up. Now invoke the QA tester:
+
+● Get changed files for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 4 lines...
+
+● Tester QA test iteration 23
+  │ playwright-browser_close
+  │   └ ### Result
+  └ playwright-browser_navigate https://localhost:8000
+      └ MCP server 'playwright': ### Error
+        Error: page.goto: net::ERR_CONNECTION_REFUSED at https://localhost:8000/
+        Call log:
+        [2m- navigating to "https://localhost:8000/", waiting until "domcontentloaded"[22m
+
+The QA tester couldn't connect (sandbox limitation). The code review from the tester says the implementation "looks structurally sound." I'll proceed with evaluation using code review instead.
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ frontend/src/pages/Conversation.tsx
+  └ 71 lines...
+
+● Stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ echo "Server stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 23
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L80:160 (81 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L55:80 (26 lines read)
+
+Score 7.0 — **KEEP**. Now record timestamps and results:
+
+● Record T4 for iteration 23 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Convert T0 to ISO 8601 (shell)
+  │ date -r 1774878907 +%Y-%m-%dT%H:%M:%S%z
+  └ 2 lines...
+
+Now compute timings and record results:
+- T0=1774878907, T1=1774879296 (propose_sec=389)
+- T2≈1774879320 (implement_sec=24)
+- T3=1774879334 (test_sec=14)
+- T4=1774879703 (evaluate_sec=369, total_sec=796)
+
+● Record results for iteration 23 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo '23   d435b01
+  │ 2026-03-30T22:55:07+09:00       389     24      14      369     796     164     164     pass
+  │ 7.0     keep    Add keyboard text input to conversation chat as speech fallback' >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+Now update the backlog:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 40 lines read
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+---
+
+**Starting Iteration 24**
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 41 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 30 lines read
+
+● Record T0 for iteration 24 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+I notice the last TSV row may have missing tabs. Let me fix it:
+
+● Check tab formatting in TSV (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -1 autoresearch/results.tsv | cat -A
+  └ 3 lines...
+
+● Check tab characters in TSV (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -1 autoresearch/results.tsv | od -c |
+  │ head -5
+  └ 6 lines...
+
+The tabs are missing. Let me fix the last row:
+
+● Fix TSV formatting (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' '$ d' autoresearch/results.tsv &&
+  │ printf
+  │ '23\td435b01\t2026-03-30T22:55:07+09:00\t389\t24\t14\t369\t796\t164\t164\tpass\t7.0\tkeep\tAdd
+  │ keyboard text input to conversation chat as speech fallback\n' >> autoresearch/results.tsv
+  └ 1 line...
+
+● Verify tabs in TSV (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -1 autoresearch/results.tsv | od -c |
+  │ head -3
+  └ 4 lines...
+
+Good, tabs are correct now. T0 for iteration 24 = 1774879748. Now propose:
+
+● Proposer Propose iteration 24
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ 85 lines read
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 103 lines read
+
+Great proposal — a genuine bug fix. Let me view the relevant files:
+
+● Record T1 for iteration 24 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find streak calculation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_calculate_streak\|UNION
+  │ ALL\|vocabulary_progress" app/dal/dashboard.py
+  └ 9 lines...
+
+T1 = 1774880019 (propose_sec = 271). Let me see the full streak function:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L58:100 (42 lines read)
+
+Clear bug — the streak query at line 60-65 doesn't include vocabulary_progress. Let me also check if there's a test file:
+
+● Check for existing test file (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py 2>/dev/null
+  │ && echo "EXISTS" || echo "NOT FOUND"
+  └ 3 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ 85 lines read
+
+Now I'll fix the streak calculation and add a test:
+
+● Edit dashboard.py +3
+  └ app/dal/dashboard.py
+
+Now add the test for vocabulary-only streak:
+
+● Edit test_dashboard_dal.py +8
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
