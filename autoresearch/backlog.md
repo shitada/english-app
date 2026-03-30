@@ -15,6 +15,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 
 - [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)
 - [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
+- [x] ✅ Preserve original punctuation (? !) in pronunciation sentence extraction (completed iteration #26)
 - [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
 - [x] ✅ Add conversation history review page — backend endpoint added: GET /api/conversation/list with topic filter and pagination (completed iteration #11)
 - [x] ✅ Add progress tracking for pronunciation — track improvement over time per sentence type (completed iteration #10)
@@ -25,6 +26,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Extract common LLM interaction patterns — safe_llm_call reduces 5 try/except blocks to 1 helper (completed iteration #12)
 - [x] ✅ Add request/response logging middleware — structured logging with timing, request IDs, log-level differentiation (completed iteration #18)
 - [x] ✅ Fix streak calculation to include vocabulary reviews (completed iteration #24)
+- [x] ✅ Fix vocabulary date format for SQLite compatibility in streak calculation (completed iteration #26)
 
 ## [LOW] UX & Frontend
 

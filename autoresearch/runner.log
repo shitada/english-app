@@ -1015,3 +1015,100 @@ The fix: use local time for `last_reviewed` since streak should be based on user
 
 Now amend and re-test:
 
+● Amend commit with date fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #26: preserve punctuation in pronunciation + fix vocabulary streak date bug
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-edit 2>&1 | head -3
+  └ 4 lines...
+
+● Re-run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 168 tests pass. Check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE_NEEDED" || echo "NO_SMOKE"
+  └ 4 lines...
+
+Smoke test needed since DAL files changed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+Smoke test passed. Now run QA test:
+
+● Start QA server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify QA server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 26
+  │ playwright-browser_evaluate
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed (ux_score: 8). Now stop server and evaluate:
+
+● Stop server and record T3 (shell)
+  │ ps aux | grep "uvicorn app.main:app" | grep -v grep | awk '{print $2}' | head -1 | xargs kill -9
+  │ 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3 = 1774884216, test_sec = 498. Now evaluate:
+
+● Evaluator Evaluate iteration 26
+  │ List directory .
+  │   └ 45 files found
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ 93 lines read
+
+Score 7.75, verdict: keep. Recording results and updating backlog.
+
+● Record T4 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && STARTED=$(date -r 1774883337
+  │ +%Y-%m-%dT%H:%M:%S%z) && echo "26     6926deb ${STARTED}      314     67      498     93
+  │ 972     168     168     pass    7.75    keep    Preserve punctuation in pronunciation + fix
+  │ vocabulary streak date bug" >> autoresearch/results.tsv
+  └ 1 line...
+
+Now update the backlog and generate the summary:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Now generate the summary:
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 33 lines read
+
+● Check if summary exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/summary.md 2>/dev/null &&
+  │ echo "---EXISTS---" || echo "---NOT_FOUND---"
+  └ 89 lines...
+
+Summary exists from previous run. Let me update it with iterations 25-26:
+
+● Edit summary.md +20 -18
+  └ autoresearch/summary.md
+
+Now commit everything:
+

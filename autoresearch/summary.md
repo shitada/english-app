@@ -2,32 +2,32 @@
 
 ## Run Overview
 - **First iteration**: 2026-03-29T15:09:03+09:00 (iteration #1)
-- **Latest iteration**: 2026-03-30T23:09:08+09:00 (iteration #24)
-- **Total iterations recorded**: 31 rows (including duplicates from re-runs)
-- **Unique successful iterations**: 24
+- **Latest iteration**: 2026-03-31T00:08:57+09:00 (iteration #26)
+- **Total iterations recorded**: 33 rows (including duplicates from re-runs)
+- **Unique successful iterations**: 26
 
 ## Results Summary
 | Metric | Value |
 |--------|-------|
-| Total iterations attempted | 31 |
-| Kept | 22 |
+| Total iterations attempted | 33 |
+| Kept | 24 |
 | Discarded | 3 |
 | Crashed | 5 |
-| **Success rate (kept/attempted)** | **71%** |
-| **Success rate (excl. crashes)** | **85%** |
+| **Success rate (kept/attempted)** | **73%** |
+| **Success rate (excl. crashes)** | **86%** |
 | Tests at start | 50 |
-| Tests at end | 165 |
-| Test increase | +115 tests (+230%) |
+| Tests at end | 168 |
+| Test increase | +118 tests (+236%) |
 
 ## Timing Analysis (kept iterations only)
 
 | Phase | Avg (sec) | Min | Max |
 |-------|-----------|-----|-----|
-| Propose | 109 | 33 | 389 |
-| Implement | 75 | 24 | 144 |
-| Test | 20 | 12 | 50 |
+| Propose | 122 | 33 | 580 |
+| Implement | 76 | 24 | 144 |
+| Test | 43 | 12 | 691 |
 | Evaluate | 92 | 30 | 402 |
-| **Total (per iteration)** | **305** | 123 | 796 |
+| **Total (per iteration)** | **337** | 123 | 1470 |
 
 ## All Kept Changes
 
@@ -56,8 +56,10 @@
 | 22 | 6.5 | feature | Add reverse quiz mode (meaning-to-word) for vocabulary |
 | 23 | 7.0 | ux | Add keyboard text input to conversation chat as speech fallback |
 | 24 | 7.8 | bugfix | Include vocabulary reviews in streak calculation |
+| 25 | 6.75 | ux | Fetch topics from API instead of hardcoding in frontend |
+| 26 | 7.75 | bugfix | Preserve punctuation in pronunciation + fix vocabulary streak date bug |
 
-**Average score (kept)**: 7.55/10
+**Average score (kept)**: 7.52/10
 
 ## Discarded Attempts
 
@@ -76,12 +78,12 @@
 - [ ] Improve pronunciation feedback granularity — phoneme-level comparison
 - [ ] Diversify vocabulary quiz formats — fill-in-the-blank, sentence completion
 - [ ] Add offline fallback for vocabulary review — cache quiz data
-- [ ] Display human-readable topic labels (raw keys like 'hotel_checkin' → 'Hotel Check-in')
 - [ ] Add database migration strategy
 - [ ] Add rate limiting (attempted twice, discarded both times)
+- [ ] Unify dashboard timestamp formats (raw ISO vs human-friendly)
 
 ## Recommendations for Next Run
 
-1. **Display human-readable topic labels** — Low-risk UX fix that addresses a known QA issue (#13); just needs a mapping from topic keys to display names
-2. **Diversify vocabulary quiz formats** — Add fill-in-the-blank and sentence completion modes; high user value for learning variety
-3. **Improve pronunciation feedback granularity** — Add phoneme-level feedback; requires careful LLM prompt design
+1. **Diversify vocabulary quiz formats** — Add fill-in-the-blank and sentence completion modes; high user value for learning variety
+2. **Improve pronunciation feedback granularity** — Add phoneme-level feedback; requires careful LLM prompt design
+3. **Unify timestamp formats** — Dashboard recent activity shows inconsistent date formats; small UX polish
