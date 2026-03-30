@@ -45,7 +45,7 @@ class StartResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
-    feedback: dict[str, Any]
+    feedback: dict[str, Any] | None
 
 
 class EndResponse(BaseModel):
@@ -132,21 +132,28 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."
 
     # Run grammar check and conversation response in PARALLEL
+    # Grammar check is non-fatal — if it fails, we still return the AI response
     t0 = time.monotonic()
-    feedback, ai_response = await safe_llm_call(
-        asyncio.gather(
-            copilot.ask_json(
+
+    async def _safe_grammar_check():
+        try:
+            return await copilot.ask_json(
                 "You are an English grammar and expression checker. Return ONLY valid JSON.",
                 grammar_prompt,
-            ),
-            copilot.ask(system, conv_prompt),
-        ),
-        context="send_message",
+            )
+        except Exception as e:
+            logger.warning("Grammar check failed (non-fatal): %s", e)
+            return None
+
+    feedback, ai_response = await asyncio.gather(
+        _safe_grammar_check(),
+        safe_llm_call(copilot.ask(system, conv_prompt), context="send_message"),
     )
     logger.info("Parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
     # Save feedback + AI response
-    await conv_dal.update_message_feedback(db, req.conversation_id, "user", req.content, feedback)
+    if feedback is not None:
+        await conv_dal.update_message_feedback(db, req.conversation_id, "user", req.content, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
     return {"message": ai_response, "feedback": feedback}

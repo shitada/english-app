@@ -185,3 +185,25 @@ async def test_list_conversations_filter_by_topic(client, mock_copilot):
     data = res.json()
     assert len(data["conversations"]) == 1
     assert data["conversations"][0]["topic"] == "hotel_checkin"
+
+
+@pytest.mark.asyncio
+async def test_send_message_grammar_check_failure_is_non_fatal(client, mock_copilot):
+    """Test that grammar check failure doesn't kill the conversation response."""
+    # Start a conversation
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # Grammar check fails, but conversation response succeeds
+    mock_copilot.ask = AsyncMock(return_value="That sounds great!")
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("Grammar LLM timeout"))
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "I want to check in.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["message"] == "That sounds great!"
+    assert data["feedback"] is None
