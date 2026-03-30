@@ -27,7 +27,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 
 ## [LOW] UX & Frontend
 
-- [ ] Improve accessibility — add ARIA labels, keyboard navigation, screen reader support
+- [x] ✅ Improve accessibility — add ARIA labels, keyboard navigation, screen reader support (completed iteration #16)
 - [ ] Add loading states and skeleton screens — better UX during LLM processing delays
 - [ ] Add offline fallback for vocabulary review — cache previously fetched quiz data
 - [ ] Improve mobile responsiveness — optimize layout for smaller screens
