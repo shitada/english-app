@@ -19,6 +19,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
 - [x] ✅ Add conversation history review page — backend endpoint added: GET /api/conversation/list with topic filter and pagination (completed iteration #11)
 - [x] ✅ Add progress tracking for pronunciation — track improvement over time per sentence type (completed iteration #10)
+- [x] ✅ Add conversation delete/cleanup endpoints — DELETE single and bulk clear ended (completed iteration #31)
 
 ## [MEDIUM] Code Quality & Bug Fixes
 

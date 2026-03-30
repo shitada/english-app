@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2 } from 'lucide-react';
 import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -104,6 +104,27 @@ export default function Conversation() {
       const res = await api.getHistory(id);
       setHistoryMessages(res.messages);
       setPhase('history');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteConversation = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this conversation?')) return;
+    try {
+      await api.deleteConversation(id);
+      setPastConversations((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleClearEnded = async () => {
+    if (!window.confirm('Delete all past conversations?')) return;
+    try {
+      await api.clearEndedConversations();
+      setPastConversations([]);
     } catch (err) {
       console.error(err);
     }
@@ -240,9 +261,19 @@ export default function Conversation() {
         {/* Past Conversations */}
         {pastConversations.length > 0 && (
           <div style={{ marginTop: 32 }}>
-            <h3 style={{ marginBottom: 12, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <History size={18} /> Past Conversations
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h3 style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                <History size={18} /> Past Conversations
+              </h3>
+              {pastConversations.length >= 2 && (
+                <button
+                  onClick={handleClearEnded}
+                  style={{ fontSize: '0.8rem', color: '#b91c1c', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {pastConversations.slice(0, 5).map((c) => {
                 const topic = topics.find((t) => t.id === c.topic);
@@ -268,9 +299,21 @@ export default function Conversation() {
                         {c.difficulty} · {c.message_count} messages
                       </span>
                     </div>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                      {formatDateTime(c.started_at)}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                        {formatDateTime(c.started_at)}
+                      </span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Delete conversation"
+                        onClick={(e) => handleDeleteConversation(e, c.id)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleDeleteConversation(e as any, c.id); }}
+                        style={{ color: '#b91c1c', cursor: 'pointer', padding: 4, borderRadius: 4 }}
+                      >
+                        <Trash2 size={16} />
+                      </span>
+                    </div>
                   </button>
                 );
               })}

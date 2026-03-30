@@ -42,6 +42,12 @@ export const api = {
       `/api/conversation/list${topic ? `?topic=${encodeURIComponent(topic)}` : ''}`
     ),
 
+  deleteConversation: (conversation_id: number) =>
+    request<{ deleted: boolean }>(`/api/conversation/${conversation_id}`, { method: 'DELETE' }),
+
+  clearEndedConversations: () =>
+    request<{ deleted_count: number }>('/api/conversation/clear/ended', { method: 'DELETE' }),
+
   // Pronunciation
   getPronunciationSentences: () =>
     request<{ sentences: { text: string; topic: string }[] }>('/api/pronunciation/sentences'),

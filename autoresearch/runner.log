@@ -2098,3 +2098,120 @@ Now add delete endpoint integration tests to the end:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 31 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #31: add DELETE endpoints for conversation cleanup
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check iteration 31 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 31 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 5 lines...
+
+199 passed, TS clean. Smoke test needed (routers changed):
+
+● Smoke test iteration 31 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record T3 for iteration 31 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Skip QA (backend-only change, no frontend modifications). Evaluate:● Request failed due to a transient API error. Retrying...
+
+Skipping QA test (backend-only, no UI changes). Evaluate:
+
+● Evaluator Evaluate iteration 31
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L27:35 (9 lines read)
+  └ List directory tests
+      └ 8 files found
+
+● Record T4 for iteration 31 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.6 — KEEP. Recording:
+
+● Record iteration 31 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf
+  │ "31\t%s\t2026-03-30T16:39:16+00:00\t1141\t106\t30\t1813\t3090\t199\t199\tpass\t7.6\tkeep\tAdd
+  │ DELETE endpoints for conversation cleanup\n" "$COMMIT" >> autoresearch/results.tsv
+  └ 1 line...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Iteration 31 complete (KEEP, 7.6). Starting iteration 32.
+
+---
+
+● Record T0 for iteration 32 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Request failed due to a transient API error. Retrying...
+
+● Proposer Propose iteration 32
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ 293 lines read
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1:75 (75 lines read)
+
+● Record T1 for iteration 32 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=2095. Let me look at api.ts and implement:
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ 150 lines read
+
+Now add the delete methods to the API:
+
+● Edit api.ts +6
+  └ frontend/src/api.ts
+
+Now add delete buttons to the Conversation page:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the delete handler and button. Let me find the past conversations section:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L100:115 (16 lines read)
+
+● Edit Conversation.tsx +21
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the delete button to each past conversation entry and a "Clear All" button:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L255:300 (46 lines read)
+
+● Edit Conversation.tsx +28 -6
+  └ frontend/src/pages/Conversation.tsx
+
+● Record T2 for iteration 32 (shell)
+  │ date +%s
+  └ 2 lines...
+
