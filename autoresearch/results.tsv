@@ -37,3 +37,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 30	ebd245f	2026-03-30T16:30:52+00:00	73	45	314	50	482	190	190	pass	7.0	keep	Add React Error Boundary for graceful crash recovery
 31	4087046	2026-03-30T16:39:16+00:00	1141	106	30	1813	3090	199	199	pass	7.6	keep	Add DELETE endpoints for conversation cleanup
 32	7eef2b8	2026-03-30T17:24:33+00:00	2095	57	3724	2450	8326	199	199	pass	6.7	keep	Add Delete button for past conversations in history list
+33	ad6eb2b	2026-03-30T18:32:05+00:00	84	1592	1023	1057	3756	204	204	pass	7.55	keep	Add vocabulary mastery statistics endpoint
