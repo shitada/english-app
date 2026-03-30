@@ -52,6 +52,20 @@ class EndResponse(BaseModel):
     summary: dict[str, Any]
 
 
+class ConversationListItem(BaseModel):
+    id: int
+    topic: str
+    difficulty: str
+    started_at: str
+    ended_at: str | None
+    status: str
+    message_count: int
+
+
+class ConversationListResponse(BaseModel):
+    conversations: list[ConversationListItem]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_conversation_topics()
@@ -174,3 +188,15 @@ async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(g
             msg["feedback"] = json.loads(r["feedback_json"])
         messages.append(msg)
     return {"messages": messages}
+
+
+@router.get("/list", response_model=ConversationListResponse)
+async def list_conversations(
+    topic: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """List past conversations with message counts."""
+    conversations = await conv_dal.list_conversations(db, topic=topic, limit=limit, offset=offset)
+    return {"conversations": conversations}

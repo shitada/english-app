@@ -13,6 +13,7 @@ from app.dal.conversation import (
     format_history_text,
     get_active_conversation,
     get_conversation_history,
+    list_conversations,
     update_message_feedback,
 )
 
@@ -181,3 +182,45 @@ class TestEndConversation:
         result = await get_active_conversation(test_db, cid2)
         assert result is not None
         assert result["status"] == "active"
+
+
+@pytest.mark.unit
+class TestListConversations:
+    async def test_returns_empty_when_no_conversations(self, test_db):
+        result = await list_conversations(test_db)
+        assert result == []
+
+    async def test_returns_conversations_with_message_count(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await add_message(test_db, cid, "user", "Hello")
+        result = await list_conversations(test_db)
+        assert len(result) == 1
+        assert result[0]["topic"] == "hotel_checkin"
+        assert result[0]["message_count"] == 2
+
+    async def test_filters_by_topic(self, test_db):
+        await create_conversation(test_db, "hotel_checkin")
+        await create_conversation(test_db, "shopping")
+        result = await list_conversations(test_db, topic="hotel_checkin")
+        assert len(result) == 1
+        assert result[0]["topic"] == "hotel_checkin"
+
+    async def test_respects_limit_and_offset(self, test_db):
+        for i in range(5):
+            await create_conversation(test_db, f"topic_{i}")
+        result = await list_conversations(test_db, limit=2, offset=1)
+        assert len(result) == 2
+
+    async def test_orders_by_started_at_desc(self, test_db):
+        cid1 = await create_conversation(test_db, "first")
+        cid2 = await create_conversation(test_db, "second")
+        result = await list_conversations(test_db)
+        assert len(result) == 2
+        ids = {r["id"] for r in result}
+        assert ids == {cid1, cid2}
+
+    async def test_includes_difficulty_field(self, test_db):
+        await create_conversation(test_db, "hotel_checkin", "advanced")
+        result = await list_conversations(test_db)
+        assert result[0]["difficulty"] == "advanced"

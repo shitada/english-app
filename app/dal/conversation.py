@@ -83,3 +83,36 @@ async def end_conversation(db: aiosqlite.Connection, conversation_id: int) -> No
         (conversation_id,),
     )
     await db.commit()
+
+
+async def list_conversations(
+    db: aiosqlite.Connection,
+    topic: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """List past conversations with message counts."""
+    if topic:
+        rows = await db.execute_fetchall(
+            """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
+                      COUNT(m.id) as message_count
+               FROM conversations c
+               LEFT JOIN messages m ON c.id = m.conversation_id
+               WHERE c.topic = ?
+               GROUP BY c.id
+               ORDER BY c.started_at DESC
+               LIMIT ? OFFSET ?""",
+            (topic, limit, offset),
+        )
+    else:
+        rows = await db.execute_fetchall(
+            """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
+                      COUNT(m.id) as message_count
+               FROM conversations c
+               LEFT JOIN messages m ON c.id = m.conversation_id
+               GROUP BY c.id
+               ORDER BY c.started_at DESC
+               LIMIT ? OFFSET ?""",
+            (limit, offset),
+        )
+    return [dict(r) for r in rows]

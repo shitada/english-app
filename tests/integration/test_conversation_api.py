@@ -152,3 +152,36 @@ async def test_start_conversation_default_difficulty(client, mock_copilot):
     res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
     assert res.status_code == 200
     assert res.json()["conversation_id"] > 0
+
+
+@pytest.mark.asyncio
+async def test_list_conversations_empty(client):
+    """Test listing conversations when none exist."""
+    res = await client.get("/api/conversation/list")
+    assert res.status_code == 200
+    assert res.json()["conversations"] == []
+
+
+@pytest.mark.asyncio
+async def test_list_conversations_after_creating(client, mock_copilot):
+    """Test listing conversations returns created conversations."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    await client.post("/api/conversation/start", json={"topic": "shopping"})
+    res = await client.get("/api/conversation/list")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["conversations"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_list_conversations_filter_by_topic(client, mock_copilot):
+    """Test filtering conversation list by topic."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    await client.post("/api/conversation/start", json={"topic": "shopping"})
+    res = await client.get("/api/conversation/list?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["conversations"]) == 1
+    assert data["conversations"][0]["topic"] == "hotel_checkin"
