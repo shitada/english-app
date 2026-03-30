@@ -20,6 +20,7 @@ export default function Vocabulary() {
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word'>('word-to-meaning');
 
   const tts = useSpeechSynthesis();
 
@@ -51,7 +52,9 @@ export default function Vocabulary() {
     if (revealed) return;
 
     const correctMeaning = currentQ?.correct_meaning || currentQ?.meaning || '';
-    const isCorrect = answer === correctMeaning;
+    const isCorrect = quizMode === 'word-to-meaning'
+      ? answer === correctMeaning
+      : answer === currentQ?.word;
 
     setSelectedAnswer(answer);
     setRevealed(true);
@@ -82,16 +85,35 @@ export default function Vocabulary() {
 
   const getOptions = () => {
     if (!currentQ) return [];
-    const correct = currentQ.correct_meaning || currentQ.meaning;
-    const wrong = currentQ.wrong_options || [];
-    const all = [correct, ...wrong];
-    // Deterministic shuffle based on word
-    return all.sort((a, b) => {
-      const hashA = a.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const hashB = b.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      return hashA - hashB;
-    });
+    if (quizMode === 'word-to-meaning') {
+      // Show meanings as options
+      const correct = currentQ.correct_meaning || currentQ.meaning;
+      const wrong = currentQ.wrong_options || [];
+      const all = [correct, ...wrong];
+      return all.sort((a, b) => {
+        const hashA = a.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const hashB = b.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        return hashA - hashB;
+      });
+    } else {
+      // Show words as options (meaning→word mode)
+      const correctWord = currentQ.word;
+      const otherWords = questions
+        .filter((q) => q.word !== correctWord)
+        .map((q) => q.word)
+        .slice(0, 3);
+      const all = [correctWord, ...otherWords];
+      return all.sort((a, b) => {
+        const hashA = a.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const hashB = b.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        return hashA - hashB;
+      });
+    }
   };
+
+  const correctAnswer = quizMode === 'word-to-meaning'
+    ? (currentQ?.correct_meaning || currentQ?.meaning || '')
+    : (currentQ?.word || '');
 
   // Topic selection
   if (phase === 'select') {
@@ -101,6 +123,35 @@ export default function Vocabulary() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
         </p>
+
+        <div style={{ marginBottom: 16 }}>
+          <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setQuizMode('word-to-meaning')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'word-to-meaning' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'word-to-meaning' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'word-to-meaning' ? 'white' : 'var(--text)',
+              }}
+            >
+              Word → Meaning
+            </button>
+            <button
+              onClick={() => setQuizMode('meaning-to-word')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'meaning-to-word' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'meaning-to-word' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'meaning-to-word' ? 'white' : 'var(--text)',
+              }}
+            >
+              Meaning → Word
+            </button>
+          </div>
+        </div>
+
         {loading ? (
           <div className="topic-grid">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -175,7 +226,6 @@ export default function Vocabulary() {
 
   // Quiz question
   if (!currentQ) return null;
-  const correctMeaning = currentQ.correct_meaning || currentQ.meaning;
   const options = getOptions();
 
   return (
@@ -197,7 +247,9 @@ export default function Vocabulary() {
         Question {currentIndex + 1} of {questions.length}
       </p>
 
-      <h3 style={{ textAlign: 'center', marginBottom: 8 }}>What does this mean?</h3>
+      <h3 style={{ textAlign: 'center', marginBottom: 8 }}>
+        {quizMode === 'word-to-meaning' ? 'What does this mean?' : 'Which word matches this meaning?'}
+      </h3>
 
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <span
@@ -210,7 +262,7 @@ export default function Vocabulary() {
           onClick={() => tts.speak(currentQ.word)}
           title="Click to hear pronunciation"
         >
-          {currentQ.word}
+          {quizMode === 'word-to-meaning' ? currentQ.word : (currentQ.correct_meaning || currentQ.meaning)}
           <Volume2
             size={18}
             style={{ marginLeft: 8, verticalAlign: 'middle', opacity: 0.6 }}
@@ -249,7 +301,7 @@ export default function Vocabulary() {
         {options.map((opt, i) => {
           let className = 'quiz-option';
           if (revealed) {
-            if (opt === correctMeaning) className += ' correct';
+            if (opt === correctAnswer) className += ' correct';
             else if (opt === selectedAnswer) className += ' incorrect';
           } else if (opt === selectedAnswer) {
             className += ' selected';
@@ -263,8 +315,8 @@ export default function Vocabulary() {
               disabled={revealed}
               aria-label={`Answer option: ${opt}`}
             >
-              {revealed && opt === correctMeaning && <Check size={16} style={{ marginRight: 8, color: 'var(--success)' }} />}
-              {revealed && opt === selectedAnswer && opt !== correctMeaning && <X size={16} style={{ marginRight: 8, color: 'var(--danger)' }} />}
+              {revealed && opt === correctAnswer && <Check size={16} style={{ marginRight: 8, color: 'var(--success)' }} />}
+              {revealed && opt === selectedAnswer && opt !== correctAnswer && <X size={16} style={{ marginRight: 8, color: 'var(--danger)' }} />}
               {opt}
             </button>
           );

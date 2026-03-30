@@ -25,3 +25,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 18	bc7e457	2026-03-30T22:17:20+09:00	79	39	22	59	199	159	159	pass	7.3	keep	Enhance logging middleware with timing and request IDs
 19	6495ea5	2026-03-30T22:19:19+09:00	50	83	14	54	201	159	159	pass	7.15	keep	Add skeleton loading screens to Dashboard and Vocabulary
 20	8b19229	2026-03-30T22:29:41+09:00	64	76	13	67	220	159	159	pass	7.0	keep	Improve mobile responsiveness with hamburger nav and responsive grids
+21	1cd6639	2026-03-30T22:45:41+09:00	172	124	24	52	372	164	164	pass	7.55	keep	Persist conversation summary in database
