@@ -9,6 +9,8 @@ import pytest
 from app.dal.conversation import (
     add_message,
     create_conversation,
+    delete_conversation,
+    delete_ended_conversations,
     end_conversation,
     format_history_text,
     get_active_conversation,
@@ -242,3 +244,50 @@ class TestListConversations:
         await create_conversation(test_db, "hotel_checkin", "advanced")
         result = await list_conversations(test_db)
         assert result[0]["difficulty"] == "advanced"
+
+
+@pytest.mark.unit
+class TestDeleteConversation:
+    async def test_deletes_existing_conversation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        result = await delete_conversation(test_db, cid)
+        assert result is True
+        rows = await test_db.execute_fetchall("SELECT * FROM conversations WHERE id = ?", (cid,))
+        assert len(rows) == 0
+
+    async def test_returns_false_for_nonexistent(self, test_db):
+        result = await delete_conversation(test_db, 99999)
+        assert result is False
+
+    async def test_cascade_deletes_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await delete_conversation(test_db, cid)
+        rows = await test_db.execute_fetchall("SELECT * FROM messages WHERE conversation_id = ?", (cid,))
+        assert len(rows) == 0
+
+
+@pytest.mark.unit
+class TestDeleteEndedConversations:
+    async def test_deletes_only_ended(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        cid2 = await create_conversation(test_db, "shopping")
+        await end_conversation(test_db, cid1)
+        count = await delete_ended_conversations(test_db)
+        assert count == 1
+        # Active conversation should remain
+        active = await get_active_conversation(test_db, cid2)
+        assert active is not None
+
+    async def test_returns_zero_when_none_ended(self, test_db):
+        await create_conversation(test_db, "hotel_checkin")
+        count = await delete_ended_conversations(test_db)
+        assert count == 0
+
+    async def test_deletes_multiple_ended(self, test_db):
+        for _ in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            await end_conversation(test_db, cid)
+        count = await delete_ended_conversations(test_db)
+        assert count == 3

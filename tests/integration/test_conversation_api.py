@@ -238,3 +238,54 @@ async def test_get_summary_not_found(client):
     """Test that summary returns 404 for nonexistent conversation."""
     res = await client.get("/api/conversation/99999/summary")
     assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_conversation(client, mock_copilot):
+    """Test deleting an existing conversation."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    res = await client.delete(f"/api/conversation/{conv_id}")
+    assert res.status_code == 200
+    assert res.json()["deleted"] is True
+
+    # Verify it's gone
+    list_res = await client.get("/api/conversation/list")
+    ids = [c["id"] for c in list_res.json()["conversations"]]
+    assert conv_id not in ids
+
+
+@pytest.mark.asyncio
+async def test_delete_nonexistent_conversation(client):
+    """Test deleting a nonexistent conversation returns 404."""
+    res = await client.delete("/api/conversation/99999")
+    assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_clear_ended_conversations(client, mock_copilot):
+    """Test clearing all ended conversations."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Test.", "key_vocabulary": [], "communication_level": "beginner", "tip": "Practice.",
+    })
+
+    # Create and end 2 conversations, leave 1 active
+    for _ in range(2):
+        start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+        cid = start_res.json()["conversation_id"]
+        await client.post("/api/conversation/end", json={"conversation_id": cid})
+
+    await client.post("/api/conversation/start", json={"topic": "shopping"})
+
+    res = await client.delete("/api/conversation/clear/ended")
+    assert res.status_code == 200
+    assert res.json()["deleted_count"] == 2
+
+    # Active conversation should remain
+    list_res = await client.get("/api/conversation/list")
+    conversations = list_res.json()["conversations"]
+    assert len(conversations) == 1
+    assert conversations[0]["topic"] == "shopping"

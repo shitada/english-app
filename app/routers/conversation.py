@@ -214,3 +214,27 @@ async def list_conversations(
     """List past conversations with message counts."""
     conversations = await conv_dal.list_conversations(db, topic=topic, limit=limit, offset=offset)
     return {"conversations": conversations}
+
+
+class DeleteResponse(BaseModel):
+    deleted: bool
+
+
+class ClearResponse(BaseModel):
+    deleted_count: int
+
+
+@router.delete("/{conversation_id}", response_model=DeleteResponse)
+async def delete_conversation(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Delete a conversation and its messages."""
+    deleted = await conv_dal.delete_conversation(db, conversation_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"deleted": True}
+
+
+@router.delete("/clear/ended", response_model=ClearResponse)
+async def clear_ended_conversations(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Delete all ended conversations."""
+    count = await conv_dal.delete_ended_conversations(db)
+    return {"deleted_count": count}

@@ -37,6 +37,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Improve mobile responsiveness — optimize layout for smaller screens (completed iteration #20)
 - [x] ✅ Display human-readable topic labels in dashboard and pronunciation pages — topics now fetched from API (completed iteration #25)
 - [x] ✅ Fix inconsistent date formatting — shared formatDate utility with relative and absolute time formatters (completed iteration #28)
+- [x] ✅ Add React Error Boundary for graceful crash recovery (completed iteration #30)
 
 ## [LOW] Infrastructure
 

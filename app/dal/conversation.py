@@ -135,3 +135,21 @@ async def list_conversations(
             (limit, offset),
         )
     return [dict(r) for r in rows]
+
+
+async def delete_conversation(db: aiosqlite.Connection, conversation_id: int) -> bool:
+    """Delete a conversation and its messages (cascade). Returns True if deleted."""
+    cursor = await db.execute(
+        "DELETE FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    await db.commit()
+    return cursor.rowcount > 0
+
+
+async def delete_ended_conversations(db: aiosqlite.Connection) -> int:
+    """Delete all ended conversations. Returns count of deleted rows."""
+    cursor = await db.execute(
+        "DELETE FROM conversations WHERE status = 'ended'"
+    )
+    await db.commit()
+    return cursor.rowcount
