@@ -348,17 +348,18 @@ export default function Conversation() {
               step={0.05}
               value={tts.volume}
               onChange={(e) => tts.setVolume(parseFloat(e.target.value))}
+              aria-label="Volume"
               style={{ width: 60, accentColor: 'var(--primary)' }}
             />
           </div>
           <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
-          <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading}>
+          <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
             <Square size={14} /> End
           </button>
         </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" role="log" aria-live="polite">
         {messages.map((msg, i) => (
           <div key={i}>
             <div className={`message message-${msg.role}`}>
@@ -386,6 +387,7 @@ export default function Conversation() {
           onClick={speech.isListening ? speech.stop : speech.start}
           disabled={!speech.isSupported || loading}
           title={speech.isSupported ? (speech.isListening ? 'Stop listening' : 'Start speaking') : 'Speech recognition not supported'}
+          aria-label={speech.isListening ? 'Stop listening' : 'Start speaking'}
           style={{ width: 56, height: 56 }}
         >
           {speech.isListening ? <MicOff size={24} color="white" /> : <Mic size={24} />}
@@ -403,6 +405,7 @@ export default function Conversation() {
           className="btn btn-primary btn-icon"
           onClick={sendMessage}
           disabled={loading || !input.trim()}
+          aria-label="Send message"
           style={{ width: 56, height: 56 }}
         >
           <Send size={24} />

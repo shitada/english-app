@@ -138,6 +138,7 @@ export default function Pronunciation() {
                 tts.speak(selectedSentence);
               }}
               disabled={tts.isSpeaking}
+              aria-label="Start shadowing practice"
             >
               <Volume2 size={18} /> Start Shadowing
             </button>
@@ -150,6 +151,7 @@ export default function Pronunciation() {
                 speech.stop();
                 setShadowingState('done');
               }}
+              aria-label="Stop recording"
             >
               <MicOff size={18} /> Stop Recording
             </button>
@@ -160,6 +162,7 @@ export default function Pronunciation() {
               className="btn btn-secondary"
               onClick={() => tts.speak(selectedSentence)}
               disabled={tts.isSpeaking}
+              aria-label="Listen to sentence again"
             >
               <Volume2 size={18} /> Listen Again
             </button>

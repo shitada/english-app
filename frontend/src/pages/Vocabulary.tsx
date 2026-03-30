@@ -259,6 +259,7 @@ export default function Vocabulary() {
               className={className}
               onClick={() => selectAnswer(opt)}
               disabled={revealed}
+              aria-label={`Answer option: ${opt}`}
             >
               {revealed && opt === correctMeaning && <Check size={16} style={{ marginRight: 8, color: 'var(--success)' }} />}
               {revealed && opt === selectedAnswer && opt !== correctMeaning && <X size={16} style={{ marginRight: 8, color: 'var(--danger)' }} />}
@@ -269,7 +270,7 @@ export default function Vocabulary() {
       </div>
 
       {revealed && (
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
+        <div style={{ textAlign: 'center', marginTop: 16 }} role="status" aria-live="polite">
           <button className="btn btn-primary" onClick={nextQuestion}>
             {currentIndex + 1 >= questions.length ? 'See Results' : 'Next'}
             <ArrowRight size={16} />
