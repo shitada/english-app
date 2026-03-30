@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import logging.handlers
 import time
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -82,11 +83,32 @@ app.add_middleware(
 )
 
 
+_SKIP_LOG_PATHS = {"/api/health", "/favicon.svg", "/favicon.ico"}
+
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    logger.info(">> %s %s", request.method, request.url.path)
+    path = request.url.path
+    if path.startswith("/assets/") or path in _SKIP_LOG_PATHS:
+        return await call_next(request)
+
+    request_id = uuid.uuid4().hex[:8]
+    t0 = time.monotonic()
+    logger.info(">> %s %s [%s]", request.method, path, request_id)
+
     response = await call_next(request)
-    logger.info("<< %s %s -> %s", request.method, request.url.path, response.status_code)
+
+    duration_ms = round((time.monotonic() - t0) * 1000)
+    status = response.status_code
+    response.headers["X-Request-ID"] = request_id
+
+    if status >= 500:
+        logger.error("<< %s %s -> %s (%dms) [%s]", request.method, path, status, duration_ms, request_id)
+    elif status >= 400:
+        logger.warning("<< %s %s -> %s (%dms) [%s]", request.method, path, status, duration_ms, request_id)
+    else:
+        logger.info("<< %s %s -> %s (%dms) [%s]", request.method, path, status, duration_ms, request_id)
+
     return response
 
 
