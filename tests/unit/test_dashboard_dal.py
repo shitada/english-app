@@ -75,3 +75,11 @@ class TestGetStats:
             await create_conversation(test_db, f"topic_{i}")
         stats = await get_stats(test_db)
         assert len(stats["recent_activity"]) <= 7
+
+    async def test_recent_activity_includes_vocabulary(self, test_db):
+        questions = [{"word": "hello", "correct_meaning": "greeting"}]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        await update_progress(test_db, words[0]["id"], True)
+        stats = await get_stats(test_db)
+        types = {a["type"] for a in stats["recent_activity"]}
+        assert "vocabulary" in types

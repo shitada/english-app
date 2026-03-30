@@ -86,6 +86,11 @@ async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list
         SELECT 'conversation' as type, topic as detail, started_at as ts FROM conversations
         UNION ALL
         SELECT 'pronunciation' as type, reference_text as detail, created_at as ts FROM pronunciation_attempts
+        UNION ALL
+        SELECT 'vocabulary' as type, vw.word as detail, vp.last_reviewed as ts
+        FROM vocabulary_progress vp
+        JOIN vocabulary_words vw ON vp.word_id = vw.id
+        WHERE vp.last_reviewed IS NOT NULL
         ORDER BY ts DESC LIMIT ?
     """, (limit,))
     return [
