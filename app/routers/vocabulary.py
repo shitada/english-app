@@ -60,6 +60,27 @@ class ProgressResponse(BaseModel):
     progress: list[ProgressItem]
 
 
+class LevelCount(BaseModel):
+    level: int
+    count: int
+
+
+class TopicBreakdown(BaseModel):
+    topic: str
+    word_count: int
+    mastered_count: int
+    avg_level: float
+
+
+class VocabularyStatsResponse(BaseModel):
+    total_words: int
+    total_mastered: int
+    total_reviews: int
+    accuracy_rate: float
+    level_distribution: list[LevelCount]
+    topic_breakdown: list[TopicBreakdown]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_vocabulary_topics()
@@ -122,3 +143,9 @@ async def get_progress(
 ):
     progress = await vocab_dal.get_progress(db, topic)
     return {"progress": progress}
+
+
+@router.get("/stats", response_model=VocabularyStatsResponse)
+async def get_vocabulary_stats(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get aggregate vocabulary mastery statistics."""
+    return await vocab_dal.get_vocabulary_stats(db)

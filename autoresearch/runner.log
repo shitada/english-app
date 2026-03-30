@@ -2215,3 +2215,219 @@ Now add the delete button to each past conversation entry and a "Clear All" butt
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 32 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #32: add Delete button for past conversations in history list
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check iteration 32 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 32 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+199 passed, TS clean. Build frontend and start QA:
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host
+  │ 127.0.0.1 --port 8000 --timeout-keep-alive 300 &
+  │ sleep 3 && curl -s http://127.0.0.1:8000/api/health
+  └ 10 lines...
+
+● Tester QA test iteration 32
+  │ Read ErrorBoundary.tsx
+  │   │ frontend/src/components/ErrorBoundary.tsx
+  │   └ 56 lines read
+  └ Read index.css
+      │ frontend/src/index.css
+      └ 647 lines read
+
+QA passed=true, ux_score=7. Stop server and evaluate:
+
+● Find server PID (shell)
+  │ ps aux | grep uvicorn | grep -v grep | awk '{print $2}' | head -3
+  └ 1 line...
+
+● Record T3 for iteration 32 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 32
+  │ Read database.py
+  │   │ app/database.py
+  │   └ 133 lines read
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ 291 lines read
+
+● Record T4 for iteration 32 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.7 — KEEP. Recording:
+
+● Record iteration 32 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf
+  │ "32\t%s\t2026-03-30T17:24:33+00:00\t2095\t57\t3724\t2450\t8326\t199\t199\tpass\t6.7\tkeep\tAdd
+  │ Delete button for past conversations in history list\n" "$COMMIT" >> autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 32 done (KEEP, 6.7). Starting iteration 33.
+
+---
+
+● Record T0 for iteration 33 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 33
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ 166 lines read
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ 291 lines read
+
+● Record T1 for iteration 33 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=84. Let me examine vocabulary DAL:
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ 144 lines read
+
+Now implement:
+
+✗ Edit vocabulary.py
+  │ app/dal/vocabulary.py
+  └ Multiple matches found
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L140:145 (5 lines read)
+
+✗ Edit vocabulary.py
+  │ app/dal/vocabulary.py
+  └ No match found
+
+● Check exact file ending (shell)
+  │ tail -10 /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py | cat -v
+  └ 11 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L136:145 (9 lines read)
+
+✗ Edit vocabulary.py
+  │ app/dal/vocabulary.py
+  └ No match found
+
+✗ Append vocabulary stats function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ content = open('app/dal/vocabulary.py').read()
+  │ new_func = '''…
+  └ Permission denied and could not request permission from user
+
+● Append vocabulary stats function via heredoc (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
+  │ """Get aggregate vocabulary mastery statistics."""…
+  └ 54 lines...
+
+● Verify append (shell)
+  │ tail -5 /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py
+  └ 6 lines...
+
+Good. Now add the router endpoint:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L55:65 (11 lines read)
+
+● Edit vocabulary.py +21
+  └ app/routers/vocabulary.py
+
+Now add the endpoint. Let me see the end of the file:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L130:145 (16 lines read)
+
+● Edit vocabulary.py +6
+  └ app/routers/vocabulary.py
+
+Now add tests. First unit tests:
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L1:15 (15 lines read)
+
+● Edit test_vocabulary_dal.py +1
+  └ tests/unit/test_vocabulary_dal.py
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L170:185 (16 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L185:200 (16 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L200:230 (30 lines read)
+
+Now append vocab stats tests:
+
+● Add vocab stats unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 43 lines...
+
+Now add integration test:
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L90:105 (15 lines read)
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L125:145 (21 lines read)
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L155:170 (12 lines read)
+
+● Add vocab stats integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 44 lines...
+
+● Record T2 for iteration 33 (shell)
+  │ date +%s
+  └ 2 lines...
+

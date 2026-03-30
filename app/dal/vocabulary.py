@@ -142,3 +142,55 @@ async def get_progress(db: aiosqlite.Connection, topic: str | None = None) -> li
                ORDER BY vp.level ASC""",
         )
     return [dict(r) for r in rows]
+
+
+async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get aggregate vocabulary mastery statistics."""
+    rows = await db.execute_fetchall(
+        """SELECT
+               COUNT(*) as total_words,
+               SUM(CASE WHEN level >= 3 THEN 1 ELSE 0 END) as total_mastered,
+               SUM(correct_count + incorrect_count) as total_reviews,
+               SUM(correct_count) as total_correct
+           FROM vocabulary_progress"""
+    )
+    r = rows[0]
+    total_words = r["total_words"] or 0
+    total_mastered = r["total_mastered"] or 0
+    total_reviews = r["total_reviews"] or 0
+    total_correct = r["total_correct"] or 0
+    accuracy_rate = round(total_correct / total_reviews * 100, 1) if total_reviews > 0 else 0.0
+
+    level_rows = await db.execute_fetchall(
+        "SELECT level, COUNT(*) as count FROM vocabulary_progress GROUP BY level ORDER BY level"
+    )
+    level_distribution = [{"level": lr["level"], "count": lr["count"]} for lr in level_rows]
+
+    topic_rows = await db.execute_fetchall(
+        """SELECT vw.topic,
+                  COUNT(*) as word_count,
+                  SUM(CASE WHEN vp.level >= 3 THEN 1 ELSE 0 END) as mastered_count,
+                  ROUND(AVG(vp.level), 1) as avg_level
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           GROUP BY vw.topic
+           ORDER BY vw.topic"""
+    )
+    topic_breakdown = [
+        {
+            "topic": tr["topic"],
+            "word_count": tr["word_count"],
+            "mastered_count": tr["mastered_count"] or 0,
+            "avg_level": tr["avg_level"] or 0.0,
+        }
+        for tr in topic_rows
+    ]
+
+    return {
+        "total_words": total_words,
+        "total_mastered": total_mastered,
+        "total_reviews": total_reviews,
+        "accuracy_rate": accuracy_rate,
+        "level_distribution": level_distribution,
+        "topic_breakdown": topic_breakdown,
+    }

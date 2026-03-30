@@ -164,3 +164,43 @@ async def test_frontend_log_endpoint(client):
     })
     assert res.status_code == 200
     assert res.json()["ok"] is True
+
+
+@pytest.mark.asyncio
+async def test_vocabulary_stats_empty(client):
+    """Test vocabulary stats on empty database."""
+    res = await client.get("/api/vocabulary/stats")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_words"] == 0
+    assert data["total_mastered"] == 0
+    assert data["total_reviews"] == 0
+    assert data["accuracy_rate"] == 0.0
+    assert data["level_distribution"] == []
+    assert data["topic_breakdown"] == []
+
+
+@pytest.mark.asyncio
+async def test_vocabulary_stats_with_data(client, mock_copilot):
+    """Test vocabulary stats after some quiz activity."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "hello", "correct_meaning": "greeting", "example_sentence": "Hello!", "difficulty": 1},
+            {"word": "goodbye", "correct_meaning": "farewell", "example_sentence": "Goodbye!", "difficulty": 1},
+        ]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=greetings&count=2")
+    assert quiz_res.status_code == 200
+    questions = quiz_res.json()["questions"]
+
+    # Answer first word correctly
+    await client.post("/api/vocabulary/answer", json={"word_id": questions[0]["id"], "is_correct": True})
+
+    res = await client.get("/api/vocabulary/stats")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_words"] >= 1
+    assert data["total_reviews"] >= 1
+    assert data["accuracy_rate"] > 0
+    assert isinstance(data["level_distribution"], list)
+    assert isinstance(data["topic_breakdown"], list)

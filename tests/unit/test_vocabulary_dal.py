@@ -8,6 +8,7 @@ from app.dal.vocabulary import (
     build_quiz,
     get_due_word_ids,
     get_progress,
+    get_vocabulary_stats,
     get_word,
     get_words_by_topic,
     save_words,
@@ -226,3 +227,45 @@ class TestGetProgress:
     async def test_returns_empty_when_no_progress(self, test_db):
         progress = await get_progress(test_db, "hotel_checkin")
         assert progress == []
+
+
+@pytest.mark.unit
+class TestGetVocabularyStats:
+    async def test_empty_database(self, test_db):
+        stats = await get_vocabulary_stats(test_db)
+        assert stats["total_words"] == 0
+        assert stats["total_mastered"] == 0
+        assert stats["total_reviews"] == 0
+        assert stats["accuracy_rate"] == 0.0
+        assert stats["level_distribution"] == []
+        assert stats["topic_breakdown"] == []
+
+    async def test_single_topic_stats(self, test_db):
+        words = await save_words(test_db, "greetings", _make_questions(3))
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+        stats = await get_vocabulary_stats(test_db)
+        assert stats["total_words"] == 3
+        assert stats["total_reviews"] == 3
+        assert stats["accuracy_rate"] == 100.0
+        assert len(stats["topic_breakdown"]) == 1
+        assert stats["topic_breakdown"][0]["topic"] == "greetings"
+        assert stats["topic_breakdown"][0]["word_count"] == 3
+
+    async def test_mixed_levels_and_topics(self, test_db):
+        w1 = await save_words(test_db, "greetings", _make_questions(2))
+        w2 = await save_words(test_db, "travel", _make_questions(1))
+        # Advance w1[0] to mastered (level 3+)
+        for _ in range(3):
+            await update_progress(test_db, w1[0]["id"], True)
+        # w1[1] stays at level 1
+        await update_progress(test_db, w1[1]["id"], True)
+        # w2[0] gets wrong answer
+        await update_progress(test_db, w2[0]["id"], False)
+
+        stats = await get_vocabulary_stats(test_db)
+        assert stats["total_words"] == 3
+        assert stats["total_mastered"] == 1
+        assert stats["total_reviews"] == 5  # 3 + 1 + 1
+        assert len(stats["level_distribution"]) > 0
+        assert len(stats["topic_breakdown"]) == 2
