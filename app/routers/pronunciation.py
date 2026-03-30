@@ -9,11 +9,11 @@ import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app.config import get_prompt
+from app.config import get_conversation_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
-from app.utils import safe_llm_call
+from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,14 @@ class PronunciationProgressResponse(BaseModel):
 @router.get("/sentences", response_model=SentencesResponse)
 async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
     sentences = await pron_dal.get_sentences_from_conversations(db)
+
+    # Convert raw topic keys to human-readable labels
+    topics = get_conversation_topics()
+    sentences = [
+        {**s, "topic": get_topic_label(topics, s["topic"])}
+        for s in sentences
+    ]
+
     return {"sentences": sentences}
 
 

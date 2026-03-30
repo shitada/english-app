@@ -79,27 +79,39 @@ async def propose(
     backlog: str,
 ) -> Proposal:
     """Ask the LLM to propose one improvement."""
-    proposer_instructions = _read_agent_md("proposer")
+    # Use a compact system prompt instead of the full proposer.agent.md
+    system = """You are an analyst for an English learning app (FastAPI + React + TypeScript + SQLite).
+Propose exactly ONE focused improvement. Return ONLY a JSON object:
+{"type":"test|bugfix|feature|refactor","title":"short title","description":"what to change and why, include file paths","files_to_modify":["path/to/file.py"],"priority":"high|medium|low","estimated_complexity":"small|medium|large"}
+Constraints: max 5 files, no duplicates from past experiments, respect async/await and DAL separation conventions."""
+
+    # Only send the description column from past results (not full TSV)
+    past_descriptions = []
+    for line in results_tsv.strip().splitlines()[1:]:  # skip header
+        parts = line.split("\t")
+        if len(parts) >= 14:
+            past_descriptions.append(f"  {parts[0]}: [{parts[12]}] {parts[13]}")
+
+    # Trim backlog to only uncompleted items
+    backlog_lines = []
+    for line in backlog.splitlines():
+        if line.strip().startswith("- [ ]"):
+            backlog_lines.append(line.strip())
 
     priority_note = ""
     if iteration <= 2:
-        priority_note = "\nPRIORITY: Focus on test coverage improvements.\n"
+        priority_note = "PRIORITY: Focus on test coverage improvements.\n"
 
-    user_prompt = f"""Current iteration: {iteration}
-{priority_note}
-Results TSV (past experiments — avoid duplicates):
-```
-{results_tsv}
-```
+    user_prompt = f"""Iteration {iteration}. {priority_note}
+Past experiments (avoid duplicates):
+{chr(10).join(past_descriptions[-10:]) if past_descriptions else "  (none)"}
 
-Backlog:
-```
-{backlog}
-```
+Uncompleted backlog:
+{chr(10).join(backlog_lines) if backlog_lines else "  (none)"}
 
-Read the codebase files as needed, then return exactly one focused proposal as JSON."""
+Return one JSON proposal."""
 
-    raw = await copilot.ask(proposer_instructions, user_prompt, timeout=180)
+    raw = await copilot.ask(system, user_prompt, timeout=300)
     data = _parse_json(raw)
     return Proposal(
         type=data.get("type", "unknown"),
@@ -189,29 +201,30 @@ async def evaluate(
     qa_issues: str = "",
 ) -> Evaluation:
     """Ask the LLM to evaluate the changes."""
-    evaluator_instructions = _read_agent_md("evaluator")
+    system = """You are a code reviewer for an English learning app. Score changes on:
+- code_quality (1-10, weight 25%): conventions, security, readability. If database.py SCHEMA changed but _MIGRATIONS not updated, score ≤3.
+- feature_value (1-10, weight 25%): value to English learners
+- maintainability (1-10, weight 30%): test coverage, coupling, backward compatibility
+- ux_quality (1-10, weight 20%): user experience quality
+Formula: total = code*0.25 + feature*0.25 + maintain*0.3 + ux*0.2
+Verdict: keep if total≥6.0 AND tests pass, else discard.
+Return ONLY JSON: {"code_quality":N,"feature_value":N,"maintainability":N,"ux_quality":N,"total_score":N.N,"verdict":"keep|discard","reason":"one sentence"}"""
 
-    user_prompt = f"""Proposal title: {proposal.title}
-Proposal description: {proposal.description}
+    # Truncate diff to avoid token overflow
+    diff_truncated = diff[:6000] if len(diff) > 6000 else diff
 
-Test results:
-- tests_passed: {test_passed}
-- tests_total: {test_total}
-- ts_check: {ts_check}
+    user_prompt = f"""Proposal: {proposal.title}
+Tests: {test_passed}/{test_total}, tsc: {ts_check}
+QA: passed={qa_passed}, ux_score={qa_ux_score}
 
-QA tester results:
-- qa_passed: {qa_passed if qa_passed is not None else 'not run'}
-- qa_ux_score: {qa_ux_score if qa_ux_score is not None else 'not run'}
-- qa_issues: {qa_issues or 'none'}
-
-Git diff:
+Diff:
 ```
-{diff[:8000]}
+{diff_truncated}
 ```
 
-Return your evaluation as JSON."""
+Return JSON evaluation."""
 
-    raw = await copilot.ask(evaluator_instructions, user_prompt, timeout=180)
+    raw = await copilot.ask(system, user_prompt, timeout=300)
     data = _parse_json(raw)
     return Evaluation(
         code_quality=data.get("code_quality", 5),

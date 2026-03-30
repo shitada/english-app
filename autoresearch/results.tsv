@@ -12,3 +12,9 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 11	087d7d7	2026-03-30T18:14:51+09:00	64	101	34	125	324	154	154	pass	7.25	keep	Add list-conversations endpoint for history review
 12	1f8bccd	2026-03-30T18:20:43+09:00	108	127	18	67	320	154	154	pass	7.05	keep	Unify LLM error handling with safe_llm_call helper
 13	dd9f764	2026-03-30T18:46:39+09:00	205	117	23	334	679	155	155	pass	7.8	keep	Make grammar check failure non-fatal in send_message
+17	none	2026-03-30T10:44:57.705787+00:00	155	74	4	51	287	153	155	pass	5.65	discard	Display fluency score and feedback in pronunciation results
+18	none	2026-03-30T10:49:45.029610+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
+19	none	2026-03-30T10:52:45.196792+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
+20	none	2026-03-30T10:55:45.417839+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
+14	none	2026-03-30T11:11:03.062898+00:00	0	0	0	0	182	0	0	skip	0.0	crash	Propose failed
+15	none	2026-03-30T11:14:05.321583+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed

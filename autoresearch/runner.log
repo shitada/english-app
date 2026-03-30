@@ -1,0 +1,45 @@
+2026-03-30 20:11:03,062 INFO [app.config] Config loaded from /Users/shingotada/Documents/vscode/english-app/config.yaml
+2026-03-30 20:11:03,062 INFO [__main__] Starting autoresearch: iterations 14-20
+2026-03-30 20:11:03,062 INFO [app.copilot_client] CopilotService configured: model=claude-sonnet-4-20250514, timeout=120, retries=3
+2026-03-30 20:11:03,063 INFO [__main__] ============================================================
+2026-03-30 20:11:03,063 INFO [__main__] ITERATION 14
+2026-03-30 20:11:03,063 INFO [__main__] ============================================================
+2026-03-30 20:11:03,087 INFO [__main__] Context: 17 past results, git HEAD: a9ecd64 feat: add standalone autoresearch runner (runner.py, llm.py, tester.py, git_ops.py)
+2026-03-30 20:11:03,087 INFO [__main__] Step 2: Proposing...
+2026-03-30 20:11:04,335 INFO [app.copilot_client] CopilotClient started (model=claude-sonnet-4-20250514)
+2026-03-30 20:11:05,160 INFO [app.copilot_client] Session created (0.8s)
+2026-03-30 20:14:05,320 ERROR [__main__] Propose failed: Timeout after 180.0s waiting for session.idle
+2026-03-30 20:14:05,321 INFO [__main__] Progress: 1/7 complete (kept=0, discarded=0, crashed=1)
+2026-03-30 20:14:05,321 INFO [__main__] ============================================================
+2026-03-30 20:14:05,321 INFO [__main__] ITERATION 15
+2026-03-30 20:14:05,321 INFO [__main__] ============================================================
+2026-03-30 20:14:05,355 INFO [__main__] Context: 18 past results, git HEAD: a9ecd64 feat: add standalone autoresearch runner (runner.py, llm.py, tester.py, git_ops.py)
+2026-03-30 20:14:05,356 INFO [__main__] Step 2: Proposing...
+2026-03-30 20:14:05,523 INFO [app.copilot_client] Session created (0.2s)
+2026-03-30 20:17:05,592 ERROR [__main__] Propose failed: Timeout after 180.0s waiting for session.idle
+2026-03-30 20:17:05,593 INFO [__main__] Progress: 2/7 complete (kept=0, discarded=0, crashed=2)
+2026-03-30 20:17:05,593 INFO [__main__] ============================================================
+2026-03-30 20:17:05,593 INFO [__main__] ITERATION 16
+2026-03-30 20:17:05,593 INFO [__main__] ============================================================
+2026-03-30 20:17:05,630 INFO [__main__] Context: 19 past results, git HEAD: a9ecd64 feat: add standalone autoresearch runner (runner.py, llm.py, tester.py, git_ops.py)
+2026-03-30 20:17:05,630 INFO [__main__] Step 2: Proposing...
+2026-03-30 20:17:05,703 INFO [app.copilot_client] Session created (0.1s)
+2026-03-30 20:19:59,538 INFO [app.config] Config loaded from /Users/shingotada/Documents/vscode/english-app/config.yaml
+2026-03-30 20:19:59,538 INFO [__main__] Starting autoresearch: iterations 14-16
+2026-03-30 20:19:59,538 INFO [app.copilot_client] CopilotService configured: model=claude-sonnet-4-20250514, timeout=120, retries=3
+2026-03-30 20:19:59,539 INFO [__main__] ============================================================
+2026-03-30 20:19:59,539 INFO [__main__] ITERATION 14
+2026-03-30 20:19:59,539 INFO [__main__] ============================================================
+2026-03-30 20:19:59,562 INFO [__main__] Context: 19 past results, git HEAD: a9ecd64 feat: add standalone autoresearch runner (runner.py, llm.py, tester.py, git_ops.py)
+2026-03-30 20:19:59,563 INFO [__main__] Step 2: Proposing...
+2026-03-30 20:20:01,331 INFO [app.copilot_client] CopilotClient started (model=claude-sonnet-4-20250514)
+2026-03-30 20:20:02,388 INFO [app.copilot_client] Session created (1.1s)
+2026-03-30 20:22:07,344 INFO [app.copilot_client] Copilot response (session=1.1s, llm=125.0s, total=126.0s)
+2026-03-30 20:22:07,446 INFO [__main__] Proposal: [bugfix] Display human-readable topic labels in dashboard and pronunciation
+2026-03-30 20:22:07,446 INFO [__main__] Step 3: Implementing...
+2026-03-30 20:22:07,797 INFO [app.copilot_client] Session created (0.3s)
+2026-03-30 20:26:03,615 INFO [app.copilot_client] Copilot response (session=0.3s, llm=235.8s, total=236.2s)
+2026-03-30 20:26:03,701 INFO [__main__]   Wrote app/routers/dashboard.py (1439 bytes)
+2026-03-30 20:26:03,701 INFO [__main__]   Wrote app/routers/pronunciation.py (3091 bytes)
+2026-03-30 20:26:03,702 INFO [__main__]   Wrote tests/test_topic_labels.py (4799 bytes)
+2026-03-30 20:26:03,702 INFO [__main__]   Applied 3 file changes
