@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     topic TEXT NOT NULL,
     difficulty TEXT NOT NULL DEFAULT 'intermediate',
+    summary_json TEXT,
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
     status TEXT NOT NULL DEFAULT 'active'
@@ -77,6 +78,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add difficulty column to conversations",
         "ALTER TABLE conversations ADD COLUMN difficulty TEXT NOT NULL DEFAULT 'intermediate'",
+    ),
+    (
+        "add summary_json column to conversations",
+        "ALTER TABLE conversations ADD COLUMN summary_json TEXT",
     ),
 ]
 

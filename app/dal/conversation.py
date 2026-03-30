@@ -77,12 +77,31 @@ async def format_history_text(db: aiosqlite.Connection, conversation_id: int) ->
     return "\n".join(f"{r['role']}: {r['content']}" for r in rows)
 
 
-async def end_conversation(db: aiosqlite.Connection, conversation_id: int) -> None:
+async def end_conversation(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    summary: dict[str, Any] | None = None,
+) -> None:
+    summary_json = json.dumps(summary) if summary else None
     await db.execute(
-        "UPDATE conversations SET status = 'ended', ended_at = datetime('now') WHERE id = ?",
-        (conversation_id,),
+        "UPDATE conversations SET status = 'ended', ended_at = datetime('now'), summary_json = ? WHERE id = ?",
+        (summary_json, conversation_id),
     )
     await db.commit()
+
+
+async def get_conversation_summary(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+) -> dict[str, Any] | None:
+    """Retrieve a stored conversation summary."""
+    rows = await db.execute_fetchall(
+        "SELECT summary_json FROM conversations WHERE id = ?",
+        (conversation_id,),
+    )
+    if rows and rows[0]["summary_json"]:
+        return json.loads(rows[0]["summary_json"])
+    return None
 
 
 async def list_conversations(

@@ -13,6 +13,7 @@ from app.dal.conversation import (
     format_history_text,
     get_active_conversation,
     get_conversation_history,
+    get_conversation_summary,
     list_conversations,
     update_message_feedback,
 )
@@ -182,6 +183,23 @@ class TestEndConversation:
         result = await get_active_conversation(test_db, cid2)
         assert result is not None
         assert result["status"] == "active"
+
+    async def test_saves_summary_json(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {"key_vocabulary": ["hello"], "communication_level": "beginner", "tip": "Practice more"}
+        await end_conversation(test_db, cid, summary=summary)
+        result = await get_conversation_summary(test_db, cid)
+        assert result == summary
+
+    async def test_summary_none_when_not_saved(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        result = await get_conversation_summary(test_db, cid)
+        assert result is None
+
+    async def test_summary_none_for_nonexistent(self, test_db):
+        result = await get_conversation_summary(test_db, 99999)
+        assert result is None
 
 
 @pytest.mark.unit

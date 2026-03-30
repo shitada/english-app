@@ -207,3 +207,34 @@ async def test_send_message_grammar_check_failure_is_non_fatal(client, mock_copi
     data = res.json()
     assert data["message"] == "That sounds great!"
     assert data["feedback"] is None
+
+
+@pytest.mark.asyncio
+async def test_get_summary_after_end(client, mock_copilot):
+    """Test that summary is persisted and retrievable after ending conversation."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    summary_data = {
+        "summary": "Brief hotel check-in conversation.",
+        "key_vocabulary": ["check-in", "reservation"],
+        "communication_level": "intermediate",
+        "tip": "Try using more polite phrases.",
+    }
+    mock_copilot.ask_json = AsyncMock(return_value=summary_data)
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    # Retrieve the stored summary
+    res = await client.get(f"/api/conversation/{conv_id}/summary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["summary"]["communication_level"] == "intermediate"
+    assert "check-in" in data["summary"]["key_vocabulary"]
+
+
+@pytest.mark.asyncio
+async def test_get_summary_not_found(client):
+    """Test that summary returns 404 for nonexistent conversation."""
+    res = await client.get("/api/conversation/99999/summary")
+    assert res.status_code == 404

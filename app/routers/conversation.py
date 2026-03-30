@@ -177,8 +177,17 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
         context="end_conversation",
     )
 
-    await conv_dal.end_conversation(db, req.conversation_id)
+    await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
 
+    return {"summary": summary}
+
+
+@router.get("/{conversation_id}/summary")
+async def get_summary(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Retrieve a stored conversation summary."""
+    summary = await conv_dal.get_conversation_summary(db, conversation_id)
+    if summary is None:
+        raise HTTPException(status_code=404, detail="Summary not found")
     return {"summary": summary}
 
 
