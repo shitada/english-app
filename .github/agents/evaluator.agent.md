@@ -18,6 +18,10 @@ You will receive:
 - `tests_total`: Total number of tests
 - `ts_check`: "pass" or "fail" (TypeScript compile check)
 - `test_output`: Relevant test output (especially failures)
+- `qa_passed`: Whether the QA tester passed (true/false)
+- `qa_ux_score`: UX score from the QA tester (1-10)
+- `qa_issues`: List of issues found by the QA tester
+- `qa_overall_impression`: One-sentence summary from QA tester
 
 ## Evaluation Criteria
 
@@ -64,13 +68,22 @@ Score each dimension from 1-10:
 ## Scoring Formula
 
 ```
-total_score = (code_quality * 0.3) + (feature_value * 0.3) + (maintainability * 0.4)
+total_score = (code_quality * 0.25) + (feature_value * 0.25) + (maintainability * 0.3) + (ux_quality * 0.2)
 ```
+
+### 4. UX Quality (weight: 20%)
+
+Based on the QA tester's report:
+- If `qa_passed: false` → set ux_quality to **2 or lower**
+- If QA tester found critical or multiple major issues → score 1-3
+- If minor issues only → score 5-7
+- If no issues and good overall impression → score 8-10
+- If QA tester was not run (no frontend changes) → default to **7** (neutral)
 
 ## Verdict Rules
 
-- **keep**: total_score >= 6.0 AND all tests pass AND TypeScript check passes
-- **discard**: total_score < 6.0 OR any test failure OR TypeScript check failure
+- **keep**: total_score >= 6.0 AND all tests pass AND TypeScript check passes AND qa_passed is true (or QA not run)
+- **discard**: total_score < 6.0 OR any test failure OR TypeScript check failure OR qa_passed is false
 
 If tests fail, automatically set verdict to "discard" regardless of other scores.
 
@@ -83,7 +96,8 @@ Return EXACTLY this JSON (no markdown fences, no extra text around it):
   "code_quality": 7,
   "feature_value": 8,
   "maintainability": 7,
-  "total_score": 7.3,
+  "ux_quality": 7,
+  "total_score": 7.25,
   "verdict": "keep",
   "reason": "One-sentence summary of why this change should be kept or discarded"
 }
@@ -98,3 +112,4 @@ Return EXACTLY this JSON (no markdown fences, no extra text around it):
 - **Check the diff carefully** — does the code actually do what the proposal claims?
 - **Consider regressions** — does the change risk breaking existing functionality?
 - **Security matters** — any security issue is an automatic low score on code_quality
+- **QA tester feedback matters** — if the QA tester found real UI issues, these should be reflected in ux_quality even if the code looks clean

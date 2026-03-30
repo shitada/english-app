@@ -108,14 +108,39 @@ The script starts the real server on port 8099, hits `/api/health`, `/api/conver
 
 If smoke test fails → treat as test failure (discard the change).
 
+### Step 5c — QA Test (Playwright MCP)
+
+Start the server if not already running for smoke test:
+```bash
+cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1
+uv run uvicorn app.main:app --host localhost --port 8000 --timeout-keep-alive 5 &
+sleep 3
+```
+
+Invoke the **tester** subagent. Pass it:
+- `server_url`: `https://localhost:8000`
+- `change_description`: The proposal title + description from Step 2
+- `changed_files`: List of files modified in this iteration (from `git diff HEAD~1 --name-only`)
+
+The tester uses Playwright MCP tools to open a real browser, navigate the app as a strict end-user, and returns:
+`{passed, ux_score, pages_tested, issues, performance_notes, overall_impression}`
+
+After the tester finishes, stop the server:
+```bash
+lsof -ti:8000 | xargs kill -9 2>/dev/null
+```
+
+If `passed: false` → treat as test failure (discard the change).
+
 ### Step 6 — Evaluate
 Invoke the **evaluator** subagent. Pass it:
 - The proposal (title + description)
 - The git diff of changes: `git diff HEAD~1`
 - Test results (tests_passed, tests_total, ts_check)
 - Any test failure output
+- **QA tester results**: passed, ux_score, issues list, overall_impression (from Step 5c)
 
-The evaluator returns: `{test_pass_rate, code_quality, feature_value, maintainability, total_score, verdict, reason}`
+The evaluator returns: `{test_pass_rate, code_quality, feature_value, maintainability, ux_quality, total_score, verdict, reason}`
 
 Record timestamp after evaluation:
 ```bash
@@ -129,12 +154,15 @@ Save as `T4`. Calculate `evaluate_sec = T4 - T3` and `total_sec = T4 - T0`.
 - All tests pass (tests_passed == tests_total)
 - TypeScript check passes (ts_check == "pass")
 - Smoke test passes (if applicable)
+- QA tester passed (passed == true)
+- QA tester ux_score >= 5.0
 - Evaluator total_score >= 6.0
 
 **DISCARD** if ANY of:
 - Any test fails
 - TypeScript check fails
 - Smoke test fails
+- QA tester failed (passed == false) or ux_score < 5.0
 - Evaluator total_score < 6.0
 
 If discarding:

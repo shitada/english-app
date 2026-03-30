@@ -59,6 +59,8 @@ cd frontend && npm run dev
 - Markers: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.e2e`
 - E2E tests excluded by default (`--ignore=tests/e2e` in pyproject.toml)
 - Use `pytest-asyncio` with `asyncio_mode = "auto"`
+- **QA Tester agent** (`tester.agent.md`): Uses Playwright MCP to operate the app as a real user. Run in autoresearch loop after unit/integration tests. Checks functionality, display quality, and UX. Reports issues with severity levels and a ux_score (1-10).
+- **Smoke test** (`tests/smoke_test.py`): Starts real server, hits 5 API endpoints, checks for non-5xx responses. Run when `database.py`, `routers/`, or `dal/` are modified.
 
 ## Config Structure
 `config.yaml` holds: copilot settings (model, timeout, retries), logging config, 6 conversation scenarios (hotel, restaurant, job interview, doctor, shopping, airport), vocabulary topics, and all system prompt templates.
