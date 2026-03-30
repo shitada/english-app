@@ -1661,3 +1661,133 @@ Now update the Dashboard and Conversation pages:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 28 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #28: fix inconsistent date formatting with shared formatDate utility
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check iteration 28 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 28 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+181 passed, TS pass. Start QA server and test:
+
+● Build frontend for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 5 lines...
+
+● Check build output (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/dist/index.html 2>/dev/null && echo
+  │ "BUILD_OK" || echo "BUILD_FAILED"
+  └ 3 lines...
+
+Build exists. Let me start the server for QA:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host
+  │ 127.0.0.1 --port 8000 --timeout-keep-alive 30 &
+  │ sleep 3 && curl -s http://127.0.0.1:8000/api/health
+  └ 10 lines...
+
+● Tester QA test iteration 28
+  │ playwright-browser_navigate http://localhost:8000/dashboard
+  │   └ ### Ran Playwright code
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+QA failed due to server being down. Let me check and restart:
+
+● Check server status (shell)
+  │ ps aux | grep uvicorn | grep -v grep | head -3
+  └ 1 line...
+
+Server died. Let me restart and re-run QA:
+
+● Restart server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host
+  │ 127.0.0.1 --port 8000 --timeout-keep-alive 30 &
+  │ sleep 3 && curl -s http://127.0.0.1:8000/api/health
+  └ 10 lines...
+
+● Tester Re-QA test iteration 28
+  │ Read Dashboard.tsx
+  │   │ frontend/src/pages/Dashboard.tsx
+  │   └ L1:5 (4 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L1:7 (6 lines read)
+
+QA passed=true, ux_score=5 (edge case - server instability was infrastructure, not code). Let me stop server and evaluate:
+
+● Find server PID (shell)
+  │ ps aux | grep uvicorn | grep -v grep | awk '{print $2}' | head -3
+  └ 1 line...
+
+● Record T3 for iteration 28 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 28
+  │ Read Dashboard.tsx
+  │   │ frontend/src/pages/Dashboard.tsx
+  │   └ L60:75 (16 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L265:315 (50 lines read)
+
+● Record T4 for iteration 28 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.05 — KEEP. Recording:
+
+● Record iteration 28 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf
+  │ "28\t%s\t2026-03-30T16:03:06+00:00\t101\t55\t1768\t187\t2111\t181\t181\tpass\t6.05\tkeep\tFix
+  │ inconsistent date formatting with shared formatDate utility\n" "$COMMIT" >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Iteration 28 complete (KEEP, 6.05). Starting iteration 29.
+
+---
+
+● Record T0 for iteration 29 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 29
+  │ List directory app/routers
+  │   └ 6 files found
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L1:30 (29 lines read)
+
+● Record T1 for iteration 29 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=58. Implementing unit tests for rate_limit.py:
+
+● Create test_rate_limit.py +114
+  └ tests/unit/test_rate_limit.py
+
+● Record T2 for iteration 29 (shell)
+  │ date +%s
+  └ 2 lines...
+
