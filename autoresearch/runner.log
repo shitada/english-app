@@ -1791,3 +1791,102 @@ propose_sec=58. Implementing unit tests for rate_limit.py:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 29 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #29: add unit tests for RateLimiter module
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 19 lines...
+
+● Run tests for iteration 29 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+190 passed! TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+Test-only change, no router/dal/frontend changes. Evaluate:
+
+● Evaluator Evaluate iteration 29
+  │ Read test_config.py
+  │   │ tests/unit/test_config.py
+  │   └ 66 lines read
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+● Record T4 for iteration 29 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 — KEEP. Recording:
+
+● Record iteration 29 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf "29\t%s\t2026-03-30T16:25:25+00:00\t58\t24\t20\t212\t314\t190\t190\tpass\t8.1\tkeep\tAdd
+  │ unit tests for RateLimiter module\n" "$COMMIT" >> autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 29 done (KEEP, 8.1). Starting iteration 30.
+
+---
+
+● Record T0 for iteration 30 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 30
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ 59 lines read
+  └ Read main.tsx
+      │ frontend/src/main.tsx
+      └ 10 lines read
+
+● Record T1 for iteration 30 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=73. Let me examine App.tsx and create the ErrorBoundary:
+
+● List directory frontend/src/components
+
+● Read App.tsx
+  │ frontend/src/App.tsx
+  └ 57 lines read
+
+● Ensure components dir exists (shell)
+  │ mkdir -p /Users/shingotada/Documents/vscode/english-app/frontend/src/components
+  └ 1 line...
+
+● Create ErrorBoundary.tsx +57
+  └ frontend/src/components/ErrorBoundary.tsx
+
+Now wrap Routes in App.tsx with the ErrorBoundary:
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+● Edit App.tsx +9 -7
+  └ frontend/src/App.tsx
+
+Also fix the unused `location` variable that's causing a build warning:
+
+● Read App.tsx
+  │ frontend/src/App.tsx
+  └ L9:16 (8 lines read)
+
+● Edit App.tsx -1
+  └ frontend/src/App.tsx
+
+● Edit App.tsx +1 -1
+  └ frontend/src/App.tsx
+
+● Record T2 for iteration 30 (shell)
+  │ date +%s
+  └ 2 lines...
+

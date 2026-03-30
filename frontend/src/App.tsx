@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import Conversation from './pages/Conversation';
 import Pronunciation from './pages/Pronunciation';
@@ -8,7 +9,6 @@ import Dashboard from './pages/Dashboard';
 
 function Header() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [navOpen, setNavOpen] = useState(false);
 
   // Close nav on route change
@@ -43,13 +43,15 @@ export default function App() {
       <div className="app-layout">
         <Header />
         <main className="app-main">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/conversation" element={<Conversation />} />
-            <Route path="/pronunciation" element={<Pronunciation />} />
-            <Route path="/vocabulary" element={<Vocabulary />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/conversation" element={<Conversation />} />
+              <Route path="/pronunciation" element={<Pronunciation />} />
+              <Route path="/vocabulary" element={<Vocabulary />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
     </BrowserRouter>
