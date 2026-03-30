@@ -82,6 +82,25 @@ body {
   color: white;
 }
 
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 4px 8px;
+  color: var(--text);
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
 .app-main {
   flex: 1;
   padding: 24px;
@@ -585,12 +604,18 @@ body {
 
 /* Responsive */
 @media (max-width: 640px) {
-  .app-header { padding: 0 12px; }
-  .app-header nav a { padding: 6px 10px; font-size: 13px; }
+  .app-header { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 56px; }
+  .app-header nav { display: none; width: 100%; flex-direction: column; gap: 4px; padding: 8px 0; }
+  .app-header nav.nav-open { display: flex; }
+  .app-header nav a { padding: 10px 16px; font-size: 15px; }
+  .nav-toggle { display: block; }
   .app-main { padding: 12px; }
   .message { max-width: 90%; }
   .feature-grid, .topic-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
   .home-hero h2 { font-size: 22px; }
+  .btn-icon { min-width: 44px; min-height: 44px; }
+  .chat-input-bar { gap: 8px; padding: 8px; }
 }
 
 /* Skeleton loading */
