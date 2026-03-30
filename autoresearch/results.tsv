@@ -31,3 +31,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 24	0c1109c	2026-03-30T23:09:08+09:00	271	35	14	184	504	165	165	pass	7.8	keep	Include vocabulary reviews in streak calculation
 25	97e9c41	2026-03-30T23:44:03+09:00	58	0	11	86	918	11	470	pass	6.75	keep	Fetch topics from API instead of hardcoding in frontend
 26	fc1761d	2026-03-30T15:47:09+00:00	347	83	485	92	1007	174	174	pass	7.5	keep	Add rate limiting for LLM endpoints
+27	792c552	2026-03-30T15:51:02+00:00	147	41	45	78	311	181	181	pass	8.1	keep	Add integration tests for dashboard stats API

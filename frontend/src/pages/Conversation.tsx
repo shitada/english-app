@@ -3,6 +3,7 @@ import { Mic, MicOff, Send, Square, Volume2, History } from 'lucide-react';
 import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { formatDateTime } from '../utils/formatDate';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -268,7 +269,7 @@ export default function Conversation() {
                       </span>
                     </div>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                      {new Date(c.started_at).toLocaleDateString()}
+                      {formatDateTime(c.started_at)}
                     </span>
                   </button>
                 );
@@ -303,7 +304,7 @@ export default function Conversation() {
                 )}
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {new Date(msg.created_at).toLocaleTimeString()}
+                {formatDateTime(msg.created_at)}
               </span>
             </div>
           ))}

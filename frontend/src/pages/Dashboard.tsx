@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Trophy } from 'lucide-react';
 import { api, type DashboardStats } from '../api';
+import { formatRelativeTime } from '../utils/formatDate';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -64,7 +65,7 @@ export default function Dashboard() {
               </span>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 14 }}>{a.detail}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{a.timestamp}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{formatRelativeTime(a.timestamp)}</p>
               </div>
             </div>
           ))}

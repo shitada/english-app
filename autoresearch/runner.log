@@ -1558,3 +1558,106 @@ The vocabulary DAL expects `correct_meaning` not `meaning`. Let me fix the mock 
 
 All 181 tests pass. Amend commit:
 
+● Amend commit and record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && date +%s
+  └ 31 lines...
+
+No routers/dal/database changed → skip smoke test. No frontend change → skip QA (test-only change). Run evaluator:
+
+● Evaluator Evaluate iteration 27
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ 79 lines read
+  └ Read pyproject.toml
+      └ 33 lines read
+
+● Record T4 for iteration 27 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 — KEEP. Recording results:
+
+● Record iteration 27 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf "27\t%s\t2026-03-30T15:51:02+00:00\t147\t41\t45\t78\t311\t181\t181\tpass\t8.1\tkeep\tAdd
+  │ integration tests for dashboard stats API\n" "$COMMIT" >> autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 27 complete (KEEP, score 8.1). Starting iteration 28.
+
+---
+
+● Record T0 for iteration 28 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 28
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ 346 lines read
+  └ Read utils.py
+      │ app/utils.py
+      └ 33 lines read
+
+● Record T1 for iteration 28 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=101. Let me examine the frontend files:
+
+● Read Dashboard.tsx
+  │ frontend/src/pages/Dashboard.tsx
+  └ 86 lines read
+
+● List directory frontend/src
+  └ 9 files found
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ 497 lines read
+
+Now I have the full context. Let me create the date formatting utility and apply it:
+
+● Check if utils dir exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/utils/ 2>/dev/null || echo
+  │ "NO_UTILS_DIR"
+  └ 2 lines...
+
+✗ Create formatDate.ts
+  │ frontend/src/utils/formatDate.ts
+  └ Parent directory does not exist
+
+● Create utils dir (shell)
+  │ mkdir -p /Users/shingotada/Documents/vscode/english-app/frontend/src/utils
+  └ 1 line...
+
+● Create utils directory (shell)
+  │ mkdir -p /Users/shingotada/Documents/vscode/english-app/frontend/src/utils && ls -la
+  │ /Users/shingotada/Documents/vscode/english-app/frontend/src/utils/
+  └ 4 lines...
+
+● Create formatDate.ts +42
+  └ frontend/src/utils/formatDate.ts
+
+Now update the Dashboard and Conversation pages:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Dashboard.tsx +1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Record T2 for iteration 28 (shell)
+  │ date +%s
+  └ 2 lines...
+
