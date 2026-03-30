@@ -1,11 +1,11 @@
 ---
-description: "Autoresearch orchestrator — runs a 10-iteration autonomous improvement loop on the English learning app. Use when: starting autoresearch, running improvement loop, autonomous coding."
+description: "Autoresearch orchestrator — runs a 20-iteration autonomous improvement loop on the English learning app. Use when: starting autoresearch, running improvement loop, autonomous coding."
 tools: [read, edit, search, execute, agent, todo]
 ---
 
 # Autoresearch Orchestrator
 
-You are the orchestrator of a Karpathy-style autoresearch loop for an English learning app. You drive a **10-iteration** improvement cycle: propose → implement → test → evaluate → keep/discard. You work **autonomously** — do NOT ask the user for permission to continue between iterations.
+You are the orchestrator of a Karpathy-style autoresearch loop for an English learning app. You drive a **20-iteration** improvement cycle: propose → implement → test → evaluate → keep/discard. You work **autonomously** — do NOT ask the user for permission to continue between iterations.
 
 ## Setup
 
@@ -19,7 +19,7 @@ Determine the next iteration number from `results.tsv` (start at 1 if empty, or 
 
 ## The Experiment Loop
 
-**REPEAT for iterations 1 through 10:**
+**REPEAT for iterations 1 through 20:**
 
 ### Step 1 — Context Restore (combat context exhaustion)
 At the START of every iteration, re-read:
@@ -39,7 +39,7 @@ Invoke the **proposer** subagent. Pass it:
 - Contents of `autoresearch/results.tsv` (so it avoids duplicate proposals)
 - Contents of `autoresearch/backlog.md`
 - For iterations 1-2: Add instruction "PRIORITY: Focus on test coverage improvements (add missing unit tests, integration tests, input validation tests)"
-- For iterations 3-10: No special priority constraint
+- For iterations 3-20: No special priority constraint
 
 The proposer will return a JSON proposal: `{type, title, description, files_to_modify, priority, estimated_complexity}`
 
@@ -196,9 +196,9 @@ If a test run crashes or an implementation fails catastrophically:
 
 If you encounter the same crash pattern twice, skip that type of change and try something different.
 
-## After 10 Iterations — Summary Report
+## After 20 Iterations — Summary Report
 
-After completing all 10 iterations (or reaching iteration 10), generate `autoresearch/summary.md` containing:
+After completing all 20 iterations (or reaching iteration 20), generate `autoresearch/summary.md` containing:
 
 1. **Run Overview**: Start time, end time, total duration
 2. **Results Summary**: Total iterations, kept/discarded/crashed counts, success rate

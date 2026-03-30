@@ -33,7 +33,7 @@ Evaluate the codebase from these angles (in priority order):
 3. **Input validation gaps** — endpoints accepting invalid data without error
 4. **Edge case coverage** — unhappy paths not tested
 
-### For iterations 3-10 (general improvements)
+### For iterations 3-20 (general improvements)
 1. **Listening/Speaking features** — improvements to conversation, pronunciation, shadowing
 2. **Bug detection** — logic errors, race conditions, missing error handling
 3. **Code quality** — duplicated logic, missing type hints, inconsistent patterns
