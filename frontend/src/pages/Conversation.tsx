@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2 } from 'lucide-react';
-import { api, type GrammarFeedback } from '../api';
+import { Mic, MicOff, Send, Square, Volume2, History } from 'lucide-react';
+import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
@@ -30,7 +30,7 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
 ];
 
 export default function Conversation() {
-  const [phase, setPhase] = useState<'select' | 'chat' | 'summary'>('select');
+  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -38,6 +38,8 @@ export default function Conversation() {
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [summary, setSummary] = useState<any>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
+  const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
+  const [historyMessages, setHistoryMessages] = useState<ChatMessage[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -77,6 +79,23 @@ export default function Conversation() {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Load past conversations for history browsing
+  useEffect(() => {
+    api.listConversations().then((res) => {
+      setPastConversations(res.conversations.filter((c) => c.status === 'ended'));
+    }).catch(() => {});
+  }, [phase]);
+
+  const viewConversationHistory = async (id: number) => {
+    try {
+      const res = await api.getHistory(id);
+      setHistoryMessages(res.messages);
+      setPhase('history');
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const startConversation = async (topicId: string) => {
@@ -198,6 +217,79 @@ export default function Conversation() {
             </div>
           </>
         )}
+
+        {/* Past Conversations */}
+        {pastConversations.length > 0 && (
+          <div style={{ marginTop: 32 }}>
+            <h3 style={{ marginBottom: 12, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <History size={18} /> Past Conversations
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {pastConversations.slice(0, 5).map((c) => {
+                const scenario = SCENARIOS.find((s) => s.id === c.topic);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => viewConversationHistory(c.id)}
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: 8,
+                      border: '1px solid var(--border)',
+                      background: 'var(--card-bg)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div>
+                      <strong>{scenario?.emoji} {scenario?.label || c.topic}</strong>
+                      <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontSize: '0.85rem' }}>
+                        {c.difficulty} · {c.message_count} messages
+                      </span>
+                    </div>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                      {new Date(c.started_at).toLocaleDateString()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // History view (read-only past conversation)
+  if (phase === 'history') {
+    return (
+      <div>
+        <button
+          onClick={() => setPhase('select')}
+          style={{ marginBottom: 16, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
+        >
+          ← Back to scenarios
+        </button>
+        <h2 style={{ marginBottom: 16 }}>Conversation History</h2>
+        <div className="chat-container" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+          {historyMessages.map((msg, i) => (
+            <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
+              <div className={`message-bubble ${msg.role}`}>
+                <p>{msg.content}</p>
+                {msg.feedback && !msg.feedback.is_correct && (
+                  <div style={{ fontSize: '0.85rem', marginTop: 8, padding: 8, background: 'rgba(255,200,0,0.1)', borderRadius: 4 }}>
+                    <strong>Correction:</strong> {msg.feedback.corrected_text}
+                  </div>
+                )}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                {new Date(msg.created_at).toLocaleTimeString()}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

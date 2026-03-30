@@ -37,6 +37,11 @@ export const api = {
   getHistory: (conversation_id: number) =>
     request<{ messages: ChatMessage[] }>(`/api/conversation/${conversation_id}/history`),
 
+  listConversations: (topic?: string) =>
+    request<{ conversations: ConversationListItem[] }>(
+      `/api/conversation/list${topic ? `?topic=${encodeURIComponent(topic)}` : ''}`
+    ),
+
   // Pronunciation
   getPronunciationSentences: () =>
     request<{ sentences: { text: string; topic: string }[] }>('/api/pronunciation/sentences'),
@@ -132,4 +137,14 @@ export interface DashboardStats {
   total_vocab_reviewed: number;
   vocab_mastered: number;
   recent_activity: { type: string; detail: string; timestamp: string }[];
+}
+
+export interface ConversationListItem {
+  id: number;
+  topic: string;
+  difficulty: string;
+  started_at: string;
+  ended_at: string | null;
+  status: string;
+  message_count: number;
 }
