@@ -30,7 +30,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Improve accessibility — add ARIA labels, keyboard navigation, screen reader support (completed iteration #16)
 - [x] ✅ Add loading states and skeleton screens — better UX during LLM processing delays (completed iteration #19)
 - [ ] Add offline fallback for vocabulary review — cache previously fetched quiz data
-- [ ] Improve mobile responsiveness — optimize layout for smaller screens
+- [x] ✅ Improve mobile responsiveness — optimize layout for smaller screens (completed iteration #20)
 - [ ] Display human-readable topic labels in dashboard and pronunciation pages (QA #13: raw keys like 'hotel_checkin' shown instead of 'Hotel Check-in')
 
 ## [LOW] Infrastructure
