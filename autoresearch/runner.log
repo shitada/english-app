@@ -2604,3 +2604,75 @@ Now add the progress integration tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 35 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #35: add integration tests for pronunciation progress endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 35 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+217 passed, TS clean. Test-only change. Evaluate:
+
+● Record T3 for iteration 35 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 35
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L83:156 (73 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ 127 lines read
+
+● Record T4 for iteration 35 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 — KEEP. Recording final results:
+
+● Record iteration 35 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf
+  │ "35\t%s\t2026-03-30T19:58:44+00:00\t1097\t28\t507\t55\t1687\t217\t217\tpass\t8.1\tkeep\tAdd
+  │ integration tests for pronunciation progress endpoint\n" "$COMMIT" >> autoresearch/results.tsv
+  └ 1 line...
+
+All 10 iterations complete (26-35), all KEPT! Now generating summary and committing:
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 42 lines read
+
+Now generate the summary:
+
+● Check if summary exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md 2>/dev/null && echo
+  │ "EXISTS" || echo "NOT_EXISTS"
+  └ 3 lines...
+
+✗ Edit summary.md
+  │ autoresearch/summary.md
+  └ No match found
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L1:5 (5 lines read)
+
+● Write summary report (shell)
+  │ cat > /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md << 'MDEOF'
+  │ # Autoresearch Summary Report
+  │
+  │ ## Run Overview (Iterations 26-35)
+  │ - **Run**: Iterations 26-35 (10 iterations)…
+  └ 76 lines...
+
