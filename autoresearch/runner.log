@@ -43,3 +43,221 @@
 2026-03-30 20:26:03,701 INFO [__main__]   Wrote app/routers/pronunciation.py (3091 bytes)
 2026-03-30 20:26:03,702 INFO [__main__]   Wrote tests/test_topic_labels.py (4799 bytes)
 2026-03-30 20:26:03,702 INFO [__main__]   Applied 3 file changes
+[2026-03-30 22:44:38] ==========================================
+[2026-03-30 22:44:38] Autoresearch CLI Runner started
+[2026-03-30 22:44:38] Target iterations: 30
+[2026-03-30 22:44:38] Max invocations:   8
+[2026-03-30 22:44:38] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-30 22:44:38] ==========================================
+[2026-03-30 22:44:38] WARNING: Working tree has uncommitted changes
+[2026-03-30 22:44:38]   M autoresearch/runner.log
+[2026-03-30 22:44:38]   ?? autoresearch/run.sh
+[2026-03-30 22:44:38] Continuing anyway...
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 1 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 2 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 3 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 4 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 5 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 6 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 7 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Invocation 8 / 8
+[2026-03-30 22:44:38] Resuming from iteration 23
+[2026-03-30 22:44:38] ------------------------------------------
+[2026-03-30 22:44:38] Current iteration count: 22 / 30
+[2026-03-30 22:44:38] Max invocations reached (8) — stopping
+[2026-03-30 22:44:38] Progress: iteration 22 / 30
+[2026-03-30 22:44:38] ==========================================
+[2026-03-30 22:44:38] Runner finished
+[2026-03-30 22:44:38] Total invocations: 9
+[2026-03-30 22:44:38] Final iteration:   22 / 30
+[2026-03-30 22:44:38] ==========================================
+[2026-03-30 22:52:39] ==========================================
+[2026-03-30 22:52:39] Autoresearch CLI Runner started
+[2026-03-30 22:52:39] Target iterations: 2
+[2026-03-30 22:52:39] Max invocations:   10
+[2026-03-30 22:52:39] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-30 22:52:39] ==========================================
+[2026-03-30 22:52:39] WARNING: Working tree has uncommitted changes
+[2026-03-30 22:52:39]   M autoresearch/runner.log
+[2026-03-30 22:52:39]   ?? autoresearch/run.sh
+[2026-03-30 22:52:39] Continuing anyway...
+[2026-03-30 22:52:39] Current iteration count: 22 / 2
+[2026-03-30 22:52:39] Target reached (22 >= 2) — done!
+[2026-03-30 22:52:39] ==========================================
+[2026-03-30 22:52:39] Runner finished
+[2026-03-30 22:52:39] Total invocations: 0
+[2026-03-30 22:52:39] Final iteration:   22 / 2
+[2026-03-30 22:52:39] ==========================================
+[2026-03-30 22:54:26] ==========================================
+[2026-03-30 22:54:26] Autoresearch CLI Runner started
+[2026-03-30 22:54:26] Current iteration: 22
+[2026-03-30 22:54:26] Additional iters:  2
+[2026-03-30 22:54:26] Target iteration:  24
+[2026-03-30 22:54:26] Max invocations:   10
+[2026-03-30 22:54:26] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-30 22:54:26] ==========================================
+[2026-03-30 22:54:26] WARNING: Working tree has uncommitted changes
+[2026-03-30 22:54:26]   M autoresearch/runner.log
+[2026-03-30 22:54:26]   ?? autoresearch/run.sh
+[2026-03-30 22:54:26] Continuing anyway...
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 1 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 2 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 3 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 4 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 5 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 6 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 7 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 8 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 9 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Invocation 10 / 10
+[2026-03-30 22:54:26] Resuming from iteration 23
+[2026-03-30 22:54:26] ------------------------------------------
+[2026-03-30 22:54:26] Current iteration count: 22 / 24
+[2026-03-30 22:54:26] Max invocations reached (10) — stopping
+[2026-03-30 22:54:26] Progress: iteration 22 / 24
+[2026-03-30 22:54:26] ==========================================
+[2026-03-30 22:54:26] Runner finished
+[2026-03-30 22:54:26] Total invocations: 11
+[2026-03-30 22:54:26] Final iteration:   22 / 24
+[2026-03-30 22:54:26] ==========================================
+[2026-03-30 22:54:44] ==========================================
+[2026-03-30 22:54:44] Autoresearch CLI Runner started
+[2026-03-30 22:54:44] Current iteration: 22
+[2026-03-30 22:54:44] Additional iters:  2
+[2026-03-30 22:54:44] Target iteration:  24
+[2026-03-30 22:54:44] Max invocations:   10
+[2026-03-30 22:54:44] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-30 22:54:44] ==========================================
+[2026-03-30 22:54:44] WARNING: Working tree has uncommitted changes
+[2026-03-30 22:54:44]   M autoresearch/runner.log
+[2026-03-30 22:54:44]   ?? autoresearch/run.sh
+[2026-03-30 22:54:44] Continuing anyway...
+[2026-03-30 22:54:44] Current iteration count: 22 / 24
+[2026-03-30 22:54:44] ------------------------------------------
+[2026-03-30 22:54:44] Invocation 1 / 10
+[2026-03-30 22:54:44] Resuming from iteration 23
+[2026-03-30 22:54:44] ------------------------------------------
+[2026-03-30 22:54:44] Starting copilot invocation...
+
+
+
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 40 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 29 lines read
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -10
+  └ 11 lines...
+
+Good, I have the full context. Last completed iteration was #22. I'll run iterations 23–24 now.
+
+---
+
+**Starting Iteration 23**
+
+● Record T0 for iteration 23 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1774878907. Now proposing a change.
+
+● Proposer Propose iteration 23
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L380:416 (37 lines read)
+  └ Read useSpeechRecognition.ts
+      │ frontend/src/hooks/useSpeechRecognition.ts
+      └ 167 lines read
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L60:90 (30 lines read)
+
+● Record T1 for iteration 23 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L380:420 (40 lines read)
+
+Now I'll implement the change — replace the read-only transcript preview with an editable text input:
+
+● Edit Conversation.tsx +31 -12
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit and test:
+

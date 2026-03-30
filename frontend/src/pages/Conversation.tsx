@@ -381,34 +381,53 @@ export default function Conversation() {
           {speech.error}
         </div>
       )}
-      <div className="chat-input-bar" style={{ justifyContent: 'center', gap: 16 }}>
+      <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>
         <button
           className={`btn btn-icon ${speech.isListening ? 'mic-active' : 'btn-secondary'}`}
           onClick={speech.isListening ? speech.stop : speech.start}
           disabled={!speech.isSupported || loading}
           title={speech.isSupported ? (speech.isListening ? 'Stop listening' : 'Start speaking') : 'Speech recognition not supported'}
           aria-label={speech.isListening ? 'Stop listening' : 'Start speaking'}
-          style={{ width: 56, height: 56 }}
+          style={{ width: 48, height: 48, flexShrink: 0 }}
         >
-          {speech.isListening ? <MicOff size={24} color="white" /> : <Mic size={24} />}
+          {speech.isListening ? <MicOff size={22} color="white" /> : <Mic size={22} />}
         </button>
 
-        {/* Show transcript preview */}
-        {(speech.transcript || speech.interimTranscript) && (
-          <div style={{ flex: 1, fontSize: 14, color: 'var(--text)', padding: '8px 0' }}>
-            {speech.transcript}
-            <span style={{ color: 'var(--text-secondary)' }}>{speech.interimTranscript}</span>
-          </div>
-        )}
+        <div style={{ flex: 1, position: 'relative' }}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && input.trim() && !loading) sendMessage(); }}
+            placeholder={speech.isListening ? 'Listening...' : 'Type your message or use the mic'}
+            disabled={loading}
+            aria-label="Message input"
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              fontSize: 14,
+              border: '1px solid var(--border, #e2e8f0)',
+              borderRadius: 8,
+              outline: 'none',
+              background: 'var(--bg, #fff)',
+              color: 'var(--text)',
+            }}
+          />
+          {speech.interimTranscript && (
+            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--text-secondary)', pointerEvents: 'none' }}>
+              {speech.interimTranscript}
+            </span>
+          )}
+        </div>
 
         <button
           className="btn btn-primary btn-icon"
           onClick={sendMessage}
           disabled={loading || !input.trim()}
           aria-label="Send message"
-          style={{ width: 56, height: 56 }}
+          style={{ width: 48, height: 48, flexShrink: 0 }}
         >
-          <Send size={24} />
+          <Send size={22} />
         </button>
       </div>
     </div>
