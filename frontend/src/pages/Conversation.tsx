@@ -10,14 +10,14 @@ interface Message {
   feedback?: GrammarFeedback;
 }
 
-const SCENARIOS = [
-  { id: 'hotel_checkin', label: 'Hotel Check-in', description: 'Check into a hotel, ask about amenities', emoji: '🏨' },
-  { id: 'restaurant_order', label: 'Restaurant Order', description: 'Order food, ask about the menu, pay the bill', emoji: '🍽️' },
-  { id: 'job_interview', label: 'Job Interview', description: 'Answer interview questions, discuss experience', emoji: '💼' },
-  { id: 'doctor_visit', label: 'Doctor Visit', description: 'Describe symptoms, understand the diagnosis', emoji: '🏥' },
-  { id: 'shopping', label: 'Shopping', description: 'Ask about products, sizes, prices, returns', emoji: '🛍️' },
-  { id: 'airport', label: 'At the Airport', description: 'Check-in, go through security, find the gate', emoji: '✈️' },
-];
+const TOPIC_EMOJIS: Record<string, string> = {
+  hotel_checkin: '🏨',
+  restaurant_order: '🍽️',
+  job_interview: '💼',
+  doctor_visit: '🏥',
+  shopping: '🛍️',
+  airport: '✈️',
+};
 
 const DURATION = 5 * 60; // 5 minutes in seconds
 
@@ -40,6 +40,8 @@ export default function Conversation() {
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<ChatMessage[]>([]);
+  const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
+  const [topicsLoading, setTopicsLoading] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -74,6 +76,14 @@ export default function Conversation() {
       setInput(speech.transcript);
     }
   }, [speech.transcript]);
+
+  // Fetch topics from API
+  useEffect(() => {
+    api.getConversationTopics()
+      .then((data) => setTopics(data))
+      .catch(() => {})
+      .finally(() => setTopicsLoading(false));
+  }, []);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -203,18 +213,26 @@ export default function Conversation() {
                 ))}
               </div>
             </div>
-            <div className="topic-grid">
-              {SCENARIOS.map((s) => (
-                <button
-                  key={s.id}
-                  className="topic-card"
-                  onClick={() => startConversation(s.id)}
-                >
-                  <h3>{s.emoji} {s.label}</h3>
-                  <p>{s.description}</p>
-                </button>
-              ))}
-            </div>
+            {topicsLoading ? (
+              <div className="topic-grid">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="skeleton skeleton-card" style={{ height: 100 }} />
+                ))}
+              </div>
+            ) : (
+              <div className="topic-grid">
+                {topics.map((s) => (
+                  <button
+                    key={s.id}
+                    className="topic-card"
+                    onClick={() => startConversation(s.id)}
+                  >
+                    <h3>{TOPIC_EMOJIS[s.id] || '💬'} {s.label}</h3>
+                    <p>{s.description}</p>
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
 
@@ -226,7 +244,7 @@ export default function Conversation() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {pastConversations.slice(0, 5).map((c) => {
-                const scenario = SCENARIOS.find((s) => s.id === c.topic);
+                const topic = topics.find((t) => t.id === c.topic);
                 return (
                   <button
                     key={c.id}
@@ -244,7 +262,7 @@ export default function Conversation() {
                     }}
                   >
                     <div>
-                      <strong>{scenario?.emoji} {scenario?.label || c.topic}</strong>
+                      <strong>{TOPIC_EMOJIS[c.topic] || '💬'} {topic?.label || c.topic}</strong>
                       <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontSize: '0.85rem' }}>
                         {c.difficulty} · {c.message_count} messages
                       </span>

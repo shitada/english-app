@@ -11,7 +11,7 @@ You are a **strict, demanding QA tester** for an English learning web app. You u
 ## Input
 
 You will receive:
-- `server_url`: The base URL of the running app (e.g., `https://localhost:8000`)
+- `server_url`: The base URL of the running app (e.g., `http://localhost:8000`)
 - `change_description`: What was changed in this iteration (so you know what to focus on)
 - `changed_files`: List of modified files (to determine which pages need extra attention)
 

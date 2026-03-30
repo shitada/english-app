@@ -225,11 +225,25 @@ main() {
     # Final summary
     local final_iter
     final_iter=$(get_current_iteration)
+
+    # Tally premium requests from this run's log output
+    local total_premium=0
+    if [[ -f "$LOG_FILE" ]]; then
+        while IFS= read -r n; do
+            total_premium=$((total_premium + n))
+        done < <(grep "Total usage est:" "$LOG_FILE" | grep -o '[0-9]\+ Premium' | grep -o '[0-9]\+')
+    fi
+
     log "=========================================="
     log "Runner finished"
     log "Total invocations: $invocation"
     log "Final iteration:   $final_iter / $TARGET_ITERATIONS"
+    log "Premium requests:  $total_premium"
     log "=========================================="
+
+    echo ""
+    echo "  Premium requests used this run: $total_premium"
+    echo ""
 }
 
 main

@@ -110,15 +110,16 @@ If smoke test fails → treat as test failure (discard the change).
 
 ### Step 5c — QA Test (Playwright MCP)
 
-Start the server if not already running for smoke test:
+Start the server if not already running for smoke test (use nohup + disown so the process survives after this shell exits):
 ```bash
 cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1
-uv run uvicorn app.main:app --host localhost --port 8000 --timeout-keep-alive 5 &
-sleep 3
+nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/qa_server.log 2>&1 &
+disown
+sleep 4 && curl -s http://localhost:8000/api/health
 ```
 
 Invoke the **tester** subagent. Pass it:
-- `server_url`: `https://localhost:8000`
+- `server_url`: `http://localhost:8000`
 - `change_description`: The proposal title + description from Step 2
 - `changed_files`: List of files modified in this iteration (from `git diff HEAD~1 --name-only`)
 

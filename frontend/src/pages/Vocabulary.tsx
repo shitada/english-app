@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2, Check, X, ArrowRight } from 'lucide-react';
 import { api, type QuizQuestion } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
-const TOPICS = [
-  { id: 'hotel_checkin', label: 'Hotel & Accommodation', description: 'Reservation, check-in, amenities, complaints', emoji: '🏨' },
-  { id: 'restaurant_order', label: 'Restaurant & Dining', description: 'Menu, ordering, allergies, tipping', emoji: '🍽️' },
-  { id: 'job_interview', label: 'Job Interview', description: 'Resume, qualifications, strengths, salary', emoji: '💼' },
-  { id: 'doctor_visit', label: 'Health & Medical', description: 'Symptoms, diagnosis, prescription, insurance', emoji: '🏥' },
-  { id: 'shopping', label: 'Shopping & Retail', description: 'Sizes, colors, prices, returns, discounts', emoji: '🛍️' },
-  { id: 'airport', label: 'Travel & Transport', description: 'Boarding, delays, luggage, immigration', emoji: '✈️' },
-];
+const TOPIC_EMOJIS: Record<string, string> = {
+  hotel_checkin: '🏨',
+  restaurant_order: '🍽️',
+  job_interview: '💼',
+  doctor_visit: '🏥',
+  shopping: '🛍️',
+  airport: '✈️',
+};
 
 export default function Vocabulary() {
   const [phase, setPhase] = useState<'select' | 'quiz' | 'result'>('select');
@@ -21,8 +21,18 @@ export default function Vocabulary() {
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word'>('word-to-meaning');
+  const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
+  const [topicsLoading, setTopicsLoading] = useState(true);
 
   const tts = useSpeechSynthesis();
+
+  // Fetch topics from API
+  useEffect(() => {
+    api.getVocabularyTopics()
+      .then((data) => setTopics(data))
+      .catch(() => {})
+      .finally(() => setTopicsLoading(false));
+  }, []);
 
   const startQuiz = async (topicId: string) => {
     setLoading(true);
@@ -152,7 +162,7 @@ export default function Vocabulary() {
           </div>
         </div>
 
-        {loading ? (
+        {loading || topicsLoading ? (
           <div className="topic-grid">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="skeleton skeleton-card" style={{ height: 100 }} />
@@ -160,13 +170,13 @@ export default function Vocabulary() {
           </div>
         ) : (
           <div className="topic-grid">
-            {TOPICS.map((topic) => (
+            {topics.map((topic) => (
               <button
                 key={topic.id}
                 className="topic-card"
                 onClick={() => startQuiz(topic.id)}
               >
-                <h3>{topic.emoji} {topic.label}</h3>
+                <h3>{TOPIC_EMOJIS[topic.id] || '📚'} {topic.label}</h3>
                 <p>{topic.description}</p>
               </button>
             ))}

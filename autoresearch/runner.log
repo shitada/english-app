@@ -599,3 +599,153 @@ I'll update the summary with the latest iterations:
 
 Now commit all tracking files:
 
+● Commit tracking files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ complete iterations 23-24
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+✅ **Iterations 23-24 complete.** Both kept.
+
+| # | Score | Description |
+|---|-------|-------------|
+| **23** | 7.0 | Add keyboard text input to conversation chat as speech fallback |
+| **24** | 7.8 | Fix streak calculation to include vocabulary reviews (bugfix) |
+
+**Test count**: 165 (up from 164). Summary report updated in `autoresearch/summary.md`.
+
+
+Total usage est:        3 Premium requests
+API time spent:         22m 42s
+Total session time:     24m 8s
+Total code changes:     +103 -70
+Breakdown by AI model:
+ claude-opus-4.6          2.9m in, 36.3k out, 2.6m cached (Est. 3 Premium requests)
+[2026-03-30 23:18:56] Copilot invocation completed (duration: 1452s)
+[2026-03-30 23:18:59] Current iteration count: 24 / 24
+[2026-03-30 23:18:59] Target reached (24 >= 24) — done!
+[2026-03-30 23:18:59] ==========================================
+[2026-03-30 23:18:59] Runner finished
+[2026-03-30 23:18:59] Total invocations: 1
+[2026-03-30 23:18:59] Final iteration:   24 / 24
+[2026-03-30 23:18:59] ==========================================
+[2026-03-30 23:43:37] ==========================================
+[2026-03-30 23:43:37] Autoresearch CLI Runner started
+[2026-03-30 23:43:37] Current iteration: 24
+[2026-03-30 23:43:37] Additional iters:  2
+[2026-03-30 23:43:37] Target iteration:  26
+[2026-03-30 23:43:37] Max invocations:   10
+[2026-03-30 23:43:37] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-30 23:43:37] ==========================================
+[2026-03-30 23:43:37] WARNING: Working tree has uncommitted changes
+[2026-03-30 23:43:37]   M  .github/agents/orchestrator.agent.md
+[2026-03-30 23:43:37]   M  .github/agents/tester.agent.md
+[2026-03-30 23:43:37]   M  autoresearch/run.sh
+[2026-03-30 23:43:37]   MM autoresearch/runner.log
+[2026-03-30 23:43:37] Continuing anyway...
+[2026-03-30 23:43:37] Current iteration count: 24 / 26
+[2026-03-30 23:43:37] ------------------------------------------
+[2026-03-30 23:43:37] Invocation 1 / 10
+[2026-03-30 23:43:37] Resuming from iteration 25
+[2026-03-30 23:43:37] ------------------------------------------
+[2026-03-30 23:43:37] Starting copilot invocation...
+
+
+
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 42 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 31 lines read
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -10
+  └ 11 lines...
+
+Good. Last completed iteration is 24. I'll run iterations 25 and 26. Starting iteration 25 now.
+
+## Iteration 25
+
+● Record T0 for iteration 25 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1774881843. Now invoking the proposer.
+
+● Proposer Propose iteration 25
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L1:14 (13 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L14:17 (3 lines read)
+
+Good proposal. Let me record T1 and explore the files to implement.
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ 150 lines read
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 336 lines read
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ 479 lines read
+
+● Record T1 for iteration 25 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1774882423, propose_sec = 580. Now let me check the API endpoint to understand the response shape.
+
+● Explore Find topic API endpoints
+  │ Read config.py
+  │   │ app/config.py
+  │   └ 57 lines read
+  └ Read config.yaml
+      └ 203 lines read
+
+Good. Now I'll implement the changes. Both pages need to fetch topics from API instead of hardcoding them.
+
+● Edit Conversation.tsx +8 -8
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the useEffect to fetch topics, right after the speech transcript sync effect:
+
+● Edit Conversation.tsx +8
+  └ frontend/src/pages/Conversation.tsx
+
+Now replace the topic grid rendering to use fetched topics instead of SCENARIOS:
+
+● Edit Conversation.tsx +20 -12
+  └ frontend/src/pages/Conversation.tsx
+
+Now update the past conversations lookup to use fetched topics instead of SCENARIOS:
+
+● Edit Conversation.tsx +2 -2
+  └ frontend/src/pages/Conversation.tsx
+
+Now update Vocabulary.tsx similarly:
+
+● Edit Vocabulary.tsx +9 -9
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +10
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now update the topic grid rendering in Vocabulary.tsx:
+
+● Edit Vocabulary.tsx +3 -3
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now record T2 and commit:
+
