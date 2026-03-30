@@ -16,7 +16,7 @@ from app.config import get_conversation_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
-from app.utils import get_topic_label
+from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +92,10 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         role=topic_data.get("scenario", "a conversation partner") if topic_data else "a conversation partner",
         goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
     ) + difficulty_instructions[req.difficulty]
-    try:
-        opening = await copilot.ask(system, "Start the scenario. Greet the user in character.")
-    except Exception as e:
-        logger.error("LLM error in start_conversation: %s", e)
-        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+    opening = await safe_llm_call(
+        copilot.ask(system, "Start the scenario. Greet the user in character."),
+        context="start_conversation",
+    )
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
@@ -134,17 +133,16 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Run grammar check and conversation response in PARALLEL
     t0 = time.monotonic()
-    try:
-        feedback, ai_response = await asyncio.gather(
+    feedback, ai_response = await safe_llm_call(
+        asyncio.gather(
             copilot.ask_json(
                 "You are an English grammar and expression checker. Return ONLY valid JSON.",
                 grammar_prompt,
             ),
             copilot.ask(system, conv_prompt),
-        )
-    except Exception as e:
-        logger.error("LLM error in send_message: %s", e)
-        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        ),
+        context="send_message",
+    )
     logger.info("Parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
     # Save feedback + AI response
@@ -164,14 +162,13 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
 
     copilot = get_copilot_service()
     summary_prompt = get_prompt("conversation_summary").format(conversation=history)
-    try:
-        summary = await copilot.ask_json(
+    summary = await safe_llm_call(
+        copilot.ask_json(
             "You are an English learning assistant. Return ONLY valid JSON.",
             summary_prompt,
-        )
-    except Exception as e:
-        logger.error("LLM error in end_conversation: %s", e)
-        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        ),
+        context="end_conversation",
+    )
 
     await conv_dal.end_conversation(db, req.conversation_id)
 

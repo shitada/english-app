@@ -9,3 +9,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 8	9771382	2026-03-29T15:30:42+09:00	67	64	16	50	197	138	138	pass	7.7	keep	Add Pydantic response models to all endpoints
 9	b94affc	2026-03-29T15:34:15+09:00	58	40	16	34	148	140	140	pass	7.7	keep	Add health check endpoint with DB verification
 10	69c1691	2026-03-29T15:37:04+09:00	87	62	21	39	209	145	145	pass	7.7	keep	Add pronunciation progress tracking endpoint
+11	087d7d7	2026-03-30T18:14:51+09:00	64	101	34	125	324	154	154	pass	7.25	keep	Add list-conversations endpoint for history review

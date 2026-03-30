@@ -13,7 +13,7 @@ from app.config import get_vocabulary_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
-from app.utils import get_topic_label
+from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -88,14 +88,13 @@ async def generate_quiz(
     topic_label = get_topic_label(get_vocabulary_topics(), topic)
     copilot = get_copilot_service()
     prompt = get_prompt("vocabulary_quiz_generator").format(topic=topic_label, count=count)
-    try:
-        result = await copilot.ask_json(
+    result = await safe_llm_call(
+        copilot.ask_json(
             "You are an English vocabulary teacher. Return ONLY valid JSON.",
             prompt,
-        )
-    except Exception as e:
-        logger.error("LLM error in generate_quiz: %s", e)
-        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        ),
+        context="generate_quiz",
+    )
 
     words = await vocab_dal.save_words(db, topic, result.get("questions", []))
     return {"questions": words}

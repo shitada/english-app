@@ -13,6 +13,7 @@ from app.config import get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
+from app.utils import safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +80,13 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         reference_text=req.reference_text,
         user_transcription=req.user_transcription,
     )
-    try:
-        feedback = await copilot.ask_json(
+    feedback = await safe_llm_call(
+        copilot.ask_json(
             "You are an English pronunciation coach. Return ONLY valid JSON.",
             prompt,
-        )
-    except Exception as e:
-        logger.error("LLM error in check_pronunciation: %s", e)
-        raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
+        ),
+        context="check_pronunciation",
+    )
 
     await pron_dal.save_attempt(
         db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),

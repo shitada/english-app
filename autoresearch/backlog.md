@@ -16,7 +16,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)
 - [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
 - [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
-- [ ] Add conversation history review page — let users revisit past conversations and grammar feedback
+- [x] ✅ Add conversation history review page — backend endpoint added: GET /api/conversation/list with topic filter and pagination (completed iteration #11)
 - [x] ✅ Add progress tracking for pronunciation — track improvement over time per sentence type (completed iteration #10)
 
 ## [MEDIUM] Code Quality
