@@ -33,7 +33,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add keyboard text input as speech fallback in conversation chat (completed iteration #23)
 - [ ] Add offline fallback for vocabulary review — cache previously fetched quiz data
 - [x] ✅ Improve mobile responsiveness — optimize layout for smaller screens (completed iteration #20)
-- [ ] Display human-readable topic labels in dashboard and pronunciation pages (QA #13: raw keys like 'hotel_checkin' shown instead of 'Hotel Check-in')
+- [x] ✅ Display human-readable topic labels in dashboard and pronunciation pages — topics now fetched from API (completed iteration #25)
 
 ## [LOW] Infrastructure
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import aiosqlite
@@ -22,11 +23,16 @@ async def get_sentences_from_conversations(db: aiosqlite.Connection, limit: int 
     seen: set[str] = set()
     for r in rows:
         content = r["content"]
-        for sent in content.replace("!", ".").replace("?", ".").split("."):
+        # Split on sentence boundaries, preserving trailing punctuation
+        fragments = re.split(r'(?<=[.!?])\s+', content)
+        for sent in fragments:
             sent = sent.strip()
-            if 5 <= len(sent.split()) <= 20 and sent not in seen:
+            # Ensure sentence ends with punctuation
+            if sent and sent[-1] not in '.!?':
+                sent += '.'
+            if 5 <= len(sent.rstrip('.!?').split()) <= 20 and sent not in seen:
                 seen.add(sent)
-                sentences.append({"text": sent + ".", "topic": r["topic"]})
+                sentences.append({"text": sent, "topic": r["topic"]})
                 if len(sentences) >= 10:
                     return sentences
     return sentences

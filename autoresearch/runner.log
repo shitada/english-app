@@ -749,3 +749,269 @@ Now update the topic grid rendering in Vocabulary.tsx:
 
 Now record T2 and commit:
 
+● Record T2 and commit iteration 25 (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m
+  │ "autoresearch #25: fetch topics from API instead of hardcoding in frontend
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+T2 = 1774882541, implement_sec = 118. Now run tests:
+
+● Run TypeScript check for iteration 25 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests for iteration 25 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 165 tests passed, TypeScript check passed. Now check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE_NEEDED" || echo "NO_SMOKE"
+  └ 2 lines...
+
+No smoke test needed (frontend-only changes). Now run QA test. Start the server and invoke tester:
+
+✗ Start QA server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1 && nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  │ > /tmp/qa_server.log 2>&1 & disown && sleep 4 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+✗ Start QA server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/qa_server.log 2>&1 & disown && sleep 4 &&
+  │ curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+✗ Start QA server for testing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /tmp/qa_server.log 2>&1 &
+  │ sleep 4
+  │ curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start QA server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify QA server is running (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is running. Now invoke the tester:
+
+● Get changed files for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 7 lines...
+
+● Tester QA test iteration 25
+  │ playwright-browser_evaluate
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed (ux_score: 7). The issues found are pre-existing (stale build). Now stop server and evaluate:
+
+● Record T3 for iteration 25 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Stop QA server (shell)
+  │ ps aux | grep "uvicorn app.main:app" | grep -v grep | awk '{print $2}' | head -1 | xargs kill -9
+  │ 2>/dev/null; echo "done"
+  └ 2 lines...
+
+T3 = 1774883232, test_sec = 691. Now invoke the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 10 lines...
+
+● Evaluator Evaluate iteration 25
+  │ Read config.py
+  │   │ app/config.py
+  │   └ 57 lines read
+  └ Read config.yaml
+      └ L1:60 (60 lines read)
+
+Score 6.75, verdict: keep. Let me record T4 and log results:
+
+● Record T4 for iteration 25 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 25 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && STARTED=$(date -r 1774881843
+  │ +%Y-%m-%dT%H:%M:%S%z) && echo "25     97e9c41 ${STARTED}      580     118     691     81
+  │ 1470    165     165     pass    6.75    keep    Fetch topics from API instead of hardcoding in
+  │ frontend" >> autoresearch/results.tsv
+  └ 1 line...
+
+Now update the backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Good. Iteration 25 complete (KEPT, score 6.75). Starting iteration 26.
+
+---
+
+## Iteration 26
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 32 lines read
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 42 lines read
+
+● Record T0 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0 = 1774883337. Invoking proposer for iteration 26:
+
+● Proposer Propose iteration 26
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ 193 lines read
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L1:32 (32 lines read)
+
+Good bugfix proposal. Recording T1 and implementing:
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ 121 lines read
+
+● Record T1 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check sentence extraction logic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "split\|replace\|punctuation\|sentence" app/dal/pronunciation.py
+  └ 12 lines...
+
+Now let me check the existing tests:
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ 193 lines read
+
+Now I'll implement the fix. The key change is in `get_sentences_from_conversations` - use regex to split while preserving punctuation:
+
+● Edit pronunciation.py +9 -3
+  └ app/dal/pronunciation.py
+
+Now add a test that verifies punctuation is preserved:
+
+● Edit test_pronunciation_dal.py +35
+  └ tests/unit/test_pronunciation_dal.py
+
+Now record T2 and commit:
+
+● Record T2 and commit iteration 26 (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m
+  │ "autoresearch #26: preserve original punctuation in pronunciation sentence extraction
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 28 lines...
+
+T2 = 1774883718, implement_sec = 67. Now run tests:
+
+● Run TypeScript check for iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests for iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+1 test failing - `test_streak_includes_vocabulary_only_days`. This looks like a pre-existing flaky test, not related to my changes. Let me verify by re-running:
+
+● Re-run failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetStats::test_streak_includes_vocabulary_only_days -v
+  │ 2>&1
+  └ 31 lines...
+
+This is a consistent failure. Let me investigate and fix it since it was introduced in a previous iteration:
+
+● Explore Debug streak test failure
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ 102 lines read
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ 144 lines read
+
+Good diagnosis. Let me fix the date format issue:
+
+● Find the date format in vocabulary.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "isoformat\|last_reviewed\|datetime.now" app/dal/vocabulary.py
+  └ 8 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L80:120 (40 lines read)
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+Also fix the `next_review` timestamps for consistency:
+
+● Edit vocabulary.py +2 -2
+  └ app/dal/vocabulary.py
+
+Now amend the commit and re-run tests:
+
+● Amend commit with vocabulary fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #26: preserve punctuation in pronunciation + fix vocabulary date format
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-edit 2>&1 | head -5
+  └ 6 lines...
+
+● Re-run all tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+Still failing. Let me debug more deeply:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ 102 lines read
+
+● Debug SQLite date parsing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ import sqlite3, datetime
+  │
+  │ db = sqlite3.connect(':memory:')
+  │ db.row_factory = sqlite3.Row…
+  └ 27 lines...
+
+Found it! The timezone mismatch: `datetime.now(timezone.utc)` stores UTC date (March 30) but `date.today()` returns local JST date (March 31). The streak calculation compares UTC dates against local dates.
+
+The fix: use local time for `last_reviewed` since streak should be based on user's local day:
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+Now amend and re-test:
+

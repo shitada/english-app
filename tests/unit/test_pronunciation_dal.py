@@ -68,6 +68,41 @@ class TestGetSentencesFromConversations:
         # Both sentences should be extracted (both have 5+ words)
         assert len(sentences) >= 1
 
+    async def test_preserves_question_mark_punctuation(self, test_db):
+        cid = await create_conversation(test_db, "restaurant_order")
+        await add_message(
+            test_db, cid, "assistant",
+            "Would you like to see the menu today?"
+        )
+        sentences = await get_sentences_from_conversations(test_db)
+        assert len(sentences) == 1
+        assert sentences[0]["text"].endswith("?")
+
+    async def test_preserves_exclamation_mark_punctuation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(
+            test_db, cid, "assistant",
+            "Welcome to our wonderful hotel and enjoy your stay!"
+        )
+        sentences = await get_sentences_from_conversations(test_db)
+        assert len(sentences) == 1
+        assert sentences[0]["text"].endswith("!")
+
+    async def test_preserves_mixed_punctuation(self, test_db):
+        cid = await create_conversation(test_db, "restaurant_order")
+        await add_message(
+            test_db, cid, "assistant",
+            "Would you like to see the menu? We have some great specials today! Please take your time to decide."
+        )
+        sentences = await get_sentences_from_conversations(test_db)
+        texts = [s["text"] for s in sentences]
+        question_found = any(t.endswith("?") for t in texts)
+        exclamation_found = any(t.endswith("!") for t in texts)
+        period_found = any(t.endswith(".") for t in texts)
+        assert question_found, f"No question mark found in: {texts}"
+        assert exclamation_found, f"No exclamation found in: {texts}"
+        assert period_found, f"No period found in: {texts}"
+
     async def test_excludes_user_messages(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
         await add_message(test_db, cid, "user", "I would like to check into my room please.")

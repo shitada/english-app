@@ -84,7 +84,7 @@ async def update_progress(
     progress = await db.execute_fetchall(
         "SELECT * FROM vocabulary_progress WHERE word_id = ?", (word_id,)
     )
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     if progress:
         p = progress[0]
@@ -98,7 +98,7 @@ async def update_progress(
             correct = p["correct_count"]
             incorrect = p["incorrect_count"] + 1
 
-        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).isoformat()
+        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
         await db.execute(
             """UPDATE vocabulary_progress
                SET correct_count = ?, incorrect_count = ?, level = ?,
@@ -110,7 +110,7 @@ async def update_progress(
         level = 1 if is_correct else 0
         correct = 1 if is_correct else 0
         incorrect = 0 if is_correct else 1
-        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).isoformat()
+        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
         await db.execute(
             """INSERT INTO vocabulary_progress
                (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at)
