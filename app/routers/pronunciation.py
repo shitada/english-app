@@ -13,6 +13,7 @@ from app.config import get_conversation_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
+from app.rate_limit import require_rate_limit
 from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
@@ -81,7 +82,7 @@ async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
 
 
 @router.post("/check")
-async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     copilot = get_copilot_service()
 
     prompt = get_prompt("pronunciation_checker").format(

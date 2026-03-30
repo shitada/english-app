@@ -87,10 +87,12 @@ async def client(tmp_path: Path, mock_copilot) -> AsyncGenerator[AsyncClient, No
             await db.close()
 
     from app.database import get_db_session
+    from app.rate_limit import require_rate_limit
     from app.main import app
 
     app.router.lifespan_context = _noop_lifespan
     app.dependency_overrides[get_db_session] = _test_db_session
+    app.dependency_overrides[require_rate_limit] = lambda: None
 
     with patch("app.routers.conversation.get_copilot_service", return_value=mock_copilot), \
          patch("app.routers.pronunciation.get_copilot_service", return_value=mock_copilot), \

@@ -16,6 +16,7 @@ from app.config import get_conversation_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
+from app.rate_limit import require_rate_limit
 from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ async def list_topics():
 
 
 @router.post("/start", response_model=StartResponse)
-async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     topics = get_conversation_topics()
     topic_data = next((t for t in topics if t["id"] == req.topic), None)
     topic_label = topic_data["label"] if topic_data else req.topic
@@ -107,7 +108,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
 
 @router.post("/message", response_model=MessageResponse)
-async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found or already ended")
@@ -160,7 +161,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
 
 @router.post("/end", response_model=EndResponse)
-async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")

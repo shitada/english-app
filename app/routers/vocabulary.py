@@ -13,6 +13,7 @@ from app.config import get_vocabulary_topics, get_prompt
 from app.copilot_client import get_copilot_service
 from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
+from app.rate_limit import require_rate_limit
 from app.utils import get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ async def generate_quiz(
     topic: str,
     count: int = Query(default=10, ge=1, le=50),
     db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
 ):
     existing = await vocab_dal.get_words_by_topic(db, topic)
 

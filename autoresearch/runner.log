@@ -1112,3 +1112,204 @@ Summary exists from previous run. Let me update it with iterations 25-26:
 
 Now commit everything:
 
+● Commit summary and results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ complete iterations 25-26
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 26 lines...
+
+Both iterations complete. Here's the summary:
+
+## Iterations 25-26 Complete
+
+| # | Score | Status | Description |
+|---|-------|--------|-------------|
+| **25** | 6.75 | ✅ keep | Fetch topics from API instead of hardcoding in frontend |
+| **26** | 7.75 | ✅ keep | Preserve punctuation in pronunciation + fix vocabulary streak date bug |
+
+**Key improvements:**
+- **#25**: Conversation & Vocabulary pages now fetch topics from backend API (config.yaml is single source of truth), eliminating hardcoded duplication
+- **#26**: Fixed pronunciation sentences losing `?`/`!` punctuation (important for intonation practice) + fixed timezone bug where vocabulary-only days weren't counting toward streaks
+
+**Test count**: 165 → 168 (+3 new punctuation tests). All passing, smoke + QA verified.
+
+
+Total usage est:        3 Premium requests
+API time spent:         40m 29s
+Total session time:     42m 40s
+Total code changes:     +133 -60
+Breakdown by AI model:
+ claude-opus-4.6          7.1m in, 67.8k out, 6.6m cached (Est. 3 Premium requests)
+ claude-haiku-4.5         102.6k in, 3.1k out, 78.1k cached (Est. 0 Premium requests)
+[2026-03-31 00:26:21] Copilot invocation completed (duration: 2564s)
+[2026-03-31 00:26:24] Current iteration count: 266926deb2026-03-31T00:08:57+09003146749893972168168pass7.75keepPreserve punctuation in pronunciation + fix vocabulary streak date bug / 26
+[2026-03-31 00:46:13] ==========================================
+[2026-03-31 00:46:13] Autoresearch CLI Runner started
+[2026-03-31 00:46:13] Current iteration: 25
+[2026-03-31 00:46:13] Additional iters:  10
+[2026-03-31 00:46:13] Target iteration:  35
+[2026-03-31 00:46:13] Max invocations:   10
+[2026-03-31 00:46:13] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-31 00:46:13] ==========================================
+[2026-03-31 00:46:13] WARNING: Working tree has uncommitted changes
+[2026-03-31 00:46:13]   M autoresearch/results.tsv
+[2026-03-31 00:46:13]   M autoresearch/runner.log
+[2026-03-31 00:46:13] Continuing anyway...
+[2026-03-31 00:46:13] Current iteration count: 25 / 35
+[2026-03-31 00:46:14] ------------------------------------------
+[2026-03-31 00:46:14] Invocation 1 / 10
+[2026-03-31 00:46:14] Resuming from iteration 26
+[2026-03-31 00:46:14] ------------------------------------------
+[2026-03-31 00:46:14] Starting copilot invocation...
+
+
+
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 32 lines read
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 44 lines read
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -15
+  └ 16 lines...
+
+Now I have the full state. Last recorded iteration is 25. I'll run iterations 26–35 (10 iterations). Let me start by getting the current test baseline.
+
+● Run baseline TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run baseline tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+Baseline: 168 tests pass, TypeScript OK. Starting iteration 26.
+
+● Record T0 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 26
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ 79 lines read
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ 166 lines read
+
+● Record T1 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose_sec = 347. Now implementing rate limiting. Let me examine the existing routers first.
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ 215 lines read
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ 115 lines read
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ 122 lines read
+
+● Read main.py
+  │ app/main.py
+  └ 188 lines read
+
+Now implementing. Creating the rate limiter module and tests, then applying to routers.
+
+● Create rate_limit.py +48
+  └ app/rate_limit.py
+
+Now apply the dependency to the LLM-calling endpoints:
+
+● Edit pronunciation.py +1
+  └ app/routers/pronunciation.py
+
+● Edit conversation.py +1
+  └ app/routers/conversation.py
+
+● Edit vocabulary.py +1
+  └ app/routers/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit vocabulary.py +1
+  └ app/routers/vocabulary.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now let me check the existing test conftest and create the rate limiting tests:
+
+● Read conftest.py
+  │ tests/conftest.py
+  └ 103 lines read
+
+I need to override the rate limiter in the test client fixture so existing tests aren't affected:
+
+● Edit conftest.py +2
+  └ tests/conftest.py
+
+Now create the rate limiting tests:
+
+● Create test_rate_limiting.py +161
+  └ tests/integration/test_rate_limiting.py
+
+● Record T2 for iteration 26 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #26: add rate limiting for LLM endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+Now run tests:
+
+● Run tests for iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+The 422 errors are because the rate limit dependency override needs proper FastAPI `Request` type hint. Let me fix:
+
+● Edit test_rate_limiting.py +3 -1
+  └ tests/integration/test_rate_limiting.py
+
+● Re-run rate limiting tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_rate_limiting.py -v 2>&1
+  └ 18 lines...
+
+All pass. Now run the full test suite and TS check:
+
+● TypeScript check iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Full test suite iteration 26 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+174 passed, TS check passes. Now amend the commit and run smoke test:
+
