@@ -2517,3 +2517,90 @@ propose_sec=93. Let me check utils.py then create tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 34 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #34: add unit tests for app/utils.py (safe_llm_call, get_topic_label)
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 34 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 5 lines...
+
+213 passed, TS clean. Test-only change, evaluate:● Request failed due to a transient API error. Retrying...
+
+213 passed! TS clean. Test-only change, no smoke/QA needed. Evaluate:
+
+● Record T3 for iteration 34 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 34
+  │ Read test_utils.py
+  │   │ tests/unit/test_utils.py
+  │   └ 79 lines read
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+● Record T4 for iteration 34 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.35 — KEEP. Recording:
+
+● Record iteration 34 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && COMMIT=$(git rev-parse --short HEAD) &&
+  │ printf
+  │ "34\t%s\t2026-03-30T19:28:15+00:00\t93\t1519\t951\t49\t2612\t213\t213\tpass\t8.35\tkeep\tAdd
+  │ unit tests for app/utils.py (safe_llm_call, get_topic_label)\n" "$COMMIT" >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 34 done (KEEP, 8.35). Starting final iteration 35.
+
+---
+
+● Record T0 for iteration 35 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 35
+  │ List directory autoresearch
+  │   └ 6 files found
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ 41 lines read
+
+● Record T1 for iteration 35 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=1097. Let me look at the existing pronunciation tests and the progress endpoint:
+
+● Read test_pronunciation_api.py
+  │ tests/integration/test_pronunciation_api.py
+  └ 79 lines read
+
+Now add the progress integration tests:
+
+● Add pronunciation progress tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'PYEOF'…
+  └ 80 lines...
+
+● Record T2 for iteration 35 (shell)
+  │ date +%s
+  └ 2 lines...
+

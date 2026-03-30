@@ -77,3 +77,79 @@ async def test_pronunciation_history_empty(client):
     res = await client.get("/api/pronunciation/history")
     assert res.status_code == 200
     assert res.json()["attempts"] == []
+
+
+@pytest.mark.asyncio
+async def test_pronunciation_progress_empty(client):
+    """Progress on empty database should return zeroed stats."""
+    res = await client.get("/api/pronunciation/progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] == 0
+    assert data["avg_score"] == 0
+    assert data["best_score"] == 0
+    assert data["scores_by_date"] == []
+    assert data["most_practiced"] == []
+
+
+@pytest.mark.asyncio
+async def test_pronunciation_progress_after_attempts(client, mock_copilot):
+    """Progress should reflect submitted pronunciation checks."""
+    for score in [7, 9, 5]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score,
+            "overall_feedback": "OK",
+            "word_feedback": [],
+            "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": "Hello world",
+            "user_transcription": "Hello world",
+        })
+
+    res = await client.get("/api/pronunciation/progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] == 3
+    assert data["best_score"] == 9
+    assert data["avg_score"] == 7.0
+    assert len(data["scores_by_date"]) >= 1
+    assert len(data["most_practiced"]) >= 1
+    assert data["most_practiced"][0]["text"] == "Hello world"
+    assert data["most_practiced"][0]["attempt_count"] == 3
+
+
+@pytest.mark.asyncio
+async def test_pronunciation_progress_response_shape(client):
+    """Response should match PronunciationProgressResponse model."""
+    res = await client.get("/api/pronunciation/progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["total_attempts"], int)
+    assert isinstance(data["avg_score"], (int, float))
+    assert isinstance(data["best_score"], (int, float))
+    assert isinstance(data["scores_by_date"], list)
+    assert isinstance(data["most_practiced"], list)
+
+
+@pytest.mark.asyncio
+async def test_pronunciation_history_ordering(client, mock_copilot):
+    """History should return attempts in order."""
+    for text in ["Good morning", "Good evening"]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": 8,
+            "overall_feedback": "Good",
+            "word_feedback": [],
+            "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": text,
+            "user_transcription": text,
+        })
+
+    res = await client.get("/api/pronunciation/history")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["attempts"]) == 2
+    assert data["attempts"][0]["reference_text"] == "Good morning"
+    assert data["attempts"][1]["reference_text"] == "Good evening"
