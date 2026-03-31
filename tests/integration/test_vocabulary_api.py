@@ -35,7 +35,7 @@ async def test_generate_quiz(client, mock_copilot):
         ]
     })
 
-    res = await client.get("/api/vocabulary/quiz?topic=business&count=2")
+    res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=2")
     assert res.status_code == 200
     data = res.json()
     assert "questions" in data
@@ -56,7 +56,7 @@ async def test_submit_correct_answer(client, mock_copilot):
         }]
     })
 
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
     word_id = quiz_res.json()["questions"][0]["id"]
 
     # Submit correct answer
@@ -82,7 +82,7 @@ async def test_submit_incorrect_answer(client, mock_copilot):
         }]
     })
 
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
     word_id = quiz_res.json()["questions"][0]["id"]
 
     res = await client.post("/api/vocabulary/answer", json={
@@ -117,7 +117,7 @@ async def test_spaced_repetition_level_up(client, mock_copilot):
         }]
     })
 
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
     word_id = quiz_res.json()["questions"][0]["id"]
 
     # Answer correctly 3 times
@@ -144,12 +144,12 @@ async def test_get_progress(client, mock_copilot):
         }]
     })
 
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=business&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
     word_id = quiz_res.json()["questions"][0]["id"]
 
     await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
 
-    res = await client.get("/api/vocabulary/progress?topic=business")
+    res = await client.get("/api/vocabulary/progress?topic=job_interview")
     assert res.status_code == 200
     data = res.json()
     assert len(data["progress"]) >= 1
@@ -189,7 +189,7 @@ async def test_vocabulary_stats_with_data(client, mock_copilot):
             {"word": "goodbye", "correct_meaning": "farewell", "example_sentence": "Goodbye!", "difficulty": 1},
         ]
     })
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=greetings&count=2")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2")
     assert quiz_res.status_code == 200
     questions = quiz_res.json()["questions"]
 
@@ -224,7 +224,7 @@ async def test_due_words_returns_due_items(client, mock_copilot):
             {"word": "apple", "correct_meaning": "a fruit", "example_sentence": "I ate an apple.", "difficulty": 1},
         ]
     })
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=food&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=restaurant_order&count=1")
     assert quiz_res.status_code == 200
     word_id = quiz_res.json()["questions"][0]["id"]
 
@@ -246,14 +246,14 @@ async def test_due_words_filter_by_topic(client, mock_copilot):
             {"word": "cat", "correct_meaning": "a pet", "example_sentence": "The cat sat.", "difficulty": 1},
         ]
     })
-    quiz_res = await client.get("/api/vocabulary/quiz?topic=animals&count=1")
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=doctor_visit&count=1")
     assert quiz_res.status_code == 200
     word_id = quiz_res.json()["questions"][0]["id"]
 
     await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": False})
 
     # Filter by matching topic
-    res = await client.get("/api/vocabulary/due?topic=animals")
+    res = await client.get("/api/vocabulary/due?topic=doctor_visit")
     assert res.status_code == 200
     assert res.json()["due_count"] >= 1
 
@@ -271,7 +271,7 @@ async def test_quiz_fill_blank_mode(client, mock_copilot):
             {"word": "book", "correct_meaning": "a written work", "example_sentence": "I read a book.", "difficulty": 1},
         ]
     })
-    res = await client.get("/api/vocabulary/quiz?topic=reading&count=1&mode=fill_blank")
+    res = await client.get("/api/vocabulary/quiz?topic=shopping&count=1&mode=fill_blank")
     assert res.status_code == 200
     questions = res.json()["questions"]
     assert len(questions) >= 1
@@ -291,7 +291,7 @@ async def test_quiz_default_mode_unchanged(client, mock_copilot):
             {"word": "pen", "correct_meaning": "writing tool", "example_sentence": "Use a pen.", "difficulty": 1},
         ]
     })
-    res = await client.get("/api/vocabulary/quiz?topic=office&count=1")
+    res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
     assert res.status_code == 200
     questions = res.json()["questions"]
     assert len(questions) >= 1
@@ -315,7 +315,7 @@ async def test_reset_progress_after_answers(client, mock_copilot):
     mock_copilot.ask_json = AsyncMock(return_value={
         "questions": [{"word": "sun", "correct_meaning": "star", "example_sentence": "The sun.", "difficulty": 1}]
     })
-    quiz = await client.get("/api/vocabulary/quiz?topic=science&count=1")
+    quiz = await client.get("/api/vocabulary/quiz?topic=airport&count=1")
     wid = quiz.json()["questions"][0]["id"]
     await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": True})
 
@@ -341,7 +341,7 @@ async def test_weak_words_after_answers(client, mock_copilot):
             {"word": "hard", "correct_meaning": "difficult", "example_sentence": "Hard work.", "difficulty": 1},
         ]
     })
-    quiz = await client.get("/api/vocabulary/quiz?topic=adj&count=1")
+    quiz = await client.get("/api/vocabulary/quiz?topic=shopping&count=1")
     wid = quiz.json()["questions"][0]["id"]
     # 2 wrong answers → error_rate = 1.0
     await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": False})
@@ -368,7 +368,7 @@ async def test_word_bank_after_quiz(client, mock_copilot):
     mock_copilot.ask_json = AsyncMock(return_value={
         "questions": [{"word": "moon", "correct_meaning": "celestial body", "example_sentence": "The moon.", "difficulty": 1}]
     })
-    await client.get("/api/vocabulary/quiz?topic=space&count=1")
+    await client.get("/api/vocabulary/quiz?topic=airport&count=1")
 
     res = await client.get("/api/vocabulary/words")
     assert res.status_code == 200
@@ -378,3 +378,10 @@ async def test_word_bank_after_quiz(client, mock_copilot):
     res2 = await client.get("/api/vocabulary/words?q=moon")
     assert res2.status_code == 200
     assert res2.json()["total_count"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_quiz_invalid_topic(client):
+    res = await client.get("/api/vocabulary/quiz?topic=nonexistent_xyz")
+    assert res.status_code == 422
+    assert "Unknown topic" in res.json()["detail"]

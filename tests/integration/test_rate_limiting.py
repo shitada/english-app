@@ -86,7 +86,7 @@ class TestRateLimiting:
         for _ in range(3):
             resp = await rate_limited_client.post(
                 "/api/conversation/start",
-                json={"topic": "hotel", "difficulty": "intermediate"},
+                json={"topic": "hotel_checkin", "difficulty": "intermediate"},
             )
             assert resp.status_code == 200
 
@@ -95,13 +95,13 @@ class TestRateLimiting:
         for _ in range(3):
             resp = await rate_limited_client.post(
                 "/api/conversation/start",
-                json={"topic": "hotel", "difficulty": "intermediate"},
+                json={"topic": "hotel_checkin", "difficulty": "intermediate"},
             )
             assert resp.status_code == 200
 
         resp = await rate_limited_client.post(
             "/api/conversation/start",
-            json={"topic": "hotel", "difficulty": "intermediate"},
+            json={"topic": "hotel_checkin", "difficulty": "intermediate"},
         )
         assert resp.status_code == 429
         assert "Rate limit exceeded" in resp.json()["detail"]
@@ -112,7 +112,7 @@ class TestRateLimiting:
         for _ in range(2):
             resp = await rate_limited_client.post(
                 "/api/conversation/start",
-                json={"topic": "hotel", "difficulty": "intermediate"},
+                json={"topic": "hotel_checkin", "difficulty": "intermediate"},
             )
             assert resp.status_code == 200
 
@@ -136,7 +136,7 @@ class TestRateLimiting:
         for _ in range(3):
             await rate_limited_client.post(
                 "/api/conversation/start",
-                json={"topic": "hotel", "difficulty": "intermediate"},
+                json={"topic": "hotel_checkin", "difficulty": "intermediate"},
             )
 
         # GET /api/conversation/topics should still work

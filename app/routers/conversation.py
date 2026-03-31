@@ -17,7 +17,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import get_topic_label, safe_llm_call
+from app.utils import safe_llm_call, validate_topic
 
 logger = logging.getLogger(__name__)
 
@@ -75,8 +75,8 @@ async def list_topics():
 @router.post("/start", response_model=StartResponse)
 async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     topics = get_conversation_topics()
-    topic_data = next((t for t in topics if t["id"] == req.topic), None)
-    topic_label = topic_data["label"] if topic_data else req.topic
+    topic_data = validate_topic(topics, req.topic)
+    topic_label = topic_data["label"]
 
     conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty)
 
@@ -89,9 +89,9 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     }
 
     system = get_prompt("conversation_partner").format(
-        scenario=topic_data.get("scenario", topic_label) if topic_data else topic_label,
-        role=topic_data.get("scenario", "a conversation partner") if topic_data else "a conversation partner",
-        goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
+        scenario=topic_data.get("scenario", topic_label),
+        role=topic_data.get("scenario", "a conversation partner"),
+        goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty]
     opening = await safe_llm_call(
         copilot.ask(system, "Start the scenario. Greet the user in character."),

@@ -19,13 +19,13 @@ async def test_list_topics(client):
 async def test_start_conversation(client, mock_copilot):
     mock_copilot.ask = AsyncMock(return_value="Hi! What kind of business do you work in?")
 
-    res = await client.post("/api/conversation/start", json={"topic": "business"})
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
     assert res.status_code == 200
     data = res.json()
     assert "conversation_id" in data
     assert data["conversation_id"] > 0
     assert "message" in data
-    assert data["topic"] == "business"
+    assert data["topic"] == "hotel_checkin"
     mock_copilot.ask.assert_called_once()
 
 
@@ -33,7 +33,7 @@ async def test_start_conversation(client, mock_copilot):
 async def test_send_message(client, mock_copilot):
     # Start a conversation first
     mock_copilot.ask = AsyncMock(return_value="Welcome! Let's talk about business.")
-    start_res = await client.post("/api/conversation/start", json={"topic": "business"})
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
     conv_id = start_res.json()["conversation_id"]
 
     # Send a message
@@ -71,7 +71,7 @@ async def test_send_message_invalid_conversation(client):
 async def test_end_conversation(client, mock_copilot):
     # Start conversation
     mock_copilot.ask = AsyncMock(return_value="Let's chat!")
-    start_res = await client.post("/api/conversation/start", json={"topic": "daily"})
+    start_res = await client.post("/api/conversation/start", json={"topic": "restaurant_order"})
     conv_id = start_res.json()["conversation_id"]
 
     # End it
@@ -92,7 +92,7 @@ async def test_end_conversation(client, mock_copilot):
 @pytest.mark.asyncio
 async def test_end_already_ended_conversation(client, mock_copilot):
     mock_copilot.ask = AsyncMock(return_value="Hi!")
-    start_res = await client.post("/api/conversation/start", json={"topic": "travel"})
+    start_res = await client.post("/api/conversation/start", json={"topic": "airport"})
     conv_id = start_res.json()["conversation_id"]
 
     mock_copilot.ask_json = AsyncMock(return_value={
@@ -111,7 +111,7 @@ async def test_end_already_ended_conversation(client, mock_copilot):
 @pytest.mark.asyncio
 async def test_get_history(client, mock_copilot):
     mock_copilot.ask = AsyncMock(return_value="Hello! How are you?")
-    start_res = await client.post("/api/conversation/start", json={"topic": "daily"})
+    start_res = await client.post("/api/conversation/start", json={"topic": "restaurant_order"})
     conv_id = start_res.json()["conversation_id"]
 
     res = await client.get(f"/api/conversation/{conv_id}/history")
@@ -289,3 +289,12 @@ async def test_clear_ended_conversations(client, mock_copilot):
     conversations = list_res.json()["conversations"]
     assert len(conversations) == 1
     assert conversations[0]["topic"] == "shopping"
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_invalid_topic(client):
+    res = await client.post("/api/conversation/start", json={
+        "topic": "nonexistent_topic", "difficulty": "beginner",
+    })
+    assert res.status_code == 422
+    assert "Unknown topic" in res.json()["detail"]

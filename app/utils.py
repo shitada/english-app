@@ -31,3 +31,15 @@ def get_topic_label(topics: list[dict[str, Any]], topic_id: str) -> str:
         if t["id"] == topic_id:
             return t["label"]
     return topic_id
+
+
+def validate_topic(topics: list[dict[str, Any]], topic_id: str) -> dict[str, Any]:
+    """Validate that a topic ID exists in the config. Raises 422 if not found."""
+    for t in topics:
+        if t["id"] == topic_id:
+            return t
+    valid_ids = [t["id"] for t in topics]
+    raise HTTPException(
+        status_code=422,
+        detail=f"Unknown topic '{topic_id}'. Valid topics: {valid_ids}",
+    )

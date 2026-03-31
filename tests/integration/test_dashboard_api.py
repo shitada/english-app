@@ -27,7 +27,7 @@ class TestDashboardStats:
         # Start a conversation
         resp = await client.post(
             "/api/conversation/start",
-            json={"topic": "hotel", "difficulty": "beginner"},
+            json={"topic": "hotel_checkin", "difficulty": "beginner"},
         )
         assert resp.status_code == 200
         cid = resp.json()["conversation_id"]
@@ -71,7 +71,7 @@ class TestDashboardStats:
                 {"word": "goodbye", "correct_meaning": "farewell", "example_sentence": "Goodbye!", "difficulty": 1},
             ]
         }
-        resp = await client.get("/api/vocabulary/quiz?topic=greetings&count=2")
+        resp = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2")
         assert resp.status_code == 200
         questions = resp.json()["questions"]
         assert len(questions) >= 1
@@ -96,7 +96,7 @@ class TestDashboardStats:
         # Create a conversation
         resp = await client.post(
             "/api/conversation/start",
-            json={"topic": "hotel", "difficulty": "intermediate"},
+            json={"topic": "hotel_checkin", "difficulty": "intermediate"},
         )
         assert resp.status_code == 200
 
@@ -113,7 +113,7 @@ class TestDashboardStats:
                 {"word": "test", "correct_meaning": "exam", "example_sentence": "Take a test.", "difficulty": 1},
             ]
         }
-        resp = await client.get("/api/vocabulary/quiz?topic=general&count=1")
+        resp = await client.get("/api/vocabulary/quiz?topic=shopping&count=1")
         assert resp.status_code == 200
         word_id = resp.json()["questions"][0]["id"]
         await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
