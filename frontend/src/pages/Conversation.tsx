@@ -55,6 +55,21 @@ export default function Conversation() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const endConversation = useCallback(async () => {
+    if (!conversationId) return;
+    setLoading(true);
+    try {
+      const res = await api.endConversation(conversationId);
+      setSummary(res.summary);
+      setPhase('summary');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      clearInterval(timerRef.current);
+    }
+  }, [conversationId]);
+
   // Timer
   useEffect(() => {
     if (phase === 'chat') {
@@ -70,6 +85,13 @@ export default function Conversation() {
     }
     return () => clearInterval(timerRef.current);
   }, [phase]);
+
+  // Auto-end conversation when timer expires
+  useEffect(() => {
+    if (phase === 'chat' && timeLeft === 0) {
+      endConversation();
+    }
+  }, [timeLeft, phase, endConversation]);
 
   // Sync speech recognition transcript to input
   useEffect(() => {
@@ -182,21 +204,6 @@ export default function Conversation() {
       setLoading(false);
     }
   };
-
-  const endConversation = useCallback(async () => {
-    if (!conversationId) return;
-    setLoading(true);
-    try {
-      const res = await api.endConversation(conversationId);
-      setSummary(res.summary);
-      setPhase('summary');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-      clearInterval(timerRef.current);
-    }
-  }, [conversationId]);
 
   // Topic selection
   if (phase === 'select') {

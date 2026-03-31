@@ -44,3 +44,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 378c51e362026-03-31T22:57:44+09:00163472844282221221pass7.55keepFix timezone inconsistency in vocabulary DAL and streak calculation
 388ceb2872026-03-31T23:02:50+09:00192912763373227227pass7.55keepAdd fill-in-the-blank vocabulary quiz mode
 39d8476d42026-03-31T23:09:27+09:001011842160366227227pass6.95keepWire up fill-in-the-blank quiz mode in frontend UI
+41none2026-03-31T23:21:09+09:00782723207335227227pass4.6discardAuto-end conversation when timer expires (TDZ bug)
