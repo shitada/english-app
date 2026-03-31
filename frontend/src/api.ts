@@ -48,6 +48,9 @@ export const api = {
   clearEndedConversations: () =>
     request<{ deleted_count: number }>('/api/conversation/clear/ended', { method: 'DELETE' }),
 
+  getConversationSummary: (conversation_id: number) =>
+    request<{ summary: ConversationSummary }>(`/api/conversation/${conversation_id}/summary`),
+
   // Pronunciation
   getPronunciationSentences: () =>
     request<{ sentences: { text: string; topic: string }[] }>('/api/pronunciation/sentences'),

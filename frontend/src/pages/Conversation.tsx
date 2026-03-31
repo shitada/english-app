@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2 } from 'lucide-react';
-import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem } from '../api';
+import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
@@ -41,6 +41,7 @@ export default function Conversation() {
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<ChatMessage[]>([]);
+  const [historySummary, setHistorySummary] = useState<ConversationSummary | null>(null);
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
 
@@ -123,8 +124,12 @@ export default function Conversation() {
 
   const viewConversationHistory = async (id: number) => {
     try {
-      const res = await api.getHistory(id);
-      setHistoryMessages(res.messages);
+      const [histRes, sumRes] = await Promise.allSettled([
+        api.getHistory(id),
+        api.getConversationSummary(id),
+      ]);
+      setHistoryMessages(histRes.status === 'fulfilled' ? histRes.value.messages : []);
+      setHistorySummary(sumRes.status === 'fulfilled' ? sumRes.value.summary : null);
       setPhase('history');
     } catch (err) {
       console.error(err);
@@ -342,6 +347,29 @@ export default function Conversation() {
           ← Back to scenarios
         </button>
         <h2 style={{ marginBottom: 16 }}>Conversation History</h2>
+
+        {historySummary && (
+          <div className="card summary-card" style={{ marginBottom: 24 }}>
+            <p style={{ marginBottom: 12 }}>{historySummary.summary}</p>
+            {historySummary.key_vocabulary?.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <strong style={{ fontSize: 13 }}>Key Vocabulary:</strong>
+                <div className="vocab-tags" style={{ marginTop: 4 }}>
+                  {historySummary.key_vocabulary.map((w: string) => (
+                    <span key={w}>{w}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p style={{ fontSize: 13, marginBottom: 4 }}>
+              <strong>Level:</strong> {historySummary.communication_level}
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--primary-dark)' }}>
+              <strong>Tip:</strong> {historySummary.tip}
+            </p>
+          </div>
+        )}
+
         <div className="chat-container" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
           {historyMessages.map((msg, i) => (
             <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
