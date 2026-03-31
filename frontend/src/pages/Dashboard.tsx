@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Flame, MessageSquare, Mic, BookOpen, Trophy } from 'lucide-react';
+import { Flame, MessageSquare, Mic, BookOpen, Trophy, Clock } from 'lucide-react';
 import { api, type DashboardStats } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
 
@@ -51,7 +51,7 @@ export default function Dashboard() {
         <StatCard icon={<MessageSquare size={24} color="#6366f1" />} label="Conversations" value={stats.total_conversations} sub={`${stats.total_messages} messages sent`} />
         <StatCard icon={<Mic size={24} color="#f59e0b" />} label="Shadowing" value={stats.total_pronunciation} sub={`Avg score: ${stats.avg_pronunciation_score}/10`} />
         <StatCard icon={<BookOpen size={24} color="#10b981" />} label="Words Reviewed" value={stats.total_vocab_reviewed} sub={`${stats.vocab_mastered} mastered`} />
-        <StatCard icon={<Trophy size={24} color="#8b5cf6" />} label="Mastered" value={stats.vocab_mastered} sub="Level 3+" />
+        <StatCard icon={<Clock size={24} color={stats.vocab_due_count > 0 ? '#ef4444' : '#6b7280'} />} label="Due for Review" value={stats.vocab_due_count} sub={stats.vocab_due_count > 0 ? 'Words need review!' : 'All caught up!'} />
       </div>
 
       {/* Recent activity */}

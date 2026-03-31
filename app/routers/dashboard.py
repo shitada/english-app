@@ -33,6 +33,7 @@ class DashboardStatsResponse(BaseModel):
     avg_pronunciation_score: float
     total_vocab_reviewed: int
     vocab_mastered: int
+    vocab_due_count: int
     recent_activity: list[ActivityItem]
 
 

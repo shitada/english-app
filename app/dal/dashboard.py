@@ -37,6 +37,13 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 3")
     vocab_mastered = rows[0]["cnt"]
 
+    # Vocabulary words due for review
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at <= ?", (now,)
+    )
+    vocab_due_count = rows[0]["cnt"]
+
     # Streak: count consecutive days with activity
     streak = await _calculate_streak(db)
 
@@ -51,6 +58,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "avg_pronunciation_score": avg_pronunciation_score,
         "total_vocab_reviewed": total_vocab_reviewed,
         "vocab_mastered": vocab_mastered,
+        "vocab_due_count": vocab_due_count,
         "recent_activity": recent_activity,
     }
 

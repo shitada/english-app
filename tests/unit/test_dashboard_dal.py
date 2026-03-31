@@ -91,3 +91,15 @@ class TestGetStats:
         await update_progress(test_db, words[0]["id"], True)
         stats = await get_stats(test_db)
         assert stats["streak"] >= 1
+
+    async def test_vocab_due_count_empty(self, test_db):
+        stats = await get_stats(test_db)
+        assert stats["vocab_due_count"] == 0
+
+    async def test_vocab_due_count_with_due_words(self, test_db):
+        """Words answered incorrectly (level 0, interval 0) should be immediately due."""
+        questions = [{"word": "test", "correct_meaning": "exam"}]
+        words = await save_words(test_db, "study", questions)
+        await update_progress(test_db, words[0]["id"], False)
+        stats = await get_stats(test_db)
+        assert stats["vocab_due_count"] >= 1
