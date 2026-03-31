@@ -271,3 +271,32 @@ async def delete_word(
     if not deleted:
         raise HTTPException(status_code=404, detail="Word not found")
     return {"deleted": True}
+
+
+class ExportWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    example_sentence: str
+    topic: str
+    difficulty: int
+    correct_count: int
+    incorrect_count: int
+    level: int
+    last_reviewed: str | None
+    next_review_at: str | None
+
+
+class ExportResponse(BaseModel):
+    words: list[ExportWordItem]
+    total_count: int
+
+
+@router.get("/export", response_model=ExportResponse)
+async def export_words(
+    topic: str | None = None,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Export vocabulary words with progress data."""
+    words = await vocab_dal.export_words(db, topic)
+    return {"words": words, "total_count": len(words)}

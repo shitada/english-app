@@ -331,3 +331,34 @@ async def delete_word(db: aiosqlite.Connection, word_id: int) -> bool:
     cursor = await db.execute("DELETE FROM vocabulary_words WHERE id = ?", (word_id,))
     await db.commit()
     return cursor.rowcount > 0
+
+
+async def export_words(
+    db: aiosqlite.Connection, topic: str | None = None
+) -> list[dict[str, Any]]:
+    """Export all vocabulary words with progress data."""
+    if topic:
+        rows = await db.execute_fetchall(
+            """SELECT vw.id, vw.word, vw.meaning, vw.example_sentence, vw.topic, vw.difficulty,
+                      COALESCE(vp.correct_count, 0) as correct_count,
+                      COALESCE(vp.incorrect_count, 0) as incorrect_count,
+                      COALESCE(vp.level, 0) as level,
+                      vp.last_reviewed, vp.next_review_at
+               FROM vocabulary_words vw
+               LEFT JOIN vocabulary_progress vp ON vw.id = vp.word_id
+               WHERE vw.topic = ?
+               ORDER BY vw.word""",
+            (topic,),
+        )
+    else:
+        rows = await db.execute_fetchall(
+            """SELECT vw.id, vw.word, vw.meaning, vw.example_sentence, vw.topic, vw.difficulty,
+                      COALESCE(vp.correct_count, 0) as correct_count,
+                      COALESCE(vp.incorrect_count, 0) as incorrect_count,
+                      COALESCE(vp.level, 0) as level,
+                      vp.last_reviewed, vp.next_review_at
+               FROM vocabulary_words vw
+               LEFT JOIN vocabulary_progress vp ON vw.id = vp.word_id
+               ORDER BY vw.topic, vw.word"""
+        )
+    return [dict(r) for r in rows]

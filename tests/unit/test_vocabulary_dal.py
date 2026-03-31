@@ -463,3 +463,25 @@ class TestDatabaseIndexes:
         index_names = {r["name"] for r in rows}
         assert "idx_vocabulary_progress_word_review" in index_names
         assert "idx_pron_attempts_created" in index_names
+
+
+class TestExportWords:
+    async def test_export_empty(self, test_db):
+        from app.dal.vocabulary import export_words
+        result = await export_words(test_db)
+        assert result == []
+
+    async def test_export_with_data(self, test_db):
+        from app.dal.vocabulary import export_words
+        await save_words(test_db, "food", _make_questions(2))
+        result = await export_words(test_db)
+        assert len(result) == 2
+        assert "correct_count" in result[0]
+        assert "level" in result[0]
+
+    async def test_export_with_topic_filter(self, test_db):
+        from app.dal.vocabulary import export_words
+        await save_words(test_db, "food", _make_questions(2))
+        await save_words(test_db, "greetings", _make_questions(1))
+        result = await export_words(test_db, topic="food")
+        assert len(result) == 2

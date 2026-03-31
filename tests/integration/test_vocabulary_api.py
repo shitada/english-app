@@ -419,3 +419,26 @@ async def test_delete_word(client, mock_copilot):
 async def test_delete_word_not_found(client):
     res = await client.delete("/api/vocabulary/99999")
     assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_export_words_empty(client):
+    res = await client.get("/api/vocabulary/export")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["words"] == []
+    assert data["total_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_export_words_with_data(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "book", "correct_meaning": "reading material", "example_sentence": "Read a book.", "difficulty": 1}]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    res = await client.get("/api/vocabulary/export?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    assert "word" in data["words"][0]
+    assert "correct_count" in data["words"][0]
