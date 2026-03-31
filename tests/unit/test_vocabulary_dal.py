@@ -10,6 +10,7 @@ from app.dal.vocabulary import (
     get_due_word_ids,
     get_progress,
     get_vocabulary_stats,
+    get_weak_words,
     get_word,
     get_words_by_topic,
     reset_progress,
@@ -346,3 +347,29 @@ class TestResetProgress:
     async def test_reset_empty(self, test_db):
         deleted = await reset_progress(test_db)
         assert deleted == 0
+
+
+class TestGetWeakWords:
+    async def test_empty(self, test_db):
+        words = await get_weak_words(test_db)
+        assert words == []
+
+    async def test_single_attempt_excluded(self, test_db):
+        """Words with only 1 attempt should be excluded (min 2)."""
+        ws = await save_words(test_db, "t1", _make_questions(1))
+        await update_progress(test_db, ws[0]["id"], False)
+        words = await get_weak_words(test_db)
+        assert len(words) == 0
+
+    async def test_high_error_rate_first(self, test_db):
+        """Word with higher error rate should appear first."""
+        ws = await save_words(test_db, "t1", _make_questions(2))
+        # w0: 0 correct, 2 incorrect → error_rate = 1.0
+        await update_progress(test_db, ws[0]["id"], False)
+        await update_progress(test_db, ws[0]["id"], False)
+        # w1: 1 correct, 1 incorrect → error_rate = 0.5
+        await update_progress(test_db, ws[1]["id"], True)
+        await update_progress(test_db, ws[1]["id"], False)
+        words = await get_weak_words(test_db)
+        assert len(words) == 2
+        assert words[0]["error_rate"] >= words[1]["error_rate"]

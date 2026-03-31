@@ -259,3 +259,19 @@ async def reset_progress(db: aiosqlite.Connection, topic: str | None = None) -> 
         cursor = await db.execute("DELETE FROM vocabulary_progress")
     await db.commit()
     return cursor.rowcount
+
+
+async def get_weak_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict[str, Any]]:
+    """Return words with highest error rate (min 2 attempts)."""
+    rows = await db.execute_fetchall(
+        """SELECT vw.id, vw.word, vw.meaning, vw.topic,
+                  vp.correct_count, vp.incorrect_count, vp.level,
+                  ROUND(CAST(vp.incorrect_count AS REAL) / (vp.correct_count + vp.incorrect_count), 2) as error_rate
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           WHERE (vp.correct_count + vp.incorrect_count) >= 2
+           ORDER BY error_rate DESC, vp.level ASC
+           LIMIT ?""",
+        (limit,),
+    )
+    return [dict(r) for r in rows]

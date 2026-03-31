@@ -108,6 +108,21 @@ class ResetProgressResponse(BaseModel):
     deleted_count: int
 
 
+class WeakWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    topic: str
+    correct_count: int
+    incorrect_count: int
+    level: int
+    error_rate: float
+
+
+class WeakWordsResponse(BaseModel):
+    words: list[WeakWordItem]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_vocabulary_topics()
@@ -202,3 +217,13 @@ async def reset_progress(
     """Reset vocabulary progress, optionally filtered by topic."""
     deleted = await vocab_dal.reset_progress(db, topic)
     return {"deleted_count": deleted}
+
+
+@router.get("/weak-words", response_model=WeakWordsResponse)
+async def get_weak_words(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get vocabulary words with highest error rates."""
+    words = await vocab_dal.get_weak_words(db, limit)
+    return {"words": words}

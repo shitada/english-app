@@ -49,3 +49,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 43475eb682026-03-31T23:30:16+09:00164981989370227227pass7.0keepAdd pronunciation history and progress UI
 44671a3d42026-03-31T23:36:48+09:001231163574348229229pass7.8keepAdd vocabulary due-for-review count to dashboard
 45a6f87f12026-03-31T23:42:57+09:001581178294451234234pass7.3keepAdd vocabulary progress reset endpoint
+464aa1c232026-03-31T23:50:49+09:001078113102303234234pass6.95keepShow stored conversation summary in history view

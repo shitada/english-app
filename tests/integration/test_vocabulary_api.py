@@ -325,3 +325,30 @@ async def test_reset_progress_after_answers(client, mock_copilot):
 
     prog = await client.get("/api/vocabulary/progress")
     assert prog.json()["progress"] == []
+
+
+@pytest.mark.asyncio
+async def test_weak_words_empty(client):
+    res = await client.get("/api/vocabulary/weak-words")
+    assert res.status_code == 200
+    assert res.json()["words"] == []
+
+
+@pytest.mark.asyncio
+async def test_weak_words_after_answers(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "hard", "correct_meaning": "difficult", "example_sentence": "Hard work.", "difficulty": 1},
+        ]
+    })
+    quiz = await client.get("/api/vocabulary/quiz?topic=adj&count=1")
+    wid = quiz.json()["questions"][0]["id"]
+    # 2 wrong answers → error_rate = 1.0
+    await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": False})
+    await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": False})
+
+    res = await client.get("/api/vocabulary/weak-words")
+    assert res.status_code == 200
+    words = res.json()["words"]
+    assert len(words) >= 1
+    assert words[0]["error_rate"] > 0
