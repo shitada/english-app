@@ -67,6 +67,12 @@ export const api = {
   getPronunciationProgress: () =>
     request<PronunciationProgress>('/api/pronunciation/progress'),
 
+  clearPronunciationHistory: () =>
+    request<{ deleted_count: number }>('/api/pronunciation/history', { method: 'DELETE' }),
+
+  deletePronunciationAttempt: (attemptId: number) =>
+    request<{ deleted: boolean }>(`/api/pronunciation/${attemptId}`, { method: 'DELETE' }),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -85,6 +91,12 @@ export const api = {
   getVocabularyProgress: (topic?: string) =>
     request<{ progress: VocabularyProgressItem[] }>(
       `/api/vocabulary/progress${topic ? `?topic=${encodeURIComponent(topic)}` : ''}`
+    ),
+
+  resetVocabularyProgress: (topic?: string) =>
+    request<{ deleted_count: number }>(
+      `/api/vocabulary/progress${topic ? `?topic=${encodeURIComponent(topic)}` : ''}`,
+      { method: 'DELETE' }
     ),
 
   // Dashboard
@@ -179,6 +191,7 @@ export interface ConversationListItem {
 }
 
 export interface PronunciationAttempt {
+  id: number;
   reference_text: string;
   user_transcription: string;
   score: number | null;
