@@ -258,3 +258,18 @@ class TestDeleteAttempt:
     async def test_delete_nonexistent(self, test_db):
         result = await delete_attempt(test_db, 99999)
         assert result is False
+
+
+class TestSaveAttemptReturnsId:
+    async def test_returns_integer_id(self, test_db):
+        feedback = {"overall_score": 8}
+        attempt_id = await save_attempt(test_db, "Hello.", "Hello.", feedback, 8.0)
+        assert isinstance(attempt_id, int)
+        assert attempt_id > 0
+
+    async def test_history_includes_id(self, test_db):
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "Test.", "Test.", feedback, 7.0)
+        history = await get_history(test_db)
+        assert "id" in history[0]
+        assert isinstance(history[0]["id"], int)

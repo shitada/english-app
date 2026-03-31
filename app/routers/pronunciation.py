@@ -36,6 +36,7 @@ class SentencesResponse(BaseModel):
 
 
 class AttemptItem(BaseModel):
+    id: int
     reference_text: str
     user_transcription: str
     feedback: dict[str, Any] | None
@@ -105,11 +106,11 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         context="check_pronunciation",
     )
 
-    await pron_dal.save_attempt(
+    attempt_id = await pron_dal.save_attempt(
         db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),
     )
 
-    return feedback
+    return {**feedback, "attempt_id": attempt_id}
 
 
 @router.get("/history", response_model=HistoryResponse)

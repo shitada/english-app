@@ -44,25 +44,27 @@ async def save_attempt(
     user_transcription: str,
     feedback: dict[str, Any],
     score: float,
-) -> None:
-    await db.execute(
+) -> int:
+    cursor = await db.execute(
         """INSERT INTO pronunciation_attempts
            (reference_text, user_transcription, feedback_json, score)
            VALUES (?, ?, ?, ?)""",
         (reference_text, user_transcription, json.dumps(feedback), score),
     )
     await db.commit()
+    return cursor.lastrowid
 
 
 async def get_history(db: aiosqlite.Connection, limit: int = 20) -> list[dict[str, Any]]:
     rows = await db.execute_fetchall(
-        """SELECT reference_text, user_transcription, feedback_json, score, created_at
+        """SELECT id, reference_text, user_transcription, feedback_json, score, created_at
            FROM pronunciation_attempts
            ORDER BY created_at DESC LIMIT ?""",
         (limit,),
     )
     return [
         {
+            "id": r["id"],
             "reference_text": r["reference_text"],
             "user_transcription": r["user_transcription"],
             "feedback": json.loads(r["feedback_json"]) if r["feedback_json"] else None,

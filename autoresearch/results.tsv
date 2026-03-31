@@ -55,3 +55,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 49efbe99a2026-04-01T00:08:04+09:00151541590310250250pass7.8keepDeduplicate vocabulary words in save_words
 50\t409b38e\t2025-06-09T14:36:00Z\t15\t45\t20\t10\t90\t257\t257\tpass\t7.05\tKEEP\tPronunciation history clear/delete endpoints
 51\tcf1f5b7\t2025-06-09T14:39:08Z\t15\t120\t60\t15\t210\t259\t259\tpass\t7.80\tKEEP\tValidate topic IDs against config (422 for unknown topics)
+52\t1025161\t2025-06-09T14:44:00Z\t10\t30\t15\t10\t65\t260\t260\tpass\t7.05\tKEEP\tAdd quiz_type field to quiz response (multiple_choice/fill_blank)
