@@ -2676,3 +2676,46 @@ Now generate the summary:
   │ - **Run**: Iterations 26-35 (10 iterations)…
   └ 76 lines...
 
+● Final commit for run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ complete iterations 26-35
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+## Autoresearch Run Complete ✅
+
+**10 iterations (26-35), all 10 KEPT** — 100% success rate.
+
+### Key improvements this run:
+| # | Score | Change |
+|---|-------|--------|
+| 26 | 7.5 | Rate limiting for LLM endpoints |
+| 27 | 8.1 | Dashboard stats integration tests |
+| 28 | 6.1 | Consistent date formatting utility |
+| 29 | 8.1 | RateLimiter unit tests |
+| 30 | 7.0 | React Error Boundary |
+| 31 | 7.6 | Conversation DELETE endpoints |
+| 32 | 6.7 | Delete UI for past conversations |
+| 33 | 7.6 | Vocabulary mastery stats endpoint |
+| 34 | 8.4 | Utils unit tests |
+| 35 | 8.1 | Pronunciation progress tests |
+
+**Tests grew from 168 → 217** (+49 tests). Average score: **7.51**. Summary written to `autoresearch/summary.md`.
+
+
+Total usage est:        3 Premium requests
+API time spent:         3h 34m 12s
+Total session time:     6h 55m 19s
+Total code changes:     +922 -29
+Breakdown by AI model:
+ claude-opus-4.6          34.1m in, 171.8k out, 30.1m cached (Est. 3 Premium requests)
+[2026-03-31 07:41:35] Copilot invocation completed (duration: 24921s)
+[2026-03-31 07:41:38] Current iteration count: 35 / 35
+[2026-03-31 07:41:39] Target reached (35 >= 35) — done!
+[2026-03-31 07:41:39] ==========================================
+[2026-03-31 07:41:39] Runner finished
+[2026-03-31 07:41:39] Total invocations: 1
+[2026-03-31 07:41:39] Final iteration:   35 / 35
+[2026-03-31 07:41:39] Premium requests:  9
+[2026-03-31 07:41:39] ==========================================
