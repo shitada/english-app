@@ -58,6 +58,12 @@ export const api = {
       body: JSON.stringify({ reference_text, user_transcription }),
     }),
 
+  getPronunciationHistory: () =>
+    request<{ attempts: PronunciationAttempt[] }>('/api/pronunciation/history'),
+
+  getPronunciationProgress: () =>
+    request<PronunciationProgress>('/api/pronunciation/progress'),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -166,4 +172,19 @@ export interface ConversationListItem {
   ended_at: string | null;
   status: string;
   message_count: number;
+}
+
+export interface PronunciationAttempt {
+  reference_text: string;
+  user_transcription: string;
+  score: number | null;
+  created_at: string;
+}
+
+export interface PronunciationProgress {
+  total_attempts: number;
+  avg_score: number;
+  best_score: number;
+  scores_by_date: { date: string; avg_score: number; count: number }[];
+  most_practiced: { text: string; attempt_count: number; avg_score: number }[];
 }

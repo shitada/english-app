@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Volume2, MicOff, RotateCcw, ChevronRight } from 'lucide-react';
-import { api, type PronunciationFeedback } from '../api';
+import { Volume2, MicOff, RotateCcw, ChevronRight, History } from 'lucide-react';
+import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { formatDateTime } from '../utils/formatDate';
 
 const SAMPLE_SENTENCES = [
   { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel' },
@@ -14,12 +15,15 @@ const SAMPLE_SENTENCES = [
 ];
 
 export default function Pronunciation() {
-  const [phase, setPhase] = useState<'select' | 'practice' | 'result'>('select');
+  const [phase, setPhase] = useState<'select' | 'practice' | 'result' | 'history'>('select');
   const [sentences, setSentences] = useState(SAMPLE_SENTENCES);
   const [selectedSentence, setSelectedSentence] = useState<string>('');
   const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
   const [loading, setLoading] = useState(false);
   const [shadowingState, setShadowingState] = useState<'idle' | 'listening' | 'recording' | 'done'>('idle');
+  const [historyData, setHistoryData] = useState<PronunciationAttempt[]>([]);
+  const [progressData, setProgressData] = useState<PronunciationProgress | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -80,6 +84,101 @@ export default function Pronunciation() {
     setPhase('practice');
   };
 
+  const loadHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const [hist, prog] = await Promise.all([
+        api.getPronunciationHistory(),
+        api.getPronunciationProgress(),
+      ]);
+      setHistoryData(hist.attempts);
+      setProgressData(prog);
+      setPhase('history');
+    } catch {
+      // fallback
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // History phase
+  if (phase === 'history') {
+    return (
+      <div>
+        <button
+          onClick={() => setPhase('select')}
+          style={{ marginBottom: 16, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
+        >
+          ← Back to sentences
+        </button>
+        <h2 style={{ marginBottom: 16 }}>Pronunciation History</h2>
+
+        {progressData && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 16 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary)' }}>{progressData.total_attempts}</div>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Attempts</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div className={`score-circle ${progressData.avg_score >= 8 ? 'score-high' : progressData.avg_score >= 5 ? 'score-mid' : 'score-low'}`} style={{ margin: '0 auto' }}>
+                  {progressData.avg_score}
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Avg Score</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div className={`score-circle ${progressData.best_score >= 8 ? 'score-high' : progressData.best_score >= 5 ? 'score-mid' : 'score-low'}`} style={{ margin: '0 auto' }}>
+                  {progressData.best_score}
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Best</p>
+              </div>
+            </div>
+
+            {progressData.most_practiced.length > 0 && (
+              <div>
+                <h4 style={{ marginBottom: 8 }}>Most Practiced</h4>
+                {progressData.most_practiced.map((mp, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: 14, flex: 1 }}>{mp.text.slice(0, 50)}{mp.text.length > 50 ? '...' : ''}</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 8 }}>
+                      {mp.attempt_count}× · avg {mp.avg_score}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {historyData.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No attempts yet. Start practicing!</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {historyData.map((a, i) => (
+              <div key={i} className="card" style={{ padding: '12px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, flex: 1 }}>{a.reference_text.slice(0, 60)}{a.reference_text.length > 60 ? '...' : ''}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {a.score != null && (
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                        background: a.score >= 8 ? '#dcfce7' : a.score >= 5 ? '#fef9c3' : '#fee2e2',
+                        color: a.score >= 8 ? '#15803d' : a.score >= 5 ? '#a16207' : '#b91c1c',
+                      }}>
+                        {a.score}/10
+                      </span>
+                    )}
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{formatDateTime(a.created_at)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Sentence selection
   if (phase === 'select') {
     return (
@@ -88,6 +187,17 @@ export default function Pronunciation() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback.
         </p>
+
+        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={loadHistory}
+            disabled={historyLoading}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <History size={16} /> {historyLoading ? 'Loading...' : 'View History'}
+          </button>
+        </div>
 
         <div className="sentence-list">
           {sentences.map((s, i) => (
