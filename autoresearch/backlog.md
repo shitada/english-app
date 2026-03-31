@@ -45,3 +45,4 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [ ] Add database migration strategy — handle schema changes without data loss
 - [x] ✅ Add health check endpoint — monitor service availability (completed iteration #9)
 - [x] ✅ Add rate limiting — prevent abuse of LLM endpoints (completed iteration #26)
+- [x] ✅ Add vocabulary due-for-review endpoint — GET /api/vocabulary/due with topic filter (completed iteration #36)

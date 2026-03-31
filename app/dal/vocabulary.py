@@ -84,7 +84,7 @@ async def update_progress(
     progress = await db.execute_fetchall(
         "SELECT * FROM vocabulary_progress WHERE word_id = ?", (word_id,)
     )
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
     if progress:
         p = progress[0]

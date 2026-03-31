@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Any
 
 import aiosqlite
@@ -69,7 +69,7 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
     """)
 
     streak = 0
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     for i, r in enumerate(rows):
         try:
             day = date.fromisoformat(r["d"])

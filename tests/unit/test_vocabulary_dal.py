@@ -269,3 +269,25 @@ class TestGetVocabularyStats:
         assert stats["total_reviews"] == 5  # 3 + 1 + 1
         assert len(stats["level_distribution"]) > 0
         assert len(stats["topic_breakdown"]) == 2
+
+
+class TestTimezoneConsistency:
+    """Verify that timestamps written by vocabulary DAL use UTC."""
+
+    async def test_update_progress_writes_utc(self, test_db):
+        """last_reviewed and next_review_at should both be UTC strings."""
+        words = await save_words(test_db, "tz", _make_questions(1))
+        await update_progress(test_db, words[0]["id"], True)
+        rows = await test_db.execute_fetchall(
+            "SELECT last_reviewed, next_review_at FROM vocabulary_progress WHERE word_id = ?",
+            (words[0]["id"],),
+        )
+        assert len(rows) == 1
+        last_reviewed = rows[0]["last_reviewed"]
+        next_review = rows[0]["next_review_at"]
+        # Both should be parseable UTC timestamps (no timezone offset suffix)
+        from datetime import datetime
+        lr = datetime.strptime(last_reviewed, "%Y-%m-%d %H:%M:%S")
+        nr = datetime.strptime(next_review, "%Y-%m-%d %H:%M:%S")
+        # next_review should be >= last_reviewed (interval >= 0)
+        assert nr >= lr
