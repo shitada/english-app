@@ -25,22 +25,38 @@ async def save_words(
     topic: str,
     questions: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Save LLM-generated words to DB and return them with IDs."""
+    """Save LLM-generated words to DB, skipping duplicates (case-insensitive)."""
     words = []
     for q in questions:
-        cursor = await db.execute(
-            """INSERT INTO vocabulary_words (topic, word, meaning, example_sentence, difficulty)
-               VALUES (?, ?, ?, ?, ?)""",
-            (topic, q["word"], q["correct_meaning"], q.get("example_sentence", ""), q.get("difficulty", 1)),
+        # Check for existing word in same topic (case-insensitive)
+        existing = await db.execute_fetchall(
+            "SELECT id, word, meaning, example_sentence, difficulty FROM vocabulary_words WHERE topic = ? AND LOWER(word) = LOWER(?) LIMIT 1",
+            (topic, q["word"]),
         )
-        words.append({
-            "id": cursor.lastrowid,
-            "word": q["word"],
-            "meaning": q["correct_meaning"],
-            "example_sentence": q.get("example_sentence", ""),
-            "difficulty": q.get("difficulty", 1),
-            "wrong_options": q.get("wrong_options", []),
-        })
+        if existing:
+            row = existing[0]
+            words.append({
+                "id": row["id"],
+                "word": row["word"],
+                "meaning": row["meaning"],
+                "example_sentence": row["example_sentence"],
+                "difficulty": row["difficulty"],
+                "wrong_options": q.get("wrong_options", []),
+            })
+        else:
+            cursor = await db.execute(
+                """INSERT INTO vocabulary_words (topic, word, meaning, example_sentence, difficulty)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (topic, q["word"], q["correct_meaning"], q.get("example_sentence", ""), q.get("difficulty", 1)),
+            )
+            words.append({
+                "id": cursor.lastrowid,
+                "word": q["word"],
+                "meaning": q["correct_meaning"],
+                "example_sentence": q.get("example_sentence", ""),
+                "difficulty": q.get("difficulty", 1),
+                "wrong_options": q.get("wrong_options", []),
+            })
     await db.commit()
     return words
 

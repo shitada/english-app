@@ -408,3 +408,33 @@ class TestSearchWords:
         total, words = await search_words(test_db, limit=2, offset=0)
         assert total == 5
         assert len(words) == 2
+
+
+class TestSaveWordsDedup:
+    async def test_skips_duplicates(self, test_db):
+        q = [{"word": "apple", "correct_meaning": "a fruit"}]
+        w1 = await save_words(test_db, "food", q)
+        w2 = await save_words(test_db, "food", q)
+        assert w1[0]["id"] == w2[0]["id"]
+        all_words = await get_words_by_topic(test_db, "food")
+        assert len(all_words) == 1
+
+    async def test_same_word_different_topic(self, test_db):
+        q = [{"word": "bank", "correct_meaning": "financial institution"}]
+        w1 = await save_words(test_db, "finance", q)
+        w2 = await save_words(test_db, "geography", q)
+        assert w1[0]["id"] != w2[0]["id"]
+
+    async def test_case_insensitive(self, test_db):
+        q1 = [{"word": "Hello", "correct_meaning": "greeting"}]
+        q2 = [{"word": "hello", "correct_meaning": "greeting"}]
+        w1 = await save_words(test_db, "greetings", q1)
+        w2 = await save_words(test_db, "greetings", q2)
+        assert w1[0]["id"] == w2[0]["id"]
+
+    async def test_returns_existing_id(self, test_db):
+        q = [{"word": "test", "correct_meaning": "exam"}]
+        w1 = await save_words(test_db, "study", q)
+        original_id = w1[0]["id"]
+        w2 = await save_words(test_db, "study", q)
+        assert w2[0]["id"] == original_id
