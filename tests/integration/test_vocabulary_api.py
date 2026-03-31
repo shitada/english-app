@@ -442,3 +442,23 @@ async def test_export_words_with_data(client, mock_copilot):
     assert data["total_count"] >= 1
     assert "word" in data["words"][0]
     assert "correct_count" in data["words"][0]
+
+
+@pytest.mark.asyncio
+async def test_topic_summary_empty(client):
+    res = await client.get("/api/vocabulary/topic-summary")
+    assert res.status_code == 200
+    assert res.json()["topics"] == []
+
+
+@pytest.mark.asyncio
+async def test_topic_summary_with_data(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "lamp", "correct_meaning": "light", "example_sentence": "Turn on the lamp.", "difficulty": 1}]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    res = await client.get("/api/vocabulary/topic-summary")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["topics"]) >= 1
+    assert data["topics"][0]["total_words"] >= 1

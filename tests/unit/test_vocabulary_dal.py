@@ -485,3 +485,21 @@ class TestExportWords:
         await save_words(test_db, "greetings", _make_questions(1))
         result = await export_words(test_db, topic="food")
         assert len(result) == 2
+
+
+class TestTopicSummary:
+    async def test_empty(self, test_db):
+        from app.dal.vocabulary import get_topic_summary
+        result = await get_topic_summary(test_db)
+        assert result == []
+
+    async def test_with_data(self, test_db):
+        from app.dal.vocabulary import get_topic_summary
+        await save_words(test_db, "food", _make_questions(3))
+        await save_words(test_db, "greetings", _make_questions(2))
+        result = await get_topic_summary(test_db)
+        assert len(result) == 2
+        food_topic = next(t for t in result if t["topic"] == "food")
+        assert food_topic["total_words"] == 3
+        assert food_topic["reviewed_words"] == 0
+        assert food_topic["mastered_words"] == 0

@@ -300,3 +300,22 @@ async def export_words(
     """Export vocabulary words with progress data."""
     words = await vocab_dal.export_words(db, topic)
     return {"words": words, "total_count": len(words)}
+
+
+class TopicSummaryItem(BaseModel):
+    topic: str
+    total_words: int
+    reviewed_words: int
+    mastered_words: int
+    avg_level: float
+
+
+class TopicSummaryResponse(BaseModel):
+    topics: list[TopicSummaryItem]
+
+
+@router.get("/topic-summary", response_model=TopicSummaryResponse)
+async def get_topic_summary(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get per-topic vocabulary progress summary."""
+    topics = await vocab_dal.get_topic_summary(db)
+    return {"topics": topics}

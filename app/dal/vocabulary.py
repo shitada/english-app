@@ -362,3 +362,28 @@ async def export_words(
                ORDER BY vw.topic, vw.word"""
         )
     return [dict(r) for r in rows]
+
+
+async def get_topic_summary(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get per-topic summary with word counts and mastery stats."""
+    rows = await db.execute_fetchall(
+        """SELECT vw.topic,
+                  COUNT(DISTINCT vw.id) as total_words,
+                  COUNT(DISTINCT vp.word_id) as reviewed_words,
+                  SUM(CASE WHEN vp.level >= 3 THEN 1 ELSE 0 END) as mastered_words,
+                  ROUND(AVG(vp.level), 1) as avg_level
+           FROM vocabulary_words vw
+           LEFT JOIN vocabulary_progress vp ON vw.id = vp.word_id
+           GROUP BY vw.topic
+           ORDER BY vw.topic"""
+    )
+    return [
+        {
+            "topic": r["topic"],
+            "total_words": r["total_words"],
+            "reviewed_words": r["reviewed_words"],
+            "mastered_words": r["mastered_words"] or 0,
+            "avg_level": r["avg_level"] or 0,
+        }
+        for r in rows
+    ]
