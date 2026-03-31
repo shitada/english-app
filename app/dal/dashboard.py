@@ -56,6 +56,9 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     # Grammar accuracy
     grammar_stats = await get_grammar_stats(db)
 
+    # Vocabulary level distribution
+    vocab_level_distribution = await get_vocab_level_distribution(db)
+
     return {
         "streak": streak,
         "total_conversations": total_conversations,
@@ -67,6 +70,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "vocab_due_count": vocab_due_count,
         "conversations_by_difficulty": conversations_by_difficulty,
         "grammar_accuracy": grammar_stats["grammar_accuracy"],
+        "vocab_level_distribution": vocab_level_distribution,
         "recent_activity": recent_activity,
     }
 
@@ -141,3 +145,14 @@ async def get_grammar_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     error_free = rows[0]["error_free"] or 0
     accuracy = round(error_free / total * 100, 1) if total > 0 else 0
     return {"total_checked": total, "error_free": error_free, "grammar_accuracy": accuracy}
+
+
+async def get_vocab_level_distribution(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get vocabulary word count per mastery level."""
+    rows = await db.execute_fetchall(
+        """SELECT level, COUNT(*) as count
+           FROM vocabulary_progress
+           GROUP BY level
+           ORDER BY level"""
+    )
+    return [{"level": r["level"], "count": r["count"]} for r in rows]

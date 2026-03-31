@@ -145,3 +145,26 @@ class TestGrammarStats:
         assert result["total_checked"] == 2
         assert result["error_free"] == 1
         assert result["grammar_accuracy"] == 50.0
+
+
+class TestVocabLevelDistribution:
+    async def test_empty(self, test_db):
+        from app.dal.dashboard import get_vocab_level_distribution
+        result = await get_vocab_level_distribution(test_db)
+        assert result == []
+
+    async def test_with_progress(self, test_db):
+        from app.dal.dashboard import get_vocab_level_distribution
+        from app.dal.vocabulary import save_words, update_progress
+        words = await save_words(test_db, "food", [
+            {"word": "a", "correct_meaning": "m", "example_sentence": "s", "difficulty": 1},
+            {"word": "b", "correct_meaning": "m", "example_sentence": "s", "difficulty": 1},
+            {"word": "c", "correct_meaning": "m", "example_sentence": "s", "difficulty": 1},
+        ])
+        # Create progress entries by answering
+        await update_progress(test_db, words[0]["id"], True)  # level 1
+        await update_progress(test_db, words[1]["id"], True)  # level 1
+        await update_progress(test_db, words[2]["id"], True)  # level 1
+        await update_progress(test_db, words[2]["id"], True)  # level 2
+        result = await get_vocab_level_distribution(test_db)
+        assert len(result) >= 1

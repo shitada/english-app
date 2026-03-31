@@ -30,6 +30,11 @@ class DifficultyBreakdown(BaseModel):
     count: int
 
 
+class LevelDistribution(BaseModel):
+    level: int
+    count: int
+
+
 class DashboardStatsResponse(BaseModel):
     streak: int
     total_conversations: int
@@ -41,6 +46,7 @@ class DashboardStatsResponse(BaseModel):
     vocab_due_count: int
     conversations_by_difficulty: list[DifficultyBreakdown]
     grammar_accuracy: float
+    vocab_level_distribution: list[LevelDistribution]
     recent_activity: list[ActivityItem]
 
 
