@@ -180,3 +180,12 @@ async def test_clear_history_with_data(client, mock_copilot):
 async def test_delete_attempt_not_found(client):
     res = await client.delete("/api/pronunciation/99999")
     assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_pronunciation_check_text_too_long(client):
+    long_text = "x" * 1001
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": long_text, "user_transcription": "hello",
+    })
+    assert res.status_code == 422

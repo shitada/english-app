@@ -22,8 +22,8 @@ router = APIRouter(prefix="/api/pronunciation", tags=["pronunciation"])
 
 
 class CheckRequest(BaseModel):
-    reference_text: str = Field(min_length=1)
-    user_transcription: str = Field(min_length=1)
+    reference_text: str = Field(min_length=1, max_length=1000)
+    user_transcription: str = Field(min_length=1, max_length=1000)
 
 
 class SentenceItem(BaseModel):

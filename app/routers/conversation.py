@@ -25,13 +25,13 @@ router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
 
 class StartRequest(BaseModel):
-    topic: str = Field(min_length=1)
+    topic: str = Field(min_length=1, max_length=100)
     difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
 
 
 class MessageRequest(BaseModel):
     conversation_id: int = Field(ge=1)
-    content: str = Field(min_length=1)
+    content: str = Field(min_length=1, max_length=2000)
 
 
 class EndRequest(BaseModel):

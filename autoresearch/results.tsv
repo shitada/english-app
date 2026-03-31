@@ -58,3 +58,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 52\t1025161\t2025-06-09T14:44:00Z\t10\t30\t15\t10\t65\t260\t260\tpass\t7.05\tKEEP\tAdd quiz_type field to quiz response (multiple_choice/fill_blank)
 53\t765f26e\t2025-06-09T14:45:00Z\t10\t30\t12\t8\t60\t262\t262\tpass\t7.30\tKEEP\tsave_attempt returns attempt_id, history includes id field
 54\tbe1144b\t2025-06-09T14:48:00Z\t8\t25\t12\t8\t53\t262\t262\tpass\t6.70\tKEEP\tAdd frontend API methods for delete/clear pronunciation+vocabulary
+55\te8a621c\t2025-06-09T14:51:00Z\t10\t30\t15\t10\t65\t266\t266\tpass\t7.55\tKEEP\tAdd vocabulary word deletion endpoint (DELETE /api/vocabulary/{word_id})

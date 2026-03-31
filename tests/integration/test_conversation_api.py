@@ -298,3 +298,17 @@ async def test_start_conversation_invalid_topic(client):
     })
     assert res.status_code == 422
     assert "Unknown topic" in res.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_message_content_too_long(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start = await client.post("/api/conversation/start", json={
+        "topic": "hotel_checkin", "difficulty": "beginner"
+    })
+    cid = start.json()["conversation_id"]
+    long_content = "x" * 2001
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": cid, "content": long_content
+    })
+    assert res.status_code == 422
