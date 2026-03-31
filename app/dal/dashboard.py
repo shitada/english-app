@@ -53,6 +53,9 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     # Conversations by difficulty
     conversations_by_difficulty = await get_conversations_by_difficulty(db)
 
+    # Grammar accuracy
+    grammar_stats = await get_grammar_stats(db)
+
     return {
         "streak": streak,
         "total_conversations": total_conversations,
@@ -63,6 +66,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "vocab_mastered": vocab_mastered,
         "vocab_due_count": vocab_due_count,
         "conversations_by_difficulty": conversations_by_difficulty,
+        "grammar_accuracy": grammar_stats["grammar_accuracy"],
         "recent_activity": recent_activity,
     }
 
@@ -123,3 +127,17 @@ async def get_conversations_by_difficulty(db: aiosqlite.Connection) -> list[dict
            ORDER BY count DESC"""
     )
     return [{"difficulty": r["difficulty"], "count": r["count"]} for r in rows]
+
+
+async def get_grammar_stats(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get aggregate grammar feedback statistics from conversation messages."""
+    rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as total_checked,
+                  SUM(CASE WHEN json_extract(feedback_json, '$.errors') = '[]' THEN 1 ELSE 0 END) as error_free
+           FROM messages
+           WHERE role = 'user' AND feedback_json IS NOT NULL"""
+    )
+    total = rows[0]["total_checked"]
+    error_free = rows[0]["error_free"] or 0
+    accuracy = round(error_free / total * 100, 1) if total > 0 else 0
+    return {"total_checked": total, "error_free": error_free, "grammar_accuracy": accuracy}

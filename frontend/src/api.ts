@@ -178,6 +178,7 @@ export interface DashboardStats {
   vocab_mastered: number;
   vocab_due_count: number;
   conversations_by_difficulty: { difficulty: string; count: number }[];
+  grammar_accuracy: number;
   recent_activity: { type: string; detail: string; timestamp: string }[];
 }
 

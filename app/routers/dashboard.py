@@ -40,6 +40,7 @@ class DashboardStatsResponse(BaseModel):
     vocab_mastered: int
     vocab_due_count: int
     conversations_by_difficulty: list[DifficultyBreakdown]
+    grammar_accuracy: float
     recent_activity: list[ActivityItem]
 
 

@@ -124,3 +124,24 @@ class TestConversationsByDifficulty:
         assert result[0]["count"] == 2
         assert result[1]["difficulty"] == "advanced"
         assert result[1]["count"] == 1
+
+
+class TestGrammarStats:
+    async def test_empty(self, test_db):
+        from app.dal.dashboard import get_grammar_stats
+        result = await get_grammar_stats(test_db)
+        assert result["total_checked"] == 0
+        assert result["grammar_accuracy"] == 0
+
+    async def test_with_feedback(self, test_db):
+        from app.dal.conversation import add_message, create_conversation
+        from app.dal.dashboard import get_grammar_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # Message with no errors
+        await add_message(test_db, cid, "user", "Hello", feedback={"errors": [], "suggestions": []})
+        # Message with errors
+        await add_message(test_db, cid, "user", "I go yesterday", feedback={"errors": [{"original": "go", "correction": "went"}], "suggestions": []})
+        result = await get_grammar_stats(test_db)
+        assert result["total_checked"] == 2
+        assert result["error_free"] == 1
+        assert result["grammar_accuracy"] == 50.0

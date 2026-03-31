@@ -64,3 +64,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 58\td63a891\t2025-06-09T14:57:00Z\t10\t40\t15\t10\t75\t271\t271\tpass\t7.55\tKEEP\tAdd conversations_by_difficulty breakdown to dashboard stats
 59\t938860f\t2025-06-09T15:00:00Z\t10\t35\t15\t10\t70\t273\t273\tpass\t7.30\tKEEP\tAdd duration_seconds to conversation list endpoint
 60\t7da9e6c\t2025-06-09T15:03:00Z\t10\t35\t15\t10\t70\t278\t278\tpass\t7.55\tKEEP\tAdd vocabulary export endpoint with progress data
+61\t8ec6973\t2025-06-09T15:06:00Z\t10\t40\t18\t10\t78\t282\t282\tpass\t7.55\tKEEP\tAdd pronunciation score trend endpoint (improving/declining/stable)
