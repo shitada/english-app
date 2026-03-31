@@ -3143,3 +3143,161 @@ Now add integration test for fill_blank mode:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 38 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #38: add fill-in-the-blank vocabulary quiz mode
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 38 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● TS check iteration 38 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3
+  └ 1 line...
+
+● Smoke test iteration 38 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+227/227 pass, TS pass, smoke OK. Evaluate:
+
+● T3 for iteration 38 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 38
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ 322 lines read
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ 301 lines read
+
+● T4 for iteration 38 + ISO start (shell)
+  │ date +%s && date -r 1774965770 +%Y-%m-%dT%H:%M:%S%z
+  └ 3 lines...
+
+● Record iteration 38 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo '38   8ceb287
+  │ 2026-03-31T23:02:50+09:00       192     91      27      63      373     227     227     pass
+  │ 7.55    keep    Add fill-in-the-blank vocabulary quiz mode' >> autoresearch/results.tsv
+  └ 1 line...
+
+Now let me continue the loop more efficiently. Iteration 39:
+
+● T0 for iteration 39 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 39
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ 304 lines read
+  └ List directory frontend/src/hooks
+      └ 2 files found
+
+Good proposal — wire up the fill-in-the-blank UI. Let me implement it.
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ 156 lines read
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 346 lines read
+
+● T1 for iteration 39 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now implementing the frontend changes:
+
+● Edit api.ts +4 -2
+  └ frontend/src/api.ts
+
+● Edit api.ts +9
+  └ frontend/src/api.ts
+
+Now update Vocabulary.tsx to add the fill-blank mode:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +3 -2
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now update the startQuiz to pass the mode:
+
+● Edit Vocabulary.tsx +3 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the fill-blank submit handler and update the next question handler:
+
+● Edit Vocabulary.tsx +29 -6
+  └ frontend/src/pages/Vocabulary.tsx
+
+Update nextQuestion to reset fillBlankInput:
+
+● Edit Vocabulary.tsx +1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the fill-blank mode button and update the correctAnswer logic:
+
+● Edit Vocabulary.tsx +5 -3
+  └ frontend/src/pages/Vocabulary.tsx
+
+Add the fill-blank button to the mode selector:
+
+● Edit Vocabulary.tsx +11
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now update the result page to handle fill-blank questions (they have `answer` instead of `word`):
+
+● Edit Vocabulary.tsx +7 -4
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now update the quiz question rendering to handle fill-blank mode:
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L248:260 (13 lines read)
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L280:400 (110 lines read)
+
+I need to replace the quiz question rendering section to handle fill-blank mode:
+
+● Edit Vocabulary.tsx +88
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now fix the multiple choice rendering section to use proper type casting:
+
+● Edit Vocabulary.tsx +2 -2
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now fix the example_sentence reference:
+
+● Edit Vocabulary.tsx +2 -2
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now I need to also fix getOptions() since it accesses properties directly on QuizQuestion union type:
+
+● Edit Vocabulary.tsx +6 -7
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now let me test TypeScript compilation first, then run all tests:
+
+● TS check for iteration 39 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● T2 for iteration 39 (shell)
+  │ date +%s
+  └ 2 lines...
+

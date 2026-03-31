@@ -62,8 +62,10 @@ export const api = {
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
 
-  generateQuiz: (topic: string, count = 10) =>
-    request<{ questions: QuizQuestion[] }>(`/api/vocabulary/quiz?topic=${encodeURIComponent(topic)}&count=${count}`),
+  generateQuiz: (topic: string, count = 10, mode: 'multiple_choice' | 'fill_blank' = 'multiple_choice') =>
+    request<{ questions: (QuizQuestion | FillBlankQuestion)[] }>(
+      `/api/vocabulary/quiz?topic=${encodeURIComponent(topic)}&count=${count}&mode=${mode}`
+    ),
 
   submitAnswer: (word_id: number, is_correct: boolean) =>
     request<{ word_id: number; is_correct: boolean; new_level: number; next_review: string }>(
@@ -122,6 +124,15 @@ export interface QuizQuestion {
   example_sentence: string;
   difficulty: number;
   wrong_options: string[];
+}
+
+export interface FillBlankQuestion {
+  id: number;
+  meaning: string;
+  example_with_blank: string;
+  hint: string;
+  answer: string;
+  difficulty: number;
 }
 
 export interface VocabularyProgressItem {

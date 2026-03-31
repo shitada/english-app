@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Volume2, Check, X, ArrowRight } from 'lucide-react';
-import { api, type QuizQuestion } from '../api';
+import { api, type QuizQuestion, type FillBlankQuestion } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -14,15 +14,16 @@ const TOPIC_EMOJIS: Record<string, string> = {
 
 export default function Vocabulary() {
   const [phase, setPhase] = useState<'select' | 'quiz' | 'result'>('select');
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word'>('word-to-meaning');
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank'>('word-to-meaning');
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
+  const [fillBlankInput, setFillBlankInput] = useState('');
 
   const tts = useSpeechSynthesis();
 
@@ -37,7 +38,8 @@ export default function Vocabulary() {
   const startQuiz = async (topicId: string) => {
     setLoading(true);
     try {
-      const res = await api.generateQuiz(topicId, 10);
+      const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
+      const res = await api.generateQuiz(topicId, 10, apiMode);
       if (!res.questions || res.questions.length === 0) {
         alert('No questions generated. Try again.');
         return;
@@ -47,6 +49,7 @@ export default function Vocabulary() {
       setAnswers([]);
       setSelectedAnswer(null);
       setRevealed(false);
+      setFillBlankInput('');
       setPhase('quiz');
     } catch (err) {
       console.error(err);
@@ -61,10 +64,11 @@ export default function Vocabulary() {
   const selectAnswer = async (answer: string) => {
     if (revealed) return;
 
-    const correctMeaning = currentQ?.correct_meaning || currentQ?.meaning || '';
+    const mcQ = currentQ as QuizQuestion;
+    const correctMeaning = mcQ?.correct_meaning || mcQ?.meaning || '';
     const isCorrect = quizMode === 'word-to-meaning'
       ? answer === correctMeaning
-      : answer === currentQ?.word;
+      : answer === mcQ?.word;
 
     setSelectedAnswer(answer);
     setRevealed(true);
@@ -72,14 +76,36 @@ export default function Vocabulary() {
 
     // Voice feedback
     if (isCorrect) {
-      tts.speak(`Correct! ${currentQ.word} means ${correctMeaning}.`);
+      tts.speak(`Correct! ${mcQ.word} means ${correctMeaning}.`);
     } else {
-      tts.speak(`Incorrect. ${currentQ.word} means ${correctMeaning}.`);
+      tts.speak(`Incorrect. ${mcQ.word} means ${correctMeaning}.`);
     }
 
     // Submit to backend if word has an ID
-    if (currentQ?.id) {
-      api.submitAnswer(currentQ.id, isCorrect).catch(() => {});
+    if (mcQ?.id) {
+      api.submitAnswer(mcQ.id, isCorrect).catch(() => {});
+    }
+  };
+
+  const submitFillBlank = async () => {
+    if (revealed) return;
+    const fbQ = currentQ as FillBlankQuestion;
+    const userAnswer = fillBlankInput.trim().toLowerCase();
+    const correctAnswer = fbQ.answer.toLowerCase();
+    const isCorrect = userAnswer === correctAnswer;
+
+    setSelectedAnswer(fillBlankInput);
+    setRevealed(true);
+    setAnswers((prev) => [...prev, isCorrect]);
+
+    if (isCorrect) {
+      tts.speak(`Correct! The word is ${fbQ.answer}.`);
+    } else {
+      tts.speak(`Incorrect. The correct word is ${fbQ.answer}.`);
+    }
+
+    if (fbQ?.id) {
+      api.submitAnswer(fbQ.id, isCorrect).catch(() => {});
     }
   };
 
@@ -90,15 +116,16 @@ export default function Vocabulary() {
       setCurrentIndex((i) => i + 1);
       setSelectedAnswer(null);
       setRevealed(false);
+      setFillBlankInput('');
     }
   };
 
   const getOptions = () => {
-    if (!currentQ) return [];
+    if (!currentQ || quizMode === 'fill-blank') return [];
+    const mcQ = currentQ as QuizQuestion;
     if (quizMode === 'word-to-meaning') {
-      // Show meanings as options
-      const correct = currentQ.correct_meaning || currentQ.meaning;
-      const wrong = currentQ.wrong_options || [];
+      const correct = mcQ.correct_meaning || mcQ.meaning;
+      const wrong = mcQ.wrong_options || [];
       const all = [correct, ...wrong];
       return all.sort((a, b) => {
         const hashA = a.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -106,9 +133,8 @@ export default function Vocabulary() {
         return hashA - hashB;
       });
     } else {
-      // Show words as options (meaning→word mode)
-      const correctWord = currentQ.word;
-      const otherWords = questions
+      const correctWord = mcQ.word;
+      const otherWords = (questions as QuizQuestion[])
         .filter((q) => q.word !== correctWord)
         .map((q) => q.word)
         .slice(0, 3);
@@ -121,9 +147,11 @@ export default function Vocabulary() {
     }
   };
 
-  const correctAnswer = quizMode === 'word-to-meaning'
-    ? (currentQ?.correct_meaning || currentQ?.meaning || '')
-    : (currentQ?.word || '');
+  const correctAnswer = quizMode === 'fill-blank'
+    ? (currentQ as FillBlankQuestion)?.answer || ''
+    : quizMode === 'word-to-meaning'
+    ? ((currentQ as QuizQuestion)?.correct_meaning || (currentQ as QuizQuestion)?.meaning || '')
+    : ((currentQ as QuizQuestion)?.word || '');
 
   // Topic selection
   if (phase === 'select') {
@@ -158,6 +186,17 @@ export default function Vocabulary() {
               }}
             >
               Meaning → Word
+            </button>
+            <button
+              onClick={() => setQuizMode('fill-blank')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'fill-blank' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'fill-blank' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'fill-blank' ? 'white' : 'var(--text)',
+              }}
+            >
+              Fill in Blank
             </button>
           </div>
         </div>
@@ -210,7 +249,9 @@ export default function Vocabulary() {
         <div style={{ marginBottom: 24 }}>
           <h4 style={{ marginBottom: 8 }}>Words Reviewed</h4>
           <div className="vocab-tags">
-            {questions.map((q, i) => (
+            {questions.map((q, i) => {
+              const displayWord = 'word' in q ? q.word : (q as FillBlankQuestion).answer;
+              return (
               <span
                 key={i}
                 style={{
@@ -218,12 +259,13 @@ export default function Vocabulary() {
                   background: answers[i] ? '#f0fdf4' : '#fef2f2',
                   color: answers[i] ? '#15803d' : '#b91c1c',
                 }}
-                onClick={() => tts.speak(q.word)}
+                onClick={() => tts.speak(displayWord)}
                 title="Click to hear pronunciation"
               >
-                {answers[i] ? '✓' : '✗'} {q.word}
+                {answers[i] ? '✓' : '✗'} {displayWord}
               </span>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -236,6 +278,94 @@ export default function Vocabulary() {
 
   // Quiz question
   if (!currentQ) return null;
+
+  // Fill-in-the-blank mode
+  if (quizMode === 'fill-blank') {
+    const fbQ = currentQ as FillBlankQuestion;
+    return (
+      <div className="card">
+        <div className="quiz-progress">
+          {questions.map((_, i) => (
+            <div
+              key={i}
+              className={`quiz-progress-dot ${
+                i < currentIndex ? (answers[i] ? 'done' : 'wrong') :
+                i === currentIndex ? 'current' : ''
+              }`}
+            />
+          ))}
+        </div>
+
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: 4, fontSize: 13 }}>
+          Question {currentIndex + 1} of {questions.length}
+        </p>
+
+        <h3 style={{ textAlign: 'center', marginBottom: 8 }}>
+          Type the missing word
+        </h3>
+
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <span style={{ fontSize: 20, fontWeight: 600, color: 'var(--primary)' }}>
+            {fbQ.meaning}
+          </span>
+        </div>
+
+        {fbQ.example_with_blank && (
+          <p style={{
+            textAlign: 'center', color: 'var(--text-secondary)', fontSize: 16,
+            marginBottom: 8, fontStyle: 'italic',
+          }}>
+            &ldquo;{fbQ.example_with_blank}&rdquo;
+          </p>
+        )}
+
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, marginBottom: 24 }}>
+          Hint: starts with &ldquo;<strong>{fbQ.hint}</strong>&rdquo;
+        </p>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+          <input
+            type="text"
+            value={fillBlankInput}
+            onChange={(e) => setFillBlankInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && !revealed) submitFillBlank(); }}
+            disabled={revealed}
+            placeholder="Type your answer..."
+            style={{
+              padding: '10px 16px', borderRadius: 8, fontSize: 16,
+              border: revealed
+                ? answers[answers.length - 1] ? '2px solid var(--success)' : '2px solid var(--danger)'
+                : '2px solid var(--border)',
+              outline: 'none', width: 250, textAlign: 'center',
+            }}
+            autoFocus
+          />
+          {!revealed && (
+            <button className="btn btn-primary" onClick={submitFillBlank}>
+              <Check size={16} /> Check
+            </button>
+          )}
+        </div>
+
+        {revealed && (
+          <div style={{ textAlign: 'center', marginBottom: 16 }} role="status" aria-live="polite">
+            <p style={{
+              fontSize: 16, fontWeight: 600, marginBottom: 12,
+              color: answers[answers.length - 1] ? 'var(--success)' : 'var(--danger)',
+            }}>
+              {answers[answers.length - 1] ? '✓ Correct!' : `✗ The answer is: ${fbQ.answer}`}
+            </p>
+            <button className="btn btn-primary" onClick={nextQuestion}>
+              {currentIndex + 1 >= questions.length ? 'See Results' : 'Next'}
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Multiple choice mode
   const options = getOptions();
 
   return (
@@ -269,10 +399,10 @@ export default function Vocabulary() {
             cursor: 'pointer',
             color: 'var(--primary)',
           }}
-          onClick={() => tts.speak(currentQ.word)}
+          onClick={() => tts.speak((currentQ as QuizQuestion).word)}
           title="Click to hear pronunciation"
         >
-          {quizMode === 'word-to-meaning' ? currentQ.word : (currentQ.correct_meaning || currentQ.meaning)}
+          {quizMode === 'word-to-meaning' ? (currentQ as QuizQuestion).word : ((currentQ as QuizQuestion).correct_meaning || (currentQ as QuizQuestion).meaning)}
           <Volume2
             size={18}
             style={{ marginLeft: 8, verticalAlign: 'middle', opacity: 0.6 }}
@@ -295,7 +425,7 @@ export default function Vocabulary() {
         </div>
       </div>
 
-      {currentQ.example_sentence && (
+      {(currentQ as QuizQuestion).example_sentence && (
         <p style={{
           textAlign: 'center',
           color: 'var(--text-secondary)',
@@ -303,7 +433,7 @@ export default function Vocabulary() {
           marginBottom: 24,
           fontStyle: 'italic',
         }}>
-          "{currentQ.example_sentence}"
+          &quot;{(currentQ as QuizQuestion).example_sentence}&quot;
         </p>
       )}
 
