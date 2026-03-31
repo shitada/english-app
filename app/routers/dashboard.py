@@ -25,6 +25,11 @@ class ActivityItem(BaseModel):
     timestamp: str
 
 
+class DifficultyBreakdown(BaseModel):
+    difficulty: str
+    count: int
+
+
 class DashboardStatsResponse(BaseModel):
     streak: int
     total_conversations: int
@@ -34,6 +39,7 @@ class DashboardStatsResponse(BaseModel):
     total_vocab_reviewed: int
     vocab_mastered: int
     vocab_due_count: int
+    conversations_by_difficulty: list[DifficultyBreakdown]
     recent_activity: list[ActivityItem]
 
 

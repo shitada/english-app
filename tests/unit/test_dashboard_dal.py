@@ -103,3 +103,24 @@ class TestGetStats:
         await update_progress(test_db, words[0]["id"], False)
         stats = await get_stats(test_db)
         assert stats["vocab_due_count"] >= 1
+
+
+class TestConversationsByDifficulty:
+    async def test_empty(self, test_db):
+        from app.dal.dashboard import get_conversations_by_difficulty
+        result = await get_conversations_by_difficulty(test_db)
+        assert result == []
+
+    async def test_with_conversations(self, test_db):
+        from app.dal.conversation import create_conversation
+        from app.dal.dashboard import get_conversations_by_difficulty
+        await create_conversation(test_db, "hotel_checkin", "beginner")
+        await create_conversation(test_db, "shopping", "beginner")
+        await create_conversation(test_db, "airport", "advanced")
+        result = await get_conversations_by_difficulty(test_db)
+        assert len(result) == 2
+        # beginner has 2, should be first (ordered by count DESC)
+        assert result[0]["difficulty"] == "beginner"
+        assert result[0]["count"] == 2
+        assert result[1]["difficulty"] == "advanced"
+        assert result[1]["count"] == 1

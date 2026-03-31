@@ -50,6 +50,9 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     # Recent activity (last 7 items)
     recent_activity = await _get_recent_activity(db)
 
+    # Conversations by difficulty
+    conversations_by_difficulty = await get_conversations_by_difficulty(db)
+
     return {
         "streak": streak,
         "total_conversations": total_conversations,
@@ -59,6 +62,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "total_vocab_reviewed": total_vocab_reviewed,
         "vocab_mastered": vocab_mastered,
         "vocab_due_count": vocab_due_count,
+        "conversations_by_difficulty": conversations_by_difficulty,
         "recent_activity": recent_activity,
     }
 
@@ -108,3 +112,14 @@ async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list
         {"type": r["type"], "detail": r["detail"][:60], "timestamp": r["ts"]}
         for r in rows
     ]
+
+
+async def get_conversations_by_difficulty(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get conversation count breakdown by difficulty level."""
+    rows = await db.execute_fetchall(
+        """SELECT difficulty, COUNT(*) as count
+           FROM conversations
+           GROUP BY difficulty
+           ORDER BY count DESC"""
+    )
+    return [{"difficulty": r["difficulty"], "count": r["count"]} for r in rows]
