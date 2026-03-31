@@ -453,3 +453,13 @@ class TestDeleteWord:
     async def test_delete_nonexistent_word(self, test_db):
         result = await delete_word(test_db, 99999)
         assert result is False
+
+
+class TestDatabaseIndexes:
+    async def test_compound_index_exists(self, test_db):
+        rows = await test_db.execute_fetchall(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_%'"
+        )
+        index_names = {r["name"] for r in rows}
+        assert "idx_vocabulary_progress_word_review" in index_names
+        assert "idx_pron_attempts_created" in index_names

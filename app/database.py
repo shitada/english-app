@@ -67,6 +67,8 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id
 CREATE INDEX IF NOT EXISTS idx_vocabulary_topic ON vocabulary_words(topic);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(word_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
+CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word_review ON vocabulary_progress(word_id, next_review_at);
+CREATE INDEX IF NOT EXISTS idx_pron_attempts_created ON pronunciation_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
