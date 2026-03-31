@@ -291,3 +291,21 @@ class TestDeleteEndedConversations:
             await end_conversation(test_db, cid)
         count = await delete_ended_conversations(test_db)
         assert count == 3
+
+
+class TestListConversationsDuration:
+    async def test_active_conversation_null_duration(self, test_db):
+        from app.dal.conversation import create_conversation, list_conversations
+        await create_conversation(test_db, "hotel_checkin")
+        result = await list_conversations(test_db)
+        assert len(result) == 1
+        assert result[0]["duration_seconds"] is None
+
+    async def test_ended_conversation_has_duration(self, test_db):
+        from app.dal.conversation import create_conversation, end_conversation, list_conversations
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        result = await list_conversations(test_db)
+        assert len(result) == 1
+        assert result[0]["duration_seconds"] is not None
+        assert isinstance(result[0]["duration_seconds"], int)

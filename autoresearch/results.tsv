@@ -61,3 +61,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 55\te8a621c\t2025-06-09T14:51:00Z\t10\t30\t15\t10\t65\t266\t266\tpass\t7.55\tKEEP\tAdd vocabulary word deletion endpoint (DELETE /api/vocabulary/{word_id})
 56\t0db283a\t2025-06-09T14:53:00Z\t8\t20\t12\t8\t48\t268\t268\tpass\t6.95\tKEEP\tAdd max_length validation to message/pronunciation inputs
 57\t86a6797\t2025-06-09T14:55:00Z\t8\t15\t12\t8\t43\t269\t269\tpass\t7.05\tKEEP\tAdd compound indexes for vocabulary progress + pronunciation queries
+58\td63a891\t2025-06-09T14:57:00Z\t10\t40\t15\t10\t75\t271\t271\tpass\t7.55\tKEEP\tAdd conversations_by_difficulty breakdown to dashboard stats

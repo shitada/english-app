@@ -114,7 +114,10 @@ async def list_conversations(
     if topic:
         rows = await db.execute_fetchall(
             """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
-                      COUNT(m.id) as message_count
+                      COUNT(m.id) as message_count,
+                      CASE WHEN c.ended_at IS NOT NULL
+                           THEN CAST((julianday(c.ended_at) - julianday(c.started_at)) * 86400 AS INTEGER)
+                           ELSE NULL END as duration_seconds
                FROM conversations c
                LEFT JOIN messages m ON c.id = m.conversation_id
                WHERE c.topic = ?
@@ -126,7 +129,10 @@ async def list_conversations(
     else:
         rows = await db.execute_fetchall(
             """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
-                      COUNT(m.id) as message_count
+                      COUNT(m.id) as message_count,
+                      CASE WHEN c.ended_at IS NOT NULL
+                           THEN CAST((julianday(c.ended_at) - julianday(c.started_at)) * 86400 AS INTEGER)
+                           ELSE NULL END as duration_seconds
                FROM conversations c
                LEFT JOIN messages m ON c.id = m.conversation_id
                GROUP BY c.id

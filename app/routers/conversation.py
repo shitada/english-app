@@ -61,6 +61,7 @@ class ConversationListItem(BaseModel):
     ended_at: str | None
     status: str
     message_count: int
+    duration_seconds: int | None = None
 
 
 class ConversationListResponse(BaseModel):

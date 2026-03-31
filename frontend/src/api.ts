@@ -189,6 +189,7 @@ export interface ConversationListItem {
   ended_at: string | null;
   status: string;
   message_count: number;
+  duration_seconds: number | null;
 }
 
 export interface PronunciationAttempt {
