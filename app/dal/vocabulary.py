@@ -70,6 +70,28 @@ def build_quiz(words: list[dict[str, Any]], all_meanings: list[str]) -> list[dic
     return questions
 
 
+def build_fill_blank_quiz(words: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Build fill-in-the-blank quiz where user types the word."""
+    questions = []
+    for w in words:
+        w_dict = dict(w)
+        word = w_dict["word"]
+        sentence = w_dict.get("example_sentence", "")
+        # Replace word in sentence (case-insensitive) with ___
+        import re
+        blanked = re.sub(re.escape(word), "___", sentence, flags=re.IGNORECASE) if sentence else ""
+        hint = word[0] if word else ""
+        questions.append({
+            "id": w_dict["id"],
+            "meaning": w_dict["meaning"],
+            "example_with_blank": blanked,
+            "hint": hint,
+            "answer": word,
+            "difficulty": w_dict.get("difficulty", 1),
+        })
+    return questions
+
+
 async def get_word(db: aiosqlite.Connection, word_id: int) -> dict | None:
     rows = await db.execute_fetchall("SELECT * FROM vocabulary_words WHERE id = ?", (word_id,))
     return dict(rows[0]) if rows else None

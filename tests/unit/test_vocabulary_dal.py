@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from app.dal.vocabulary import (
+    build_fill_blank_quiz,
     build_quiz,
     get_due_word_ids,
     get_progress,
@@ -291,3 +292,31 @@ class TestTimezoneConsistency:
         nr = datetime.strptime(next_review, "%Y-%m-%d %H:%M:%S")
         # next_review should be >= last_reviewed (interval >= 0)
         assert nr >= lr
+
+
+class TestBuildFillBlankQuiz:
+    def test_word_in_sentence_gets_blanked(self):
+        words = [{"id": 1, "word": "apple", "meaning": "a fruit", "example_sentence": "I ate an apple.", "difficulty": 1}]
+        result = build_fill_blank_quiz(words)
+        assert len(result) == 1
+        assert result[0]["example_with_blank"] == "I ate an ___."
+        assert result[0]["hint"] == "a"
+        assert result[0]["answer"] == "apple"
+
+    def test_word_not_in_sentence(self):
+        words = [{"id": 2, "word": "run", "meaning": "to move quickly", "example_sentence": "He sprinted fast.", "difficulty": 1}]
+        result = build_fill_blank_quiz(words)
+        assert len(result) == 1
+        # Sentence stays unchanged since word is not present
+        assert result[0]["example_with_blank"] == "He sprinted fast."
+        assert result[0]["hint"] == "r"
+
+    def test_empty_list(self):
+        result = build_fill_blank_quiz([])
+        assert result == []
+
+    def test_case_insensitive_blanking(self):
+        words = [{"id": 3, "word": "Hello", "meaning": "greeting", "example_sentence": "hello world!", "difficulty": 1}]
+        result = build_fill_blank_quiz(words)
+        assert "___" in result[0]["example_with_blank"]
+        assert "hello" not in result[0]["example_with_blank"].lower() or "___" in result[0]["example_with_blank"]

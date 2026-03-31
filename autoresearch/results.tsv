@@ -41,3 +41,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 34	7835f2e	2026-03-30T19:28:15+00:00	93	1519	951	49	2612	213	213	pass	8.35	keep	Add unit tests for app/utils.py (safe_llm_call, get_topic_label)
 35	e16e8a0	2026-03-30T19:58:44+00:00	1097	28	507	55	1687	217	217	pass	8.1	keep	Add integration tests for pronunciation progress endpoint
 36b887c472026-03-31T22:41:49+09:002455472524895220220pass7.8keepAdd vocabulary due-for-review endpoint
+378c51e362026-03-31T22:57:44+09:00163472844282221221pass7.55keepFix timezone inconsistency in vocabulary DAL and streak calculation

@@ -39,6 +39,15 @@ class QuizResponse(BaseModel):
     questions: list[QuizQuestionItem]
 
 
+class FillBlankQuestionItem(BaseModel):
+    id: int
+    meaning: str
+    example_with_blank: str
+    hint: str
+    answer: str
+    difficulty: int
+
+
 class AnswerResponse(BaseModel):
     word_id: int
     is_correct: bool
@@ -104,6 +113,7 @@ async def list_topics():
 async def generate_quiz(
     topic: str,
     count: int = Query(default=10, ge=1, le=50),
+    mode: str = Query(default="multiple_choice", pattern="^(multiple_choice|fill_blank)$"),
     db: aiosqlite.Connection = Depends(get_db_session),
     _rl=Depends(require_rate_limit),
 ):
@@ -118,6 +128,8 @@ async def generate_quiz(
             else:
                 words.append(r)
         words = words[:count]
+        if mode == "fill_blank":
+            return {"questions": vocab_dal.build_fill_blank_quiz(words)}
         all_meanings = [r["meaning"] for r in existing]
         return {"questions": vocab_dal.build_quiz(words, all_meanings)}
 
@@ -134,6 +146,8 @@ async def generate_quiz(
     )
 
     words = await vocab_dal.save_words(db, topic, result.get("questions", []))
+    if mode == "fill_blank":
+        return {"questions": vocab_dal.build_fill_blank_quiz(words)}
     return {"questions": words}
 
 

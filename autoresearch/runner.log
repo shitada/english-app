@@ -3017,3 +3017,129 @@ Now let me add a test for the timezone fix. Let me check existing test files:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 37 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #37: fix timezone inconsistency in vocabulary DAL and streak calculation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 37 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check for iteration 37 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3
+  └ 1 line...
+
+● Smoke test for iteration 37 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+All tests pass (221/221), TS check pass, smoke OK. Evaluate:
+
+● T3 for iteration 37 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 37
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1:10 (8 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L274:294 (20 lines read)
+
+● T4 for iteration 37 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 37 (shell)
+  │ date -r 1774965464 +%Y-%m-%dT%H:%M:%S%z && cd /Users/shingotada/Documents/vscode/english-app &&
+  │ echo '37        8c51e36 2026-03-31T22:57:44+09:00       163     47      28      44      282
+  │ 221     221     pass    7.55    keep    Fix timezone inconsistency in vocabulary DAL and streak
+  │ calculation' >> autoresearch/results.tsv
+  └ 2 lines...
+
+Good. Now iteration 38.
+
+● T0 for iteration 38 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 38
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ 293 lines read
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ 87 lines read
+
+● T1 for iteration 38 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Implementing fill-in-the-blank quiz mode.
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L60:82 (23 lines read)
+
+● Edit vocabulary.py +22
+  └ app/dal/vocabulary.py
+
+Now update the router:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L28:55 (28 lines read)
+
+● Edit vocabulary.py +9
+  └ app/routers/vocabulary.py
+
+Now update the quiz endpoint to accept mode parameter:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L96:140 (45 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L140:150 (11 lines read)
+
+● Edit vocabulary.py +5
+  └ app/routers/vocabulary.py
+
+Now add tests:
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L7:18 (10 lines read)
+
+● Edit test_vocabulary_dal.py +1
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add the test class at the end of the file:
+
+● Check file end (shell)
+  │ tail -5 /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py
+  └ 6 lines...
+
+● Edit test_vocabulary_dal.py +28
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add integration test for fill_blank mode:
+
+● Check test file end (shell)
+  │ tail -3 /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  └ 4 lines...
+
+● Edit test_vocabulary_api.py +38
+  └ tests/integration/test_vocabulary_api.py
+
+● T2 for iteration 38 (shell)
+  │ date +%s
+  └ 2 lines...
+

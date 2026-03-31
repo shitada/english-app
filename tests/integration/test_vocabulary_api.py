@@ -261,3 +261,41 @@ async def test_due_words_filter_by_topic(client, mock_copilot):
     res2 = await client.get("/api/vocabulary/due?topic=technology")
     assert res2.status_code == 200
     assert res2.json()["due_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_quiz_fill_blank_mode(client, mock_copilot):
+    """Test fill_blank quiz mode returns correct response shape."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "book", "correct_meaning": "a written work", "example_sentence": "I read a book.", "difficulty": 1},
+        ]
+    })
+    res = await client.get("/api/vocabulary/quiz?topic=reading&count=1&mode=fill_blank")
+    assert res.status_code == 200
+    questions = res.json()["questions"]
+    assert len(questions) >= 1
+    q = questions[0]
+    assert "example_with_blank" in q
+    assert "hint" in q
+    assert "answer" in q
+    assert "___" in q["example_with_blank"]
+    assert "wrong_options" not in q
+
+
+@pytest.mark.asyncio
+async def test_quiz_default_mode_unchanged(client, mock_copilot):
+    """Default mode still returns multiple_choice format."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "pen", "correct_meaning": "writing tool", "example_sentence": "Use a pen.", "difficulty": 1},
+        ]
+    })
+    res = await client.get("/api/vocabulary/quiz?topic=office&count=1")
+    assert res.status_code == 200
+    questions = res.json()["questions"]
+    assert len(questions) >= 1
+    # Default should have wrong_options (multiple choice format)
+    q = questions[0]
+    assert "word" in q
+    assert "meaning" in q
