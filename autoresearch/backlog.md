@@ -16,10 +16,31 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)
 - [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
 - [x] ✅ Preserve original punctuation (? !) in pronunciation sentence extraction (completed iteration #26)
-- [ ] Diversify vocabulary quiz formats — add word-to-definition, fill-in-the-blank, sentence completion modes
+- [x] ✅ Diversify vocabulary quiz formats — fill-in-the-blank mode added (completed iteration #38-39)
 - [x] ✅ Add conversation history review page — backend endpoint added: GET /api/conversation/list with topic filter and pagination (completed iteration #11)
 - [x] ✅ Add progress tracking for pronunciation — track improvement over time per sentence type (completed iteration #10)
 - [x] ✅ Add conversation delete/cleanup endpoints — DELETE single and bulk clear ended (completed iteration #31)
+- [x] ✅ Add vocabulary due-for-review endpoint — GET /api/vocabulary/due with topic filter (completed iteration #36)
+- [x] ✅ Fix timezone inconsistency — datetime.now() → datetime.now(timezone.utc) everywhere (completed iteration #37)
+- [x] ✅ Display fluency score and feedback in pronunciation results (completed iteration #40)
+- [x] ✅ Add auto-end conversation timer (completed iteration #42, discarded #41 then fixed)
+- [x] ✅ Add pronunciation history & progress UI (completed iteration #43)
+- [x] ✅ Add vocabulary due-for-review count to dashboard (completed iteration #44)
+- [x] ✅ Add vocabulary progress reset endpoint (completed iteration #45)
+- [x] ✅ Show stored conversation summary in history view (completed iteration #46)
+- [x] ✅ Add vocabulary weak words endpoint (completed iteration #47)
+- [x] ✅ Add vocabulary word bank browse/search endpoint (completed iteration #48)
+- [x] ✅ Deduplicate vocabulary words in save_words (completed iteration #49)
+- [x] ✅ Add pronunciation history clear/delete endpoints (completed iteration #50)
+- [x] ✅ Validate topic IDs against config (completed iteration #51)
+- [x] ✅ Add quiz_type field to quiz response (completed iteration #52)
+- [x] ✅ save_attempt returns attempt_id, history includes id (completed iteration #53)
+- [x] ✅ Add frontend API methods for delete/clear endpoints (completed iteration #54)
+- [x] ✅ Add vocabulary word deletion endpoint (completed iteration #55)
+- [x] ✅ Add max_length validation to message/pronunciation inputs (completed iteration #56)
+- [x] ✅ Add pronunciation score trend endpoint (completed iteration #61)
+- [x] ✅ Add vocabulary export endpoint with progress data (completed iteration #60)
+- [x] ✅ Add vocabulary topic-summary endpoint (completed iteration #65)
 
 ## [MEDIUM] Code Quality & Bug Fixes
 
@@ -45,4 +66,9 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [ ] Add database migration strategy — handle schema changes without data loss
 - [x] ✅ Add health check endpoint — monitor service availability (completed iteration #9)
 - [x] ✅ Add rate limiting — prevent abuse of LLM endpoints (completed iteration #26)
-- [x] ✅ Add vocabulary due-for-review endpoint — GET /api/vocabulary/due with topic filter (completed iteration #36)
+- [x] ✅ Add compound indexes for vocabulary progress + pronunciation queries (completed iteration #57)
+- [x] ✅ Add conversations_by_difficulty to dashboard (completed iteration #58)
+- [x] ✅ Add duration_seconds to conversation list (completed iteration #59)
+- [x] ✅ Add grammar_accuracy stat to dashboard (completed iteration #62)
+- [x] ✅ Add vocab_level_distribution to dashboard (completed iteration #63)
+- [x] ✅ Add conversations_by_topic to dashboard (completed iteration #64)
