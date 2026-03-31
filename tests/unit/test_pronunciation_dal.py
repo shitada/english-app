@@ -273,3 +273,31 @@ class TestSaveAttemptReturnsId:
         history = await get_history(test_db)
         assert "id" in history[0]
         assert isinstance(history[0]["id"], int)
+
+
+class TestScoreTrend:
+    async def test_insufficient_data(self, test_db):
+        from app.dal.pronunciation import get_score_trend
+        result = await get_score_trend(test_db)
+        assert result["trend"] == "insufficient_data"
+
+    async def test_improving_trend(self, test_db):
+        from app.dal.pronunciation import get_score_trend
+        feedback = {"overall_score": 5}
+        # Old scores: lower
+        for s in [4.0, 4.5, 5.0, 5.5, 5.0]:
+            await save_attempt(test_db, "Test.", "Test.", feedback, s)
+        # Recent scores: higher
+        for s in [7.0, 7.5, 8.0, 8.5, 8.0]:
+            await save_attempt(test_db, "Test.", "Test.", feedback, s)
+        result = await get_score_trend(test_db)
+        assert result["trend"] == "improving"
+        assert result["change"] > 0
+
+    async def test_stable_trend(self, test_db):
+        from app.dal.pronunciation import get_score_trend
+        feedback = {"overall_score": 7}
+        for _ in range(10):
+            await save_attempt(test_db, "Test.", "Test.", feedback, 7.0)
+        result = await get_score_trend(test_db)
+        assert result["trend"] == "stable"

@@ -141,3 +141,31 @@ async def delete_attempt(db: aiosqlite.Connection, attempt_id: int) -> bool:
     cursor = await db.execute("DELETE FROM pronunciation_attempts WHERE id = ?", (attempt_id,))
     await db.commit()
     return cursor.rowcount > 0
+
+
+async def get_score_trend(db: aiosqlite.Connection, window: int = 5) -> dict[str, Any]:
+    """Calculate pronunciation score trend (improving/declining/stable).
+    
+    Compares average of last `window` attempts to the `window` before that.
+    """
+    rows = await db.execute_fetchall(
+        "SELECT score FROM pronunciation_attempts WHERE score IS NOT NULL ORDER BY id DESC LIMIT ?",
+        (window * 2,),
+    )
+    if len(rows) < window:
+        return {"trend": "insufficient_data", "recent_avg": 0, "previous_avg": 0, "change": 0}
+    
+    recent = [r["score"] for r in rows[:window]]
+    previous = [r["score"] for r in rows[window:]]
+    recent_avg = round(sum(recent) / len(recent), 2)
+    previous_avg = round(sum(previous) / len(previous), 2) if previous else recent_avg
+    change = round(recent_avg - previous_avg, 2)
+    
+    if change > 0.5:
+        trend = "improving"
+    elif change < -0.5:
+        trend = "declining"
+    else:
+        trend = "stable"
+    
+    return {"trend": trend, "recent_avg": recent_avg, "previous_avg": previous_avg, "change": change}

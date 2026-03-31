@@ -139,3 +139,16 @@ async def delete_attempt(attempt_id: int, db: aiosqlite.Connection = Depends(get
     if not deleted:
         raise HTTPException(status_code=404, detail="Attempt not found")
     return {"deleted": True}
+
+
+class ScoreTrendResponse(BaseModel):
+    trend: str
+    recent_avg: float
+    previous_avg: float
+    change: float
+
+
+@router.get("/trend", response_model=ScoreTrendResponse)
+async def get_score_trend(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get pronunciation score trend (improving/declining/stable)."""
+    return await pron_dal.get_score_trend(db)

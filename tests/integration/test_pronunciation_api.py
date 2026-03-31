@@ -189,3 +189,10 @@ async def test_pronunciation_check_text_too_long(client):
         "reference_text": long_text, "user_transcription": "hello",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_score_trend_insufficient_data(client):
+    res = await client.get("/api/pronunciation/trend")
+    assert res.status_code == 200
+    assert res.json()["trend"] == "insufficient_data"
