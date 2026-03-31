@@ -59,6 +59,9 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     # Vocabulary level distribution
     vocab_level_distribution = await get_vocab_level_distribution(db)
 
+    # Conversations by topic
+    conversations_by_topic = await get_conversations_by_topic(db)
+
     return {
         "streak": streak,
         "total_conversations": total_conversations,
@@ -71,6 +74,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "conversations_by_difficulty": conversations_by_difficulty,
         "grammar_accuracy": grammar_stats["grammar_accuracy"],
         "vocab_level_distribution": vocab_level_distribution,
+        "conversations_by_topic": conversations_by_topic,
         "recent_activity": recent_activity,
     }
 
@@ -156,3 +160,14 @@ async def get_vocab_level_distribution(db: aiosqlite.Connection) -> list[dict[st
            ORDER BY level"""
     )
     return [{"level": r["level"], "count": r["count"]} for r in rows]
+
+
+async def get_conversations_by_topic(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get conversation count breakdown by topic."""
+    rows = await db.execute_fetchall(
+        """SELECT topic, COUNT(*) as count
+           FROM conversations
+           GROUP BY topic
+           ORDER BY count DESC"""
+    )
+    return [{"topic": r["topic"], "count": r["count"]} for r in rows]

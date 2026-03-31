@@ -35,6 +35,11 @@ class LevelDistribution(BaseModel):
     count: int
 
 
+class TopicBreakdown(BaseModel):
+    topic: str
+    count: int
+
+
 class DashboardStatsResponse(BaseModel):
     streak: int
     total_conversations: int
@@ -47,6 +52,7 @@ class DashboardStatsResponse(BaseModel):
     conversations_by_difficulty: list[DifficultyBreakdown]
     grammar_accuracy: float
     vocab_level_distribution: list[LevelDistribution]
+    conversations_by_topic: list[TopicBreakdown]
     recent_activity: list[ActivityItem]
 
 

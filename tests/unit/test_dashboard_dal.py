@@ -168,3 +168,21 @@ class TestVocabLevelDistribution:
         await update_progress(test_db, words[2]["id"], True)  # level 2
         result = await get_vocab_level_distribution(test_db)
         assert len(result) >= 1
+
+
+class TestConversationsByTopic:
+    async def test_empty(self, test_db):
+        from app.dal.dashboard import get_conversations_by_topic
+        result = await get_conversations_by_topic(test_db)
+        assert result == []
+
+    async def test_with_data(self, test_db):
+        from app.dal.conversation import create_conversation
+        from app.dal.dashboard import get_conversations_by_topic
+        await create_conversation(test_db, "hotel_checkin")
+        await create_conversation(test_db, "hotel_checkin")
+        await create_conversation(test_db, "shopping")
+        result = await get_conversations_by_topic(test_db)
+        assert len(result) == 2
+        assert result[0]["topic"] == "hotel_checkin"
+        assert result[0]["count"] == 2

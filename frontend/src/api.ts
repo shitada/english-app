@@ -180,6 +180,7 @@ export interface DashboardStats {
   conversations_by_difficulty: { difficulty: string; count: number }[];
   grammar_accuracy: number;
   vocab_level_distribution: { level: number; count: number }[];
+  conversations_by_topic: { topic: string; count: number }[];
   recent_activity: { type: string; detail: string; timestamp: string }[];
 }
 
