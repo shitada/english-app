@@ -153,3 +153,30 @@ async def test_pronunciation_history_ordering(client, mock_copilot):
     assert len(data["attempts"]) == 2
     assert data["attempts"][0]["reference_text"] == "Good morning"
     assert data["attempts"][1]["reference_text"] == "Good evening"
+
+
+@pytest.mark.asyncio
+async def test_clear_history_empty(client):
+    res = await client.delete("/api/pronunciation/history")
+    assert res.status_code == 200
+    assert res.json()["deleted_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_clear_history_with_data(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 7, "overall_feedback": "Good",
+        "word_feedback": [], "focus_areas": [],
+    })
+    await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world", "user_transcription": "Hello world",
+    })
+    res = await client.delete("/api/pronunciation/history")
+    assert res.status_code == 200
+    assert res.json()["deleted_count"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_delete_attempt_not_found(client):
+    res = await client.delete("/api/pronunciation/99999")
+    assert res.status_code == 404

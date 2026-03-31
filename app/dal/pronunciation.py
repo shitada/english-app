@@ -125,3 +125,17 @@ async def get_progress(db: aiosqlite.Connection) -> dict[str, Any]:
         "scores_by_date": scores_by_date,
         "most_practiced": most_practiced,
     }
+
+
+async def clear_history(db: aiosqlite.Connection) -> int:
+    """Delete all pronunciation attempts."""
+    cursor = await db.execute("DELETE FROM pronunciation_attempts")
+    await db.commit()
+    return cursor.rowcount
+
+
+async def delete_attempt(db: aiosqlite.Connection, attempt_id: int) -> bool:
+    """Delete a single pronunciation attempt. Returns True if deleted."""
+    cursor = await db.execute("DELETE FROM pronunciation_attempts WHERE id = ?", (attempt_id,))
+    await db.commit()
+    return cursor.rowcount > 0

@@ -52,3 +52,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 464aa1c232026-03-31T23:50:49+09:001078113102303234234pass6.95keepShow stored conversation summary in history view
 479135ba72026-03-31T23:56:11+09:00158781290338239239pass7.55keepAdd vocabulary weak words endpoint for targeted review
 489b1950f2026-04-01T00:02:22+09:001331071490344246246pass7.55keepAdd vocabulary word bank browse/search endpoint
+49efbe99a2026-04-01T00:08:04+09:00151541590310250250pass7.8keepDeduplicate vocabulary words in save_words

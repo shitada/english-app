@@ -8,6 +8,8 @@ import pytest
 
 from app.dal.conversation import add_message, create_conversation
 from app.dal.pronunciation import (
+    clear_history,
+    delete_attempt,
     get_history,
     get_progress,
     get_sentences_from_conversations,
@@ -226,3 +228,33 @@ class TestGetProgress:
         assert "date" in progress["scores_by_date"][0]
         assert "avg_score" in progress["scores_by_date"][0]
         assert "count" in progress["scores_by_date"][0]
+
+
+class TestClearHistory:
+    async def test_clear_empty(self, test_db):
+        deleted = await clear_history(test_db)
+        assert deleted == 0
+
+    async def test_clear_with_data(self, test_db):
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "A.", "A.", feedback, 7.0)
+        await save_attempt(test_db, "B.", "B.", feedback, 8.0)
+        deleted = await clear_history(test_db)
+        assert deleted == 2
+        history = await get_history(test_db)
+        assert len(history) == 0
+
+
+class TestDeleteAttempt:
+    async def test_delete_existing(self, test_db):
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "Test.", "Test.", feedback, 7.0)
+        # Get the attempt ID
+        rows = await test_db.execute_fetchall("SELECT id FROM pronunciation_attempts LIMIT 1")
+        attempt_id = rows[0]["id"]
+        result = await delete_attempt(test_db, attempt_id)
+        assert result is True
+
+    async def test_delete_nonexistent(self, test_db):
+        result = await delete_attempt(test_db, 99999)
+        assert result is False

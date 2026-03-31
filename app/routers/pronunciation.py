@@ -67,6 +67,14 @@ class PronunciationProgressResponse(BaseModel):
     most_practiced: list[MostPracticed]
 
 
+class ClearHistoryResponse(BaseModel):
+    deleted_count: int
+
+
+class DeleteAttemptResponse(BaseModel):
+    deleted: bool
+
+
 @router.get("/sentences", response_model=SentencesResponse)
 async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
     sentences = await pron_dal.get_sentences_from_conversations(db)
@@ -114,3 +122,19 @@ async def get_pronunciation_history(db: aiosqlite.Connection = Depends(get_db_se
 async def get_pronunciation_progress(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get aggregate pronunciation progress statistics."""
     return await pron_dal.get_progress(db)
+
+
+@router.delete("/history", response_model=ClearHistoryResponse)
+async def clear_history(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Clear all pronunciation attempts."""
+    deleted = await pron_dal.clear_history(db)
+    return {"deleted_count": deleted}
+
+
+@router.delete("/{attempt_id}", response_model=DeleteAttemptResponse)
+async def delete_attempt(attempt_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Delete a single pronunciation attempt."""
+    deleted = await pron_dal.delete_attempt(db, attempt_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Attempt not found")
+    return {"deleted": True}
