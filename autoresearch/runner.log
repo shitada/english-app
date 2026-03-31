@@ -3301,3 +3301,77 @@ Now let me test TypeScript compilation first, then run all tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 39 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #39: wire up fill-in-the-blank quiz mode in frontend UI
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 39 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+● T3 for iteration 39 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 39
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L50:140 (91 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● T4 and start time for iteration 39 (shell)
+  │ date +%s && date -r 1774966167 +%Y-%m-%dT%H:%M:%S%z
+  └ 3 lines...
+
+Score 6.95 — keep. Recording and moving to iteration 40.
+
+● Record iteration 39 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo '39   d8476d4
+  │ 2026-03-31T23:09:27+09:00       101     184     21      60      366     227     227     pass
+  │ 6.95    keep    Wire up fill-in-the-blank quiz mode in frontend UI' >> autoresearch/results.tsv
+  └ 1 line...
+
+● T0 for iteration 40 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 40
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ 304 lines read
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ 167 lines read
+
+● Read Pronunciation.tsx
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 304 lines read
+
+● T1 for iteration 40 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now implement the changes:
+
+● Edit api.ts +2
+  └ frontend/src/api.ts
+
+Now update the Pronunciation result phase to show fluency score:
+
+● Edit Pronunciation.tsx +22 -3
+  └ frontend/src/pages/Pronunciation.tsx
+
+● TS check for iteration 40 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● T2 for iteration 40 (shell)
+  │ date +%s
+  └ 2 lines...
+

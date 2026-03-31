@@ -240,13 +240,32 @@ export default function Pronunciation() {
       <div className="card">
         <h3 style={{ textAlign: 'center', marginBottom: 16 }}>Pronunciation Result</h3>
 
-        <div className={`score-circle ${scoreClass}`}>
-          {feedback.overall_score}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 16 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className={`score-circle ${scoreClass}`}>
+              {feedback.overall_score}
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Accuracy</p>
+          </div>
+          {feedback.fluency_score != null && (
+            <div style={{ textAlign: 'center' }}>
+              <div className={`score-circle ${feedback.fluency_score >= 8 ? 'score-high' : feedback.fluency_score >= 5 ? 'score-mid' : 'score-low'}`}>
+                {feedback.fluency_score}
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Fluency</p>
+            </div>
+          )}
         </div>
 
-        <p style={{ textAlign: 'center', marginBottom: 24, color: 'var(--text-secondary)' }}>
+        <p style={{ textAlign: 'center', marginBottom: 8, color: 'var(--text-secondary)' }}>
           {feedback.overall_feedback}
         </p>
+
+        {feedback.fluency_feedback && (
+          <p style={{ textAlign: 'center', marginBottom: 24, color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: 14 }}>
+            {feedback.fluency_feedback}
+          </p>
+        )}
 
         <h4 style={{ marginBottom: 8 }}>Word-by-Word Analysis</h4>
         <div className="word-comparison">
