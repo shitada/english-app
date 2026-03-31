@@ -104,6 +104,10 @@ class DueWordsResponse(BaseModel):
     words: list[DueWordItem]
 
 
+class ResetProgressResponse(BaseModel):
+    deleted_count: int
+
+
 @router.get("/topics")
 async def list_topics():
     return get_vocabulary_topics()
@@ -188,3 +192,13 @@ async def get_due_words(
 async def get_vocabulary_stats(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get aggregate vocabulary mastery statistics."""
     return await vocab_dal.get_vocabulary_stats(db)
+
+
+@router.delete("/progress", response_model=ResetProgressResponse)
+async def reset_progress(
+    topic: str | None = None,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Reset vocabulary progress, optionally filtered by topic."""
+    deleted = await vocab_dal.reset_progress(db, topic)
+    return {"deleted_count": deleted}

@@ -12,6 +12,7 @@ from app.dal.vocabulary import (
     get_vocabulary_stats,
     get_word,
     get_words_by_topic,
+    reset_progress,
     save_words,
     update_progress,
 )
@@ -320,3 +321,28 @@ class TestBuildFillBlankQuiz:
         result = build_fill_blank_quiz(words)
         assert "___" in result[0]["example_with_blank"]
         assert "hello" not in result[0]["example_with_blank"].lower() or "___" in result[0]["example_with_blank"]
+
+
+class TestResetProgress:
+    async def test_reset_all(self, test_db):
+        words = await save_words(test_db, "t1", _make_questions(2))
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+        deleted = await reset_progress(test_db)
+        assert deleted == 2
+        progress = await get_progress(test_db)
+        assert len(progress) == 0
+
+    async def test_reset_by_topic(self, test_db):
+        w1 = await save_words(test_db, "food", _make_questions(2))
+        w2 = await save_words(test_db, "travel", _make_questions(1))
+        for w in w1 + w2:
+            await update_progress(test_db, w["id"], True)
+        deleted = await reset_progress(test_db, topic="food")
+        assert deleted == 2
+        progress = await get_progress(test_db)
+        assert len(progress) == 1
+
+    async def test_reset_empty(self, test_db):
+        deleted = await reset_progress(test_db)
+        assert deleted == 0

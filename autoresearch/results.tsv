@@ -47,3 +47,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 41none2026-03-31T23:21:09+09:00782723207335227227pass4.6discardAuto-end conversation when timer expires (TDZ bug)
 42748993b2026-03-31T23:27:01+09:0003920118177227227pass6.7keepAuto-end conversation when 5-minute timer expires
 43475eb682026-03-31T23:30:16+09:00164981989370227227pass7.0keepAdd pronunciation history and progress UI
+44671a3d42026-03-31T23:36:48+09:001231163574348229229pass7.8keepAdd vocabulary due-for-review count to dashboard

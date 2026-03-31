@@ -244,3 +244,18 @@ async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
         "level_distribution": level_distribution,
         "topic_breakdown": topic_breakdown,
     }
+
+
+async def reset_progress(db: aiosqlite.Connection, topic: str | None = None) -> int:
+    """Delete vocabulary progress rows. If topic is given, only for that topic."""
+    if topic:
+        cursor = await db.execute(
+            """DELETE FROM vocabulary_progress WHERE word_id IN (
+                   SELECT id FROM vocabulary_words WHERE topic = ?
+               )""",
+            (topic,),
+        )
+    else:
+        cursor = await db.execute("DELETE FROM vocabulary_progress")
+    await db.commit()
+    return cursor.rowcount

@@ -299,3 +299,29 @@ async def test_quiz_default_mode_unchanged(client, mock_copilot):
     q = questions[0]
     assert "word" in q
     assert "meaning" in q
+
+
+@pytest.mark.asyncio
+async def test_reset_progress_empty(client):
+    """Reset on empty DB returns 0."""
+    res = await client.delete("/api/vocabulary/progress")
+    assert res.status_code == 200
+    assert res.json()["deleted_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_reset_progress_after_answers(client, mock_copilot):
+    """Reset clears progress after answering quiz."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "sun", "correct_meaning": "star", "example_sentence": "The sun.", "difficulty": 1}]
+    })
+    quiz = await client.get("/api/vocabulary/quiz?topic=science&count=1")
+    wid = quiz.json()["questions"][0]["id"]
+    await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": True})
+
+    res = await client.delete("/api/vocabulary/progress")
+    assert res.status_code == 200
+    assert res.json()["deleted_count"] >= 1
+
+    prog = await client.get("/api/vocabulary/progress")
+    assert prog.json()["progress"] == []
