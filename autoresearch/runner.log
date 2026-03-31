@@ -2719,3 +2719,110 @@ Breakdown by AI model:
 [2026-03-31 07:41:39] Final iteration:   35 / 35
 [2026-03-31 07:41:39] Premium requests:  9
 [2026-03-31 07:41:39] ==========================================
+[2026-03-31 22:41:15] ==========================================
+[2026-03-31 22:41:15] Autoresearch CLI Runner started
+[2026-03-31 22:41:15] Current iteration: 35
+[2026-03-31 22:41:15] Additional iters:  30
+[2026-03-31 22:41:15] Target iteration:  65
+[2026-03-31 22:41:15] Max invocations:   10
+[2026-03-31 22:41:15] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-03-31 22:41:15] ==========================================
+[2026-03-31 22:41:15] WARNING: Working tree has uncommitted changes
+[2026-03-31 22:41:15]   M autoresearch/runner.log
+[2026-03-31 22:41:15] Continuing anyway...
+[2026-03-31 22:41:15] Current iteration count: 35 / 65
+[2026-03-31 22:41:15] ------------------------------------------
+[2026-03-31 22:41:15] Invocation 1 / 10
+[2026-03-31 22:41:15] Resuming from iteration 36
+[2026-03-31 22:41:15] ------------------------------------------
+[2026-03-31 22:41:15] Starting copilot invocation...
+
+
+
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 42 lines read
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 47 lines read
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -15
+  └ 16 lines...
+
+Starting autoresearch loop from iteration 36. Current state: 35 iterations completed, 217 tests passing. Let me begin.
+
+● Get T0 timestamp for iteration 36 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Baseline test check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+Good, baseline is 217/217 tests passing. Starting iteration 36.
+
+● Proposer Propose iteration 36
+  │ Read conftest.py
+  │   │ tests/conftest.py
+  │   └ 105 lines read
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ 59 lines read
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ 196 lines read
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ 151 lines read
+
+● T1 timestamp after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check test file end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ tests/integration/test_vocabulary_api.py
+  └ 49 lines...
+
+Now implementing the due-for-review endpoint. Let me make all the changes.
+
+● Edit vocabulary.py +14
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +28
+  └ app/dal/vocabulary.py
+
+● Edit vocabulary.py +11
+  └ app/routers/vocabulary.py
+
+Now add tests:
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L1:15 (14 lines read)
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L1:5 (4 lines read)
+
+● Count lines in test file (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  └ 2 lines...
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L200:206 (7 lines read)
+
+● Edit test_vocabulary_api.py +57
+  └ tests/integration/test_vocabulary_api.py
+
+● T2 timestamp after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+

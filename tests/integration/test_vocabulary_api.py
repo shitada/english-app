@@ -204,3 +204,60 @@ async def test_vocabulary_stats_with_data(client, mock_copilot):
     assert data["accuracy_rate"] > 0
     assert isinstance(data["level_distribution"], list)
     assert isinstance(data["topic_breakdown"], list)
+
+
+@pytest.mark.asyncio
+async def test_due_words_empty(client):
+    """Test due words endpoint on empty database."""
+    res = await client.get("/api/vocabulary/due")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["due_count"] == 0
+    assert data["words"] == []
+
+
+@pytest.mark.asyncio
+async def test_due_words_returns_due_items(client, mock_copilot):
+    """Words answered with level 0 (interval=0 days) should be immediately due."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "apple", "correct_meaning": "a fruit", "example_sentence": "I ate an apple.", "difficulty": 1},
+        ]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=food&count=1")
+    assert quiz_res.status_code == 200
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    # Answer incorrectly → level goes to 0, interval = 0 days → due immediately
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": False})
+
+    res = await client.get("/api/vocabulary/due")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["due_count"] >= 1
+    assert any(w["id"] == word_id for w in data["words"])
+
+
+@pytest.mark.asyncio
+async def test_due_words_filter_by_topic(client, mock_copilot):
+    """Filter due words by topic."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "cat", "correct_meaning": "a pet", "example_sentence": "The cat sat.", "difficulty": 1},
+        ]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=animals&count=1")
+    assert quiz_res.status_code == 200
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": False})
+
+    # Filter by matching topic
+    res = await client.get("/api/vocabulary/due?topic=animals")
+    assert res.status_code == 200
+    assert res.json()["due_count"] >= 1
+
+    # Filter by non-matching topic
+    res2 = await client.get("/api/vocabulary/due?topic=technology")
+    assert res2.status_code == 200
+    assert res2.json()["due_count"] == 0

@@ -81,6 +81,20 @@ class VocabularyStatsResponse(BaseModel):
     topic_breakdown: list[TopicBreakdown]
 
 
+class DueWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    topic: str
+    level: int
+    next_review_at: str
+
+
+class DueWordsResponse(BaseModel):
+    due_count: int
+    words: list[DueWordItem]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_vocabulary_topics()
@@ -143,6 +157,17 @@ async def get_progress(
 ):
     progress = await vocab_dal.get_progress(db, topic)
     return {"progress": progress}
+
+
+@router.get("/due", response_model=DueWordsResponse)
+async def get_due_words(
+    topic: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get vocabulary words that are due for review."""
+    words = await vocab_dal.get_due_words(db, topic, limit)
+    return {"due_count": len(words), "words": words}
 
 
 @router.get("/stats", response_model=VocabularyStatsResponse)

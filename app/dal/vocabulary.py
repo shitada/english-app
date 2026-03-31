@@ -144,6 +144,34 @@ async def get_progress(db: aiosqlite.Connection, topic: str | None = None) -> li
     return [dict(r) for r in rows]
 
 
+async def get_due_words(
+    db: aiosqlite.Connection, topic: str | None = None, limit: int = 50
+) -> list[dict[str, Any]]:
+    """Return words where next_review_at <= now (due for review)."""
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    if topic:
+        rows = await db.execute_fetchall(
+            """SELECT vw.id, vw.word, vw.meaning, vw.topic, vp.level, vp.next_review_at
+               FROM vocabulary_progress vp
+               JOIN vocabulary_words vw ON vp.word_id = vw.id
+               WHERE vp.next_review_at <= ? AND vw.topic = ?
+               ORDER BY vp.next_review_at ASC
+               LIMIT ?""",
+            (now, topic, limit),
+        )
+    else:
+        rows = await db.execute_fetchall(
+            """SELECT vw.id, vw.word, vw.meaning, vw.topic, vp.level, vp.next_review_at
+               FROM vocabulary_progress vp
+               JOIN vocabulary_words vw ON vp.word_id = vw.id
+               WHERE vp.next_review_at <= ?
+               ORDER BY vp.next_review_at ASC
+               LIMIT ?""",
+            (now, limit),
+        )
+    return [dict(r) for r in rows]
+
+
 async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get aggregate vocabulary mastery statistics."""
     rows = await db.execute_fetchall(
