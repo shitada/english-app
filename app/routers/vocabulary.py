@@ -176,9 +176,9 @@ async def generate_quiz(
                 words.append(r)
         words = words[:count]
         if mode == "fill_blank":
-            return {"questions": vocab_dal.build_fill_blank_quiz(words)}
+            return {"quiz_type": "fill_blank", "questions": vocab_dal.build_fill_blank_quiz(words)}
         all_meanings = [r["meaning"] for r in existing]
-        return {"questions": vocab_dal.build_quiz(words, all_meanings)}
+        return {"quiz_type": "multiple_choice", "questions": vocab_dal.build_quiz(words, all_meanings)}
 
     # Generate new words via LLM
     topic_label = get_topic_label(get_vocabulary_topics(), topic)
@@ -194,8 +194,8 @@ async def generate_quiz(
 
     words = await vocab_dal.save_words(db, topic, result.get("questions", []))
     if mode == "fill_blank":
-        return {"questions": vocab_dal.build_fill_blank_quiz(words)}
-    return {"questions": words}
+        return {"quiz_type": "fill_blank", "questions": vocab_dal.build_fill_blank_quiz(words)}
+    return {"quiz_type": "multiple_choice", "questions": words}
 
 
 @router.post("/answer", response_model=AnswerResponse)

@@ -72,7 +72,7 @@ export const api = {
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
 
   generateQuiz: (topic: string, count = 10, mode: 'multiple_choice' | 'fill_blank' = 'multiple_choice') =>
-    request<{ questions: (QuizQuestion | FillBlankQuestion)[] }>(
+    request<{ quiz_type: string; questions: (QuizQuestion | FillBlankQuestion)[] }>(
       `/api/vocabulary/quiz?topic=${encodeURIComponent(topic)}&count=${count}&mode=${mode}`
     ),
 

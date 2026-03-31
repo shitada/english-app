@@ -385,3 +385,19 @@ async def test_quiz_invalid_topic(client):
     res = await client.get("/api/vocabulary/quiz?topic=nonexistent_xyz")
     assert res.status_code == 422
     assert "Unknown topic" in res.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_quiz_response_includes_quiz_type(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "desk", "correct_meaning": "a table", "example_sentence": "Sit at the desk.", "difficulty": 1}]
+    })
+    res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["quiz_type"] == "multiple_choice"
+
+    # fill_blank mode
+    fb_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1&mode=fill_blank")
+    assert fb_res.status_code == 200
+    assert fb_res.json()["quiz_type"] == "fill_blank"

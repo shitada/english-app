@@ -54,3 +54,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 489b1950f2026-04-01T00:02:22+09:001331071490344246246pass7.55keepAdd vocabulary word bank browse/search endpoint
 49efbe99a2026-04-01T00:08:04+09:00151541590310250250pass7.8keepDeduplicate vocabulary words in save_words
 50\t409b38e\t2025-06-09T14:36:00Z\t15\t45\t20\t10\t90\t257\t257\tpass\t7.05\tKEEP\tPronunciation history clear/delete endpoints
+51\tcf1f5b7\t2025-06-09T14:39:08Z\t15\t120\t60\t15\t210\t259\t259\tpass\t7.80\tKEEP\tValidate topic IDs against config (422 for unknown topics)
