@@ -255,3 +255,19 @@ async def get_weak_words(
     """Get vocabulary words with highest error rates."""
     words = await vocab_dal.get_weak_words(db, limit)
     return {"words": words}
+
+
+class DeleteWordResponse(BaseModel):
+    deleted: bool
+
+
+@router.delete("/{word_id}", response_model=DeleteWordResponse)
+async def delete_word(
+    word_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Delete a vocabulary word and its progress."""
+    deleted = await vocab_dal.delete_word(db, word_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Word not found")
+    return {"deleted": True}

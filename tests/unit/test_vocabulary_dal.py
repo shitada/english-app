@@ -7,6 +7,7 @@ import pytest
 from app.dal.vocabulary import (
     build_fill_blank_quiz,
     build_quiz,
+    delete_word,
     get_due_word_ids,
     get_progress,
     get_vocabulary_stats,
@@ -438,3 +439,17 @@ class TestSaveWordsDedup:
         original_id = w1[0]["id"]
         w2 = await save_words(test_db, "study", q)
         assert w2[0]["id"] == original_id
+
+
+class TestDeleteWord:
+    async def test_delete_existing_word(self, test_db):
+        words = await save_words(test_db, "food", _make_questions(1))
+        word_id = words[0]["id"]
+        result = await delete_word(test_db, word_id)
+        assert result is True
+        remaining = await get_words_by_topic(test_db, "food")
+        assert len(remaining) == 0
+
+    async def test_delete_nonexistent_word(self, test_db):
+        result = await delete_word(test_db, 99999)
+        assert result is False

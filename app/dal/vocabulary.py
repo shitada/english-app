@@ -323,3 +323,11 @@ async def get_weak_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict
         (limit,),
     )
     return [dict(r) for r in rows]
+
+
+async def delete_word(db: aiosqlite.Connection, word_id: int) -> bool:
+    """Delete a vocabulary word and its progress. Returns True if found."""
+    await db.execute("DELETE FROM vocabulary_progress WHERE word_id = ?", (word_id,))
+    cursor = await db.execute("DELETE FROM vocabulary_words WHERE id = ?", (word_id,))
+    await db.commit()
+    return cursor.rowcount > 0

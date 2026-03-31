@@ -401,3 +401,21 @@ async def test_quiz_response_includes_quiz_type(client, mock_copilot):
     fb_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1&mode=fill_blank")
     assert fb_res.status_code == 200
     assert fb_res.json()["quiz_type"] == "fill_blank"
+
+
+@pytest.mark.asyncio
+async def test_delete_word(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "chair", "correct_meaning": "seat", "example_sentence": "Sit on a chair.", "difficulty": 1}]
+    })
+    quiz = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz.json()["questions"][0]["id"]
+    res = await client.delete(f"/api/vocabulary/{word_id}")
+    assert res.status_code == 200
+    assert res.json()["deleted"] is True
+
+
+@pytest.mark.asyncio
+async def test_delete_word_not_found(client):
+    res = await client.delete("/api/vocabulary/99999")
+    assert res.status_code == 404
