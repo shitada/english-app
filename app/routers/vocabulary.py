@@ -123,9 +123,36 @@ class WeakWordsResponse(BaseModel):
     words: list[WeakWordItem]
 
 
+class WordBankItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    example_sentence: str
+    topic: str
+    difficulty: int
+
+
+class WordBankResponse(BaseModel):
+    total_count: int
+    words: list[WordBankItem]
+
+
 @router.get("/topics")
 async def list_topics():
     return get_vocabulary_topics()
+
+
+@router.get("/words", response_model=WordBankResponse)
+async def browse_words(
+    q: str | None = None,
+    topic: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Browse and search saved vocabulary words."""
+    total, words = await vocab_dal.search_words(db, q, topic, limit, offset)
+    return {"total_count": total, "words": words}
 
 
 @router.get("/quiz")

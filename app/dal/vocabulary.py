@@ -194,6 +194,38 @@ async def get_due_words(
     return [dict(r) for r in rows]
 
 
+async def search_words(
+    db: aiosqlite.Connection,
+    query: str | None = None,
+    topic: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> tuple[int, list[dict[str, Any]]]:
+    """Search vocabulary words with optional filters. Returns (total_count, words)."""
+    conditions = []
+    params: list[Any] = []
+    if query:
+        conditions.append("(word LIKE ? OR meaning LIKE ?)")
+        like = f"%{query}%"
+        params.extend([like, like])
+    if topic:
+        conditions.append("topic = ?")
+        params.append(topic)
+
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    count_rows = await db.execute_fetchall(
+        f"SELECT COUNT(*) as cnt FROM vocabulary_words {where}", params
+    )
+    total = count_rows[0]["cnt"]
+
+    rows = await db.execute_fetchall(
+        f"SELECT id, word, meaning, example_sentence, topic, difficulty FROM vocabulary_words {where} ORDER BY id DESC LIMIT ? OFFSET ?",
+        params + [limit, offset],
+    )
+    return total, [dict(r) for r in rows]
+
+
 async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get aggregate vocabulary mastery statistics."""
     rows = await db.execute_fetchall(

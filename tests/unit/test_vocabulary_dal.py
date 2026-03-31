@@ -15,6 +15,7 @@ from app.dal.vocabulary import (
     get_words_by_topic,
     reset_progress,
     save_words,
+    search_words,
     update_progress,
 )
 
@@ -373,3 +374,37 @@ class TestGetWeakWords:
         words = await get_weak_words(test_db)
         assert len(words) == 2
         assert words[0]["error_rate"] >= words[1]["error_rate"]
+
+
+class TestSearchWords:
+    async def test_empty(self, test_db):
+        total, words = await search_words(test_db)
+        assert total == 0
+        assert words == []
+
+    async def test_returns_all(self, test_db):
+        await save_words(test_db, "t1", _make_questions(3))
+        total, words = await search_words(test_db)
+        assert total == 3
+        assert len(words) == 3
+
+    async def test_filter_by_topic(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        await save_words(test_db, "travel", _make_questions(1))
+        total, words = await search_words(test_db, topic="food")
+        assert total == 2
+
+    async def test_search_by_query(self, test_db):
+        await save_words(test_db, "t1", [
+            {"word": "apple", "correct_meaning": "a fruit"},
+            {"word": "car", "correct_meaning": "a vehicle"},
+        ])
+        total, words = await search_words(test_db, query="apple")
+        assert total == 1
+        assert words[0]["word"] == "apple"
+
+    async def test_pagination(self, test_db):
+        await save_words(test_db, "t1", _make_questions(5))
+        total, words = await search_words(test_db, limit=2, offset=0)
+        assert total == 5
+        assert len(words) == 2

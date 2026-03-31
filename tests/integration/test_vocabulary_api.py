@@ -352,3 +352,29 @@ async def test_weak_words_after_answers(client, mock_copilot):
     words = res.json()["words"]
     assert len(words) >= 1
     assert words[0]["error_rate"] > 0
+
+
+@pytest.mark.asyncio
+async def test_word_bank_empty(client):
+    res = await client.get("/api/vocabulary/words")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] == 0
+    assert data["words"] == []
+
+
+@pytest.mark.asyncio
+async def test_word_bank_after_quiz(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "moon", "correct_meaning": "celestial body", "example_sentence": "The moon.", "difficulty": 1}]
+    })
+    await client.get("/api/vocabulary/quiz?topic=space&count=1")
+
+    res = await client.get("/api/vocabulary/words")
+    assert res.status_code == 200
+    assert res.json()["total_count"] >= 1
+
+    # Search by word
+    res2 = await client.get("/api/vocabulary/words?q=moon")
+    assert res2.status_code == 200
+    assert res2.json()["total_count"] >= 1
