@@ -339,3 +339,31 @@ async def get_review_forecast(
 ):
     """Get vocabulary review workload forecast for the next N days."""
     return await vocab_dal.get_review_forecast(db, days=days)
+
+
+class AttemptItem(BaseModel):
+    id: int
+    word_id: int
+    word: str
+    topic: str
+    is_correct: bool
+    answered_at: str
+
+
+class AttemptHistoryResponse(BaseModel):
+    total_count: int
+    attempts: list[AttemptItem]
+
+
+@router.get("/attempts", response_model=AttemptHistoryResponse)
+async def get_attempt_history(
+    word_id: int | None = None,
+    topic: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = 0,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get vocabulary quiz attempt history with optional filters."""
+    return await vocab_dal.get_attempt_history(
+        db, word_id=word_id, topic=topic, limit=limit, offset=offset
+    )

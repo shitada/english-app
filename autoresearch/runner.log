@@ -4508,3 +4508,154 @@ Add tests:
   │ @pytest.mark.integration…
   └ 20 lines...
 
+● Commit + test 74 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #74: add daily learning activity history endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -15
+  └ 31 lines...
+
+341 passed! Quick checks:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● T4 + record 74 (shell)
+  │ date +%s && echo "74    18479b4 2026-04-01T12:18:46+09:00       80      71      33      50
+  │ 234     341     341     pass    7.3     keep    Add daily learning activity history endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Iteration 75:
+
+● T0 for iteration 75 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 75
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L1:30 (30 lines read)
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L1:30 (30 lines read)
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me check the database schema and update_progress:
+
+● Find schema/migration locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "SCHEMA\|_MIGRATIONS"
+  │ app/database.py | head -10
+  └ 5 lines...
+
+● Read database.py
+  │ app/database.py
+  └ L16:95 (80 lines read)
+
+Now implement. Since `quiz_attempts` is a new table, it will be created by `CREATE TABLE IF NOT EXISTS` in SCHEMA without needing a migration:
+
+● Edit database.py +11
+  └ app/database.py
+
+Now update the DAL - add log_attempt and get_attempt_history, and modify update_progress:
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L116:180 (65 lines read)
+
+Add `log_attempt` call to `update_progress`:
+
+● Edit vocabulary.py +1
+  └ app/dal/vocabulary.py
+
+Now add the new DAL functions at the end of the file:
+
+● End of vocab DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/vocabulary.py
+  └ 6 lines...
+
+● Add attempt history DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def log_attempt(
+  │ db: aiosqlite.Connection, word_id: int, is_correct: bool…
+  └ 62 lines...
+
+Add router endpoint:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L335:345 (7 lines read)
+
+● Add attempts endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ class AttemptItem(BaseModel):
+  │ id: int…
+  └ 26 lines...
+
+Add tests:
+
+● Add attempt unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 53 lines...
+
+● Add attempt integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 24 lines...
+
+● Commit + test 75 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #75: add vocabulary quiz attempt history endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -15
+  └ 31 lines...
+
+Need to check the quiz response structure:
+
+● Check quiz response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "word_id" app/routers/vocabulary.py
+  │ | head -10
+  └ 11 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L40:65 (26 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L30:42 (13 lines read)
+
+The quiz response has `id` not `word_id`. The `AnswerRequest` uses `word_id`. Let me check:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L22:30 (9 lines read)
+
+So quiz response uses `id` for each question (which is the vocabulary_words id). The AnswerRequest expects `word_id`. Fix the test:
+
+● Edit test_vocabulary_api.py +1 -1
+  └ tests/integration/test_vocabulary_api.py
+

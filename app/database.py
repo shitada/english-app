@@ -69,6 +69,17 @@ CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(w
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word_review ON vocabulary_progress(word_id, next_review_at);
 CREATE INDEX IF NOT EXISTS idx_pron_attempts_created ON pronunciation_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    word_id INTEGER NOT NULL,
+    is_correct INTEGER NOT NULL,
+    answered_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (word_id) REFERENCES vocabulary_words(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_quiz_attempts_word ON quiz_attempts(word_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_attempts_answered ON quiz_attempts(answered_at DESC);
 """
 
 # ---------------------------------------------------------------------------

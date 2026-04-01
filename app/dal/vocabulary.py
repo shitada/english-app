@@ -156,6 +156,7 @@ async def update_progress(
             (word_id, correct, incorrect, level, now, next_review),
         )
 
+    await log_attempt(db, word_id, is_correct)
     await db.commit()
     return {"word_id": word_id, "is_correct": is_correct, "new_level": level, "next_review": next_review}
 
@@ -423,3 +424,67 @@ async def get_topic_summary(db: aiosqlite.Connection) -> list[dict[str, Any]]:
         }
         for r in rows
     ]
+
+
+async def log_attempt(
+    db: aiosqlite.Connection, word_id: int, is_correct: bool
+) -> None:
+    """Log a single quiz attempt to the quiz_attempts table."""
+    await db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct) VALUES (?, ?)",
+        (word_id, int(is_correct)),
+    )
+
+
+async def get_attempt_history(
+    db: aiosqlite.Connection,
+    word_id: int | None = None,
+    topic: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Get quiz attempt history with optional filters."""
+    where_clauses: list[str] = []
+    params: list[Any] = []
+
+    if word_id is not None:
+        where_clauses.append("qa.word_id = ?")
+        params.append(word_id)
+    if topic:
+        where_clauses.append("vw.topic = ?")
+        params.append(topic)
+
+    where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+    # Count total
+    count_rows = await db.execute_fetchall(
+        f"""SELECT COUNT(*) as cnt FROM quiz_attempts qa
+            JOIN vocabulary_words vw ON qa.word_id = vw.id
+            {where_sql}""",
+        params,
+    )
+    total_count = count_rows[0]["cnt"] if count_rows else 0
+
+    # Get attempts
+    params_with_paging = params + [limit, offset]
+    rows = await db.execute_fetchall(
+        f"""SELECT qa.id, qa.word_id, vw.word, vw.topic, qa.is_correct, qa.answered_at
+            FROM quiz_attempts qa
+            JOIN vocabulary_words vw ON qa.word_id = vw.id
+            {where_sql}
+            ORDER BY qa.answered_at DESC
+            LIMIT ? OFFSET ?""",
+        params_with_paging,
+    )
+    attempts = [
+        {
+            "id": r["id"],
+            "word_id": r["word_id"],
+            "word": r["word"],
+            "topic": r["topic"],
+            "is_correct": bool(r["is_correct"]),
+            "answered_at": r["answered_at"],
+        }
+        for r in rows
+    ]
+    return {"total_count": total_count, "attempts": attempts}

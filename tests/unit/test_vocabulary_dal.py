@@ -618,3 +618,57 @@ class TestGetDueWords:
         await test_db.commit()
         result = await get_due_words(test_db, limit=1)
         assert len(result) == 1
+
+
+@pytest.mark.unit
+class TestQuizAttempts:
+    async def test_update_progress_logs_attempt(self, test_db):
+        from app.dal.vocabulary import get_attempt_history
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        await update_progress(test_db, words[0]["id"], is_correct=True)
+        history = await get_attempt_history(test_db)
+        assert history["total_count"] == 1
+        assert history["attempts"][0]["is_correct"] is True
+
+    async def test_multiple_attempts_for_same_word(self, test_db):
+        from app.dal.vocabulary import get_attempt_history
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        wid = words[0]["id"]
+        await update_progress(test_db, wid, is_correct=True)
+        await update_progress(test_db, wid, is_correct=False)
+        await update_progress(test_db, wid, is_correct=True)
+        history = await get_attempt_history(test_db, word_id=wid)
+        assert history["total_count"] == 3
+
+    async def test_filter_by_topic(self, test_db):
+        from app.dal.vocabulary import get_attempt_history
+        await save_words(test_db, "food", _make_questions(1))
+        await save_words(test_db, "greetings", _make_questions(1))
+        food_words = await get_words_by_topic(test_db, "food")
+        greet_words = await get_words_by_topic(test_db, "greetings")
+        await update_progress(test_db, food_words[0]["id"], is_correct=True)
+        await update_progress(test_db, greet_words[0]["id"], is_correct=False)
+        history = await get_attempt_history(test_db, topic="food")
+        assert history["total_count"] == 1
+        assert history["attempts"][0]["topic"] == "food"
+
+    async def test_empty_history(self, test_db):
+        from app.dal.vocabulary import get_attempt_history
+        history = await get_attempt_history(test_db)
+        assert history["total_count"] == 0
+        assert history["attempts"] == []
+
+    async def test_pagination(self, test_db):
+        from app.dal.vocabulary import get_attempt_history
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        wid = words[0]["id"]
+        for _ in range(5):
+            await update_progress(test_db, wid, is_correct=True)
+        page1 = await get_attempt_history(test_db, limit=2, offset=0)
+        assert page1["total_count"] == 5
+        assert len(page1["attempts"]) == 2
+        page2 = await get_attempt_history(test_db, limit=2, offset=2)
+        assert len(page2["attempts"]) == 2

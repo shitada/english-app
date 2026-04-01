@@ -500,3 +500,27 @@ async def test_forecast_days_param(client):
     assert res2.status_code == 422
     res3 = await client.get("/api/vocabulary/forecast?days=100")
     assert res3.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_attempts_empty(client):
+    res = await client.get("/api/vocabulary/attempts")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] == 0
+    assert data["attempts"] == []
+
+
+@pytest.mark.asyncio
+async def test_attempts_after_answering(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "fork", "correct_meaning": "utensil", "example_sentence": "Use a fork.", "difficulty": 1}]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
+    res = await client.get("/api/vocabulary/attempts")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    assert data["attempts"][0]["is_correct"] is True
