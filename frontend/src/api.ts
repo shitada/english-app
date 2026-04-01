@@ -362,8 +362,7 @@ export interface GrammarAccuracyResponse {
 }
 
 export async function getGrammarAccuracy(): Promise<GrammarAccuracyResponse> {
-  const res = await fetch("/api/conversation/grammar-accuracy");
-  return res.json();
+  return request<GrammarAccuracyResponse>("/api/conversation/grammar-accuracy");
 }
 
 // Word notes (from iteration 88)
@@ -379,12 +378,10 @@ export interface WordWithNotes {
 }
 
 export async function updateWordNotes(wordId: number, notes: string | null): Promise<WordWithNotes> {
-  const res = await fetch(`/api/vocabulary/${wordId}/notes`, {
+  return request<WordWithNotes>(`/api/vocabulary/${wordId}/notes`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ notes }),
   });
-  return res.json();
 }
 
 // Weekly pronunciation progress (from iteration 89)
@@ -396,8 +393,7 @@ export interface WeeklyProgressResponse {
 
 export async function getPronunciationWeeklyProgress(weeks?: number): Promise<WeeklyProgressResponse> {
   const params = weeks ? `?weeks=${weeks}` : "";
-  const res = await fetch(`/api/pronunciation/weekly-progress${params}`);
-  return res.json();
+  return request<WeeklyProgressResponse>(`/api/pronunciation/weekly-progress${params}`);
 }
 
 // Topic recommendations (from iteration 90)
@@ -409,8 +405,7 @@ export interface TopicRecommendation {
 }
 
 export async function getTopicRecommendations(): Promise<TopicRecommendation[]> {
-  const res = await fetch("/api/conversation/topic-recommendations");
-  return res.json();
+  return request<TopicRecommendation[]>("/api/conversation/topic-recommendations");
 }
 
 // Learning goals (from iteration 92)
@@ -425,21 +420,18 @@ export interface LearningGoal {
 }
 
 export async function getLearningGoals(): Promise<LearningGoal[]> {
-  const res = await fetch("/api/dashboard/goals");
-  return res.json();
+  return request<LearningGoal[]>("/api/dashboard/goals");
 }
 
 export async function setLearningGoal(goalType: string, dailyTarget: number): Promise<LearningGoal> {
-  const res = await fetch("/api/dashboard/goals", {
+  return request<LearningGoal>("/api/dashboard/goals", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ goal_type: goalType, daily_target: dailyTarget }),
   });
-  return res.json();
 }
 
 export async function deleteLearningGoal(goalType: string): Promise<void> {
-  await fetch(`/api/dashboard/goals/${goalType}`, { method: "DELETE" });
+  await request<unknown>(`/api/dashboard/goals/${goalType}`, { method: "DELETE" });
 }
 
 // Word detail (from iteration 94)
@@ -463,8 +455,7 @@ export interface WordDetail {
 }
 
 export async function getWordDetail(wordId: number): Promise<WordDetail> {
-  const res = await fetch(`/api/vocabulary/${wordId}/detail`);
-  return res.json();
+  return request<WordDetail>(`/api/vocabulary/${wordId}/detail`);
 }
 
 // Conversation message bookmarks (from iteration 96)
@@ -486,8 +477,7 @@ export interface BookmarkedMessagesResponse {
 }
 
 export async function toggleMessageBookmark(messageId: number): Promise<BookmarkedMessage> {
-  const res = await fetch(`/api/conversation/messages/${messageId}/bookmark`, { method: 'PUT' });
-  return res.json();
+  return request<BookmarkedMessage>(`/api/conversation/messages/${messageId}/bookmark`, { method: 'PUT' });
 }
 
 export async function getBookmarkedMessages(params?: {
@@ -500,6 +490,5 @@ export async function getBookmarkedMessages(params?: {
   if (params?.limit) sp.set('limit', String(params.limit));
   if (params?.offset) sp.set('offset', String(params.offset));
   const qs = sp.toString();
-  const res = await fetch(`/api/conversation/bookmarks${qs ? `?${qs}` : ''}`);
-  return res.json();
+  return request<BookmarkedMessagesResponse>(`/api/conversation/bookmarks${qs ? `?${qs}` : ''}`);
 }
