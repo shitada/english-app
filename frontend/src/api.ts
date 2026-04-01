@@ -37,10 +37,17 @@ export const api = {
   getHistory: (conversation_id: number) =>
     request<{ messages: ChatMessage[] }>(`/api/conversation/${conversation_id}/history`),
 
-  listConversations: (topic?: string) =>
-    request<{ conversations: ConversationListItem[] }>(
-      `/api/conversation/list${topic ? `?topic=${encodeURIComponent(topic)}` : ''}`
-    ),
+  listConversations: (params?: { topic?: string; keyword?: string; limit?: number; offset?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.topic) searchParams.set('topic', params.topic);
+    if (params?.keyword) searchParams.set('keyword', params.keyword);
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.offset) searchParams.set('offset', String(params.offset));
+    const qs = searchParams.toString();
+    return request<ConversationListResponse>(
+      `/api/conversation/list${qs ? `?${qs}` : ''}`
+    );
+  },
 
   deleteConversation: (conversation_id: number) =>
     request<{ deleted: boolean }>(`/api/conversation/${conversation_id}`, { method: 'DELETE' }),
@@ -101,6 +108,45 @@ export const api = {
 
   // Dashboard
   getDashboardStats: () => request<DashboardStats>('/api/dashboard/stats'),
+
+  getActivityHistory: (days = 30) =>
+    request<ActivityHistoryResponse>(`/api/dashboard/activity-history?days=${days}`),
+
+  getStreakMilestones: () =>
+    request<StreakMilestonesResponse>('/api/dashboard/streak-milestones'),
+
+  getConversationDuration: () =>
+    request<ConversationDurationResponse>('/api/dashboard/conversation-duration'),
+
+  // Conversation export
+  exportConversation: (conversationId: number) =>
+    request<ConversationExport>(`/api/conversation/${conversationId}/export`),
+
+  // Pronunciation extras
+  getPronunciationScoreTrend: () =>
+    request<ScoreTrendResponse>('/api/pronunciation/trend'),
+
+  getPronunciationDistribution: () =>
+    request<ScoreDistributionResponse>('/api/pronunciation/distribution'),
+
+  // Vocabulary extras
+  getVocabularyForecast: (days = 14) =>
+    request<ReviewForecastResponse>(`/api/vocabulary/forecast?days=${days}`),
+
+  getVocabularyAttempts: (params?: { wordId?: number; topic?: string; limit?: number; offset?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.wordId) searchParams.set('word_id', String(params.wordId));
+    if (params?.topic) searchParams.set('topic', params.topic);
+    if (params?.limit) searchParams.set('limit', String(params.limit));
+    if (params?.offset) searchParams.set('offset', String(params.offset));
+    const qs = searchParams.toString();
+    return request<AttemptHistoryResponse>(
+      `/api/vocabulary/attempts${qs ? `?${qs}` : ''}`
+    );
+  },
+
+  getTopicAccuracy: () =>
+    request<TopicAccuracyResponse>('/api/vocabulary/topic-accuracy'),
 };
 
 // Types
@@ -193,6 +239,79 @@ export interface ConversationListItem {
   status: string;
   message_count: number;
   duration_seconds: number | null;
+}
+
+export interface ConversationListResponse {
+  conversations: ConversationListItem[];
+  total_count: number;
+  has_more: boolean;
+}
+
+export interface ConversationExport {
+  id: number;
+  topic: string;
+  difficulty: string;
+  started_at: string;
+  ended_at: string | null;
+  status: string;
+  summary: unknown;
+  messages: { role: string; content: string; feedback: unknown; created_at: string }[];
+}
+
+export interface ScoreTrendResponse {
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
+  recent_avg: number;
+  previous_avg: number;
+  change: number;
+}
+
+export interface ScoreDistributionItem {
+  bucket: string;
+  label: string;
+  min_score: number;
+  max_score: number;
+  count: number;
+}
+
+export interface ScoreDistributionResponse {
+  total_attempts: number;
+  distribution: ScoreDistributionItem[];
+}
+
+export interface ReviewForecastResponse {
+  overdue_count: number;
+  total_upcoming: number;
+  daily_forecast: { date: string; count: number }[];
+}
+
+export interface AttemptHistoryResponse {
+  total_count: number;
+  attempts: { id: number; word_id: number; word: string; topic: string; is_correct: boolean; answered_at: string }[];
+}
+
+export interface TopicAccuracyResponse {
+  topics: { topic: string; correct_count: number; incorrect_count: number; total_attempts: number; accuracy_rate: number }[];
+}
+
+export interface ActivityHistoryResponse {
+  days: number;
+  history: { date: string; conversations: number; messages: number; pronunciation_attempts: number; vocabulary_reviews: number }[];
+}
+
+export interface StreakMilestonesResponse {
+  current_streak: number;
+  longest_streak: number;
+  milestones: { days: number; label: string; achieved: boolean }[];
+  next_milestone: { days: number; label: string; days_remaining: number } | null;
+}
+
+export interface ConversationDurationResponse {
+  total_completed: number;
+  total_duration_seconds: number;
+  avg_duration_seconds: number;
+  shortest_duration_seconds: number;
+  longest_duration_seconds: number;
+  duration_by_difficulty: { difficulty: string; count: number; avg_duration_seconds: number }[];
 }
 
 export interface PronunciationAttempt {

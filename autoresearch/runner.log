@@ -4927,3 +4927,69 @@ sqlite3.Row doesn't have `.get()`. Need to use dict() or subscript:
 ● Edit dashboard.py +1 -1
   └ app/dal/dashboard.py
 
+● Fix + retest 78 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #78: add conversation duration stats endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+358 passed!
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● T4 + record 78 (shell)
+  │ date +%s && echo "78    6a6b790 2026-04-01T12:36:32+09:00       59      35      55      30
+  │ 179     358     358     pass    7.3     keep    Add conversation duration stats endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue with more iterations. I'll accelerate by implementing directly after proposals:
+
+● T0 for iteration 79 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 79, I'll add frontend TypeScript API types for the new endpoints added in iterations 66-78. Let me check what exists:
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ 212 lines read
+
+Now I'll update the frontend API with types for all the new endpoints from iterations 66-78:
+
+● Edit api.ts +11 -4
+  └ frontend/src/api.ts
+
+● Edit api.ts +39
+  └ frontend/src/api.ts
+
+Now add the new TypeScript interfaces:
+
+● Edit api.ts +73
+  └ frontend/src/api.ts
+
+Now I need to check if any components reference `listConversations` with the old signature:
+
+● Find listConversations usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "listConversations" frontend/src/
+  │ --include="*.ts" --include="*.tsx"
+  └ 3 lines...
+
+The old call was `api.listConversations()` which passes no arguments. The new function accepts `params?` so calling with no args still works. But the return type changed from `{ conversations: ConversationListItem[] }` to `ConversationListResponse` which includes `conversations, total_count, has_more`. Let me check how the result is used:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L118:125 (8 lines read)
+
+This accesses `res.conversations` which still exists in the new type. It works.
+
