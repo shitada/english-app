@@ -424,6 +424,53 @@ async def get_pronunciation_weaknesses(
     ]
 
 
+async def get_sentence_attempts(
+    db: aiosqlite.Connection, reference_text: str, limit: int = 20
+) -> dict[str, Any]:
+    """Return all pronunciation attempts for a specific sentence with summary stats."""
+    rows = await db.execute_fetchall(
+        """SELECT id, user_transcription, score, difficulty, created_at
+           FROM pronunciation_attempts
+           WHERE reference_text = ?
+           ORDER BY id ASC
+           LIMIT ?""",
+        (reference_text, limit),
+    )
+    attempts = [
+        {
+            "id": r["id"],
+            "user_transcription": r["user_transcription"],
+            "score": r["score"],
+            "difficulty": r["difficulty"],
+            "created_at": r["created_at"],
+        }
+        for r in rows
+    ]
+
+    if attempts:
+        scores = [a["score"] for a in attempts if a["score"] is not None]
+        first_score = scores[0] if scores else 0.0
+        latest_score = scores[-1] if scores else 0.0
+        best_score = max(scores) if scores else 0.0
+        summary = {
+            "first_score": first_score,
+            "latest_score": latest_score,
+            "best_score": best_score,
+            "attempt_count": len(attempts),
+            "improvement": round(latest_score - first_score, 2),
+        }
+    else:
+        summary = {
+            "first_score": 0.0,
+            "latest_score": 0.0,
+            "best_score": 0.0,
+            "attempt_count": 0,
+            "improvement": 0.0,
+        }
+
+    return {"attempts": attempts, "summary": summary}
+
+
 async def get_retry_suggestions(
     db: aiosqlite.Connection, threshold: float = 7.0, limit: int = 10
 ) -> list[dict[str, Any]]:

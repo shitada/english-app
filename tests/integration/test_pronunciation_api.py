@@ -299,6 +299,43 @@ async def test_vocabulary_sentences_difficulty_filter(client, mock_copilot):
 
 
 @pytest.mark.integration
+async def test_sentence_history_empty_result(client):
+    """Querying history for a sentence with no attempts returns empty."""
+    res = await client.get("/api/pronunciation/sentence-history", params={"text": "No attempts."})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["attempts"] == []
+    assert data["summary"]["attempt_count"] == 0
+
+
+@pytest.mark.integration
+async def test_sentence_history_after_attempts(client, mock_copilot):
+    """Saving attempts then querying returns correct history."""
+    for score in [5, 8]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score, "overall_feedback": "OK",
+            "word_feedback": [], "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": "Good morning.",
+            "user_transcription": "Good morning.",
+        })
+    res = await client.get("/api/pronunciation/sentence-history", params={"text": "Good morning."})
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["attempts"]) == 2
+    assert data["summary"]["attempt_count"] == 2
+    assert data["summary"]["improvement"] == 3.0
+
+
+@pytest.mark.integration
+async def test_sentence_history_missing_text_param(client):
+    """Missing text parameter should return 422."""
+    res = await client.get("/api/pronunciation/sentence-history")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
 async def test_weaknesses_empty(client):
     res = await client.get("/api/pronunciation/weaknesses")
     assert res.status_code == 200

@@ -497,6 +497,74 @@ class TestDifficultyTracking:
 
 
 @pytest.mark.unit
+class TestGetSentenceAttempts:
+    async def test_empty_result(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        result = await get_sentence_attempts(test_db, "Nonexistent sentence.")
+        assert result["attempts"] == []
+        assert result["summary"]["attempt_count"] == 0
+        assert result["summary"]["first_score"] == 0.0
+        assert result["summary"]["latest_score"] == 0.0
+        assert result["summary"]["best_score"] == 0.0
+        assert result["summary"]["improvement"] == 0.0
+
+    async def test_single_attempt(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "Hello world.", "Hello world.", feedback, 7.0, difficulty="beginner")
+        result = await get_sentence_attempts(test_db, "Hello world.")
+        assert len(result["attempts"]) == 1
+        assert result["attempts"][0]["user_transcription"] == "Hello world."
+        assert result["attempts"][0]["score"] == 7.0
+        assert result["attempts"][0]["difficulty"] == "beginner"
+        assert result["summary"]["attempt_count"] == 1
+        assert result["summary"]["first_score"] == 7.0
+        assert result["summary"]["latest_score"] == 7.0
+        assert result["summary"]["best_score"] == 7.0
+        assert result["summary"]["improvement"] == 0.0
+
+    async def test_multiple_attempts_with_progression(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        feedback = {"overall_score": 0}
+        await save_attempt(test_db, "Good morning.", "Good moaning.", feedback, 4.0)
+        await save_attempt(test_db, "Good morning.", "Good morning.", feedback, 7.0)
+        await save_attempt(test_db, "Good morning.", "Good morning.", feedback, 9.0)
+        result = await get_sentence_attempts(test_db, "Good morning.")
+        assert len(result["attempts"]) == 3
+        scores = [a["score"] for a in result["attempts"]]
+        assert scores == [4.0, 7.0, 9.0]
+        assert result["summary"]["first_score"] == 4.0
+        assert result["summary"]["latest_score"] == 9.0
+        assert result["summary"]["best_score"] == 9.0
+
+    async def test_improvement_calculation(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        feedback = {"overall_score": 0}
+        await save_attempt(test_db, "Test sentence.", "Test.", feedback, 3.0)
+        await save_attempt(test_db, "Test sentence.", "Test sentence.", feedback, 8.0)
+        result = await get_sentence_attempts(test_db, "Test sentence.")
+        assert result["summary"]["improvement"] == 5.0
+
+    async def test_limit_parameter(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        feedback = {"overall_score": 5}
+        for i in range(10):
+            await save_attempt(test_db, "Repeat.", "Repeat.", feedback, 5.0 + i * 0.1)
+        result = await get_sentence_attempts(test_db, "Repeat.", limit=3)
+        assert len(result["attempts"]) == 3
+        assert result["summary"]["attempt_count"] == 3
+
+    async def test_does_not_include_other_sentences(self, test_db):
+        from app.dal.pronunciation import get_sentence_attempts
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Sentence A.", "Sentence A.", feedback, 5.0)
+        await save_attempt(test_db, "Sentence B.", "Sentence B.", feedback, 8.0)
+        result = await get_sentence_attempts(test_db, "Sentence A.")
+        assert len(result["attempts"]) == 1
+        assert result["attempts"][0]["user_transcription"] == "Sentence A."
+
+
+@pytest.mark.unit
 class TestGetRetrySuggestions:
     async def test_empty_db(self, test_db):
         from app.dal.pronunciation import get_retry_suggestions

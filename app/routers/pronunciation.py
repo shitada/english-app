@@ -264,6 +264,37 @@ class RetrySuggestionsResponse(BaseModel):
     threshold: float
 
 
+class SentenceAttemptItem(BaseModel):
+    id: int
+    user_transcription: str
+    score: float | None
+    difficulty: str | None
+    created_at: str
+
+
+class SentenceAttemptSummary(BaseModel):
+    first_score: float
+    latest_score: float
+    best_score: float
+    attempt_count: int
+    improvement: float
+
+
+class SentenceHistoryResponse(BaseModel):
+    attempts: list[SentenceAttemptItem]
+    summary: SentenceAttemptSummary
+
+
+@router.get("/sentence-history", response_model=SentenceHistoryResponse)
+async def get_sentence_history(
+    text: str = Query(..., min_length=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get pronunciation attempt history for a specific sentence."""
+    return await pron_dal.get_sentence_attempts(db, reference_text=text, limit=limit)
+
+
 @router.get("/retry-suggestions", response_model=RetrySuggestionsResponse)
 async def get_retry_suggestions(
     threshold: float = Query(default=7.0, ge=0, le=10),
