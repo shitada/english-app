@@ -118,6 +118,28 @@ async def test_get_history(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert "messages" in data
+    # Verify messages include id and is_bookmarked fields
+    if data["messages"]:
+        msg = data["messages"][0]
+        assert "id" in msg
+        assert "is_bookmarked" in msg
+        assert isinstance(msg["id"], int)
+
+
+@pytest.mark.integration
+async def test_history_shows_bookmark_status(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+    # Get history to find message id
+    hist = await client.get(f"/api/conversation/{conv_id}/history")
+    msg_id = hist.json()["messages"][0]["id"]
+    # Bookmark it
+    await client.put(f"/api/conversation/messages/{msg_id}/bookmark")
+    # Verify history reflects bookmark
+    hist2 = await client.get(f"/api/conversation/{conv_id}/history")
+    bookmarked = [m for m in hist2.json()["messages"] if m["id"] == msg_id]
+    assert bookmarked[0]["is_bookmarked"] == 1
 
 
 @pytest.mark.asyncio

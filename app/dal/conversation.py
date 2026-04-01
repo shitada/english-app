@@ -64,7 +64,7 @@ async def get_conversation_history(
     conversation_id: int,
 ) -> list[dict[str, Any]]:
     rows = await db.execute_fetchall(
-        "SELECT role, content, feedback_json, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at",
+        "SELECT id, role, content, feedback_json, is_bookmarked, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at",
         (conversation_id,),
     )
     return [dict(r) for r in rows]

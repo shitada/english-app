@@ -8556,3 +8556,129 @@ Now add tests:
   │ @pytest.mark.unit…
   └ 25 lines...
 
+● Commit iteration 107 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #107: Store difficulty level with pronunciation attempts
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 39 lines...
+
+● Run tests iteration 107 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+500 tests! TS + smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 107
+  │ playwright-browser_snapshot
+  │   └ ### Page
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+● Record T3 for iteration 107 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 107
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L38:46 (9 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L109:134 (26 lines read)
+
+Score 7.95, keep.
+
+● Record results iteration 107 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log
+  │ -1 --format=%h) && echo "107   ${HASH} 2026-04-01T15:59:07+00:00       136     83      330
+  │ $(($T4-1775060896))     $(($T4-1775060347))     500     500     pass    7.95    keep    Store
+  │ difficulty level with pronunciation attempts" >> autoresearch/results.tsv && echo "done"
+  └ 2 lines...
+
+**Iteration 107 complete: KEEP (7.95, 500/500 tests — milestone! +3 tests)**
+
+---
+
+Let me continue with iterations 108-117 efficiently. I'll streamline the cycle:
+
+● T0 iter 108 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 108
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L62:78 (17 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L198:210 (13 lines read)
+
+● Record T1 for iteration 108 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775061240, propose_sec=211. Implementing:
+
+● Find function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_history"
+  │ app/dal/conversation.py | head -3
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L62:90 (29 lines read)
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+Now update the router to parse feedback safely and include the new fields:
+
+● Find history endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_history\|def.*history"
+  │ app/routers/conversation.py | head -5
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L195:215 (21 lines read)
+
+● Edit conversation.py +11 -2
+  └ app/routers/conversation.py
+
+Add integration tests:
+
+● Find existing history test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_get_history\|test.*history"
+  │ tests/integration/test_conversation_api.py | head -5
+  └ 2 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L112:135 (24 lines read)
+
+● Edit test_conversation_api.py +22
+  └ tests/integration/test_conversation_api.py
+
+Commit and test:
+

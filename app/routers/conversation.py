@@ -200,9 +200,18 @@ async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(g
     rows = await conv_dal.get_conversation_history(db, conversation_id)
     messages = []
     for r in rows:
-        msg = {"role": r["role"], "content": r["content"], "created_at": r["created_at"]}
+        msg = {
+            "id": r["id"],
+            "role": r["role"],
+            "content": r["content"],
+            "is_bookmarked": r["is_bookmarked"],
+            "created_at": r["created_at"],
+        }
         if r["feedback_json"]:
-            msg["feedback"] = json.loads(r["feedback_json"])
+            try:
+                msg["feedback"] = json.loads(r["feedback_json"])
+            except (json.JSONDecodeError, TypeError):
+                msg["feedback"] = None
         messages.append(msg)
     return {"messages": messages}
 
