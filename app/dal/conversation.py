@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 import aiosqlite
@@ -514,7 +515,7 @@ async def get_conversation_vocabulary(
     matched = []
     for r in word_rows:
         word_lower = r["word"].lower()
-        if word_lower in full_text:
+        if re.search(r'\b' + re.escape(word_lower) + r'\b', full_text):
             matched.append({
                 "word_id": r["id"],
                 "word": r["word"],

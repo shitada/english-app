@@ -688,6 +688,42 @@ class TestGetConversationVocabulary:
         assert result["total"] >= 1
         assert any(w["word"] == "hotel" for w in result["words"])
 
+    async def test_no_substring_false_positive_go(self, test_db):
+        """'go' should NOT match text containing only 'going'."""
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "go", "correct_meaning": "move", "example_sentence": "Go.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+        ]
+        await save_words(test_db, "travel", questions)
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "user", "I am going to the store and it was good")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert not any(w["word"] == "go" for w in result["words"])
+
+    async def test_no_substring_false_positive_short_word(self, test_db):
+        """Short words like 'a' should not match as substrings of longer words."""
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "a", "correct_meaning": "article", "example_sentence": "A cat.", "difficulty": 1, "wrong_options": ["b", "c", "d"]},
+        ]
+        await save_words(test_db, "grammar", questions)
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "user", "About three items at the store")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert not any(w["word"] == "a" for w in result["words"])
+
+    async def test_exact_whole_word_match(self, test_db):
+        """Exact whole-word matches should still work correctly."""
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "go", "correct_meaning": "move", "example_sentence": "Go.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+        ]
+        await save_words(test_db, "travel2", questions)
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "user", "Let's go to the hotel")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert any(w["word"] == "go" for w in result["words"])
+
     async def test_includes_srs_progress(self, test_db):
         from app.dal.vocabulary import save_words, update_progress
         questions = [
