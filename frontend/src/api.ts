@@ -59,8 +59,10 @@ export const api = {
     request<{ summary: ConversationSummary }>(`/api/conversation/${conversation_id}/summary`),
 
   // Pronunciation
-  getPronunciationSentences: () =>
-    request<{ sentences: { text: string; topic: string }[] }>('/api/pronunciation/sentences'),
+  getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
+    const qs = difficulty ? `?difficulty=${difficulty}` : '';
+    return request<{ sentences: { text: string; topic: string; difficulty: string }[] }>(`/api/pronunciation/sentences${qs}`);
+  },
 
   checkPronunciation: (reference_text: string, user_transcription: string) =>
     request<PronunciationFeedback>('/api/pronunciation/check', {

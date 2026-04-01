@@ -224,3 +224,36 @@ async def test_weekly_progress_empty(client):
     assert data["weeks"] == []
     assert data["total_weeks"] == 0
     assert data["improvement"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_get_sentences_includes_difficulty(client, mock_copilot):
+    """Sentences should include a difficulty field."""
+    mock_copilot.ask = AsyncMock(
+        return_value="That sounds like a great idea. I think we should schedule a meeting."
+    )
+    await client.post("/api/conversation/start", json={"topic": "hotel", "difficulty": "beginner"})
+
+    res = await client.get("/api/pronunciation/sentences")
+    assert res.status_code == 200
+    data = res.json()
+    for s in data["sentences"]:
+        assert "difficulty" in s
+        assert s["difficulty"] in ("beginner", "intermediate", "advanced")
+
+
+@pytest.mark.asyncio
+async def test_get_sentences_filter_by_difficulty(client):
+    """Filtering by difficulty should only return matching sentences."""
+    res = await client.get("/api/pronunciation/sentences?difficulty=beginner")
+    assert res.status_code == 200
+    data = res.json()
+    for s in data["sentences"]:
+        assert s["difficulty"] == "beginner"
+
+
+@pytest.mark.asyncio
+async def test_get_sentences_invalid_difficulty(client):
+    """Invalid difficulty value should return 422."""
+    res = await client.get("/api/pronunciation/sentences?difficulty=expert")
+    assert res.status_code == 422

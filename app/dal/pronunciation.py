@@ -9,9 +9,11 @@ from typing import Any
 import aiosqlite
 
 
-async def get_sentences_from_conversations(db: aiosqlite.Connection, limit: int = 20) -> list[dict[str, str]]:
+async def get_sentences_from_conversations(
+    db: aiosqlite.Connection, limit: int = 20, difficulty: str | None = None
+) -> list[dict[str, str]]:
     rows = await db.execute_fetchall(
-        """SELECT DISTINCT m.content, c.topic
+        """SELECT DISTINCT m.content, c.topic, c.difficulty
            FROM messages m
            JOIN conversations c ON m.conversation_id = c.id
            WHERE m.role = 'assistant'
@@ -23,6 +25,7 @@ async def get_sentences_from_conversations(db: aiosqlite.Connection, limit: int 
     seen: set[str] = set()
     for r in rows:
         content = r["content"]
+        conv_difficulty = r["difficulty"] or "intermediate"
         # Split on sentence boundaries, preserving trailing punctuation
         fragments = re.split(r'(?<=[.!?])\s+', content)
         for sent in fragments:
@@ -30,12 +33,27 @@ async def get_sentences_from_conversations(db: aiosqlite.Connection, limit: int 
             # Ensure sentence ends with punctuation
             if sent and sent[-1] not in '.!?':
                 sent += '.'
-            if 5 <= len(sent.rstrip('.!?').split()) <= 20 and sent not in seen:
+            word_count = len(sent.rstrip('.!?').split())
+            if 5 <= word_count <= 20 and sent not in seen:
+                # Use conversation difficulty or estimate from word count
+                est_difficulty = _estimate_difficulty(word_count, conv_difficulty)
+                if difficulty and est_difficulty != difficulty:
+                    continue
                 seen.add(sent)
-                sentences.append({"text": sent, "topic": r["topic"]})
+                sentences.append({"text": sent, "topic": r["topic"], "difficulty": est_difficulty})
                 if len(sentences) >= 10:
                     return sentences
     return sentences
+
+
+def _estimate_difficulty(word_count: int, conv_difficulty: str) -> str:
+    """Estimate sentence difficulty from word count, falling back to conversation difficulty."""
+    if word_count <= 8:
+        return "beginner"
+    elif word_count <= 14:
+        return "intermediate"
+    else:
+        return "advanced"
 
 
 async def save_attempt(

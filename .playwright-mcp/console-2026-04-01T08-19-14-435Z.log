@@ -1,0 +1,2 @@
+[   27982ms] [ERROR] Failed to load resource: the server responded with a status of 405 (Method Not Allowed) @ http://localhost:8000/api/conversation/1/messages/1/bookmark:0
+[   36679ms] [ERROR] Failed to load resource: the server responded with a status of 405 (Method Not Allowed) @ http://localhost:8000/api/conversation/1/messages/1/bookmark:0

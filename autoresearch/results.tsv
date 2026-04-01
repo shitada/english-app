@@ -99,3 +99,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 93	68e9fab	2025-06-29T00:42:47Z	10	40	15	10	75	420	420	pass	7.3	kept	Add vocabulary difficulty auto-adjustment
 94	c0ad33c	2025-06-29T00:44:59Z	10	50	20	10	90	427	427	pass	7.3	kept	Add word detail with similar words and progress
 95	1b38bd8	2025-06-29T00:46:06Z	5	30	15	5	55	427	427	pass	7.3	kept	Expand smoke test and add final TypeScript types
+96fd35f262026-04-01T08:10:33Z72250312275909436436pass7.55keepAdd conversation message bookmarks

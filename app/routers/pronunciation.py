@@ -29,6 +29,7 @@ class CheckRequest(BaseModel):
 class SentenceItem(BaseModel):
     text: str
     topic: str
+    difficulty: str = "intermediate"
 
 
 class SentencesResponse(BaseModel):
@@ -77,8 +78,11 @@ class DeleteAttemptResponse(BaseModel):
 
 
 @router.get("/sentences", response_model=SentencesResponse)
-async def get_sentences(db: aiosqlite.Connection = Depends(get_db_session)):
-    sentences = await pron_dal.get_sentences_from_conversations(db)
+async def get_sentences(
+    difficulty: str | None = Query(default=None, pattern="^(beginner|intermediate|advanced)$"),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    sentences = await pron_dal.get_sentences_from_conversations(db, difficulty=difficulty)
 
     # Convert raw topic keys to human-readable labels
     topics = get_conversation_topics()

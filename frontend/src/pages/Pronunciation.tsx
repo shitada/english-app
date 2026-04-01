@@ -6,12 +6,12 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
 
 const SAMPLE_SENTENCES = [
-  { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel' },
-  { text: "Could I see the menu, please? Do you have any specials today?", topic: 'restaurant' },
-  { text: "I have three years of experience in software development.", topic: 'interview' },
-  { text: "I've been having a headache for the past two days.", topic: 'medical' },
-  { text: "Do you have this in a medium? I'd like to try it on.", topic: 'shopping' },
-  { text: "What gate does the flight to London depart from?", topic: 'airport' },
+  { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel', difficulty: 'intermediate' },
+  { text: "Could I see the menu, please? Do you have any specials today?", topic: 'restaurant', difficulty: 'intermediate' },
+  { text: "I have three years of experience in software development.", topic: 'interview', difficulty: 'beginner' },
+  { text: "I've been having a headache for the past two days.", topic: 'medical', difficulty: 'beginner' },
+  { text: "Do you have this in a medium? I'd like to try it on.", topic: 'shopping', difficulty: 'intermediate' },
+  { text: "What gate does the flight to London depart from?", topic: 'airport', difficulty: 'beginner' },
 ];
 
 export default function Pronunciation() {
@@ -24,6 +24,7 @@ export default function Pronunciation() {
   const [historyData, setHistoryData] = useState<PronunciationAttempt[]>([]);
   const [progressData, setProgressData] = useState<PronunciationProgress | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -50,6 +51,10 @@ export default function Pronunciation() {
       // Use sample sentences if API fails
     });
   }, []);
+
+  const filteredSentences = difficultyFilter === 'all'
+    ? sentences
+    : sentences.filter(s => s.difficulty === difficultyFilter);
 
   const startPractice = (text: string) => {
     setSelectedSentence(text);
@@ -199,8 +204,21 @@ export default function Pronunciation() {
           </button>
         </div>
 
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          {(['all', 'beginner', 'intermediate', 'advanced'] as const).map((level) => (
+            <button
+              key={level}
+              className={`btn ${difficultyFilter === level ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setDifficultyFilter(level)}
+              style={{ fontSize: 13, padding: '4px 12px' }}
+            >
+              {level === 'all' ? 'All' : level === 'beginner' ? '🌱 Beginner' : level === 'intermediate' ? '📗 Intermediate' : '🚀 Advanced'}
+            </button>
+          ))}
+        </div>
+
         <div className="sentence-list">
-          {sentences.map((s, i) => (
+          {filteredSentences.map((s, i) => (
             <div
               key={i}
               className="sentence-item"
@@ -208,6 +226,7 @@ export default function Pronunciation() {
             >
               <p>{s.text}</p>
               <span className="topic-badge">{s.topic}</span>
+              <span className="topic-badge" style={{ marginLeft: 4, opacity: 0.7 }}>{s.difficulty}</span>
               <ChevronRight size={16} color="var(--text-secondary)" />
             </div>
           ))}

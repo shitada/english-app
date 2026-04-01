@@ -105,7 +105,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Expand smoke test and add final TypeScript types (completed iteration #95)
 - [ ] Add pronunciation sentence categorization by difficulty
 - [ ] Add API versioning prefix
-- [ ] Add conversation message bookmarks
+- [x] ✅ Add conversation message bookmarks (completed iteration #96)
 - [ ] Add vocabulary spaced repetition analytics
 - [ ] Add user preference settings persistence
 - [ ] Add conversation replay/review mode
