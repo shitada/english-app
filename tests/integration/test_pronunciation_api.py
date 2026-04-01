@@ -377,3 +377,41 @@ async def test_check_pronunciation_with_difficulty(client, mock_copilot):
     match = [a for a in attempts if a["reference_text"] == "I have a reservation."]
     assert len(match) == 1
     assert match[0]["difficulty"] == "beginner"
+
+
+@pytest.mark.integration
+async def test_difficulty_progress_empty(client):
+    """Empty DB should return empty items list."""
+    res = await client.get("/api/pronunciation/difficulty-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["items"] == []
+
+
+@pytest.mark.integration
+async def test_difficulty_progress_after_attempts(client, mock_copilot):
+    """Submit attempts at different difficulties and verify breakdown."""
+    for difficulty, score in [("beginner", 8), ("beginner", 6), ("advanced", 9)]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score, "overall_feedback": "OK",
+            "word_feedback": [], "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": "Test sentence.",
+            "user_transcription": "Test sentence.",
+            "difficulty": difficulty,
+        })
+
+    res = await client.get("/api/pronunciation/difficulty-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["items"]) == 2
+    difficulties = {item["difficulty"] for item in data["items"]}
+    assert difficulties == {"beginner", "advanced"}
+    beginner = next(i for i in data["items"] if i["difficulty"] == "beginner")
+    assert beginner["attempt_count"] == 2
+    assert beginner["avg_score"] == 7.0
+    assert beginner["best_score"] == 8
+    advanced = next(i for i in data["items"] if i["difficulty"] == "advanced")
+    assert advanced["attempt_count"] == 1
+    assert advanced["best_score"] == 9

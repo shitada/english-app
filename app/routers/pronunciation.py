@@ -251,6 +251,25 @@ async def get_pronunciation_weaknesses(
     return {"weaknesses": weaknesses, "total": len(weaknesses)}
 
 
+class DifficultyProgressItem(BaseModel):
+    difficulty: str
+    attempt_count: int
+    avg_score: float
+    best_score: float
+    latest_score: float
+
+
+class DifficultyProgressResponse(BaseModel):
+    items: list[DifficultyProgressItem]
+
+
+@router.get("/difficulty-progress", response_model=DifficultyProgressResponse)
+async def get_difficulty_progress(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get pronunciation progress breakdown by difficulty level."""
+    items = await pron_dal.get_progress_by_difficulty(db)
+    return {"items": items}
+
+
 class RetrySuggestionItem(BaseModel):
     text: str
     attempt_count: int

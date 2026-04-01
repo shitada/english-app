@@ -12,6 +12,7 @@ from app.dal.pronunciation import (
     delete_attempt,
     get_history,
     get_progress,
+    get_progress_by_difficulty,
     get_sentences_from_conversations,
     get_sentences_from_vocabulary,
     get_weekly_progress,
@@ -641,3 +642,50 @@ class TestGetRetrySuggestions:
             await save_attempt(test_db, f"Sentence {i}.", f"S {i}.", feedback, 2.0)
         result = await get_retry_suggestions(test_db, threshold=7.0, limit=3)
         assert len(result) <= 3
+
+
+@pytest.mark.unit
+class TestGetProgressByDifficulty:
+    async def test_empty_db_returns_empty_list(self, test_db):
+        result = await get_progress_by_difficulty(test_db)
+        assert result == []
+
+    async def test_single_difficulty(self, test_db):
+        feedback = {"overall_score": 8}
+        await save_attempt(test_db, "Hello.", "Hello.", feedback, 7.0, difficulty="beginner")
+        await save_attempt(test_db, "Hi there.", "Hi there.", feedback, 9.0, difficulty="beginner")
+        result = await get_progress_by_difficulty(test_db)
+        assert len(result) == 1
+        item = result[0]
+        assert item["difficulty"] == "beginner"
+        assert item["attempt_count"] == 2
+        assert item["avg_score"] == 8.0
+        assert item["best_score"] == 9.0
+        assert item["latest_score"] == 9.0
+
+    async def test_multiple_difficulties(self, test_db):
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Easy.", "Easy.", feedback, 9.0, difficulty="beginner")
+        await save_attempt(test_db, "Medium.", "Medium.", feedback, 6.0, difficulty="intermediate")
+        await save_attempt(test_db, "Hard.", "Hard.", feedback, 3.0, difficulty="advanced")
+        result = await get_progress_by_difficulty(test_db)
+        assert len(result) == 3
+        difficulties = {item["difficulty"] for item in result}
+        assert difficulties == {"beginner", "intermediate", "advanced"}
+        beginner = next(i for i in result if i["difficulty"] == "beginner")
+        assert beginner["attempt_count"] == 1
+        assert beginner["best_score"] == 9.0
+        intermediate = next(i for i in result if i["difficulty"] == "intermediate")
+        assert intermediate["best_score"] == 6.0
+        advanced = next(i for i in result if i["difficulty"] == "advanced")
+        assert advanced["best_score"] == 3.0
+
+    async def test_null_difficulty_grouped_as_unknown(self, test_db):
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "No diff.", "No diff.", feedback, 5.0, difficulty=None)
+        await save_attempt(test_db, "Has diff.", "Has diff.", feedback, 8.0, difficulty="beginner")
+        result = await get_progress_by_difficulty(test_db)
+        assert len(result) == 2
+        unknown = next(i for i in result if i["difficulty"] == "unknown")
+        assert unknown["attempt_count"] == 1
+        assert unknown["avg_score"] == 5.0

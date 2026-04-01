@@ -485,6 +485,41 @@ async def get_sentence_attempts(
     return {"attempts": attempts, "summary": summary}
 
 
+async def get_progress_by_difficulty(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get pronunciation progress stats grouped by difficulty level."""
+    rows = await db.execute_fetchall(
+        """SELECT COALESCE(difficulty, 'unknown') as diff_level,
+                  COUNT(*) as attempt_count,
+                  ROUND(AVG(score), 1) as avg_score,
+                  MAX(score) as best_score
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL
+           GROUP BY diff_level
+           ORDER BY diff_level"""
+    )
+
+    results: list[dict[str, Any]] = []
+    for r in rows:
+        diff_level = r["diff_level"]
+        # Get latest score for this difficulty
+        latest_row = await db.execute_fetchall(
+            """SELECT score FROM pronunciation_attempts
+               WHERE COALESCE(difficulty, 'unknown') = ? AND score IS NOT NULL
+               ORDER BY created_at DESC, id DESC LIMIT 1""",
+            (diff_level,),
+        )
+        latest_score = latest_row[0]["score"] if latest_row else 0.0
+        results.append({
+            "difficulty": diff_level,
+            "attempt_count": r["attempt_count"],
+            "avg_score": r["avg_score"] or 0.0,
+            "best_score": r["best_score"] or 0.0,
+            "latest_score": latest_score,
+        })
+
+    return results
+
+
 async def get_retry_suggestions(
     db: aiosqlite.Connection, threshold: float = 7.0, limit: int = 10
 ) -> list[dict[str, Any]]:
