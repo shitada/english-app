@@ -665,3 +665,54 @@ async def get_word_with_notes(
     if not rows:
         return None
     return dict(rows[0])
+
+
+async def auto_adjust_difficulty(
+    db: aiosqlite.Connection, word_id: int
+) -> dict[str, Any] | None:
+    """Auto-adjust word difficulty based on quiz history.
+
+    Rules:
+    - If last 5 attempts are all correct and difficulty > 1, decrease difficulty
+    - If last 5 attempts have 4+ incorrect and difficulty < 5, increase difficulty
+    - Returns None if no adjustment needed.
+    """
+    attempts = await db.execute_fetchall(
+        """SELECT is_correct FROM quiz_attempts
+           WHERE word_id = ? ORDER BY answered_at DESC LIMIT 5""",
+        (word_id,),
+    )
+    if len(attempts) < 5:
+        return None
+
+    correct_count = sum(1 for a in attempts if a["is_correct"])
+    incorrect_count = len(attempts) - correct_count
+
+    word_rows = await db.execute_fetchall(
+        "SELECT id, difficulty FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    if not word_rows:
+        return None
+
+    current_difficulty = word_rows[0]["difficulty"]
+    new_difficulty = current_difficulty
+
+    if correct_count == 5 and current_difficulty > 1:
+        new_difficulty = current_difficulty - 1
+    elif incorrect_count >= 4 and current_difficulty < 5:
+        new_difficulty = current_difficulty + 1
+
+    if new_difficulty != current_difficulty:
+        await db.execute(
+            "UPDATE vocabulary_words SET difficulty = ? WHERE id = ?",
+            (new_difficulty, word_id),
+        )
+        await db.commit()
+        return {
+            "word_id": word_id,
+            "old_difficulty": current_difficulty,
+            "new_difficulty": new_difficulty,
+            "reason": "too_easy" if new_difficulty < current_difficulty else "too_hard",
+        }
+    return None

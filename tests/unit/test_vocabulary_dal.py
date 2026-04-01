@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from app.dal.vocabulary import (
+    auto_adjust_difficulty,
     build_fill_blank_quiz,
     build_quiz,
     delete_word,
@@ -17,6 +18,7 @@ from app.dal.vocabulary import (
     get_word,
     get_word_with_notes,
     get_words_by_topic,
+    log_attempt,
     reset_progress,
     save_words,
     search_words,
@@ -824,3 +826,60 @@ class TestUpdateNotes:
         assert "meaning" in word
         assert "notes" in word
         assert "is_favorite" in word
+
+
+@pytest.mark.unit
+class TestAutoAdjustDifficulty:
+    async def test_no_adjustment_with_few_attempts(self, test_db):
+        words = await save_words(test_db, "travel", _make_questions(1))
+        word_id = words[0]["id"]
+        for _ in range(3):
+            await log_attempt(test_db, word_id, True)
+        result = await auto_adjust_difficulty(test_db, word_id)
+        assert result is None
+
+    async def test_decrease_difficulty_when_too_easy(self, test_db):
+        qs = [{"word": "easy", "correct_meaning": "簡単", "example_sentence": "Easy.", "difficulty": 3, "wrong_options": []}]
+        words = await save_words(test_db, "travel", qs)
+        word_id = words[0]["id"]
+        for _ in range(5):
+            await log_attempt(test_db, word_id, True)
+        result = await auto_adjust_difficulty(test_db, word_id)
+        assert result is not None
+        assert result["old_difficulty"] == 3
+        assert result["new_difficulty"] == 2
+        assert result["reason"] == "too_easy"
+
+    async def test_increase_difficulty_when_too_hard(self, test_db):
+        qs = [{"word": "hard", "correct_meaning": "難しい", "example_sentence": "Hard.", "difficulty": 2, "wrong_options": []}]
+        words = await save_words(test_db, "travel", qs)
+        word_id = words[0]["id"]
+        for _ in range(4):
+            await log_attempt(test_db, word_id, False)
+        await log_attempt(test_db, word_id, True)
+        result = await auto_adjust_difficulty(test_db, word_id)
+        assert result is not None
+        assert result["new_difficulty"] == 3
+        assert result["reason"] == "too_hard"
+
+    async def test_no_adjustment_below_min(self, test_db):
+        qs = [{"word": "min", "correct_meaning": "最小", "example_sentence": "Min.", "difficulty": 1, "wrong_options": []}]
+        words = await save_words(test_db, "travel", qs)
+        word_id = words[0]["id"]
+        for _ in range(5):
+            await log_attempt(test_db, word_id, True)
+        result = await auto_adjust_difficulty(test_db, word_id)
+        assert result is None
+
+    async def test_no_adjustment_above_max(self, test_db):
+        qs = [{"word": "max", "correct_meaning": "最大", "example_sentence": "Max.", "difficulty": 5, "wrong_options": []}]
+        words = await save_words(test_db, "travel", qs)
+        word_id = words[0]["id"]
+        for _ in range(5):
+            await log_attempt(test_db, word_id, False)
+        result = await auto_adjust_difficulty(test_db, word_id)
+        assert result is None
+
+    async def test_word_not_found(self, test_db):
+        result = await auto_adjust_difficulty(test_db, 9999)
+        assert result is None
