@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
+from fastapi import Response
+
 from app.rate_limit import RateLimiter, require_rate_limit, llm_rate_limiter
 
 
@@ -32,6 +34,14 @@ class TestRateLimiter:
         request = _make_request()
         for _ in range(3):
             limiter.check(request)  # Should not raise
+
+    def test_check_returns_remaining_count(self):
+        """check() should return the number of remaining requests."""
+        limiter = RateLimiter(max_requests=3, window_seconds=60)
+        request = _make_request()
+        assert limiter.check(request) == 2  # 3 - 1
+        assert limiter.check(request) == 1  # 3 - 2
+        assert limiter.check(request) == 0  # 3 - 3
 
     def test_blocks_requests_exceeding_limit(self):
         """The (max_requests + 1)th request should raise HTTP 429."""
@@ -100,14 +110,34 @@ class TestRequireRateLimit:
     def test_delegates_to_global_limiter(self):
         """require_rate_limit should call llm_rate_limiter.check."""
         request = _make_request()
-        with patch.object(llm_rate_limiter, "check") as mock_check:
-            require_rate_limit(request)
+        response = Response()
+        with patch.object(llm_rate_limiter, "check", return_value=19) as mock_check:
+            require_rate_limit(request, response)
             mock_check.assert_called_once_with(request)
 
     def test_raises_on_limit_exceeded(self):
         """require_rate_limit should propagate 429 from the global limiter."""
         request = _make_request()
+        response = Response()
         with patch.object(llm_rate_limiter, "check", side_effect=HTTPException(status_code=429, detail="Rate limit exceeded.")):
             with pytest.raises(HTTPException) as exc_info:
-                require_rate_limit(request)
+                require_rate_limit(request, response)
             assert exc_info.value.status_code == 429
+
+    def test_sets_rate_limit_headers(self):
+        """require_rate_limit should set X-RateLimit-* headers on the response."""
+        request = _make_request()
+        response = Response()
+        with patch.object(llm_rate_limiter, "check", return_value=15):
+            require_rate_limit(request, response)
+        assert response.headers["X-RateLimit-Limit"] == "20"
+        assert response.headers["X-RateLimit-Remaining"] == "15"
+        assert response.headers["X-RateLimit-Window"] == "60"
+
+    def test_headers_set_on_last_allowed_request(self):
+        """Headers should still be set when remaining is 0."""
+        request = _make_request()
+        response = Response()
+        with patch.object(llm_rate_limiter, "check", return_value=0):
+            require_rate_limit(request, response)
+        assert response.headers["X-RateLimit-Remaining"] == "0"

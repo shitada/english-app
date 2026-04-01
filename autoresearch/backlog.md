@@ -72,3 +72,30 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add grammar_accuracy stat to dashboard (completed iteration #62)
 - [x] ✅ Add vocab_level_distribution to dashboard (completed iteration #63)
 - [x] ✅ Add conversations_by_topic to dashboard (completed iteration #64)
+- [x] ✅ Add retry logic with exponential backoff to safe_llm_call (completed iteration #66)
+- [x] ✅ Add vocabulary review forecast endpoint (completed iteration #67)
+- [x] ✅ Add conversation export endpoint (completed iteration #68)
+- [x] ✅ Add pagination metadata to conversation list (completed iteration #71)
+- [x] ✅ Add conversation search by keyword (completed iteration #72)
+- [x] ✅ Add pronunciation score distribution endpoint (completed iteration #73)
+- [x] ✅ Add daily learning activity history endpoint (completed iteration #74)
+- [x] ✅ Add vocabulary quiz attempt history endpoint (completed iteration #75)
+- [x] ✅ Add study streak milestones endpoint (completed iteration #76)
+- [x] ✅ Add vocabulary per-topic accuracy endpoint (completed iteration #77)
+- [x] ✅ Add conversation duration stats endpoint (completed iteration #78)
+- [x] ✅ Add frontend TypeScript API types for new endpoints (completed iteration #79)
+- [x] ✅ Add vocabulary batch import endpoint (completed iteration #80)
+- [x] ✅ Add vocabulary word edit endpoint (completed iteration #81)
+- [x] ✅ Add pronunciation personal records endpoint (completed iteration #82)
+- [x] ✅ Add application config summary endpoint (completed iteration #83)
+- [x] ✅ Add learning summary endpoint (completed iteration #84)
+- [x] ✅ Add vocabulary word favorites/bookmarks system (completed iteration #85)
+
+## [NEW] Ideas for Future Iterations
+
+- [ ] Add conversation average score endpoint
+- [ ] Add learning goals/targets system
+- [ ] Add pronunciation sentence categorization by difficulty
+- [ ] Add vocabulary word synonyms/related words
+- [ ] Add API versioning prefix
+- [ ] Add vocabulary difficulty auto-adjustment
