@@ -741,3 +741,41 @@ class TestUpdateWord:
         result = await update_word(test_db, original["id"])
         assert result is not None
         assert result["meaning"] == original["meaning"]
+
+
+@pytest.mark.unit
+class TestFavorites:
+    async def test_toggle_on(self, test_db):
+        from app.dal.vocabulary import toggle_favorite
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        result = await toggle_favorite(test_db, words[0]["id"])
+        assert result["is_favorite"] is True
+
+    async def test_toggle_off(self, test_db):
+        from app.dal.vocabulary import toggle_favorite
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        await toggle_favorite(test_db, words[0]["id"])  # on
+        result = await toggle_favorite(test_db, words[0]["id"])  # off
+        assert result["is_favorite"] is False
+
+    async def test_toggle_not_found(self, test_db):
+        from app.dal.vocabulary import toggle_favorite
+        result = await toggle_favorite(test_db, 99999)
+        assert result is None
+
+    async def test_get_favorites_empty(self, test_db):
+        from app.dal.vocabulary import get_favorites
+        result = await get_favorites(test_db)
+        assert result["total_count"] == 0
+        assert result["words"] == []
+
+    async def test_get_favorites_with_data(self, test_db):
+        from app.dal.vocabulary import get_favorites, toggle_favorite
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        await toggle_favorite(test_db, words[0]["id"])
+        result = await get_favorites(test_db)
+        assert result["total_count"] == 1
+        assert len(result["words"]) == 1

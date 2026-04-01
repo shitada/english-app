@@ -585,3 +585,58 @@ async def update_word(
         (word_id,),
     )
     return dict(rows[0]) if rows else None
+
+
+async def toggle_favorite(
+    db: aiosqlite.Connection, word_id: int
+) -> dict[str, Any] | None:
+    """Toggle a word's favorite status. Returns {word_id, is_favorite} or None."""
+    rows = await db.execute_fetchall(
+        "SELECT id, is_favorite FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    if not rows:
+        return None
+    new_val = 0 if rows[0]["is_favorite"] else 1
+    await db.execute(
+        "UPDATE vocabulary_words SET is_favorite = ? WHERE id = ?",
+        (new_val, word_id),
+    )
+    await db.commit()
+    return {"word_id": word_id, "is_favorite": bool(new_val)}
+
+
+async def get_favorites(
+    db: aiosqlite.Connection,
+    topic: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Get favorited vocabulary words with optional topic filter."""
+    where_clauses = ["is_favorite = 1"]
+    params: list[Any] = []
+    if topic:
+        where_clauses.append("topic = ?")
+        params.append(topic)
+
+    where_sql = " AND ".join(where_clauses)
+
+    count_rows = await db.execute_fetchall(
+        f"SELECT COUNT(*) as cnt FROM vocabulary_words WHERE {where_sql}",
+        params,
+    )
+    total = count_rows[0]["cnt"] if count_rows else 0
+
+    params_paged = params + [limit, offset]
+    rows = await db.execute_fetchall(
+        f"""SELECT id, topic, word, meaning, example_sentence, difficulty
+            FROM vocabulary_words
+            WHERE {where_sql}
+            ORDER BY word ASC
+            LIMIT ? OFFSET ?""",
+        params_paged,
+    )
+    return {
+        "total_count": total,
+        "words": [dict(r) for r in rows],
+    }

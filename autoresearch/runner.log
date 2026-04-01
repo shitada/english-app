@@ -5333,3 +5333,105 @@ For iteration 84, I'll add a summary statistics overview endpoint — a single e
   │ @pytest.mark.integration…
   └ 11 lines...
 
+● Commit + test 84 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #84: add learning summary endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+375 passed!
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record 84 (shell)
+  │ date +%s && echo "84    61914d5 2026-04-01T12:57:30+09:00       0       30      30      20
+  │ 80      375     375     pass    7.0     keep    Add learning summary endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue pushing through iterations 85-95. I'll keep maintaining the tight cycle:
+
+● T0 for iteration 85 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 85, I'll add validation to the conversation export to handle edge cases, and add a conversation message count to dashboard stats:
+
+● Proposer Propose iteration 85
+  │ Read config.yaml
+  │   └ L80:160 (80 lines read)
+  └ Read config.yaml
+      └ L160:230 (44 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me implement the favorites system:
+
+● Read database.py
+  │ app/database.py
+  └ L46:55 (10 lines read)
+
+● Edit database.py +2 -1
+  └ app/database.py
+
+● Read database.py
+  │ app/database.py
+  └ L79:92 (14 lines read)
+
+● Read database.py
+  │ app/database.py
+  └ L91:102 (10 lines read)
+
+● Edit database.py +4
+  └ app/database.py
+
+Now add DAL functions:
+
+● Add favorites DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def toggle_favorite(
+  │ db: aiosqlite.Connection, word_id: int…
+  └ 53 lines...
+
+Add router endpoints:
+
+● Add favorites endpoints (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ class ToggleFavoriteResponse(BaseModel):
+  │ word_id: int…
+  └ 40 lines...
+
+Add tests:
+
+● Add favorites tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 37 lines...
+
+● Add favorites integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 29 lines...
+

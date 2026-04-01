@@ -592,3 +592,32 @@ async def test_update_word(client, mock_copilot):
 async def test_update_word_not_found(client):
     res = await client.put("/api/vocabulary/99999", json={"meaning": "test"})
     assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_favorites_empty(client):
+    res = await client.get("/api/vocabulary/favorites")
+    assert res.status_code == 200
+    assert res.json()["total_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_toggle_favorite(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "towel", "correct_meaning": "cloth for drying", "example_sentence": "Use a towel.", "difficulty": 1}]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+    # Toggle on
+    res = await client.post(f"/api/vocabulary/{word_id}/favorite")
+    assert res.status_code == 200
+    assert res.json()["is_favorite"] is True
+    # Check favorites
+    fav_res = await client.get("/api/vocabulary/favorites")
+    assert fav_res.json()["total_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_toggle_favorite_not_found(client):
+    res = await client.post("/api/vocabulary/99999/favorite")
+    assert res.status_code == 404

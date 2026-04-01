@@ -447,3 +447,45 @@ async def batch_import(
     """Import a batch of vocabulary words."""
     words_data = [w.model_dump() for w in req.words]
     return await vocab_dal.batch_import_words(db, words_data)
+
+
+class ToggleFavoriteResponse(BaseModel):
+    word_id: int
+    is_favorite: bool
+
+
+@router.post("/{word_id}/favorite", response_model=ToggleFavoriteResponse)
+async def toggle_favorite(
+    word_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Toggle a word's favorite status."""
+    result = await vocab_dal.toggle_favorite(db, word_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Word not found")
+    return result
+
+
+class FavoriteWordItem(BaseModel):
+    id: int
+    topic: str
+    word: str
+    meaning: str
+    example_sentence: str | None
+    difficulty: int
+
+
+class FavoritesResponse(BaseModel):
+    total_count: int
+    words: list[FavoriteWordItem]
+
+
+@router.get("/favorites", response_model=FavoritesResponse)
+async def get_favorites(
+    topic: str | None = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = 0,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get favorited vocabulary words."""
+    return await vocab_dal.get_favorites(db, topic=topic, limit=limit, offset=offset)
