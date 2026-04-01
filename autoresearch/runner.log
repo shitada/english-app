@@ -8413,3 +8413,146 @@ Now add validation tests. Check if there's an existing input validation test fil
   │ 'ENDOFTEST'…
   └ 31 lines...
 
+● Commit iteration 106 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #106: Add missing input validation bounds on pagination and goals
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 31 lines...
+
+● Run tests iteration 106 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+497 passed. TS + smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 106
+  │ playwright-browser_console_messages
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Record T3 for iteration 106 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 106
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L70:110 (39 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L110:150 (41 lines read)
+
+Score 7.75, keep.
+
+● Record results iteration 106 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log
+  │ -1 --format=%h) && echo "106   ${HASH} 2026-04-01T15:47:26+00:00       112     90      322
+  │ $(($T4-1775060170))     $(($T4-1775059646))     497     497     pass    7.75    keep    Add
+  │ missing input validation bounds on pagination and goals" >> autoresearch/results.tsv && echo
+  │ "done"
+  └ 2 lines...
+
+**Iteration 106 complete: KEEP (7.75, 497/497, +6 tests)**
+
+---
+
+● Kill server, T0 iter 107 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 107
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L1:60 (59 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L60:end (412 lines read)
+
+● Record T1 for iteration 107 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775060483, propose_sec=136. Implementing difficulty tracking for pronunciation:
+
+● Read database.py
+  │ app/database.py
+  └ L27:40 (14 lines read)
+
+● Read database.py
+  │ app/database.py
+  └ L38:50 (13 lines read)
+
+● Edit database.py +1
+  └ app/database.py
+
+Now add the migration:
+
+● Read database.py
+  │ app/database.py
+  └ L119:135 (16 lines read)
+
+● Edit database.py +4
+  └ app/database.py
+
+Now update the DAL:
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L59:95 (35 lines read)
+
+● Edit pronunciation.py +6 -4
+  └ app/dal/pronunciation.py
+
+Now update the router to pass difficulty through:
+
+● Find CheckRequest and save_attempt (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ CheckRequest\|difficulty.*check\|save_attempt" app/routers/pronunciation.py | head -10
+  └ 3 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L24:35 (12 lines read)
+
+● Edit pronunciation.py +1
+  └ app/routers/pronunciation.py
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L108:125 (17 lines read)
+
+● Edit pronunciation.py +1
+  └ app/routers/pronunciation.py
+
+Now add tests:
+
+● Add difficulty tracking tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'ENDOFTEST'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 25 lines...
+

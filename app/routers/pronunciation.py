@@ -24,6 +24,7 @@ router = APIRouter(prefix="/api/pronunciation", tags=["pronunciation"])
 class CheckRequest(BaseModel):
     reference_text: str = Field(min_length=1, max_length=1000)
     user_transcription: str = Field(min_length=1, max_length=1000)
+    difficulty: str | None = None
 
 
 class SentenceItem(BaseModel):
@@ -112,6 +113,7 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
 
     attempt_id = await pron_dal.save_attempt(
         db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),
+        difficulty=req.difficulty,
     )
 
     return {**feedback, "attempt_id": attempt_id}

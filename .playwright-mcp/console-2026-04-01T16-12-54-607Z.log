@@ -1,0 +1,10 @@
+[   66945ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/conversation/list?offset=-1&limit=10:0
+[   66947ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/conversation/list?offset=0&limit=101:0
+[   66950ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/conversation/list?offset=0&limit=0:0
+[   66955ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/conversation/bookmarks?offset=-1&limit=10:0
+[   66958ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/conversation/bookmarks?offset=0&limit=201:0
+[   79905ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/dashboard/goals:0
+[   79908ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/dashboard/goals:0
+[   79910ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/dashboard/goals:0
+[   79917ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/dashboard/activity-history?days=0:0
+[   79919ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/dashboard/activity-history?days=366:0

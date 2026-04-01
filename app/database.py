@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS pronunciation_attempts (
     user_transcription TEXT NOT NULL,
     feedback_json TEXT,
     score REAL,
+    difficulty TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -125,6 +126,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add is_bookmarked column to messages",
         "ALTER TABLE messages ADD COLUMN is_bookmarked INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "add difficulty column to pronunciation_attempts",
+        "ALTER TABLE pronunciation_attempts ADD COLUMN difficulty TEXT",
     ),
 ]
 

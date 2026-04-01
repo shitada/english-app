@@ -469,3 +469,28 @@ class TestGetPronunciationWeaknesses:
             await save_attempt(test_db, f"Test {i}", f"Test {i}", fb, 5.0)
         result = await get_pronunciation_weaknesses(test_db, limit=3)
         assert len(result) <= 3
+
+
+@pytest.mark.unit
+class TestDifficultyTracking:
+    async def test_save_attempt_with_difficulty(self, test_db):
+        feedback = {"overall_score": 8}
+        attempt_id = await save_attempt(test_db, "Hello.", "Hello.", feedback, 8.0, difficulty="beginner")
+        history = await get_history(test_db, limit=1)
+        assert len(history) == 1
+        assert history[0]["difficulty"] == "beginner"
+
+    async def test_save_attempt_without_difficulty(self, test_db):
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Test.", "Test.", feedback, 5.0)
+        history = await get_history(test_db, limit=1)
+        assert history[0]["difficulty"] is None
+
+    async def test_history_includes_difficulty(self, test_db):
+        feedback = {"overall_score": 7}
+        await save_attempt(test_db, "Easy.", "Easy.", feedback, 7.0, difficulty="beginner")
+        await save_attempt(test_db, "Hard.", "Hard.", feedback, 6.0, difficulty="advanced")
+        history = await get_history(test_db, limit=10)
+        difficulties = [h["difficulty"] for h in history]
+        assert "beginner" in difficulties
+        assert "advanced" in difficulties
