@@ -19,7 +19,9 @@ from app.dal.conversation import (
     get_bookmarked_messages,
     get_conversation_export,
     get_conversation_history,
+    get_conversation_replay,
     get_conversation_summary,
+    get_conversation_vocabulary,
     get_grammar_accuracy,
     get_topic_recommendations,
     list_conversations,
@@ -592,3 +594,97 @@ class TestCountBookmarkedMessages:
         await toggle_message_bookmark(test_db, mid1)
         await toggle_message_bookmark(test_db, mid2)
         assert await count_bookmarked_messages(test_db, conversation_id=cid1) == 1
+
+
+@pytest.mark.unit
+class TestGetConversationReplay:
+    async def test_nonexistent_returns_none(self, test_db):
+        result = await get_conversation_replay(test_db, 9999)
+        assert result is None
+
+    async def test_opening_assistant_message(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "assistant", "Welcome to the hotel!")
+        result = await get_conversation_replay(test_db, cid)
+        assert result is not None
+        assert result["total_turns"] == 1
+        assert result["turns"][0]["turn_number"] == 1
+        assert result["turns"][0]["user_message"] is None
+        assert result["turns"][0]["assistant_message"] == "Welcome to the hotel!"
+
+    async def test_user_assistant_pairing(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await add_message(test_db, cid, "user", "Hi, I need a room.")
+        await add_message(test_db, cid, "assistant", "Sure, how many nights?")
+        result = await get_conversation_replay(test_db, cid)
+        assert result["total_turns"] == 2
+        user_turn = result["turns"][1]
+        assert user_turn["user_message"] == "Hi, I need a room."
+        assert user_turn["assistant_message"] == "Sure, how many nights?"
+
+    async def test_feedback_and_corrections(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        mid = await add_message(test_db, cid, "user", "I want check in.")
+        feedback = {"is_correct": False, "errors": [{"original": "want", "correction": "want to"}]}
+        await update_message_feedback(test_db, cid, "user", "I want check in.", feedback)
+        await add_message(test_db, cid, "assistant", "Of course!")
+        result = await get_conversation_replay(test_db, cid)
+        user_turn = result["turns"][0]
+        assert user_turn["feedback"] is not None
+        assert len(user_turn["corrections"]) == 1
+
+    async def test_unpaired_user_message(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "user", "Hello")
+        result = await get_conversation_replay(test_db, cid)
+        assert result["total_turns"] == 1
+        assert result["turns"][0]["user_message"] == "Hello"
+        assert result["turns"][0]["assistant_message"] is None
+
+
+@pytest.mark.unit
+class TestGetConversationVocabulary:
+    async def test_nonexistent_returns_none(self, test_db):
+        result = await get_conversation_vocabulary(test_db, 9999)
+        assert result is None
+
+    async def test_no_messages_returns_empty(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert result is not None
+        assert result["words"] == []
+        assert result["total"] == 0
+
+    async def test_no_vocabulary_words(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "assistant", "Welcome to the hotel!")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert result["words"] == []
+
+    async def test_matches_words_case_insensitive(self, test_db):
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "hotel", "correct_meaning": "lodging", "example_sentence": "Stay.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "assistant", "Welcome to the Hotel!")
+        result = await get_conversation_vocabulary(test_db, cid)
+        assert result["total"] >= 1
+        assert any(w["word"] == "hotel" for w in result["words"])
+
+    async def test_includes_srs_progress(self, test_db):
+        from app.dal.vocabulary import save_words, update_progress
+        questions = [
+            {"word": "hotel", "correct_meaning": "lodging", "example_sentence": "Stay.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+        ]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        await update_progress(test_db, words[0]["id"], is_correct=True)
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "assistant", "Welcome to the hotel!")
+        result = await get_conversation_vocabulary(test_db, cid)
+        matched = [w for w in result["words"] if w["word"] == "hotel"]
+        assert len(matched) == 1
+        assert matched[0]["srs_level"] is not None
+        assert matched[0]["correct_count"] >= 1
