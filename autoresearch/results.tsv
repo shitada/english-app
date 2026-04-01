@@ -40,32 +40,32 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 33	ad6eb2b	2026-03-30T18:32:05+00:00	84	1592	1023	1057	3756	204	204	pass	7.55	keep	Add vocabulary mastery statistics endpoint
 34	7835f2e	2026-03-30T19:28:15+00:00	93	1519	951	49	2612	213	213	pass	8.35	keep	Add unit tests for app/utils.py (safe_llm_call, get_topic_label)
 35	e16e8a0	2026-03-30T19:58:44+00:00	1097	28	507	55	1687	217	217	pass	8.1	keep	Add integration tests for pronunciation progress endpoint
-36b887c472026-03-31T22:41:49+09:002455472524895220220pass7.8keepAdd vocabulary due-for-review endpoint
-378c51e362026-03-31T22:57:44+09:00163472844282221221pass7.55keepFix timezone inconsistency in vocabulary DAL and streak calculation
-388ceb2872026-03-31T23:02:50+09:00192912763373227227pass7.55keepAdd fill-in-the-blank vocabulary quiz mode
-39d8476d42026-03-31T23:09:27+09:001011842160366227227pass6.95keepWire up fill-in-the-blank quiz mode in frontend UI
-41none2026-03-31T23:21:09+09:00782723207335227227pass4.6discardAuto-end conversation when timer expires (TDZ bug)
-42748993b2026-03-31T23:27:01+09:0003920118177227227pass6.7keepAuto-end conversation when 5-minute timer expires
-43475eb682026-03-31T23:30:16+09:00164981989370227227pass7.0keepAdd pronunciation history and progress UI
-44671a3d42026-03-31T23:36:48+09:001231163574348229229pass7.8keepAdd vocabulary due-for-review count to dashboard
-45a6f87f12026-03-31T23:42:57+09:001581178294451234234pass7.3keepAdd vocabulary progress reset endpoint
-464aa1c232026-03-31T23:50:49+09:001078113102303234234pass6.95keepShow stored conversation summary in history view
-479135ba72026-03-31T23:56:11+09:00158781290338239239pass7.55keepAdd vocabulary weak words endpoint for targeted review
-489b1950f2026-04-01T00:02:22+09:001331071490344246246pass7.55keepAdd vocabulary word bank browse/search endpoint
-49efbe99a2026-04-01T00:08:04+09:00151541590310250250pass7.8keepDeduplicate vocabulary words in save_words
-50\t409b38e\t2025-06-09T14:36:00Z\t15\t45\t20\t10\t90\t257\t257\tpass\t7.05\tKEEP\tPronunciation history clear/delete endpoints
-51\tcf1f5b7\t2025-06-09T14:39:08Z\t15\t120\t60\t15\t210\t259\t259\tpass\t7.80\tKEEP\tValidate topic IDs against config (422 for unknown topics)
-52\t1025161\t2025-06-09T14:44:00Z\t10\t30\t15\t10\t65\t260\t260\tpass\t7.05\tKEEP\tAdd quiz_type field to quiz response (multiple_choice/fill_blank)
-53\t765f26e\t2025-06-09T14:45:00Z\t10\t30\t12\t8\t60\t262\t262\tpass\t7.30\tKEEP\tsave_attempt returns attempt_id, history includes id field
-54\tbe1144b\t2025-06-09T14:48:00Z\t8\t25\t12\t8\t53\t262\t262\tpass\t6.70\tKEEP\tAdd frontend API methods for delete/clear pronunciation+vocabulary
-55\te8a621c\t2025-06-09T14:51:00Z\t10\t30\t15\t10\t65\t266\t266\tpass\t7.55\tKEEP\tAdd vocabulary word deletion endpoint (DELETE /api/vocabulary/{word_id})
-56\t0db283a\t2025-06-09T14:53:00Z\t8\t20\t12\t8\t48\t268\t268\tpass\t6.95\tKEEP\tAdd max_length validation to message/pronunciation inputs
-57\t86a6797\t2025-06-09T14:55:00Z\t8\t15\t12\t8\t43\t269\t269\tpass\t7.05\tKEEP\tAdd compound indexes for vocabulary progress + pronunciation queries
-58\td63a891\t2025-06-09T14:57:00Z\t10\t40\t15\t10\t75\t271\t271\tpass\t7.55\tKEEP\tAdd conversations_by_difficulty breakdown to dashboard stats
-59\t938860f\t2025-06-09T15:00:00Z\t10\t35\t15\t10\t70\t273\t273\tpass\t7.30\tKEEP\tAdd duration_seconds to conversation list endpoint
-60\t7da9e6c\t2025-06-09T15:03:00Z\t10\t35\t15\t10\t70\t278\t278\tpass\t7.55\tKEEP\tAdd vocabulary export endpoint with progress data
-61\t8ec6973\t2025-06-09T15:06:00Z\t10\t40\t18\t10\t78\t282\t282\tpass\t7.55\tKEEP\tAdd pronunciation score trend endpoint (improving/declining/stable)
-62\t8ac6a96\t2025-06-09T15:10:00Z\t10\t40\t15\t10\t75\t284\t284\tpass\t7.30\tKEEP\tAdd grammar_accuracy stat to dashboard
-63\tdf35449\t2025-06-09T15:14:00Z\t10\t35\t15\t10\t70\t286\t286\tpass\t7.05\tKEEP\tAdd vocab_level_distribution to dashboard stats
-64\td5711a8\t2025-06-09T15:18:00Z\t10\t35\t15\t10\t70\t288\t288\tpass\t7.05\tKEEP\tAdd conversations_by_topic to dashboard stats
-65\td23e1ae\t2025-06-09T15:21:00Z\t10\t35\t15\t10\t70\t292\t292\tpass\t7.30\tKEEP\tAdd vocabulary topic-summary endpoint
+36	b887c47	2026-03-31T22:41:49+09:002455472524895220220	0	0	0	0	0	0	0	pass	7.8	keep	Add vocabulary due-for-review endpoint
+37	8c51e36	2026-03-31T22:57:44+09:00163472844282221221	0	0	0	0	0	0	0	pass	7.55	keep	Fix timezone inconsistency in vocabulary DAL and streak calculation
+38	8ceb287	2026-03-31T23:02:50+09:00192912763373227227	0	0	0	0	0	0	0	pass	7.55	keep	Add fill-in-the-blank vocabulary quiz mode
+39	d8476d4	2026-03-31T23:09:27+09:001011842160366227227	0	0	0	0	0	0	0	pass	6.95	keep	Wire up fill-in-the-blank quiz mode in frontend UI
+41	none	2026-03-31T23:21:09+09:00782723207335227227	0	0	0	0	0	0	0	pass	4.6	discard	Auto-end conversation when timer expires (TDZ bug)
+42	748993b	2026-03-31T23:27:01+09:0003920118177227227	0	0	0	0	0	0	0	pass	6.7	keep	Auto-end conversation when 5-minute timer expires
+43	475eb68	2026-03-31T23:30:16+09:00164981989370227227	0	0	0	0	0	0	0	pass	7.0	keep	Add pronunciation history and progress UI
+44	671a3d4	2026-03-31T23:36:48+09:001231163574348229229	0	0	0	0	0	0	0	pass	7.8	keep	Add vocabulary due-for-review count to dashboard
+45	a6f87f1	2026-03-31T23:42:57+09:001581178294451234234	0	0	0	0	0	0	0	pass	7.3	keep	Add vocabulary progress reset endpoint
+46	4aa1c23	2026-03-31T23:50:49+09:001078113102303234234	0	0	0	0	0	0	0	pass	6.95	keep	Show stored conversation summary in history view
+47	9135ba7	2026-03-31T23:56:11+09:00158781290338239239	0	0	0	0	0	0	0	pass	7.55	keep	Add vocabulary weak words endpoint for targeted review
+48	9b1950f	2026-04-01T00:02:22+09:001331071490344246246	0	0	0	0	0	0	0	pass	7.55	keep	Add vocabulary word bank browse/search endpoint
+49	efbe99a	2026-04-01T00:08:04+09:00151541590310250250	0	0	0	0	0	0	0	pass	7.8	keep	Deduplicate vocabulary words in save_words
+50	409b38e	2025-06-09T14:36:00Z	15	45	20	10	90	257	257	pass	7.05	KEEP	Pronunciation history clear/delete endpoints
+51	cf1f5b7	2025-06-09T14:39:08Z	15	120	60	15	210	259	259	pass	7.80	KEEP	Validate topic IDs against config (422 for unknown topics)
+52	1025161	2025-06-09T14:44:00Z	10	30	15	10	65	260	260	pass	7.05	KEEP	Add quiz_type field to quiz response (multiple_choice/fill_blank)
+53	765f26e	2025-06-09T14:45:00Z	10	30	12	8	60	262	262	pass	7.30	KEEP	save_attempt returns attempt_id, history includes id field
+54	be1144b	2025-06-09T14:48:00Z	8	25	12	8	53	262	262	pass	6.70	KEEP	Add frontend API methods for delete/clear pronunciation+vocabulary
+55	e8a621c	2025-06-09T14:51:00Z	10	30	15	10	65	266	266	pass	7.55	KEEP	Add vocabulary word deletion endpoint (DELETE /api/vocabulary/{word_id})
+56	0db283a	2025-06-09T14:53:00Z	8	20	12	8	48	268	268	pass	6.95	KEEP	Add max_length validation to message/pronunciation inputs
+57	86a6797	2025-06-09T14:55:00Z	8	15	12	8	43	269	269	pass	7.05	KEEP	Add compound indexes for vocabulary progress + pronunciation queries
+58	d63a891	2025-06-09T14:57:00Z	10	40	15	10	75	271	271	pass	7.55	KEEP	Add conversations_by_difficulty breakdown to dashboard stats
+59	938860f	2025-06-09T15:00:00Z	10	35	15	10	70	273	273	pass	7.30	KEEP	Add duration_seconds to conversation list endpoint
+60	7da9e6c	2025-06-09T15:03:00Z	10	35	15	10	70	278	278	pass	7.55	KEEP	Add vocabulary export endpoint with progress data
+61	8ec6973	2025-06-09T15:06:00Z	10	40	18	10	78	282	282	pass	7.55	KEEP	Add pronunciation score trend endpoint (improving/declining/stable)
+62	8ac6a96	2025-06-09T15:10:00Z	10	40	15	10	75	284	284	pass	7.30	KEEP	Add grammar_accuracy stat to dashboard
+63	df35449	2025-06-09T15:14:00Z	10	35	15	10	70	286	286	pass	7.05	KEEP	Add vocab_level_distribution to dashboard stats
+64	d5711a8	2025-06-09T15:18:00Z	10	35	15	10	70	288	288	pass	7.05	KEEP	Add conversations_by_topic to dashboard stats
+65	d23e1ae	2025-06-09T15:21:00Z	10	35	15	10	70	292	292	pass	7.30	KEEP	Add vocabulary topic-summary endpoint
