@@ -3957,3 +3957,112 @@ Need to fix the test - `update_message_feedback` takes `content` and `feedback` 
 ● Edit test_conversation_dal.py +1 -1
   └ tests/unit/test_conversation_dal.py
 
+● Fix and rerun tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #69: add unit tests for conversation export DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+311 passed. TS check:
+
+● TS check + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?" && date +%s
+  └ 3 lines...
+
+● Evaluator Evaluate iteration 69
+  │ List directory app
+  │   └ 11 files found
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ 213 lines read
+
+● T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 → **KEEP**.
+
+● Record iteration 69 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "69   eca3a85
+  │ 2026-04-01T12:00:38+09:00       71      31      57      38      197     311     311     pass
+  │ 8.1     keep    Add unit tests for conversation export DAL" >> autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 70:
+
+● T0 for iteration 70 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 70
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L400:end (106 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ 341 lines read
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L1:25 (25 lines read)
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● End of vocab DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 tests/unit/test_vocabulary_dal.py
+  │ && echo "---" && wc -l tests/unit/test_vocabulary_dal.py
+  └ 33 lines...
+
+Now let me check the DAL functions I need to test:
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L185:215 (31 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L367:403 (37 lines read)
+
+● Edit test_vocabulary_dal.py +2
+  └ tests/unit/test_vocabulary_dal.py
+
+● Add forecast + due words tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 112 lines...
+
+● Commit + test iteration 70 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #70: add unit tests for vocab forecast and due words DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -15
+  └ 31 lines...
+
+Need to check the signature of `update_progress`:
+
+● Check update_progress signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def update_progress"
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L116:140 (25 lines read)
+
+The parameter is `is_correct`, not `correct`. Let me fix:
+
+● Fix parameter name (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i ''
+  │ 's/correct=False/is_correct=False/g; s/correct=True/is_correct=True/g'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 1 line...
+

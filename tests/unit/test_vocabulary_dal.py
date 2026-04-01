@@ -9,7 +9,9 @@ from app.dal.vocabulary import (
     build_quiz,
     delete_word,
     get_due_word_ids,
+    get_due_words,
     get_progress,
+    get_review_forecast,
     get_vocabulary_stats,
     get_weak_words,
     get_word,
@@ -503,3 +505,116 @@ class TestTopicSummary:
         assert food_topic["total_words"] == 3
         assert food_topic["reviewed_words"] == 0
         assert food_topic["mastered_words"] == 0
+
+
+@pytest.mark.unit
+class TestGetReviewForecast:
+    async def test_empty_database(self, test_db):
+        result = await get_review_forecast(test_db)
+        assert result["overdue_count"] == 0
+        assert result["total_upcoming"] == 0
+        assert result["daily_forecast"] == []
+
+    async def test_with_overdue_words(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        # Set next_review_at to yesterday
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 day')"
+        )
+        await test_db.commit()
+        result = await get_review_forecast(test_db)
+        assert result["overdue_count"] == 2
+
+    async def test_with_upcoming_words(self, test_db):
+        await save_words(test_db, "food", _make_questions(3))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        # Set next_review_at to today
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now')"
+        )
+        await test_db.commit()
+        result = await get_review_forecast(test_db)
+        assert result["total_upcoming"] == 3
+        assert len(result["daily_forecast"]) >= 1
+
+    async def test_total_matches_daily_sum(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now')"
+        )
+        await test_db.commit()
+        result = await get_review_forecast(test_db)
+        assert result["total_upcoming"] == sum(
+            d["count"] for d in result["daily_forecast"]
+        )
+
+
+@pytest.mark.unit
+class TestGetDueWords:
+    async def test_empty_database(self, test_db):
+        result = await get_due_words(test_db)
+        assert result == []
+
+    async def test_no_due_words(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=True)
+        # Set next_review_at to tomorrow (not due)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '+1 day')"
+        )
+        await test_db.commit()
+        result = await get_due_words(test_db)
+        assert result == []
+
+    async def test_returns_due_words(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        # Set next_review_at to past
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 hour')"
+        )
+        await test_db.commit()
+        result = await get_due_words(test_db)
+        assert len(result) == 2
+        assert all("word" in r and "topic" in r for r in result)
+
+    async def test_filter_by_topic(self, test_db):
+        await save_words(test_db, "food", _make_questions(2))
+        await save_words(test_db, "greetings", _make_questions(1))
+        all_words = await get_words_by_topic(test_db, "food")
+        for w in all_words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        greet_words = await get_words_by_topic(test_db, "greetings")
+        for w in greet_words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 hour')"
+        )
+        await test_db.commit()
+        result = await get_due_words(test_db, topic="food")
+        assert len(result) == 2
+        assert all(r["topic"] == "food" for r in result)
+
+    async def test_respects_limit(self, test_db):
+        await save_words(test_db, "food", _make_questions(3))
+        words = await get_words_by_topic(test_db, "food")
+        for w in words:
+            await update_progress(test_db, w["id"], is_correct=False)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 hour')"
+        )
+        await test_db.commit()
+        result = await get_due_words(test_db, limit=1)
+        assert len(result) == 1
