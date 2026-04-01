@@ -171,3 +171,24 @@ class ScoreDistributionResponse(BaseModel):
 async def get_score_distribution(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get pronunciation score distribution across quality buckets."""
     return await pron_dal.get_score_distribution(db)
+
+
+class AttemptRecord(BaseModel):
+    text: str
+    score: float
+    date: str
+
+
+class PersonalRecordsResponse(BaseModel):
+    total_attempts: int
+    avg_score: float
+    best_score: float
+    worst_score: float
+    best_attempts: list[AttemptRecord]
+    worst_attempts: list[AttemptRecord]
+
+
+@router.get("/records", response_model=PersonalRecordsResponse)
+async def get_personal_records(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get pronunciation personal records and best/worst attempts."""
+    return await pron_dal.get_personal_records(db)

@@ -205,3 +205,12 @@ async def test_score_distribution_empty(client):
     data = res.json()
     assert data["total_attempts"] == 0
     assert len(data["distribution"]) == 5
+
+
+@pytest.mark.asyncio
+async def test_personal_records_empty(client):
+    res = await client.get("/api/pronunciation/records")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] == 0
+    assert data["best_attempts"] == []

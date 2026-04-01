@@ -348,3 +348,26 @@ class TestGetScoreDistribution:
         assert dist[4]["bucket"] == "excellent"
         assert dist[4]["min_score"] == 9
         assert dist[4]["max_score"] == 10
+
+
+@pytest.mark.unit
+class TestGetPersonalRecords:
+    async def test_empty_database(self, test_db):
+        from app.dal.pronunciation import get_personal_records
+        result = await get_personal_records(test_db)
+        assert result["total_attempts"] == 0
+        assert result["best_attempts"] == []
+        assert result["worst_attempts"] == []
+
+    async def test_with_attempts(self, test_db):
+        from app.dal.pronunciation import get_personal_records
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Hello.", "Hello.", feedback, 3.0)
+        await save_attempt(test_db, "Good morning.", "Good morning.", feedback, 8.0)
+        await save_attempt(test_db, "Bye.", "Bye.", feedback, 5.0)
+        result = await get_personal_records(test_db)
+        assert result["total_attempts"] == 3
+        assert result["best_score"] == 8.0
+        assert result["worst_score"] == 3.0
+        assert len(result["best_attempts"]) == 3
+        assert result["best_attempts"][0]["score"] == 8.0

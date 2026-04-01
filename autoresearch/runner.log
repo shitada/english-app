@@ -5161,3 +5161,67 @@ Let me continue with more iterations. I'll keep the efficient pattern going:
   │ @pytest.mark.asyncio…
   └ 18 lines...
 
+● Commit + test 81 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #81: add vocabulary word edit endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+370 passed! Quick checks:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record 81 (shell)
+  │ date +%s && echo "81    3a2ed32 2026-04-01T12:46:30+09:00       54      50      40      20
+  │ 164     370     370     pass    7.55    keep    Add vocabulary word edit endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue with iterations 82+:
+
+● T0 for iteration 82 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 82, I'll add pronunciation personal records (best/worst/average per-sentence stats). This is a good analytics feature:
+
+● Add personal records DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py << 'PYEOF'
+  │
+  │
+  │ async def get_personal_records(db: aiosqlite.Connection) -> dict[str, Any]:
+  │ """Get pronunciation personal records (best, worst, average scores)."""…
+  └ 40 lines...
+
+● Add personal records endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py << 'PYEOF'
+  │
+  │
+  │ class AttemptRecord(BaseModel):
+  │ text: str…
+  └ 19 lines...
+
+● Add records tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 22 lines...
+
+● Add records integration test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'TESTS'…
+  └ 11 lines...
+

@@ -207,3 +207,45 @@ async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
         "total_attempts": len(rows),
         "distribution": distribution,
     }
+
+
+async def get_personal_records(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get pronunciation personal records (best, worst, average scores)."""
+    rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as total_attempts,
+                  ROUND(AVG(score), 2) as avg_score,
+                  MAX(score) as best_score,
+                  MIN(score) as worst_score
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL"""
+    )
+    r = dict(rows[0]) if rows else {}
+
+    # Best and worst sentences
+    best_rows = await db.execute_fetchall(
+        """SELECT reference_text, score, created_at
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL
+           ORDER BY score DESC LIMIT 3"""
+    )
+    worst_rows = await db.execute_fetchall(
+        """SELECT reference_text, score, created_at
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL
+           ORDER BY score ASC LIMIT 3"""
+    )
+
+    return {
+        "total_attempts": r.get("total_attempts", 0),
+        "avg_score": r.get("avg_score") or 0,
+        "best_score": r.get("best_score") or 0,
+        "worst_score": r.get("worst_score") or 0,
+        "best_attempts": [
+            {"text": row["reference_text"], "score": row["score"], "date": row["created_at"]}
+            for row in best_rows
+        ],
+        "worst_attempts": [
+            {"text": row["reference_text"], "score": row["score"], "date": row["created_at"]}
+            for row in worst_rows
+        ],
+    }
