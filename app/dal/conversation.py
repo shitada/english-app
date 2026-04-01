@@ -290,3 +290,41 @@ async def get_grammar_accuracy(db: aiosqlite.Connection) -> dict[str, Any]:
         "overall_accuracy_rate": overall_rate,
         "by_topic": by_topic,
     }
+
+
+async def get_topic_recommendations(
+    db: aiosqlite.Connection, all_topics: list[str]
+) -> list[dict[str, Any]]:
+    """Recommend conversation topics based on practice frequency."""
+    rows = await db.execute_fetchall(
+        """SELECT topic, COUNT(*) as session_count,
+                  MAX(started_at) as last_practiced
+           FROM conversations
+           GROUP BY topic"""
+    )
+    practiced = {row["topic"]: dict(row) for row in rows}
+    recommendations = []
+    for topic in all_topics:
+        if topic in practiced:
+            recommendations.append({
+                "topic": topic,
+                "session_count": practiced[topic]["session_count"],
+                "last_practiced": practiced[topic]["last_practiced"],
+                "reason": "continue_practice",
+            })
+        else:
+            recommendations.append({
+                "topic": topic,
+                "session_count": 0,
+                "last_practiced": None,
+                "reason": "never_practiced",
+            })
+    # Sort: never practiced first, then by fewest sessions, then oldest last_practiced
+    recommendations.sort(
+        key=lambda r: (
+            0 if r["reason"] == "never_practiced" else 1,
+            r["session_count"],
+            r["last_practiced"] or "",
+        )
+    )
+    return recommendations

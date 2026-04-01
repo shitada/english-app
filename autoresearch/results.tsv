@@ -92,3 +92,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 86	c365af0	2025-06-29T00:29:09Z	15	40	20	10	85	386	386	pass	7.3	kept	Add rate limit response headers (X-RateLimit-*)
 87	8f08580	2025-06-29T00:31:34Z	10	50	20	10	90	390	390	pass	7.3	kept	Add grammar accuracy analytics endpoint
 88	a7b0103	2025-06-29T00:34:59Z	10	60	25	10	105	397	397	pass	7.3	kept	Add vocabulary word notes/annotations
+89	b292c83	2025-06-29T00:36:55Z	10	45	20	10	85	400	400	pass	7.3	kept	Add pronunciation weekly progress tracker

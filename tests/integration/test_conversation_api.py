@@ -408,3 +408,13 @@ async def test_grammar_accuracy_empty(client):
     assert data["total_checked"] == 0
     assert data["overall_accuracy_rate"] == 0.0
     assert data["by_topic"] == []
+
+
+@pytest.mark.integration
+async def test_topic_recommendations(client):
+    res = await client.get("/api/conversation/topic-recommendations")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert all("topic" in r and "reason" in r for r in data)

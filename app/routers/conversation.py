@@ -283,3 +283,11 @@ async def export_conversation(
 async def grammar_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get grammar accuracy statistics across all conversations."""
     return await conv_dal.get_grammar_accuracy(db)
+
+
+@router.get("/topic-recommendations")
+async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get conversation topic recommendations based on practice history."""
+    topics = get_conversation_topics()
+    all_topic_keys = [t["id"] for t in topics]
+    return await conv_dal.get_topic_recommendations(db, all_topic_keys)

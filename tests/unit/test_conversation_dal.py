@@ -19,6 +19,7 @@ from app.dal.conversation import (
     get_conversation_history,
     get_conversation_summary,
     get_grammar_accuracy,
+    get_topic_recommendations,
     list_conversations,
     update_message_feedback,
 )
@@ -485,3 +486,32 @@ class TestGrammarAccuracy:
         result = await get_grammar_accuracy(test_db)
         assert result["total_checked"] == 2
         assert len(result["by_topic"]) == 2
+
+
+@pytest.mark.unit
+class TestTopicRecommendations:
+    async def test_all_unpracticed(self, test_db):
+        result = await get_topic_recommendations(test_db, ["hotel", "restaurant", "shopping"])
+        assert len(result) == 3
+        assert all(r["reason"] == "never_practiced" for r in result)
+        assert all(r["session_count"] == 0 for r in result)
+
+    async def test_some_practiced(self, test_db):
+        await create_conversation(test_db, "hotel")
+        await create_conversation(test_db, "hotel")
+        result = await get_topic_recommendations(test_db, ["hotel", "restaurant", "shopping"])
+        assert result[0]["reason"] == "never_practiced"
+        assert result[-1]["topic"] == "hotel"
+        assert result[-1]["session_count"] == 2
+
+    async def test_sorts_by_session_count(self, test_db):
+        await create_conversation(test_db, "hotel")
+        await create_conversation(test_db, "hotel")
+        await create_conversation(test_db, "restaurant")
+        result = await get_topic_recommendations(test_db, ["hotel", "restaurant", "shopping"])
+        assert result[0]["topic"] == "shopping"
+        assert result[0]["reason"] == "never_practiced"
+        assert result[1]["topic"] == "restaurant"
+        assert result[1]["session_count"] == 1
+        assert result[2]["topic"] == "hotel"
+        assert result[2]["session_count"] == 2
