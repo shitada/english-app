@@ -405,3 +405,78 @@ async def count_bookmarked_messages(
         f"SELECT COUNT(*) as cnt FROM messages {where}", params
     )
     return rows[0]["cnt"] if rows else 0
+
+
+async def get_conversation_replay(
+    db: aiosqlite.Connection, conversation_id: int
+) -> dict[str, Any] | None:
+    """Get conversation messages structured as turn-by-turn pairs for replay."""
+    conv_rows = await db.execute_fetchall(
+        """SELECT id, topic, difficulty, started_at, ended_at, status
+           FROM conversations WHERE id = ?""",
+        (conversation_id,),
+    )
+    if not conv_rows:
+        return None
+
+    conv = dict(conv_rows[0])
+    rows = await db.execute_fetchall(
+        """SELECT id, role, content, feedback_json, created_at
+           FROM messages WHERE conversation_id = ?
+           ORDER BY created_at ASC, id ASC""",
+        (conversation_id,),
+    )
+
+    turns: list[dict[str, Any]] = []
+    turn_number = 0
+    i = 0
+    messages = [dict(r) for r in rows]
+
+    while i < len(messages):
+        msg = messages[i]
+        if msg["role"] == "user":
+            turn_number += 1
+            turn: dict[str, Any] = {
+                "turn_number": turn_number,
+                "user_message": msg["content"],
+                "user_timestamp": msg["created_at"],
+                "assistant_message": None,
+                "assistant_timestamp": None,
+                "feedback": None,
+                "corrections": [],
+            }
+            # Look for paired assistant response
+            if i + 1 < len(messages) and messages[i + 1]["role"] == "assistant":
+                ast = messages[i + 1]
+                turn["assistant_message"] = ast["content"]
+                turn["assistant_timestamp"] = ast["created_at"]
+                i += 1
+            # Parse feedback from user message
+            if msg["feedback_json"]:
+                try:
+                    feedback = json.loads(msg["feedback_json"])
+                    turn["feedback"] = feedback
+                    if isinstance(feedback, dict):
+                        turn["corrections"] = feedback.get("errors", [])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            turns.append(turn)
+        elif msg["role"] == "assistant" and turn_number == 0:
+            # Opening assistant message (before any user message)
+            turn_number += 1
+            turns.append({
+                "turn_number": turn_number,
+                "user_message": None,
+                "user_timestamp": None,
+                "assistant_message": msg["content"],
+                "assistant_timestamp": msg["created_at"],
+                "feedback": None,
+                "corrections": [],
+            })
+        i += 1
+
+    return {
+        "conversation": conv,
+        "turns": turns,
+        "total_turns": len(turns),
+    }

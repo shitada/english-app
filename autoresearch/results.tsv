@@ -102,3 +102,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 96	fd35f26	2026-04-01T08:10:33Z	72	250	312	275	909	436	436	pass	7.55	keep	Add conversation message bookmarks
 97	40a58ef	2026-04-01T09:10:00Z	0	0	0	0	0	439	439	pass	7.3	keep	Add pronunciation sentence categorization by difficulty
 988b2f0062026-04-01T14:17:13+00:0014911058083922444444pass7.75keepAdd vocabulary spaced repetition analytics endpoint
+9984cee4a2026-04-01T14:33:15+00:0086129979771271462462pass8.05keepAdd user preference settings persistence

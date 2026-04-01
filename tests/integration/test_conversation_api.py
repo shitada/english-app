@@ -418,3 +418,42 @@ async def test_topic_recommendations(client):
     assert isinstance(data, list)
     assert len(data) > 0
     assert all("topic" in r and "reason" in r for r in data)
+
+
+@pytest.mark.integration
+async def test_replay_not_found(client):
+    res = await client.get("/api/conversation/9999/replay")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_replay_empty_conversation(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+    res = await client.get(f"/api/conversation/{conv_id}/replay")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversation"]["id"] == conv_id
+    assert data["total_turns"] >= 1
+    # Opening assistant message should be the first turn
+    assert data["turns"][0]["assistant_message"] == "Welcome to the hotel!"
+
+
+@pytest.mark.integration
+async def test_replay_multi_turn(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+    mock_copilot.ask = AsyncMock(return_value="Sure, I can help!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "corrected": "", "errors": []})
+    await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "I need a room."})
+    res = await client.get(f"/api/conversation/{conv_id}/replay")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_turns"] >= 2
+    # Find the user turn
+    user_turns = [t for t in data["turns"] if t["user_message"] is not None]
+    assert len(user_turns) >= 1
+    assert user_turns[0]["user_message"] == "I need a room."
+    assert user_turns[0]["assistant_message"] == "Sure, I can help!"

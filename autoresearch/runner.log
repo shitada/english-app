@@ -7447,3 +7447,190 @@ Now create unit tests:
 
 Now commit and test:
 
+● Record T2 and commit iteration 99 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #99: Add user preference settings persistence
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 42 lines...
+
+T2=1775054210, implement_sec=129. Running tests:
+
+● Run backend tests iteration 99 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+462 tests pass. TS check and smoke test:
+
+● TypeScript check iteration 99 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run smoke test iteration 99 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. Now QA test:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Restart server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 >
+  │ /dev/null 2>&1 &
+  │ echo "PID=$!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+Server is up. Now invoke the QA tester:
+
+● Tester QA test iteration 99
+  │ playwright-browser_navigate http://localhost:8000/conversation
+  │   └ ### Ran Playwright code
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed (ux_score=8). Now evaluate:
+
+● Record T3 for iteration 99 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 99
+  │ List directory tests
+  │   └ 8 files found
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+Score 8.05, verdict: keep. Recording results:
+
+● Record T4 for iteration 99 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 99 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log -1 --format=%h)
+  │ && echo "99      ${HASH} 2026-04-01T14:33:15+00:00       86      129     979     77      1271
+  │ 462     462     pass    8.05    keep    Add user preference settings persistence" >>
+  │ autoresearch/results.tsv && echo "Recorded: $HASH"
+  └ 2 lines...
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+**Iteration 99 complete: KEEP (8.05, 462/462 tests, +17 new tests)**
+
+---
+
+Kill server, start iteration 100:
+
+● Kill server, record T0 iter 100 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 100
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ 1 line read
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L1:40 (40 lines read)
+
+● Record T1 for iteration 100 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Explore conversation DAL/router
+  │ Search (grep)
+  │   │ "CREATE TABLE" (app/database.py)
+  │   └ 124 lines found
+  └ Search (grep)
+      │ "messages" (app/database.py)
+      └ 96 lines found
+
+T1=1775055445, propose_sec=155. Implementing conversation replay:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L1:10 (8 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L270:280 (11 lines read)
+
+Now add the replay DAL function at the end of conversation.py:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L360:375 (16 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L390:410 (18 lines read)
+
+✗ Edit conversation.py
+  │ app/dal/conversation.py
+  └ Multiple matches found
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L395:408 (13 lines read)
+
+● Edit conversation.py +75
+  └ app/dal/conversation.py
+
+Now add the router endpoint:
+
+● Edit conversation.py +12
+  └ app/routers/conversation.py
+
+Now add integration tests:
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L1:10 (10 lines read)
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L195:215 (20 lines read)
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L280:310 (31 lines read)
+
+● Get end of conv test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_conversation_api.py
+  └ 19 lines...
+
+● Add replay integration tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'ENDOFTEST'…
+  └ 43 lines...
+
+Now commit and test:
+

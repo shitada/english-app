@@ -316,3 +316,15 @@ async def list_bookmarks(
     items = await conv_dal.get_bookmarked_messages(db, conversation_id, limit, offset)
     total = await conv_dal.count_bookmarked_messages(db, conversation_id)
     return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+
+@router.get("/{conversation_id}/replay")
+async def get_conversation_replay(
+    conversation_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get conversation as turn-by-turn pairs for replay/review mode."""
+    result = await conv_dal.get_conversation_replay(db, conversation_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return result
