@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.utils import get_topic_label, safe_llm_call
+from app.utils import get_topic_label, safe_llm_call, validate_topic
 
 
 @pytest.mark.unit
@@ -159,3 +159,36 @@ class TestGetTopicLabel:
             {"id": "x", "label": "Second"},
         ]
         assert get_topic_label(topics, "x") == "First"
+
+
+@pytest.mark.unit
+class TestValidateTopic:
+    def test_valid_topic_returns_dict(self):
+        topics = [
+            {"id": "hotel_checkin", "label": "Hotel Check-in"},
+            {"id": "shopping", "label": "Shopping"},
+        ]
+        result = validate_topic(topics, "hotel_checkin")
+        assert result == {"id": "hotel_checkin", "label": "Hotel Check-in"}
+
+    def test_invalid_topic_raises_422(self):
+        topics = [{"id": "hotel_checkin", "label": "Hotel Check-in"}]
+        with pytest.raises(HTTPException) as exc_info:
+            validate_topic(topics, "nonexistent")
+        assert exc_info.value.status_code == 422
+        assert "nonexistent" in exc_info.value.detail
+
+    def test_error_includes_valid_ids(self):
+        topics = [
+            {"id": "hotel_checkin", "label": "Hotel"},
+            {"id": "shopping", "label": "Shopping"},
+        ]
+        with pytest.raises(HTTPException) as exc_info:
+            validate_topic(topics, "bad")
+        assert "hotel_checkin" in exc_info.value.detail
+        assert "shopping" in exc_info.value.detail
+
+    def test_empty_topics_raises_422(self):
+        with pytest.raises(HTTPException) as exc_info:
+            validate_topic([], "any")
+        assert exc_info.value.status_code == 422

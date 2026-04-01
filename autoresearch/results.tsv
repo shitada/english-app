@@ -111,3 +111,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 10588955892026-04-01T15:37:40+00:002734617187577491491pass8.25keepFix missing db.commit() in update_message_feedback
 1069100ca82026-04-01T15:47:26+00:0011290322167691497497pass7.75keepAdd missing input validation bounds on pagination and goals
 10769d1abd2026-04-01T15:59:07+00:0013683330123672500500pass7.95keepStore difficulty level with pronunciation attempts
+108f12d8942026-04-01T16:17:09+00:00211667031971177501501pass7.5keepInclude message id and bookmark status in history endpoint

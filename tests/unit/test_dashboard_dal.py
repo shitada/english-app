@@ -8,6 +8,7 @@ from app.dal.conversation import add_message, create_conversation
 from app.dal.dashboard import (
     delete_learning_goal,
     get_learning_goals,
+    get_learning_summary,
     get_stats,
     set_learning_goal,
 )
@@ -302,3 +303,48 @@ class TestLearningGoals:
 
     async def test_delete_nonexistent_goal(self, test_db):
         assert await delete_learning_goal(test_db, "conversations") is False
+
+
+def _make_questions(count=1):
+    return [
+        {"word": f"word_{i}", "correct_meaning": f"m_{i}", "example_sentence": f"Ex {i}.", "difficulty": 1, "wrong_options": ["a", "b", "c"]}
+        for i in range(count)
+    ]
+
+
+@pytest.mark.unit
+class TestGetLearningSummary:
+    async def test_empty_db(self, test_db):
+        result = await get_learning_summary(test_db)
+        assert result["total_study_days"] == 0
+        assert result["words_learning"] == 0
+        assert result["total_quiz_attempts"] == 0
+        assert result["quiz_accuracy_percent"] == 0
+
+    async def test_study_days_from_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        await add_message(test_db, cid, "user", "Hello")
+        result = await get_learning_summary(test_db)
+        assert result["total_study_days"] >= 1
+
+    async def test_words_learning_count(self, test_db):
+        words = await save_words(test_db, "hotel", _make_questions(2))
+        await update_progress(test_db, words[0]["id"], is_correct=True)
+        result = await get_learning_summary(test_db)
+        assert result["words_learning"] == 1  # Only 1 word has level >= 1
+
+    async def test_quiz_accuracy_all_correct(self, test_db):
+        words = await save_words(test_db, "hotel", _make_questions(1))
+        from app.dal.vocabulary import log_attempt
+        await log_attempt(test_db, words[0]["id"], is_correct=True)
+        await log_attempt(test_db, words[0]["id"], is_correct=True)
+        result = await get_learning_summary(test_db)
+        assert result["quiz_accuracy_percent"] == 100.0
+
+    async def test_quiz_accuracy_mixed(self, test_db):
+        words = await save_words(test_db, "hotel", _make_questions(1))
+        from app.dal.vocabulary import log_attempt
+        await log_attempt(test_db, words[0]["id"], is_correct=True)
+        await log_attempt(test_db, words[0]["id"], is_correct=False)
+        result = await get_learning_summary(test_db)
+        assert result["quiz_accuracy_percent"] == 50.0
