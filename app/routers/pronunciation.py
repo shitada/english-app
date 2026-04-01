@@ -205,3 +205,17 @@ async def get_weekly_progress(
 ):
     """Get pronunciation score averages grouped by week."""
     return await pron_dal.get_weekly_progress(db, weeks=weeks)
+
+
+@router.get("/sentences/vocabulary")
+async def get_vocabulary_sentences(
+    difficulty: str | None = Query(default=None, pattern="^(beginner|intermediate|advanced)$"),
+    topic: str | None = None,
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get pronunciation practice sentences sourced from vocabulary example sentences."""
+    sentences = await pron_dal.get_sentences_from_vocabulary(
+        db, limit=limit, difficulty=difficulty, topic=topic
+    )
+    return {"sentences": sentences, "source": "vocabulary", "count": len(sentences)}

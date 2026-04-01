@@ -108,4 +108,4 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add conversation message bookmarks (completed iteration #96)
 - [x] ✅ Add vocabulary spaced repetition analytics (completed iteration #98)
 - [x] ✅ Add user preference settings persistence (completed iteration #99)
-- [ ] Add conversation replay/review mode
+- [x] ✅ Add conversation replay/review mode (completed iteration #100)

@@ -257,3 +257,42 @@ async def test_get_sentences_invalid_difficulty(client):
     """Invalid difficulty value should return 422."""
     res = await client.get("/api/pronunciation/sentences?difficulty=expert")
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_vocabulary_sentences_empty(client):
+    res = await client.get("/api/pronunciation/sentences/vocabulary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["sentences"] == []
+    assert data["source"] == "vocabulary"
+
+
+@pytest.mark.integration
+async def test_vocabulary_sentences_with_data(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "desk", "correct_meaning": "a table", "example_sentence": "Please sit at the desk.", "difficulty": 2, "wrong_options": ["a", "b", "c"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    res = await client.get("/api/pronunciation/sentences/vocabulary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["count"] >= 1
+    assert data["sentences"][0]["word"] == "desk"
+
+
+@pytest.mark.integration
+async def test_vocabulary_sentences_difficulty_filter(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "desk", "correct_meaning": "a table", "example_sentence": "Sit.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+            {"word": "complex", "correct_meaning": "difficult", "example_sentence": "Complex.", "difficulty": 4, "wrong_options": ["a", "b", "c"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    res = await client.get("/api/pronunciation/sentences/vocabulary?difficulty=beginner")
+    assert res.status_code == 200
+    for s in res.json()["sentences"]:
+        assert s["difficulty"] == "beginner"

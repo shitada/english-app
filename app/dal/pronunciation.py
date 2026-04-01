@@ -307,3 +307,56 @@ async def get_weekly_progress(
         "total_weeks": len(weekly),
         "improvement": improvement,
     }
+
+
+_VOCAB_DIFFICULTY_MAP = {
+    1: "beginner",
+    2: "beginner",
+    3: "intermediate",
+    4: "advanced",
+    5: "advanced",
+}
+
+
+async def get_sentences_from_vocabulary(
+    db: aiosqlite.Connection,
+    limit: int = 10,
+    difficulty: str | None = None,
+    topic: str | None = None,
+) -> list[dict[str, Any]]:
+    """Get pronunciation practice sentences from vocabulary example_sentence column."""
+    where_clauses = ["example_sentence IS NOT NULL", "example_sentence != ''"]
+    params: list[Any] = []
+
+    if difficulty:
+        levels = [k for k, v in _VOCAB_DIFFICULTY_MAP.items() if v == difficulty]
+        if levels:
+            placeholders = ",".join("?" * len(levels))
+            where_clauses.append(f"difficulty IN ({placeholders})")
+            params.extend(levels)
+
+    if topic:
+        where_clauses.append("topic = ?")
+        params.append(topic)
+
+    params.append(limit)
+    where = " AND ".join(where_clauses)
+
+    rows = await db.execute_fetchall(
+        f"""SELECT word, meaning, example_sentence, difficulty, topic
+            FROM vocabulary_words
+            WHERE {where}
+            ORDER BY RANDOM()
+            LIMIT ?""",
+        params,
+    )
+    return [
+        {
+            "text": r["example_sentence"],
+            "word": r["word"],
+            "meaning": r["meaning"],
+            "topic": r["topic"],
+            "difficulty": _VOCAB_DIFFICULTY_MAP.get(r["difficulty"], "intermediate"),
+        }
+        for r in rows
+    ]

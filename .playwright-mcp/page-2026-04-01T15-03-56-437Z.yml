@@ -1,0 +1,80 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Choose a Scenario" [level=2] [ref=e9]
+      - paragraph [ref=e10]: Select a real-life scenario. AI will play a role and you'll practice the conversation.
+      - generic [ref=e11]:
+        - heading "Difficulty Level" [level=3] [ref=e12]
+        - generic [ref=e13]:
+          - button "🌱 Beginner" [ref=e14] [cursor=pointer]
+          - button "📗 Intermediate" [ref=e15] [cursor=pointer]
+          - button "🚀 Advanced" [active] [ref=e16] [cursor=pointer]
+      - generic [ref=e17]:
+        - button "🏨 Hotel Check-in Check into a hotel, ask about amenities" [ref=e18] [cursor=pointer]:
+          - heading "🏨 Hotel Check-in" [level=3] [ref=e19]
+          - paragraph [ref=e20]: Check into a hotel, ask about amenities
+        - button "🍽️ Restaurant Order Order food, ask about the menu, pay the bill" [ref=e21] [cursor=pointer]:
+          - heading "🍽️ Restaurant Order" [level=3] [ref=e22]
+          - paragraph [ref=e23]: Order food, ask about the menu, pay the bill
+        - button "💼 Job Interview Answer interview questions, discuss experience" [ref=e24] [cursor=pointer]:
+          - heading "💼 Job Interview" [level=3] [ref=e25]
+          - paragraph [ref=e26]: Answer interview questions, discuss experience
+        - button "🏥 Doctor Visit Describe symptoms, understand the diagnosis" [ref=e27] [cursor=pointer]:
+          - heading "🏥 Doctor Visit" [level=3] [ref=e28]
+          - paragraph [ref=e29]: Describe symptoms, understand the diagnosis
+        - button "🛍️ Shopping Ask about products, sizes, prices, returns" [ref=e30] [cursor=pointer]:
+          - heading "🛍️ Shopping" [level=3] [ref=e31]
+          - paragraph [ref=e32]: Ask about products, sizes, prices, returns
+        - button "✈️ At the Airport Check-in, go through security, find the gate" [ref=e33] [cursor=pointer]:
+          - heading "✈️ At the Airport" [level=3] [ref=e34]
+          - paragraph [ref=e35]: Check-in, go through security, find the gate
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Past Conversations" [level=3] [ref=e38]:
+            - img [ref=e39]
+            - text: Past Conversations
+          - button "Clear All" [ref=e43] [cursor=pointer]
+        - generic [ref=e44]:
+          - button "🏨 Hotel Check-inadvanced · 1 messages Apr 1, 2026, 8:16 AM Delete conversation" [ref=e45] [cursor=pointer]:
+            - generic [ref=e46]:
+              - strong [ref=e47]: 🏨 Hotel Check-in
+              - generic [ref=e48]: advanced · 1 messages
+            - generic [ref=e49]:
+              - generic [ref=e50]: Apr 1, 2026, 8:16 AM
+              - button "Delete conversation" [ref=e51]:
+                - img [ref=e52]
+          - button "🏨 Hotel Check-inintermediate · 3 messages Apr 1, 2026, 7:20 AM Delete conversation" [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]:
+              - strong [ref=e57]: 🏨 Hotel Check-in
+              - generic [ref=e58]: intermediate · 3 messages
+            - generic [ref=e59]:
+              - generic [ref=e60]: Apr 1, 2026, 7:20 AM
+              - button "Delete conversation" [ref=e61]:
+                - img [ref=e62]
+          - button "🍽️ Restaurant Orderbeginner · 3 messages Apr 1, 2026, 7:14 AM Delete conversation" [ref=e65] [cursor=pointer]:
+            - generic [ref=e66]:
+              - strong [ref=e67]: 🍽️ Restaurant Order
+              - generic [ref=e68]: beginner · 3 messages
+            - generic [ref=e69]:
+              - generic [ref=e70]: Apr 1, 2026, 7:14 AM
+              - button "Delete conversation" [ref=e71]:
+                - img [ref=e72]
+          - button "🛍️ Shoppingintermediate · 11 messages Mar 31, 2026, 9:53 AM Delete conversation" [ref=e75] [cursor=pointer]:
+            - generic [ref=e76]:
+              - strong [ref=e77]: 🛍️ Shopping
+              - generic [ref=e78]: intermediate · 11 messages
+            - generic [ref=e79]:
+              - generic [ref=e80]: Mar 31, 2026, 9:53 AM
+              - button "Delete conversation" [ref=e81]:
+                - img [ref=e82]
+          - button "🏨 Hotel Check-inbeginner · 1 messages Mar 30, 2026, 3:57 PM Delete conversation" [ref=e85] [cursor=pointer]:
+            - generic [ref=e86]:
+              - strong [ref=e87]: 🏨 Hotel Check-in
+              - generic [ref=e88]: beginner · 1 messages
+            - generic [ref=e89]:
+              - generic [ref=e90]: Mar 30, 2026, 3:57 PM
+              - button "Delete conversation" [ref=e91]:
+                - img [ref=e92]

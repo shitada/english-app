@@ -13,6 +13,7 @@ from app.dal.pronunciation import (
     get_history,
     get_progress,
     get_sentences_from_conversations,
+    get_sentences_from_vocabulary,
     get_weekly_progress,
     save_attempt,
 )
@@ -390,3 +391,40 @@ class TestWeeklyProgress:
         assert result["total_weeks"] >= 1
         assert result["weeks"][0]["attempt_count"] == 2
         assert result["weeks"][0]["avg_score"] == 90.0
+
+
+@pytest.mark.unit
+class TestGetSentencesFromVocabulary:
+    async def test_empty_db(self, test_db):
+        result = await get_sentences_from_vocabulary(test_db)
+        assert result == []
+
+    async def test_returns_sentences(self, test_db):
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "desk", "correct_meaning": "a table", "example_sentence": "Please sit at the desk.", "difficulty": 2, "wrong_options": ["a", "b", "c"]},
+            {"word": "lamp", "correct_meaning": "a light", "example_sentence": "Turn on the lamp.", "difficulty": 3, "wrong_options": ["a", "b", "c"]},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        result = await get_sentences_from_vocabulary(test_db)
+        assert len(result) == 2
+        assert all("text" in r and "word" in r and "difficulty" in r for r in result)
+
+    async def test_filter_by_difficulty(self, test_db):
+        from app.dal.vocabulary import save_words
+        questions = [
+            {"word": "desk", "correct_meaning": "a table", "example_sentence": "Please sit at the desk.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+            {"word": "lamp", "correct_meaning": "a light", "example_sentence": "Turn on the lamp.", "difficulty": 4, "wrong_options": ["a", "b", "c"]},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        result = await get_sentences_from_vocabulary(test_db, difficulty="beginner")
+        assert all(r["difficulty"] == "beginner" for r in result)
+
+    async def test_filter_by_topic(self, test_db):
+        from app.dal.vocabulary import save_words
+        q1 = [{"word": "desk", "correct_meaning": "a table", "example_sentence": "Sit.", "difficulty": 1, "wrong_options": ["a", "b", "c"]}]
+        q2 = [{"word": "lamp", "correct_meaning": "a light", "example_sentence": "Light.", "difficulty": 1, "wrong_options": ["a", "b", "c"]}]
+        await save_words(test_db, "hotel_checkin", q1)
+        await save_words(test_db, "shopping", q2)
+        result = await get_sentences_from_vocabulary(test_db, topic="hotel_checkin")
+        assert all(r["topic"] == "hotel_checkin" for r in result)
