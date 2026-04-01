@@ -219,3 +219,30 @@ async def get_vocabulary_sentences(
         db, limit=limit, difficulty=difficulty, topic=topic
     )
     return {"sentences": sentences, "source": "vocabulary", "count": len(sentences)}
+
+
+class WeaknessHeardAs(BaseModel):
+    heard: str
+    count: int
+
+
+class WeaknessItem(BaseModel):
+    word: str
+    occurrence_count: int
+    common_heard_as: list[list]
+    tips: list[str]
+
+
+class WeaknessesResponse(BaseModel):
+    weaknesses: list[WeaknessItem]
+    total: int
+
+
+@router.get("/weaknesses", response_model=WeaknessesResponse)
+async def get_pronunciation_weaknesses(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get commonly mispronounced words aggregated from pronunciation feedback."""
+    weaknesses = await pron_dal.get_pronunciation_weaknesses(db, limit=limit)
+    return {"weaknesses": weaknesses, "total": len(weaknesses)}

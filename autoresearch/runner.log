@@ -7772,3 +7772,136 @@ Add integration tests:
 
 Commit and test:
 
+● Record T2 and commit iteration 101 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #101: Add pronunciation practice sentences from vocabulary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 33 lines...
+
+T2=1775056355, implement_sec=90. Running tests:
+
+● Run tests iteration 101 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+472 passed. TS check + smoke test:
+
+● TS check iteration 101 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Smoke test iteration 101 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. QA test:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 101
+  │ playwright-browser_evaluate
+  │   └ ### Result
+  └ playwright-browser_click
+      └ ### Ran Playwright code
+
+QA passed (ux_score=8). Evaluate:
+
+● Record T3 for iteration 101 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 101
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:60 (60 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L1:30 (30 lines read)
+
+Score 7.3, verdict: keep.
+
+● Record T4 for iteration 101 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 101 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log -1 --format=%h)
+  │ && echo "101     ${HASH} 2026-04-01T14:54:56+00:00       169     90      410     72      741
+  │ 472     472     pass    7.3     keep    Add pronunciation practice sentences from vocabulary" >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+**Iteration 101 complete: KEEP (7.3, 472/472 tests, +7 new tests)**
+
+---
+
+Iteration 102:
+
+● Kill server, record T0 iter 102 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 102
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ 430 lines read
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ 298 lines read
+
+● Record T1 for iteration 102 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775057129, propose_sec=267. Implementing pronunciation weakness analysis:
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L340:350 (11 lines read)
+
+● Check file length (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L355:362 (8 lines read)
+
+● Edit pronunciation.py +60
+  └ app/dal/pronunciation.py
+
+Now add the router endpoint:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L215:230 (7 lines read)
+
+● Edit pronunciation.py +27
+  └ app/routers/pronunciation.py
+
+Now add unit and integration tests:
+
+● Add unit tests for weaknesses (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'ENDOFTEST'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 44 lines...
+
+● Add integration test for weaknesses (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'ENDOFTEST'…
+  └ 11 lines...
+
+Commit and test:
+

@@ -428,3 +428,44 @@ class TestGetSentencesFromVocabulary:
         await save_words(test_db, "shopping", q2)
         result = await get_sentences_from_vocabulary(test_db, topic="hotel_checkin")
         assert all(r["topic"] == "hotel_checkin" for r in result)
+
+
+@pytest.mark.unit
+class TestGetPronunciationWeaknesses:
+    async def test_empty_db(self, test_db):
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        result = await get_pronunciation_weaknesses(test_db)
+        assert result == []
+
+    async def test_single_mispronunciation(self, test_db):
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        feedback = {
+            "overall_score": 7,
+            "word_feedback": [
+                {"expected": "hello", "heard": "helo", "is_correct": False, "tip": "Focus on the double L"},
+                {"expected": "world", "heard": "world", "is_correct": True},
+            ]
+        }
+        await save_attempt(test_db, "Hello world", "Helo world", feedback, 7.0)
+        result = await get_pronunciation_weaknesses(test_db)
+        assert len(result) == 1
+        assert result[0]["word"] == "hello"
+        assert result[0]["occurrence_count"] == 1
+
+    async def test_aggregates_across_attempts(self, test_db):
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        feedback1 = {"word_feedback": [{"expected": "the", "heard": "da", "is_correct": False, "tip": "th sound"}]}
+        feedback2 = {"word_feedback": [{"expected": "the", "heard": "de", "is_correct": False, "tip": "th sound"}]}
+        await save_attempt(test_db, "The cat.", "Da cat.", feedback1, 5.0)
+        await save_attempt(test_db, "The dog.", "De dog.", feedback2, 5.0)
+        result = await get_pronunciation_weaknesses(test_db)
+        assert result[0]["word"] == "the"
+        assert result[0]["occurrence_count"] == 2
+
+    async def test_limit_parameter(self, test_db):
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        for i in range(5):
+            fb = {"word_feedback": [{"expected": f"word{i}", "heard": f"w{i}", "is_correct": False}]}
+            await save_attempt(test_db, f"Test {i}", f"Test {i}", fb, 5.0)
+        result = await get_pronunciation_weaknesses(test_db, limit=3)
+        assert len(result) <= 3

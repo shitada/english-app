@@ -296,3 +296,12 @@ async def test_vocabulary_sentences_difficulty_filter(client, mock_copilot):
     assert res.status_code == 200
     for s in res.json()["sentences"]:
         assert s["difficulty"] == "beginner"
+
+
+@pytest.mark.integration
+async def test_weaknesses_empty(client):
+    res = await client.get("/api/pronunciation/weaknesses")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["weaknesses"] == []
+    assert data["total"] == 0

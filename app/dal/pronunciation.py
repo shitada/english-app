@@ -360,3 +360,63 @@ async def get_sentences_from_vocabulary(
         }
         for r in rows
     ]
+
+
+async def get_pronunciation_weaknesses(
+    db: aiosqlite.Connection, limit: int = 10
+) -> list[dict[str, Any]]:
+    """Aggregate commonly mispronounced words from pronunciation feedback data."""
+    rows = await db.execute_fetchall(
+        """SELECT feedback_json FROM pronunciation_attempts
+           WHERE feedback_json IS NOT NULL"""
+    )
+
+    word_stats: dict[str, dict[str, Any]] = {}
+    for r in rows:
+        try:
+            feedback = json.loads(r["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        word_feedback = feedback.get("word_feedback", [])
+        if not isinstance(word_feedback, list):
+            continue
+        for wf in word_feedback:
+            if not isinstance(wf, dict):
+                continue
+            if wf.get("is_correct", True):
+                continue
+            expected = wf.get("expected", "").lower().strip()
+            if not expected:
+                continue
+            if expected not in word_stats:
+                word_stats[expected] = {
+                    "word": expected,
+                    "occurrence_count": 0,
+                    "heard_as": {},
+                    "tips": set(),
+                }
+            word_stats[expected]["occurrence_count"] += 1
+            heard = wf.get("heard", "").lower().strip()
+            if heard:
+                word_stats[expected]["heard_as"][heard] = (
+                    word_stats[expected]["heard_as"].get(heard, 0) + 1
+                )
+            tip = wf.get("tip", "")
+            if tip:
+                word_stats[expected]["tips"].add(tip)
+
+    ranked = sorted(word_stats.values(), key=lambda x: x["occurrence_count"], reverse=True)[:limit]
+
+    return [
+        {
+            "word": w["word"],
+            "occurrence_count": w["occurrence_count"],
+            "common_heard_as": sorted(
+                w["heard_as"].items(), key=lambda x: x[1], reverse=True
+            )[:3],
+            "tips": list(w["tips"])[:3],
+        }
+        for w in ranked
+    ]

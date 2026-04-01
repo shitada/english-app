@@ -1,0 +1,40 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [active] [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e314]:
+      - heading "Vocabulary" [level=2] [ref=e315]
+      - paragraph [ref=e316]: Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
+      - generic [ref=e317]:
+        - heading "Quiz Mode" [level=3] [ref=e318]
+        - generic [ref=e319]:
+          - button "Word → Meaning" [ref=e320] [cursor=pointer]
+          - button "Meaning → Word" [ref=e321] [cursor=pointer]
+      - generic [ref=e322]:
+        - button "🏨 Hotel & Accommodation Reservation, check-in, amenities, complaints" [ref=e323] [cursor=pointer]:
+          - heading "🏨 Hotel & Accommodation" [level=3] [ref=e324]
+          - paragraph [ref=e325]: Reservation, check-in, amenities, complaints
+        - button "🍽️ Restaurant & Dining Menu, ordering, allergies, tipping" [ref=e326] [cursor=pointer]:
+          - heading "🍽️ Restaurant & Dining" [level=3] [ref=e327]
+          - paragraph [ref=e328]: Menu, ordering, allergies, tipping
+        - button "💼 Job Interview Resume, qualifications, strengths, salary" [ref=e329] [cursor=pointer]:
+          - heading "💼 Job Interview" [level=3] [ref=e330]
+          - paragraph [ref=e331]: Resume, qualifications, strengths, salary
+        - button "🏥 Health & Medical Symptoms, diagnosis, prescription, insurance" [ref=e332] [cursor=pointer]:
+          - heading "🏥 Health & Medical" [level=3] [ref=e333]
+          - paragraph [ref=e334]: Symptoms, diagnosis, prescription, insurance
+        - button "🛍️ Shopping & Retail Sizes, colors, prices, returns, discounts" [ref=e335] [cursor=pointer]:
+          - heading "🛍️ Shopping & Retail" [level=3] [ref=e336]
+          - paragraph [ref=e337]: Sizes, colors, prices, returns, discounts
+        - button "✈️ Travel & Transport Boarding, delays, luggage, immigration" [ref=e338] [cursor=pointer]:
+          - heading "✈️ Travel & Transport" [level=3] [ref=e339]
+          - paragraph [ref=e340]: Boarding, delays, luggage, immigration
