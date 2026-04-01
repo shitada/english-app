@@ -248,3 +248,28 @@ async def get_pronunciation_weaknesses(
     """Get commonly mispronounced words aggregated from pronunciation feedback."""
     weaknesses = await pron_dal.get_pronunciation_weaknesses(db, limit=limit)
     return {"weaknesses": weaknesses, "total": len(weaknesses)}
+
+
+class RetrySuggestionItem(BaseModel):
+    text: str
+    attempt_count: int
+    latest_score: float
+    worst_score: float
+    best_score: float
+
+
+class RetrySuggestionsResponse(BaseModel):
+    suggestions: list[RetrySuggestionItem]
+    total: int
+    threshold: float
+
+
+@router.get("/retry-suggestions", response_model=RetrySuggestionsResponse)
+async def get_retry_suggestions(
+    threshold: float = Query(default=7.0, ge=0, le=10),
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get sentences that need re-practicing based on low scores."""
+    suggestions = await pron_dal.get_retry_suggestions(db, threshold=threshold, limit=limit)
+    return {"suggestions": suggestions, "total": len(suggestions), "threshold": threshold}

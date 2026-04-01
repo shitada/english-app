@@ -8807,3 +8807,121 @@ Now add dashboard unit tests:
   │ def _make_questions(count=1):…
   └ 45 lines...
 
+● Commit iteration 109 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #109: Add unit tests for validate_topic and get_learning_summary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 36 lines...
+
+● Run tests iteration 109 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+510 passed! Quick checks:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+QA:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 109
+  │ playwright-browser_resize
+  │   └ ### Ran Playwright code
+  └ playwright-browser_snapshot
+      └ ### Page
+
+● T3 iter 109 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 109
+  │ Read test_utils.py
+  │   │ tests/unit/test_utils.py
+  │   └ L164:195 (31 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L315:351 (36 lines read)
+
+Score 7.8, keep.
+
+● Record results, kill server (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log
+  │ -1 --format=%h) && echo "109   ${HASH} 2026-04-01T16:30:16+00:00       731     89      103
+  │ $(($T4-1775063139))     $(($T4-1775062216))     510     510     pass    7.8     keep    Add unit
+  │ tests for validate_topic and get_learning_summary" >> autoresearch/results.tsv && lsof -ti:8000
+  │ | xargs kill -9 2>/dev/null && echo "done"
+  └ 2 lines...
+
+**Iteration 109 complete: KEEP (7.8, 510/510, +9 tests)**
+
+I've completed 12 iterations so far (98-109). Let me continue with iterations 110-117 following the same pattern. Due to the extensive work done, let me now generate the summary for iterations completed so far and continue:
+
+● T0 iter 110 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 110
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1:80 (80 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L1:60 (58 lines read)
+
+● T1 iter 110 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775063386, propose_sec=141. Implementing:
+
+● Check file length (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L418:424 (7 lines read)
+
+● Add retry suggestions DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py << 'ENDOFCODE'
+  │
+  │
+  │ async def get_retry_suggestions(
+  │ db: aiosqlite.Connection, threshold: float = 7.0, limit: int = 10…
+  └ 30 lines...
+
+Now add the router endpoint:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L245:255 (6 lines read)
+
+● Add retry suggestions endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py <<
+  │ 'ENDOFCODE'
+  │
+  │
+  │ class RetrySuggestionItem(BaseModel):…
+  └ 24 lines...
+
+Now add tests:
+
+● Add retry suggestions tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'ENDOFTEST'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 46 lines...
+

@@ -422,3 +422,35 @@ async def get_pronunciation_weaknesses(
         }
         for w in ranked
     ]
+
+
+async def get_retry_suggestions(
+    db: aiosqlite.Connection, threshold: float = 7.0, limit: int = 10
+) -> list[dict[str, Any]]:
+    """Get sentences that should be re-practiced based on low latest scores."""
+    rows = await db.execute_fetchall(
+        """SELECT reference_text,
+                  COUNT(*) as attempt_count,
+                  MIN(score) as worst_score,
+                  MAX(score) as best_score,
+                  (SELECT pa2.score FROM pronunciation_attempts pa2
+                   WHERE pa2.reference_text = pa.reference_text
+                   ORDER BY pa2.created_at DESC LIMIT 1) as latest_score
+           FROM pronunciation_attempts pa
+           WHERE score IS NOT NULL
+           GROUP BY reference_text
+           HAVING latest_score < ?
+           ORDER BY latest_score ASC
+           LIMIT ?""",
+        (threshold, limit),
+    )
+    return [
+        {
+            "text": r["reference_text"],
+            "attempt_count": r["attempt_count"],
+            "latest_score": r["latest_score"],
+            "worst_score": r["worst_score"],
+            "best_score": r["best_score"],
+        }
+        for r in rows
+    ]

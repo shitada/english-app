@@ -494,3 +494,36 @@ class TestDifficultyTracking:
         difficulties = [h["difficulty"] for h in history]
         assert "beginner" in difficulties
         assert "advanced" in difficulties
+
+
+@pytest.mark.unit
+class TestGetRetrySuggestions:
+    async def test_empty_db(self, test_db):
+        from app.dal.pronunciation import get_retry_suggestions
+        result = await get_retry_suggestions(test_db)
+        assert result == []
+
+    async def test_all_above_threshold(self, test_db):
+        from app.dal.pronunciation import get_retry_suggestions
+        feedback = {"overall_score": 9}
+        await save_attempt(test_db, "Hello.", "Hello.", feedback, 9.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert result == []
+
+    async def test_returns_low_score_sentences(self, test_db):
+        from app.dal.pronunciation import get_retry_suggestions
+        feedback = {"overall_score": 3}
+        await save_attempt(test_db, "Hard sentence.", "Hard sentance.", feedback, 3.0)
+        await save_attempt(test_db, "Easy sentence.", "Easy sentence.", feedback, 9.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert len(result) == 1
+        assert result[0]["text"] == "Hard sentence."
+        assert result[0]["latest_score"] == 3.0
+
+    async def test_limit(self, test_db):
+        from app.dal.pronunciation import get_retry_suggestions
+        feedback = {"overall_score": 2}
+        for i in range(5):
+            await save_attempt(test_db, f"Sentence {i}.", f"S {i}.", feedback, 2.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0, limit=3)
+        assert len(result) <= 3

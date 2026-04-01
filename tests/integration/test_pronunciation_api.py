@@ -305,3 +305,12 @@ async def test_weaknesses_empty(client):
     data = res.json()
     assert data["weaknesses"] == []
     assert data["total"] == 0
+
+
+@pytest.mark.integration
+async def test_retry_suggestions_empty(client):
+    res = await client.get("/api/pronunciation/retry-suggestions")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["suggestions"] == []
+    assert data["threshold"] == 7.0
