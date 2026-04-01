@@ -410,3 +410,57 @@ export async function getTopicRecommendations(): Promise<TopicRecommendation[]> 
   const res = await fetch("/api/conversation/topic-recommendations");
   return res.json();
 }
+
+// Learning goals (from iteration 92)
+export interface LearningGoal {
+  id: number;
+  goal_type: "conversations" | "vocabulary_reviews" | "pronunciation_attempts";
+  daily_target: number;
+  created_at: string;
+  updated_at: string;
+  today_count: number;
+  completed: boolean;
+}
+
+export async function getLearningGoals(): Promise<LearningGoal[]> {
+  const res = await fetch("/api/dashboard/goals");
+  return res.json();
+}
+
+export async function setLearningGoal(goalType: string, dailyTarget: number): Promise<LearningGoal> {
+  const res = await fetch("/api/dashboard/goals", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ goal_type: goalType, daily_target: dailyTarget }),
+  });
+  return res.json();
+}
+
+export async function deleteLearningGoal(goalType: string): Promise<void> {
+  await fetch(`/api/dashboard/goals/${goalType}`, { method: "DELETE" });
+}
+
+// Word detail (from iteration 94)
+export interface WordDetail {
+  id: number;
+  topic: string;
+  word: string;
+  meaning: string;
+  example_sentence: string;
+  difficulty: number;
+  is_favorite: number;
+  notes: string | null;
+  progress: {
+    correct_count: number;
+    incorrect_count: number;
+    level: number;
+    last_reviewed: string;
+    next_review_at: string;
+  } | null;
+  similar_words: { id: number; word: string; meaning: string; difficulty: number }[];
+}
+
+export async function getWordDetail(wordId: number): Promise<WordDetail> {
+  const res = await fetch(`/api/vocabulary/${wordId}/detail`);
+  return res.json();
+}

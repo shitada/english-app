@@ -11,9 +11,24 @@ BASE = f"http://localhost:{PORT}"
 ENDPOINTS = [
     "/api/health",
     "/api/conversation/topics",
+    "/api/conversation/grammar-accuracy",
+    "/api/conversation/topic-recommendations",
     "/api/pronunciation/sentences",
+    "/api/pronunciation/distribution",
+    "/api/pronunciation/records",
+    "/api/pronunciation/weekly-progress",
     "/api/vocabulary/topics",
+    "/api/vocabulary/favorites",
+    "/api/vocabulary/forecast",
+    "/api/vocabulary/attempts",
+    "/api/vocabulary/topic-accuracy",
     "/api/dashboard/stats",
+    "/api/dashboard/activity-history",
+    "/api/dashboard/streak-milestones",
+    "/api/dashboard/conversation-duration",
+    "/api/dashboard/config",
+    "/api/dashboard/summary",
+    "/api/dashboard/goals",
 ]
 
 
