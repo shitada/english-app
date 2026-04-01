@@ -574,3 +574,21 @@ async def test_batch_import_skips_duplicates(client):
     res = await client.post("/api/vocabulary/import", json={"words": words})
     assert res.status_code == 200
     assert res.json()["skipped_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_update_word(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "bed", "correct_meaning": "furniture for sleeping", "example_sentence": "Sleep on the bed.", "difficulty": 1}]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+    res = await client.put(f"/api/vocabulary/{word_id}", json={"meaning": "updated meaning"})
+    assert res.status_code == 200
+    assert res.json()["meaning"] == "updated meaning"
+
+
+@pytest.mark.asyncio
+async def test_update_word_not_found(client):
+    res = await client.put("/api/vocabulary/99999", json={"meaning": "test"})
+    assert res.status_code == 404

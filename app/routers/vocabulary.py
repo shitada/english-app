@@ -273,6 +273,39 @@ async def delete_word(
     return {"deleted": True}
 
 
+class UpdateWordRequest(BaseModel):
+    meaning: str | None = Field(default=None, max_length=500)
+    example_sentence: str | None = Field(default=None, max_length=500)
+    difficulty: int | None = Field(default=None, ge=1, le=5)
+
+
+class UpdateWordResponse(BaseModel):
+    id: int
+    topic: str
+    word: str
+    meaning: str
+    example_sentence: str
+    difficulty: int
+
+
+@router.put("/{word_id}", response_model=UpdateWordResponse)
+async def update_word(
+    word_id: int,
+    req: UpdateWordRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Update a vocabulary word's meaning, example, or difficulty."""
+    result = await vocab_dal.update_word(
+        db, word_id,
+        meaning=req.meaning,
+        example_sentence=req.example_sentence,
+        difficulty=req.difficulty,
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Word not found")
+    return result
+
+
 class ExportWordItem(BaseModel):
     id: int
     word: str

@@ -550,3 +550,38 @@ async def batch_import_words(
         "skipped_count": skipped,
         "words": imported,
     }
+
+
+async def update_word(
+    db: aiosqlite.Connection,
+    word_id: int,
+    meaning: str | None = None,
+    example_sentence: str | None = None,
+    difficulty: int | None = None,
+) -> dict[str, Any] | None:
+    """Update a vocabulary word's meaning, example, or difficulty. Returns updated word or None."""
+    updates: list[str] = []
+    params: list[Any] = []
+    if meaning is not None:
+        updates.append("meaning = ?")
+        params.append(meaning)
+    if example_sentence is not None:
+        updates.append("example_sentence = ?")
+        params.append(example_sentence)
+    if difficulty is not None:
+        updates.append("difficulty = ?")
+        params.append(difficulty)
+
+    if updates:
+        params.append(word_id)
+        await db.execute(
+            f"UPDATE vocabulary_words SET {', '.join(updates)} WHERE id = ?",
+            params,
+        )
+        await db.commit()
+
+    rows = await db.execute_fetchall(
+        "SELECT id, topic, word, meaning, example_sentence, difficulty FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    return dict(rows[0]) if rows else None

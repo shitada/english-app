@@ -704,3 +704,40 @@ class TestBatchImport:
         result = await batch_import_words(test_db, words)
         assert result["imported_count"] == 1
         assert result["skipped_count"] == 1
+
+
+@pytest.mark.unit
+class TestUpdateWord:
+    async def test_update_meaning(self, test_db):
+        from app.dal.vocabulary import update_word
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        result = await update_word(test_db, words[0]["id"], meaning="updated meaning")
+        assert result is not None
+        assert result["meaning"] == "updated meaning"
+
+    async def test_update_all_fields(self, test_db):
+        from app.dal.vocabulary import update_word
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        result = await update_word(
+            test_db, words[0]["id"],
+            meaning="new meaning", example_sentence="new example", difficulty=3
+        )
+        assert result["meaning"] == "new meaning"
+        assert result["example_sentence"] == "new example"
+        assert result["difficulty"] == 3
+
+    async def test_not_found(self, test_db):
+        from app.dal.vocabulary import update_word
+        result = await update_word(test_db, 99999, meaning="test")
+        assert result is None
+
+    async def test_no_update_is_noop(self, test_db):
+        from app.dal.vocabulary import update_word
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        original = words[0]
+        result = await update_word(test_db, original["id"])
+        assert result is not None
+        assert result["meaning"] == original["meaning"]

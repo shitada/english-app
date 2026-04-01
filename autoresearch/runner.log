@@ -5082,3 +5082,82 @@ Add tests:
   │ @pytest.mark.asyncio…
   └ 28 lines...
 
+● Commit + test 80 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #80: add vocabulary batch import endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+364 passed! TS + smoke:
+
+● TS check 80 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test 80 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record 80 (shell)
+  │ date +%s && echo "80    08dc348 2026-04-01T12:42:19+09:00       69      49      35      20
+  │ 173     364     364     pass    7.3     keep    Add vocabulary batch import endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue with more iterations. I'll keep the efficient pattern going:
+
+● T0 for iteration 81 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 81
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L1:50 (50 lines read)
+  └ List directory tests/integration
+      └ 11 files found
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Add update word DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def update_word(
+  │ db: aiosqlite.Connection,…
+  └ 35 lines...
+
+● Find insert point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class DeleteWordResponse"
+  │ app/routers/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L255:280 (26 lines read)
+
+● Edit vocabulary.py +33
+  └ app/routers/vocabulary.py
+
+● Add update word tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 36 lines...
+
+● Add update integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 18 lines...
+
