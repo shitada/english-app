@@ -143,3 +143,28 @@ class ConversationDurationResponse(BaseModel):
 async def get_conversation_duration(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get aggregate conversation duration statistics."""
     return await dash_dal.get_conversation_duration_stats(db)
+
+
+class AppConfigResponse(BaseModel):
+    conversation_topics_count: int
+    vocabulary_topics_count: int
+    rate_limit: str
+    max_message_length: int
+    max_pronunciation_length: int
+    sm2_intervals: list[int]
+
+
+@router.get("/config", response_model=AppConfigResponse)
+async def get_app_config():
+    """Get application configuration summary."""
+    from app.config import get_vocabulary_topics
+    conv_topics = get_conversation_topics()
+    vocab_topics = get_vocabulary_topics()
+    return {
+        "conversation_topics_count": len(conv_topics),
+        "vocabulary_topics_count": len(vocab_topics),
+        "rate_limit": "20 requests per minute",
+        "max_message_length": 2000,
+        "max_pronunciation_length": 1000,
+        "sm2_intervals": [0, 1, 3, 7, 14, 30, 60],
+    }

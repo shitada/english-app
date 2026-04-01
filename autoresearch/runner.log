@@ -5225,3 +5225,53 @@ For iteration 82, I'll add pronunciation personal records (best/worst/average pe
   │ 'TESTS'…
   └ 11 lines...
 
+● Commit + test 82 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #82: add pronunciation personal records endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+373 passed!
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record 82 (shell)
+  │ date +%s && echo "82    1e22dfc 2026-04-01T12:49:24+09:00       0       37      35      20
+  │ 92      373     373     pass    7.3     keep    Add pronunciation personal records endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me now update the backlog and continue with more iterations. First, let me commit the progress to the backlog:
+
+● T0 for iteration 83 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 83, I'll add a configuration endpoint to expose available settings/limits:
+
+● Add config endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py << 'PYEOF'
+  │
+  │
+  │ class AppConfigResponse(BaseModel):
+  │ conversation_topics_count: int…
+  └ 23 lines...
+
+● Add config test (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_dashboard_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 11 lines...
+

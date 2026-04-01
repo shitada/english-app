@@ -198,3 +198,15 @@ class TestConversationDuration:
         assert "total_completed" in data
         assert "avg_duration_seconds" in data
         assert "duration_by_difficulty" in data
+
+
+@pytest.mark.integration
+class TestAppConfig:
+    async def test_returns_config(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/config")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["conversation_topics_count"] > 0
+        assert data["vocabulary_topics_count"] > 0
+        assert "rate_limit" in data
+        assert "sm2_intervals" in data
