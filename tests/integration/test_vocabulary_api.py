@@ -621,3 +621,22 @@ async def test_toggle_favorite(client, mock_copilot):
 async def test_toggle_favorite_not_found(client):
     res = await client.post("/api/vocabulary/99999/favorite")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_update_notes(client):
+    await client.post("/api/vocabulary/import", json={
+        "words": [{"word": "hotel", "meaning": "宿泊施設", "topic": "travel", "example_sentence": "I stayed at a hotel.", "difficulty": 1}],
+    })
+    words_res = await client.get("/api/vocabulary/words?topic=travel")
+    word_list = words_res.json()["words"]
+    word_id = word_list[0]["id"]
+    res = await client.put(f"/api/vocabulary/{word_id}/notes", json={"notes": "Important!"})
+    assert res.status_code == 200
+    assert res.json()["notes"] == "Important!"
+
+
+@pytest.mark.integration
+async def test_update_notes_not_found(client):
+    res = await client.put("/api/vocabulary/9999/notes", json={"notes": "test"})
+    assert res.status_code == 404

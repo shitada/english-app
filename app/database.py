@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS vocabulary_words (
     meaning TEXT NOT NULL,
     example_sentence TEXT,
     difficulty INTEGER NOT NULL DEFAULT 1,
-    is_favorite INTEGER NOT NULL DEFAULT 0
+    is_favorite INTEGER NOT NULL DEFAULT 0,
+    notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS vocabulary_progress (
@@ -100,6 +101,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add is_favorite column to vocabulary_words",
         "ALTER TABLE vocabulary_words ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "add notes column to vocabulary_words",
+        "ALTER TABLE vocabulary_words ADD COLUMN notes TEXT",
     ),
 ]
 

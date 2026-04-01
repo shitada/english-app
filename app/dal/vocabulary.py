@@ -640,3 +640,28 @@ async def get_favorites(
         "total_count": total,
         "words": [dict(r) for r in rows],
     }
+
+
+async def update_notes(
+    db: aiosqlite.Connection, word_id: int, notes: str | None
+) -> bool:
+    """Update or clear notes for a vocabulary word."""
+    cursor = await db.execute(
+        "UPDATE vocabulary_words SET notes = ? WHERE id = ?",
+        (notes, word_id),
+    )
+    await db.commit()
+    return cursor.rowcount > 0
+
+
+async def get_word_with_notes(
+    db: aiosqlite.Connection, word_id: int
+) -> dict[str, Any] | None:
+    """Get a vocabulary word including its notes."""
+    rows = await db.execute_fetchall(
+        "SELECT id, topic, word, meaning, example_sentence, difficulty, is_favorite, notes FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    if not rows:
+        return None
+    return dict(rows[0])

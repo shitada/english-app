@@ -15,10 +15,12 @@ from app.dal.vocabulary import (
     get_vocabulary_stats,
     get_weak_words,
     get_word,
+    get_word_with_notes,
     get_words_by_topic,
     reset_progress,
     save_words,
     search_words,
+    update_notes,
     update_progress,
 )
 
@@ -779,3 +781,46 @@ class TestFavorites:
         result = await get_favorites(test_db)
         assert result["total_count"] == 1
         assert len(result["words"]) == 1
+
+
+@pytest.mark.unit
+class TestUpdateNotes:
+    async def test_update_notes_success(self, test_db):
+        await save_words(test_db, "travel", [{"word": "hotel", "correct_meaning": "宿泊施設", "example_sentence": "I stayed at a hotel.", "difficulty": 1}])
+        words = await get_words_by_topic(test_db, "travel")
+        word_id = words[0]["id"]
+        result = await update_notes(test_db, word_id, "Important word for travel")
+        assert result is True
+        word = await get_word_with_notes(test_db, word_id)
+        assert word["notes"] == "Important word for travel"
+
+    async def test_update_notes_clear(self, test_db):
+        await save_words(test_db, "travel", [{"word": "hotel", "correct_meaning": "宿泊施設", "example_sentence": "I stayed at a hotel.", "difficulty": 1}])
+        words = await get_words_by_topic(test_db, "travel")
+        word_id = words[0]["id"]
+        await update_notes(test_db, word_id, "Some notes")
+        result = await update_notes(test_db, word_id, None)
+        assert result is True
+        word = await get_word_with_notes(test_db, word_id)
+        assert word["notes"] is None
+
+    async def test_update_notes_not_found(self, test_db):
+        result = await update_notes(test_db, 9999, "notes")
+        assert result is False
+
+    async def test_get_word_with_notes_not_found(self, test_db):
+        result = await get_word_with_notes(test_db, 9999)
+        assert result is None
+
+    async def test_get_word_with_notes_includes_all_fields(self, test_db):
+        await save_words(test_db, "travel", [{"word": "hotel", "correct_meaning": "宿泊施設", "example_sentence": "I stayed at a hotel.", "difficulty": 1}])
+        words = await get_words_by_topic(test_db, "travel")
+        word_id = words[0]["id"]
+        await update_notes(test_db, word_id, "My note")
+        word = await get_word_with_notes(test_db, word_id)
+        assert "id" in word
+        assert "topic" in word
+        assert "word" in word
+        assert "meaning" in word
+        assert "notes" in word
+        assert "is_favorite" in word

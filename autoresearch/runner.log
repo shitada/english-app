@@ -5711,3 +5711,206 @@ Also add integration test:
 
 390 passed. Commit:
 
+● Commit iteration 87 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #87: Add grammar accuracy analytics endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-verify 2>&1 | tail -3
+  └ 4 lines...
+
+● Get commit and time (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short HEAD && date +%s
+  └ 3 lines...
+
+● Record iteration 87 (shell)
+  │ printf '87\t8f08580\t2025-06-29T00:31:34Z\t10\t50\t20\t10\t90\t390\t390\tpass\t7.3\tkept\tAdd
+  │ grammar accuracy analytics endpoint\n' >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 88:
+
+● T0 for iteration 88 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 88, let me add vocabulary word notes/annotations. This adds a `notes` column to vocabulary_words:
+
+● Check vocab words schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "vocabulary_words" app/database.py
+  │ | head -10
+  └ 7 lines...
+
+● Check full vocab words schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '46,56p' app/database.py
+  └ 12 lines...
+
+● Check migrations section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '88,110p' app/database.py
+  └ 24 lines...
+
+Now I'll add the `notes` column:
+
+● Edit database.py +2 -1
+  └ app/database.py
+
+● Edit database.py +4
+  └ app/database.py
+
+Now add a DAL function and router endpoint for updating notes:
+
+● Check vocab DAL end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/dal/vocabulary.py
+  └ 20 lines...
+
+● Add notes DAL functions (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'EOF'
+  │
+  │
+  │ async def update_notes(
+  │ db: aiosqlite.Connection, word_id: int, notes: str | None…
+  └ 24 lines...
+
+Now add the router endpoint:
+
+● Check vocab router end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -15 app/routers/vocabulary.py
+  └ 15 lines...
+
+● Add notes endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/vocabulary.py << 'EOF'
+  │
+  │
+  │ class UpdateNotesRequest(BaseModel):
+  │ notes: str | None = None…
+  └ 16 lines...
+
+Add unit tests:
+
+● Check vocab test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^from app.dal.vocabulary import"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 2 lines...
+
+● Check full import block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '/^from app.dal.vocabulary
+  │ import/,/^)/p' tests/unit/test_vocabulary_dal.py
+  └ 18 lines...
+
+● Edit test_vocabulary_dal.py +2
+  └ tests/unit/test_vocabulary_dal.py
+
+● Add notes unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 45 lines...
+
+Add integration test:
+
+● Add notes integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 19 lines...
+
+● Run tests for iteration 88 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -15
+  └ 16 lines...
+
+● Debug notes test failure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_vocabulary_dal.py::TestUpdateNotes::test_update_notes_success -v --tb=long 2>&1
+  │ | tail -20
+  └ 21 lines...
+
+The save_words function expects `correct_meaning` not `meaning`. Let me fix the test data:
+
+● Check save_words signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '25,55p' app/dal/vocabulary.py
+  └ 32 lines...
+
+I see - save_words expects `correct_meaning`. Let me fix the test data:
+
+● Find helper function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def _make_questions"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 2 lines...
+
+● Check helper (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '29,42p'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 15 lines...
+
+I need to use `correct_meaning` in my test data:
+
+● Fix test data keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' 's/{"word": "hotel", "meaning":
+  │ "宿泊施設"/{"word": "hotel", "correct_meaning": "宿泊施設"/g' tests/unit/test_vocabulary_dal.py
+  └ 1 line...
+
+Now fix the integration test - that uses the import endpoint which has different structure:
+
+● Debug integration test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_vocabulary_api.py::test_update_notes -v --tb=long 2>&1 | tail -30
+  └ 30 lines...
+
+The import endpoint returns 422 - probably needs `correct_meaning` too. Let me check:
+
+● Check import schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 10
+  │ "class.*ImportWord\|class.*BatchImport" app/routers/vocabulary.py
+  └ 16 lines...
+
+● Check WordImportItem (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B 5 "class WordImportItem"
+  │ app/routers/vocabulary.py
+  └ 7 lines...
+
+● Check WordImportItem fields (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 8 "class WordImportItem"
+  │ app/routers/vocabulary.py
+  └ 10 lines...
+
+It uses `meaning` but BatchImportRequest doesn't have a `topic` at the top level. Let me check the working batch import test:
+
+● Check working import test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 8 "test_batch_import_success"
+  │ tests/integration/test_vocabulary_api.py
+  └ 10 lines...
+
+I see - each word has a `topic` field. Let me fix my integration test:
+
+● Edit test_vocabulary_api.py +4 -4
+  └ tests/integration/test_vocabulary_api.py
+
+● Run tests for iteration 88 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+Still KeyError: 0. The `/api/vocabulary/words` endpoint returns a different structure. Let me check:
+
+● Check browse_words endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 15 "async def browse_words"
+  │ app/routers/vocabulary.py
+  └ 17 lines...
+
+The response is `{"total_count": ..., "words": [...]}`. Need to access `.words`:
+
+● Edit test_vocabulary_api.py +1 -1
+  └ tests/integration/test_vocabulary_api.py
+
+● Run tests for iteration 88 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+397 passed. Commit:
+

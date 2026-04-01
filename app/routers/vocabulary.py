@@ -489,3 +489,21 @@ async def get_favorites(
 ):
     """Get favorited vocabulary words."""
     return await vocab_dal.get_favorites(db, topic=topic, limit=limit, offset=offset)
+
+
+class UpdateNotesRequest(BaseModel):
+    notes: str | None = None
+
+
+@router.put("/{word_id}/notes")
+async def update_notes(
+    word_id: int,
+    req: UpdateNotesRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Update or clear notes for a vocabulary word."""
+    updated = await vocab_dal.update_notes(db, word_id, req.notes)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Word not found")
+    word = await vocab_dal.get_word_with_notes(db, word_id)
+    return word
