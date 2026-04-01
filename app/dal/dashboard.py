@@ -427,3 +427,134 @@ async def delete_learning_goal(db: aiosqlite.Connection, goal_type: str) -> bool
     )
     await db.commit()
     return cursor.rowcount > 0
+
+
+async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Compute cross-module learning insights with personalized recommendations."""
+    streak = await _calculate_streak(db)
+
+    # Streak at risk: no activity today but had activity yesterday
+    at_risk = False
+    if streak == 0:
+        rows = await db.execute_fetchall("""
+            SELECT COUNT(*) as cnt FROM (
+                SELECT 1 FROM messages
+                    WHERE role = 'user' AND date(created_at) = date('now', '-1 day')
+                UNION ALL
+                SELECT 1 FROM pronunciation_attempts
+                    WHERE date(created_at) = date('now', '-1 day')
+                UNION ALL
+                SELECT 1 FROM vocabulary_progress
+                    WHERE last_reviewed IS NOT NULL
+                      AND date(last_reviewed) = date('now', '-1 day')
+            )
+        """)
+        if rows[0]["cnt"] > 0:
+            at_risk = True
+
+    # --- Module strengths (0-100) ---
+    grammar = await get_grammar_stats(db)
+    conversation_strength = grammar["grammar_accuracy"]
+
+    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM vocabulary_progress")
+    total_reviewed = rows[0]["cnt"]
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 3"
+    )
+    mastered = rows[0]["cnt"]
+    vocabulary_strength = round(mastered / total_reviewed * 100, 1) if total_reviewed > 0 else 0.0
+
+    rows = await db.execute_fetchall(
+        "SELECT AVG(score) as avg_score FROM pronunciation_attempts WHERE score IS NOT NULL"
+    )
+    avg_score = rows[0]["avg_score"] or 0
+    pronunciation_strength = round(avg_score * 10, 1)
+
+    strengths = {
+        "conversation": conversation_strength,
+        "vocabulary": vocabulary_strength,
+        "pronunciation": pronunciation_strength,
+    }
+    if any(v > 0 for v in strengths.values()):
+        strongest_area = max(strengths, key=strengths.get)
+        weakest_area = min(strengths, key=strengths.get)
+    else:
+        strongest_area = None
+        weakest_area = None
+
+    # --- Recommendations ---
+    recommendations: list[str] = []
+
+    now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at <= ?",
+        (now_ts,),
+    )
+    vocab_due = rows[0]["cnt"]
+    if vocab_due > 0:
+        recommendations.append(f"You have {vocab_due} words due for review")
+
+    if pronunciation_strength > 0 and pronunciation_strength < 50:
+        recommendations.append("Try pronunciation retry suggestions to improve")
+
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM conversations "
+        "WHERE started_at >= datetime('now', '-7 days')"
+    )
+    if rows[0]["cnt"] == 0:
+        total_convos = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM conversations"
+        )
+        if total_convos[0]["cnt"] > 0:
+            recommendations.append("Practice a conversation to maintain skills")
+
+    if at_risk:
+        recommendations.append("Complete an activity today to keep your streak")
+
+    # --- Weekly comparison ---
+    weekly_comparison = await _get_weekly_comparison(db)
+
+    return {
+        "streak": streak,
+        "streak_at_risk": at_risk,
+        "module_strengths": strengths,
+        "strongest_area": strongest_area,
+        "weakest_area": weakest_area,
+        "recommendations": recommendations,
+        "weekly_comparison": weekly_comparison,
+    }
+
+
+async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Activity counts for this week vs last week per module."""
+    queries = [
+        ("conversations", """
+            SELECT
+                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-14 days')
+                              AND date(started_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM conversations
+        """),
+        ("vocabulary", """
+            SELECT
+                COALESCE(SUM(CASE WHEN date(last_reviewed) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(last_reviewed) >= date('now', '-14 days')
+                              AND date(last_reviewed) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM vocabulary_progress WHERE last_reviewed IS NOT NULL
+        """),
+        ("pronunciation", """
+            SELECT
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-14 days')
+                              AND date(created_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM pronunciation_attempts
+        """),
+    ]
+    result = {}
+    for module, query in queries:
+        rows = await db.execute_fetchall(query)
+        result[module] = {
+            "this_week": rows[0]["this_week"] or 0,
+            "last_week": rows[0]["last_week"] or 0,
+        }
+    return result

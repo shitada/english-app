@@ -183,6 +183,39 @@ async def get_learning_summary(db: aiosqlite.Connection = Depends(get_db_session
     return await dash_dal.get_learning_summary(db)
 
 
+class ModuleStrengths(BaseModel):
+    conversation: float
+    vocabulary: float
+    pronunciation: float
+
+
+class WeeklyCount(BaseModel):
+    this_week: int
+    last_week: int
+
+
+class WeeklyComparison(BaseModel):
+    conversations: WeeklyCount
+    vocabulary: WeeklyCount
+    pronunciation: WeeklyCount
+
+
+class LearningInsightsResponse(BaseModel):
+    streak: int
+    streak_at_risk: bool
+    module_strengths: ModuleStrengths
+    strongest_area: str | None
+    weakest_area: str | None
+    recommendations: list[str]
+    weekly_comparison: WeeklyComparison
+
+
+@router.get("/insights", response_model=LearningInsightsResponse)
+async def get_learning_insights(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get cross-module learning insights with personalized recommendations."""
+    return await dash_dal.get_learning_insights(db)
+
+
 class SetGoalRequest(BaseModel):
     goal_type: str
     daily_target: int = Field(ge=1, le=100)

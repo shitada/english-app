@@ -225,6 +225,28 @@ class TestLearningSummary:
 
 
 @pytest.mark.integration
+class TestLearningInsights:
+    async def test_returns_correct_shape(self, client: AsyncClient):
+        """Insights endpoint returns 200 with correct response shape."""
+        resp = await client.get("/api/dashboard/insights")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data["streak"], int)
+        assert isinstance(data["streak_at_risk"], bool)
+        assert isinstance(data["module_strengths"], dict)
+        assert "conversation" in data["module_strengths"]
+        assert "vocabulary" in data["module_strengths"]
+        assert "pronunciation" in data["module_strengths"]
+        assert data["strongest_area"] is None or isinstance(data["strongest_area"], str)
+        assert data["weakest_area"] is None or isinstance(data["weakest_area"], str)
+        assert isinstance(data["recommendations"], list)
+        assert isinstance(data["weekly_comparison"], dict)
+        for module in ("conversations", "vocabulary", "pronunciation"):
+            assert "this_week" in data["weekly_comparison"][module]
+            assert "last_week" in data["weekly_comparison"][module]
+
+
+@pytest.mark.integration
 async def test_goals_empty(client):
     res = await client.get("/api/dashboard/goals")
     assert res.status_code == 200

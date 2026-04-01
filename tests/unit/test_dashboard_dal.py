@@ -8,6 +8,7 @@ from app.dal.conversation import add_message, create_conversation
 from app.dal.dashboard import (
     delete_learning_goal,
     get_learning_goals,
+    get_learning_insights,
     get_learning_summary,
     get_stats,
     set_learning_goal,
@@ -303,6 +304,105 @@ class TestLearningGoals:
 
     async def test_delete_nonexistent_goal(self, test_db):
         assert await delete_learning_goal(test_db, "conversations") is False
+
+
+@pytest.mark.unit
+class TestGetLearningInsights:
+    async def test_empty_database_defaults(self, test_db):
+        """Empty DB returns neutral/default insights."""
+        result = await get_learning_insights(test_db)
+        assert result["streak"] == 0
+        assert result["streak_at_risk"] is False
+        assert result["module_strengths"]["conversation"] == 0
+        assert result["module_strengths"]["vocabulary"] == 0
+        assert result["module_strengths"]["pronunciation"] == 0
+        assert result["strongest_area"] is None
+        assert result["weakest_area"] is None
+        assert result["recommendations"] == []
+        assert result["weekly_comparison"]["conversations"]["this_week"] == 0
+        assert result["weekly_comparison"]["vocabulary"]["this_week"] == 0
+        assert result["weekly_comparison"]["pronunciation"]["this_week"] == 0
+
+    async def test_strongest_weakest_identification(self, test_db):
+        """Correctly identifies strongest and weakest areas."""
+        # Conversation: add messages with grammar feedback (100% accuracy)
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(
+            test_db, cid, "user", "Hello",
+            feedback={"errors": [], "suggestions": []},
+        )
+
+        # Pronunciation: score=3 → strength=30
+        await save_attempt(test_db, "Hi.", "Hi.", {"overall_score": 3}, 3.0)
+
+        # Vocabulary: 1 reviewed, 0 mastered → strength=0
+        words = await save_words(test_db, "food", [
+            {"word": "apple", "correct_meaning": "fruit"},
+        ])
+        await update_progress(test_db, words[0]["id"], True)  # level 1
+
+        result = await get_learning_insights(test_db)
+        assert result["strongest_area"] == "conversation"  # 100%
+        assert result["weakest_area"] == "vocabulary"  # 0%
+        assert result["module_strengths"]["conversation"] == 100.0
+        assert result["module_strengths"]["pronunciation"] == 30.0
+
+    async def test_streak_at_risk_detection(self, test_db):
+        """Detects streak at risk when activity was yesterday but not today."""
+        # Insert activity dated yesterday only
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-1 day'))",
+            ("Hello", "Hello", 8.0),
+        )
+        await test_db.commit()
+
+        result = await get_learning_insights(test_db)
+        assert result["streak_at_risk"] is True
+        assert "Complete an activity today to keep your streak" in result["recommendations"]
+
+    async def test_streak_not_at_risk_with_today_activity(self, test_db):
+        """No risk when there is activity today."""
+        await save_attempt(test_db, "Hi.", "Hi.", {"overall_score": 5}, 5.0)
+        result = await get_learning_insights(test_db)
+        assert result["streak_at_risk"] is False
+
+    async def test_recommendation_vocab_due(self, test_db):
+        """Recommends review when vocabulary words are due."""
+        words = await save_words(test_db, "study", [
+            {"word": "test", "correct_meaning": "exam"},
+        ])
+        await update_progress(test_db, words[0]["id"], False)  # level 0, due immediately
+        result = await get_learning_insights(test_db)
+        due_recs = [r for r in result["recommendations"] if "words due" in r]
+        assert len(due_recs) == 1
+
+    async def test_recommendation_low_pronunciation(self, test_db):
+        """Recommends pronunciation practice when avg score < 50%."""
+        await save_attempt(test_db, "Hello.", "Helo.", {"overall_score": 3}, 3.0)
+        result = await get_learning_insights(test_db)
+        assert "Try pronunciation retry suggestions to improve" in result["recommendations"]
+
+    async def test_recommendation_no_recent_conversations(self, test_db):
+        """Recommends conversation practice when none in 7 days."""
+        # Insert an old conversation (>7 days ago) so the user has history
+        await test_db.execute(
+            "INSERT INTO conversations (topic, started_at) VALUES (?, datetime('now', '-10 days'))",
+            ("hotel_checkin",),
+        )
+        await test_db.commit()
+        # Also add pronunciation so there's some current activity
+        await save_attempt(test_db, "Hi.", "Hi.", {"overall_score": 8}, 8.0)
+        result = await get_learning_insights(test_db)
+        assert "Practice a conversation to maintain skills" in result["recommendations"]
+
+    async def test_weekly_comparison_counts(self, test_db):
+        """Weekly comparison includes this_week counts."""
+        await create_conversation(test_db, "hotel_checkin")
+        await save_attempt(test_db, "Hi.", "Hi.", {"overall_score": 7}, 7.0)
+        result = await get_learning_insights(test_db)
+        assert result["weekly_comparison"]["conversations"]["this_week"] >= 1
+        assert result["weekly_comparison"]["pronunciation"]["this_week"] >= 1
 
 
 def _make_questions(count=1):
