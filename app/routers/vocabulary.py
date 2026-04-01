@@ -509,6 +509,47 @@ async def update_notes(
     return word
 
 
+class SRSLevelStats(BaseModel):
+    level: int
+    word_count: int
+    accuracy: float
+    total_reviews: int
+
+
+class ReviewEfficiency(BaseModel):
+    level: int
+    avg_reviews: float
+
+
+class LevelSummary(BaseModel):
+    total_words: int
+    with_progress: int
+    progressing: int
+    stalled: int
+    mastered: int
+    not_reviewed: int
+
+
+class MasteryVelocity(BaseModel):
+    week: str
+    words_mastered: int
+
+
+class SRSAnalyticsResponse(BaseModel):
+    retention_by_level: list[SRSLevelStats]
+    review_efficiency: list[ReviewEfficiency]
+    level_summary: LevelSummary
+    mastery_velocity: list[MasteryVelocity]
+
+
+@router.get("/srs-analytics", response_model=SRSAnalyticsResponse)
+async def get_srs_analytics(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get spaced repetition analytics for vocabulary learning."""
+    return await vocab_dal.get_srs_analytics(db)
+
+
 @router.get("/{word_id}/detail")
 async def get_word_detail(
     word_id: int,

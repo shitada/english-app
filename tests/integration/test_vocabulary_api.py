@@ -665,3 +665,33 @@ async def test_word_detail(client, mock_copilot):
 async def test_word_detail_not_found(client):
     res = await client.get("/api/vocabulary/9999/detail")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_srs_analytics_empty(client):
+    res = await client.get("/api/vocabulary/srs-analytics")
+    assert res.status_code == 200
+    data = res.json()
+    assert "retention_by_level" in data
+    assert "review_efficiency" in data
+    assert "level_summary" in data
+    assert "mastery_velocity" in data
+    assert data["level_summary"]["total_words"] >= 0
+
+
+@pytest.mark.integration
+async def test_srs_analytics_with_data(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "srs_w1", "correct_meaning": "m1", "example_sentence": "E1.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+            {"word": "srs_w2", "correct_meaning": "m2", "example_sentence": "E2.", "difficulty": 2, "wrong_options": ["a", "b", "c"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    words_res = await client.get("/api/vocabulary/words?topic=hotel_checkin")
+    word_id = words_res.json()["words"][0]["id"]
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "selected_answer": words_res.json()["words"][0]["meaning"], "is_correct": True})
+    res = await client.get("/api/vocabulary/srs-analytics")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["level_summary"]["with_progress"] >= 1

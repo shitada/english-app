@@ -14,6 +14,7 @@ from app.dal.vocabulary import (
     get_progress,
     get_review_forecast,
     get_similar_words,
+    get_srs_analytics,
     get_vocabulary_stats,
     get_weak_words,
     get_word,
@@ -923,3 +924,39 @@ class TestWordDetail:
         word_id = words[0]["id"]
         detail = await get_word_detail(test_db, word_id)
         assert detail["progress"] is None
+
+
+@pytest.mark.unit
+class TestSRSAnalytics:
+    async def test_empty_db(self, test_db):
+        result = await get_srs_analytics(test_db)
+        assert result["retention_by_level"] == []
+        assert result["review_efficiency"] == []
+        assert result["level_summary"]["total_words"] == 0
+        assert result["level_summary"]["not_reviewed"] == 0
+        assert result["mastery_velocity"] == []
+
+    async def test_words_without_progress(self, test_db):
+        await save_words(test_db, "travel", _make_questions(3))
+        result = await get_srs_analytics(test_db)
+        assert result["level_summary"]["total_words"] == 3
+        assert result["level_summary"]["not_reviewed"] == 3
+        assert result["level_summary"]["with_progress"] == 0
+
+    async def test_with_progress_at_various_levels(self, test_db):
+        words = await save_words(test_db, "travel", _make_questions(3))
+        # word 0: correct twice (level 2)
+        await update_progress(test_db, words[0]["id"], is_correct=True)
+        await update_progress(test_db, words[0]["id"], is_correct=True)
+        # word 1: one correct, one wrong (level 0)
+        await update_progress(test_db, words[1]["id"], is_correct=True)
+        await update_progress(test_db, words[1]["id"], is_correct=False)
+        # word 2: no progress
+        result = await get_srs_analytics(test_db)
+        assert result["level_summary"]["with_progress"] == 2
+        assert result["level_summary"]["not_reviewed"] == 1
+        assert len(result["retention_by_level"]) > 0
+        total_words_in_levels = sum(
+            r["word_count"] for r in result["retention_by_level"]
+        )
+        assert total_words_in_levels == 2

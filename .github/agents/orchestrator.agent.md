@@ -117,13 +117,26 @@ If smoke test fails → treat as test failure (discard the change).
 2. Retry the tester subagent ONE more time
 3. If it fails again, record the iteration with ux_score=5.0 and add a note "Playwright infrastructure failure — QA skipped" but you MUST still call the evaluator with qa_passed=false
 
-Start the server if not already running for smoke test (use nohup + disown so the process survives after this shell exits):
+Start the server as a **background process** using `isBackground=true` in run_in_terminal. **NEVER** start uvicorn in a foreground terminal — it will block forever and stall the entire run.
+
+**Server start procedure** (two separate terminal commands):
+
+Command 1 — Kill old server (foreground terminal):
 ```bash
-cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1
-nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/qa_server.log 2>&1 &
-disown
+lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+```
+
+Command 2 — Start new server (**MUST use isBackground=true**):
+```bash
+cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+```
+
+Command 3 — Verify server is up (foreground terminal):
+```bash
 sleep 4 && curl -s http://localhost:8000/api/health
 ```
+
+**CRITICAL**: Command 2 MUST be run with `isBackground=true`. If you run uvicorn in a foreground terminal, it will never return and your entire session will hang.
 
 Invoke the **tester** subagent. Pass it:
 - `server_url`: `http://localhost:8000`

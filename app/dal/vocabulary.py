@@ -741,6 +741,93 @@ async def get_similar_words(
     return [dict(r) for r in rows]
 
 
+async def get_srs_analytics(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Compute spaced repetition analytics from vocabulary progress data."""
+    # Retention by level: count and accuracy at each SRS level (0-6)
+    level_rows = await db.execute_fetchall(
+        """SELECT level,
+                  COUNT(*) as word_count,
+                  SUM(correct_count) as total_correct,
+                  SUM(incorrect_count) as total_incorrect
+           FROM vocabulary_progress
+           GROUP BY level
+           ORDER BY level"""
+    )
+    retention_by_level = []
+    for r in level_rows:
+        total = r["total_correct"] + r["total_incorrect"]
+        accuracy = round(r["total_correct"] / total, 4) if total > 0 else 0.0
+        retention_by_level.append({
+            "level": r["level"],
+            "word_count": r["word_count"],
+            "accuracy": accuracy,
+            "total_reviews": total,
+        })
+
+    # Review efficiency: avg reviews needed to reach each level
+    efficiency_rows = await db.execute_fetchall(
+        """SELECT level,
+                  AVG(correct_count + incorrect_count) as avg_reviews
+           FROM vocabulary_progress
+           WHERE level > 0
+           GROUP BY level
+           ORDER BY level"""
+    )
+    review_efficiency = [
+        {"level": r["level"], "avg_reviews": round(r["avg_reviews"], 2)}
+        for r in efficiency_rows
+    ]
+
+    # Level progression summary
+    total_with_progress = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress"
+    )
+    progressing = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level > 0"
+    )
+    stalled = await db.execute_fetchall(
+        """SELECT COUNT(*) as cnt FROM vocabulary_progress
+           WHERE level = 0 AND (correct_count + incorrect_count) > 0"""
+    )
+    mastered = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 5"
+    )
+    total_words = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_words"
+    )
+    not_reviewed = total_words[0]["cnt"] - total_with_progress[0]["cnt"]
+
+    level_summary = {
+        "total_words": total_words[0]["cnt"],
+        "with_progress": total_with_progress[0]["cnt"],
+        "progressing": progressing[0]["cnt"],
+        "stalled": stalled[0]["cnt"],
+        "mastered": mastered[0]["cnt"],
+        "not_reviewed": max(not_reviewed, 0),
+    }
+
+    # Mastery velocity: words reaching level >= 3 grouped by week
+    velocity_rows = await db.execute_fetchall(
+        """SELECT strftime('%Y-W%W', last_reviewed) as week,
+                  COUNT(*) as words_mastered
+           FROM vocabulary_progress
+           WHERE level >= 3 AND last_reviewed IS NOT NULL
+           GROUP BY week
+           ORDER BY week"""
+    )
+    mastery_velocity = [
+        {"week": r["week"], "words_mastered": r["words_mastered"]}
+        for r in velocity_rows
+    ]
+
+    return {
+        "retention_by_level": retention_by_level,
+        "review_efficiency": review_efficiency,
+        "level_summary": level_summary,
+        "mastery_velocity": mastery_velocity,
+    }
+
+
 async def get_word_detail(
     db: aiosqlite.Connection, word_id: int
 ) -> dict[str, Any] | None:

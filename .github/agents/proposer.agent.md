@@ -39,7 +39,7 @@ Evaluate the codebase from these angles (in priority order):
 3. **Code quality** — duplicated logic, missing type hints, inconsistent patterns
 4. **New features** — ideas from config.yaml topics, UX improvements
 5. **Maintainability** — refactoring for testability, reducing coupling
-6. **Frontend improvements** — accessibility, state management, user experience
+6. **Frontend improvements** — accessibility, state management, user experience, performance
 
 ## Constraints
 

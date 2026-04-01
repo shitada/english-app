@@ -7060,3 +7060,195 @@ Now add the integration test:
 
 ### Step 4 — Commit
 
+● Commit iteration 97 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #97: Add pronunciation sentence categorization by difficulty
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 39 lines...
+
+### Step 5 — Test
+
+● Run backend tests for iteration 97 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -60
+  └ 61 lines...
+
+439/439 passed! TypeScript check:
+
+● TypeScript check for iteration 97 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+### Step 5b — Smoke Test
+
+● Check if smoke test needed for iteration 97 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+● Run smoke test for iteration 97 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1
+  └ 22 lines...
+
+### Step 5c — QA Test
+
+Server is still running on port 8000 from iteration 96. Let me verify and run the tester:
+
+● Verify QA server still running (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Need to restart the server to pick up the new code:
+
+✗ Kill old server (shell)
+  │ kill $(lsof -ti:8000) 2>/dev/null; sleep 1
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● Find PID on port 8000 (shell)
+  │ lsof -ti:8000
+  └ 2 lines...
+
+● Kill old server process (shell)
+  │ kill -9 79481 && sleep 1
+  └ 1 line...
+
+● Start QA server with new code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify new QA server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server restarted with new code. Now invoke the QA tester:
+
+[2026-04-01 18:47:20] Received interrupt signal — stopping after current invocation
+[2026-04-01 18:47:20] Copilot exited with code 130 (duration: 5832s)
+[2026-04-01 18:47:20] Will retry in next invocation...
+[2026-04-01 18:47:20] Interrupted — exiting
+[2026-04-01 18:47:20] ==========================================
+[2026-04-01 18:47:20] Runner finished
+[2026-04-01 18:47:20] Total invocations: 1
+[2026-04-01 18:47:20] Final iteration:   96fd35f262026-04-01T08:10:33Z72250312275909436436pass7.55keepAdd conversation message bookmarks / 98
+[2026-04-01 18:47:20] Premium requests:  12
+[2026-04-01 18:47:20] ==========================================
+[2026-04-01 23:16:17] ==========================================
+[2026-04-01 23:16:17] Autoresearch CLI Runner started
+[2026-04-01 23:16:17] Current iteration: 97
+[2026-04-01 23:16:17] Additional iters:  20
+[2026-04-01 23:16:17] Target iteration:  117
+[2026-04-01 23:16:38] ==========================================
+[2026-04-01 23:16:38] Autoresearch CLI Runner started
+[2026-04-01 23:16:38] Current iteration: 97
+[2026-04-01 23:16:38] Additional iters:  20
+[2026-04-01 23:16:38] Target iteration:  117
+[2026-04-01 23:16:38] Max invocations:   10
+[2026-04-01 23:16:38] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-01 23:16:38] ==========================================
+[2026-04-01 23:16:38] WARNING: Working tree has uncommitted changes
+[2026-04-01 23:16:38]   M .github/agents/orchestrator.agent.md
+[2026-04-01 23:16:38]   M .github/agents/proposer.agent.md
+[2026-04-01 23:16:38]   M autoresearch/results.tsv
+[2026-04-01 23:16:38]   M autoresearch/runner.log
+[2026-04-01 23:16:38]   ?? .playwright-mcp/page-2026-04-01T08-37-30-599Z.yml
+[2026-04-01 23:16:38] Continuing anyway...
+[2026-04-01 23:16:38] Current iteration count: 97 / 117
+[2026-04-01 23:16:38] ------------------------------------------
+[2026-04-01 23:16:38] Invocation 1 / 10
+[2026-04-01 23:16:38] Resuming from iteration 98
+[2026-04-01 23:16:38] ------------------------------------------
+[2026-04-01 23:16:38] Starting copilot invocation...
+
+
+
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 111 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 103 lines read
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -15
+  └ 16 lines...
+
+Starting autoresearch loop from iteration 98 (target: 117). Current state: 97 iterations completed, 439 tests passing, last commit `40a58ef`.
+
+● Record T0 for iteration 98 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 98
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ 429 lines read
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1:50 (50 lines read)
+
+● Record T1 for iteration 98 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Explore vocabulary DAL/router
+  │ Search (grep)
+  │   │ "CREATE TABLE IF NOT EXISTS vocabulary_progress|CREATE TABLE IF NOT EXISTS quiz_attempts"
+  │   │ (app/database.py)
+  │   └ 2 lines found
+  └ Show line numbers around vocabulary tables in database.py (shell)
+      │ grep -n -A 10 -B 2 'CREATE TABLE IF NOT EXISTS vocabulary_progress\|CREATE TABLE IF NOT
+      EXISTS
+      │ quiz_attempts' /Users/shingotada/Documents/vscode/english-app/app/database.py
+      └ 28 lines...
+
+Now implementing the SRS analytics endpoint. T1=1775053182, propose_sec=149.
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L1:15 (15 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L1:10 (9 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L1:15 (15 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L15:50 (36 lines read)
+
+Now I'll add the DAL function, router endpoint, and tests:
+
+● Edit vocabulary.py +87
+  └ app/dal/vocabulary.py
+
+Now add the router endpoint:
+
+● Edit vocabulary.py +41
+  └ app/routers/vocabulary.py
+
+Now add unit tests:
+
+● Edit test_vocabulary_dal.py +36
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add the import for `get_srs_analytics`:
+
+● Edit test_vocabulary_dal.py +1
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add the integration test:
+
+● Edit test_vocabulary_api.py +30
+  └ tests/integration/test_vocabulary_api.py
+
+Now commit and test:
+
