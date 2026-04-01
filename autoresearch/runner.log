@@ -6125,3 +6125,48 @@ It's a list of dicts with `id` field. Let me fix:
 
 404 passed. Commit:
 
+● Commit iteration 90 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #90: Add conversation topic recommendations endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-verify 2>&1 | tail -3
+  │ && git rev-parse --short HEAD && date +%s
+  └ 6 lines...
+
+● Record iteration 90 (shell)
+  │ printf '90\t3edd464\t2025-06-29T00:38:49Z\t10\t50\t20\t10\t90\t404\t404\tpass\t7.3\tkept\tAdd
+  │ conversation topic recommendations endpoint\n' >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 91:
+
+● T0 for iteration 91 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For #91, let me add frontend TypeScript types for all the new endpoints from iterations 86-90:
+
+● Check api.ts end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 frontend/src/api.ts
+  └ 51 lines...
+
+● Add TS types for new endpoints (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/frontend/src/api.ts << 'EOF'
+  │
+  │ // Rate limit headers (from iteration 86)
+  │ export interface RateLimitHeaders {
+  │ limit: number;…
+  └ 81 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+● Run tests for iteration 91 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -3
+  └ 4 lines...
+
+Commit:
+

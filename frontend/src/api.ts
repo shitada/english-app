@@ -329,3 +329,84 @@ export interface PronunciationProgress {
   scores_by_date: { date: string; avg_score: number; count: number }[];
   most_practiced: { text: string; attempt_count: number; avg_score: number }[];
 }
+
+// Rate limit headers (from iteration 86)
+export interface RateLimitHeaders {
+  limit: number;
+  remaining: number;
+  window: number;
+}
+
+export function parseRateLimitHeaders(headers: Headers): RateLimitHeaders | null {
+  const limit = headers.get("X-RateLimit-Limit");
+  const remaining = headers.get("X-RateLimit-Remaining");
+  const window = headers.get("X-RateLimit-Window");
+  if (!limit || !remaining || !window) return null;
+  return { limit: parseInt(limit), remaining: parseInt(remaining), window: parseInt(window) };
+}
+
+// Grammar accuracy (from iteration 87)
+export interface GrammarAccuracyResponse {
+  total_checked: number;
+  total_correct: number;
+  overall_accuracy_rate: number;
+  by_topic: {
+    topic: string;
+    total_messages: number;
+    correct_messages: number;
+    accuracy_rate: number;
+    total_errors: number;
+  }[];
+}
+
+export async function getGrammarAccuracy(): Promise<GrammarAccuracyResponse> {
+  const res = await fetch("/api/conversation/grammar-accuracy");
+  return res.json();
+}
+
+// Word notes (from iteration 88)
+export interface WordWithNotes {
+  id: number;
+  topic: string;
+  word: string;
+  meaning: string;
+  example_sentence: string;
+  difficulty: number;
+  is_favorite: number;
+  notes: string | null;
+}
+
+export async function updateWordNotes(wordId: number, notes: string | null): Promise<WordWithNotes> {
+  const res = await fetch(`/api/vocabulary/${wordId}/notes`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notes }),
+  });
+  return res.json();
+}
+
+// Weekly pronunciation progress (from iteration 89)
+export interface WeeklyProgressResponse {
+  weeks: { week: string; attempt_count: number; avg_score: number; best_score: number }[];
+  total_weeks: number;
+  improvement: number;
+}
+
+export async function getPronunciationWeeklyProgress(weeks?: number): Promise<WeeklyProgressResponse> {
+  const params = weeks ? `?weeks=${weeks}` : "";
+  const res = await fetch(`/api/pronunciation/weekly-progress${params}`);
+  return res.json();
+}
+
+// Topic recommendations (from iteration 90)
+export interface TopicRecommendation {
+  topic: string;
+  session_count: number;
+  last_practiced: string | null;
+  reason: "never_practiced" | "continue_practice";
+}
+
+export async function getTopicRecommendations(): Promise<TopicRecommendation[]> {
+  const res = await fetch("/api/conversation/topic-recommendations");
+  return res.json();
+}
