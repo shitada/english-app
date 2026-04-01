@@ -96,3 +96,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 90	3edd464	2025-06-29T00:38:49Z	10	50	20	10	90	404	404	pass	7.3	kept	Add conversation topic recommendations endpoint
 91	cce95c2	2025-06-29T00:39:46Z	5	30	15	5	55	404	404	pass	7.3	kept	Add frontend TypeScript types for iterations 86-90
 92	5f0060e	2025-06-29T00:41:29Z	10	45	15	10	80	414	414	pass	7.3	kept	Add learning goals system with daily targets
+93	68e9fab	2025-06-29T00:42:47Z	10	40	15	10	75	420	420	pass	7.3	kept	Add vocabulary difficulty auto-adjustment

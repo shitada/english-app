@@ -507,3 +507,15 @@ async def update_notes(
         raise HTTPException(status_code=404, detail="Word not found")
     word = await vocab_dal.get_word_with_notes(db, word_id)
     return word
+
+
+@router.get("/{word_id}/detail")
+async def get_word_detail(
+    word_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get full word detail including progress, notes, and similar words."""
+    detail = await vocab_dal.get_word_detail(db, word_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="Word not found")
+    return detail

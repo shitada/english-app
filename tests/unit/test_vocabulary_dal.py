@@ -13,9 +13,11 @@ from app.dal.vocabulary import (
     get_due_words,
     get_progress,
     get_review_forecast,
+    get_similar_words,
     get_vocabulary_stats,
     get_weak_words,
     get_word,
+    get_word_detail,
     get_word_with_notes,
     get_words_by_topic,
     log_attempt,
@@ -883,3 +885,41 @@ class TestAutoAdjustDifficulty:
     async def test_word_not_found(self, test_db):
         result = await auto_adjust_difficulty(test_db, 9999)
         assert result is None
+
+
+@pytest.mark.unit
+class TestSimilarWords:
+    async def test_empty_when_not_found(self, test_db):
+        result = await get_similar_words(test_db, 9999)
+        assert result == []
+
+    async def test_finds_similar_in_same_topic(self, test_db):
+        words = await save_words(test_db, "travel", _make_questions(5))
+        word_id = words[0]["id"]
+        similar = await get_similar_words(test_db, word_id)
+        assert len(similar) > 0
+        assert all(s["id"] != word_id for s in similar)
+
+
+@pytest.mark.unit
+class TestWordDetail:
+    async def test_not_found(self, test_db):
+        result = await get_word_detail(test_db, 9999)
+        assert result is None
+
+    async def test_includes_progress_and_similar(self, test_db):
+        words = await save_words(test_db, "travel", _make_questions(3))
+        word_id = words[0]["id"]
+        await update_progress(test_db, word_id, is_correct=True)
+        detail = await get_word_detail(test_db, word_id)
+        assert detail is not None
+        assert detail["word"] == words[0]["word"]
+        assert detail["progress"] is not None
+        assert detail["progress"]["correct_count"] == 1
+        assert "similar_words" in detail
+
+    async def test_no_progress_returns_null(self, test_db):
+        words = await save_words(test_db, "travel", _make_questions(1))
+        word_id = words[0]["id"]
+        detail = await get_word_detail(test_db, word_id)
+        assert detail["progress"] is None

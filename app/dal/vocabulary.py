@@ -716,3 +716,55 @@ async def auto_adjust_difficulty(
             "reason": "too_easy" if new_difficulty < current_difficulty else "too_hard",
         }
     return None
+
+
+async def get_similar_words(
+    db: aiosqlite.Connection, word_id: int, limit: int = 5
+) -> list[dict[str, Any]]:
+    """Find words in the same topic with similar difficulty level."""
+    word_rows = await db.execute_fetchall(
+        "SELECT topic, difficulty FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    if not word_rows:
+        return []
+    topic = word_rows[0]["topic"]
+    difficulty = word_rows[0]["difficulty"]
+    rows = await db.execute_fetchall(
+        """SELECT id, word, meaning, example_sentence, difficulty
+           FROM vocabulary_words
+           WHERE topic = ? AND id != ? AND ABS(difficulty - ?) <= 1
+           ORDER BY ABS(difficulty - ?) ASC, word ASC
+           LIMIT ?""",
+        (topic, word_id, difficulty, difficulty, limit),
+    )
+    return [dict(r) for r in rows]
+
+
+async def get_word_detail(
+    db: aiosqlite.Connection, word_id: int
+) -> dict[str, Any] | None:
+    """Get full word detail including progress and notes."""
+    word_rows = await db.execute_fetchall(
+        """SELECT w.id, w.topic, w.word, w.meaning, w.example_sentence,
+                  w.difficulty, w.is_favorite, w.notes
+           FROM vocabulary_words w
+           WHERE w.id = ?""",
+        (word_id,),
+    )
+    if not word_rows:
+        return None
+    word = dict(word_rows[0])
+
+    progress_rows = await db.execute_fetchall(
+        """SELECT correct_count, incorrect_count, level, last_reviewed, next_review_at
+           FROM vocabulary_progress WHERE word_id = ?""",
+        (word_id,),
+    )
+    if progress_rows:
+        word["progress"] = dict(progress_rows[0])
+    else:
+        word["progress"] = None
+
+    word["similar_words"] = await get_similar_words(db, word_id)
+    return word

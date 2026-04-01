@@ -640,3 +640,28 @@ async def test_update_notes(client):
 async def test_update_notes_not_found(client):
     res = await client.put("/api/vocabulary/9999/notes", json={"notes": "test"})
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_word_detail(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "desk", "correct_meaning": "a table", "example_sentence": "Sit at the desk.", "difficulty": 2, "wrong_options": ["chair", "lamp", "bed"]},
+            {"word": "lamp", "correct_meaning": "a light", "example_sentence": "Turn on the lamp.", "difficulty": 2, "wrong_options": ["desk", "chair", "bed"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    words_res = await client.get("/api/vocabulary/words?topic=hotel_checkin")
+    words = words_res.json()["words"]
+    word_id = words[0]["id"]
+    res = await client.get(f"/api/vocabulary/{word_id}/detail")
+    assert res.status_code == 200
+    data = res.json()
+    assert "word" in data
+    assert "similar_words" in data
+
+
+@pytest.mark.integration
+async def test_word_detail_not_found(client):
+    res = await client.get("/api/vocabulary/9999/detail")
+    assert res.status_code == 404
