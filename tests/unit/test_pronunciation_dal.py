@@ -351,6 +351,52 @@ class TestGetScoreDistribution:
         assert dist[4]["min_score"] == 9
         assert dist[4]["max_score"] == 10
 
+    async def test_float_score_2_5_classified_as_poor(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        await save_attempt(test_db, "Test.", "Test.", {}, 2.5)
+        result = await get_score_distribution(test_db)
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["poor"] == 1
+
+    async def test_float_score_4_5_classified_as_fair(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        await save_attempt(test_db, "Test.", "Test.", {}, 4.5)
+        result = await get_score_distribution(test_db)
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["fair"] == 1
+
+    async def test_float_score_6_5_classified_as_good(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        await save_attempt(test_db, "Test.", "Test.", {}, 6.5)
+        result = await get_score_distribution(test_db)
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["good"] == 1
+
+    async def test_float_score_8_5_classified_as_very_good(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        await save_attempt(test_db, "Test.", "Test.", {}, 8.5)
+        result = await get_score_distribution(test_db)
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["very_good"] == 1
+
+    async def test_total_equals_sum_of_buckets_mixed_scores(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        scores = [0.5, 2.5, 3, 4.5, 5, 6.5, 7, 8.5, 9, 10]
+        for s in scores:
+            await save_attempt(test_db, "Test.", "Test.", {}, s)
+        result = await get_score_distribution(test_db)
+        total = sum(d["count"] for d in result["distribution"])
+        assert result["total_attempts"] == total == len(scores)
+
+    async def test_boundary_scores_classified_correctly(self, test_db):
+        from app.dal.pronunciation import _classify_score
+        assert _classify_score(0) == "poor"
+        assert _classify_score(3) == "fair"
+        assert _classify_score(5) == "good"
+        assert _classify_score(7) == "very_good"
+        assert _classify_score(9) == "excellent"
+        assert _classify_score(10) == "excellent"
+
 
 @pytest.mark.unit
 class TestGetPersonalRecords:

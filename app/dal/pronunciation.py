@@ -200,6 +200,23 @@ _SCORE_BUCKETS = [
 ]
 
 
+def _classify_score(score: float) -> str:
+    """Classify a score into a quality bucket using contiguous ranges.
+
+    Ranges: poor [0,3), fair [3,5), good [5,7), very_good [7,9), excellent [9,10].
+    """
+    if score < 3:
+        return "poor"
+    elif score < 5:
+        return "fair"
+    elif score < 7:
+        return "good"
+    elif score < 9:
+        return "very_good"
+    else:
+        return "excellent"
+
+
 async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get pronunciation scores grouped into quality buckets."""
     rows = await db.execute_fetchall(
@@ -207,11 +224,8 @@ async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
     )
     bucket_counts = {name: 0 for name, _, _ in _SCORE_BUCKETS}
     for r in rows:
-        score = r["score"]
-        for name, lo, hi in _SCORE_BUCKETS:
-            if lo <= score <= hi:
-                bucket_counts[name] = bucket_counts.get(name, 0) + 1
-                break
+        bucket = _classify_score(r["score"])
+        bucket_counts[bucket] += 1
 
     distribution = [
         {
