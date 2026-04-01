@@ -1,0 +1,32 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e269]:
+      - heading "Vocabulary" [level=2] [ref=e270]
+      - paragraph [ref=e271]: Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
+      - generic [ref=e272]:
+        - heading "Quiz Mode" [level=3] [ref=e273]
+        - generic [ref=e274]:
+          - button "Word → Meaning" [ref=e275] [cursor=pointer]
+          - button "Meaning → Word" [ref=e276] [cursor=pointer]
+      - generic [ref=e277]:
+        - button "🏨 Hotel & Accommodation Reservation, check-in, amenities, complaints" [ref=e278] [cursor=pointer]:
+          - heading "🏨 Hotel & Accommodation" [level=3] [ref=e279]
+          - paragraph [ref=e280]: Reservation, check-in, amenities, complaints
+        - button "🍽️ Restaurant & Dining Menu, ordering, allergies, tipping" [ref=e281] [cursor=pointer]:
+          - heading "🍽️ Restaurant & Dining" [level=3] [ref=e282]
+          - paragraph [ref=e283]: Menu, ordering, allergies, tipping
+        - button "💼 Job Interview Resume, qualifications, strengths, salary" [ref=e284] [cursor=pointer]:
+          - heading "💼 Job Interview" [level=3] [ref=e285]
+          - paragraph [ref=e286]: Resume, qualifications, strengths, salary
+        - button "🏥 Health & Medical Symptoms, diagnosis, prescription, insurance" [ref=e287] [cursor=pointer]:
+          - heading "🏥 Health & Medical" [level=3] [ref=e288]
+          - paragraph [ref=e289]: Symptoms, diagnosis, prescription, insurance
+        - button "🛍️ Shopping & Retail Sizes, colors, prices, returns, discounts" [ref=e290] [cursor=pointer]:
+          - heading "🛍️ Shopping & Retail" [level=3] [ref=e291]
+          - paragraph [ref=e292]: Sizes, colors, prices, returns, discounts
+        - button "✈️ Travel & Transport Boarding, delays, luggage, immigration" [ref=e293] [cursor=pointer]:
+          - heading "✈️ Travel & Transport" [level=3] [ref=e294]
+          - paragraph [ref=e295]: Boarding, delays, luggage, immigration

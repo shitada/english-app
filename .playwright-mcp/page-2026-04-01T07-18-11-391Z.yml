@@ -1,0 +1,77 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [active] [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e436]:
+      - heading "Dashboard" [level=2] [ref=e437]
+      - generic [ref=e438]:
+        - img [ref=e439]
+        - generic [ref=e441]: "5"
+        - paragraph [ref=e442]: Day streak! Amazing!
+      - generic [ref=e443]:
+        - generic [ref=e444]:
+          - img [ref=e446]
+          - generic [ref=e448]: "37"
+          - paragraph [ref=e449]: Conversations
+          - paragraph [ref=e450]: 20 messages sent
+        - generic [ref=e451]:
+          - img [ref=e453]
+          - generic [ref=e456]: "6"
+          - paragraph [ref=e457]: Shadowing
+          - paragraph [ref=e458]: "Avg score: 7/10"
+        - generic [ref=e459]:
+          - img [ref=e461]
+          - generic [ref=e463]: "13"
+          - paragraph [ref=e464]: Words Reviewed
+          - paragraph [ref=e465]: 2 mastered
+        - generic [ref=e466]:
+          - img [ref=e468]
+          - generic [ref=e474]: "2"
+          - paragraph [ref=e475]: Mastered
+          - paragraph [ref=e476]: Level 3+
+      - generic [ref=e477]:
+        - heading "Recent Activity" [level=3] [ref=e478]
+        - generic [ref=e479]:
+          - generic [ref=e480]: 📚
+          - generic [ref=e481]:
+            - paragraph [ref=e482]: check in
+            - paragraph [ref=e483]: 9h ago
+        - generic [ref=e484]:
+          - generic [ref=e485]: 💬
+          - generic [ref=e486]:
+            - paragraph [ref=e487]: Restaurant Order
+            - paragraph [ref=e488]: 9h ago
+        - generic [ref=e489]:
+          - generic [ref=e490]: 📚
+          - generic [ref=e491]:
+            - paragraph [ref=e492]: window shopping
+            - paragraph [ref=e493]: 21h ago
+        - generic [ref=e494]:
+          - generic [ref=e495]: 📚
+          - generic [ref=e496]:
+            - paragraph [ref=e497]: rain check
+            - paragraph [ref=e498]: 21h ago
+        - generic [ref=e499]:
+          - generic [ref=e500]: 📚
+          - generic [ref=e501]:
+            - paragraph [ref=e502]: splurge
+            - paragraph [ref=e503]: 21h ago
+        - generic [ref=e504]:
+          - generic [ref=e505]: 📚
+          - generic [ref=e506]:
+            - paragraph [ref=e507]: out of stock
+            - paragraph [ref=e508]: 21h ago
+        - generic [ref=e509]:
+          - generic [ref=e510]: 📚
+          - generic [ref=e511]:
+            - paragraph [ref=e512]: refund
+            - paragraph [ref=e513]: 21h ago

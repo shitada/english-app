@@ -34,7 +34,9 @@ date +%s
 Save this as `T0`.
 
 ### Step 2 — Propose
-Invoke the **proposer** subagent. Pass it:
+**MANDATORY**: You MUST invoke the **proposer** subagent via `runSubagent`. You are FORBIDDEN from proposing changes yourself, deciding what to implement without the proposer, or skipping this step. Every iteration MUST call the proposer agent.
+
+Pass the proposer:
 - Current iteration number (N)
 - Contents of `autoresearch/results.tsv` (so it avoids duplicate proposals)
 - Contents of `autoresearch/backlog.md`
@@ -110,6 +112,11 @@ If smoke test fails → treat as test failure (discard the change).
 
 ### Step 5c — QA Test (Playwright MCP)
 
+**MANDATORY**: You MUST invoke the **tester** subagent via `runSubagent` for EVERY iteration. You are FORBIDDEN from skipping this step, replacing it with curl commands, or deciding "QA passed" yourself. If Playwright fails due to infrastructure issues (e.g., SingletonLock, browser busy), you MUST:
+1. Kill any existing browser processes: `pkill -f "chrome.*mcp" 2>/dev/null; rm -f /Users/shingotada/Library/Caches/ms-playwright/mcp-chrome-*/SingletonLock 2>/dev/null`
+2. Retry the tester subagent ONE more time
+3. If it fails again, record the iteration with ux_score=5.0 and add a note "Playwright infrastructure failure — QA skipped" but you MUST still call the evaluator with qa_passed=false
+
 Start the server if not already running for smoke test (use nohup + disown so the process survives after this shell exits):
 ```bash
 cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1
@@ -134,6 +141,8 @@ lsof -ti:8000 | xargs kill -9 2>/dev/null
 If `passed: false` → treat as test failure (discard the change).
 
 ### Step 6 — Evaluate
+**MANDATORY**: You MUST invoke the **evaluator** subagent via `runSubagent` for EVERY iteration. You are FORBIDDEN from assigning scores yourself, deciding keep/discard without the evaluator, or skipping this step. The score MUST come from the evaluator agent — never from you.
+
 Invoke the **evaluator** subagent. Pass it:
 - The proposal (title + description)
 - The git diff of changes: `git diff HEAD~1`
@@ -219,3 +228,7 @@ After completing all 20 iterations (or reaching iteration 20), generate `autores
 6. **Test-first for iterations 1-2** — prioritize adding test coverage before feature work
 7. **Record timing** at every checkpoint (T0-T4) for performance tracking
 8. **Schema changes require migrations** — if `database.py` SCHEMA is modified, `_MIGRATIONS` must be updated and smoke test must pass
+9. **NEVER skip the proposer** — every iteration MUST call the proposer subagent. You are an orchestrator, not a proposer. Do NOT decide what to implement yourself.
+10. **NEVER skip the evaluator** — every iteration MUST call the evaluator subagent. You MUST NOT assign scores or make keep/discard decisions yourself. The evaluator's score is the ONLY valid score.
+11. **NEVER skip the tester** — every iteration MUST call the tester subagent for Playwright QA. If Playwright has infrastructure issues, follow the recovery procedure in Step 5c. Never replace the tester with curl commands or self-assessment.
+12. **NEVER fabricate timestamps** — all timestamps in results.tsv MUST come from actual `date` commands, not hardcoded or estimated values.

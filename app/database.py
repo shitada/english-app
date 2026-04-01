@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS messages (
     role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
     content TEXT NOT NULL,
     feedback_json TEXT,
+    is_bookmarked INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
@@ -114,6 +115,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add notes column to vocabulary_words",
         "ALTER TABLE vocabulary_words ADD COLUMN notes TEXT",
+    ),
+    (
+        "add is_bookmarked column to messages",
+        "ALTER TABLE messages ADD COLUMN is_bookmarked INTEGER NOT NULL DEFAULT 0",
     ),
 ]
 

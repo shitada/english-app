@@ -1,0 +1,34 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e42]:
+      - generic [ref=e131]:
+        - generic [ref=e132]: Role Play Scenario
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - img [ref=e135]
+            - slider "Volume" [ref=e139]: "0.7"
+          - generic [ref=e140]: 4:08
+          - button "End conversation" [disabled] [ref=e141]:
+            - img [ref=e142]
+            - text: End
+      - log [ref=e144]:
+        - generic [ref=e146]: Hello! Welcome to our restaurant. 😊 My name is Marco. I am your waiter today. Would you like to see the menu? Or do you know what you want?
+        - generic [ref=e157]: I would like to see the menu please
+      - generic [ref=e70]:
+        - button "Start speaking" [disabled] [ref=e147]:
+          - img [ref=e148]
+        - textbox "Message input" [disabled] [ref=e151]:
+          - /placeholder: Type your message or use the mic
+        - button "Send message" [disabled] [ref=e152]:
+          - img [ref=e153]

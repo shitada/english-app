@@ -1,0 +1,81 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [active] [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e188]:
+      - heading "Pronunciation Practice" [level=2] [ref=e189]
+      - paragraph [ref=e190]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e191]:
+        - generic [ref=e192] [cursor=pointer]:
+          - paragraph [ref=e193]: Just let me know when you're ready to order, or if you have any questions about the dishes.
+          - generic [ref=e194]: Restaurant Order
+          - img [ref=e195]
+        - generic [ref=e197] [cursor=pointer]:
+          - paragraph [ref=e198]: 😊 My name is Marco.
+          - generic [ref=e199]: Restaurant Order
+          - img [ref=e200]
+        - generic [ref=e202] [cursor=pointer]:
+          - paragraph [ref=e203]: I am your waiter today.
+          - generic [ref=e204]: Restaurant Order
+          - img [ref=e205]
+        - generic [ref=e207] [cursor=pointer]:
+          - paragraph [ref=e208]: Would you like to see the menu?
+          - generic [ref=e209]: Restaurant Order
+          - img [ref=e210]
+        - generic [ref=e212] [cursor=pointer]:
+          - paragraph [ref=e213]: Or do you know what you want?
+          - generic [ref=e214]: Restaurant Order
+          - img [ref=e215]
+        - generic [ref=e217] [cursor=pointer]:
+          - paragraph [ref=e218]: I'm so glad everything fits perfectly!
+          - generic [ref=e219]: Shopping
+          - img [ref=e220]
+        - generic [ref=e222] [cursor=pointer]:
+          - paragraph [ref=e223]: Does the jacket fit well through the shoulders, and are the trousers comfortable around the waist?
+          - generic [ref=e224]: Shopping
+          - img [ref=e225]
+        - generic [ref=e227] [cursor=pointer]:
+          - paragraph [ref=e228]: Sometimes with our spring line, people like to go up or down a size depending on the fit they prefer.
+          - generic [ref=e229]: Shopping
+          - img [ref=e230]
+        - generic [ref=e232] [cursor=pointer]:
+          - paragraph [ref=e233]: Let me grab a small in the jacket and the trousers for you right away.
+          - generic [ref=e234]: Shopping
+          - img [ref=e235]
+        - generic [ref=e237] [cursor=pointer]:
+          - paragraph [ref=e238]: I'll bring them over to the fitting room so you can try them on.
+          - generic [ref=e239]: Shopping
+          - img [ref=e240]
+        - generic [ref=e242] [cursor=pointer]:
+          - paragraph [ref=e243]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e244]: hotel
+          - img [ref=e245]
+        - generic [ref=e247] [cursor=pointer]:
+          - paragraph [ref=e248]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e249]: restaurant
+          - img [ref=e250]
+        - generic [ref=e252] [cursor=pointer]:
+          - paragraph [ref=e253]: I have three years of experience in software development.
+          - generic [ref=e254]: interview
+          - img [ref=e255]
+        - generic [ref=e257] [cursor=pointer]:
+          - paragraph [ref=e258]: I've been having a headache for the past two days.
+          - generic [ref=e259]: medical
+          - img [ref=e260]
+        - generic [ref=e262] [cursor=pointer]:
+          - paragraph [ref=e263]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e264]: shopping
+          - img [ref=e265]
+        - generic [ref=e267] [cursor=pointer]:
+          - paragraph [ref=e268]: What gate does the flight to London depart from?
+          - generic [ref=e269]: airport
+          - img [ref=e270]

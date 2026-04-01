@@ -464,3 +464,40 @@ export async function getWordDetail(wordId: number): Promise<WordDetail> {
   const res = await fetch(`/api/vocabulary/${wordId}/detail`);
   return res.json();
 }
+
+// Conversation message bookmarks (from iteration 96)
+export interface BookmarkedMessage {
+  id: number;
+  conversation_id: number;
+  role: 'user' | 'assistant';
+  content: string;
+  is_bookmarked: number;
+  created_at: string;
+  topic?: string;
+}
+
+export interface BookmarkedMessagesResponse {
+  items: BookmarkedMessage[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export async function toggleMessageBookmark(messageId: number): Promise<BookmarkedMessage> {
+  const res = await fetch(`/api/conversation/messages/${messageId}/bookmark`, { method: 'PUT' });
+  return res.json();
+}
+
+export async function getBookmarkedMessages(params?: {
+  conversation_id?: number;
+  limit?: number;
+  offset?: number;
+}): Promise<BookmarkedMessagesResponse> {
+  const sp = new URLSearchParams();
+  if (params?.conversation_id) sp.set('conversation_id', String(params.conversation_id));
+  if (params?.limit) sp.set('limit', String(params.limit));
+  if (params?.offset) sp.set('offset', String(params.offset));
+  const qs = sp.toString();
+  const res = await fetch(`/api/conversation/bookmarks${qs ? `?${qs}` : ''}`);
+  return res.json();
+}

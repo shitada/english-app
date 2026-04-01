@@ -291,3 +291,28 @@ async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_sessio
     topics = get_conversation_topics()
     all_topic_keys = [t["id"] for t in topics]
     return await conv_dal.get_topic_recommendations(db, all_topic_keys)
+
+
+@router.put("/messages/{message_id}/bookmark")
+async def toggle_bookmark(
+    message_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Toggle bookmark status on a conversation message."""
+    result = await conv_dal.toggle_message_bookmark(db, message_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Message not found")
+    return result
+
+
+@router.get("/bookmarks")
+async def list_bookmarks(
+    conversation_id: int | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """List all bookmarked messages, optionally filtered by conversation."""
+    items = await conv_dal.get_bookmarked_messages(db, conversation_id, limit, offset)
+    total = await conv_dal.count_bookmarked_messages(db, conversation_id)
+    return {"items": items, "total": total, "limit": limit, "offset": offset}

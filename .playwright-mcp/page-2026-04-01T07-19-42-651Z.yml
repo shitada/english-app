@@ -1,0 +1,73 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e155]:
+      - heading "Pronunciation Practice" [level=2] [ref=e156]
+      - paragraph [ref=e157]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e158]:
+        - generic [ref=e159] [cursor=pointer]:
+          - paragraph [ref=e160]: Just let me know when you're ready to order, or if you have any questions about the dishes.
+          - generic [ref=e161]: Restaurant Order
+          - img [ref=e162]
+        - generic [ref=e164] [cursor=pointer]:
+          - paragraph [ref=e165]: 😊 My name is Marco.
+          - generic [ref=e166]: Restaurant Order
+          - img [ref=e167]
+        - generic [ref=e169] [cursor=pointer]:
+          - paragraph [ref=e170]: I am your waiter today.
+          - generic [ref=e171]: Restaurant Order
+          - img [ref=e172]
+        - generic [ref=e174] [cursor=pointer]:
+          - paragraph [ref=e175]: Would you like to see the menu?
+          - generic [ref=e176]: Restaurant Order
+          - img [ref=e177]
+        - generic [ref=e179] [cursor=pointer]:
+          - paragraph [ref=e180]: Or do you know what you want?
+          - generic [ref=e181]: Restaurant Order
+          - img [ref=e182]
+        - generic [ref=e184] [cursor=pointer]:
+          - paragraph [ref=e185]: I'm so glad everything fits perfectly!
+          - generic [ref=e186]: Shopping
+          - img [ref=e187]
+        - generic [ref=e189] [cursor=pointer]:
+          - paragraph [ref=e190]: Does the jacket fit well through the shoulders, and are the trousers comfortable around the waist?
+          - generic [ref=e191]: Shopping
+          - img [ref=e192]
+        - generic [ref=e194] [cursor=pointer]:
+          - paragraph [ref=e195]: Sometimes with our spring line, people like to go up or down a size depending on the fit they prefer.
+          - generic [ref=e196]: Shopping
+          - img [ref=e197]
+        - generic [ref=e199] [cursor=pointer]:
+          - paragraph [ref=e200]: Let me grab a small in the jacket and the trousers for you right away.
+          - generic [ref=e201]: Shopping
+          - img [ref=e202]
+        - generic [ref=e204] [cursor=pointer]:
+          - paragraph [ref=e205]: I'll bring them over to the fitting room so you can try them on.
+          - generic [ref=e206]: Shopping
+          - img [ref=e207]
+        - generic [ref=e209] [cursor=pointer]:
+          - paragraph [ref=e210]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e211]: hotel
+          - img [ref=e212]
+        - generic [ref=e214] [cursor=pointer]:
+          - paragraph [ref=e215]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e216]: restaurant
+          - img [ref=e217]
+        - generic [ref=e219] [cursor=pointer]:
+          - paragraph [ref=e220]: I have three years of experience in software development.
+          - generic [ref=e221]: interview
+          - img [ref=e222]
+        - generic [ref=e224] [cursor=pointer]:
+          - paragraph [ref=e225]: I've been having a headache for the past two days.
+          - generic [ref=e226]: medical
+          - img [ref=e227]
+        - generic [ref=e229] [cursor=pointer]:
+          - paragraph [ref=e230]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e231]: shopping
+          - img [ref=e232]
+        - generic [ref=e234] [cursor=pointer]:
+          - paragraph [ref=e235]: What gate does the flight to London depart from?
+          - generic [ref=e236]: airport
+          - img [ref=e237]

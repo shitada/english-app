@@ -1,0 +1,30 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e296]:
+      - generic [ref=e297]:
+        - heading "Improve Your English" [level=2] [ref=e298]
+        - paragraph [ref=e299]: Practice conversations, pronunciation, and vocabulary with AI
+      - generic [ref=e300]:
+        - link "Conversation Practice real-life scenarios like hotel check-in, job interviews, and restaurant orders with AI role play." [ref=e301] [cursor=pointer]:
+          - /url: /conversation
+          - img [ref=e303]
+          - heading "Conversation" [level=3] [ref=e305]
+          - paragraph [ref=e306]: Practice real-life scenarios like hotel check-in, job interviews, and restaurant orders with AI role play.
+        - 'link "Pronunciation Shadowing practice: listen to a sentence, then repeat it immediately. Get feedback on accuracy and fluency." [ref=e307] [cursor=pointer]':
+          - /url: /pronunciation
+          - img [ref=e309]
+          - heading "Pronunciation" [level=3] [ref=e312]
+          - paragraph [ref=e313]: "Shadowing practice: listen to a sentence, then repeat it immediately. Get feedback on accuracy and fluency."
+        - link "Vocabulary Learn scenario-specific words and phrases in context through interactive quizzes with real-life examples." [ref=e314] [cursor=pointer]:
+          - /url: /vocabulary
+          - img [ref=e316]
+          - heading "Vocabulary" [level=3] [ref=e318]
+          - paragraph [ref=e319]: Learn scenario-specific words and phrases in context through interactive quizzes with real-life examples.
+        - link "Dashboard Track your learning streak, view statistics, and see your progress across all activities." [ref=e320] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e322]
+          - heading "Dashboard" [level=3] [ref=e324]
+          - paragraph [ref=e325]: Track your learning streak, view statistics, and see your progress across all activities.

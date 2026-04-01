@@ -1,0 +1,57 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e42]:
+      - generic [ref=e131]:
+        - generic [ref=e132]: Role Play Scenario
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - img [ref=e135]
+            - slider "Volume" [ref=e139]: "0.7"
+          - generic [ref=e140]: 3:32
+          - button "End conversation" [ref=e141] [cursor=pointer]:
+            - img [ref=e142]
+            - text: End
+      - log [ref=e144]:
+        - generic [ref=e146]: Hello! Welcome to our restaurant. 😊 My name is Marco. I am your waiter today. Would you like to see the menu? Or do you know what you want?
+        - generic [ref=e156]:
+          - generic [ref=e157]: I would like to see the menu please
+          - generic [ref=e160]:
+            - generic [ref=e161] [cursor=pointer]:
+              - text: 📝 Corrections & Suggestions
+              - generic [ref=e162]: ▼
+            - generic [ref=e163]:
+              - strong [ref=e164]: the menu please
+              - text: →
+              - emphasis [ref=e165]: the menu, please.
+              - text: A comma should be placed before 'please' when it appears at the end of a sentence, and the sentence should end with a period.
+            - generic [ref=e166]:
+              - text: 💡 "I would like to see the menu please" →
+              - emphasis [ref=e167]: "\"Could I see the menu, please?\""
+              - text: Using 'Could I…?' is a common, polite, and natural way to make a request in everyday English, especially in a restaurant setting.
+            - generic [ref=e168]:
+              - text: 💡 "I would like to see the menu" →
+              - emphasis [ref=e169]: "\"May I have a look at the menu, please?\""
+              - text: "'May I have a look at…' sounds slightly more refined and is another natural alternative for politely requesting something."
+            - generic [ref=e170]:
+              - text: ✏️
+              - strong [ref=e171]: "Corrected:"
+              - text: I would like to see the menu, please.
+        - generic [ref=e173]: "Of course! Here's what we have today: **🥗 Starters** - Garden Salad — $8 - Tomato Soup — $7 - Garlic Bread — $6 **🍝 Main Courses** - Grilled Chicken with roasted vegetables — $18 - Spaghetti Bolognese — $15 - Grilled Salmon with mashed potatoes — $22 - Mushroom Risotto *(vegetarian)* — $16 **🍰 Desserts** - Chocolate Cake — $9 - Tiramisu — $10 - Ice Cream (vanilla, chocolate, or strawberry) — $7 **🥤 Drinks** - Water / Soda — $3 - Coffee / Tea — $4 - Fresh Juice — $5 Take your time! Just let me know when you're ready to order, or if you have any questions about the dishes. 😊"
+      - generic [ref=e70]:
+        - button "Start speaking" [ref=e147] [cursor=pointer]:
+          - img [ref=e148]
+        - textbox "Message input" [ref=e151]:
+          - /placeholder: Type your message or use the mic
+        - button "Send message" [disabled] [ref=e152]:
+          - img [ref=e153]

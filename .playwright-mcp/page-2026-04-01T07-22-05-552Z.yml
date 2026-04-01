@@ -1,0 +1,26 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e97]:
+        - generic [ref=e98]: Role Play Scenario
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - img [ref=e101]
+            - slider "Volume" [ref=e105]: "0.7"
+          - generic [ref=e106]: 4:38
+          - button "End conversation" [disabled] [ref=e107]:
+            - img [ref=e108]
+            - text: End
+      - log [ref=e110]:
+        - generic [ref=e112]: Good morning and welcome to the Grand Horizon Hotel! I hope you had a pleasant trip getting here. Do you have a reservation with us, or will you be booking a room today?
+        - generic [ref=e123]: Yes, I have a reservation under the name Smith.
+      - generic [ref=e36]:
+        - button "Start speaking" [disabled] [ref=e113]:
+          - img [ref=e114]
+        - textbox "Message input" [disabled] [ref=e117]:
+          - /placeholder: Type your message or use the mic
+        - button "Send message" [disabled] [ref=e118]:
+          - img [ref=e119]

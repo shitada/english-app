@@ -8,6 +8,7 @@ import pytest
 
 from app.dal.conversation import (
     add_message,
+    count_bookmarked_messages,
     count_conversations,
     create_conversation,
     delete_conversation,
@@ -15,12 +16,14 @@ from app.dal.conversation import (
     end_conversation,
     format_history_text,
     get_active_conversation,
+    get_bookmarked_messages,
     get_conversation_export,
     get_conversation_history,
     get_conversation_summary,
     get_grammar_accuracy,
     get_topic_recommendations,
     list_conversations,
+    toggle_message_bookmark,
     update_message_feedback,
 )
 
@@ -515,3 +518,77 @@ class TestTopicRecommendations:
         assert result[1]["session_count"] == 1
         assert result[2]["topic"] == "hotel"
         assert result[2]["session_count"] == 2
+
+
+@pytest.mark.unit
+class TestToggleMessageBookmark:
+    async def test_toggle_on(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        mid = await add_message(test_db, cid, "user", "Hello")
+        result = await toggle_message_bookmark(test_db, mid)
+        assert result is not None
+        assert result["is_bookmarked"] == 1
+        assert result["id"] == mid
+
+    async def test_toggle_off(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        mid = await add_message(test_db, cid, "user", "Hello")
+        await toggle_message_bookmark(test_db, mid)
+        result = await toggle_message_bookmark(test_db, mid)
+        assert result["is_bookmarked"] == 0
+
+    async def test_nonexistent_message(self, test_db):
+        result = await toggle_message_bookmark(test_db, 99999)
+        assert result is None
+
+
+@pytest.mark.unit
+class TestGetBookmarkedMessages:
+    async def test_empty(self, test_db):
+        result = await get_bookmarked_messages(test_db)
+        assert result == []
+
+    async def test_with_bookmarks(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        mid1 = await add_message(test_db, cid, "user", "Hello")
+        await add_message(test_db, cid, "assistant", "Hi")
+        await toggle_message_bookmark(test_db, mid1)
+        result = await get_bookmarked_messages(test_db)
+        assert len(result) == 1
+        assert result[0]["id"] == mid1
+        assert result[0]["topic"] == "hotel"
+
+    async def test_filtered_by_conversation(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel")
+        cid2 = await create_conversation(test_db, "restaurant")
+        mid1 = await add_message(test_db, cid1, "user", "Hello")
+        mid2 = await add_message(test_db, cid2, "user", "Hi")
+        await toggle_message_bookmark(test_db, mid1)
+        await toggle_message_bookmark(test_db, mid2)
+        result = await get_bookmarked_messages(test_db, conversation_id=cid1)
+        assert len(result) == 1
+        assert result[0]["conversation_id"] == cid1
+
+
+@pytest.mark.unit
+class TestCountBookmarkedMessages:
+    async def test_zero(self, test_db):
+        count = await count_bookmarked_messages(test_db)
+        assert count == 0
+
+    async def test_counts_correctly(self, test_db):
+        cid = await create_conversation(test_db, "hotel")
+        mid1 = await add_message(test_db, cid, "user", "Hello")
+        mid2 = await add_message(test_db, cid, "assistant", "Hi")
+        await toggle_message_bookmark(test_db, mid1)
+        await toggle_message_bookmark(test_db, mid2)
+        assert await count_bookmarked_messages(test_db) == 2
+
+    async def test_filtered_by_conversation(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel")
+        cid2 = await create_conversation(test_db, "restaurant")
+        mid1 = await add_message(test_db, cid1, "user", "Hello")
+        mid2 = await add_message(test_db, cid2, "user", "Hi")
+        await toggle_message_bookmark(test_db, mid1)
+        await toggle_message_bookmark(test_db, mid2)
+        assert await count_bookmarked_messages(test_db, conversation_id=cid1) == 1

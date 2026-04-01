@@ -328,3 +328,80 @@ async def get_topic_recommendations(
         )
     )
     return recommendations
+
+
+async def toggle_message_bookmark(db: aiosqlite.Connection, message_id: int) -> dict | None:
+    """Toggle the is_bookmarked flag on a message. Returns updated message or None."""
+    rows = await db.execute_fetchall(
+        "SELECT id, conversation_id, role, content, is_bookmarked, created_at FROM messages WHERE id = ?",
+        (message_id,),
+    )
+    if not rows:
+        return None
+    row = rows[0]
+    new_value = 0 if row["is_bookmarked"] else 1
+    await db.execute(
+        "UPDATE messages SET is_bookmarked = ? WHERE id = ?",
+        (new_value, message_id),
+    )
+    await db.commit()
+    return {
+        "id": row["id"],
+        "conversation_id": row["conversation_id"],
+        "role": row["role"],
+        "content": row["content"],
+        "is_bookmarked": new_value,
+        "created_at": row["created_at"],
+    }
+
+
+async def get_bookmarked_messages(
+    db: aiosqlite.Connection,
+    conversation_id: int | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[dict]:
+    """Return bookmarked messages, optionally filtered by conversation_id."""
+    params: list[Any] = []
+    where = "WHERE m.is_bookmarked = 1"
+    if conversation_id is not None:
+        where += " AND m.conversation_id = ?"
+        params.append(conversation_id)
+    params.extend([limit, offset])
+    rows = await db.execute_fetchall(
+        f"""SELECT m.id, m.conversation_id, m.role, m.content, m.is_bookmarked,
+                   m.created_at, c.topic
+            FROM messages m
+            JOIN conversations c ON c.id = m.conversation_id
+            {where}
+            ORDER BY m.created_at DESC
+            LIMIT ? OFFSET ?""",
+        params,
+    )
+    return [
+        {
+            "id": r["id"],
+            "conversation_id": r["conversation_id"],
+            "role": r["role"],
+            "content": r["content"],
+            "is_bookmarked": r["is_bookmarked"],
+            "created_at": r["created_at"],
+            "topic": r["topic"],
+        }
+        for r in rows
+    ]
+
+
+async def count_bookmarked_messages(
+    db: aiosqlite.Connection, conversation_id: int | None = None
+) -> int:
+    """Count bookmarked messages, optionally filtered by conversation_id."""
+    params: list[Any] = []
+    where = "WHERE is_bookmarked = 1"
+    if conversation_id is not None:
+        where += " AND conversation_id = ?"
+        params.append(conversation_id)
+    rows = await db.execute_fetchall(
+        f"SELECT COUNT(*) as cnt FROM messages {where}", params
+    )
+    return rows[0]["cnt"] if rows else 0
