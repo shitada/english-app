@@ -7252,3 +7252,198 @@ Now add the integration test:
 
 Now commit and test:
 
+● Record T2 and commit iteration 98 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #98: Add vocabulary spaced repetition analytics endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 23 lines...
+
+T2=1775053292, implement_sec=110. Now running tests:
+
+● Run backend tests iteration 98 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 444 tests pass. Now run TypeScript check:
+
+● TypeScript check iteration 98 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS check passes. Run smoke test since DAL was modified:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+● Run smoke test iteration 98 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 22 lines...
+
+Smoke test passes. Now start server for QA testing:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 98
+  │ playwright-browser_navigate http://localhost:8000/vocabulary
+  │   └ ### Ran Playwright code
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+QA passed (ux_score=9). Now evaluating:
+
+● Record T3, get diff stats (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1
+  │ --stat
+  └ 20 lines...
+
+● Evaluator Evaluate iteration 98
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:60 (60 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L60:120 (61 lines read)
+
+Score 7.75, verdict: keep. Recording results:
+
+● Record T4 for iteration 98 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 98 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log -1 --format=%h)
+  │ && echo "98      ${HASH} 2026-04-01T14:17:13+00:00       149     110     580     83      922
+  │ 444     444     pass    7.75    keep    Add vocabulary spaced repetition analytics endpoint" >>
+  │ autoresearch/results.tsv && echo "Recorded: $HASH"
+  └ 2 lines...
+
+✗ Edit backlog.md
+  │ autoresearch/backlog.md
+  └ No match found
+
+● Find backlog entry (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "spaced repetition analytics"
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L106:112 (6 lines read)
+
+● Edit backlog.md +2 -2
+  └ autoresearch/backlog.md
+
+Kill server, move to iteration 99:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+**Iteration 98 complete: KEEP (7.75, 444/444 tests, +5 new tests)**
+
+---
+
+Starting iteration 99:
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L100:105 (5 lines read)
+
+● Record T0 for iteration 99 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 99
+  │ Read config.py
+  │   │ app/config.py
+  │   └ 57 lines read
+  └ Read smoke_test.py
+      │ tests/smoke_test.py
+      └ 86 lines read
+
+● Record T1 for iteration 99 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775054081, propose_sec=86. Implementing user preference settings:
+
+● Explore Explore database and main.py
+  │ List DAL directory with sizes (shell)
+  │   │ ls -lh /Users/shingotada/Documents/vscode/english-app/app/dal
+  │   └ 8 lines...
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L1:120 (120 lines read)
+
+Now I'll implement everything. Since `user_preferences` is a new table, `CREATE TABLE IF NOT EXISTS` suffices — no migration entry needed.
+
+● Read main.py
+  │ app/main.py
+  └ L1:10 (10 lines read)
+
+● Read database.py
+  │ app/database.py
+  └ L92:100 (9 lines read)
+
+● Read main.py
+  │ app/main.py
+  └ L150:165 (16 lines read)
+
+Now I'll create the DAL, router, add the schema table, register the router, and add tests:
+
+● Edit database.py +6
+  └ app/database.py
+
+● Create preferences.py +60
+  └ app/dal/preferences.py
+
+● Create preferences.py +87
+  └ app/routers/preferences.py
+
+Now register the router and update the import:
+
+● Read main.py
+  │ app/main.py
+  └ L15:30 (16 lines read)
+
+● Edit main.py +1
+  └ app/main.py
+
+● Edit main.py +1
+  └ app/main.py
+
+Now add smoke test endpoint:
+
+● Read smoke_test.py
+  │ tests/smoke_test.py
+  └ L29:35 (7 lines read)
+
+● Edit smoke_test.py +1
+  └ tests/smoke_test.py
+
+Now create unit tests:
+
+● Create test_preferences_dal.py +81
+  └ tests/unit/test_preferences_dal.py
+
+● Create test_preferences_api.py +66
+  └ tests/integration/test_preferences_api.py
+
+Now commit and test:
+

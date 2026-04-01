@@ -103,9 +103,9 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add vocabulary difficulty auto-adjustment (completed iteration #93)
 - [x] ✅ Add word detail with similar words and progress (completed iteration #94)
 - [x] ✅ Expand smoke test and add final TypeScript types (completed iteration #95)
-- [ ] Add pronunciation sentence categorization by difficulty
+- [x] ✅ Add pronunciation sentence categorization by difficulty (completed iteration #97)
 - [ ] Add API versioning prefix
 - [x] ✅ Add conversation message bookmarks (completed iteration #96)
-- [ ] Add vocabulary spaced repetition analytics
+- [x] ✅ Add vocabulary spaced repetition analytics (completed iteration #98)
 - [ ] Add user preference settings persistence
 - [ ] Add conversation replay/review mode

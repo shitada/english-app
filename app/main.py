@@ -19,6 +19,7 @@ from app.config import load_config, get_logging_config
 from app.database import init_db, get_db_session
 from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
+from app.routers import preferences
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -157,6 +158,7 @@ app.include_router(conversation.router)
 app.include_router(pronunciation.router)
 app.include_router(vocabulary.router)
 app.include_router(dashboard.router)
+app.include_router(preferences.router)
 
 # Serve React build — SPA fallback for client-side routing
 if FRONTEND_BUILD.is_dir():

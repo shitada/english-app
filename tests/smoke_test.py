@@ -29,6 +29,7 @@ ENDPOINTS = [
     "/api/dashboard/config",
     "/api/dashboard/summary",
     "/api/dashboard/goals",
+    "/api/preferences",
 ]
 
 

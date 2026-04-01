@@ -92,6 +92,12 @@ CREATE TABLE IF NOT EXISTS learning_goals (
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(goal_type)
 );
+
+CREATE TABLE IF NOT EXISTS user_preferences (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------
