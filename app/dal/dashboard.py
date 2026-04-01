@@ -291,3 +291,40 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
                 current = 1
         prev_ord = day_ord
     return longest
+
+
+async def get_conversation_duration_stats(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get aggregate conversation duration statistics."""
+    rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as total_completed,
+                  COALESCE(SUM(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)), 0) as total_duration,
+                  COALESCE(AVG(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)), 0) as avg_duration,
+                  COALESCE(MIN(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)), 0) as shortest,
+                  COALESCE(MAX(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)), 0) as longest
+           FROM conversations
+           WHERE status = 'ended' AND ended_at IS NOT NULL"""
+    )
+    row = dict(rows[0]) if rows else {}
+
+    # Duration by difficulty
+    diff_rows = await db.execute_fetchall(
+        """SELECT difficulty,
+                  COUNT(*) as count,
+                  CAST(AVG(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)) AS INTEGER) as avg_duration
+           FROM conversations
+           WHERE status = 'ended' AND ended_at IS NOT NULL
+           GROUP BY difficulty
+           ORDER BY difficulty"""
+    )
+
+    return {
+        "total_completed": row.get("total_completed", 0),
+        "total_duration_seconds": row.get("total_duration", 0),
+        "avg_duration_seconds": int(row.get("avg_duration", 0)),
+        "shortest_duration_seconds": row.get("shortest", 0),
+        "longest_duration_seconds": row.get("longest", 0),
+        "duration_by_difficulty": [
+            {"difficulty": r["difficulty"], "count": r["count"], "avg_duration_seconds": r["avg_duration"] or 0}
+            for r in diff_rows
+        ],
+    }

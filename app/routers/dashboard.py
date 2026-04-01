@@ -122,3 +122,24 @@ class StreakMilestonesResponse(BaseModel):
 async def get_streak_milestones(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get study streak with milestone achievements."""
     return await dash_dal.get_streak_milestones(db)
+
+
+class DifficultyDuration(BaseModel):
+    difficulty: str
+    count: int
+    avg_duration_seconds: int
+
+
+class ConversationDurationResponse(BaseModel):
+    total_completed: int
+    total_duration_seconds: int
+    avg_duration_seconds: int
+    shortest_duration_seconds: int
+    longest_duration_seconds: int
+    duration_by_difficulty: list[DifficultyDuration]
+
+
+@router.get("/conversation-duration", response_model=ConversationDurationResponse)
+async def get_conversation_duration(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get aggregate conversation duration statistics."""
+    return await dash_dal.get_conversation_duration_stats(db)

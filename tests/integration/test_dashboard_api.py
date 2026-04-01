@@ -187,3 +187,14 @@ class TestStreakMilestones:
         assert "longest_streak" in data
         assert len(data["milestones"]) == 5
         assert data["milestones"][0]["days"] == 7
+
+
+@pytest.mark.integration
+class TestConversationDuration:
+    async def test_returns_duration_stats(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/conversation-duration")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "total_completed" in data
+        assert "avg_duration_seconds" in data
+        assert "duration_by_difficulty" in data

@@ -240,3 +240,28 @@ class TestStreakMilestones:
         result = await _calculate_longest_streak(test_db)
         assert isinstance(result, int)
         assert result >= 0
+
+
+@pytest.mark.unit
+class TestConversationDurationStats:
+    async def test_empty_database(self, test_db):
+        from app.dal.dashboard import get_conversation_duration_stats
+        result = await get_conversation_duration_stats(test_db)
+        assert result["total_completed"] == 0
+        assert result["total_duration_seconds"] == 0
+        assert result["duration_by_difficulty"] == []
+
+    async def test_with_ended_conversations(self, test_db):
+        from app.dal.conversation import end_conversation
+        from app.dal.dashboard import get_conversation_duration_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        result = await get_conversation_duration_stats(test_db)
+        assert result["total_completed"] == 1
+        assert result["total_duration_seconds"] >= 0
+
+    async def test_excludes_active_conversations(self, test_db):
+        from app.dal.dashboard import get_conversation_duration_stats
+        await create_conversation(test_db, "hotel_checkin")  # active, not ended
+        result = await get_conversation_duration_stats(test_db)
+        assert result["total_completed"] == 0
