@@ -8,6 +8,7 @@ import pytest
 
 from app.dal.conversation import (
     add_message,
+    count_conversations,
     create_conversation,
     delete_conversation,
     delete_ended_conversations,
@@ -385,3 +386,23 @@ class TestGetConversationExport:
         await test_db.commit()
         result = await get_conversation_export(test_db, cid)
         assert result["messages"][0]["feedback"] == "bad json"
+
+
+@pytest.mark.unit
+class TestCountConversations:
+    async def test_empty_returns_zero(self, test_db):
+        assert await count_conversations(test_db) == 0
+
+    async def test_counts_all(self, test_db):
+        await create_conversation(test_db, "hotel_checkin")
+        await create_conversation(test_db, "restaurant_order")
+        await create_conversation(test_db, "hotel_checkin")
+        assert await count_conversations(test_db) == 3
+
+    async def test_filters_by_topic(self, test_db):
+        await create_conversation(test_db, "hotel_checkin")
+        await create_conversation(test_db, "restaurant_order")
+        await create_conversation(test_db, "hotel_checkin")
+        assert await count_conversations(test_db, topic="hotel_checkin") == 2
+        assert await count_conversations(test_db, topic="restaurant_order") == 1
+        assert await count_conversations(test_db, topic="nonexistent") == 0

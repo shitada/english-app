@@ -66,6 +66,8 @@ class ConversationListItem(BaseModel):
 
 class ConversationListResponse(BaseModel):
     conversations: list[ConversationListItem]
+    total_count: int
+    has_more: bool
 
 
 @router.get("/topics")
@@ -214,7 +216,12 @@ async def list_conversations(
 ):
     """List past conversations with message counts."""
     conversations = await conv_dal.list_conversations(db, topic=topic, limit=limit, offset=offset)
-    return {"conversations": conversations}
+    total_count = await conv_dal.count_conversations(db, topic=topic)
+    return {
+        "conversations": conversations,
+        "total_count": total_count,
+        "has_more": (offset + limit) < total_count,
+    }
 
 
 class DeleteResponse(BaseModel):

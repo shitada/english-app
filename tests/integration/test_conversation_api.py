@@ -159,7 +159,10 @@ async def test_list_conversations_empty(client):
     """Test listing conversations when none exist."""
     res = await client.get("/api/conversation/list")
     assert res.status_code == 200
-    assert res.json()["conversations"] == []
+    data = res.json()
+    assert data["conversations"] == []
+    assert data["total_count"] == 0
+    assert data["has_more"] is False
 
 
 @pytest.mark.asyncio
@@ -172,6 +175,8 @@ async def test_list_conversations_after_creating(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert len(data["conversations"]) == 2
+    assert data["total_count"] == 2
+    assert data["has_more"] is False
 
 
 @pytest.mark.asyncio
@@ -358,3 +363,23 @@ async def test_export_ended_conversation_with_summary(client, mock_copilot):
     assert data["status"] == "ended"
     assert data["ended_at"] is not None
     assert data["summary"] is not None
+
+
+@pytest.mark.asyncio
+async def test_list_conversations_pagination_metadata(client, mock_copilot):
+    """Test pagination metadata with limit/offset."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    for _ in range(3):
+        await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    # First page
+    res1 = await client.get("/api/conversation/list?limit=2&offset=0")
+    data1 = res1.json()
+    assert len(data1["conversations"]) == 2
+    assert data1["total_count"] == 3
+    assert data1["has_more"] is True
+    # Second page
+    res2 = await client.get("/api/conversation/list?limit=2&offset=2")
+    data2 = res2.json()
+    assert len(data2["conversations"]) == 1
+    assert data2["total_count"] == 3
+    assert data2["has_more"] is False

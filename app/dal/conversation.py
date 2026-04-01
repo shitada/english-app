@@ -143,6 +143,22 @@ async def list_conversations(
     return [dict(r) for r in rows]
 
 
+async def count_conversations(
+    db: aiosqlite.Connection, topic: str | None = None
+) -> int:
+    """Count total conversations, optionally filtered by topic."""
+    if topic:
+        rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM conversations WHERE topic = ?",
+            (topic,),
+        )
+    else:
+        rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM conversations"
+        )
+    return rows[0]["cnt"] if rows else 0
+
+
 async def delete_conversation(db: aiosqlite.Connection, conversation_id: int) -> bool:
     """Delete a conversation and its messages (cascade). Returns True if deleted."""
     cursor = await db.execute(

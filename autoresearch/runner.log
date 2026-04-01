@@ -4066,3 +4066,133 @@ The parameter is `is_correct`, not `correct`. Let me fix:
   │ tests/unit/test_vocabulary_dal.py
   └ 1 line...
 
+● Fix and rerun tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #70: add unit tests for vocab forecast and due words DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+320 passed! TS check:
+
+● TS check + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?" && date +%s
+  └ 3 lines...
+
+● Evaluator Evaluate iteration 70
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L490:510 (21 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L1:30 (30 lines read)
+
+● T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 → **KEEP**.
+
+● Record iteration 70 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "70   0324fef
+  │ 2026-04-01T12:04:04+09:00       66      40      52      37      195     320     320     pass
+  │ 8.1     keep    Add unit tests for vocab forecast and due words DAL" >> autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 71:
+
+● T0 for iteration 71 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 71
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ 360 lines read
+  └ Read database.py
+      │ app/database.py
+      └ 135 lines read
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me look at the current list endpoint and response model:
+
+● Find list endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ConversationListResponse\|list_conversations\|/list" app/routers/conversation.py
+  └ 5 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L60:80 (21 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L208:225 (18 lines read)
+
+Now implement:
+
+● Edit conversation.py +2
+  └ app/routers/conversation.py
+
+● Edit conversation.py +6 -1
+  └ app/routers/conversation.py
+
+Now add the DAL function:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L100:130 (31 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L140:160 (21 lines read)
+
+● Edit conversation.py +16
+  └ app/dal/conversation.py
+
+Now add unit tests and update integration tests:
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+● Add count tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_conversation_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 19 lines...
+
+Now update integration tests - check for existing list tests:
+
+● Find list tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "list.*conversations\|/api/conversation/list" tests/integration/test_conversation_api.py | head
+  │ -20
+  └ 13 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L158:195 (38 lines read)
+
+I need to update existing list tests to also check for `total_count` and `has_more`:
+
+● Edit test_conversation_api.py +4 -1
+  └ tests/integration/test_conversation_api.py
+
+● Edit test_conversation_api.py +2
+  └ tests/integration/test_conversation_api.py
+
+Now add a pagination test:
+
+● Add pagination test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'TESTS'…
+  └ 22 lines...
+
