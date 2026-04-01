@@ -1,0 +1,3 @@
+[   11998ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/pronunciation/weaknesses?limit=0:0
+[   22331ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/pronunciation/weaknesses?limit=51:0
+[   22332ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/pronunciation/weaknesses?limit=abc:0

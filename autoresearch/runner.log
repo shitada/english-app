@@ -7905,3 +7905,139 @@ Now add unit and integration tests:
 
 Commit and test:
 
+● Record T2 and commit iteration 102 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #102: Add pronunciation weakness analysis endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 46 lines...
+
+T2=1775057196, implement_sec=67. Running tests:
+
+● Run tests iteration 102 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+477 passed. TS check + smoke:
+
+● TS check iteration 102 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test iteration 102 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. QA test:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 102
+  │ playwright-browser_evaluate
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed (ux_score=8). Now evaluate:
+
+● Record T3 for iteration 102 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 102
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L1:50 (49 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L50:end (422 lines read)
+
+Score 7.0, verdict: keep.
+
+● Record T4 for iteration 102 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 102 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log -1 --format=%h)
+  │ && echo "102     ${HASH} 2026-04-01T15:07:42+00:00       267     67      363     88      785
+  │ 477     477     pass    7.0     keep    Add pronunciation weakness analysis endpoint" >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+**Iteration 102 complete: KEEP (7.0, 477/477 tests, +5 new tests)**
+
+---
+
+Iteration 103:
+
+● Kill server, T0 iter 103 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 103
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L200:350 (151 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L350:500 (151 lines read)
+
+● Record T1 for iteration 103 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775057818, propose_sec=153. Implementing conversation vocabulary crossover:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L465:475 (11 lines read)
+
+● Check file length (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L476:482 (7 lines read)
+
+● Edit conversation.py +47
+  └ app/dal/conversation.py
+
+Now add the router endpoint:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L228:245 (18 lines read)
+
+I need to place the new endpoint near the other `/{conversation_id}` routes:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L298:320 (21 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L320:340 (11 lines read)
+
+● Edit conversation.py +12
+  └ app/routers/conversation.py
+
+Now add integration tests:
+
+● Add integration tests for vocab crossover (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'ENDOFTEST'…
+  └ 41 lines...
+
+Commit and test:
+

@@ -457,3 +457,41 @@ async def test_replay_multi_turn(client, mock_copilot):
     assert len(user_turns) >= 1
     assert user_turns[0]["user_message"] == "I need a room."
     assert user_turns[0]["assistant_message"] == "Sure, I can help!"
+
+
+@pytest.mark.integration
+async def test_conversation_vocabulary_not_found(client):
+    res = await client.get("/api/conversation/9999/vocabulary")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_conversation_vocabulary_no_matches(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+    res = await client.get(f"/api/conversation/{conv_id}/vocabulary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversation_id"] == conv_id
+    assert isinstance(data["words"], list)
+
+
+@pytest.mark.integration
+async def test_conversation_vocabulary_with_matches(client, mock_copilot):
+    # First create vocabulary words
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "hotel", "correct_meaning": "a place to stay", "example_sentence": "Stay at the hotel.", "difficulty": 1, "wrong_options": ["a", "b", "c"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    # Create a conversation containing the word "hotel"
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+    res = await client.get(f"/api/conversation/{conv_id}/vocabulary")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total"] >= 1
+    assert any(w["word"] == "hotel" for w in data["words"])

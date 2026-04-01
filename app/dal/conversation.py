@@ -480,3 +480,50 @@ async def get_conversation_replay(
         "turns": turns,
         "total_turns": len(turns),
     }
+
+
+async def get_conversation_vocabulary(
+    db: aiosqlite.Connection, conversation_id: int
+) -> dict[str, Any] | None:
+    """Find vocabulary words that appear in a conversation's messages."""
+    conv_rows = await db.execute_fetchall(
+        "SELECT id FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    if not conv_rows:
+        return None
+
+    msg_rows = await db.execute_fetchall(
+        "SELECT content FROM messages WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+    if not msg_rows:
+        return {"conversation_id": conversation_id, "words": [], "total": 0}
+
+    # Combine all message content into one searchable text
+    full_text = " ".join(r["content"].lower() for r in msg_rows)
+
+    # Get all vocabulary words
+    word_rows = await db.execute_fetchall(
+        """SELECT w.id, w.word, w.meaning, w.topic, w.difficulty,
+                  p.level, p.correct_count, p.incorrect_count, p.next_review_at
+           FROM vocabulary_words w
+           LEFT JOIN vocabulary_progress p ON w.id = p.word_id"""
+    )
+
+    matched = []
+    for r in word_rows:
+        word_lower = r["word"].lower()
+        if word_lower in full_text:
+            matched.append({
+                "word_id": r["id"],
+                "word": r["word"],
+                "meaning": r["meaning"],
+                "topic": r["topic"],
+                "difficulty": r["difficulty"],
+                "srs_level": r["level"],
+                "correct_count": r["correct_count"] or 0,
+                "incorrect_count": r["incorrect_count"] or 0,
+                "next_review_at": r["next_review_at"],
+            })
+
+    return {"conversation_id": conversation_id, "words": matched, "total": len(matched)}

@@ -328,3 +328,15 @@ async def get_conversation_replay(
     if result is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return result
+
+
+@router.get("/{conversation_id}/vocabulary")
+async def get_conversation_vocabulary(
+    conversation_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Find vocabulary words that appear in a conversation's messages."""
+    result = await conv_dal.get_conversation_vocabulary(db, conversation_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return result

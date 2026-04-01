@@ -105,3 +105,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 9984cee4a2026-04-01T14:33:15+00:0086129979771271462462pass8.05keepAdd user preference settings persistence
 100a94304a2026-04-01T14:41:30+00:0015515438388780465465pass7.75keepAdd conversation replay/review mode endpoint
 101b11f4372026-04-01T14:54:56+00:001699041072741472472pass7.3keepAdd pronunciation practice sentences from vocabulary
+102ecd4c312026-04-01T15:07:42+00:002676736388785477477pass7.0keepAdd pronunciation weakness analysis endpoint

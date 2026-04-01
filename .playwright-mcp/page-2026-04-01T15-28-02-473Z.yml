@@ -1,0 +1,25 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e42]:
+      - heading "Shadowing Practice" [level=3] [ref=e126]
+      - generic [ref=e127]: Good morning and welcome to The Grand Pinnacle Hotel!
+      - generic [ref=e128]: ▶ Press "Start Shadowing" to begin
+      - button "Start shadowing practice" [ref=e130] [cursor=pointer]:
+        - img [ref=e131]
+        - text: Start Shadowing
+      - generic [ref=e135]:
+        - img [ref=e136]
+        - slider [ref=e140]: "0.7"
+        - generic [ref=e141]: 70%
+      - button "Back" [ref=e143] [cursor=pointer]
