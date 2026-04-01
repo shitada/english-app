@@ -6170,3 +6170,99 @@ For #91, let me add frontend TypeScript types for all the new endpoints from ite
 
 Commit:
 
+● Commit iteration 91 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #91: Add frontend TypeScript types for iterations 86-90
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-verify 2>&1 | tail -3
+  │ && git rev-parse --short HEAD && date +%s
+  └ 6 lines...
+
+● Record iteration 91 (shell)
+  │ printf '91\tcce95c2\t2025-06-29T00:39:46Z\t5\t30\t15\t5\t55\t404\t404\tpass\t7.3\tkept\tAdd
+  │ frontend TypeScript types for iterations 86-90\n' >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 92:
+
+● T0 for iteration 92 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For #92, let me add a learning goals system - user can set daily targets:
+
+● Check schema near quiz_attempts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '85,90p' app/database.py
+  └ 7 lines...
+
+● Check near quiz_attempts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '74,86p' app/database.py
+  └ 12 lines...
+
+I'll add a `learning_goals` table:
+
+● Edit database.py +9
+  └ app/database.py
+
+Now add a DAL for learning goals:
+
+● Add learning goals DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/dashboard.py << 'EOF'
+  │
+  │
+  │ async def get_learning_goals(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+  │ """Get all learning goals with today's progress."""…
+  └ 62 lines...
+
+Add router endpoints:
+
+● Check dashboard router end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/routers/dashboard.py
+  └ 11 lines...
+
+● Check dashboard router imports (shell)
+  │ head -15 /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py
+  └ 16 lines...
+
+● Add goals endpoints (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py << 'PYEOF'
+  │
+  │
+  │ class SetGoalRequest(BaseModel):
+  │ goal_type: str…
+  └ 30 lines...
+
+Add tests:
+
+● Check dashboard test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^from app.dal.dashboard import"
+  │ tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Edit test_dashboard_dal.py +6 -1
+  └ tests/unit/test_dashboard_dal.py
+
+● Add goals unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 31 lines...
+
+● Add goals integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_dashboard_api.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 37 lines...
+
+● Run tests for iteration 92 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -15
+  └ 16 lines...
+
+414 passed. Commit:
+

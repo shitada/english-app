@@ -82,6 +82,15 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_word ON quiz_attempts(word_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_answered ON quiz_attempts(answered_at DESC);
+
+CREATE TABLE IF NOT EXISTS learning_goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_type TEXT NOT NULL CHECK (goal_type IN ('conversations', 'vocabulary_reviews', 'pronunciation_attempts')),
+    daily_target INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(goal_type)
+);
 """
 
 # ---------------------------------------------------------------------------

@@ -368,3 +368,62 @@ async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
         "total_quiz_attempts": total_quiz_attempts,
         "quiz_accuracy_percent": quiz_accuracy,
     }
+
+
+async def get_learning_goals(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get all learning goals with today's progress."""
+    goals = await db.execute_fetchall(
+        "SELECT id, goal_type, daily_target, created_at, updated_at FROM learning_goals"
+    )
+    result = []
+    for g in goals:
+        goal = dict(g)
+        goal_type = goal["goal_type"]
+        # Count today's activity
+        if goal_type == "conversations":
+            rows = await db.execute_fetchall(
+                "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+            )
+        elif goal_type == "vocabulary_reviews":
+            rows = await db.execute_fetchall(
+                "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+            )
+        elif goal_type == "pronunciation_attempts":
+            rows = await db.execute_fetchall(
+                "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+            )
+        else:
+            rows = [{"cnt": 0}]
+        today_count = rows[0]["cnt"] if rows else 0
+        goal["today_count"] = today_count
+        goal["completed"] = today_count >= goal["daily_target"]
+        result.append(goal)
+    return result
+
+
+async def set_learning_goal(
+    db: aiosqlite.Connection, goal_type: str, daily_target: int
+) -> dict[str, Any]:
+    """Set or update a daily learning goal."""
+    await db.execute(
+        """INSERT INTO learning_goals (goal_type, daily_target, updated_at)
+           VALUES (?, ?, datetime('now'))
+           ON CONFLICT(goal_type) DO UPDATE SET daily_target = ?, updated_at = datetime('now')""",
+        (goal_type, daily_target, daily_target),
+    )
+    await db.commit()
+    rows = await db.execute_fetchall(
+        "SELECT id, goal_type, daily_target, created_at, updated_at FROM learning_goals WHERE goal_type = ?",
+        (goal_type,),
+    )
+    return dict(rows[0])
+
+
+async def delete_learning_goal(db: aiosqlite.Connection, goal_type: str) -> bool:
+    """Delete a learning goal."""
+    cursor = await db.execute(
+        "DELETE FROM learning_goals WHERE goal_type = ?",
+        (goal_type,),
+    )
+    await db.commit()
+    return cursor.rowcount > 0

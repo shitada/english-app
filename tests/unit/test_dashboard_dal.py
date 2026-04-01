@@ -5,7 +5,12 @@ from __future__ import annotations
 import pytest
 
 from app.dal.conversation import add_message, create_conversation
-from app.dal.dashboard import get_stats
+from app.dal.dashboard import (
+    delete_learning_goal,
+    get_learning_goals,
+    get_stats,
+    set_learning_goal,
+)
 from app.dal.pronunciation import save_attempt
 from app.dal.vocabulary import save_words, update_progress
 
@@ -265,3 +270,35 @@ class TestConversationDurationStats:
         await create_conversation(test_db, "hotel_checkin")  # active, not ended
         result = await get_conversation_duration_stats(test_db)
         assert result["total_completed"] == 0
+
+
+@pytest.mark.unit
+class TestLearningGoals:
+    async def test_empty_goals(self, test_db):
+        result = await get_learning_goals(test_db)
+        assert result == []
+
+    async def test_set_and_get_goal(self, test_db):
+        goal = await set_learning_goal(test_db, "conversations", 3)
+        assert goal["goal_type"] == "conversations"
+        assert goal["daily_target"] == 3
+        goals = await get_learning_goals(test_db)
+        assert len(goals) == 1
+        assert goals[0]["daily_target"] == 3
+        assert goals[0]["today_count"] == 0
+        assert goals[0]["completed"] is False
+
+    async def test_update_existing_goal(self, test_db):
+        await set_learning_goal(test_db, "conversations", 3)
+        goal = await set_learning_goal(test_db, "conversations", 5)
+        assert goal["daily_target"] == 5
+        goals = await get_learning_goals(test_db)
+        assert len(goals) == 1
+
+    async def test_delete_goal(self, test_db):
+        await set_learning_goal(test_db, "conversations", 3)
+        assert await delete_learning_goal(test_db, "conversations") is True
+        assert await get_learning_goals(test_db) == []
+
+    async def test_delete_nonexistent_goal(self, test_db):
+        assert await delete_learning_goal(test_db, "conversations") is False

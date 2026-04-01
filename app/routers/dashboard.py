@@ -181,3 +181,34 @@ class LearningSummaryResponse(BaseModel):
 async def get_learning_summary(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get a high-level learning progress summary."""
     return await dash_dal.get_learning_summary(db)
+
+
+class SetGoalRequest(BaseModel):
+    goal_type: str
+    daily_target: int
+
+
+@router.get("/goals")
+async def get_goals(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get all learning goals with today's progress."""
+    return await dash_dal.get_learning_goals(db)
+
+
+@router.post("/goals")
+async def set_goal(req: SetGoalRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Set or update a daily learning goal."""
+    valid_types = {"conversations", "vocabulary_reviews", "pronunciation_attempts"}
+    if req.goal_type not in valid_types:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid goal_type. Must be one of: {valid_types}")
+    return await dash_dal.set_learning_goal(db, req.goal_type, req.daily_target)
+
+
+@router.delete("/goals/{goal_type}")
+async def delete_goal(goal_type: str, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Delete a learning goal."""
+    deleted = await dash_dal.delete_learning_goal(db, goal_type)
+    if not deleted:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return {"deleted": True}

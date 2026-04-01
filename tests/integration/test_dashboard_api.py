@@ -222,3 +222,38 @@ class TestLearningSummary:
         assert "words_learning" in data
         assert "quiz_accuracy_percent" in data
         assert isinstance(data["total_study_days"], int)
+
+
+@pytest.mark.integration
+async def test_goals_empty(client):
+    res = await client.get("/api/dashboard/goals")
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+@pytest.mark.integration
+async def test_set_goal(client):
+    res = await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": 3})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["goal_type"] == "conversations"
+    assert data["daily_target"] == 3
+
+
+@pytest.mark.integration
+async def test_set_goal_invalid_type(client):
+    res = await client.post("/api/dashboard/goals", json={"goal_type": "invalid", "daily_target": 3})
+    assert res.status_code == 400
+
+
+@pytest.mark.integration
+async def test_delete_goal(client):
+    await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": 3})
+    res = await client.delete("/api/dashboard/goals/conversations")
+    assert res.status_code == 200
+
+
+@pytest.mark.integration
+async def test_delete_goal_not_found(client):
+    res = await client.delete("/api/dashboard/goals/nonexistent")
+    assert res.status_code == 404
