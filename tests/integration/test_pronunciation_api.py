@@ -214,3 +214,13 @@ async def test_personal_records_empty(client):
     data = res.json()
     assert data["total_attempts"] == 0
     assert data["best_attempts"] == []
+
+
+@pytest.mark.integration
+async def test_weekly_progress_empty(client):
+    res = await client.get("/api/pronunciation/weekly-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["weeks"] == []
+    assert data["total_weeks"] == 0
+    assert data["improvement"] == 0.0

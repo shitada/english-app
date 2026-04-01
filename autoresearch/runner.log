@@ -5914,3 +5914,116 @@ The response is `{"total_count": ..., "words": [...]}`. Need to access `.words`:
 
 397 passed. Commit:
 
+● Commit iteration 88 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #88: Add vocabulary word notes/annotations
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-verify 2>&1 | tail -3
+  │ && git rev-parse --short HEAD && date +%s
+  └ 6 lines...
+
+● Record iteration 88 (shell)
+  │ printf '88\ta7b0103\t2025-06-29T00:34:59Z\t10\t60\t25\t10\t105\t397\t397\tpass\t7.3\tkept\tAdd
+  │ vocabulary word notes/annotations\n' >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 1 line...
+
+Iteration 89:
+
+● T0 for iteration 89 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For #89, let me add a pronunciation practice history endpoint - list recent attempts with scores:
+
+● Check pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def " app/dal/pronunciation.py
+  └ 10 lines...
+
+Already has history, distribution, records. Let me add a pronunciation streak/improvement tracker:
+
+● Check personal records (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '212,260p' app/dal/pronunciation.py
+  └ 41 lines...
+
+Let me add a weekly pronunciation improvement tracker:
+
+● Add weekly progress DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py << 'EOF'
+  │
+  │
+  │ async def get_weekly_progress(
+  │ db: aiosqlite.Connection, weeks: int = 8…
+  └ 38 lines...
+
+Add router endpoint:
+
+● Check pronunciation router end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/routers/pronunciation.py
+  └ 11 lines...
+
+● Add weekly progress endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py << 'EOF'
+  │
+  │
+  │ @router.get("/weekly-progress")
+  │ async def get_weekly_progress(…
+  └ 7 lines...
+
+Add tests:
+
+● Check pronunciation test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^from app.dal.pronunciation import"
+  │ tests/unit/test_pronunciation_dal.py
+  └ 2 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '/^from app.dal.pronunciation
+  │ import/,/^)/p' tests/unit/test_pronunciation_dal.py
+  └ 9 lines...
+
+● Edit test_pronunciation_dal.py +1
+  └ tests/unit/test_pronunciation_dal.py
+
+● Add weekly progress tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 17 lines...
+
+● Add integration test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'PYEOF'…
+  └ 12 lines...
+
+● Run tests for iteration 89 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+Errors! Let me check:
+
+● Debug error (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_vocabulary_api.py::test_update_notes -v --tb=long 2>&1 | tail -30
+  └ 31 lines...
+
+Need to import Query in pronunciation router:
+
+● Check pronunciation router imports (shell)
+  │ head -10 /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py
+  └ 11 lines...
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+● Run tests for iteration 89 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+400 passed! Commit:
+

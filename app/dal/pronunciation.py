@@ -249,3 +249,43 @@ async def get_personal_records(db: aiosqlite.Connection) -> dict[str, Any]:
             for row in worst_rows
         ],
     }
+
+
+async def get_weekly_progress(
+    db: aiosqlite.Connection, weeks: int = 8
+) -> dict[str, Any]:
+    """Get pronunciation score averages grouped by week."""
+    rows = await db.execute_fetchall(
+        """SELECT strftime('%Y-W%W', created_at) as week,
+                  COUNT(*) as attempt_count,
+                  ROUND(AVG(score), 2) as avg_score,
+                  MAX(score) as best_score
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL
+             AND created_at >= datetime('now', ?)
+           GROUP BY week
+           ORDER BY week ASC""",
+        (f"-{weeks * 7} days",),
+    )
+    weekly = [
+        {
+            "week": row["week"],
+            "attempt_count": row["attempt_count"],
+            "avg_score": row["avg_score"] or 0,
+            "best_score": row["best_score"] or 0,
+        }
+        for row in rows
+    ]
+    # Calculate improvement trend
+    if len(weekly) >= 2:
+        first_avg = weekly[0]["avg_score"]
+        last_avg = weekly[-1]["avg_score"]
+        improvement = round(last_avg - first_avg, 2)
+    else:
+        improvement = 0.0
+
+    return {
+        "weeks": weekly,
+        "total_weeks": len(weekly),
+        "improvement": improvement,
+    }

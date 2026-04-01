@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt
@@ -192,3 +192,12 @@ class PersonalRecordsResponse(BaseModel):
 async def get_personal_records(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get pronunciation personal records and best/worst attempts."""
     return await pron_dal.get_personal_records(db)
+
+
+@router.get("/weekly-progress")
+async def get_weekly_progress(
+    weeks: int = Query(default=8, ge=1, le=52),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get pronunciation score averages grouped by week."""
+    return await pron_dal.get_weekly_progress(db, weeks=weeks)

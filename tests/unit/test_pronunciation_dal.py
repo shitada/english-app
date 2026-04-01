@@ -13,6 +13,7 @@ from app.dal.pronunciation import (
     get_history,
     get_progress,
     get_sentences_from_conversations,
+    get_weekly_progress,
     save_attempt,
 )
 
@@ -371,3 +372,21 @@ class TestGetPersonalRecords:
         assert result["worst_score"] == 3.0
         assert len(result["best_attempts"]) == 3
         assert result["best_attempts"][0]["score"] == 8.0
+
+
+@pytest.mark.unit
+class TestWeeklyProgress:
+    async def test_empty_returns_no_weeks(self, test_db):
+        result = await get_weekly_progress(test_db)
+        assert result["weeks"] == []
+        assert result["total_weeks"] == 0
+        assert result["improvement"] == 0.0
+
+    async def test_with_attempts(self, test_db):
+        feedback = {"accuracy": 0.9, "mispronounced": []}
+        await save_attempt(test_db, "Hello world", "Hello world", feedback, 95.0)
+        await save_attempt(test_db, "Good morning", "Good morning", feedback, 85.0)
+        result = await get_weekly_progress(test_db)
+        assert result["total_weeks"] >= 1
+        assert result["weeks"][0]["attempt_count"] == 2
+        assert result["weeks"][0]["avg_score"] == 90.0
