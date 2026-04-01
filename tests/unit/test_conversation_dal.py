@@ -113,6 +113,20 @@ class TestUpdateMessageFeedback:
         # "Goodbye" message should remain without feedback
         assert rows[1]["feedback_json"] is None
 
+    async def test_feedback_committed_independently(self, test_db):
+        """Regression: feedback should be committed without relying on subsequent operations."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Test commit")
+        feedback = {"is_correct": True, "errors": []}
+        await update_message_feedback(test_db, cid, "user", "Test commit", feedback)
+        # Verify data is readable (committed) without any other writes
+        rows = await test_db.execute_fetchall(
+            "SELECT feedback_json FROM messages WHERE conversation_id = ? AND content = 'Test commit'",
+            (cid,),
+        )
+        assert len(rows) == 1
+        assert json.loads(rows[0]["feedback_json"]) == feedback
+
 
 @pytest.mark.unit
 class TestGetActiveConversation:

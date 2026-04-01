@@ -1,0 +1,81 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e105]:
+      - heading "Pronunciation Practice" [level=2] [ref=e207]
+      - paragraph [ref=e208]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e209]:
+        - generic [ref=e210] [cursor=pointer]:
+          - paragraph [ref=e211]: Good morning and welcome to The Grand Pinnacle Hotel!
+          - generic [ref=e212]: Hotel Check-in
+          - img [ref=e213]
+        - generic [ref=e215] [cursor=pointer]:
+          - paragraph [ref=e216]: I hope you had a pleasant journey getting here.
+          - generic [ref=e217]: Hotel Check-in
+          - img [ref=e218]
+        - generic [ref=e220] [cursor=pointer]:
+          - paragraph [ref=e221]: Do you have a reservation with us, or will you be looking to book a room for tonight?
+          - generic [ref=e222]: Hotel Check-in
+          - img [ref=e223]
+        - generic [ref=e225] [cursor=pointer]:
+          - paragraph [ref=e226]: Smith — let me pull that up right now.
+          - generic [ref=e227]: Hotel Check-in
+          - img [ref=e228]
+        - generic [ref=e230] [cursor=pointer]:
+          - paragraph [ref=e231]: Good morning and welcome to the Grand Horizon Hotel!
+          - generic [ref=e232]: Hotel Check-in
+          - img [ref=e233]
+        - generic [ref=e235] [cursor=pointer]:
+          - paragraph [ref=e236]: I hope you had a pleasant trip getting here.
+          - generic [ref=e237]: Hotel Check-in
+          - img [ref=e238]
+        - generic [ref=e240] [cursor=pointer]:
+          - paragraph [ref=e241]: Do you have a reservation with us, or will you be booking a room today?
+          - generic [ref=e242]: Hotel Check-in
+          - img [ref=e243]
+        - generic [ref=e245] [cursor=pointer]:
+          - paragraph [ref=e246]: Just let me know when you're ready to order, or if you have any questions about the dishes.
+          - generic [ref=e247]: Restaurant Order
+          - img [ref=e248]
+        - generic [ref=e250] [cursor=pointer]:
+          - paragraph [ref=e251]: 😊 My name is Marco.
+          - generic [ref=e252]: Restaurant Order
+          - img [ref=e253]
+        - generic [ref=e255] [cursor=pointer]:
+          - paragraph [ref=e256]: I am your waiter today.
+          - generic [ref=e257]: Restaurant Order
+          - img [ref=e258]
+        - generic [ref=e260] [cursor=pointer]:
+          - paragraph [ref=e261]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e262]: hotel
+          - img [ref=e263]
+        - generic [ref=e265] [cursor=pointer]:
+          - paragraph [ref=e266]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e267]: restaurant
+          - img [ref=e268]
+        - generic [ref=e270] [cursor=pointer]:
+          - paragraph [ref=e271]: I have three years of experience in software development.
+          - generic [ref=e272]: interview
+          - img [ref=e273]
+        - generic [ref=e275] [cursor=pointer]:
+          - paragraph [ref=e276]: I've been having a headache for the past two days.
+          - generic [ref=e277]: medical
+          - img [ref=e278]
+        - generic [ref=e280] [cursor=pointer]:
+          - paragraph [ref=e281]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e282]: shopping
+          - img [ref=e283]
+        - generic [ref=e285] [cursor=pointer]:
+          - paragraph [ref=e286]: What gate does the flight to London depart from?
+          - generic [ref=e287]: airport
+          - img [ref=e288]

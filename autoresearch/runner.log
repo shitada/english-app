@@ -8153,3 +8153,110 @@ T1=1775058578, propose_sec=203. Now add unit tests for replay and vocabulary fun
 
 Commit and test:
 
+● Commit iteration 104 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #104: Add unit tests for conversation replay and vocabulary DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 37 lines...
+
+● Run tests iteration 104 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+490 passed! TS check:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+No DAL/router changes (only tests), so skip smoke test. QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 104
+  │ playwright-browser_resize
+  │   └ ### Ran Playwright code
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Record T3 for iteration 104 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 104
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L1:30 (30 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L300:end (230 lines read)
+
+Score 8.35, verdict: keep.
+
+● Record results iteration 104 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log
+  │ -1 --format=%h) && echo "104   ${HASH} 2026-04-01T15:26:15+00:00       203     106     303
+  │ $(($T4-1775058987))     $(($T4-1775058375))     490     490     pass    8.35    keep    Add unit
+  │ tests for conversation replay and vocabulary DAL" >> autoresearch/results.tsv && echo "T4=$T4"
+  └ 2 lines...
+
+**Iteration 104 complete: KEEP (8.35, 490/490 tests, +10 new tests)**
+
+---
+
+Continuing efficiently. Iterations 105-117 follow the same pattern. Let me proceed:
+
+● Kill server, T0 iter 105 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 105
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L19:51 (32 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L80:91 (11 lines read)
+
+● Record T1 for iteration 105 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775059333, propose_sec=273. Let me verify and fix:
+
+● Find function location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def update_message_feedback"
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L35:55 (21 lines read)
+
+● Edit conversation.py +1
+  └ app/dal/conversation.py
+
+Now add a regression test. Find existing test for this function:
+
+● Find test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "TestUpdateMessageFeedback"
+  │ tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L89:125 (36 lines read)
+
+Add a regression test that verifies the data persists after the function returns:
+
+● Edit test_conversation_dal.py +14
+  └ tests/unit/test_conversation_dal.py
+

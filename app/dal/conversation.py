@@ -48,6 +48,7 @@ async def update_message_feedback(
            )""",
         (json.dumps(feedback), conversation_id, role, content),
     )
+    await db.commit()
 
 
 async def get_active_conversation(db: aiosqlite.Connection, conversation_id: int) -> dict | None:
