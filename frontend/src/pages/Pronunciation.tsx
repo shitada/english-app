@@ -18,6 +18,7 @@ export default function Pronunciation() {
   const [phase, setPhase] = useState<'select' | 'practice' | 'result' | 'history'>('select');
   const [sentences, setSentences] = useState(SAMPLE_SENTENCES);
   const [selectedSentence, setSelectedSentence] = useState<string>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(undefined);
   const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
   const [loading, setLoading] = useState(false);
   const [shadowingState, setShadowingState] = useState<'idle' | 'listening' | 'recording' | 'done'>('idle');
@@ -58,6 +59,8 @@ export default function Pronunciation() {
 
   const startPractice = (text: string) => {
     setSelectedSentence(text);
+    const sentence = sentences.find(s => s.text === text);
+    setSelectedDifficulty(sentence?.difficulty);
     setFeedback(null);
     speech.reset();
     setShadowingState('idle');
@@ -71,7 +74,7 @@ export default function Pronunciation() {
     setShadowingState('done');
     setLoading(true);
     try {
-      const res = await api.checkPronunciation(selectedSentence, speech.transcript);
+      const res = await api.checkPronunciation(selectedSentence, speech.transcript, selectedDifficulty);
       setFeedback(res);
       setPhase('result');
     } catch (err) {

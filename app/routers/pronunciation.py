@@ -43,6 +43,7 @@ class AttemptItem(BaseModel):
     user_transcription: str
     feedback: dict[str, Any] | None
     score: float | None
+    difficulty: str | None = None
     created_at: str
 
 

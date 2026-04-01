@@ -351,3 +351,29 @@ async def test_retry_suggestions_empty(client):
     data = res.json()
     assert data["suggestions"] == []
     assert data["threshold"] == 7.0
+
+
+@pytest.mark.integration
+async def test_check_pronunciation_with_difficulty(client, mock_copilot):
+    """Submitting a check with difficulty should persist and return it in history."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 7,
+        "overall_feedback": "Good job!",
+        "word_feedback": [],
+        "focus_areas": [],
+    })
+
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "I have a reservation.",
+        "user_transcription": "I have a reservation.",
+        "difficulty": "beginner",
+    })
+    assert res.status_code == 200
+
+    res = await client.get("/api/pronunciation/history")
+    assert res.status_code == 200
+    attempts = res.json()["attempts"]
+    assert len(attempts) >= 1
+    match = [a for a in attempts if a["reference_text"] == "I have a reservation."]
+    assert len(match) == 1
+    assert match[0]["difficulty"] == "beginner"

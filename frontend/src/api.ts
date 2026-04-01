@@ -64,10 +64,10 @@ export const api = {
     return request<{ sentences: { text: string; topic: string; difficulty: string }[] }>(`/api/pronunciation/sentences${qs}`);
   },
 
-  checkPronunciation: (reference_text: string, user_transcription: string) =>
+  checkPronunciation: (reference_text: string, user_transcription: string, difficulty?: string) =>
     request<PronunciationFeedback>('/api/pronunciation/check', {
       method: 'POST',
-      body: JSON.stringify({ reference_text, user_transcription }),
+      body: JSON.stringify({ reference_text, user_transcription, difficulty }),
     }),
 
   getPronunciationHistory: () =>
@@ -321,6 +321,7 @@ export interface PronunciationAttempt {
   reference_text: string;
   user_transcription: string;
   score: number | null;
+  difficulty: string | null;
   created_at: string;
 }
 
