@@ -517,3 +517,36 @@ async def get_topic_accuracy(db: aiosqlite.Connection) -> list[dict[str, Any]]:
         }
         for r in rows
     ]
+
+
+async def batch_import_words(
+    db: aiosqlite.Connection, words: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Import a batch of vocabulary words, skipping case-insensitive duplicates."""
+    imported = []
+    skipped = 0
+    for w in words:
+        existing = await db.execute_fetchall(
+            "SELECT id FROM vocabulary_words WHERE topic = ? AND LOWER(word) = LOWER(?) LIMIT 1",
+            (w["topic"], w["word"]),
+        )
+        if existing:
+            skipped += 1
+        else:
+            cursor = await db.execute(
+                """INSERT INTO vocabulary_words (topic, word, meaning, example_sentence, difficulty)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (w["topic"], w["word"], w["meaning"], w.get("example_sentence", ""), w.get("difficulty", 1)),
+            )
+            imported.append({
+                "id": cursor.lastrowid,
+                "word": w["word"],
+                "meaning": w["meaning"],
+                "topic": w["topic"],
+            })
+    await db.commit()
+    return {
+        "imported_count": len(imported),
+        "skipped_count": skipped,
+        "words": imported,
+    }

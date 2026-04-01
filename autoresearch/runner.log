@@ -4993,3 +4993,92 @@ The old call was `api.listConversations()` which passes no arguments. The new fu
 
 This accesses `res.conversations` which still exists in the new type. It works.
 
+● Commit 79 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #79: add frontend TypeScript API types for new endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TS check 79 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Test 79 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+358 passed, TS passes!
+
+● Record 79 (shell)
+  │ date +%s && echo "79    a61e59c 2026-04-01T12:39:21+09:00       0       47      30      0
+  │ 77      358     358     pass    7.3     keep    Add frontend TypeScript API types for new
+  │ endpoints" >> /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Iteration 80:
+
+● T0 for iteration 80 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 80
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ 548 lines read
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1:50 (50 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me check the existing save_words function to understand the duplicate check pattern:
+
+● Find save_words (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def save_words"
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L23:65 (43 lines read)
+
+Good. Now implement:
+
+● Add batch import DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def batch_import_words(
+  │ db: aiosqlite.Connection, words: list[dict[str, Any]]…
+  └ 34 lines...
+
+● Add batch import endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ class WordImportItem(BaseModel):
+  │ word: str = Field(min_length=1, max_length=100)…
+  └ 26 lines...
+
+Add tests:
+
+● Add import unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 32 lines...
+
+● Add import integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 28 lines...
+

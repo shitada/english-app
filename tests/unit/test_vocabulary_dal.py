@@ -672,3 +672,35 @@ class TestQuizAttempts:
         assert len(page1["attempts"]) == 2
         page2 = await get_attempt_history(test_db, limit=2, offset=2)
         assert len(page2["attempts"]) == 2
+
+
+@pytest.mark.unit
+class TestBatchImport:
+    async def test_import_new_words(self, test_db):
+        from app.dal.vocabulary import batch_import_words
+        words = [
+            {"word": "apple", "meaning": "a fruit", "topic": "food"},
+            {"word": "banana", "meaning": "yellow fruit", "topic": "food"},
+        ]
+        result = await batch_import_words(test_db, words)
+        assert result["imported_count"] == 2
+        assert result["skipped_count"] == 0
+
+    async def test_skips_duplicates(self, test_db):
+        from app.dal.vocabulary import batch_import_words
+        words = [{"word": "apple", "meaning": "a fruit", "topic": "food"}]
+        await batch_import_words(test_db, words)
+        result = await batch_import_words(test_db, words)
+        assert result["imported_count"] == 0
+        assert result["skipped_count"] == 1
+
+    async def test_mixed_new_and_duplicate(self, test_db):
+        from app.dal.vocabulary import batch_import_words
+        await batch_import_words(test_db, [{"word": "apple", "meaning": "a fruit", "topic": "food"}])
+        words = [
+            {"word": "apple", "meaning": "a fruit", "topic": "food"},  # dup
+            {"word": "grape", "meaning": "small fruit", "topic": "food"},  # new
+        ]
+        result = await batch_import_words(test_db, words)
+        assert result["imported_count"] == 1
+        assert result["skipped_count"] == 1

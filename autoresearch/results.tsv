@@ -82,3 +82,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 76fb8f1442026-04-01T12:28:17+09:0069453530179352352pass7.3keepAdd study streak milestones endpoint
 77b537a742026-04-01T12:32:23+09:0081293530175354354pass7.3keepAdd vocabulary per-topic accuracy rate endpoint
 786a6b7902026-04-01T12:36:32+09:0059355530179358358pass7.3keepAdd conversation duration stats endpoint
+79a61e59c2026-04-01T12:39:21+09:0004730077358358pass7.3keepAdd frontend TypeScript API types for new endpoints

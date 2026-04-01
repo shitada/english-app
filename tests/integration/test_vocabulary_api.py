@@ -546,3 +546,31 @@ async def test_topic_accuracy_with_data(client, mock_copilot):
     data = res.json()
     assert len(data["topics"]) >= 1
     assert data["topics"][0]["accuracy_rate"] > 0
+
+
+@pytest.mark.asyncio
+async def test_batch_import_success(client):
+    words = [
+        {"word": "desk", "meaning": "a table for work", "topic": "hotel_checkin", "difficulty": 1},
+        {"word": "lamp", "meaning": "a light source", "topic": "hotel_checkin"},
+    ]
+    res = await client.post("/api/vocabulary/import", json={"words": words})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["imported_count"] == 2
+    assert data["skipped_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_batch_import_validation_error(client):
+    res = await client.post("/api/vocabulary/import", json={"words": []})
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_batch_import_skips_duplicates(client):
+    words = [{"word": "pillow", "meaning": "for sleeping", "topic": "hotel_checkin"}]
+    await client.post("/api/vocabulary/import", json={"words": words})
+    res = await client.post("/api/vocabulary/import", json={"words": words})
+    assert res.status_code == 200
+    assert res.json()["skipped_count"] == 1

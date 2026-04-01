@@ -386,3 +386,31 @@ async def get_topic_accuracy(db: aiosqlite.Connection = Depends(get_db_session))
     """Get per-topic vocabulary quiz accuracy rates."""
     topics = await vocab_dal.get_topic_accuracy(db)
     return {"topics": topics}
+
+
+class WordImportItem(BaseModel):
+    word: str = Field(min_length=1, max_length=100)
+    meaning: str = Field(min_length=1, max_length=500)
+    example_sentence: str = Field(default="", max_length=500)
+    topic: str = Field(min_length=1)
+    difficulty: int = Field(default=1, ge=1, le=5)
+
+
+class BatchImportRequest(BaseModel):
+    words: list[WordImportItem] = Field(min_length=1, max_length=100)
+
+
+class BatchImportResponse(BaseModel):
+    imported_count: int
+    skipped_count: int
+    words: list[dict]
+
+
+@router.post("/import", response_model=BatchImportResponse)
+async def batch_import(
+    req: BatchImportRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Import a batch of vocabulary words."""
+    words_data = [w.model_dump() for w in req.words]
+    return await vocab_dal.batch_import_words(db, words_data)
