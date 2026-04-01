@@ -113,3 +113,11 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 10769d1abd2026-04-01T15:59:07+00:0013683330123672500500pass7.95keepStore difficulty level with pronunciation attempts
 108f12d8942026-04-01T16:17:09+00:00211667031971177501501pass7.5keepInclude message id and bookmark status in history endpoint
 109829f11c2026-04-01T16:30:16+00:0073189103841007510510pass7.8keepAdd unit tests for validate_topic and get_learning_summary
+110	44280bf	2026-04-01T16:42:00+00:00	12	85	90	38	225	515	515	pass	7.3	keep	Add pronunciation retry suggestions endpoint
+111	84de88c	2026-04-01T17:24:44+00:00	207	131	27	30	395	524	524	pass	7.55	keep	Add per-sentence pronunciation attempt history endpoint
+112	6040842	2026-04-01T17:29:53+00:00	209	56	31	25	321	524	524	pass	7.5	keep	Consolidate standalone API functions to use request helper
+113	93bd8c3	2026-04-01T17:34:53+00:00	203	170	-84	25	314	530	530	pass	8.0	keep	Fix pronunciation score distribution gaps for float scores
+114	398c533	2026-04-01T17:40:42+00:00	271	180	-112	25	364	533	533	pass	8.25	keep	Fix substring false positives in conversation vocabulary matching
+115	524cfad	2026-04-01T17:45:52+00:00	139	180	-18	25	326	534	534	pass	8.0	keep	Pass sentence difficulty through pronunciation check and history flow
+116	e081a05	2026-04-01T17:52:27+00:00	152	180	55	25	412	540	540	pass	7.5	keep	Add pronunciation progress breakdown by difficulty level
+117	4aa146b	2026-04-01T17:59:44+00:00	129	200	99	30	458	549	549	pass	8.0	keep	Add cross-module learning insights endpoint
