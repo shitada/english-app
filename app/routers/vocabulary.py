@@ -367,3 +367,22 @@ async def get_attempt_history(
     return await vocab_dal.get_attempt_history(
         db, word_id=word_id, topic=topic, limit=limit, offset=offset
     )
+
+
+class TopicAccuracyItem(BaseModel):
+    topic: str
+    correct_count: int
+    incorrect_count: int
+    total_attempts: int
+    accuracy_rate: float
+
+
+class TopicAccuracyResponse(BaseModel):
+    topics: list[TopicAccuracyItem]
+
+
+@router.get("/topic-accuracy", response_model=TopicAccuracyResponse)
+async def get_topic_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get per-topic vocabulary quiz accuracy rates."""
+    topics = await vocab_dal.get_topic_accuracy(db)
+    return {"topics": topics}

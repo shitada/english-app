@@ -488,3 +488,32 @@ async def get_attempt_history(
         for r in rows
     ]
     return {"total_count": total_count, "attempts": attempts}
+
+
+async def get_topic_accuracy(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Get per-topic quiz accuracy rates."""
+    rows = await db.execute_fetchall(
+        """SELECT vw.topic,
+                  SUM(vp.correct_count) as correct_count,
+                  SUM(vp.incorrect_count) as incorrect_count,
+                  SUM(vp.correct_count) + SUM(vp.incorrect_count) as total_attempts,
+                  ROUND(
+                      CAST(SUM(vp.correct_count) AS REAL) /
+                      NULLIF(SUM(vp.correct_count) + SUM(vp.incorrect_count), 0) * 100,
+                      1
+                  ) as accuracy_rate
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           GROUP BY vw.topic
+           ORDER BY accuracy_rate ASC"""
+    )
+    return [
+        {
+            "topic": r["topic"],
+            "correct_count": r["correct_count"] or 0,
+            "incorrect_count": r["incorrect_count"] or 0,
+            "total_attempts": r["total_attempts"] or 0,
+            "accuracy_rate": r["accuracy_rate"] or 0.0,
+        }
+        for r in rows
+    ]

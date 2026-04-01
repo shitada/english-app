@@ -524,3 +524,25 @@ async def test_attempts_after_answering(client, mock_copilot):
     data = res.json()
     assert data["total_count"] >= 1
     assert data["attempts"][0]["is_correct"] is True
+
+
+@pytest.mark.asyncio
+async def test_topic_accuracy_empty(client):
+    res = await client.get("/api/vocabulary/topic-accuracy")
+    assert res.status_code == 200
+    assert res.json()["topics"] == []
+
+
+@pytest.mark.asyncio
+async def test_topic_accuracy_with_data(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "key", "correct_meaning": "tool for locks", "example_sentence": "Use the key.", "difficulty": 1}]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+    await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
+    res = await client.get("/api/vocabulary/topic-accuracy")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["topics"]) >= 1
+    assert data["topics"][0]["accuracy_rate"] > 0
