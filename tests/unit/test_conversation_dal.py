@@ -18,6 +18,7 @@ from app.dal.conversation import (
     get_conversation_export,
     get_conversation_history,
     get_conversation_summary,
+    get_grammar_accuracy,
     list_conversations,
     update_message_feedback,
 )
@@ -447,3 +448,40 @@ class TestSearchConversations:
         await add_message(test_db, cid2, "user", "Buy something")
         assert await count_conversations(test_db, keyword="Check") == 1
         assert await count_conversations(test_db) == 2
+
+
+@pytest.mark.unit
+class TestGrammarAccuracy:
+    async def test_empty_returns_zeros(self, test_db):
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_checked"] == 0
+        assert result["overall_accuracy_rate"] == 0.0
+        assert result["by_topic"] == []
+
+    async def test_counts_correct_and_errors(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I want check in")
+        feedback_wrong = {"is_correct": False, "errors": [{"original": "check in", "correction": "to check in"}], "suggestions": []}
+        await update_message_feedback(test_db, cid, "user", "I want check in", feedback_wrong)
+        await add_message(test_db, cid, "user", "Thank you very much")
+        feedback_right = {"is_correct": True, "errors": [], "suggestions": []}
+        await update_message_feedback(test_db, cid, "user", "Thank you very much", feedback_right)
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_checked"] == 2
+        assert result["total_correct"] == 1
+        assert result["overall_accuracy_rate"] == 50.0
+        assert len(result["by_topic"]) == 1
+        topic = result["by_topic"][0]
+        assert topic["topic"] == "hotel_checkin"
+        assert topic["total_errors"] == 1
+
+    async def test_multiple_topics(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid1, "user", "Hello")
+        await update_message_feedback(test_db, cid1, "user", "Hello", {"is_correct": True, "errors": [], "suggestions": []})
+        cid2 = await create_conversation(test_db, "shopping")
+        await add_message(test_db, cid2, "user", "I want buy")
+        await update_message_feedback(test_db, cid2, "user", "I want buy", {"is_correct": False, "errors": [{"original": "buy", "correction": "to buy"}], "suggestions": []})
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_checked"] == 2
+        assert len(result["by_topic"]) == 2

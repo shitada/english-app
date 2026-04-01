@@ -398,3 +398,13 @@ async def test_list_conversations_search_by_keyword(client, mock_copilot):
     data = res.json()
     assert data["total_count"] >= 1
     assert all("hotel_checkin" == c["topic"] for c in data["conversations"])
+
+
+@pytest.mark.integration
+async def test_grammar_accuracy_empty(client):
+    res = await client.get("/api/conversation/grammar-accuracy")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_checked"] == 0
+    assert data["overall_accuracy_rate"] == 0.0
+    assert data["by_topic"] == []

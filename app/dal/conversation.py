@@ -240,3 +240,53 @@ async def get_conversation_export(
         "summary": summary,
         "messages": messages,
     }
+
+
+async def get_grammar_accuracy(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get grammar accuracy stats across all conversations."""
+    rows = await db.execute_fetchall(
+        """SELECT c.topic, m.feedback_json
+           FROM messages m
+           JOIN conversations c ON c.id = m.conversation_id
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL"""
+    )
+    topic_stats: dict[str, dict[str, int]] = {}
+    total_correct = 0
+    total_checked = 0
+    for row in rows:
+        topic = row["topic"]
+        try:
+            feedback = json.loads(row["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        if topic not in topic_stats:
+            topic_stats[topic] = {"correct": 0, "total": 0, "error_count": 0}
+        topic_stats[topic]["total"] += 1
+        total_checked += 1
+        if feedback.get("is_correct"):
+            topic_stats[topic]["correct"] += 1
+            total_correct += 1
+        errors = feedback.get("errors", [])
+        if isinstance(errors, list):
+            topic_stats[topic]["error_count"] += len(errors)
+
+    overall_rate = round(total_correct / total_checked * 100, 1) if total_checked > 0 else 0.0
+    by_topic = []
+    for topic, stats in sorted(topic_stats.items()):
+        rate = round(stats["correct"] / stats["total"] * 100, 1) if stats["total"] > 0 else 0.0
+        by_topic.append({
+            "topic": topic,
+            "total_messages": stats["total"],
+            "correct_messages": stats["correct"],
+            "accuracy_rate": rate,
+            "total_errors": stats["error_count"],
+        })
+
+    return {
+        "total_checked": total_checked,
+        "total_correct": total_correct,
+        "overall_accuracy_rate": overall_rate,
+        "by_topic": by_topic,
+    }

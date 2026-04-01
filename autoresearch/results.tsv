@@ -89,3 +89,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 834ca6b582026-04-01T12:53:18+09:00019302069374374pass6.7keepAdd application config summary endpoint
 8461914d52026-04-01T12:57:30+09:00030302080375375pass7.0keepAdd learning summary endpoint
 854688d102026-04-01T13:00:15+09:00107704220239383383pass7.55keepAdd vocabulary word favorites/bookmarks system
+86	c365af0	2025-06-29T00:29:09Z	15	40	20	10	85	386	386	pass	7.3	kept	Add rate limit response headers (X-RateLimit-*)

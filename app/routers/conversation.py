@@ -277,3 +277,9 @@ async def export_conversation(
     if data is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return data
+
+
+@router.get("/grammar-accuracy")
+async def grammar_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get grammar accuracy statistics across all conversations."""
+    return await conv_dal.get_grammar_accuracy(db)
