@@ -70,3 +70,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 64	d5711a8	2025-06-09T15:18:00Z	10	35	15	10	70	288	288	pass	7.05	KEEP	Add conversations_by_topic to dashboard stats
 65	d23e1ae	2025-06-09T15:21:00Z	10	35	15	10	70	292	292	pass	7.30	KEEP	Add vocabulary topic-summary endpoint
 6655f8a4a2026-04-01T11:45:32+09:00974013481051590298298pass7.3keepAdd retry logic with exponential backoff to safe_llm_call
+67553d9142026-04-01T11:52:20+09:0095663460255301301pass7.0keepAdd vocabulary review forecast endpoint

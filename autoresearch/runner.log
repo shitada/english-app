@@ -3719,3 +3719,127 @@ Now add integration tests:
   │ @pytest.mark.asyncio…
   └ 38 lines...
 
+● T2 + commit iteration 67 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #67: add vocabulary review forecast endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests iteration 67 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+301 passed. TS check and smoke test:
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+● TS check iteration 67 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+DAL/routers changed, need smoke test:
+
+● Smoke test iteration 67 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+All pass. Let me record and evaluate:
+
+● T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 67
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ 502 lines read
+  └ Read database.py
+      │ app/database.py
+      └ 135 lines read
+
+● T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.0, all pass → **KEEP**.
+
+● Record iteration 67 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "67   553d914
+  │ 2026-04-01T11:52:20+09:00       95      66      34      60      255     301     301     pass
+  │ 7.0     keep    Add vocabulary review forecast endpoint" >> autoresearch/results.tsv
+  └ 1 line...
+
+Now iteration 68:
+
+● T0 for iteration 68 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 68
+  │ Read database.py
+  │   │ app/database.py
+  │   └ 135 lines read
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Explore conversation DAL/router
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:end (135 lines read)
+  └ Search (grep)
+      │ "CREATE TABLE|conversations|messages|sqlite3|aiosqlite|metadata" (app/database.py)
+      └ 18 lines found
+
+Good. Let me implement the conversation export:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L1:10 (8 lines read)
+
+● Get line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L155:161 (7 lines read)
+
+● Edit conversation.py +52
+  └ app/dal/conversation.py
+
+Now add the router endpoint:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L1:15 (15 lines read)
+
+● Line count conv router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L230:241 (12 lines read)
+
+● Edit conversation.py +30
+  └ app/routers/conversation.py
+
+Now add integration tests:
+
+● Add export tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'TESTS'…
+  └ 48 lines...
+

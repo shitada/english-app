@@ -159,3 +159,55 @@ async def delete_ended_conversations(db: aiosqlite.Connection) -> int:
     )
     await db.commit()
     return cursor.rowcount
+
+
+async def get_conversation_export(
+    db: aiosqlite.Connection, conversation_id: int
+) -> dict[str, Any] | None:
+    """Get full conversation transcript with metadata and messages."""
+    row = await db.execute_fetchall(
+        """SELECT id, topic, difficulty, started_at, ended_at, status, summary_json
+           FROM conversations WHERE id = ?""",
+        (conversation_id,),
+    )
+    if not row:
+        return None
+    conv = dict(row[0])
+    summary = None
+    if conv["summary_json"]:
+        try:
+            summary = json.loads(conv["summary_json"])
+        except (json.JSONDecodeError, TypeError):
+            summary = conv["summary_json"]
+
+    msgs = await db.execute_fetchall(
+        """SELECT role, content, feedback_json, created_at
+           FROM messages WHERE conversation_id = ?
+           ORDER BY created_at ASC""",
+        (conversation_id,),
+    )
+    messages = []
+    for m in msgs:
+        feedback = None
+        if m["feedback_json"]:
+            try:
+                feedback = json.loads(m["feedback_json"])
+            except (json.JSONDecodeError, TypeError):
+                feedback = m["feedback_json"]
+        messages.append({
+            "role": m["role"],
+            "content": m["content"],
+            "feedback": feedback,
+            "created_at": m["created_at"],
+        })
+
+    return {
+        "id": conv["id"],
+        "topic": conv["topic"],
+        "difficulty": conv["difficulty"],
+        "started_at": conv["started_at"],
+        "ended_at": conv["ended_at"],
+        "status": conv["status"],
+        "summary": summary,
+        "messages": messages,
+    }

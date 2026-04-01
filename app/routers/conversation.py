@@ -239,3 +239,33 @@ async def clear_ended_conversations(db: aiosqlite.Connection = Depends(get_db_se
     """Delete all ended conversations."""
     count = await conv_dal.delete_ended_conversations(db)
     return {"deleted_count": count}
+
+
+class ExportMessageItem(BaseModel):
+    role: str
+    content: str
+    feedback: Any = None
+    created_at: str
+
+
+class ConversationExportResponse(BaseModel):
+    id: int
+    topic: str
+    difficulty: str
+    started_at: str
+    ended_at: str | None
+    status: str
+    summary: Any = None
+    messages: list[ExportMessageItem]
+
+
+@router.get("/{conversation_id}/export", response_model=ConversationExportResponse)
+async def export_conversation(
+    conversation_id: int,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Export a full conversation transcript with metadata and messages."""
+    data = await conv_dal.get_conversation_export(db, conversation_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return data

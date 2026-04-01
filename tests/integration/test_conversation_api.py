@@ -312,3 +312,49 @@ async def test_message_content_too_long(client, mock_copilot):
         "conversation_id": cid, "content": long_content
     })
     assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_export_conversation(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    start = await client.post("/api/conversation/start", json={
+        "topic": "hotel_checkin", "difficulty": "beginner"
+    })
+    cid = start.json()["conversation_id"]
+    mock_copilot.ask = AsyncMock(return_value="Your room is 205.")
+    await client.post("/api/conversation/message", json={
+        "conversation_id": cid, "content": "I'd like to check in"
+    })
+    res = await client.get(f"/api/conversation/{cid}/export")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] == cid
+    assert data["topic"] == "hotel_checkin"
+    assert data["difficulty"] == "beginner"
+    assert data["status"] == "active"
+    assert len(data["messages"]) >= 2  # assistant greeting + user + assistant reply
+
+
+@pytest.mark.asyncio
+async def test_export_nonexistent_conversation(client):
+    res = await client.get("/api/conversation/99999/export")
+    assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_export_ended_conversation_with_summary(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Hi there!")
+    start = await client.post("/api/conversation/start", json={
+        "topic": "hotel_checkin", "difficulty": "intermediate"
+    })
+    cid = start.json()["conversation_id"]
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 8, "feedback": "Great conversation"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": cid})
+    res = await client.get(f"/api/conversation/{cid}/export")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "ended"
+    assert data["ended_at"] is not None
+    assert data["summary"] is not None
