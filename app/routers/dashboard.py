@@ -7,7 +7,7 @@ from typing import Any
 
 import aiosqlite
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics
 from app.dal import dashboard as dash_dal
@@ -185,7 +185,7 @@ async def get_learning_summary(db: aiosqlite.Connection = Depends(get_db_session
 
 class SetGoalRequest(BaseModel):
     goal_type: str
-    daily_target: int
+    daily_target: int = Field(ge=1, le=100)
 
 
 @router.get("/goals")

@@ -99,3 +99,30 @@ class TestVocabularyValidation:
     async def test_quiz_count_negative(self, client):
         resp = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=-1")
         assert resp.status_code == 422
+
+
+@pytest.mark.integration
+class TestPaginationBounds:
+    async def test_conversation_list_negative_limit(self, client):
+        res = await client.get("/api/conversation/list?limit=-1")
+        assert res.status_code == 422
+
+    async def test_conversation_list_negative_offset(self, client):
+        res = await client.get("/api/conversation/list?offset=-1")
+        assert res.status_code == 422
+
+    async def test_conversation_list_limit_too_large(self, client):
+        res = await client.get("/api/conversation/list?limit=999")
+        assert res.status_code == 422
+
+    async def test_bookmarks_negative_limit(self, client):
+        res = await client.get("/api/conversation/bookmarks?limit=-1")
+        assert res.status_code == 422
+
+    async def test_goal_zero_daily_target(self, client):
+        res = await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": 0})
+        assert res.status_code == 422
+
+    async def test_goal_negative_daily_target(self, client):
+        res = await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": -5})
+        assert res.status_code == 422

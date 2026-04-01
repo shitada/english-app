@@ -8260,3 +8260,156 @@ Add a regression test that verifies the data persists after the function returns
 ● Edit test_conversation_dal.py +14
   └ tests/unit/test_conversation_dal.py
 
+● Commit iteration 105 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #105: Fix missing db.commit() in update_message_feedback
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 43 lines...
+
+● Run tests iteration 105 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 105
+  │ playwright-browser_console_messages
+  │   └ ### Result
+  └ playwright-browser_resize
+      └ ### Ran Playwright code
+
+● Record T3 for iteration 105 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 105
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L100:180 (81 lines read)
+
+Score 8.25, verdict: keep.
+
+● Record results iteration 105 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git --no-pager log
+  │ -1 --format=%h) && echo "105   ${HASH} 2026-04-01T15:37:40+00:00       273     46      171
+  │ $(($T4-1775059550))     $(($T4-1775059060))     491     491     pass    8.25    keep    Fix
+  │ missing db.commit() in update_message_feedback" >> autoresearch/results.tsv && echo "done"
+  └ 2 lines...
+
+**Iteration 105 complete: KEEP (8.25, 491/491, +1 test)**
+
+---
+
+● Kill server, T0 iter 106 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 106
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1:50 (49 lines read)
+  └ Read main.py
+      │ app/main.py
+      └ 190 lines read
+
+● Record T1 for iteration 106 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775059758, propose_sec=112. Let me check the exact locations and fix:
+
+● Find unbounded params (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "limit: int = 20\|limit: int =
+  │ 50\|offset: int = 0" app/routers/conversation.py
+  └ 5 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L208:222 (15 lines read)
+
+● Find daily_target field (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "daily_target"
+  │ app/routers/dashboard.py
+  └ 3 lines...
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L185:205 (20 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L306:320 (13 lines read)
+
+Now check if Query is already imported in conversation.py:
+
+● Check imports (shell)
+  │ head -15 /Users/shingotada/Documents/vscode/english-app/app/routers/conversation.py
+  └ 16 lines...
+
+Need to add Query import:
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +2 -2
+  └ app/routers/conversation.py
+
+● Edit conversation.py +2 -2
+  └ app/routers/conversation.py
+
+Now fix dashboard:
+
+● Edit dashboard.py +1 -1
+  └ app/routers/dashboard.py
+
+Check if Field is imported in dashboard:
+
+● Check imports (shell)
+  │ head -15 /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py
+  └ 16 lines...
+
+Need to add Field:
+
+● Edit dashboard.py +1 -1
+  └ app/routers/dashboard.py
+
+Now add validation tests. Check if there's an existing input validation test file:
+
+● Check test file (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/tests/integration/test_input_validation.py
+  │ 2>/dev/null && echo "exists" || echo "not found"
+  └ 3 lines...
+
+● Check end of file (shell)
+  │ tail -10
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_input_validation.py
+  └ 11 lines...
+
+● Add validation tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_input_validation.py <<
+  │ 'ENDOFTEST'…
+  └ 31 lines...
+

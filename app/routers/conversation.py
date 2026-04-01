@@ -9,7 +9,7 @@ import time
 from typing import Any, Literal
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt
@@ -211,8 +211,8 @@ async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(g
 async def list_conversations(
     topic: str | None = None,
     keyword: str | None = None,
-    limit: int = 20,
-    offset: int = 0,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """List past conversations with message counts."""
@@ -308,8 +308,8 @@ async def toggle_bookmark(
 @router.get("/bookmarks")
 async def list_bookmarks(
     conversation_id: int | None = None,
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """List all bookmarked messages, optionally filtered by conversation."""
