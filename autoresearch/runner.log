@@ -3843,3 +3843,117 @@ Now add integration tests:
   │ 'TESTS'…
   └ 48 lines...
 
+● T2 + commit iteration 68 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #68: add conversation export endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests iteration 68 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+304 passed! Let me run TS check and smoke test:
+
+● TS check iteration 68 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test iteration 68 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+All pass. Evaluate:
+
+● T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 68
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ 360 lines read
+  └ Read database.py
+      │ app/database.py
+      └ 135 lines read
+
+● T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.3 → **KEEP**.
+
+● Record iteration 68 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "68   f611a60
+  │ 2026-04-01T11:56:44+09:00       83      62      29      48      222     304     304     pass
+  │ 7.3     keep    Add conversation export endpoint" >> autoresearch/results.tsv
+  └ 1 line...
+
+Now iteration 69:
+
+● T0 for iteration 69 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 69
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ 311 lines read
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ 360 lines read
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L1:30 (30 lines read)
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● End of conv DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/unit/test_conversation_dal.py
+  └ 30 lines...
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+● Add export DAL tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_conversation_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 75 lines...
+
+● T2 + commit iteration 69 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #69: add unit tests for conversation export DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests iteration 69 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● Check function signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def update_message_feedback"
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L35:50 (16 lines read)
+
+Need to fix the test - `update_message_feedback` takes `content` and `feedback` (dict), not just feedback JSON:
+
+● Edit test_conversation_dal.py +1 -1
+  └ tests/unit/test_conversation_dal.py
+

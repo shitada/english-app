@@ -14,6 +14,7 @@ from app.dal.conversation import (
     end_conversation,
     format_history_text,
     get_active_conversation,
+    get_conversation_export,
     get_conversation_history,
     get_conversation_summary,
     list_conversations,
@@ -309,3 +310,78 @@ class TestListConversationsDuration:
         assert len(result) == 1
         assert result[0]["duration_seconds"] is not None
         assert isinstance(result[0]["duration_seconds"], int)
+
+
+@pytest.mark.unit
+class TestGetConversationExport:
+    async def test_returns_none_for_nonexistent(self, test_db):
+        result = await get_conversation_export(test_db, 99999)
+        assert result is None
+
+    async def test_export_active_no_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        result = await get_conversation_export(test_db, cid)
+        assert result is not None
+        assert result["id"] == cid
+        assert result["topic"] == "hotel_checkin"
+        assert result["status"] == "active"
+        assert result["ended_at"] is None
+        assert result["summary"] is None
+        assert result["messages"] == []
+
+    async def test_export_with_messages_preserves_order(self, test_db):
+        cid = await create_conversation(test_db, "restaurant_order")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await add_message(test_db, cid, "user", "I'd like a table.")
+        await add_message(test_db, cid, "assistant", "Right this way.")
+        result = await get_conversation_export(test_db, cid)
+        assert len(result["messages"]) == 3
+        assert result["messages"][0]["role"] == "assistant"
+        assert result["messages"][0]["content"] == "Welcome!"
+        assert result["messages"][1]["role"] == "user"
+        assert result["messages"][2]["role"] == "assistant"
+        for msg in result["messages"]:
+            assert "created_at" in msg
+
+    async def test_export_ended_with_summary(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {"overall_score": 8, "feedback": "Good job"}
+        await test_db.execute(
+            "UPDATE conversations SET status='ended', ended_at=datetime('now'), summary_json=? WHERE id=?",
+            (json.dumps(summary), cid),
+        )
+        await test_db.commit()
+        result = await get_conversation_export(test_db, cid)
+        assert result["status"] == "ended"
+        assert result["ended_at"] is not None
+        assert result["summary"] == summary
+
+    async def test_export_with_message_feedback(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        feedback = {"grammar": 9, "vocabulary": 8}
+        await update_message_feedback(test_db, cid, "user", "Hello", feedback)
+        result = await get_conversation_export(test_db, cid)
+        assert len(result["messages"]) == 1
+        assert result["messages"][0]["feedback"] == feedback
+
+    async def test_malformed_summary_json_falls_back(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "UPDATE conversations SET summary_json='not valid json' WHERE id=?",
+            (cid,),
+        )
+        await test_db.commit()
+        result = await get_conversation_export(test_db, cid)
+        assert result["summary"] == "not valid json"
+
+    async def test_malformed_feedback_json_falls_back(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hi")
+        await test_db.execute(
+            "UPDATE messages SET feedback_json='bad json' WHERE conversation_id=?",
+            (cid,),
+        )
+        await test_db.commit()
+        result = await get_conversation_export(test_db, cid)
+        assert result["messages"][0]["feedback"] == "bad json"
