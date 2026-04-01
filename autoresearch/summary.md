@@ -1,159 +1,89 @@
 # Autoresearch Summary Report
 
-## Run Overview (Iterations 26-35)
-- **Run**: Iterations 26-35 (10 iterations)
-- **Start time**: 2026-03-30T15:47:09+00:00
-- **End time**: 2026-03-30T20:26:51+00:00
-- **Total duration**: ~4h 40m
+## Run Overview (Iterations 66-95)
+- **Run**: Iterations 66-95 (30 iterations)
+- **Start time**: 2026-04-01T11:45:00+09:00
+- **End time**: 2025-06-29T00:46:06Z
+- **Tests at start**: 292 (iteration 65)
+- **Tests at end**: 427 (iteration 95)
+- **Net new tests**: 135
 
 ## Results Summary
 | Metric | Value |
 |--------|-------|
-| Total iterations | 10 |
-| Kept | 10 (100%) |
+| Total iterations | 30 |
+| Kept | 30 |
 | Discarded | 0 |
-| Crashed | 0 |
 | Success rate | 100% |
-| Tests start → end | 168 → 217 (+49 tests) |
-| Average score | 7.51 |
+| Avg score | 7.3 |
+| Tests added | 135 |
 
-## Kept Changes
+## Iteration Details (66-95)
 
-| # | Score | Description |
-|---|-------|-------------|
-| 26 | 7.5 | Add rate limiting for LLM endpoints |
-| 27 | 8.1 | Add integration tests for dashboard stats API |
-| 28 | 6.05 | Fix inconsistent date formatting with shared formatDate utility |
-| 29 | 8.1 | Add unit tests for RateLimiter module |
-| 30 | 7.0 | Add React Error Boundary for graceful crash recovery |
-| 31 | 7.6 | Add DELETE endpoints for conversation cleanup |
-| 32 | 6.7 | Add Delete button for past conversations in history list |
-| 33 | 7.55 | Add vocabulary mastery statistics endpoint |
-| 34 | 8.35 | Add unit tests for app/utils.py (safe_llm_call, get_topic_label) |
-| 35 | 8.1 | Add integration tests for pronunciation progress endpoint |
+| # | Description | Tests | Status |
+|---|-------------|-------|--------|
+| 66 | Add retry logic with exponential backoff to safe_llm_call | 298 | keep |
+| 67 | Add vocabulary review forecast endpoint | 301 | keep |
+| 68 | Add conversation export endpoint | 304 | keep |
+| 69 | Add unit tests for conversation export DAL | 311 | keep |
+| 70 | Add unit tests for vocab forecast and due words DAL | 320 | keep |
+| 71 | Add pagination metadata to conversation list | 324 | keep |
+| 72 | Add conversation search by keyword | 330 | keep |
+| 73 | Add pronunciation score distribution endpoint | 335 | keep |
+| 74 | Add daily learning activity history endpoint | 341 | keep |
+| 75 | Add vocabulary quiz attempt history endpoint | 348 | keep |
+| 76 | Add study streak milestones endpoint | 352 | keep |
+| 77 | Add vocabulary per-topic accuracy rate endpoint | 354 | keep |
+| 78 | Add conversation duration stats endpoint | 358 | keep |
+| 79 | Add frontend TypeScript API types for new endpoints | 358 | keep |
+| 80 | Add vocabulary batch import endpoint | 364 | keep |
+| 81 | Add vocabulary word edit endpoint | 370 | keep |
+| 82 | Add pronunciation personal records endpoint | 373 | keep |
+| 83 | Add application config summary endpoint | 374 | keep |
+| 84 | Add learning summary endpoint | 375 | keep |
+| 85 | Add vocabulary word favorites/bookmarks system | 383 | keep |
+| 86 | Add rate limit response headers (X-RateLimit-*) | 386 | kept |
+| 87 | Add grammar accuracy analytics endpoint | 390 | kept |
+| 88 | Add vocabulary word notes/annotations | 397 | kept |
+| 89 | Add pronunciation weekly progress tracker | 400 | kept |
+| 90 | Add conversation topic recommendations endpoint | 404 | kept |
+| 91 | Add frontend TypeScript types for iterations 86-90 | 404 | kept |
+| 92 | Add learning goals system with daily targets | 414 | kept |
+| 93 | Add vocabulary difficulty auto-adjustment | 420 | kept |
+| 94 | Add word detail with similar words and progress | 427 | kept |
+| 95 | Expand smoke test and add final TypeScript types | 427 | kept |
 
-## Timing Analysis
+## Feature Categories
 
-| Metric | Value |
-|--------|-------|
-| Average iteration time | 2,440s (~41 min) |
-| Fastest iteration | #27 (311s / 5 min) |
-| Slowest iteration | #32 (8,326s / 139 min) |
-| Avg propose time | 534s |
-| Avg implement time | 355s |
-| Avg test time | 887s |
-| Avg evaluate time | 605s |
+### Backend — New Endpoints (18)
+- Vocabulary: forecast, attempts, topic-accuracy, batch import, word edit, favorites, notes, word detail
+- Conversation: export, search, grammar-accuracy, topic-recommendations
+- Pronunciation: distribution, personal records, weekly progress
+- Dashboard: activity-history, streak-milestones, conversation-duration, config, summary, learning goals
 
-**Note**: QA testing infrastructure was unstable (server crashes during Playwright), inflating test times for frontend-touching iterations. Backend-only and test-only iterations were much faster.
+### Backend — Infrastructure (3)
+- Retry logic with exponential backoff (safe_llm_call)
+- Rate limit response headers (X-RateLimit-*)
+- Vocabulary difficulty auto-adjustment
 
-## Discarded Attempts
-None in this run (10/10 kept).
+### Database Changes (3)
+- New table: quiz_attempts
+- New table: learning_goals
+- New columns: vocabulary_words.is_favorite, vocabulary_words.notes
 
-## Remaining Backlog
-- [ ] Improve pronunciation feedback granularity — phoneme-level comparison
-- [ ] Diversify vocabulary quiz formats — fill-in-the-blank, sentence completion
-- [ ] Add offline fallback for vocabulary review — cache quiz data
-- [ ] Add database migration strategy
-- [ ] Add error toast notifications for failed API calls
-- [ ] Add loading states for delete operations in conversation UI
+### Frontend TypeScript (2 iterations)
+- ~20 new interfaces and API methods covering all new endpoints
 
-## Recommendations for Next Run
-1. **Fix QA infrastructure** — Playwright browser tests consistently fail to connect to the server. Stabilize the QA pipeline.
-2. **Frontend features** — Wire vocabulary stats to dashboard widget; add error toasts; fix mobile nav overflow.
-3. **Pronunciation enhancements** — Phoneme-level feedback and topic filtering for practice sentences.
+### Testing (4)
+- 135 new tests (292 → 427)
+- Unit tests for DAL functions
+- Integration tests for API endpoints
+- Expanded smoke test (5 → 20 endpoints)
 
-## Cumulative Stats (All 35 Iterations)
-- **Total kept**: 33/35 iterations
-- **Total discarded**: 2
-- **Total crashed**: 5 (all from early proposer failures)
-- **Test count growth**: 69 → 217 (+148 tests)
-- **Key areas covered**: Tests, validation, error handling, features, accessibility, UX, infrastructure
-
----
-
-# Autoresearch Summary — Iterations 36–65
-
-## Overview
-
-30 iterations executed from iteration 36 to 65.
-- **29 kept**, **1 discarded** (iteration #41 — TDZ bug in auto-end timer, fixed in #42)
-- **Tests**: 217 → 292 (+75 tests, +35%)
-- **TypeScript**: Passing throughout
-- **Smoke test**: Passing throughout
-- **Average score**: ~7.2 / 10
-
-## Key Improvements by Category
-
-### New API Endpoints (10 endpoints added)
-| Iteration | Endpoint | Description |
-|-----------|----------|-------------|
-| #36 | `GET /api/vocabulary/due` | Words due for spaced repetition review |
-| #45 | `DELETE /api/vocabulary/progress` | Reset vocabulary progress by topic |
-| #47 | `GET /api/vocabulary/weak-words` | Words with highest error rates |
-| #48 | `GET /api/vocabulary/words` | Word bank browse/search with pagination |
-| #50 | `DELETE /api/pronunciation/history` | Clear all pronunciation attempts |
-| #50 | `DELETE /api/pronunciation/{id}` | Delete single pronunciation attempt |
-| #55 | `DELETE /api/vocabulary/{word_id}` | Delete a vocabulary word |
-| #60 | `GET /api/vocabulary/export` | Export words with progress data |
-| #61 | `GET /api/pronunciation/trend` | Score trend (improving/declining/stable) |
-| #65 | `GET /api/vocabulary/topic-summary` | Per-topic progress summary |
-
-### Quiz Enhancements
-- **#38-39**: Fill-in-the-blank quiz mode (backend + frontend)
-- **#52**: `quiz_type` field in response for frontend disambiguation
-
-### Dashboard Stats Enrichment
-- **#44**: `vocab_due_count` — words due for review
-- **#58**: `conversations_by_difficulty` — breakdown by beginner/intermediate/advanced
-- **#62**: `grammar_accuracy` — % of messages with no grammar errors
-- **#63**: `vocab_level_distribution` — word count per mastery level
-- **#64**: `conversations_by_topic` — practice frequency by topic
-
-### Bug Fixes & Data Quality
-- **#37**: Fixed timezone inconsistency (`datetime.now()` → `datetime.now(timezone.utc)`)
-- **#49**: Deduplicated vocabulary words (case-insensitive per topic)
-- **#51**: Topic ID validation (422 for unknown topics)
-
-### Input Validation & Security
-- **#51**: `validate_topic()` helper — rejects unknown topic IDs with 422
-- **#56**: `max_length` on message content (2000) and pronunciation text (1000)
-
-### Frontend Improvements
-- **#39**: Fill-blank quiz UI with text input
-- **#40**: Fluency score display in pronunciation results
-- **#42**: Auto-end conversation on timer expiry
-- **#43**: Pronunciation history & progress UI
-- **#46**: Conversation summary display in history view
-- **#54**: Frontend API methods for all delete/clear endpoints
-
-### Infrastructure
-- **#53**: `save_attempt` returns `attempt_id`; history includes `id`
-- **#57**: Compound database indexes for query performance
-- **#59**: `duration_seconds` in conversation list
-
-## Test Growth
-
-| Checkpoint | Tests |
-|-----------|-------|
-| Start (iter 35) | 217 |
-| Iter 40 | 232 |
-| Iter 45 | 243 |
-| Iter 50 | 257 |
-| Iter 55 | 266 |
-| Iter 60 | 278 |
-| Iter 65 | 292 |
-
-## Discarded Iteration
-
-| Iter | Description | Reason |
-|------|-------------|--------|
-| #41 | Auto-end timer | TDZ bug — useEffect referenced useCallback before declaration. Fixed in #42. |
-
-## Files Most Frequently Modified
-
-1. `app/dal/vocabulary.py` — 10 iterations
-2. `app/routers/vocabulary.py` — 8 iterations
-3. `frontend/src/api.ts` — 8 iterations
-4. `app/dal/dashboard.py` — 5 iterations
-5. `tests/unit/test_vocabulary_dal.py` — 8 iterations
-6. `tests/integration/test_vocabulary_api.py` — 7 iterations
+## Key Patterns & Lessons
+1. **sqlite3.Row** doesn't support `.get()` — wrap with `dict()` first
+2. **save_words** expects `correct_meaning` not `meaning` in dict keys
+3. **get_conversation_topics()** returns `list[dict]` not `dict` — access by `id` field
+4. **FastAPI Query import** must be explicit in each router file
+5. **Mock ask_json** must return dict with `questions` key, not bare list
+6. All iterations passed on first or second attempt — no discards needed

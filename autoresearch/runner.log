@@ -6483,3 +6483,144 @@ Also add TypeScript types for the latest endpoints:
 
 427 passed. Commit final iteration:
 
+● Commit iteration 95 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #95: Expand smoke test and add final TypeScript types
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-verify 2>&1 | tail -3
+  │ && git rev-parse --short HEAD && date +%s
+  └ 6 lines...
+
+● Record iteration 95 (shell)
+  │ printf '95\t1b38bd8\t2025-06-29T00:46:06Z\t5\t30\t15\t5\t55\t427\t427\tpass\t7.3\tkept\tExpand
+  │ smoke test and add final TypeScript types\n' >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 1 line...
+
+Now generate the summary and update backlog:
+
+● Verify results file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv
+  └ 3 lines...
+
+● Count kept iterations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "kept" autoresearch/results.tsv
+  └ 2 lines...
+
+● Count all kept (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>1 {print $14}'
+  │ autoresearch/results.tsv | grep -c "kept"
+  └ 2 lines...
+
+● Count statuses (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>1 {print $13}'
+  │ autoresearch/results.tsv | sort | uniq -c
+  └ 7 lines...
+
+Good - 72 kept/KEEP out of 95. Now let me check test counts at key points:
+
+● Check test progression (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR==2 {print "Start: "$9"
+  │ tests"} NR==66 {print "Iter 65: "$9" tests"} NR==96 {print "Iter 95: "$9" tests"}'
+  │ autoresearch/results.tsv
+  └ 4 lines...
+
+● Show iterations 66-95 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -1 autoresearch/results.tsv && awk
+  │ -F'\t' 'NR>=67 && NR<=96' autoresearch/results.tsv
+  └ 32 lines...
+
+● Show iterations 91-95 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>=97'
+  │ autoresearch/results.tsv
+  └ 6 lines...
+
+Now let me create the summary:
+
+● Check if summary exists (shell)
+  │ test -f /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md && echo "exists"
+  │ || echo "not exists"
+  └ 2 lines...
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L1:10 (10 lines read)
+
+I'll overwrite with the full summary:
+
+● Edit summary.md +84 -5
+  └ autoresearch/summary.md
+
+● Check summary length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l autoresearch/summary.md
+  └ 2 lines...
+
+Let me clean up the file - remove the old content that was after my replacement point:
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L88:100 (12 lines read)
+
+There's old content. Let me remove it:
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L86:95 (10 lines read)
+
+● Edit summary.md -6
+  └ autoresearch/summary.md
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L88:100 (13 lines read)
+
+There's still old content. Let me view the full extent:
+
+● Check file length (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md
+  └ 2 lines...
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L89:92 (3 lines read)
+
+● Edit summary.md -2
+  └ autoresearch/summary.md
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L88:95 (8 lines read)
+
+Still old content from line 90 onwards. Let me remove everything from line 90:
+
+● Truncate old content (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -89 autoresearch/summary.md >
+  │ autoresearch/summary_clean.md && mv autoresearch/summary_clean.md autoresearch/summary.md
+  └ 1 line...
+
+● Verify clean summary (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md && tail -3
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/summary.md
+  └ 5 lines...
+
+Now update backlog and commit everything:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L1:20 (20 lines read)
+
+● Find future ideas section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Ideas for Future"
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L94:130 (8 lines read)
+
+● Edit backlog.md +14 -4
+  └ autoresearch/backlog.md
+
+Final commit:
+

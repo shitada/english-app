@@ -93,9 +93,19 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 
 ## [NEW] Ideas for Future Iterations
 
-- [ ] Add conversation average score endpoint
-- [ ] Add learning goals/targets system
+- [x] ✅ Add rate limit response headers (completed iteration #86)
+- [x] ✅ Add grammar accuracy analytics endpoint (completed iteration #87)
+- [x] ✅ Add vocabulary word notes/annotations (completed iteration #88)
+- [x] ✅ Add pronunciation weekly progress tracker (completed iteration #89)
+- [x] ✅ Add conversation topic recommendations (completed iteration #90)
+- [x] ✅ Add frontend TypeScript types for iterations 86-90 (completed iteration #91)
+- [x] ✅ Add learning goals/targets system (completed iteration #92)
+- [x] ✅ Add vocabulary difficulty auto-adjustment (completed iteration #93)
+- [x] ✅ Add word detail with similar words and progress (completed iteration #94)
+- [x] ✅ Expand smoke test and add final TypeScript types (completed iteration #95)
 - [ ] Add pronunciation sentence categorization by difficulty
-- [ ] Add vocabulary word synonyms/related words
 - [ ] Add API versioning prefix
-- [ ] Add vocabulary difficulty auto-adjustment
+- [ ] Add conversation message bookmarks
+- [ ] Add vocabulary spaced repetition analytics
+- [ ] Add user preference settings persistence
+- [ ] Add conversation replay/review mode
