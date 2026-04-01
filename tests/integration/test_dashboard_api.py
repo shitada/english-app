@@ -154,3 +154,24 @@ class TestDashboardStats:
         assert isinstance(data["total_vocab_reviewed"], int)
         assert isinstance(data["vocab_mastered"], int)
         assert isinstance(data["recent_activity"], list)
+
+
+@pytest.mark.integration
+class TestActivityHistory:
+    async def test_returns_history(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/activity-history")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["days"] == 30
+        assert isinstance(data["history"], list)
+        assert len(data["history"]) > 0
+
+    async def test_custom_days_param(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/activity-history?days=7")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["days"] == 7
+
+    async def test_invalid_days_param(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/activity-history?days=0")
+        assert resp.status_code == 422

@@ -4402,3 +4402,109 @@ Add tests:
   │ 'TESTS'…
   └ 11 lines...
 
+● Commit + test 73 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #73: add pronunciation score distribution endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+335 passed! Quick checks:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● T4 + record 73 (shell)
+  │ date +%s && echo "73    47b4c82 2026-04-01T12:15:27+09:00       65      80      30      55
+  │ 230     335     335     pass    7.3     keep    Add pronunciation score distribution endpoint"
+  │ >> /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me keep going efficiently. Iteration 74:
+
+● T0 for iteration 74 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 74
+  │ Read config.yaml
+  │   └ 203 lines read
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ 156 lines read
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Explore dashboard structure
+  │ Search (glob)
+  │   │ "tests/unit/test_dashboard_dal.py"
+  │   └ 1 file found
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1:10 (10 lines read)
+
+Good. Now implement:
+
+● Add daily activity DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/dashboard.py << 'PYEOF'
+  │
+  │
+  │ async def get_daily_activity(
+  │ db: aiosqlite.Connection, days: int = 30…
+  └ 48 lines...
+
+Now add the router endpoint:
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L1:15 (15 lines read)
+
+● End of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/dashboard.py && tail -5
+  │ app/routers/dashboard.py
+  └ 7 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "from fastapi"
+  │ app/routers/dashboard.py
+  └ 2 lines...
+
+● Edit dashboard.py +1 -1
+  └ app/routers/dashboard.py
+
+● Add activity history endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py << 'PYEOF'
+  │
+  │
+  │ class DailyActivityItem(BaseModel):
+  │ date: str…
+  └ 21 lines...
+
+Add tests:
+
+● Add activity DAL tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 26 lines...
+
+● Add activity integration tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_dashboard_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 20 lines...
+

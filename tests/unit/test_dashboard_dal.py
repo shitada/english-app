@@ -186,3 +186,30 @@ class TestConversationsByTopic:
         assert len(result) == 2
         assert result[0]["topic"] == "hotel_checkin"
         assert result[0]["count"] == 2
+
+
+@pytest.mark.unit
+class TestGetDailyActivity:
+    async def test_empty_database(self, test_db):
+        from app.dal.dashboard import get_daily_activity
+        result = await get_daily_activity(test_db, days=7)
+        assert isinstance(result, list)
+        assert len(result) == 8  # today + 7 past days
+        assert all(r["conversations"] == 0 for r in result)
+        assert all(r["messages"] == 0 for r in result)
+
+    async def test_with_activity(self, test_db):
+        from app.dal.dashboard import get_daily_activity
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        result = await get_daily_activity(test_db, days=1)
+        today_entry = result[-1]
+        assert today_entry["conversations"] >= 1
+        assert today_entry["messages"] >= 1
+
+    async def test_all_dates_present(self, test_db):
+        from app.dal.dashboard import get_daily_activity
+        result = await get_daily_activity(test_db, days=3)
+        assert len(result) == 4
+        dates = [r["date"] for r in result]
+        assert len(set(dates)) == 4  # all unique

@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 import aiosqlite
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
 from app.config import get_conversation_topics
@@ -74,3 +74,26 @@ async def get_stats(db: aiosqlite.Connection = Depends(get_db_session)):
     ]
 
     return stats
+
+
+class DailyActivityItem(BaseModel):
+    date: str
+    conversations: int
+    messages: int
+    pronunciation_attempts: int
+    vocabulary_reviews: int
+
+
+class ActivityHistoryResponse(BaseModel):
+    days: int
+    history: list[DailyActivityItem]
+
+
+@router.get("/activity-history", response_model=ActivityHistoryResponse)
+async def get_activity_history(
+    days: int = Query(default=30, ge=1, le=365),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get daily learning activity counts for the past N days."""
+    history = await dash_dal.get_daily_activity(db, days=days)
+    return {"days": days, "history": history}

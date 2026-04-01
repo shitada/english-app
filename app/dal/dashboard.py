@@ -171,3 +171,53 @@ async def get_conversations_by_topic(db: aiosqlite.Connection) -> list[dict[str,
            ORDER BY count DESC"""
     )
     return [{"topic": r["topic"], "count": r["count"]} for r in rows]
+
+
+async def get_daily_activity(
+    db: aiosqlite.Connection, days: int = 30
+) -> list[dict[str, Any]]:
+    """Get daily learning activity counts for the past N days."""
+    rows = await db.execute_fetchall(
+        """WITH RECURSIVE dates(d) AS (
+               SELECT date('now', '-' || ? || ' days')
+               UNION ALL
+               SELECT date(d, '+1 day') FROM dates WHERE d < date('now')
+           )
+           SELECT
+               dates.d AS date,
+               COALESCE(conv.cnt, 0) AS conversations,
+               COALESCE(msg.cnt, 0) AS messages,
+               COALESCE(pron.cnt, 0) AS pronunciation_attempts,
+               COALESCE(vocab.cnt, 0) AS vocabulary_reviews
+           FROM dates
+           LEFT JOIN (
+               SELECT date(started_at) AS d, COUNT(*) AS cnt
+               FROM conversations GROUP BY date(started_at)
+           ) conv ON dates.d = conv.d
+           LEFT JOIN (
+               SELECT date(created_at) AS d, COUNT(*) AS cnt
+               FROM messages WHERE role = 'user' GROUP BY date(created_at)
+           ) msg ON dates.d = msg.d
+           LEFT JOIN (
+               SELECT date(created_at) AS d, COUNT(*) AS cnt
+               FROM pronunciation_attempts GROUP BY date(created_at)
+           ) pron ON dates.d = pron.d
+           LEFT JOIN (
+               SELECT date(last_reviewed) AS d, COUNT(*) AS cnt
+               FROM vocabulary_progress
+               WHERE last_reviewed IS NOT NULL
+               GROUP BY date(last_reviewed)
+           ) vocab ON dates.d = vocab.d
+           ORDER BY dates.d ASC""",
+        (days,),
+    )
+    return [
+        {
+            "date": r["date"],
+            "conversations": r["conversations"],
+            "messages": r["messages"],
+            "pronunciation_attempts": r["pronunciation_attempts"],
+            "vocabulary_reviews": r["vocabulary_reviews"],
+        }
+        for r in rows
+    ]
