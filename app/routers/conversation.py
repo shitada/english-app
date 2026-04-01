@@ -210,13 +210,14 @@ async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(g
 @router.get("/list", response_model=ConversationListResponse)
 async def list_conversations(
     topic: str | None = None,
+    keyword: str | None = None,
     limit: int = 20,
     offset: int = 0,
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """List past conversations with message counts."""
-    conversations = await conv_dal.list_conversations(db, topic=topic, limit=limit, offset=offset)
-    total_count = await conv_dal.count_conversations(db, topic=topic)
+    conversations = await conv_dal.list_conversations(db, topic=topic, keyword=keyword, limit=limit, offset=offset)
+    total_count = await conv_dal.count_conversations(db, topic=topic, keyword=keyword)
     return {
         "conversations": conversations,
         "total_count": total_count,

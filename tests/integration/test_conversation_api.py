@@ -383,3 +383,18 @@ async def test_list_conversations_pagination_metadata(client, mock_copilot):
     assert len(data2["conversations"]) == 1
     assert data2["total_count"] == 3
     assert data2["has_more"] is False
+
+
+@pytest.mark.asyncio
+async def test_list_conversations_search_by_keyword(client, mock_copilot):
+    """Test searching conversations by keyword in message content."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the shop!")
+    await client.post("/api/conversation/start", json={"topic": "shopping"})
+    # Search for "hotel" - should match assistant greeting
+    res = await client.get("/api/conversation/list?keyword=hotel")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    assert all("hotel_checkin" == c["topic"] for c in data["conversations"])

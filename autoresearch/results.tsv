@@ -74,3 +74,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 68f611a602026-04-01T11:56:44+09:0083622948222304304pass7.3keepAdd conversation export endpoint
 69eca3a852026-04-01T12:00:38+09:0071315738197311311pass8.1keepAdd unit tests for conversation export DAL
 700324fef2026-04-01T12:04:04+09:0066405237195320320pass8.1keepAdd unit tests for vocab forecast and due words DAL
+71e61331e2026-04-01T12:07:29+09:0049672549190324324pass7.3keepAdd pagination metadata to conversation list

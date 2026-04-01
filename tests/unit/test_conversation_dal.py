@@ -406,3 +406,44 @@ class TestCountConversations:
         assert await count_conversations(test_db, topic="hotel_checkin") == 2
         assert await count_conversations(test_db, topic="restaurant_order") == 1
         assert await count_conversations(test_db, topic="nonexistent") == 0
+
+
+@pytest.mark.unit
+class TestSearchConversations:
+    async def test_keyword_matches_message_content(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I need a room with a view")
+        cid2 = await create_conversation(test_db, "shopping")
+        await add_message(test_db, cid2, "user", "I want to buy shoes")
+        result = await list_conversations(test_db, keyword="room")
+        assert len(result) == 1
+        assert result[0]["id"] == cid
+
+    async def test_keyword_no_matches(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello there")
+        result = await list_conversations(test_db, keyword="xyz_no_match")
+        assert len(result) == 0
+
+    async def test_keyword_combined_with_topic(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid1, "user", "I need a reservation")
+        cid2 = await create_conversation(test_db, "restaurant_order")
+        await add_message(test_db, cid2, "user", "I need a reservation")
+        result = await list_conversations(test_db, topic="hotel_checkin", keyword="reservation")
+        assert len(result) == 1
+        assert result[0]["id"] == cid1
+
+    async def test_keyword_matches_assistant_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome to our luxury hotel")
+        result = await list_conversations(test_db, keyword="luxury")
+        assert len(result) == 1
+
+    async def test_count_with_keyword(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid1, "user", "Check in please")
+        cid2 = await create_conversation(test_db, "shopping")
+        await add_message(test_db, cid2, "user", "Buy something")
+        assert await count_conversations(test_db, keyword="Check") == 1
+        assert await count_conversations(test_db) == 2

@@ -107,55 +107,68 @@ async def get_conversation_summary(
 async def list_conversations(
     db: aiosqlite.Connection,
     topic: str | None = None,
+    keyword: str | None = None,
     limit: int = 20,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
-    """List past conversations with message counts."""
+    """List past conversations with message counts, optionally filtered."""
+    where_clauses: list[str] = []
+    params: list[Any] = []
+
     if topic:
-        rows = await db.execute_fetchall(
-            """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
-                      COUNT(m.id) as message_count,
-                      CASE WHEN c.ended_at IS NOT NULL
-                           THEN CAST((julianday(c.ended_at) - julianday(c.started_at)) * 86400 AS INTEGER)
-                           ELSE NULL END as duration_seconds
-               FROM conversations c
-               LEFT JOIN messages m ON c.id = m.conversation_id
-               WHERE c.topic = ?
-               GROUP BY c.id
-               ORDER BY c.started_at DESC
-               LIMIT ? OFFSET ?""",
-            (topic, limit, offset),
+        where_clauses.append("c.topic = ?")
+        params.append(topic)
+    if keyword:
+        where_clauses.append(
+            "EXISTS (SELECT 1 FROM messages m2 WHERE m2.conversation_id = c.id "
+            "AND m2.content LIKE '%' || ? || '%')"
         )
-    else:
-        rows = await db.execute_fetchall(
-            """SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
-                      COUNT(m.id) as message_count,
-                      CASE WHEN c.ended_at IS NOT NULL
-                           THEN CAST((julianday(c.ended_at) - julianday(c.started_at)) * 86400 AS INTEGER)
-                           ELSE NULL END as duration_seconds
-               FROM conversations c
-               LEFT JOIN messages m ON c.id = m.conversation_id
-               GROUP BY c.id
-               ORDER BY c.started_at DESC
-               LIMIT ? OFFSET ?""",
-            (limit, offset),
-        )
+        params.append(keyword)
+
+    where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    params.extend([limit, offset])
+
+    rows = await db.execute_fetchall(
+        f"""SELECT c.id, c.topic, c.difficulty, c.started_at, c.ended_at, c.status,
+                   COUNT(m.id) as message_count,
+                   CASE WHEN c.ended_at IS NOT NULL
+                        THEN CAST((julianday(c.ended_at) - julianday(c.started_at)) * 86400 AS INTEGER)
+                        ELSE NULL END as duration_seconds
+            FROM conversations c
+            LEFT JOIN messages m ON c.id = m.conversation_id
+            {where_sql}
+            GROUP BY c.id
+            ORDER BY c.started_at DESC
+            LIMIT ? OFFSET ?""",
+        params,
+    )
     return [dict(r) for r in rows]
 
 
 async def count_conversations(
-    db: aiosqlite.Connection, topic: str | None = None
+    db: aiosqlite.Connection,
+    topic: str | None = None,
+    keyword: str | None = None,
 ) -> int:
-    """Count total conversations, optionally filtered by topic."""
+    """Count total conversations, optionally filtered by topic and/or keyword."""
+    where_clauses: list[str] = []
+    params: list[Any] = []
+
     if topic:
-        rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM conversations WHERE topic = ?",
-            (topic,),
+        where_clauses.append("topic = ?")
+        params.append(topic)
+    if keyword:
+        where_clauses.append(
+            "EXISTS (SELECT 1 FROM messages m WHERE m.conversation_id = conversations.id "
+            "AND m.content LIKE '%' || ? || '%')"
         )
-    else:
-        rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM conversations"
-        )
+        params.append(keyword)
+
+    where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+    rows = await db.execute_fetchall(
+        f"SELECT COUNT(*) as cnt FROM conversations{where_sql}",
+        params,
+    )
     return rows[0]["cnt"] if rows else 0
 
 
