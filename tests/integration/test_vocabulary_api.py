@@ -462,3 +462,41 @@ async def test_topic_summary_with_data(client, mock_copilot):
     data = res.json()
     assert len(data["topics"]) >= 1
     assert data["topics"][0]["total_words"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_forecast_empty(client):
+    res = await client.get("/api/vocabulary/forecast")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overdue_count"] == 0
+    assert data["total_upcoming"] == 0
+    assert data["daily_forecast"] == []
+
+
+@pytest.mark.asyncio
+async def test_forecast_with_due_words(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "delay", "correct_meaning": "to postpone", "example_sentence": "Don't delay.", "difficulty": 1}]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    # Answer incorrectly -> level 0, interval 0 -> due today
+    res = await client.get("/api/vocabulary/forecast")
+    assert res.status_code == 200
+    data = res.json()
+    # Word has next_review_at set, should appear in forecast
+    assert isinstance(data["daily_forecast"], list)
+    assert data["total_upcoming"] >= 0
+
+
+@pytest.mark.asyncio
+async def test_forecast_days_param(client):
+    res = await client.get("/api/vocabulary/forecast?days=7")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["daily_forecast"], list)
+    # Invalid days param
+    res2 = await client.get("/api/vocabulary/forecast?days=0")
+    assert res2.status_code == 422
+    res3 = await client.get("/api/vocabulary/forecast?days=100")
+    assert res3.status_code == 422

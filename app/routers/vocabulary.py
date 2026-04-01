@@ -319,3 +319,23 @@ async def get_topic_summary(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get per-topic vocabulary progress summary."""
     topics = await vocab_dal.get_topic_summary(db)
     return {"topics": topics}
+
+
+class ForecastDayItem(BaseModel):
+    date: str
+    count: int
+
+
+class ReviewForecastResponse(BaseModel):
+    overdue_count: int
+    total_upcoming: int
+    daily_forecast: list[ForecastDayItem]
+
+
+@router.get("/forecast", response_model=ReviewForecastResponse)
+async def get_review_forecast(
+    days: int = Query(default=14, ge=1, le=90),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get vocabulary review workload forecast for the next N days."""
+    return await vocab_dal.get_review_forecast(db, days=days)

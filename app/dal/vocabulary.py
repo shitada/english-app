@@ -364,6 +364,42 @@ async def export_words(
     return [dict(r) for r in rows]
 
 
+async def get_review_forecast(
+    db: aiosqlite.Connection, days: int = 14
+) -> dict[str, Any]:
+    """Get review workload forecast for the next N days."""
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    end_date = (now + timedelta(days=days)).strftime("%Y-%m-%d")
+
+    # Count overdue words (next_review_at < today)
+    row = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE date(next_review_at) < ?",
+        (today,),
+    )
+    overdue_count = row[0]["cnt"] if row else 0
+
+    # Get daily counts for today through today+days
+    rows = await db.execute_fetchall(
+        """SELECT date(next_review_at) as review_date, COUNT(*) as count
+           FROM vocabulary_progress
+           WHERE date(next_review_at) >= ? AND date(next_review_at) <= ?
+           GROUP BY date(next_review_at)
+           ORDER BY date(next_review_at)""",
+        (today, end_date),
+    )
+    daily_forecast = [
+        {"date": r["review_date"], "count": r["count"]} for r in rows
+    ]
+    total_upcoming = sum(r["count"] for r in daily_forecast)
+
+    return {
+        "overdue_count": overdue_count,
+        "total_upcoming": total_upcoming,
+        "daily_forecast": daily_forecast,
+    }
+
+
 async def get_topic_summary(db: aiosqlite.Connection) -> list[dict[str, Any]]:
     """Get per-topic summary with word counts and mastery stats."""
     rows = await db.execute_fetchall(
