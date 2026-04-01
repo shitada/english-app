@@ -152,3 +152,22 @@ class ScoreTrendResponse(BaseModel):
 async def get_score_trend(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get pronunciation score trend (improving/declining/stable)."""
     return await pron_dal.get_score_trend(db)
+
+
+class ScoreDistributionItem(BaseModel):
+    bucket: str
+    label: str
+    min_score: float
+    max_score: float
+    count: int
+
+
+class ScoreDistributionResponse(BaseModel):
+    total_attempts: int
+    distribution: list[ScoreDistributionItem]
+
+
+@router.get("/distribution", response_model=ScoreDistributionResponse)
+async def get_score_distribution(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get pronunciation score distribution across quality buckets."""
+    return await pron_dal.get_score_distribution(db)

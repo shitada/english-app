@@ -4281,3 +4281,124 @@ Add tests:
   │ 'TESTS'…
   └ 17 lines...
 
+● Commit + test iteration 72 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #72: add conversation search by keyword
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+330 passed! Quick eval:
+
+✗ TS + smoke (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?" && cd .. && lsof -ti:8099 | xargs kill -9 2>/dev/null; uv run python
+  │ tests/smoke_test.py 2>&1
+  └ Permission denied and could not request permission from user
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 72
+  │ List directory .git
+  │   └ 11 files found
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+● T4 + record (shell)
+  │ date +%s && echo "72    85732b4 2026-04-01T12:11:16+09:00       66      48      29      55
+  │ 198     330     330     pass    7.55    keep    Add conversation search by keyword" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Continuing with iteration 73:
+
+● T0 for iteration 73 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 73
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ 198 lines read
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ 303 lines read
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Explore pronunciation structure
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L284:303 (20 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L189:198 (10 lines read)
+
+Now implement:
+
+● Check pronunciation DAL structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/pronunciation.py && grep -n
+  │ "^async def" app/dal/pronunciation.py
+  └ 9 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L1:12 (12 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L165:171 (7 lines read)
+
+● Add score distribution DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/pronunciation.py << 'PYEOF'
+  │
+  │
+  │ _SCORE_BUCKETS = [
+  │ ("poor", 0, 2),…
+  └ 36 lines...
+
+Now add the router endpoint:
+
+● Check line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L145:154 (10 lines read)
+
+● Edit pronunciation.py +19
+  └ app/routers/pronunciation.py
+
+Add tests:
+
+● Add distribution unit tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_pronunciation_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 46 lines...
+
+● Add distribution integration test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'TESTS'…
+  └ 11 lines...
+

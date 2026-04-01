@@ -196,3 +196,12 @@ async def test_score_trend_insufficient_data(client):
     res = await client.get("/api/pronunciation/trend")
     assert res.status_code == 200
     assert res.json()["trend"] == "insufficient_data"
+
+
+@pytest.mark.asyncio
+async def test_score_distribution_empty(client):
+    res = await client.get("/api/pronunciation/distribution")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] == 0
+    assert len(data["distribution"]) == 5

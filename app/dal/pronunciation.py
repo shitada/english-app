@@ -169,3 +169,41 @@ async def get_score_trend(db: aiosqlite.Connection, window: int = 5) -> dict[str
         trend = "stable"
     
     return {"trend": trend, "recent_avg": recent_avg, "previous_avg": previous_avg, "change": change}
+
+
+_SCORE_BUCKETS = [
+    ("poor", 0, 2),
+    ("fair", 3, 4),
+    ("good", 5, 6),
+    ("very_good", 7, 8),
+    ("excellent", 9, 10),
+]
+
+
+async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get pronunciation scores grouped into quality buckets."""
+    rows = await db.execute_fetchall(
+        "SELECT score FROM pronunciation_attempts WHERE score IS NOT NULL"
+    )
+    bucket_counts = {name: 0 for name, _, _ in _SCORE_BUCKETS}
+    for r in rows:
+        score = r["score"]
+        for name, lo, hi in _SCORE_BUCKETS:
+            if lo <= score <= hi:
+                bucket_counts[name] = bucket_counts.get(name, 0) + 1
+                break
+
+    distribution = [
+        {
+            "bucket": name,
+            "label": name.replace("_", " ").title(),
+            "min_score": lo,
+            "max_score": hi,
+            "count": bucket_counts[name],
+        }
+        for name, lo, hi in _SCORE_BUCKETS
+    ]
+    return {
+        "total_attempts": len(rows),
+        "distribution": distribution,
+    }

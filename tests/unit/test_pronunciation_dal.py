@@ -301,3 +301,50 @@ class TestScoreTrend:
             await save_attempt(test_db, "Test.", "Test.", feedback, 7.0)
         result = await get_score_trend(test_db)
         assert result["trend"] == "stable"
+
+
+@pytest.mark.unit
+class TestGetScoreDistribution:
+    async def test_empty_database(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        result = await get_score_distribution(test_db)
+        assert result["total_attempts"] == 0
+        assert len(result["distribution"]) == 5
+        assert all(d["count"] == 0 for d in result["distribution"])
+
+    async def test_scores_distributed_across_buckets(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        feedback = {"overall_score": 5}
+        scores = [1.0, 3.5, 5.0, 7.5, 9.5]
+        for s in scores:
+            await save_attempt(test_db, "Hello.", "Hello.", feedback, s)
+        result = await get_score_distribution(test_db)
+        assert result["total_attempts"] == 5
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["poor"] == 1
+        assert buckets["fair"] == 1
+        assert buckets["good"] == 1
+        assert buckets["very_good"] == 1
+        assert buckets["excellent"] == 1
+
+    async def test_all_scores_in_one_bucket(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        feedback = {"overall_score": 8}
+        for _ in range(4):
+            await save_attempt(test_db, "Test.", "Test.", feedback, 7.5)
+        result = await get_score_distribution(test_db)
+        assert result["total_attempts"] == 4
+        buckets = {d["bucket"]: d["count"] for d in result["distribution"]}
+        assert buckets["very_good"] == 4
+        assert all(buckets[k] == 0 for k in buckets if k != "very_good")
+
+    async def test_bucket_labels_and_ranges(self, test_db):
+        from app.dal.pronunciation import get_score_distribution
+        result = await get_score_distribution(test_db)
+        dist = result["distribution"]
+        assert dist[0]["bucket"] == "poor"
+        assert dist[0]["min_score"] == 0
+        assert dist[0]["max_score"] == 2
+        assert dist[4]["bucket"] == "excellent"
+        assert dist[4]["min_score"] == 9
+        assert dist[4]["max_score"] == 10
