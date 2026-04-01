@@ -78,3 +78,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 7285732b42026-04-01T12:11:16+09:0066482955198330330pass7.55keepAdd conversation search by keyword
 7347b4c822026-04-01T12:15:27+09:0065803055230335335pass7.3keepAdd pronunciation score distribution endpoint
 7418479b42026-04-01T12:18:46+09:0080713350234341341pass7.3keepAdd daily learning activity history endpoint
+75f1932852026-04-01T12:24:10+09:0089765250267348348pass7.55keepAdd vocabulary quiz attempt history endpoint

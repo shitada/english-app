@@ -221,3 +221,73 @@ async def get_daily_activity(
         }
         for r in rows
     ]
+
+
+_MILESTONES = [
+    (7, "1 Week"),
+    (14, "2 Weeks"),
+    (30, "1 Month"),
+    (60, "2 Months"),
+    (90, "3 Months"),
+]
+
+
+async def get_streak_milestones(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get current streak with milestone achievements."""
+    current_streak = await _calculate_streak(db)
+    longest_streak = await _calculate_longest_streak(db)
+
+    milestones = [
+        {"days": days, "label": label, "achieved": current_streak >= days}
+        for days, label in _MILESTONES
+    ]
+
+    next_milestone = None
+    for days, label in _MILESTONES:
+        if current_streak < days:
+            next_milestone = {
+                "days": days,
+                "label": label,
+                "days_remaining": days - current_streak,
+            }
+            break
+
+    return {
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "milestones": milestones,
+        "next_milestone": next_milestone,
+    }
+
+
+async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
+    """Find the longest consecutive streak in all activity history."""
+    rows = await db.execute_fetchall("""
+        SELECT DISTINCT date(created_at) as d FROM (
+            SELECT created_at FROM messages WHERE role = 'user'
+            UNION ALL
+            SELECT created_at FROM pronunciation_attempts
+            UNION ALL
+            SELECT last_reviewed AS created_at FROM vocabulary_progress
+            WHERE last_reviewed IS NOT NULL
+        ) ORDER BY d ASC
+    """)
+    if not rows:
+        return 0
+
+    longest = 1
+    current = 1
+    prev_ord = None
+    for r in rows:
+        try:
+            day_ord = date.fromisoformat(r["d"]).toordinal()
+        except (ValueError, TypeError):
+            continue
+        if prev_ord is not None:
+            if day_ord == prev_ord + 1:
+                current += 1
+                longest = max(longest, current)
+            elif day_ord != prev_ord:
+                current = 1
+        prev_ord = day_ord
+    return longest

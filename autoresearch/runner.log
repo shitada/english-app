@@ -4659,3 +4659,93 @@ So quiz response uses `id` for each question (which is the vocabulary_words id).
 ● Edit test_vocabulary_api.py +1 -1
   └ tests/integration/test_vocabulary_api.py
 
+● Fix + retest 75 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #75: add vocabulary quiz attempt history endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+348 passed! TS + smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● T4 + record 75 (shell)
+  │ date +%s && echo "75    f193285 2026-04-01T12:24:10+09:00       89      76      52      50
+  │ 267     348     348     pass    7.55    keep    Add vocabulary quiz attempt history endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue efficiently. I'll streamline the process for the remaining iterations.
+
+● T0 for iteration 76 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 76
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ 215 lines read
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ 177 lines read
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me look at the existing streak calculation:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L84:115 (32 lines read)
+
+● End of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/dashboard.py
+  └ 6 lines...
+
+● Add streak milestones DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/dashboard.py << 'PYEOF'
+  │
+  │
+  │ _MILESTONES = [
+  │ (7, "1 Week"),…
+  └ 68 lines...
+
+Add router endpoint:
+
+● Add streak milestones endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py << 'PYEOF'
+  │
+  │
+  │ class MilestoneItem(BaseModel):
+  │ days: int…
+  └ 23 lines...
+
+Add tests:
+
+● Add streak milestone tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py <<
+  │ 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 26 lines...
+
+● Add streak integration test (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_dashboard_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 11 lines...
+

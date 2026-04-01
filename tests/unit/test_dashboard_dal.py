@@ -213,3 +213,30 @@ class TestGetDailyActivity:
         assert len(result) == 4
         dates = [r["date"] for r in result]
         assert len(set(dates)) == 4  # all unique
+
+
+@pytest.mark.unit
+class TestStreakMilestones:
+    async def test_empty_database(self, test_db):
+        from app.dal.dashboard import get_streak_milestones
+        result = await get_streak_milestones(test_db)
+        assert result["current_streak"] == 0
+        assert result["longest_streak"] == 0
+        assert len(result["milestones"]) == 5
+        assert all(not m["achieved"] for m in result["milestones"])
+        assert result["next_milestone"] is not None
+        assert result["next_milestone"]["days"] == 7
+
+    async def test_with_activity_today(self, test_db):
+        from app.dal.dashboard import get_streak_milestones
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        result = await get_streak_milestones(test_db)
+        assert result["current_streak"] >= 1
+        assert result["longest_streak"] >= 1
+
+    async def test_longest_streak_calculation(self, test_db):
+        from app.dal.dashboard import _calculate_longest_streak
+        result = await _calculate_longest_streak(test_db)
+        assert isinstance(result, int)
+        assert result >= 0

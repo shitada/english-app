@@ -97,3 +97,28 @@ async def get_activity_history(
     """Get daily learning activity counts for the past N days."""
     history = await dash_dal.get_daily_activity(db, days=days)
     return {"days": days, "history": history}
+
+
+class MilestoneItem(BaseModel):
+    days: int
+    label: str
+    achieved: bool
+
+
+class NextMilestone(BaseModel):
+    days: int
+    label: str
+    days_remaining: int
+
+
+class StreakMilestonesResponse(BaseModel):
+    current_streak: int
+    longest_streak: int
+    milestones: list[MilestoneItem]
+    next_milestone: NextMilestone | None
+
+
+@router.get("/streak-milestones", response_model=StreakMilestonesResponse)
+async def get_streak_milestones(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get study streak with milestone achievements."""
+    return await dash_dal.get_streak_milestones(db)

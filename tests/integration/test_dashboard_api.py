@@ -175,3 +175,15 @@ class TestActivityHistory:
     async def test_invalid_days_param(self, client: AsyncClient):
         resp = await client.get("/api/dashboard/activity-history?days=0")
         assert resp.status_code == 422
+
+
+@pytest.mark.integration
+class TestStreakMilestones:
+    async def test_returns_milestones(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/streak-milestones")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "current_streak" in data
+        assert "longest_streak" in data
+        assert len(data["milestones"]) == 5
+        assert data["milestones"][0]["days"] == 7
