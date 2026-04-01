@@ -168,3 +168,16 @@ async def get_app_config():
         "max_pronunciation_length": 1000,
         "sm2_intervals": [0, 1, 3, 7, 14, 30, 60],
     }
+
+
+class LearningSummaryResponse(BaseModel):
+    total_study_days: int
+    words_learning: int
+    total_quiz_attempts: int
+    quiz_accuracy_percent: float
+
+
+@router.get("/summary", response_model=LearningSummaryResponse)
+async def get_learning_summary(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get a high-level learning progress summary."""
+    return await dash_dal.get_learning_summary(db)

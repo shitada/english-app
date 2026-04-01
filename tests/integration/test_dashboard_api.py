@@ -210,3 +210,15 @@ class TestAppConfig:
         assert data["vocabulary_topics_count"] > 0
         assert "rate_limit" in data
         assert "sm2_intervals" in data
+
+
+@pytest.mark.integration
+class TestLearningSummary:
+    async def test_returns_summary(self, client: AsyncClient):
+        resp = await client.get("/api/dashboard/summary")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "total_study_days" in data
+        assert "words_learning" in data
+        assert "quiz_accuracy_percent" in data
+        assert isinstance(data["total_study_days"], int)

@@ -328,3 +328,43 @@ async def get_conversation_duration_stats(db: aiosqlite.Connection) -> dict[str,
             for r in diff_rows
         ],
     }
+
+
+async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get a high-level learning summary with key metrics."""
+    # Total study days
+    rows = await db.execute_fetchall("""
+        SELECT COUNT(DISTINCT date(created_at)) as study_days FROM (
+            SELECT created_at FROM messages WHERE role = 'user'
+            UNION ALL
+            SELECT created_at FROM pronunciation_attempts
+            UNION ALL
+            SELECT last_reviewed AS created_at FROM vocabulary_progress
+            WHERE last_reviewed IS NOT NULL
+        )
+    """)
+    study_days = rows[0]["study_days"] if rows else 0
+
+    # Words known (level >= 1)
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 1"
+    )
+    words_learning = rows[0]["cnt"] if rows else 0
+
+    # Total quiz attempts
+    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
+    total_quiz_attempts = rows[0]["cnt"] if rows else 0
+
+    # Quiz accuracy
+    rows = await db.execute_fetchall(
+        "SELECT SUM(is_correct) as correct, COUNT(*) as total FROM quiz_attempts"
+    )
+    r = dict(rows[0]) if rows else {"correct": 0, "total": 0}
+    quiz_accuracy = round((r["correct"] or 0) / r["total"] * 100, 1) if r["total"] else 0
+
+    return {
+        "total_study_days": study_days,
+        "words_learning": words_learning,
+        "total_quiz_attempts": total_quiz_attempts,
+        "quiz_accuracy_percent": quiz_accuracy,
+    }

@@ -5275,3 +5275,61 @@ For iteration 83, I'll add a configuration endpoint to expose available settings
   │ @pytest.mark.integration…
   └ 11 lines...
 
+● Commit + test 83 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #83: add application config summary endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 26 lines...
+
+374 passed!
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3 &&
+  │ echo "TS:$?"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 7 lines...
+
+● Record 83 (shell)
+  │ date +%s && echo "83    4ca6b58 2026-04-01T12:53:18+09:00       0       19      30      20
+  │ 69      374     374     pass    6.7     keep    Add application config summary endpoint" >>
+  │ /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv
+  └ 2 lines...
+
+Let me continue to iterate. I'll keep going at this pace:
+
+● T0 for iteration 84 (shell)
+  │ date +%s
+  └ 2 lines...
+
+For iteration 84, I'll add a summary statistics overview endpoint — a single endpoint that aggregates key stats across all features:
+
+● Add learning summary DAL (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/dal/dashboard.py << 'PYEOF'
+  │
+  │
+  │ async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
+  │ """Get a high-level learning summary with key metrics."""…
+  └ 38 lines...
+
+● Add summary endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/dashboard.py << 'PYEOF'
+  │
+  │
+  │ class LearningSummaryResponse(BaseModel):
+  │ total_study_days: int…
+  └ 11 lines...
+
+● Add summary test (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_dashboard_api.py
+  │ << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 11 lines...
+
