@@ -13329,3 +13329,72 @@ Now add a comprehensive test:
 ● Edit test_vocabulary_dal.py +22
   └ tests/unit/test_vocabulary_dal.py
 
+● Commit iteration 143 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "refactor: consolidate 5 DB queries into 1 in get_srs_analytics level_summary
+  │
+  │ Replace 5 separate COUNT(*) queries with single conditional aggregation
+  │ query using SUM(CASE WHEN ...) and scalar subquery. Reduces DB round-trips…
+  └ 19 lines...
+
+● Run tests for iteration 143 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+606 passed. Record:
+
+● Record iteration 143 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "143" "6d5e7d4" "$TSTAMP" "50" "250" "55" "60" "$((T4-1775167014))" \
+  │ "606" "606" "pass" "7.5" "keep" "Consolidate 5 DB queries into 1 in get_srs_analytics …
+  └ 4 lines...
+
+Iteration 143: **KEEP** (7.5). 22/22 kept. Starting 144:
+
+● Record T0 for iteration 144 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 144
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L198:220 (21 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L293:330 (37 lines read)
+
+Good — consistent schema for history response. Let me implement:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L195:230 (36 lines read)
+
+● Edit conversation.py +8 -6
+  └ app/routers/conversation.py
+
+Now check if there are existing tests for bookmark status that need updating:
+
+● Find is_bookmarked assertions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'is_bookmarked.*==
+  │ 1\|is_bookmarked.*== 0' tests/integration/test_conversation_api.py
+  └ 2 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L135:150 (16 lines read)
+
+● Edit test_conversation_api.py +1 -1
+  └ tests/integration/test_conversation_api.py
+
+Now add a test for consistent feedback key:
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L142:160 (19 lines read)
+
+● Edit test_conversation_api.py +14
+  └ tests/integration/test_conversation_api.py
+

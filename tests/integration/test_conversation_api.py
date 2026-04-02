@@ -139,7 +139,21 @@ async def test_history_shows_bookmark_status(client, mock_copilot):
     # Verify history reflects bookmark
     hist2 = await client.get(f"/api/conversation/{conv_id}/history")
     bookmarked = [m for m in hist2.json()["messages"] if m["id"] == msg_id]
-    assert bookmarked[0]["is_bookmarked"] == 1
+    assert bookmarked[0]["is_bookmarked"] is True
+
+
+@pytest.mark.asyncio
+async def test_history_messages_always_have_feedback_key(client, mock_copilot):
+    """All messages should have 'feedback' key (None if no feedback)."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+    hist = await client.get(f"/api/conversation/{conv_id}/history")
+    messages = hist.json()["messages"]
+    assert len(messages) >= 1
+    for msg in messages:
+        assert "feedback" in msg, "All messages must have 'feedback' key"
+        assert isinstance(msg["is_bookmarked"], bool), "is_bookmarked must be bool"
 
 
 @pytest.mark.asyncio
