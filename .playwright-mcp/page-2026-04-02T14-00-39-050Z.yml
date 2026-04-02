@@ -1,0 +1,17 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Shadowing Practice" [level=3] [ref=e92]
+      - generic [ref=e93]: Good afternoon and welcome to The Grand Meridian!
+      - generic [ref=e94]: ▶ Press "Start Shadowing" to begin
+      - button "Start shadowing practice" [ref=e96] [cursor=pointer]:
+        - img [ref=e97]
+        - text: Start Shadowing
+      - generic [ref=e101]:
+        - img [ref=e102]
+        - slider [ref=e106]: "0.7"
+        - generic [ref=e107]: 70%
+      - button "Back" [ref=e109] [cursor=pointer]

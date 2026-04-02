@@ -9868,3 +9868,235 @@ Now add the test for retry with factory vs direct coroutine:
 
 Now commit and run tests:
 
+● Commit iteration 120 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #120: Fix broken LLM retries — wrap coroutines in factory lambdas
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 41 lines...
+
+● Run backend tests for iteration 120 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+555 tests pass. Now run TypeScript check:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check iteration 120 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All tests pass (555/555, TS pass). T3=1775138190. Now check if smoke test needed and start QA:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 4 lines...
+
+Router files changed — need smoke test. Let me run it:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke OK. Now start the server for QA testing and call the tester:
+
+● Kill old server on port 8000 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA testing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server crashed — let me restart it and proceed with QA testing.
+
+● Restart server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 5 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server keeps exiting after responding. Let me start it again and immediately call the tester while it's up.
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 >
+  │ /tmp/server.log 2>&1 &
+  │ echo "PID=$!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start server async mode (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is running (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+✗ Check server status (shell)
+  │ read_bash 15 2>/dev/null; cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ /tmp/server.log 2>/dev/null; echo "---"; lsof -ti:8000 2>/dev/null && echo "server still
+  │ running" || echo "server stopped"
+  └ Permission denied and could not request permission from user
+
+● Check port 8000 (shell)
+  │ lsof -ti:8000 2>/dev/null && echo "server running" || echo "server stopped"
+  └ 3 lines...
+
+Server is running (PID 65430). Let me call the tester and get the changed files list:
+
+● Get changed files for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 35 lines...
+
+● Tester QA test iteration 120
+  └ Agent started in background with agent_id: tester-120. You can use read_agent...
+
+While the tester runs, let me prepare the evaluator input by getting the diff:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ app/routers/conversation.py app/routers/pronunciation.py app/routers/vocabulary.py
+  │ tests/unit/test_utils.py 2>&1 | head -120
+  └ 102 lines...
+
+Good. Now I'll wait for the tester to complete before calling the evaluator.
+
+● Wait for tester (shell)
+  │ sleep 30 && echo "waiting for tester"
+  └ 2 lines...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Tester Check tester 120 status
+  │ playwright-browser_snapshot
+  │   └ ### Page
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+QA passed (ux_score: 8). Now call the evaluator:
+
+● Timestamp before evaluator (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 120
+  │ Read summary.md
+  │   │ autoresearch/summary.md
+  │   └ 121 lines read
+  └ Read utils.py
+      │ app/utils.py
+      └ L19:55 (37 lines read)
+
+Evaluator score: 8.8 — KEEP. Let me record T4 and write results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now record results and kill the server:
+
+● Record results for iteration 120 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "120" "3b61ecf" "2026-04-02T13:47:20+00:00" "436" "60" "388" "99" "983" \
+  │ "555" "555" "pass" "8.8" "keep" "Fix broken LLM retries — wrap coroutines in factory
+  │ lambdas" \…
+  └ 3 lines...
+
+Row verified with `|` separators. Now update backlog and kill server:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L107:112 (5 lines read)
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server killed"
+  └ 2 lines...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Good. Iteration 120 complete (KEEP, 8.8). Now starting iteration 121.
+
+---
+
+**ITERATION 121** — Context restore and T0:
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L124:127 (3 lines read)
+
+● T0 and recent commits for iteration 121 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git --no-pager log --oneline -5
+  └ 7 lines...
+
+T0=1775138677. Now call the proposer for iteration 121:
+
+● Proposer Propose iteration 121
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L200:350 (151 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L350:420 (71 lines read)
+
+Another good bug fix. T1 recording and implementation:
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find bucket definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_SCORE_BUCKETS\|_classify_score"
+  │ app/dal/pronunciation.py
+  └ 6 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L194:245 (50 lines read)
+
+● Find test lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "bucket_labels\|_SCORE_BUCKETS\|_classify_score\|bucket" tests/unit/test_pronunciation_dal.py
+  └ 31 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L344:399 (56 lines read)
+
+Now I'll make the fixes:
+
+● Edit pronunciation.py +4 -4
+  └ app/dal/pronunciation.py
+
+● Edit test_pronunciation_dal.py +10 -1
+  └ tests/unit/test_pronunciation_dal.py
+
+Now let me also add a consistency test that verifies buckets match classify_score:
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L397:410 (12 lines read)
+
+● Edit test_pronunciation_dal.py +10
+  └ tests/unit/test_pronunciation_dal.py
+
+Now commit and test:
+

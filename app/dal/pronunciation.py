@@ -192,10 +192,10 @@ async def get_score_trend(db: aiosqlite.Connection, window: int = 5) -> dict[str
 
 
 _SCORE_BUCKETS = [
-    ("poor", 0, 2),
-    ("fair", 3, 4),
-    ("good", 5, 6),
-    ("very_good", 7, 8),
+    ("poor", 0, 3),
+    ("fair", 3, 5),
+    ("good", 5, 7),
+    ("very_good", 7, 9),
     ("excellent", 9, 10),
 ]
 

@@ -347,7 +347,16 @@ class TestGetScoreDistribution:
         dist = result["distribution"]
         assert dist[0]["bucket"] == "poor"
         assert dist[0]["min_score"] == 0
-        assert dist[0]["max_score"] == 2
+        assert dist[0]["max_score"] == 3
+        assert dist[1]["bucket"] == "fair"
+        assert dist[1]["min_score"] == 3
+        assert dist[1]["max_score"] == 5
+        assert dist[2]["bucket"] == "good"
+        assert dist[2]["min_score"] == 5
+        assert dist[2]["max_score"] == 7
+        assert dist[3]["bucket"] == "very_good"
+        assert dist[3]["min_score"] == 7
+        assert dist[3]["max_score"] == 9
         assert dist[4]["bucket"] == "excellent"
         assert dist[4]["min_score"] == 9
         assert dist[4]["max_score"] == 10
@@ -397,6 +406,16 @@ class TestGetScoreDistribution:
         assert _classify_score(7) == "very_good"
         assert _classify_score(9) == "excellent"
         assert _classify_score(10) == "excellent"
+
+    async def test_buckets_consistent_with_classify_score(self, test_db):
+        """Verify _SCORE_BUCKETS boundaries match _classify_score logic."""
+        from app.dal.pronunciation import _SCORE_BUCKETS, _classify_score
+        for name, lo, hi in _SCORE_BUCKETS:
+            assert _classify_score(lo) == name, f"lo={lo} should classify as {name}"
+            if hi < 10:
+                assert _classify_score(hi) != name, f"hi={hi} should be next bucket, not {name}"
+            else:
+                assert _classify_score(hi) == name, f"hi={hi} should classify as {name}"
 
 
 @pytest.mark.unit
