@@ -11815,3 +11815,61 @@ Now add a test. Let me check the conversation test file:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 131 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #131: Add id tie-breaker to message ORDER BY for deterministic ordering
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 31 lines...
+
+● Run tests + TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && cd frontend && npx tsc --noEmit 2>&1
+  └ 7 lines...
+
+587 passed, TS pass. Smoke test + QA:
+
+● Smoke test + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 131
+  │ playwright-browser_console_messages
+  │   └ ### Result
+  └ playwright-browser_resize
+      └ ### Ran Playwright code
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 131
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:50 (50 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L50:end (132 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "131" "c17855f" "2026-04-02T17:02:18+00:00" "350" "64" "36" "265" "715" \
+  │ "587" "587" "pass" "8.0" "keep" "Add id tie-breaker to message ORDER BY for deterministic
+  │ ordering" \…
+  └ 3 lines...
+
+Iteration 131: **KEEP** (8.0). Clean up artifacts, then continue to 132.
+
