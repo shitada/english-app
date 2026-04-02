@@ -11672,3 +11672,146 @@ The route is `/{attempt_id}`, not `/history/{attempt_id}`. Fix the test:
 ● Edit test_input_validation.py +1 -1
   └ tests/integration/test_input_validation.py
 
+● Fix and re-test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #130: Validate path parameter IDs with Path(ge=1) for consistency
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/integration/test_input_validation.py::TestPathParameterValidation -v 2>&1 | tail -15
+  └ 31 lines...
+
+All passing. Full suite:
+
+● Full test suite + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && date +%s
+  └ 7 lines...
+
+585 passed. Smoke test:
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+QA test:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 130
+  │ playwright-browser_evaluate
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 130
+  │ Read test_input_validation.py
+  │   │ tests/integration/test_input_validation.py
+  │   └ 173 lines read
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "130" "65b7464" "2026-04-02T16:46:34+00:00" "452" "119" "74" "264" "907" \
+  │ "585" "585" "pass" "7.55" "keep" "Validate path parameter IDs with Path(ge=1) for
+  │ consistency" \…
+  └ 3 lines...
+
+Iteration 130: **KEEP** (7.55). 9 iterations completed, all kept! Let me continue with 131. I'll streamline the process to be more efficient.
+
+● Record T0 for iteration 131 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 131
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1:60 (59 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L60:160 (101 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find ORDER BY clauses (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ORDER BY.*created_at"
+  │ app/dal/conversation.py
+  └ 7 lines...
+
+Let me fix each one:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L48:52 (5 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L224:230 (7 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L76:90 (14 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L387:392 (6 lines read)
+
+Now apply all 5 fixes:
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+Now add a test. Let me check the conversation test file:
+
+● Check end of conversation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/unit/test_conversation_dal.py
+  └ 21 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "from app.dal.conversation import"
+  │ tests/unit/test_conversation_dal.py | head -3
+  └ 4 lines...
+
+● Full imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A10 "^from app.dal.conversation
+  │ import" tests/unit/test_conversation_dal.py
+  └ 12 lines...
+
+● Edit test_conversation_dal.py +37
+  └ tests/unit/test_conversation_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

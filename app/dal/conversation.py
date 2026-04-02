@@ -47,7 +47,7 @@ async def update_message_feedback(
            WHERE id = (
                SELECT id FROM messages
                WHERE conversation_id = ? AND role = ? AND content = ?
-               ORDER BY created_at DESC LIMIT 1
+               ORDER BY created_at DESC, id DESC LIMIT 1
            )""",
         (json.dumps(feedback), conversation_id, role, content),
     )
@@ -75,7 +75,7 @@ async def get_conversation_history(
     conversation_id: int,
 ) -> list[dict[str, Any]]:
     rows = await db.execute_fetchall(
-        "SELECT id, role, content, feedback_json, is_bookmarked, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at",
+        "SELECT id, role, content, feedback_json, is_bookmarked, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
         (conversation_id,),
     )
     return [dict(r) for r in rows]
@@ -83,7 +83,7 @@ async def get_conversation_history(
 
 async def format_history_text(db: aiosqlite.Connection, conversation_id: int) -> str:
     rows = await db.execute_fetchall(
-        "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at",
+        "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
         (conversation_id,),
     )
     return "\n".join(f"{r['role']}: {r['content']}" for r in rows)
@@ -224,7 +224,7 @@ async def get_conversation_export(
     msgs = await db.execute_fetchall(
         """SELECT role, content, feedback_json, created_at
            FROM messages WHERE conversation_id = ?
-           ORDER BY created_at ASC""",
+           ORDER BY created_at ASC, id ASC""",
         (conversation_id,),
     )
     messages = []
@@ -386,7 +386,7 @@ async def get_bookmarked_messages(
             FROM messages m
             JOIN conversations c ON c.id = m.conversation_id
             {where}
-            ORDER BY m.created_at DESC
+            ORDER BY m.created_at DESC, m.id DESC
             LIMIT ? OFFSET ?""",
         params,
     )

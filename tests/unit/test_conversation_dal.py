@@ -751,3 +751,40 @@ class TestConversationExists:
     async def test_not_exists_for_missing_id(self, test_db):
         from app.dal.conversation import conversation_exists
         assert await conversation_exists(test_db, 99999) is False
+
+
+@pytest.mark.unit
+class TestMessageOrderDeterminism:
+    """Messages with identical created_at must be ordered by id."""
+
+    async def test_history_ordered_by_id_on_timestamp_tie(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # Insert messages with identical timestamps
+        ts = "2026-01-01 12:00:00"
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "First message", ts),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Second message", ts),
+        )
+        await test_db.commit()
+        history = await get_conversation_history(test_db, cid)
+        assert history[0]["content"] == "First message"
+        assert history[1]["content"] == "Second message"
+
+    async def test_format_history_text_ordered_by_id(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        ts = "2026-01-01 12:00:00"
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "Hello", ts),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Welcome", ts),
+        )
+        await test_db.commit()
+        text = await format_history_text(test_db, cid)
+        assert text == "user: Hello\nassistant: Welcome"
