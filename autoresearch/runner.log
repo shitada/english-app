@@ -12098,3 +12098,60 @@ Let me also check for other tests that use grammar feedback without `is_correct`
 
 Good, those are already updated. Let me amend and re-test:
 
+● Amend and re-test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #133: Fix grammar accuracy inconsistency between dashboard and conversation
+  │ endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest …
+  └ 33 lines...
+
+589 passed. Smoke test:
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+QA:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 133
+  │ playwright-browser_run_code
+  │   └ ### Result
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L49:56 (7 lines read)
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 133
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L257:305 (48 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L16:80 (65 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "133" "1e7eee8" "2026-04-02T17:28:00+00:00" "387" "100" "136" "673" "1296" \
+  │ "589" "589" "pass" "7.8" "keep" "Fix grammar accuracy inconsistency between dashboard and
+  │ conversation endpoints" \…
+  └ 3 lines...
+
+Iteration 133: **KEEP** (7.8). Clean up artifacts and commit results so far.
+
