@@ -96,18 +96,24 @@ async def get_history(db: aiosqlite.Connection, limit: int = 20) -> list[dict[st
            ORDER BY created_at DESC, id DESC LIMIT ?""",
         (limit,),
     )
-    return [
-        {
+    result = []
+    for r in rows:
+        feedback = None
+        if r["feedback_json"]:
+            try:
+                feedback = json.loads(r["feedback_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        result.append({
             "id": r["id"],
             "reference_text": r["reference_text"],
             "user_transcription": r["user_transcription"],
-            "feedback": json.loads(r["feedback_json"]) if r["feedback_json"] else None,
+            "feedback": feedback,
             "score": r["score"],
             "difficulty": r["difficulty"],
             "created_at": r["created_at"],
-        }
-        for r in rows
-    ]
+        })
+    return result
 
 
 async def get_progress(db: aiosqlite.Connection) -> dict[str, Any]:

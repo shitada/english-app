@@ -226,6 +226,17 @@ class TestEndConversation:
         result = await get_conversation_summary(test_db, 99999)
         assert result is None
 
+    async def test_summary_graceful_on_corrupted_json(self, test_db):
+        """Corrupted summary_json should return None, not crash."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "UPDATE conversations SET summary_json = ? WHERE id = ?",
+            ("{invalid json!!", cid),
+        )
+        await test_db.commit()
+        result = await get_conversation_summary(test_db, cid)
+        assert result is None
+
 
 @pytest.mark.unit
 class TestListConversations:

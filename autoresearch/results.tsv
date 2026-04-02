@@ -143,3 +143,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 137	5e270d2	2026-04-02T20:12:26+00:00	40	150	55	60	713	599	599	pass	7.8	keep	Clamp pronunciation score to 0-10 range in save_attempt
 138	1c7693a	2026-04-02T20:31:49+00:00	50	200	55	60	1100	601	601	pass	8.0	keep	Fix dict.get null-value bug in LLM response processing
 139	0cf1fc4	2026-04-02T21:12:52+00:00	55	350	55	60	2357	603	603	pass	7.8	keep	Fix inconsistent NULL next_review_at handling in due-word queries
+140	d6587fe	2026-04-02T21:24:49+00:00	55	120	60	60	471	603	603	pass	7.75	keep	Fix nullable DB fields in vocabulary response models

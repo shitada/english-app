@@ -232,6 +232,19 @@ class TestGetHistory:
         assert history[0]["score"] == 9.0
         assert history[0]["created_at"] is not None
 
+    async def test_graceful_on_corrupted_feedback_json(self, test_db):
+        """Corrupted feedback_json should not crash the entire history endpoint."""
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score) VALUES (?, ?, ?, ?)",
+            ("Good morning", "Good morning", "{bad json!!", 7.0),
+        )
+        await save_attempt(test_db, "Hello.", "Hello.", {"overall_score": 8}, 8.0)
+        await test_db.commit()
+        history = await get_history(test_db)
+        assert len(history) == 2
+        feedbacks = [h["feedback"] for h in history]
+        assert None in feedbacks  # corrupted row has None feedback
+
 
 @pytest.mark.unit
 class TestGetProgress:

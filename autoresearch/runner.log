@@ -13092,3 +13092,92 @@ Good catch — nullable Pydantic field types. Let me implement:
 
 Now commit and test:
 
+● Commit iteration 140 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: make nullable DB fields optional in vocabulary response models
+  │
+  │ - ProgressItem.last_reviewed/next_review_at: str -> str | None
+  │ - DueWordItem.next_review_at: str -> str | None…
+  └ 21 lines...
+
+● Run tests for iteration 140 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+● TS check and smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && npx --prefix frontend tsc --noEmit 2>&1 |
+  │ tail -3 && uv run python tests/smoke_test.py 2>&1 | tail -2
+  └ 5 lines...
+
+● Record iteration 140 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "140" "d6587fe" "$TSTAMP" "55" "120" "60" "60" "$((T4-1775164618))" \
+  │ "603" "603" "pass" "7.75" "keep" "Fix nullable DB fields in vocabulary response models" \…
+  └ 3 lines...
+
+Iteration 140: **KEEP** (7.75). 19/19 kept. Starting 141:
+
+● Record T0 for iteration 141 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 141
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L216:240 (25 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L398:412 (15 lines read)
+
+Good — protecting json.loads calls. Let me implement:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L108:125 (18 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L95:120 (26 lines read)
+
+● Edit conversation.py +4 -1
+  └ app/dal/conversation.py
+
+● Edit pronunciation.py +12 -6
+  └ app/dal/pronunciation.py
+
+Now add tests:
+
+● Find summary test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestGetConversationSummary'
+  │ tests/unit/test_conversation_dal.py
+  └ 1 line...
+
+● Find summary references in tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_conversation_summary'
+  │ tests/unit/test_conversation_dal.py | head -5
+  └ 5 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L210:235 (25 lines read)
+
+● Edit test_conversation_dal.py +11
+  └ tests/unit/test_conversation_dal.py
+
+Now add pronunciation history test:
+
+● Find TestGetHistory class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestGetHistory'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 2 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L200:240 (41 lines read)
+
+● Edit test_pronunciation_dal.py +13
+  └ tests/unit/test_pronunciation_dal.py
+

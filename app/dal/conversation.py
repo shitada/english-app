@@ -112,7 +112,10 @@ async def get_conversation_summary(
         (conversation_id,),
     )
     if rows and rows[0]["summary_json"]:
-        return json.loads(rows[0]["summary_json"])
+        try:
+            return json.loads(rows[0]["summary_json"])
+        except (json.JSONDecodeError, TypeError):
+            return None
     return None
 
 
