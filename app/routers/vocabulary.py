@@ -69,8 +69,8 @@ class ProgressItem(BaseModel):
     correct_count: int
     incorrect_count: int
     level: int
-    last_reviewed: str
-    next_review_at: str
+    last_reviewed: str | None = None
+    next_review_at: str | None = None
 
 
 class ProgressResponse(BaseModel):
@@ -104,7 +104,7 @@ class DueWordItem(BaseModel):
     meaning: str
     topic: str
     level: int
-    next_review_at: str
+    next_review_at: str | None = None
 
 
 class DueWordsResponse(BaseModel):

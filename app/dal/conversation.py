@@ -532,7 +532,7 @@ async def get_conversation_vocabulary(
                 "meaning": r["meaning"],
                 "topic": r["topic"],
                 "difficulty": r["difficulty"],
-                "srs_level": r["level"],
+                "srs_level": r["level"] or 0,
                 "correct_count": r["correct_count"] or 0,
                 "incorrect_count": r["incorrect_count"] or 0,
                 "next_review_at": r["next_review_at"],

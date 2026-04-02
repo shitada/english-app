@@ -13013,3 +13013,82 @@ Now add a dashboard test:
 ● Edit test_dashboard_dal.py +12
   └ tests/unit/test_dashboard_dal.py
 
+● Commit iteration 139 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: include NULL next_review_at as due in all queries
+  │
+  │ Fix inconsistency where get_due_word_ids treated NULL as due but other
+  │ queries excluded them:…
+  └ 24 lines...
+
+● Run tests for iteration 139 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+603 passed. Record:
+
+● Record iteration 139 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "139" "0cf1fc4" "$TSTAMP" "55" "350" "55" "60" "$((T4-1775162015))" \
+  │ "603" "603" "pass" "7.8" "keep" "Fix inconsistent NULL next_review_at handling in due-word …
+  └ 4 lines...
+
+Iteration 139: **KEEP** (7.8). 18/18 kept. Continuing with 140:Iteration 139: **KEEP** (7.8). 18/18 kept. Starting 140:
+
+✗ Task Executing task
+  └ Unterminated string in JSON at position 939 (line 1 column 940)
+
+● Record T0 for iteration 140 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record T0 for iteration 140 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 140
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L195:221 (26 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L66:78 (12 lines read)
+
+Good catch — nullable Pydantic field types. Let me implement:
+
+● Find conversation vocabulary level (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'srs_level\|r\["level"\]'
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Find model definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class DueWordItem\|class
+  │ ProgressItem' app/routers/vocabulary.py
+  └ 3 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L101:115 (15 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L66:80 (15 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L528:542 (14 lines read)
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit vocabulary.py +2 -2
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+Now commit and test:
+
