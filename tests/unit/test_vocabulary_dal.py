@@ -96,6 +96,32 @@ class TestSaveWords:
         assert result[0]["example_sentence"] == ""
         assert result[0]["difficulty"] == 1
 
+    async def test_skips_items_missing_word_key(self, test_db):
+        questions = [{"correct_meaning": "greeting"}]
+        result = await save_words(test_db, "test", questions)
+        assert result == []
+
+    async def test_falls_back_to_meaning_key(self, test_db):
+        questions = [{"word": "hello", "meaning": "greeting"}]
+        result = await save_words(test_db, "test", questions)
+        assert len(result) == 1
+        assert result[0]["meaning"] == "greeting"
+
+    async def test_skips_non_dict_items(self, test_db):
+        questions = [None, "bad", {"word": "ok", "correct_meaning": "fine"}]
+        result = await save_words(test_db, "test", questions)
+        assert len(result) == 1
+        assert result[0]["word"] == "ok"
+
+    async def test_mixed_valid_invalid(self, test_db):
+        questions = [
+            {"word": "good", "correct_meaning": "良い"},
+            {"term": "bad", "definition": "悪い"},
+            {"no_word": True},
+        ]
+        result = await save_words(test_db, "test", questions)
+        assert len(result) == 2
+
 
 @pytest.mark.unit
 class TestGetDueWordIds:

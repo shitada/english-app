@@ -13693,3 +13693,63 @@ Now add integration tests:
   │ 'ENDTEST'…
   └ 22 lines...
 
+● Commit iteration 147 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: add max_length limits to unbounded text fields
+  │
+  │ - UpdateNotesRequest.notes: max_length=2000
+  │ - browse_words q param: max_length=200…
+  └ 22 lines...
+
+● Run tests for iteration 147 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+613 passed. Record:
+
+● Record iteration 147 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "147" "4c38a5f" "$TSTAMP" "55" "180" "55" "60" "$((T4-1775171968))" \
+  │ "613" "613" "pass" "7.75" "keep" "Add max_length limits to unbounded text fields" \…
+  └ 3 lines...
+
+Iteration 147: **KEEP** (7.75). 26/26. Starting 148:
+
+● Record T0 for iteration 148 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 148
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L25:63 (39 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L166:207 (41 lines read)
+
+Good — resilient save_words. Let me implement:
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L28:65 (36 lines read)
+
+● Edit vocabulary.py +14 -8
+  └ app/dal/vocabulary.py
+
+Now add tests:
+
+● Find TestSaveWords (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestSaveWords'
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 3 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L95:105 (11 lines read)
+
+● Edit test_vocabulary_dal.py +26
+  └ tests/unit/test_vocabulary_dal.py
+

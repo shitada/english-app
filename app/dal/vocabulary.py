@@ -30,10 +30,16 @@ async def save_words(
     """Save LLM-generated words to DB, skipping duplicates (case-insensitive)."""
     words = []
     for q in questions:
+        if not isinstance(q, dict):
+            continue
+        word = q.get("word") or q.get("term") or ""
+        meaning = q.get("correct_meaning") or q.get("meaning") or q.get("definition") or ""
+        if not word or not meaning:
+            continue
         # Check for existing word in same topic (case-insensitive)
         existing = await db.execute_fetchall(
             "SELECT id, word, meaning, example_sentence, difficulty FROM vocabulary_words WHERE topic = ? AND LOWER(word) = LOWER(?) LIMIT 1",
-            (topic, q["word"]),
+            (topic, word),
         )
         if existing:
             row = existing[0]
@@ -43,21 +49,21 @@ async def save_words(
                 "meaning": row["meaning"],
                 "example_sentence": row["example_sentence"],
                 "difficulty": row["difficulty"],
-                "wrong_options": q.get("wrong_options", []),
+                "wrong_options": q.get("wrong_options") or [],
             })
         else:
             cursor = await db.execute(
                 """INSERT INTO vocabulary_words (topic, word, meaning, example_sentence, difficulty)
                    VALUES (?, ?, ?, ?, ?)""",
-                (topic, q["word"], q["correct_meaning"], q.get("example_sentence", ""), q.get("difficulty", 1)),
+                (topic, word, meaning, q.get("example_sentence") or "", q.get("difficulty") or 1),
             )
             words.append({
                 "id": cursor.lastrowid,
-                "word": q["word"],
-                "meaning": q["correct_meaning"],
-                "example_sentence": q.get("example_sentence", ""),
-                "difficulty": q.get("difficulty", 1),
-                "wrong_options": q.get("wrong_options", []),
+                "word": word,
+                "meaning": meaning,
+                "example_sentence": q.get("example_sentence") or "",
+                "difficulty": q.get("difficulty") or 1,
+                "wrong_options": q.get("wrong_options") or [],
             })
     await db.commit()
     return words
