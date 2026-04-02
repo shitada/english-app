@@ -12155,3 +12155,64 @@ QA:
 
 Iteration 133: **KEEP** (7.8). Clean up artifacts and commit results so far.
 
+● Clean up and commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f
+  │ mobile-*.png && git add -A && git commit -m "autoresearch: Clean up QA artifacts and record
+  │ results 122-133
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3
+  └ 4 lines...
+
+● Record T0 for iteration 134 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 134
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ 139 lines read
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L100:125 (26 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L66:85 (20 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Edit vocabulary.py +3 -2
+  └ app/dal/vocabulary.py
+
+Now add the test. Let me find existing tests:
+
+● Find due word tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class TestGetDueWordIds\|def
+  │ test.*due" tests/unit/test_vocabulary_dal.py | head -10
+  └ 5 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L101:140 (40 lines read)
+
+The existing tests may need adjustment since `update_progress` sets `next_review_at` to a future time for words answered correctly. Let me check:
+
+● Check update_progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A30 "async def update_progress"
+  │ app/dal/vocabulary.py | head -35
+  └ 32 lines...
+
+OK, so when `update_progress(word_id, True)` is called:
+- First time: level goes from 0 to 1, next_review = now + SM2_INTERVALS[1] = now + 1 day
+
+So the existing test `test_returns_word_ids_with_progress` will break because after a correct answer, `next_review_at` is tomorrow (1 day from now), which is in the future. Let me adjust the tests:
+
+● Edit test_vocabulary_dal.py +34 -5
+  └ tests/unit/test_vocabulary_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

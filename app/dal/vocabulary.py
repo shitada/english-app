@@ -64,14 +64,15 @@ async def save_words(
 
 
 async def get_due_word_ids(db: aiosqlite.Connection, topic: str, count: int) -> set[int]:
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     rows = await db.execute_fetchall(
         """SELECT vp.word_id
            FROM vocabulary_progress vp
            JOIN vocabulary_words vw ON vp.word_id = vw.id
-           WHERE vw.topic = ?
+           WHERE vw.topic = ? AND (vp.next_review_at IS NULL OR vp.next_review_at <= ?)
            ORDER BY vp.next_review_at ASC NULLS FIRST
            LIMIT ?""",
-        (topic, count),
+        (topic, now, count),
     )
     return {r["word_id"] for r in rows}
 

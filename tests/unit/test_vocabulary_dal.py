@@ -99,19 +99,48 @@ class TestSaveWords:
 
 @pytest.mark.unit
 class TestGetDueWordIds:
-    async def test_returns_word_ids_with_progress(self, test_db):
+    async def test_returns_word_ids_with_null_review(self, test_db):
+        """Words with NULL next_review_at are considered due."""
         words = await save_words(test_db, "hotel_checkin", _make_questions(3))
-        # Create progress for the words
+        # Create progress with past next_review_at
         for w in words:
-            await update_progress(test_db, w["id"], True)
+            await test_db.execute(
+                "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at) VALUES (?, 0, 0, 0, datetime('now'), NULL)",
+                (w["id"],),
+            )
+        await test_db.commit()
         due = await get_due_word_ids(test_db, "hotel_checkin", 10)
         assert len(due) == 3
-        assert all(isinstance(wid, int) for wid in due)
+
+    async def test_excludes_future_review_words(self, test_db):
+        """Words with next_review_at in the future are not due."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(2))
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+        # After first correct answer, next_review is +1 day (future)
+        due = await get_due_word_ids(test_db, "hotel_checkin", 10)
+        assert len(due) == 0
+
+    async def test_includes_past_review_words(self, test_db):
+        """Words with next_review_at in the past are due."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(2))
+        for w in words:
+            await test_db.execute(
+                "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at) VALUES (?, 1, 0, 1, datetime('now'), datetime('now', '-1 day'))",
+                (w["id"],),
+            )
+        await test_db.commit()
+        due = await get_due_word_ids(test_db, "hotel_checkin", 10)
+        assert len(due) == 2
 
     async def test_respects_count_limit(self, test_db):
         words = await save_words(test_db, "hotel_checkin", _make_questions(5))
         for w in words:
-            await update_progress(test_db, w["id"], True)
+            await test_db.execute(
+                "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at) VALUES (?, 0, 0, 0, datetime('now'), NULL)",
+                (w["id"],),
+            )
+        await test_db.commit()
         due = await get_due_word_ids(test_db, "hotel_checkin", 2)
         assert len(due) == 2
 
