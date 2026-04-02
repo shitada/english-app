@@ -124,6 +124,23 @@ class TestGetSentencesFromConversations:
         topics = {s["topic"] for s in sentences}
         assert len(topics) >= 1  # At least one topic represented
 
+    async def test_difficulty_filter_prefilters_by_conversation(self, test_db):
+        """Beginner sentences should be found even when recent conversations are advanced."""
+        # Old beginner conversation
+        cid_b = await create_conversation(test_db, "hotel_checkin", difficulty="beginner")
+        await add_message(test_db, cid_b, "assistant", "Welcome to our hotel please enjoy your stay here today.")
+        # Many newer advanced conversations to push beginner out of LIMIT
+        for i in range(25):
+            cid_a = await create_conversation(test_db, "job_interview", difficulty="advanced")
+            await add_message(
+                test_db, cid_a, "assistant",
+                f"Please describe your experience with managing complex international projects number {i} in detail."
+            )
+        # Without SQL pre-filter, beginner sentences would be missed
+        sentences = await get_sentences_from_conversations(test_db, difficulty="beginner")
+        assert len(sentences) >= 1
+        assert all(s["difficulty"] == "beginner" for s in sentences)
+
 
 @pytest.mark.unit
 class TestSaveAttempt:

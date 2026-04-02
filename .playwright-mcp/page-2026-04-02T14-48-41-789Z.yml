@@ -1,0 +1,81 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e42]:
+      - heading "Pronunciation Practice" [level=2] [ref=e43]
+      - paragraph [ref=e44]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e45]:
+        - generic [ref=e46] [cursor=pointer]:
+          - paragraph [ref=e47]: Here's the menu for you.
+          - generic [ref=e48]: Restaurant Order
+          - img [ref=e49]
+        - generic [ref=e51] [cursor=pointer]:
+          - paragraph [ref=e52]: We also have a butternut squash ravioli in a sage brown butter if you're leaning toward something lighter.
+          - generic [ref=e53]: Restaurant Order
+          - img [ref=e54]
+        - generic [ref=e56] [cursor=pointer]:
+          - paragraph [ref=e57]: Take your time looking things over, and I'll be back in a few minutes to check on you.
+          - generic [ref=e58]: Restaurant Order
+          - img [ref=e59]
+        - generic [ref=e61] [cursor=pointer]:
+          - paragraph [ref=e62]: Can I grab you a water or anything to sip on while you decide?
+          - generic [ref=e63]: Restaurant Order
+          - img [ref=e64]
+        - generic [ref=e66] [cursor=pointer]:
+          - paragraph [ref=e67]: My name's Marco, and I'll be taking care of you today.
+          - generic [ref=e68]: Restaurant Order
+          - img [ref=e69]
+        - generic [ref=e71] [cursor=pointer]:
+          - paragraph [ref=e72]: Good afternoon and welcome to The Grand Meridian!
+          - generic [ref=e73]: Hotel Check-in
+          - img [ref=e74]
+        - generic [ref=e76] [cursor=pointer]:
+          - paragraph [ref=e77]: I hope you had a pleasant journey getting here.
+          - generic [ref=e78]: Hotel Check-in
+          - img [ref=e79]
+        - generic [ref=e81] [cursor=pointer]:
+          - paragraph [ref=e82]: My name is David, and I'll be taking care of your check-in today.
+          - generic [ref=e83]: Hotel Check-in
+          - img [ref=e84]
+        - generic [ref=e86] [cursor=pointer]:
+          - paragraph [ref=e87]: Do you have a reservation with us, or would you be looking to book a room for tonight?
+          - generic [ref=e88]: Hotel Check-in
+          - img [ref=e89]
+        - generic [ref=e91] [cursor=pointer]:
+          - paragraph [ref=e92]: I'd be happy to help you check in for your London flight.
+          - generic [ref=e93]: At the Airport
+          - img [ref=e94]
+        - generic [ref=e96] [cursor=pointer]:
+          - paragraph [ref=e97]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e98]: hotel
+          - img [ref=e99]
+        - generic [ref=e101] [cursor=pointer]:
+          - paragraph [ref=e102]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e103]: restaurant
+          - img [ref=e104]
+        - generic [ref=e106] [cursor=pointer]:
+          - paragraph [ref=e107]: I have three years of experience in software development.
+          - generic [ref=e108]: interview
+          - img [ref=e109]
+        - generic [ref=e111] [cursor=pointer]:
+          - paragraph [ref=e112]: I've been having a headache for the past two days.
+          - generic [ref=e113]: medical
+          - img [ref=e114]
+        - generic [ref=e116] [cursor=pointer]:
+          - paragraph [ref=e117]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e118]: shopping
+          - img [ref=e119]
+        - generic [ref=e121] [cursor=pointer]:
+          - paragraph [ref=e122]: What gate does the flight to London depart from?
+          - generic [ref=e123]: airport
+          - img [ref=e124]

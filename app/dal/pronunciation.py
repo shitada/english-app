@@ -12,15 +12,23 @@ import aiosqlite
 async def get_sentences_from_conversations(
     db: aiosqlite.Connection, limit: int = 20, difficulty: str | None = None
 ) -> list[dict[str, str]]:
-    rows = await db.execute_fetchall(
-        """SELECT DISTINCT m.content, c.topic, c.difficulty
+    params: list[Any] = []
+    where_clauses = ["m.role = 'assistant'"]
+    # Pre-filter by conversation difficulty when a specific difficulty is requested
+    if difficulty:
+        where_clauses.append("c.difficulty = ?")
+        params.append(difficulty)
+        fetch_limit = limit * 5
+    else:
+        fetch_limit = limit
+    params.append(fetch_limit)
+    query = f"""SELECT DISTINCT m.content, c.topic, c.difficulty
            FROM messages m
            JOIN conversations c ON m.conversation_id = c.id
-           WHERE m.role = 'assistant'
+           WHERE {' AND '.join(where_clauses)}
            ORDER BY m.created_at DESC
-           LIMIT ?""",
-        (limit,),
-    )
+           LIMIT ?"""
+    rows = await db.execute_fetchall(query, params)
     sentences: list[dict[str, str]] = []
     seen: set[str] = set()
     for r in rows:

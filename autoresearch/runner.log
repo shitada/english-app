@@ -10390,3 +10390,176 @@ Now let me record T2, commit, and run tests.
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 122 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #122: Fix _estimate_difficulty ignoring conv_difficulty parameter
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+T2=1775141082 (implement_sec=63). Now run tests.
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 561 tests passed, TypeScript check passed. Let me record T3, check if smoke test is needed, then run QA.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+DAL was modified, so smoke test is needed.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passed. Now start the server and run QA tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+
+
+Server exited. Let me restart it and proceed with QA.
+
+● Restart server and verify (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+Server is up. Now call the tester subagent.
+
+● Tester QA test iteration 122
+  │ playwright-browser_click
+  │   └ ### Ran Playwright code
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed with ux_score 8. Now stop the server and call the evaluator.
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 6 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 122
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L550:700 (151 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L700:800 (42 lines read)
+
+Evaluator score: 7.75, verdict: keep. Let me record T4 and write results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 122 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "122" "79bfb2f" "2026-04-02T14:38:10+00:00" "307" "63" "33" "341" "744" \
+  │ "561" "561" "pass" "7.75" "keep" "Fix _estimate_difficulty ignoring conv_difficulty
+  │ parameter" \…
+  └ 3 lines...
+
+Iteration 122 complete: **KEEP** (7.75). Now starting iteration 123.
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L120:128 (9 lines read)
+
+● Record T0 for iteration 123 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+T0=1775141475. Calling proposer for iteration 123.
+
+● Proposer Propose iteration 123
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L80:180 (101 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L180:260 (81 lines read)
+
+Good proposal. Let me record T1 and examine the code.
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L1:60 (60 lines read)
+
+● Record T1 for iteration 123 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I see the issue. When `difficulty` is specified, SQL fetches only `limit` (20) messages without filtering by difficulty. Let me implement the fix.
+
+● Edit pronunciation.py +14 -6
+  └ app/dal/pronunciation.py
+
+Now add a test for this bug fix. Let me find the relevant test class.
+
+● Find sentence/difficulty tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class Test.*Sentences\|def
+  │ test.*filter.*difficulty\|def test.*difficulty.*filter" tests/unit/test_pronunciation_dal.py |
+  │ head -10
+  └ 4 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L25:100 (76 lines read)
+
+I need to check how `create_conversation` handles difficulty. Let me check:
+
+● Check create_conversation signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def create_conversation"
+  │ app/dal/conversation.py | head -5
+  └ 2 lines...
+
+Good, `difficulty` defaults to "intermediate". Now let me add the test. I'll add it after the existing tests in `TestGetSentencesFromConversations`.
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L100:140 (41 lines read)
+
+● Edit test_pronunciation_dal.py +17
+  └ tests/unit/test_pronunciation_dal.py
+
+● Record T2 for iteration 123 (shell)
+  │ date +%s
+  └ 2 lines...
+
