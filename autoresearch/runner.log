@@ -11163,3 +11163,146 @@ The code is correct - `update_progress` apparently also logs an attempt. The tes
 ● Edit test_vocabulary_dal.py +3 -1
   └ tests/unit/test_vocabulary_dal.py
 
+● Amend and retest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #127: Clear quiz_attempts when resetting vocabulary progress
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit/test_vocabulary_dal.py::TestResetProgress -v 2>&1 | tail -15
+  └ 57 lines...
+
+All passing. Run full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+575 passed. Smoke test + QA:
+
+● Smoke test + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+T3=1775145459. QA:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 127
+  │ playwright-browser_console_messages
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 127
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L320:390 (71 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L300:315 (14 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "127" "1fc61a6" "2026-04-02T15:55:16+00:00" "290" "93" "160" "641" "1184" \
+  │ "575" "575" "pass" "7.75" "keep" "Clear quiz_attempts when resetting vocabulary progress" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Iteration 127: **KEEP** (7.75). Starting iteration 128.
+
+● Record T0 for iteration 128 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 128
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L50:120 (70 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check pronunciation models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class CheckRequest\|difficulty"
+  │ app/routers/pronunciation.py | head -10
+  └ 11 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L24:35 (10 lines read)
+
+● Check offset params (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "offset" app/routers/vocabulary.py
+  │ | head -20
+  └ 7 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L488:504 (17 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L397:414 (18 lines read)
+
+Now implement the fixes:
+
+● Check pronunciation imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10 app/routers/pronunciation.py
+  └ 11 lines...
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+✗ Edit pronunciation.py
+  │ app/routers/pronunciation.py
+  └ Multiple matches found
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+The pronunciation difficulty edit had multiple matches. Let me be more specific:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L24:50 (27 lines read)
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Now add tests:
+
+● Check end of input validation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_input_validation.py
+  └ 20 lines...
+
+● Edit test_input_validation.py +16
+  └ tests/integration/test_input_validation.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

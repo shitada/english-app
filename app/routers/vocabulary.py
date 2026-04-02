@@ -402,7 +402,7 @@ async def get_attempt_history(
     word_id: int | None = None,
     topic: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    offset: int = 0,
+    offset: int = Query(default=0, ge=0),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get vocabulary quiz attempt history with optional filters."""
@@ -493,7 +493,7 @@ class FavoritesResponse(BaseModel):
 async def get_favorites(
     topic: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
-    offset: int = 0,
+    offset: int = Query(default=0, ge=0),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get favorited vocabulary words."""

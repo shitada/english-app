@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Literal
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/pronunciation", tags=["pronunciation"])
 class CheckRequest(BaseModel):
     reference_text: str = Field(min_length=1, max_length=1000)
     user_transcription: str = Field(min_length=1, max_length=1000)
-    difficulty: str | None = None
+    difficulty: Literal["beginner", "intermediate", "advanced"] | None = None
 
 
 class SentenceItem(BaseModel):

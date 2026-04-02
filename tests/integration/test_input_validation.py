@@ -126,3 +126,19 @@ class TestPaginationBounds:
     async def test_goal_negative_daily_target(self, client):
         res = await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": -5})
         assert res.status_code == 422
+
+    async def test_pronunciation_check_invalid_difficulty(self, client):
+        res = await client.post("/api/pronunciation/check", json={
+            "reference_text": "Hello world.",
+            "user_transcription": "Hello world.",
+            "difficulty": "foobar",
+        })
+        assert res.status_code == 422
+
+    async def test_vocabulary_attempts_negative_offset(self, client):
+        res = await client.get("/api/vocabulary/attempts?offset=-1")
+        assert res.status_code == 422
+
+    async def test_vocabulary_favorites_negative_offset(self, client):
+        res = await client.get("/api/vocabulary/favorites?offset=-1")
+        assert res.status_code == 422
