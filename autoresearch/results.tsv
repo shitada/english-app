@@ -124,3 +124,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 118	e2b4bc5	2026-04-02T00:01:55+00:00	40	360	59	46	999	155	255	pass	7.75	keep	Return 404 from conversation history for nonexistent IDs
 119	67623bd	2026-04-02T00:10:00+00:00	0	0	0	0	0	552	552	pass	7.5	keep	Wire up auto_adjust_difficulty in vocabulary answer submission
 120	3b61ecf	2026-04-02T13:47:20+00:00	436	60	388	99	983	555	555	pass	8.8	keep	Fix broken LLM retries — wrap coroutines in factory lambdas
+121	392631c	2026-04-02T14:04:37+00:00	316	50	157	163	686	556	556	pass	7.75	keep	Fix _SCORE_BUCKETS metadata to match _classify_score contiguous ranges

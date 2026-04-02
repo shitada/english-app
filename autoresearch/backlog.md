@@ -106,6 +106,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add pronunciation sentence categorization by difficulty (completed iteration #97)
 - [ ] Add API versioning prefix
 - [x] ✅ Fix broken LLM retries — coroutine call sites wrapped in factory lambdas (completed iteration #120)
+- [x] ✅ Fix _SCORE_BUCKETS metadata to match _classify_score contiguous ranges (completed iteration #121)
 - [x] ✅ Add conversation message bookmarks (completed iteration #96)
 - [x] ✅ Add vocabulary spaced repetition analytics (completed iteration #98)
 - [x] ✅ Add user preference settings persistence (completed iteration #99)

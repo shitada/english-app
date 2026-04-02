@@ -10100,3 +10100,95 @@ Now let me also add a consistency test that verifies buckets match classify_scor
 
 Now commit and test:
 
+● Commit iteration 121 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #121: Fix _SCORE_BUCKETS to match _classify_score contiguous ranges
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 51 lines...
+
+● Run backend tests for iteration 121 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+556 tests pass (1 new). Run TS check and record T3:
+
+● TypeScript check iteration 121 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+Check smoke test and start QA:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE NEEDED" || echo "NO SMOKE"
+  └ 3 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+SMOKE OK. Now start server for QA and call tester:
+
+● Start server for QA 121 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 121
+  │ playwright-browser_navigate http://localhost:8000
+  │   └ ### Ran Playwright code
+  └ playwright-browser_console_messages
+      └ ### Result
+
+QA passed (ux_score: 8, 5 pages tested). Now call the evaluator:
+
+● Evaluator Evaluate iteration 121
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L700:850 (11 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L300:450 (151 lines read)
+
+Evaluator score: 7.75 — KEEP. Record T4 and results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 121 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "121" "392631c" "2026-04-02T14:04:37+00:00" "316" "50" "157" "163" "686" \
+  │ "556" "556" "pass" "7.75" "keep" "Fix _SCORE_BUCKETS metadata to match _classify_score
+  │ contiguous ranges" \…
+  └ 3 lines...
+
+Row verified. Now update backlog and kill server:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server killed"
+  └ 2 lines...
+
+Both iterations complete. Now generate the summary:
+
+● Create summary-120-121.md +51
+  └ autoresearch/summary-120-121.md
+
+Server was killed as expected. Let me commit the final results:
+
