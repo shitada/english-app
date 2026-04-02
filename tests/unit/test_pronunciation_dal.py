@@ -8,6 +8,7 @@ import pytest
 
 from app.dal.conversation import add_message, create_conversation
 from app.dal.pronunciation import (
+    _estimate_difficulty,
     clear_history,
     delete_attempt,
     get_history,
@@ -708,3 +709,33 @@ class TestGetProgressByDifficulty:
         unknown = next(i for i in result if i["difficulty"] == "unknown")
         assert unknown["attempt_count"] == 1
         assert unknown["avg_score"] == 5.0
+
+
+@pytest.mark.unit
+class TestEstimateDifficulty:
+    """Tests for _estimate_difficulty using conv_difficulty for mid-range sentences."""
+
+    def test_short_sentence_always_beginner(self):
+        assert _estimate_difficulty(5, "advanced") == "beginner"
+        assert _estimate_difficulty(8, "advanced") == "beginner"
+        assert _estimate_difficulty(1, "intermediate") == "beginner"
+
+    def test_long_sentence_always_advanced(self):
+        assert _estimate_difficulty(15, "beginner") == "advanced"
+        assert _estimate_difficulty(20, "beginner") == "advanced"
+
+    def test_mid_range_uses_conv_difficulty(self):
+        assert _estimate_difficulty(10, "beginner") == "beginner"
+        assert _estimate_difficulty(12, "advanced") == "advanced"
+        assert _estimate_difficulty(14, "intermediate") == "intermediate"
+
+    def test_mid_range_invalid_conv_difficulty_falls_back(self):
+        assert _estimate_difficulty(10, "") == "intermediate"
+        assert _estimate_difficulty(10, "unknown") == "intermediate"
+        assert _estimate_difficulty(10, "hard") == "intermediate"
+
+    def test_boundary_values(self):
+        assert _estimate_difficulty(9, "advanced") == "advanced"
+        assert _estimate_difficulty(8, "advanced") == "beginner"
+        assert _estimate_difficulty(14, "beginner") == "beginner"
+        assert _estimate_difficulty(15, "beginner") == "advanced"

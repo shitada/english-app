@@ -51,7 +51,8 @@ def _estimate_difficulty(word_count: int, conv_difficulty: str) -> str:
     if word_count <= 8:
         return "beginner"
     elif word_count <= 14:
-        return "intermediate"
+        valid_levels = {"beginner", "intermediate", "advanced"}
+        return conv_difficulty if conv_difficulty in valid_levels else "intermediate"
     else:
         return "advanced"
 

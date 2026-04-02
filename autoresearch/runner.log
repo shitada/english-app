@@ -10192,3 +10192,201 @@ Both iterations complete. Now generate the summary:
 
 Server was killed as expected. Let me commit the final results:
 
+● Commit final results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ Update results, backlog and summary for iterations 120-121
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 28 lines...
+
+**Autoresearch iterations 120-121 complete.** Both kept:
+
+| # | Score | Description |
+|---|-------|-------------|
+| **120** | **8.8** | Fix broken LLM retries — all 5 call sites wrapped in factory lambdas |
+| **121** | **7.75** | Fix _SCORE_BUCKETS metadata to match _classify_score contiguous ranges |
+
+Both were real bug fixes found by the proposer. Tests went from 552 → 556. Summary written to `autoresearch/summary-120-121.md`.
+
+
+Total usage est:        3 Premium requests
+API time spent:         31m 26s
+Total session time:     30m 24s
+Total code changes:     +115 -10
+Breakdown by AI model:
+ claude-opus-4.6          7.9m in, 60.7k out, 7.3m cached (Est. 3 Premium requests)
+ gpt-5.4-mini             49.3k in, 4.4k out, 18.9k cached (Est. 0 Premium requests)
+[2026-04-02 23:17:21] Copilot invocation completed (duration: 1831s)
+[2026-04-02 23:17:21] Running post-invocation audit (iter 120-121)...
+============================================
+ Autoresearch Audit
+ Iterations: 120 — 121
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-02 23:17:21
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 120(2) 121(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-02 23:17:22] Audit passed — no issues
+[2026-04-02 23:17:25] Current iteration count: 121 / 121
+[2026-04-02 23:17:25] Target reached (121 >= 121) — done!
+[2026-04-02 23:17:25] ==========================================
+[2026-04-02 23:17:25] Runner finished
+[2026-04-02 23:17:25] Total invocations: 1
+[2026-04-02 23:17:25] Final iteration:   121 / 121
+[2026-04-02 23:17:25] Premium requests:  21
+[2026-04-02 23:17:25] ==========================================
+[2026-04-02 23:37:56] ==========================================
+[2026-04-02 23:37:56] Autoresearch CLI Runner started
+[2026-04-02 23:37:56] Current iteration: 121
+[2026-04-02 23:37:56] Additional iters:  30
+[2026-04-02 23:37:56] Target iteration:  151
+[2026-04-02 23:37:56] Max invocations:   10
+[2026-04-02 23:37:56] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-02 23:37:56] ==========================================
+[2026-04-02 23:37:56] WARNING: Working tree has uncommitted changes
+[2026-04-02 23:37:56]   M autoresearch/audit-report.json
+[2026-04-02 23:37:56]   M autoresearch/runner.log
+[2026-04-02 23:37:56] Continuing anyway...
+[2026-04-02 23:37:56] Current iteration count: 121 / 151
+[2026-04-02 23:37:56] ------------------------------------------
+[2026-04-02 23:37:56] Invocation 1 / 10
+[2026-04-02 23:37:56] Resuming from iteration 122
+[2026-04-02 23:37:56] ------------------------------------------
+[2026-04-02 23:37:56] Starting copilot invocation...
+
+
+
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 127 lines read
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 113 lines read
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -15
+  └ 16 lines...
+
+● Record T0 for iteration 122 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T0=1775140712. Calling proposer for iteration 122.
+
+● Proposer Propose iteration 122
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L24:57 (33 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L24:65 (41 lines read)
+
+Got the proposal. Let me record T1 and examine the files to implement.
+
+● Record T1 for iteration 122 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find _estimate_difficulty in pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_estimate_difficulty"
+  │ app/dal/pronunciation.py
+  └ 3 lines...
+
+T1=1775141019 (propose_sec=307). Let me look at the function.
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L49:75 (26 lines read)
+
+● Check existing tests for _estimate_difficulty (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_estimate_difficulty\|def
+  │ test.*estimate\|def test.*difficulty" tests/unit/test_pronunciation_dal.py | head -20
+  └ 7 lines...
+
+Now let me implement the fix and add tests.
+
+● Edit pronunciation.py +2 -1
+  └ app/dal/pronunciation.py
+
+Now let me add unit tests. First, let me see the end of the test file to append.
+
+● Check end of pronunciation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_pronunciation_dal.py
+  │ && tail -20 tests/unit/test_pronunciation_dal.py
+  └ 22 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ tests/unit/test_pronunciation_dal.py
+  └ 6 lines...
+
+● Check imports from pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "from app.dal.pronunciation import"
+  │ tests/unit/test_pronunciation_dal.py | head -5
+  └ 6 lines...
+
+● Check full imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A20 "from app.dal.pronunciation
+  │ import" tests/unit/test_pronunciation_dal.py | head -25
+  └ 26 lines...
+
+Now I'll add the `_estimate_difficulty` import and tests at the end of the file.
+
+● Edit test_pronunciation_dal.py +1
+  └ tests/unit/test_pronunciation_dal.py
+
+● Edit test_pronunciation_dal.py +30
+  └ tests/unit/test_pronunciation_dal.py
+
+Now let me record T2, commit, and run tests.
+
+● Record T2 for iteration 122 (shell)
+  │ date +%s
+  └ 2 lines...
+
