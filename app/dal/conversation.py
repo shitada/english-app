@@ -52,6 +52,14 @@ async def update_message_feedback(
     await db.commit()
 
 
+async def conversation_exists(db: aiosqlite.Connection, conversation_id: int) -> bool:
+    """Check whether a conversation with the given ID exists."""
+    rows = await db.execute_fetchall(
+        "SELECT 1 FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    return len(rows) > 0
+
+
 async def get_active_conversation(db: aiosqlite.Connection, conversation_id: int) -> dict | None:
     rows = await db.execute_fetchall(
         "SELECT * FROM conversations WHERE id = ? AND status = 'active'",

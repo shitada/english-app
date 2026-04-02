@@ -28,6 +28,14 @@ You are a **first-time user** who:
 
 Perform the following checks in order. For each check, actually operate the browser using Playwright MCP tools. Do NOT skip steps or assume things work.
 
+**MINIMUM REQUIREMENTS**: You MUST:
+- Navigate to at least 3 different pages using `playwright-browser_navigate`
+- Take at least 1 snapshot using `playwright-browser_snapshot` to verify page content
+- Use at least 5 Playwright tool calls total across the entire test
+- Actually read the snapshot output to check for issues (not just call tools and ignore results)
+
+If you use fewer than 5 Playwright tool calls, your test is INVALID and will be rejected.
+
 ### 1. Home Page
 - Navigate to the app root
 - Verify the page loads without errors

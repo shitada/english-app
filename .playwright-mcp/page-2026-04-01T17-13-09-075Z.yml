@@ -1,0 +1,28 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - paragraph [ref=e10]: Question 1 of 10
+      - heading "What does this mean?" [level=3] [ref=e46]
+      - generic [ref=e16]:
+        - generic "Click to hear pronunciation" [ref=e47] [cursor=pointer]:
+          - text: check in
+          - img [ref=e48]
+        - generic [ref=e52]:
+          - img [ref=e53]
+          - slider [ref=e57]: "0.7"
+          - generic [ref=e58]: 70%
+      - paragraph [ref=e59]: "\"Good afternoon! We'd like to check in, please. We have a reservation under the name Garcia.\""
+      - generic [ref=e60]:
+        - 'button "Answer option: To register at a hotel upon arrival and receive your room key" [disabled] [ref=e61]':
+          - img [ref=e65]
+          - text: To register at a hotel upon arrival and receive your room key
+        - 'button "Answer option: Permission to leave your hotel room after the standard departure time" [disabled] [ref=e62] [cursor=pointer]': Permission to leave your hotel room after the standard departure time
+        - 'button "Answer option: Useful features and services provided by the hotel for guests'' comfort" [disabled] [ref=e63] [cursor=pointer]': Useful features and services provided by the hotel for guests' comfort
+        - 'button "Answer option: To charge an expense to your hotel room bill so you can pay everything together at checkout" [disabled] [ref=e64] [cursor=pointer]': To charge an expense to your hotel room bill so you can pay everything together at checkout
+      - status [ref=e67]:
+        - button "Next" [ref=e68] [cursor=pointer]:
+          - text: Next
+          - img [ref=e69]

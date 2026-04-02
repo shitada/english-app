@@ -517,3 +517,11 @@ async def test_conversation_vocabulary_with_matches(client, mock_copilot):
     data = res.json()
     assert data["total"] >= 1
     assert any(w["word"] == "hotel" for w in data["words"])
+
+
+@pytest.mark.integration
+async def test_get_history_nonexistent_conversation(client):
+    """Test that history returns 404 for a nonexistent conversation ID."""
+    res = await client.get("/api/conversation/99999/history")
+    assert res.status_code == 404
+    assert "not found" in res.json()["detail"].lower()

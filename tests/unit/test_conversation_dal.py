@@ -738,3 +738,16 @@ class TestGetConversationVocabulary:
         assert len(matched) == 1
         assert matched[0]["srs_level"] is not None
         assert matched[0]["correct_count"] >= 1
+
+
+class TestConversationExists:
+    """Tests for conversation_exists helper."""
+
+    async def test_exists_for_real_conversation(self, test_db):
+        from app.dal.conversation import conversation_exists, create_conversation
+        cid = await create_conversation(test_db, "hotel")
+        assert await conversation_exists(test_db, cid) is True
+
+    async def test_not_exists_for_missing_id(self, test_db):
+        from app.dal.conversation import conversation_exists
+        assert await conversation_exists(test_db, 99999) is False

@@ -27,6 +27,12 @@ At the START of every iteration, re-read:
 - `autoresearch/backlog.md` (current priorities)
 - `git log --oneline -5` (recent changes)
 
+**SELF-CHECK (read this every iteration):** You are an ORCHESTRATOR. You dispatch work to 3 subagents — you do NOT do their jobs yourself:
+- **Step 2**: Call `proposer` subagent → get proposal JSON
+- **Step 5c**: Call `tester` subagent → get QA JSON (the tester MUST test at least 3 pages with Playwright)
+- **Step 6**: Call `evaluator` subagent → get score JSON
+If you find yourself writing code to implement without a proposer call, assigning a score without an evaluator call, or saying "QA passed" without a tester call, you are violating your instructions. STOP and call the correct subagent.
+
 Record the start timestamp:
 ```bash
 date +%s
@@ -194,12 +200,22 @@ git reset --hard HEAD~1
 ```
 
 ### Step 8 — Record Results
-Append a row to `autoresearch/results.tsv`:
-```
-N	<commit_hash_or_none>	<ISO8601_started_at>	<propose_sec>	<implement_sec>	<test_sec>	<evaluate_sec>	<total_sec>	<tests_passed>	<tests_total>	<ts_check>	<score>	<keep|discard|crash>	<short description>
+Append a row to `autoresearch/results.tsv` using `printf` with explicit `\t` separators. **NEVER** use `echo -e` — it produces inconsistent tab formatting across shells.
+
+```bash
+printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  "$N" "$HASH" "$DATE" "$PROPOSE" "$IMPL" "$TEST" "$EVAL" "$TOTAL" \
+  "$PASSED" "$TOTAL_TESTS" "$TS" "$SCORE" "$VERDICT" "$DESC" \
+  >> autoresearch/results.tsv
 ```
 
 Use the 7-char short commit hash for kept changes, "none" for discarded.
+
+**After writing, verify the row** was written correctly with tabs:
+```bash
+tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+```
+If the output does NOT contain `|` separators, the row is malformed — delete it and re-write with `printf`.
 
 ### Step 9 — Update Backlog
 Edit `autoresearch/backlog.md`:

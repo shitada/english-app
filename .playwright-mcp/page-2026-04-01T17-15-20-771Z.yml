@@ -1,0 +1,57 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e99]:
+        - generic [ref=e100]: Role Play Scenario
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - img [ref=e103]
+            - slider "Volume" [ref=e107]: "0.7"
+          - generic [ref=e108]: 4:26
+          - button "End conversation" [ref=e109] [cursor=pointer]:
+            - img [ref=e110]
+            - text: End
+      - log [ref=e112]:
+        - generic [ref=e114]: Hello! Welcome to the check-in desk. How can I help you today? Do you need to check in for a flight?
+        - generic [ref=e124]:
+          - generic [ref=e125]: Yes, I need to check in for my flight to London please.
+          - generic [ref=e128]:
+            - generic [ref=e129] [cursor=pointer]:
+              - text: 📝 Corrections & Suggestions
+              - generic [ref=e130]: ▼
+            - generic [ref=e131]:
+              - strong [ref=e132]: London please
+              - text: →
+              - emphasis [ref=e133]: London, please
+              - text: A comma should be placed before 'please' when it appears at the end of a sentence, as it is a polite interjection set off from the rest of the clause.
+            - generic [ref=e134]:
+              - text: 💡 "I need to check in for my flight" →
+              - emphasis [ref=e135]: "\"I'd like to check in for my flight\""
+              - text: "'I'd like to' sounds more polite and natural in a service context than 'I need to,' which can come across as slightly blunt."
+            - generic [ref=e136]:
+              - text: 💡 "check in for my flight to London" →
+              - emphasis [ref=e137]: "\"check in for my London flight\""
+              - text: In casual spoken English, 'my London flight' is a more concise and natural way to refer to your flight destination.
+            - generic [ref=e138]:
+              - text: ✏️
+              - strong [ref=e139]: "Corrected:"
+              - text: Yes, I need to check in for my flight to London, please.
+        - generic [ref=e141]: Of course! I'd be happy to help you check in for your London flight. Could I please have your booking reference number or your last name so I can pull up your reservation?
+      - generic [ref=e40]:
+        - button "Start speaking" [ref=e115] [cursor=pointer]:
+          - img [ref=e116]
+        - textbox "Message input" [ref=e119]:
+          - /placeholder: Type your message or use the mic
+        - button "Send message" [disabled] [ref=e120]:
+          - img [ref=e121]

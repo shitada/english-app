@@ -69,26 +69,26 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 63	df35449	2025-06-09T15:14:00Z	10	35	15	10	70	286	286	pass	7.05	KEEP	Add vocab_level_distribution to dashboard stats
 64	d5711a8	2025-06-09T15:18:00Z	10	35	15	10	70	288	288	pass	7.05	KEEP	Add conversations_by_topic to dashboard stats
 65	d23e1ae	2025-06-09T15:21:00Z	10	35	15	10	70	292	292	pass	7.30	KEEP	Add vocabulary topic-summary endpoint
-6655f8a4a2026-04-01T11:45:32+09:00974013481051590298298pass7.3keepAdd retry logic with exponential backoff to safe_llm_call
-67553d9142026-04-01T11:52:20+09:0095663460255301301pass7.0keepAdd vocabulary review forecast endpoint
-68f611a602026-04-01T11:56:44+09:0083622948222304304pass7.3keepAdd conversation export endpoint
-69eca3a852026-04-01T12:00:38+09:0071315738197311311pass8.1keepAdd unit tests for conversation export DAL
-700324fef2026-04-01T12:04:04+09:0066405237195320320pass8.1keepAdd unit tests for vocab forecast and due words DAL
-71e61331e2026-04-01T12:07:29+09:0049672549190324324pass7.3keepAdd pagination metadata to conversation list
-7285732b42026-04-01T12:11:16+09:0066482955198330330pass7.55keepAdd conversation search by keyword
-7347b4c822026-04-01T12:15:27+09:0065803055230335335pass7.3keepAdd pronunciation score distribution endpoint
-7418479b42026-04-01T12:18:46+09:0080713350234341341pass7.3keepAdd daily learning activity history endpoint
-75f1932852026-04-01T12:24:10+09:0089765250267348348pass7.55keepAdd vocabulary quiz attempt history endpoint
-76fb8f1442026-04-01T12:28:17+09:0069453530179352352pass7.3keepAdd study streak milestones endpoint
-77b537a742026-04-01T12:32:23+09:0081293530175354354pass7.3keepAdd vocabulary per-topic accuracy rate endpoint
-786a6b7902026-04-01T12:36:32+09:0059355530179358358pass7.3keepAdd conversation duration stats endpoint
-79a61e59c2026-04-01T12:39:21+09:0004730077358358pass7.3keepAdd frontend TypeScript API types for new endpoints
-8008dc3482026-04-01T12:42:19+09:0069493520173364364pass7.3keepAdd vocabulary batch import endpoint
-813a2ed322026-04-01T12:46:30+09:0054504020164370370pass7.55keepAdd vocabulary word edit endpoint
-821e22dfc2026-04-01T12:49:24+09:00037352092373373pass7.3keepAdd pronunciation personal records endpoint
-834ca6b582026-04-01T12:53:18+09:00019302069374374pass6.7keepAdd application config summary endpoint
-8461914d52026-04-01T12:57:30+09:00030302080375375pass7.0keepAdd learning summary endpoint
-854688d102026-04-01T13:00:15+09:00107704220239383383pass7.55keepAdd vocabulary word favorites/bookmarks system
+66	55f8a4a	2026-04-01T11:45:32+09:00	97	40	134	81	051	590	298	pass	7.3	keep	Add retry logic with exponential backoff to safe_llm_call
+67	553d914	2026-04-01T11:52:20+09:00	95	66	34	60	255	301	301	pass	7.0	keep	Add vocabulary review forecast endpoint
+68	f611a60	2026-04-01T11:56:44+09:00	83	62	29	48	222	304	304	pass	7.3	keep	Add conversation export endpoint
+69	eca3a85	2026-04-01T12:00:38+09:00	71	31	57	38	197	311	311	pass	8.1	keep	Add unit tests for conversation export DAL
+70	0324fef	2026-04-01T12:04:04+09:00	66	40	52	37	195	320	320	pass	8.1	keep	Add unit tests for vocab forecast and due words DAL
+71	e61331e	2026-04-01T12:07:29+09:00	49	67	25	49	190	324	324	pass	7.3	keep	Add pagination metadata to conversation list
+72	85732b4	2026-04-01T12:11:16+09:00	66	48	29	55	198	330	330	pass	7.55	keep	Add conversation search by keyword
+73	47b4c82	2026-04-01T12:15:27+09:00	65	80	30	55	230	335	335	pass	7.3	keep	Add pronunciation score distribution endpoint
+74	18479b4	2026-04-01T12:18:46+09:00	80	71	33	50	234	341	341	pass	7.3	keep	Add daily learning activity history endpoint
+75	f193285	2026-04-01T12:24:10+09:00	89	76	52	50	267	348	348	pass	7.55	keep	Add vocabulary quiz attempt history endpoint
+76	fb8f144	2026-04-01T12:28:17+09:00	69	45	35	30	179	352	352	pass	7.3	keep	Add study streak milestones endpoint
+77	b537a74	2026-04-01T12:32:23+09:00	81	29	35	30	175	354	354	pass	7.3	keep	Add vocabulary per-topic accuracy rate endpoint
+78	6a6b790	2026-04-01T12:36:32+09:00	59	35	55	30	179	358	358	pass	7.3	keep	Add conversation duration stats endpoint
+79	a61e59c	2026-04-01T12:39:21+09:00	0	47	30	0	77	358	358	pass	7.3	keep	Add frontend TypeScript API types for new endpoints
+80	08dc348	2026-04-01T12:42:19+09:00	69	49	35	20	173	364	364	pass	7.3	keep	Add vocabulary batch import endpoint
+81	3a2ed32	2026-04-01T12:46:30+09:00	54	50	40	20	164	370	370	pass	7.55	keep	Add vocabulary word edit endpoint
+82	1e22dfc	2026-04-01T12:49:24+09:00	0	37	35	20	92	373	373	pass	7.3	keep	Add pronunciation personal records endpoint
+83	4ca6b58	2026-04-01T12:53:18+09:00	0	19	30	20	69	374	374	pass	6.7	keep	Add application config summary endpoint
+84	61914d5	2026-04-01T12:57:30+09:00	0	30	30	20	80	375	375	pass	7.0	keep	Add learning summary endpoint
+85	4688d10	2026-04-01T13:00:15+09:00	107	70	42	20	239	383	383	pass	7.55	keep	Add vocabulary word favorites/bookmarks system
 86	c365af0	2025-06-29T00:29:09Z	15	40	20	10	85	386	386	pass	7.3	kept	Add rate limit response headers (X-RateLimit-*)
 87	8f08580	2025-06-29T00:31:34Z	10	50	20	10	90	390	390	pass	7.3	kept	Add grammar accuracy analytics endpoint
 88	a7b0103	2025-06-29T00:34:59Z	10	60	25	10	105	397	397	pass	7.3	kept	Add vocabulary word notes/annotations
@@ -101,18 +101,18 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 95	1b38bd8	2025-06-29T00:46:06Z	5	30	15	5	55	427	427	pass	7.3	kept	Expand smoke test and add final TypeScript types
 96	fd35f26	2026-04-01T08:10:33Z	72	250	312	275	909	436	436	pass	7.55	keep	Add conversation message bookmarks
 97	40a58ef	2026-04-01T09:10:00Z	0	0	0	0	0	439	439	pass	7.3	keep	Add pronunciation sentence categorization by difficulty
-988b2f0062026-04-01T14:17:13+00:0014911058083922444444pass7.75keepAdd vocabulary spaced repetition analytics endpoint
-9984cee4a2026-04-01T14:33:15+00:0086129979771271462462pass8.05keepAdd user preference settings persistence
-100a94304a2026-04-01T14:41:30+00:0015515438388780465465pass7.75keepAdd conversation replay/review mode endpoint
-101b11f4372026-04-01T14:54:56+00:001699041072741472472pass7.3keepAdd pronunciation practice sentences from vocabulary
-102ecd4c312026-04-01T15:07:42+00:002676736388785477477pass7.0keepAdd pronunciation weakness analysis endpoint
-1039117bc02026-04-01T15:14:25+00:001537541548691480480pass7.75keepAdd conversation vocabulary crossover endpoint
-10446d907e2026-04-01T15:26:15+00:0020310630362674490490pass8.35keepAdd unit tests for conversation replay and vocabulary DAL
-10588955892026-04-01T15:37:40+00:002734617187577491491pass8.25keepFix missing db.commit() in update_message_feedback
-1069100ca82026-04-01T15:47:26+00:0011290322167691497497pass7.75keepAdd missing input validation bounds on pagination and goals
-10769d1abd2026-04-01T15:59:07+00:0013683330123672500500pass7.95keepStore difficulty level with pronunciation attempts
-108f12d8942026-04-01T16:17:09+00:00211667031971177501501pass7.5keepInclude message id and bookmark status in history endpoint
-109829f11c2026-04-01T16:30:16+00:0073189103841007510510pass7.8keepAdd unit tests for validate_topic and get_learning_summary
+98	8b2f006	2026-04-01T14:17:13+00:00	149	110	580	83	922	444	444	pass	7.75	keep	Add vocabulary spaced repetition analytics endpoint
+99	84cee4a	2026-04-01T14:33:15+00:00	86	129	979	77	1271	462	462	pass	8.05	keep	Add user preference settings persistence
+100	a94304a	2026-04-01T14:41:30+00:00	155	154	383	88	780	465	465	pass	7.75	keep	Add conversation replay/review mode endpoint
+101	b11f437	2026-04-01T14:54:56+00:00	169	90	410	72	741	472	472	pass	7.3	keep	Add pronunciation practice sentences from vocabulary
+102	ecd4c31	2026-04-01T15:07:42+00:00	267	67	363	88	785	477	477	pass	7.0	keep	Add pronunciation weakness analysis endpoint
+103	9117bc0	2026-04-01T15:14:25+00:00	153	75	415	48	691	480	480	pass	7.75	keep	Add conversation vocabulary crossover endpoint
+104	46d907e	2026-04-01T15:26:15+00:00	203	106	303	62	674	490	490	pass	8.35	keep	Add unit tests for conversation replay and vocabulary DAL
+105	8895589	2026-04-01T15:37:40+00:00	273	46	171	87	577	491	491	pass	8.25	keep	Fix missing db.commit() in update_message_feedback
+106	9100ca8	2026-04-01T15:47:26+00:00	112	90	322	167	691	497	497	pass	7.75	keep	Add missing input validation bounds on pagination and goals
+107	69d1abd	2026-04-01T15:59:07+00:00	136	83	330	123	672	500	500	pass	7.95	keep	Store difficulty level with pronunciation attempts
+108	f12d894	2026-04-01T16:17:09+00:00	211	66	703	197	1177	501	501	pass	7.5	keep	Include message id and bookmark status in history endpoint
+109	829f11c	2026-04-01T16:30:16+00:00	73	189	103	84	1007	510	510	pass	7.8	keep	Add unit tests for validate_topic and get_learning_summary
 110	44280bf	2026-04-01T16:42:00+00:00	12	85	90	38	225	515	515	pass	7.3	keep	Add pronunciation retry suggestions endpoint
 111	84de88c	2026-04-01T17:24:44+00:00	207	131	27	30	395	524	524	pass	7.55	keep	Add per-sentence pronunciation attempt history endpoint
 112	6040842	2026-04-01T17:29:53+00:00	209	56	31	25	321	524	524	pass	7.5	keep	Consolidate standalone API functions to use request helper

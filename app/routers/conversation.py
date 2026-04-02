@@ -197,6 +197,8 @@ async def get_summary(conversation_id: int, db: aiosqlite.Connection = Depends(g
 
 @router.get("/{conversation_id}/history")
 async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+    if not await conv_dal.conversation_exists(db, conversation_id):
+        raise HTTPException(status_code=404, detail="Conversation not found")
     rows = await conv_dal.get_conversation_history(db, conversation_id)
     messages = []
     for r in rows:
