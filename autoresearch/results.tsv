@@ -139,3 +139,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 133	1e7eee8	2026-04-02T17:28:00+00:00	387	100	136	673	1296	589	589	pass	7.8	keep	Fix grammar accuracy inconsistency between dashboard and conversation endpoints
 134	2f0ead8	2026-04-02T17:51:22+00:00	1438	159	67	431	2095	591	591	pass	7.8	keep	Fix get_due_word_ids returning non-due words in quiz generation
 135	08e7906	2026-04-02T19:37:21+00:00	60	300	75	120	4563	593	593	pass	8.0	keep	Add id tie-breakers to 7 remaining ORDER BY clauses for deterministic results
+136	eed714c	2026-04-02T19:59:01+00:00	45	180	60	90	1287	594	594	pass	7.8	keep	Add UNIQUE constraint on vocabulary_progress.word_id to prevent duplicates

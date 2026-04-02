@@ -163,6 +163,38 @@ class TestSaveAttempt:
         rows = await test_db.execute_fetchall("SELECT * FROM pronunciation_attempts")
         assert len(rows) == 2
 
+    async def test_clamps_score_above_10(self, test_db):
+        feedback = {"overall_score": 100, "word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, 100)
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] == 10.0
+
+    async def test_clamps_score_below_0(self, test_db):
+        feedback = {"overall_score": -5, "word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, -5)
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] == 0.0
+
+    async def test_boundary_scores_preserved(self, test_db):
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "A.", "A.", feedback, 0.0)
+        await save_attempt(test_db, "B.", "B.", feedback, 10.0)
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts ORDER BY id")
+        assert rows[0]["score"] == 0.0
+        assert rows[1]["score"] == 10.0
+
+    async def test_non_numeric_score_defaults_to_zero(self, test_db):
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, "bad")
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] == 0.0
+
+    async def test_none_score_stored_as_null(self, test_db):
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, None)
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] is None
+
 
 @pytest.mark.unit
 class TestGetHistory:
@@ -492,12 +524,12 @@ class TestWeeklyProgress:
 
     async def test_with_attempts(self, test_db):
         feedback = {"accuracy": 0.9, "mispronounced": []}
-        await save_attempt(test_db, "Hello world", "Hello world", feedback, 95.0)
-        await save_attempt(test_db, "Good morning", "Good morning", feedback, 85.0)
+        await save_attempt(test_db, "Hello world", "Hello world", feedback, 9.5)
+        await save_attempt(test_db, "Good morning", "Good morning", feedback, 8.5)
         result = await get_weekly_progress(test_db)
         assert result["total_weeks"] >= 1
         assert result["weeks"][0]["attempt_count"] == 2
-        assert result["weeks"][0]["avg_score"] == 90.0
+        assert result["weeks"][0]["avg_score"] == 9.0
 
 
 @pytest.mark.unit

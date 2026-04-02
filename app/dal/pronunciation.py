@@ -73,11 +73,17 @@ async def save_attempt(
     score: float,
     difficulty: str | None = None,
 ) -> int:
+    clamped_score: float | None = None
+    if score is not None:
+        try:
+            clamped_score = max(0.0, min(10.0, float(score)))
+        except (TypeError, ValueError):
+            clamped_score = 0.0
     cursor = await db.execute(
         """INSERT INTO pronunciation_attempts
            (reference_text, user_transcription, feedback_json, score, difficulty)
            VALUES (?, ?, ?, ?, ?)""",
-        (reference_text, user_transcription, json.dumps(feedback), score, difficulty),
+        (reference_text, user_transcription, json.dumps(feedback), clamped_score, difficulty),
     )
     await db.commit()
     return cursor.lastrowid

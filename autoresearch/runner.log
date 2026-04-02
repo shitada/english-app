@@ -12661,3 +12661,106 @@ Now add tests:
 
 Now commit and test:
 
+● Commit iteration 136 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: add UNIQUE constraint on vocabulary_progress.word_id to prevent duplicates
+  │
+  │ - Schema: UNIQUE INDEX on vocabulary_progress(word_id)
+  │ - Migrations: deduplicate existing rows + create unique index…
+  └ 62 lines...
+
+● Run tests for iteration 136 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+594 passed. Now smoke test + evaluate:
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -3
+  └ 4 lines...
+
+● Evaluator Evaluate iteration 136
+  │ Read runner.log
+  │   │ autoresearch/runner.log
+  │   └ L1:50 (50 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L119:170 (52 lines read)
+
+Iteration 136: **KEEP** (7.8). Recording and continuing:
+
+● Record iteration 136 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "136" "eed714c" "$TSTAMP" "45" "180" "60" "90" "$((T4-1775158654))" \
+  │ "594" "594" "pass" "7.8" "keep" "Add UNIQUE constraint on vocabulary_progress.word_id to …
+  └ 4 lines...
+
+Now iteration 137:Now iteration 137:
+
+● Record T0 for iteration 137 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 137
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L456:472 (16 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L213:255 (42 lines read)
+
+Good catch. Let me implement score clamping:
+
+● Find save_attempt (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def save_attempt'
+  │ app/dal/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L68:86 (19 lines read)
+
+● Edit pronunciation.py +7 -1
+  └ app/dal/pronunciation.py
+
+Now add tests:
+
+● Find test class locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestSaveAttempt\|class
+  │ TestGetHistory' tests/unit/test_pronunciation_dal.py | head -5
+  └ 4 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L146:172 (27 lines read)
+
+● Edit test_pronunciation_dal.py +32
+  └ tests/unit/test_pronunciation_dal.py
+
+● Commit iteration 137 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: clamp pronunciation score to 0-10 range in save_attempt
+  │
+  │ Prevent out-of-range scores from LLM output corrupting statistics:
+  │ - Score > 10 clamped to 10.0, < 0 clamped to 0.0…
+  └ 21 lines...
+
+● Run tests for iteration 137 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+One existing test broken — it was using a score of 90.0 which now gets clamped. Let me fix:
+
+● Find the failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n -B5 -A10 'avg_score.*90.0'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 17 lines...
+
+● Edit test_pronunciation_dal.py +3 -3
+  └ tests/unit/test_pronunciation_dal.py
+
