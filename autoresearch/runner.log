@@ -12877,3 +12877,28 @@ Now add a test for `get_pronunciation_weaknesses` with null fields:
 ● Edit test_pronunciation_dal.py +22
   └ tests/unit/test_pronunciation_dal.py
 
+● Commit iteration 138 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: handle null values from LLM in dict.get() calls
+  │
+  │ dict.get(key, default) returns None when key exists with null value.
+  │ Replace with (dict.get(key) or default) pattern at 7 locations:…
+  └ 23 lines...
+
+● Run tests for iteration 138 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+601 passed. Record:
+
+● Record iteration 138 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "138" "1c7693a" "$TSTAMP" "50" "200" "55" "60" "$((T4-1775160809))" \
+  │ "601" "601" "pass" "8.0" "keep" "Fix dict.get null-value bug in LLM response processing" \…
+  └ 3 lines...
+
+Iteration 138: **KEEP** (8.0). 17/17 kept. Now let me clean up QA artifacts and continue:
+

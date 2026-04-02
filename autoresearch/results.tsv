@@ -141,3 +141,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 135	08e7906	2026-04-02T19:37:21+00:00	60	300	75	120	4563	593	593	pass	8.0	keep	Add id tie-breakers to 7 remaining ORDER BY clauses for deterministic results
 136	eed714c	2026-04-02T19:59:01+00:00	45	180	60	90	1287	594	594	pass	7.8	keep	Add UNIQUE constraint on vocabulary_progress.word_id to prevent duplicates
 137	5e270d2	2026-04-02T20:12:26+00:00	40	150	55	60	713	599	599	pass	7.8	keep	Clamp pronunciation score to 0-10 range in save_attempt
+138	1c7693a	2026-04-02T20:31:49+00:00	50	200	55	60	1100	601	601	pass	8.0	keep	Fix dict.get null-value bug in LLM response processing

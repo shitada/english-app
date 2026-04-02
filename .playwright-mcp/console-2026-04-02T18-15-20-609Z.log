@@ -1,1 +1,0 @@
-[   31983ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/vocabulary/quiz?topic=hotel&count=10:0

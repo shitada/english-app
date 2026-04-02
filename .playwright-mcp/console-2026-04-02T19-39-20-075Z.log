@@ -1,2 +1,0 @@
-[   64637ms] [ERROR] Access to XMLHttpRequest at 'http://localhost:8000/api/health' from origin 'null' has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `loopback`. @ chrome-error://chromewebdata/:0
-[   64639ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8000/api/health:0
