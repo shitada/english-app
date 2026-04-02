@@ -13259,3 +13259,73 @@ Now add tests:
 
 Tests already exist — the atomic change is backward-compatible. Let me commit and test:
 
+● Commit iteration 142 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: make toggle_message_bookmark and toggle_favorite atomic
+  │
+  │ Replace read-then-write pattern with atomic UPDATE SET col = 1 - col
+  │ to prevent TOCTOU race condition where concurrent toggles can lose…
+  └ 19 lines...
+
+● Run tests for iteration 142 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+605 passed. Record:
+
+● Record iteration 142 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "142" "ef64135" "$TSTAMP" "50" "150" "55" "60" "$((T4-1775166377))" \
+  │ "605" "605" "pass" "7.75" "keep" "Make toggle_message_bookmark and toggle_favorite atomic" \…
+  └ 3 lines...
+
+Iteration 142: **KEEP** (7.75). 21/21 kept. Starting 143:
+
+● Record T0 for iteration 143 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 143
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L753:837 (85 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L511:543 (33 lines read)
+
+Good — reducing 5 DB queries to 1. Let me implement:
+
+● Find get_srs_analytics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def get_srs_analytics'
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L753:830 (78 lines read)
+
+● Edit vocabulary.py +16 -22
+  └ app/dal/vocabulary.py
+
+Now add a comprehensive test:
+
+● Find SRS analytics test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestGetSrsAnalytics'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 1 line...
+
+● Find SRS analytics tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_srs_analytics'
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 5 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L1030:1075 (36 lines read)
+
+● Edit test_vocabulary_dal.py +22
+  └ tests/unit/test_vocabulary_dal.py
+

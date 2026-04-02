@@ -1063,3 +1063,25 @@ class TestSRSAnalytics:
             r["word_count"] for r in result["retention_by_level"]
         )
         assert total_words_in_levels == 2
+
+    async def test_level_summary_all_states(self, test_db):
+        """Verify level_summary when words are in all states simultaneously."""
+        words = await save_words(test_db, "travel", _make_questions(4))
+        # word 0: mastered (level 5+)
+        for _ in range(6):
+            await update_progress(test_db, words[0]["id"], is_correct=True)
+        # word 1: progressing (level > 0)
+        await update_progress(test_db, words[1]["id"], is_correct=True)
+        # word 2: stalled (level 0 with attempts)
+        await update_progress(test_db, words[2]["id"], is_correct=True)
+        await update_progress(test_db, words[2]["id"], is_correct=False)
+        await update_progress(test_db, words[2]["id"], is_correct=False)
+        # word 3: not reviewed
+        result = await get_srs_analytics(test_db)
+        ls = result["level_summary"]
+        assert ls["total_words"] == 4
+        assert ls["with_progress"] == 3
+        assert ls["mastered"] >= 1
+        assert ls["progressing"] >= 1
+        assert ls["stalled"] >= 1
+        assert ls["not_reviewed"] == 1

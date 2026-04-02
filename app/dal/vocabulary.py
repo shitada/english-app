@@ -787,31 +787,25 @@ async def get_srs_analytics(db: aiosqlite.Connection) -> dict[str, Any]:
         for r in efficiency_rows
     ]
 
-    # Level progression summary
-    total_with_progress = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress"
+    # Level progression summary (single query instead of 5)
+    summary_rows = await db.execute_fetchall(
+        """SELECT
+               (SELECT COUNT(*) FROM vocabulary_words) as total_words,
+               COUNT(*) as with_progress,
+               SUM(CASE WHEN level > 0 THEN 1 ELSE 0 END) as progressing,
+               SUM(CASE WHEN level = 0 AND (correct_count + incorrect_count) > 0 THEN 1 ELSE 0 END) as stalled,
+               SUM(CASE WHEN level >= 5 THEN 1 ELSE 0 END) as mastered
+           FROM vocabulary_progress"""
     )
-    progressing = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level > 0"
-    )
-    stalled = await db.execute_fetchall(
-        """SELECT COUNT(*) as cnt FROM vocabulary_progress
-           WHERE level = 0 AND (correct_count + incorrect_count) > 0"""
-    )
-    mastered = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 5"
-    )
-    total_words = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_words"
-    )
-    not_reviewed = total_words[0]["cnt"] - total_with_progress[0]["cnt"]
+    s = summary_rows[0]
+    not_reviewed = (s["total_words"] or 0) - (s["with_progress"] or 0)
 
     level_summary = {
-        "total_words": total_words[0]["cnt"],
-        "with_progress": total_with_progress[0]["cnt"],
-        "progressing": progressing[0]["cnt"],
-        "stalled": stalled[0]["cnt"],
-        "mastered": mastered[0]["cnt"],
+        "total_words": s["total_words"] or 0,
+        "with_progress": s["with_progress"] or 0,
+        "progressing": s["progressing"] or 0,
+        "stalled": s["stalled"] or 0,
+        "mastered": s["mastered"] or 0,
         "not_reviewed": max(not_reviewed, 0),
     }
 
