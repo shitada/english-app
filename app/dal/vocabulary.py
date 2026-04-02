@@ -202,8 +202,8 @@ async def get_due_words(
             """SELECT vw.id, vw.word, vw.meaning, vw.topic, vp.level, vp.next_review_at
                FROM vocabulary_progress vp
                JOIN vocabulary_words vw ON vp.word_id = vw.id
-               WHERE vp.next_review_at <= ? AND vw.topic = ?
-               ORDER BY vp.next_review_at ASC
+               WHERE (vp.next_review_at IS NULL OR vp.next_review_at <= ?) AND vw.topic = ?
+               ORDER BY vp.next_review_at ASC NULLS FIRST
                LIMIT ?""",
             (now, topic, limit),
         )
@@ -212,8 +212,8 @@ async def get_due_words(
             """SELECT vw.id, vw.word, vw.meaning, vw.topic, vp.level, vp.next_review_at
                FROM vocabulary_progress vp
                JOIN vocabulary_words vw ON vp.word_id = vw.id
-               WHERE vp.next_review_at <= ?
-               ORDER BY vp.next_review_at ASC
+               WHERE vp.next_review_at IS NULL OR vp.next_review_at <= ?
+               ORDER BY vp.next_review_at ASC NULLS FIRST
                LIMIT ?""",
             (now, limit),
         )
@@ -385,7 +385,7 @@ async def get_review_forecast(
 
     # Count overdue words (next_review_at < today)
     row = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE date(next_review_at) < ?",
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at IS NULL OR date(next_review_at) < ?",
         (today,),
     )
     overdue_count = row[0]["cnt"] if row else 0

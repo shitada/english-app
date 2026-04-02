@@ -12902,3 +12902,114 @@ Now add a test for `get_pronunciation_weaknesses` with null fields:
 
 Iteration 138: **KEEP** (8.0). 17/17 kept. Now let me clean up QA artifacts and continue:
 
+● Clean up QA artifacts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f *.png &&
+  │ git add -A && git commit -m "autoresearch: Clean up QA artifacts
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -5
+  └ 6 lines...
+
+Now iteration 139:
+
+● Record T0 for iteration 139 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 139
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1:50 (50 lines read)
+
+Good catch — NULL next_review_at inconsistency. Let me implement:
+
+● Find dashboard due queries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'next_review_at <='
+  │ app/dal/dashboard.py
+  └ 3 lines...
+
+● Find vocabulary due queries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'next_review_at <='
+  │ app/dal/vocabulary.py
+  └ 5 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L40:48 (9 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L196:225 (30 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L486:496 (10 lines read)
+
+● Find overdue queries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'overdue_count\|next_review_at.*<'
+  │ app/dal/vocabulary.py | head -10
+  └ 10 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L383:395 (13 lines read)
+
+Now apply fixes:
+
+● Edit vocabulary.py +2 -2
+  └ app/dal/vocabulary.py
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+● Edit vocabulary.py +2 -2
+  └ app/dal/vocabulary.py
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+Now add tests. Let me find good locations:
+
+● Find due word test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestGetDueWord'
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 3 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L636:680 (45 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L680:700 (21 lines read)
+
+● Edit test_vocabulary_dal.py +12
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add a dashboard test:
+
+● Find stats test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestGetStats\|class
+  │ TestStats' tests/unit/test_dashboard_dal.py | head -5
+  └ 2 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L21:80 (60 lines read)
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L80:100 (21 lines read)
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L100:115 (16 lines read)
+
+● Edit test_dashboard_dal.py +12
+  └ tests/unit/test_dashboard_dal.py
+

@@ -694,6 +694,18 @@ class TestGetDueWords:
         result = await get_due_words(test_db, limit=1)
         assert len(result) == 1
 
+    async def test_null_next_review_at_treated_as_due(self, test_db):
+        """Words with NULL next_review_at should be included as due."""
+        await save_words(test_db, "food", _make_questions(1))
+        words = await get_words_by_topic(test_db, "food")
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 0, 0, 0, NULL)",
+            (words[0]["id"],),
+        )
+        await test_db.commit()
+        result = await get_due_words(test_db)
+        assert len(result) == 1
+
 
 @pytest.mark.unit
 class TestQuizAttempts:

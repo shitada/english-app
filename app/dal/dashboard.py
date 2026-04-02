@@ -40,7 +40,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     # Vocabulary words due for review
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at <= ?", (now,)
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at IS NULL OR next_review_at <= ?", (now,)
     )
     vocab_due_count = rows[0]["cnt"]
 
@@ -487,7 +487,7 @@ async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
 
     now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at <= ?",
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at IS NULL OR next_review_at <= ?",
         (now_ts,),
     )
     vocab_due = rows[0]["cnt"]

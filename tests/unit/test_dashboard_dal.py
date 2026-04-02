@@ -111,6 +111,18 @@ class TestGetStats:
         stats = await get_stats(test_db)
         assert stats["vocab_due_count"] >= 1
 
+    async def test_vocab_due_count_includes_null_next_review_at(self, test_db):
+        """Words with NULL next_review_at should be counted as due."""
+        questions = [{"word": "nullword", "correct_meaning": "test"}]
+        words = await save_words(test_db, "study", questions)
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 0, 0, 0, NULL)",
+            (words[0]["id"],),
+        )
+        await test_db.commit()
+        stats = await get_stats(test_db)
+        assert stats["vocab_due_count"] >= 1
+
 
 class TestConversationsByDifficulty:
     async def test_empty(self, test_db):
