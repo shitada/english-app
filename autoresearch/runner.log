@@ -13753,3 +13753,108 @@ Now add tests:
 ● Edit test_vocabulary_dal.py +26
   └ tests/unit/test_vocabulary_dal.py
 
+● Commit iteration 148 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: guard save_words against malformed LLM question dicts
+  │
+  │ - Extract word/meaning with .get() fallbacks (word/term, correct_meaning/meaning/definition)
+  │ - Skip non-dict items and items missing required fields…
+  └ 20 lines...
+
+● Run tests for iteration 148 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+617 passed. Record:
+
+● Record iteration 148 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "148" "1440f4a" "$TSTAMP" "55" "200" "55" "60" "$((T4-1775172337))" \
+  │ "617" "617" "pass" "7.8" "keep" "Guard save_words against malformed LLM question dicts" \…
+  └ 3 lines...
+
+Iteration 148: **KEEP** (7.8). 27/27. Starting 149-151 (final 3):
+
+● Record T0 for iteration 149 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 149
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L50:120 (71 lines read)
+
+Good — stale conversation cleanup. Let me implement:
+
+● Find existing cleanup function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def delete_ended\|async def
+  │ clear' app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L201:220 (20 lines read)
+
+● Edit conversation.py +11
+  └ app/dal/conversation.py
+
+Now add the router endpoint:
+
+● Find existing cleanup endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'clear_ended\|delete_ended'
+  │ app/routers/conversation.py
+  └ 3 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L258:275 (18 lines read)
+
+● Edit conversation.py +14
+  └ app/routers/conversation.py
+
+Now add tests:
+
+● Find delete test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class
+  │ TestDeleteConversation\|class TestClear' tests/unit/test_conversation_dal.py | head -5
+  └ 2 lines...
+
+✗ view view file
+  └ Expected ',' or '}' after property value in JSON at position 93 (line 1 column 94)
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L316:340 (25 lines read)
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L317:345 (29 lines read)
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L345:370 (26 lines read)
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from app.dal.conversation import'
+  │ tests/unit/test_conversation_dal.py | head -3
+  └ 4 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L9:32 (22 lines read)
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+✗ edit edit file
+  └ Unterminated string in JSON at position 1042 (line 1 column 1043)
+
+● Edit test_conversation_dal.py +33
+  └ tests/unit/test_conversation_dal.py
+

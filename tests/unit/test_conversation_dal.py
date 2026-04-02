@@ -8,6 +8,7 @@ import pytest
 
 from app.dal.conversation import (
     add_message,
+    cleanup_stale_conversations,
     count_bookmarked_messages,
     count_conversations,
     create_conversation,
@@ -360,6 +361,39 @@ class TestDeleteEndedConversations:
             await end_conversation(test_db, cid)
         count = await delete_ended_conversations(test_db)
         assert count == 3
+
+
+@pytest.mark.unit
+class TestCleanupStaleConversations:
+    async def test_marks_old_active_as_abandoned(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "UPDATE conversations SET started_at = datetime('now', '-25 hours') WHERE id = ?",
+            (cid,),
+        )
+        await test_db.commit()
+        count = await cleanup_stale_conversations(test_db, max_age_hours=24)
+        assert count == 1
+        rows = await test_db.execute_fetchall("SELECT status FROM conversations WHERE id = ?", (cid,))
+        assert rows[0]["status"] == "abandoned"
+
+    async def test_does_not_touch_recent_conversations(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        count = await cleanup_stale_conversations(test_db, max_age_hours=24)
+        assert count == 0
+        rows = await test_db.execute_fetchall("SELECT status FROM conversations WHERE id = ?", (cid,))
+        assert rows[0]["status"] == "active"
+
+    async def test_does_not_touch_ended_conversations(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        await test_db.execute(
+            "UPDATE conversations SET started_at = datetime('now', '-25 hours') WHERE id = ?",
+            (cid,),
+        )
+        await test_db.commit()
+        count = await cleanup_stale_conversations(test_db, max_age_hours=24)
+        assert count == 0
 
 
 class TestListConversationsDuration:

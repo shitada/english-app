@@ -264,6 +264,20 @@ async def clear_ended_conversations(db: aiosqlite.Connection = Depends(get_db_se
     return {"deleted_count": count}
 
 
+class CleanupResponse(BaseModel):
+    abandoned_count: int
+
+
+@router.post("/cleanup/stale", response_model=CleanupResponse)
+async def cleanup_stale_conversations(
+    max_age_hours: int = Query(default=24, ge=1, le=720),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Mark stale active conversations as abandoned."""
+    count = await conv_dal.cleanup_stale_conversations(db, max_age_hours=max_age_hours)
+    return {"abandoned_count": count}
+
+
 class ExportMessageItem(BaseModel):
     role: str
     content: str

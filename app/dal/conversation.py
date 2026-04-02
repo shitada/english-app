@@ -207,6 +207,17 @@ async def delete_ended_conversations(db: aiosqlite.Connection) -> int:
     return cursor.rowcount
 
 
+async def cleanup_stale_conversations(db: aiosqlite.Connection, max_age_hours: int = 24) -> int:
+    """Mark stale active conversations as abandoned. Returns count of updated rows."""
+    cursor = await db.execute(
+        "UPDATE conversations SET status = 'abandoned', ended_at = datetime('now') "
+        "WHERE status = 'active' AND started_at < datetime('now', '-' || ? || ' hours')",
+        (max_age_hours,),
+    )
+    await db.commit()
+    return cursor.rowcount
+
+
 async def get_conversation_export(
     db: aiosqlite.Connection, conversation_id: int
 ) -> dict[str, Any] | None:
