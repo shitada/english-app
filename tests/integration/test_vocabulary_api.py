@@ -695,3 +695,31 @@ async def test_srs_analytics_with_data(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert data["level_summary"]["with_progress"] >= 1
+
+
+@pytest.mark.integration
+async def test_answer_triggers_auto_adjust_difficulty(client, mock_copilot):
+    """Test that submitting 5 correct answers for a high-difficulty word triggers difficulty adjustment."""
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "ubiquitous", "correct_meaning": "found everywhere", "example_sentence": "Smartphones are ubiquitous.", "difficulty": 3, "wrong_options": ["rare", "hidden", "small"]},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    # Find the word_id
+    words_res = await client.get("/api/vocabulary/words?q=ubiquitous")
+    word_id = words_res.json()["words"][0]["id"]
+
+    # Submit 5 correct answers to trigger auto_adjust_difficulty
+    last_res = None
+    for _ in range(5):
+        last_res = await client.post("/api/vocabulary/answer", json={"word_id": word_id, "is_correct": True})
+        assert last_res.status_code == 200
+
+    data = last_res.json()
+    assert "difficulty_adjustment" in data
+    # After 5 correct, difficulty should decrease from 3 to 2
+    assert data["difficulty_adjustment"] is not None
+    assert data["difficulty_adjustment"]["old_difficulty"] == 3
+    assert data["difficulty_adjustment"]["new_difficulty"] == 2
+    assert data["difficulty_adjustment"]["reason"] == "too_easy"

@@ -48,11 +48,19 @@ class FillBlankQuestionItem(BaseModel):
     difficulty: int
 
 
+class DifficultyAdjustment(BaseModel):
+    word_id: int
+    old_difficulty: int
+    new_difficulty: int
+    reason: str
+
+
 class AnswerResponse(BaseModel):
     word_id: int
     is_correct: bool
     new_level: int
     next_review: str
+    difficulty_adjustment: DifficultyAdjustment | None = None
 
 
 class ProgressItem(BaseModel):
@@ -208,7 +216,8 @@ async def submit_answer(
         raise HTTPException(status_code=404, detail="Word not found")
 
     result = await vocab_dal.update_progress(db, req.word_id, req.is_correct)
-    return result
+    adjustment = await vocab_dal.auto_adjust_difficulty(db, req.word_id)
+    return {**result, "difficulty_adjustment": adjustment}
 
 
 @router.get("/progress", response_model=ProgressResponse)

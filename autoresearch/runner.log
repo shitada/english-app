@@ -9495,3 +9495,144 @@ Now let me add the tests. First, let me see the end of the test files to find wh
 
 Now commit and test:
 
+● Commit iteration 118 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #118: Return 404 from conversation history for nonexistent IDs
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 50 lines...
+
+● Run tests for iteration 118 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 552 tests pass. Let me run the TS check and record timing:
+
+● Record T3 for iteration 118 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check iteration 118 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Tests: 552/552 pass, TS check pass. T3=1775088637. Now run smoke test (since we changed routers/conversation.py):
+
+● Smoke test iteration 118 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. Now start server for QA testing:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Check if server still up (shell)
+  │ curl -s http://localhost:8000/api/health 2>&1 || echo "SERVER DOWN"
+  └ 2 lines...
+
+Server is still up. Let me invoke the QA tester:
+
+● Tester QA test iteration 118
+  │ playwright-browser_navigate http://localhost:8000
+  │   └ ### Ran Playwright code
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+QA passed (ux_score=8). Now invoke the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 52 lines...
+
+● Evaluator Evaluate iteration 118
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L680:end (74 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L200:end (328 lines read)
+
+Score: 7.75, verdict: keep. Let me record the results:
+
+● Record T4 for iteration 118 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 118 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "118  e2b4bc5
+  │ 2026-04-02T00:01:55+00:00       403     60      59      469     991     552     552     pass
+  │ 7.75    keep    Return 404 from conversation history for nonexistent IDs" >>
+  │ autoresearch/results.tsv
+  └ 1 line...
+
+Now kill the server and proceed to iteration 119:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Record T0 for iteration 119 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 119
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L670:720 (49 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L24:55 (32 lines read)
+
+● Record T1 for iteration 119 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find relevant code in vocabulary router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "submit_answer\|auto_adjust\|AnswerResponse\|class Answer" app/routers/vocabulary.py | head -20
+  └ 5 lines...
+
+● View AnswerResponse and submit_answer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '45,230p' app/routers/vocabulary.py
+  └ 187 lines...
+
+● Find auto_adjust_difficulty in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "auto_adjust_difficulty"
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● View auto_adjust_difficulty function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '670,720p' app/dal/vocabulary.py
+  └ 50 lines...
+
+Now I'll implement the changes:
+
+● Edit vocabulary.py +8
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +2 -1
+  └ app/routers/vocabulary.py
+
+Now add the integration test:
+
+● Add integration test for auto-adjust (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_vocabulary_api.py << 'TESTEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 30 lines...
+
