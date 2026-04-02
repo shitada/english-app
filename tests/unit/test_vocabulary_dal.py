@@ -359,6 +359,31 @@ class TestResetProgress:
         deleted = await reset_progress(test_db)
         assert deleted == 0
 
+    async def test_reset_clears_quiz_attempts(self, test_db):
+        """Reset should also clear quiz_attempts to prevent stale history."""
+        words = await save_words(test_db, "t1", _make_questions(2))
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+            await log_attempt(test_db, w["id"], True)
+        await test_db.commit()
+        await reset_progress(test_db)
+        rows = await test_db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
+        assert rows[0]["cnt"] == 0
+
+    async def test_reset_by_topic_clears_only_topic_attempts(self, test_db):
+        """Reset by topic clears quiz_attempts only for that topic's words."""
+        w1 = await save_words(test_db, "food", _make_questions(1))
+        w2 = await save_words(test_db, "travel", _make_questions(1))
+        for w in w1 + w2:
+            await log_attempt(test_db, w["id"], True)
+        await test_db.commit()
+        # Verify both topics have attempts
+        rows = await test_db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
+        assert rows[0]["cnt"] == 2
+        await reset_progress(test_db, topic="food")
+        rows = await test_db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
+        assert rows[0]["cnt"] == 1  # Only travel's attempt remains
+
 
 class TestGetWeakWords:
     async def test_empty(self, test_db):

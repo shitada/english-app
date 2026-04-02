@@ -129,3 +129,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 123	afce40b	2026-04-02T14:51:15+00:00	305	57	33	311	706	562	562	pass	7.8	keep	Fix pronunciation sentences returning empty when filtering by difficulty
 124	3877f6a	2026-04-02T15:03:23+00:00	308	78	38	349	773	568	568	pass	8.1	keep	Escape SQL LIKE wildcards in search_words and conversation keyword filters
 125	7d12862	2026-04-02T15:16:37+00:00	326	25	35	278	664	571	571	pass	7.75	keep	Validate individual values in batch preferences endpoint
+126	22c6cbb	2026-04-02T15:34:44+00:00	454	38	37	683	1212	573	573	pass	7.75	keep	Fix get_score_trend reporting stable when previous window is empty

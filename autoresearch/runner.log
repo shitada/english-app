@@ -10961,3 +10961,205 @@ Now add tests. Let me find the existing score trend tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 126 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #126: Fix get_score_trend reporting stable when previous window is empty
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 35 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+573 passed, TS pass. Smoke test (DAL changed):
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+T3=1775144213 (test_sec=37). QA test:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 126
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L1:50 (50 lines read)
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 126
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L175:203 (28 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L299:350 (52 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "126" "22c6cbb" "2026-04-02T15:34:44+00:00" "454" "38" "37" "683" "1212" \
+  │ "573" "573" "pass" "7.75" "keep" "Fix get_score_trend reporting stable when previous window
+  │ is empty" \…
+  └ 3 lines...
+
+Iteration 126: **KEEP** (7.75). Starting iteration 127.
+
+● Record T0 for iteration 127 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 127
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L700:900 (201 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L350:430 (81 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find reset_progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def reset_progress\|async def
+  │ reset_progress" app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L300:340 (41 lines read)
+
+Now let me check the quiz_attempts table:
+
+● Check quiz_attempts schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "quiz_attempts" app/database.py |
+  │ head -10
+  └ 4 lines...
+
+● View quiz_attempts schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '77,90p' app/database.py
+  └ 15 lines...
+
+Now implement the fix:
+
+● Edit vocabulary.py +5 -4
+  └ app/dal/vocabulary.py
+
+Now add tests. Find existing reset_progress tests:
+
+● Find reset progress tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test.*reset"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 4 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L335:370 (36 lines read)
+
+Let me check what's imported in this test file and what `save_attempt` related function is available for quiz_attempts:
+
+● Find quiz attempt functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def save_attempt\|async def
+  │ save_attempt\|def record_attempt" app/dal/vocabulary.py | head -5
+  └ 1 line...
+
+● Find quiz_attempts usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "quiz_attempts"
+  │ app/dal/vocabulary.py | head -10
+  └ 8 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L432:445 (14 lines read)
+
+Good. Now add the tests:
+
+● Check imports in vocab test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "from app.dal.vocabulary import"
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 6 lines...
+
+● Full vocab DAL imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A20 "^from app.dal.vocabulary import"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 22 lines...
+
+Good, `log_attempt` is already imported. Add tests after the existing reset tests:
+
+● Edit test_vocabulary_dal.py +23
+  └ tests/unit/test_vocabulary_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 127 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #127: Clear quiz_attempts when resetting vocabulary progress
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 41 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+Test failed. Let me debug:
+
+● Find _make_questions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_make_questions"
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 6 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L34:48 (15 lines read)
+
+OK, the words are unique (`word_0` etc.). But `save_words` might have deduplication. Let me check if `word_0` for "food" and `word_0` for "travel" are handled:
+
+● Check save_words dedup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A30 "async def save_words"
+  │ app/dal/vocabulary.py | head -35
+  └ 32 lines...
+
+OK, dedup is per-topic. So `word_0` for "food" (id=1) and `word_0` for "travel" (id=2) are both saved separately. The issue must be something else. Let me run a quick debug test:
+
+● Debug reset_progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -c "
+  │ import asyncio, aiosqlite
+  │ from app.database import SCHEMA
+  │ from app.dal.vocabulary import save_words, update_progress, log_attempt, reset_progress…
+  └ 60 lines...
+
+The code is correct - `update_progress` apparently also logs an attempt. The test issue is that `update_progress` + `log_attempt` creates 2 attempts per word. My test expects 1 remaining (travel) but there are 2 (both from travel). Let me fix the test:
+
+● Edit test_vocabulary_dal.py +3 -1
+  └ tests/unit/test_vocabulary_dal.py
+
