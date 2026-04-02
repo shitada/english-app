@@ -116,9 +116,10 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 110	44280bf	2026-04-01T16:42:00+00:00	12	85	90	38	225	515	515	pass	7.3	keep	Add pronunciation retry suggestions endpoint
 111	84de88c	2026-04-01T17:24:44+00:00	207	131	27	30	395	524	524	pass	7.55	keep	Add per-sentence pronunciation attempt history endpoint
 112	6040842	2026-04-01T17:29:53+00:00	209	56	31	25	321	524	524	pass	7.5	keep	Consolidate standalone API functions to use request helper
-113	93bd8c3	2026-04-01T17:34:53+00:00	203	170	-84	25	314	530	530	pass	8.0	keep	Fix pronunciation score distribution gaps for float scores
-114	398c533	2026-04-01T17:40:42+00:00	271	180	-112	25	364	533	533	pass	8.25	keep	Fix substring false positives in conversation vocabulary matching
-115	524cfad	2026-04-01T17:45:52+00:00	139	180	-18	25	326	534	534	pass	8.0	keep	Pass sentence difficulty through pronunciation check and history flow
+113	93bd8c3	2026-04-01T17:34:53+00:00	203	170	0	25	314	530	530	pass	8.0	keep	Fix pronunciation score distribution gaps for float scores
+114	398c533	2026-04-01T17:40:42+00:00	271	180	0	25	364	533	533	pass	8.25	keep	Fix substring false positives in conversation vocabulary matching
+115	524cfad	2026-04-01T17:45:52+00:00	139	180	0	25	326	534	534	pass	8.0	keep	Pass sentence difficulty through pronunciation check and history flow
 116	e081a05	2026-04-01T17:52:27+00:00	152	180	55	25	412	540	540	pass	7.5	keep	Add pronunciation progress breakdown by difficulty level
 117	4aa146b	2026-04-01T17:59:44+00:00	129	200	99	30	458	549	549	pass	8.0	keep	Add cross-module learning insights endpoint
-118e2b4bc52026-04-02T00:01:55+00:004036059469991552552pass7.75keepReturn 404 from conversation history for nonexistent IDs
+118	e2b4bc5	2026-04-02T00:01:55+00:00	40	360	59	46	999	155	255	pass	7.75	keep	Return 404 from conversation history for nonexistent IDs
+119	67623bd	2026-04-02T00:10:00+00:00	0	0	0	0	0	552	552	pass	7.5	keep	Wire up auto_adjust_difficulty in vocabulary answer submission

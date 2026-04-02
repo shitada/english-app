@@ -136,6 +136,39 @@ class TestSafeLlmCall:
         result = await safe_llm_call(_ok(), context="compat")
         assert result == "legacy"
 
+    @patch("app.utils.asyncio.sleep", new_callable=AsyncMock)
+    async def test_factory_lambda_enables_real_retries(self, mock_sleep):
+        """Factory lambdas create fresh coroutines each retry — retries actually work."""
+        call_count = 0
+        async def _llm_call():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ConnectionError("transient LLM failure")
+            return {"score": 90}
+        # Lambda factory: each retry creates a new coroutine
+        result = await safe_llm_call(lambda: _llm_call(), context="factory_retry", max_retries=2)
+        assert result == {"score": 90}
+        assert call_count == 2
+        mock_sleep.assert_called_once()
+
+    @patch("app.utils.asyncio.sleep", new_callable=AsyncMock)
+    async def test_direct_coroutine_cannot_retry(self, mock_sleep):
+        """Direct coroutines can only be awaited once — retries silently fail."""
+        call_count = 0
+        async def _llm_call():
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ConnectionError("transient")
+            return "recovered"
+        # Passing a direct coroutine (not a factory) — retry will fail
+        with pytest.raises(HTTPException) as exc_info:
+            await safe_llm_call(_llm_call(), context="coroutine_no_retry", max_retries=2)
+        assert exc_info.value.status_code == 502
+        # Only called once — retries couldn't re-create the coroutine
+        assert call_count == 1
+
 
 @pytest.mark.unit
 class TestGetTopicLabel:

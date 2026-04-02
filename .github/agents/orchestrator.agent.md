@@ -261,3 +261,24 @@ After completing all 20 iterations (or reaching iteration 20), generate `autores
 10. **NEVER skip the evaluator** — every iteration MUST call the evaluator subagent. You MUST NOT assign scores or make keep/discard decisions yourself. The evaluator's score is the ONLY valid score.
 11. **NEVER skip the tester** — every iteration MUST call the tester subagent for Playwright QA. If Playwright has infrastructure issues, follow the recovery procedure in Step 5c. Never replace the tester with curl commands or self-assessment.
 12. **NEVER fabricate timestamps** — all timestamps in results.tsv MUST come from actual `date` commands, not hardcoded or estimated values.
+
+<!-- AUDIT-FIX-20260402: agent_skip -->
+## AUDIT FIX: Agent Skip Prevention
+
+Previous audit detected that subagents were skipped. This is a HARD FAILURE.
+
+**MANDATORY CHECKLIST — verify BEFORE recording each iteration's results:**
+- Did I call `proposer` subagent? → Must have received JSON proposal
+- Did I call `tester` subagent? → Must have received JSON with ux_score
+- Did I call `evaluator` subagent? → Must have received JSON with total_score
+- Does the score in results.tsv match evaluator's total_score exactly?
+
+**If ANY answer is NO, STOP. Call the missing subagent NOW before proceeding.**
+You are an orchestrator — you dispatch work. You do NOT implement, score, or QA test.
+
+<!-- AUDIT-FIX-20260402: timestamp -->
+## AUDIT FIX: Timestamp Calculation
+
+Always compute timing as: `phase_sec = T_end - T_start` where T_end > T_start.
+Record T0 before propose, T1 after propose, T2 after implement, T3 after tests, T4 after evaluate.
+If any result is negative, set it to 0.

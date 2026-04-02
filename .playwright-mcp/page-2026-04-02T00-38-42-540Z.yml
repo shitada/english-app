@@ -1,0 +1,13 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Vocabulary" [level=2] [ref=e9]
+      - paragraph [ref=e10]: Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
+      - generic [ref=e11]:
+        - heading "Quiz Mode" [level=3] [ref=e12]
+        - generic [ref=e13]:
+          - button "Word → Meaning" [ref=e14] [cursor=pointer]
+          - button "Meaning → Word" [ref=e15] [cursor=pointer]

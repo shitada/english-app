@@ -9636,3 +9636,235 @@ Now add the integration test:
   │ @pytest.mark.integration…
   └ 30 lines...
 
+● Commit iteration 119 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #119: Wire up auto_adjust_difficulty in vocabulary answer submission
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 34 lines...
+
+● Run tests for iteration 119 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+553 passed. TS check:
+
+✗ TS check iteration 119 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1; echo
+  │ "T3=$(date +%s)"
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● TS check iteration 119 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Record T3 for iteration 119 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now smoke test (vocabulary router changed):
+
+● Smoke test iteration 119 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Now QA test and evaluator in parallel — start server first:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Check server status (shell)
+  │ curl -s http://localhost:8000/api/health 2>&1 || echo "SERVER DOWN"
+  └ 2 lines...
+
+Server is up. Launch QA tester and evaluator in parallel:
+
+● Tester QA test iteration 119
+  └ Agent started in background with agent_id: tester-119. You can use read_agent...
+
+● Evaluator Evaluate iteration 119
+  └ Agent started in background with agent_id: evaluator-119. You can use read_ag...
+
+While waiting for QA and evaluator, let me prepare for the next iteration by reading the current state:
+
+● Recent git log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+Good, let me wait for the background agents to complete before proceeding.
+
+● Wait for agents (shell)
+  │ sleep 30 && echo "waiting done"
+  └ 2 lines...
+
+● General-purpose Read evaluator-119 results
+
+● Wait for tester (shell)
+  │ sleep 60 && echo "done waiting"
+  └ 2 lines...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+
+Execution failed: Error: Failed to get response from the AI model; retried 5 times (total retry wait time: 6.538938823303447 seconds) Last error: Unknown error
+
+Total usage est:        3 Premium requests
+API time spent:         40m 21s
+Total session time:     41m 25s
+Total code changes:     +20 -1
+Breakdown by AI model:
+ claude-opus-4.6          8.1m in, 49.7k out, 7.3m cached (Est. 3 Premium requests)
+[2026-04-02 09:42:47] Copilot invocation completed (duration: 2492s)
+[2026-04-02 09:42:50] Current iteration count: 118e2b4bc52026-04-02T00:01:55+00:004036059469991552552pass7.75keepReturn 404 from conversation history for nonexistent IDs / 137
+[2026-04-02 22:46:50] ==========================================
+[2026-04-02 22:46:50] Autoresearch CLI Runner started
+[2026-04-02 22:46:50] Current iteration: 119
+[2026-04-02 22:46:50] Additional iters:  2
+[2026-04-02 22:46:50] Target iteration:  121
+[2026-04-02 22:46:50] Max invocations:   10
+[2026-04-02 22:46:50] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-02 22:46:50] ==========================================
+[2026-04-02 22:46:50] WARNING: Working tree has uncommitted changes
+[2026-04-02 22:46:50]   M .github/agents/orchestrator.agent.md
+[2026-04-02 22:46:50]   M autoresearch/audit.sh
+[2026-04-02 22:46:50]   M autoresearch/results.tsv
+[2026-04-02 22:46:50]   M autoresearch/run.sh
+[2026-04-02 22:46:50]   M autoresearch/runner.log
+[2026-04-02 22:46:50] Continuing anyway...
+[2026-04-02 22:46:50] Current iteration count: 119 / 121
+[2026-04-02 22:46:50] ------------------------------------------
+[2026-04-02 22:46:50] Invocation 1 / 10
+[2026-04-02 22:46:50] Resuming from iteration 120
+[2026-04-02 22:46:50] ------------------------------------------
+[2026-04-02 22:46:50] Starting copilot invocation...
+
+
+
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 111 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ 125 lines read
+
+● Recent git commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+Starting autoresearch loop from iteration 120. I'll run 2 iterations (120-121).
+
+● Record T0 for iteration 120 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775137640. Now calling the proposer subagent.
+
+● Proposer Propose iteration 120
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L190:207 (17 lines read)
+  └ Read test_utils.py
+      │ tests/unit/test_utils.py
+      └ L62:104 (43 lines read)
+
+Great proposal — a real bug fix for broken LLM retries. Let me record T1 and implement.
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Explore Find safe_llm_call call sites
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ 353 lines read
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ 326 lines read
+
+Now let me view the exact files to make surgical edits.
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L103:118 (16 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L170:187 (17 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L95:105 (10 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L148:160 (13 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L193:207 (14 lines read)
+
+● Exact line numbers of call sites (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "safe_llm_call"
+  │ app/routers/conversation.py app/routers/pronunciation.py app/routers/vocabulary.py
+  └ 9 lines...
+
+Now let me view the test file to know where to add the new test.
+
+● Read test_utils.py
+  │ tests/unit/test_utils.py
+  └ 194 lines read
+
+Now I'll implement the fix — wrapping all 5 call sites in lambdas and adding a test.
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now add the test for retry with factory vs direct coroutine:
+
+● Edit test_utils.py +33
+  └ tests/unit/test_utils.py
+
+Now commit and run tests:
+

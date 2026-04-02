@@ -105,7 +105,7 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         user_transcription=req.user_transcription,
     )
     feedback = await safe_llm_call(
-        copilot.ask_json(
+        lambda: copilot.ask_json(
             "You are an English pronunciation coach. Return ONLY valid JSON.",
             prompt,
         ),

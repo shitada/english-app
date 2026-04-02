@@ -193,7 +193,7 @@ async def generate_quiz(
     copilot = get_copilot_service()
     prompt = get_prompt("vocabulary_quiz_generator").format(topic=topic_label, count=count)
     result = await safe_llm_call(
-        copilot.ask_json(
+        lambda: copilot.ask_json(
             "You are an English vocabulary teacher. Return ONLY valid JSON.",
             prompt,
         ),

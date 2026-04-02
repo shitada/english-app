@@ -216,6 +216,24 @@ main() {
             log "Copilot invocation completed (duration: ${duration}s)"
         fi
 
+        # Post-invocation audit: diagnose + fix issues before next invocation
+        local new_iter
+        new_iter=$(get_current_iteration)
+        if [[ "$new_iter" -gt "$current" ]]; then
+            log "Running post-invocation audit (iter $((current + 1))-$new_iter)..."
+            set +e
+            bash "$SCRIPT_DIR/audit.sh" --fix \
+                -f "$((current + 1))" -t "$new_iter" \
+                2>&1 | tee -a "$LOG_FILE"
+            local audit_exit=$?
+            set -e
+            if [[ "$audit_exit" -gt 0 ]]; then
+                log "Audit found $audit_exit error(s) — fixes applied where possible"
+            else
+                log "Audit passed — no issues"
+            fi
+        fi
+
         # Brief pause before next invocation
         if ! $INTERRUPTED; then
             sleep 3

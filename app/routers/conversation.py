@@ -97,7 +97,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty]
     opening = await safe_llm_call(
-        copilot.ask(system, "Start the scenario. Greet the user in character."),
+        lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
         context="start_conversation",
     )
 
@@ -151,7 +151,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     feedback, ai_response = await asyncio.gather(
         _safe_grammar_check(),
-        safe_llm_call(copilot.ask(system, conv_prompt), context="send_message"),
+        safe_llm_call(lambda: copilot.ask(system, conv_prompt), context="send_message"),
     )
     logger.info("Parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
@@ -174,7 +174,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     copilot = get_copilot_service()
     summary_prompt = get_prompt("conversation_summary").format(conversation=history)
     summary = await safe_llm_call(
-        copilot.ask_json(
+        lambda: copilot.ask_json(
             "You are an English learning assistant. Return ONLY valid JSON.",
             summary_prompt,
         ),
