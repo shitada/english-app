@@ -13858,3 +13858,98 @@ Now add tests:
 ● Edit test_conversation_dal.py +33
   └ tests/unit/test_conversation_dal.py
 
+● Commit iteration 149 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "feat: add stale conversation cleanup with auto-expiry
+  │
+  │ - cleanup_stale_conversations DAL: marks old active → abandoned
+  │ - POST /api/conversation/cleanup/stale endpoint…
+  └ 19 lines...
+
+● Run tests for iteration 149 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+620 passed. Record:
+
+● Record iteration 149 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "149" "a6254d0" "$TSTAMP" "55" "300" "55" "60" "$((T4-1775172762))" \
+  │ "620" "620" "pass" "7.5" "keep" "Add stale conversation cleanup with auto-expiry" \…
+  └ 3 lines...
+
+Iteration 149: **KEEP** (7.5). 28/28 kept. Two more:
+
+● Record T0 for iteration 150 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 150
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L1:80 (80 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L80:200 (121 lines read)
+
+Good — fix frontend TypeScript interfaces. Let me implement:
+
+● Find TypeScript interfaces (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'ChatMessage\|PronunciationAttempt\|interface.*Message' frontend/src/api.ts | head -15
+  └ 8 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L162:175 (13 lines read)
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L319:335 (16 lines read)
+
+● Find submitAnswer type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'submitAnswer\|difficulty_adjustment\|DifficultyAdjust' frontend/src/api.ts | head -10
+  └ 2 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L90:100 (11 lines read)
+
+Now apply fixes:
+
+● Edit api.ts +3 -1
+  └ frontend/src/api.ts
+
+● Edit api.ts +1
+  └ frontend/src/api.ts
+
+Now check if PronunciationFeedback interface exists:
+
+● Check PronunciationFeedback interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'PronunciationFeedback'
+  │ frontend/src/api.ts | head -5
+  └ 4 lines...
+
+Good, it exists. Now add DifficultyAdjustment and update submitAnswer:
+
+● Check if DifficultyAdjustment exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'DifficultyAdjust'
+  │ frontend/src/api.ts
+  └ 1 line...
+
+● Edit api.ts +7
+  └ frontend/src/api.ts
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+● TypeScript check for iteration 150 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+TypeScript passes. Commit and test:
+

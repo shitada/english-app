@@ -92,7 +92,7 @@ export const api = {
     ),
 
   submitAnswer: (word_id: number, is_correct: boolean) =>
-    request<{ word_id: number; is_correct: boolean; new_level: number; next_review: string }>(
+    request<{ word_id: number; is_correct: boolean; new_level: number; next_review: string; difficulty_adjustment: DifficultyAdjustment | null }>(
       '/api/vocabulary/answer',
       { method: 'POST', body: JSON.stringify({ word_id, is_correct }) }
     ),
@@ -160,10 +160,19 @@ export interface GrammarFeedback {
 }
 
 export interface ChatMessage {
+  id: number;
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
-  feedback?: GrammarFeedback;
+  feedback?: GrammarFeedback | null;
+  is_bookmarked: boolean;
+}
+
+export interface DifficultyAdjustment {
+  word_id: number;
+  old_difficulty: number;
+  new_difficulty: number;
+  reason: string;
 }
 
 export interface ConversationSummary {
@@ -320,6 +329,7 @@ export interface PronunciationAttempt {
   id: number;
   reference_text: string;
   user_transcription: string;
+  feedback: PronunciationFeedback | null;
   score: number | null;
   difficulty: string | null;
   created_at: string;
