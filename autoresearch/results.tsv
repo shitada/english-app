@@ -135,3 +135,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 129	17da88a	2026-04-02T16:27:49+00:00	410	45	34	609	1098	579	579	pass	7.5	keep	Fix weekly comparison vocabulary count to use quiz_attempts for consistency
 130	65b7464	2026-04-02T16:46:34+00:00	452	119	74	264	907	585	585	pass	7.55	keep	Validate path parameter IDs with Path(ge=1) for consistency
 131	c17855f	2026-04-02T17:02:18+00:00	350	64	36	265	715	587	587	pass	8.0	keep	Add id tie-breaker to message ORDER BY for deterministic ordering
+132	bb93ee0	2026-04-02T17:14:46+00:00	278	84	49	358	769	588	588	pass	7.75	keep	Fix get_retry_suggestions NULL score exclusion and missing tie-breaker

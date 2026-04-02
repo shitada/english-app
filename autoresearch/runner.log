@@ -11951,3 +11951,150 @@ Now add the test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 132 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #132: Fix get_retry_suggestions NULL score exclusion and missing tie-breaker
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests + TS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && cd frontend && npx tsc --noEmit 2>&1
+  └ 7 lines...
+
+588 passed, TS pass. Smoke + QA:
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 132
+  │ playwright-browser_console_messages
+  │   └ ### Result
+  └ playwright-browser_network_requests
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 132
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L700:800 (95 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L650:720 (71 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "132" "bb93ee0" "2026-04-02T17:14:46+00:00" "278" "84" "49" "358" "769" \
+  │ "588" "588" "pass" "7.75" "keep" "Fix get_retry_suggestions NULL score exclusion and missing
+  │ tie-breaker" \…
+  └ 3 lines...
+
+Iteration 132: **KEEP** (7.75). 11 iterations, all kept! Continuing with 133.
+
+● Record T0 for iteration 133 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 133
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L60:160 (101 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L454:478 (25 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find grammar stats code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_grammar_stats\|is_correct\|errors.*=.*\[\]" app/dal/dashboard.py | head -10
+  └ 6 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L140:165 (26 lines read)
+
+Now fix it:
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+Now update tests:
+
+● Find grammar stats tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ TestGrammarStats\|test_with_feedback\|grammar_stats\|grammar_accuracy"
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 9 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L136:160 (25 lines read)
+
+I need to update the test feedback data to include `is_correct`:
+
+● Edit test_dashboard_dal.py +17 -4
+  └ tests/unit/test_dashboard_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 133 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #133: Fix grammar accuracy inconsistency between dashboard and conversation endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 26 lines...
+
+● Run tests + TS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && cd frontend && npx tsc --noEmit 2>&1
+  └ 6 lines...
+
+1 failure. Let me check:
+
+● Debug failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetLearningInsights::test_strongest_weakest_identification
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+The test expected 100% grammar accuracy for conversation, but now that I changed the check to use `is_correct` instead of `errors`, the feedback data in this test doesn't have `is_correct`, so it shows 0% accuracy. Let me fix the test data:
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L338:370 (33 lines read)
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
+Let me also check for other tests that use grammar feedback without `is_correct`:
+
+● Find other test data without is_correct (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '"errors": \[\]'
+  │ tests/unit/test_dashboard_dal.py
+  └ 3 lines...
+
+Good, those are already updated. Let me amend and re-test:
+

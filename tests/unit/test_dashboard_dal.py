@@ -144,14 +144,27 @@ class TestGrammarStats:
         from app.dal.conversation import add_message, create_conversation
         from app.dal.dashboard import get_grammar_stats
         cid = await create_conversation(test_db, "hotel_checkin")
-        # Message with no errors
-        await add_message(test_db, cid, "user", "Hello", feedback={"errors": [], "suggestions": []})
-        # Message with errors
-        await add_message(test_db, cid, "user", "I go yesterday", feedback={"errors": [{"original": "go", "correction": "went"}], "suggestions": []})
+        # Message with no errors (is_correct=true)
+        await add_message(test_db, cid, "user", "Hello", feedback={"is_correct": True, "errors": [], "suggestions": []})
+        # Message with errors (is_correct=false)
+        await add_message(test_db, cid, "user", "I go yesterday", feedback={"is_correct": False, "errors": [{"original": "go", "correction": "went"}], "suggestions": []})
         result = await get_grammar_stats(test_db)
         assert result["total_checked"] == 2
         assert result["error_free"] == 1
         assert result["grammar_accuracy"] == 50.0
+
+    async def test_is_correct_with_minor_errors(self, test_db):
+        """is_correct=true with non-empty errors should count as correct."""
+        from app.dal.conversation import add_message, create_conversation
+        from app.dal.dashboard import get_grammar_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # Correct overall but with minor style suggestions
+        await add_message(test_db, cid, "user", "I am good", feedback={
+            "is_correct": True, "errors": [{"original": "good", "suggestion": "well"}], "suggestions": []
+        })
+        result = await get_grammar_stats(test_db)
+        assert result["error_free"] == 1
+        assert result["grammar_accuracy"] == 100.0
 
 
 class TestVocabLevelDistribution:
@@ -329,7 +342,7 @@ class TestGetLearningInsights:
         cid = await create_conversation(test_db, "hotel_checkin")
         await add_message(
             test_db, cid, "user", "Hello",
-            feedback={"errors": [], "suggestions": []},
+            feedback={"is_correct": True, "errors": [], "suggestions": []},
         )
 
         # Pronunciation: score=3 → strength=30
