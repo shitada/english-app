@@ -142,3 +142,32 @@ class TestPaginationBounds:
     async def test_vocabulary_favorites_negative_offset(self, client):
         res = await client.get("/api/vocabulary/favorites?offset=-1")
         assert res.status_code == 422
+
+
+@pytest.mark.integration
+class TestPathParameterValidation:
+    """Path parameter IDs must be >= 1."""
+
+    async def test_conversation_history_zero_id(self, client):
+        res = await client.get("/api/conversation/0/history")
+        assert res.status_code == 422
+
+    async def test_conversation_delete_negative_id(self, client):
+        res = await client.delete("/api/conversation/-1")
+        assert res.status_code == 422
+
+    async def test_vocabulary_delete_zero_id(self, client):
+        res = await client.delete("/api/vocabulary/0")
+        assert res.status_code == 422
+
+    async def test_vocabulary_detail_negative_id(self, client):
+        res = await client.get("/api/vocabulary/-5/detail")
+        assert res.status_code == 422
+
+    async def test_pronunciation_delete_zero_id(self, client):
+        res = await client.delete("/api/pronunciation/0")
+        assert res.status_code == 422
+
+    async def test_bookmark_toggle_zero_id(self, client):
+        res = await client.put("/api/conversation/messages/0/bookmark")
+        assert res.status_code == 422

@@ -6,7 +6,7 @@ import logging
 from typing import Any, Literal
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt
@@ -140,7 +140,7 @@ async def clear_history(db: aiosqlite.Connection = Depends(get_db_session)):
 
 
 @router.delete("/{attempt_id}", response_model=DeleteAttemptResponse)
-async def delete_attempt(attempt_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+async def delete_attempt(attempt_id: int = Path(ge=1), db: aiosqlite.Connection = Depends(get_db_session)):
     """Delete a single pronunciation attempt."""
     deleted = await pron_dal.delete_attempt(db, attempt_id)
     if not deleted:

@@ -11488,3 +11488,187 @@ QA test:
 
 Iteration 129: **KEEP** (7.5). Let me clean up the .playwright-mcp files and screenshots to avoid ballooning the repo, then continue with iteration 130.
 
+● Clean up QA artifacts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f qa-*.png
+  │ && git add -A && git commit -m "autoresearch: Clean up QA artifacts
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>/dev/null; echo "done"
+  └ 17 lines...
+
+Good. Continuing with iteration 130.
+
+● Record T0 for iteration 130 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 130
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L27:39 (12 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L24:27 (3 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find path params without validation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversation_id: int\|word_id:
+  │ int\|message_id: int\|attempt_id: int" app/routers/conversation.py app/routers/vocabulary.py
+  │ app/routers/pronunciation.py | grep -v "Body\|Field\|Query" | head -20
+  └ 21 lines...
+
+Let me focus on the path parameter functions (the ones in endpoint decorators). Let me look at the structure more carefully:
+
+● Find path param endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B2 "conversation_id: int,"
+  │ app/routers/conversation.py | grep -E "def |conversation_id" | head -20
+  └ 16 lines...
+
+Let me check if `Path` is already imported:
+
+● Check FastAPI imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "from fastapi import"
+  │ app/routers/conversation.py app/routers/vocabulary.py app/routers/pronunciation.py
+  └ 4 lines...
+
+Need to add `Path` import to all three. Let me now make the focused changes. I'll update the path parameter functions only (not body model fields):
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Now update path params. Let me do conversation.py first:
+
+● Find function signatures to update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def get_summary\|async def
+  │ get_history\|async def delete_conversation\|async def export_conversation\|async def
+  │ get_conversation_replay\|async def get_conversation_vocabulary\|async def toggle_bookmark\|async
+  │ def delete_attempt" app/routers/conversation.py app/routers/pronunciation.py
+  └ 9 lines...
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L281:350 (70 lines read)
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now vocabulary.py path params:
+
+● Find vocab path param endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def delete_word\|async def
+  │ update_word\|async def toggle_favorite\|async def update_notes\|async def get_word_detail"
+  │ app/routers/vocabulary.py
+  └ 6 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L563:570 (8 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L274:280 (7 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L301:308 (8 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L508:516 (9 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L467:475 (9 lines read)
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +2 -2
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +2 -2
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+Now pronunciation.py:
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Now add tests:
+
+● Read test_input_validation.py
+  │ tests/integration/test_input_validation.py
+  └ L1:10 (10 lines read)
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_input_validation.py
+  └ 20 lines...
+
+● Edit test_input_validation.py +29
+  └ tests/integration/test_input_validation.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 130 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #130: Validate path parameter IDs with Path(ge=1) for consistency
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+The pronunciation delete endpoint has a different URL pattern. Let me check:
+
+● Find pronunciation delete route (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "router.delete\|@router.delete"
+  │ app/routers/pronunciation.py
+  └ 3 lines...
+
+The route is `/{attempt_id}`, not `/history/{attempt_id}`. Fix the test:
+
+● Edit test_input_validation.py +1 -1
+  └ tests/integration/test_input_validation.py
+

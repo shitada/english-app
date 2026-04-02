@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_vocabulary_topics, get_prompt
@@ -272,7 +272,7 @@ class DeleteWordResponse(BaseModel):
 
 @router.delete("/{word_id}", response_model=DeleteWordResponse)
 async def delete_word(
-    word_id: int,
+    word_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Delete a vocabulary word and its progress."""
@@ -299,8 +299,8 @@ class UpdateWordResponse(BaseModel):
 
 @router.put("/{word_id}", response_model=UpdateWordResponse)
 async def update_word(
-    word_id: int,
-    req: UpdateWordRequest,
+    word_id: int = Path(ge=1),
+    req: UpdateWordRequest = ...,
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Update a vocabulary word's meaning, example, or difficulty."""
@@ -465,7 +465,7 @@ class ToggleFavoriteResponse(BaseModel):
 
 @router.post("/{word_id}/favorite", response_model=ToggleFavoriteResponse)
 async def toggle_favorite(
-    word_id: int,
+    word_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Toggle a word's favorite status."""
@@ -506,8 +506,8 @@ class UpdateNotesRequest(BaseModel):
 
 @router.put("/{word_id}/notes")
 async def update_notes(
-    word_id: int,
-    req: UpdateNotesRequest,
+    word_id: int = Path(ge=1),
+    req: UpdateNotesRequest = ...,
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Update or clear notes for a vocabulary word."""
@@ -561,7 +561,7 @@ async def get_srs_analytics(
 
 @router.get("/{word_id}/detail")
 async def get_word_detail(
-    word_id: int,
+    word_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get full word detail including progress, notes, and similar words."""

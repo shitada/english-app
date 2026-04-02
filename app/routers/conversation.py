@@ -9,7 +9,7 @@ import time
 from typing import Any, Literal
 
 import aiosqlite
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt
@@ -187,7 +187,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
 
 
 @router.get("/{conversation_id}/summary")
-async def get_summary(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+async def get_summary(conversation_id: int = Path(ge=1), db: aiosqlite.Connection = Depends(get_db_session)):
     """Retrieve a stored conversation summary."""
     summary = await conv_dal.get_conversation_summary(db, conversation_id)
     if summary is None:
@@ -196,7 +196,7 @@ async def get_summary(conversation_id: int, db: aiosqlite.Connection = Depends(g
 
 
 @router.get("/{conversation_id}/history")
-async def get_history(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+async def get_history(conversation_id: int = Path(ge=1), db: aiosqlite.Connection = Depends(get_db_session)):
     if not await conv_dal.conversation_exists(db, conversation_id):
         raise HTTPException(status_code=404, detail="Conversation not found")
     rows = await conv_dal.get_conversation_history(db, conversation_id)
@@ -245,7 +245,7 @@ class ClearResponse(BaseModel):
 
 
 @router.delete("/{conversation_id}", response_model=DeleteResponse)
-async def delete_conversation(conversation_id: int, db: aiosqlite.Connection = Depends(get_db_session)):
+async def delete_conversation(conversation_id: int = Path(ge=1), db: aiosqlite.Connection = Depends(get_db_session)):
     """Delete a conversation and its messages."""
     deleted = await conv_dal.delete_conversation(db, conversation_id)
     if not deleted:
@@ -280,7 +280,7 @@ class ConversationExportResponse(BaseModel):
 
 @router.get("/{conversation_id}/export", response_model=ConversationExportResponse)
 async def export_conversation(
-    conversation_id: int,
+    conversation_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Export a full conversation transcript with metadata and messages."""
@@ -306,7 +306,7 @@ async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_sessio
 
 @router.put("/messages/{message_id}/bookmark")
 async def toggle_bookmark(
-    message_id: int,
+    message_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Toggle bookmark status on a conversation message."""
@@ -331,7 +331,7 @@ async def list_bookmarks(
 
 @router.get("/{conversation_id}/replay")
 async def get_conversation_replay(
-    conversation_id: int,
+    conversation_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get conversation as turn-by-turn pairs for replay/review mode."""
@@ -343,7 +343,7 @@ async def get_conversation_replay(
 
 @router.get("/{conversation_id}/vocabulary")
 async def get_conversation_vocabulary(
-    conversation_id: int,
+    conversation_id: int = Path(ge=1),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Find vocabulary words that appear in a conversation's messages."""
