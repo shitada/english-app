@@ -537,10 +537,10 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
         """),
         ("vocabulary", """
             SELECT
-                COALESCE(SUM(CASE WHEN date(last_reviewed) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(last_reviewed) >= date('now', '-14 days')
-                              AND date(last_reviewed) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
-            FROM vocabulary_progress WHERE last_reviewed IS NOT NULL
+                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-14 days')
+                              AND date(answered_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM quiz_attempts
         """),
         ("pronunciation", """
             SELECT

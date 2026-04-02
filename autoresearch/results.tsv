@@ -131,3 +131,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 125	7d12862	2026-04-02T15:16:37+00:00	326	25	35	278	664	571	571	pass	7.75	keep	Validate individual values in batch preferences endpoint
 126	22c6cbb	2026-04-02T15:34:44+00:00	454	38	37	683	1212	573	573	pass	7.75	keep	Fix get_score_trend reporting stable when previous window is empty
 127	1fc61a6	2026-04-02T15:55:16+00:00	290	93	160	641	1184	575	575	pass	7.75	keep	Clear quiz_attempts when resetting vocabulary progress
+128	f980ca2	2026-04-02T16:08:42+00:00	288	70	35	321	714	578	578	pass	7.75	keep	Validate pronunciation difficulty and vocabulary offset parameters

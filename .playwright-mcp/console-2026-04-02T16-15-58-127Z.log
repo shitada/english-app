@@ -1,0 +1,4 @@
+[    6349ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/pronunciation/check:0
+[    6352ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/vocabulary/attempts?offset=-1:0
+[    6355ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/vocabulary/favorites?offset=-5:0
+[    6357ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://localhost:8000/api/pronunciation/sentences?difficulty=invalid:0

@@ -404,6 +404,18 @@ class TestGetLearningInsights:
         assert result["weekly_comparison"]["conversations"]["this_week"] >= 1
         assert result["weekly_comparison"]["pronunciation"]["this_week"] >= 1
 
+    async def test_weekly_comparison_vocabulary_counts_events(self, test_db):
+        """Vocabulary weekly count should reflect quiz attempt events, not unique words."""
+        from app.dal.vocabulary import log_attempt
+        words = await save_words(test_db, "food", _make_questions(1))
+        word_id = words[0]["id"]
+        # Same word answered 3 times
+        for _ in range(3):
+            await log_attempt(test_db, word_id, True)
+        await test_db.commit()
+        result = await get_learning_insights(test_db)
+        assert result["weekly_comparison"]["vocabulary"]["this_week"] == 3
+
 
 def _make_questions(count=1):
     return [

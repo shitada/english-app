@@ -11306,3 +11306,121 @@ Now add tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 128 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #128: Validate pronunciation difficulty and vocabulary offset parameters
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 41 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+578 passed, TS pass. Smoke test and QA:
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 128
+  │ playwright-browser_navigate http://localhost:8000/
+  │   └ ### Ran Playwright code
+  └ playwright-browser_take_screenshot
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 128
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L398:412 (14 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L490:501 (11 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "128" "f980ca2" "2026-04-02T16:08:42+00:00" "288" "70" "35" "321" "714" \
+  │ "578" "578" "pass" "7.75" "keep" "Validate pronunciation difficulty and vocabulary offset
+  │ parameters" \…
+  └ 3 lines...
+
+Iteration 128: **KEEP** (7.75). Starting iteration 129.
+
+● Record T0 for iteration 129 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 129
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L528:561 (33 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L399:451 (52 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find weekly comparison (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_get_weekly_comparison"
+  │ app/dal/dashboard.py
+  └ 3 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L528:590 (33 lines read)
+
+Now fix the vocabulary query to use quiz_attempts:
+
+● Edit dashboard.py +4 -4
+  └ app/dal/dashboard.py
+
+Now add a test. Let me find the test file:
+
+● Find relevant test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "weekly_comparison\|_get_weekly_comparison\|TestGetLearningInsights"
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 8 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L396:420 (25 lines read)
+
+● Check imports in dashboard test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "from app.dal"
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 11 lines...
+
+I need `log_attempt` from vocabulary DAL:
+
+● Edit test_dashboard_dal.py +12
+  └ tests/unit/test_dashboard_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
