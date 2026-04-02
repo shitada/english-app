@@ -1,0 +1,6 @@
+[     687ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/conversation/topics:0
+[     688ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/conversation/list:0
+[   11880ms] [ERROR] Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID @ https://localhost:8000/api/health:0
+[   18323ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/health:0
+[   94643ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/health:0
+[  119580ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/health:0

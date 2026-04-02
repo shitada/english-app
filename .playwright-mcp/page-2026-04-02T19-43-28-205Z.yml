@@ -1,0 +1,33 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Pronunciation Practice" [level=2] [ref=e9]
+      - paragraph [ref=e10]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e11]:
+        - generic [ref=e12] [cursor=pointer]:
+          - paragraph [ref=e13]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e14]: hotel
+          - img [ref=e15]
+        - generic [ref=e17] [cursor=pointer]:
+          - paragraph [ref=e18]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e19]: restaurant
+          - img [ref=e20]
+        - generic [ref=e22] [cursor=pointer]:
+          - paragraph [ref=e23]: I have three years of experience in software development.
+          - generic [ref=e24]: interview
+          - img [ref=e25]
+        - generic [ref=e27] [cursor=pointer]:
+          - paragraph [ref=e28]: I've been having a headache for the past two days.
+          - generic [ref=e29]: medical
+          - img [ref=e30]
+        - generic [ref=e32] [cursor=pointer]:
+          - paragraph [ref=e33]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e34]: shopping
+          - img [ref=e35]
+        - generic [ref=e37] [cursor=pointer]:
+          - paragraph [ref=e38]: What gate does the flight to London depart from?
+          - generic [ref=e39]: airport
+          - img [ref=e40]

@@ -155,7 +155,13 @@ async def update_progress(
         await db.execute(
             """INSERT INTO vocabulary_progress
                (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(word_id) DO UPDATE SET
+               correct_count = excluded.correct_count,
+               incorrect_count = excluded.incorrect_count,
+               level = excluded.level,
+               last_reviewed = excluded.last_reviewed,
+               next_review_at = excluded.next_review_at""",
             (word_id, correct, incorrect, level, now, next_review),
         )
 

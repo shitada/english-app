@@ -248,6 +248,20 @@ class TestUpdateProgress:
         assert rows[0]["correct_count"] == 2
         assert rows[0]["incorrect_count"] == 1
 
+    async def test_always_single_progress_row(self, test_db):
+        """update_progress should never create duplicate rows for same word_id."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(1))
+        wid = words[0]["id"]
+        for _ in range(5):
+            await update_progress(test_db, wid, True)
+        for _ in range(3):
+            await update_progress(test_db, wid, False)
+        rows = await test_db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE word_id = ?",
+            (wid,),
+        )
+        assert rows[0]["cnt"] == 1
+
 
 @pytest.mark.unit
 class TestGetProgress:

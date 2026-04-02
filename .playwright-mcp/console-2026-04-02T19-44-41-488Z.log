@@ -1,0 +1,5 @@
+[    6963ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/conversation/topics:0
+[   13122ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/conversation/topics:0
+[   13123ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/dashboard/stats:0
+[   13123ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/vocabulary/topics:0
+[   13124ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/pronunciation/sentences:0

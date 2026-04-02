@@ -1,0 +1,41 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Pronunciation Practice" [level=2] [ref=e64]
+      - paragraph [ref=e65]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e66]:
+        - generic [ref=e67] [cursor=pointer]:
+          - paragraph [ref=e68]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e69]: hotel
+          - img [ref=e70]
+        - generic [ref=e72] [cursor=pointer]:
+          - paragraph [ref=e73]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e74]: restaurant
+          - img [ref=e75]
+        - generic [ref=e77] [cursor=pointer]:
+          - paragraph [ref=e78]: I have three years of experience in software development.
+          - generic [ref=e79]: interview
+          - img [ref=e80]
+        - generic [ref=e82] [cursor=pointer]:
+          - paragraph [ref=e83]: I've been having a headache for the past two days.
+          - generic [ref=e84]: medical
+          - img [ref=e85]
+        - generic [ref=e87] [cursor=pointer]:
+          - paragraph [ref=e88]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e89]: shopping
+          - img [ref=e90]
+        - generic [ref=e92] [cursor=pointer]:
+          - paragraph [ref=e93]: What gate does the flight to London depart from?
+          - generic [ref=e94]: airport
+          - img [ref=e95]

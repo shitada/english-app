@@ -1,0 +1,12 @@
+[      70ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:8000/api/dashboard/stats:0
+[      71ms] [ERROR] TypeError: Failed to fetch
+    at vr (http://localhost:8000/assets/index-Br-Ilj-f.js:11:33451)
+    at Object.getDashboardStats (http://localhost:8000/assets/index-Br-Ilj-f.js:11:34885)
+    at http://localhost:8000/assets/index-Br-Ilj-f.js:11:63822
+    at Hc (http://localhost:8000/assets/index-Br-Ilj-f.js:8:91691)
+    at Dl (http://localhost:8000/assets/index-Br-Ilj-f.js:8:106814)
+    at El (http://localhost:8000/assets/index-Br-Ilj-f.js:8:106698)
+    at Dl (http://localhost:8000/assets/index-Br-Ilj-f.js:8:107578)
+    at El (http://localhost:8000/assets/index-Br-Ilj-f.js:8:106698)
+    at Dl (http://localhost:8000/assets/index-Br-Ilj-f.js:8:106794)
+    at El (http://localhost:8000/assets/index-Br-Ilj-f.js:8:106698) @ :0

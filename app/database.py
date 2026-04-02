@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS vocabulary_progress (
 
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_topic ON vocabulary_words(topic);
-CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(word_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(word_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word_review ON vocabulary_progress(word_id, next_review_at);
 CREATE INDEX IF NOT EXISTS idx_pron_attempts_created ON pronunciation_attempts(created_at DESC);
@@ -130,6 +130,14 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add difficulty column to pronunciation_attempts",
         "ALTER TABLE pronunciation_attempts ADD COLUMN difficulty TEXT",
+    ),
+    (
+        "deduplicate vocabulary_progress rows",
+        "DELETE FROM vocabulary_progress WHERE id NOT IN (SELECT MAX(id) FROM vocabulary_progress GROUP BY word_id)",
+    ),
+    (
+        "add unique index on vocabulary_progress word_id",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_vp_word_id_unique ON vocabulary_progress(word_id)",
     ),
 ]
 
