@@ -11873,3 +11873,81 @@ Now add a test. Let me check the conversation test file:
 
 Iteration 131: **KEEP** (8.0). Clean up artifacts, then continue to 132.
 
+● Clean up artifacts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f
+  │ conversation-mobile-375.png dashboard-mobile-375.png && git add -A && git commit -m
+  │ "autoresearch: Clean up QA artifacts
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3
+  └ 4 lines...
+
+● Record T0 for iteration 132 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 132
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L534:564 (30 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L499:532 (33 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find get_retry_suggestions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_retry_suggestions"
+  │ app/dal/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L534:570 (30 lines read)
+
+✗ Edit pronunciation.py
+  │ app/dal/pronunciation.py
+  └ No match found
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L543:546 (4 lines read)
+
+✗ Edit pronunciation.py
+  │ app/dal/pronunciation.py
+  └ No match found
+
+● Show exact characters (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '543,545p' app/dal/pronunciation.py
+  │ | cat -A
+  └ 3 lines...
+
+● Show exact chars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '543,545p' app/dal/pronunciation.py
+  │ | cat -v
+  └ 4 lines...
+
+I see - the indentation uses different spacing. Let me match exactly:
+
+● Edit pronunciation.py +2 -2
+  └ app/dal/pronunciation.py
+
+Now add the test:
+
+● Find retry suggestions tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ TestGetRetrySuggestions\|get_retry_suggestions" tests/unit/test_pronunciation_dal.py | head -10
+  └ 10 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L699:730 (32 lines read)
+
+● Edit test_pronunciation_dal.py +13
+  └ tests/unit/test_pronunciation_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

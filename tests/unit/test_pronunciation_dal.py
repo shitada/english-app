@@ -703,6 +703,19 @@ class TestGetRetrySuggestions:
         result = await get_retry_suggestions(test_db, threshold=7.0, limit=3)
         assert len(result) <= 3
 
+    async def test_null_score_latest_still_suggests(self, test_db):
+        """A NULL-scored latest attempt should not hide low-scored sentences."""
+        from app.dal.pronunciation import get_retry_suggestions
+        feedback = {"overall_score": 3}
+        # First attempt: low score
+        await save_attempt(test_db, "Test sentence.", "Test sentence.", feedback, 3.0)
+        # Second attempt: NULL score (e.g., evaluation failed)
+        await save_attempt(test_db, "Test sentence.", "Test sentence.", feedback, None)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert len(result) == 1
+        assert result[0]["text"] == "Test sentence."
+        assert result[0]["latest_score"] == 3.0
+
 
 @pytest.mark.unit
 class TestGetProgressByDifficulty:

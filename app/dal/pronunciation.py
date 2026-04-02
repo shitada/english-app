@@ -541,8 +541,8 @@ async def get_retry_suggestions(
                   MIN(score) as worst_score,
                   MAX(score) as best_score,
                   (SELECT pa2.score FROM pronunciation_attempts pa2
-                   WHERE pa2.reference_text = pa.reference_text
-                   ORDER BY pa2.created_at DESC LIMIT 1) as latest_score
+                   WHERE pa2.reference_text = pa.reference_text AND pa2.score IS NOT NULL
+                   ORDER BY pa2.created_at DESC, pa2.id DESC LIMIT 1) as latest_score
            FROM pronunciation_attempts pa
            WHERE score IS NOT NULL
            GROUP BY reference_text
