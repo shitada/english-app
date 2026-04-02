@@ -8,6 +8,8 @@ from typing import Any
 
 import aiosqlite
 
+from app.utils import escape_like
+
 # SM-2 simplified intervals (days)
 SM2_INTERVALS = [0, 1, 3, 7, 14, 30, 60]
 
@@ -222,8 +224,8 @@ async def search_words(
     conditions = []
     params: list[Any] = []
     if query:
-        conditions.append("(word LIKE ? OR meaning LIKE ?)")
-        like = f"%{query}%"
+        conditions.append("(word LIKE ? ESCAPE '\\' OR meaning LIKE ? ESCAPE '\\')")
+        like = f"%{escape_like(query)}%"
         params.extend([like, like])
     if topic:
         conditions.append("topic = ?")

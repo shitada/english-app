@@ -10563,3 +10563,177 @@ Good, `difficulty` defaults to "intermediate". Now let me add the test. I'll add
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 123 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #123: Fix pronunciation sentences returning empty when filtering by difficulty
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 31 lines...
+
+T2=1775141837 (implement_sec=57). Now run tests.
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+562 passed, TS check passed. Run smoke test since DAL was modified, then QA.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -5
+  └ 6 lines...
+
+T3=1775141870 (test_sec=33). Start server for QA testing.
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown; sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 123
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L80:160 (81 lines read)
+  └ playwright-browser_evaluate
+      └ ### Result
+
+QA passed (ux_score=8). Now call the evaluator.
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 123
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L60:120 (61 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L12:54 (43 lines read)
+
+Evaluator: 7.8, keep. Record T4 and results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 123 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "123" "afce40b" "2026-04-02T14:51:15+00:00" "305" "57" "33" "311" "706" \
+  │ "562" "562" "pass" "7.8" "keep" "Fix pronunciation sentences returning empty when filtering
+  │ by difficulty" \…
+  └ 3 lines...
+
+Iteration 123: **KEEP** (7.8). Starting iteration 124.
+
+● Record T0 for iteration 124 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 124
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L200:400 (201 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L300:450 (151 lines read)
+
+● Record T1 for iteration 124 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find LIKE patterns in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "LIKE" app/dal/vocabulary.py
+  │ app/dal/conversation.py
+  └ 4 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L125:180 (56 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L215:245 (29 lines read)
+
+● Check if escape_like exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def escape_like\|def search_words"
+  │ app/utils.py
+  └ 1 line...
+
+Good, no `escape_like` exists yet. Let me check `app/utils.py`:
+
+● Check end of utils.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/utils.py
+  └ 19 lines...
+
+Now implement. Add `escape_like` to utils.py, then update the DAL files.
+
+● Edit utils.py +5
+  └ app/utils.py
+
+Now update vocabulary DAL:
+
+● Check imports in vocabulary DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10 app/dal/vocabulary.py
+  └ 10 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L10:15 (6 lines read)
+
+● Edit vocabulary.py +2
+  └ app/dal/vocabulary.py
+
+● Edit vocabulary.py +2 -2
+  └ app/dal/vocabulary.py
+
+Now update conversation DAL:
+
+● Check conversation DAL imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -12 app/dal/conversation.py
+  └ 13 lines...
+
+● Edit conversation.py +2
+  └ app/dal/conversation.py
+
+Now update the two LIKE patterns in conversation.py. The tricky part is that these use `'%' || ? || '%'` syntax — I need to switch to pre-escaping and passing the full pattern:
+
+● Edit conversation.py +2 -2
+  └ app/dal/conversation.py
+
+● Edit conversation.py +2 -2
+  └ app/dal/conversation.py
+
+Now add unit tests. Check existing test_utils.py:
+
+● Check end of test_utils (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_utils.py
+  └ 21 lines...
+
+● Check utils imports in test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "from app.utils import"
+  │ tests/unit/test_utils.py
+  └ 2 lines...
+
+● Edit test_utils.py +1 -1
+  └ tests/unit/test_utils.py
+
+● Edit test_utils.py +21
+  └ tests/unit/test_utils.py
+
+● Record T2 for iteration 124 (shell)
+  │ date +%s
+  └ 2 lines...
+

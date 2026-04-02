@@ -73,3 +73,8 @@ def validate_topic(topics: list[dict[str, Any]], topic_id: str) -> dict[str, Any
         status_code=422,
         detail=f"Unknown topic '{topic_id}'. Valid topics: {valid_ids}",
     )
+
+
+def escape_like(value: str) -> str:
+    """Escape SQL LIKE wildcard characters (%, _, \\) for safe use in LIKE patterns."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")

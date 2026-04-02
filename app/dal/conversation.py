@@ -8,6 +8,8 @@ from typing import Any
 
 import aiosqlite
 
+from app.utils import escape_like
+
 
 async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate") -> int:
     cursor = await db.execute(
@@ -131,9 +133,9 @@ async def list_conversations(
     if keyword:
         where_clauses.append(
             "EXISTS (SELECT 1 FROM messages m2 WHERE m2.conversation_id = c.id "
-            "AND m2.content LIKE '%' || ? || '%')"
+            "AND m2.content LIKE '%' || ? || '%' ESCAPE '\\')"
         )
-        params.append(keyword)
+        params.append(escape_like(keyword))
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     params.extend([limit, offset])
@@ -170,9 +172,9 @@ async def count_conversations(
     if keyword:
         where_clauses.append(
             "EXISTS (SELECT 1 FROM messages m WHERE m.conversation_id = conversations.id "
-            "AND m.content LIKE '%' || ? || '%')"
+            "AND m.content LIKE '%' || ? || '%' ESCAPE '\\')"
         )
-        params.append(keyword)
+        params.append(escape_like(keyword))
 
     where_sql = f" WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
     rows = await db.execute_fetchall(

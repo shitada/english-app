@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.utils import get_topic_label, safe_llm_call, validate_topic
+from app.utils import escape_like, get_topic_label, safe_llm_call, validate_topic
 
 
 @pytest.mark.unit
@@ -225,3 +225,24 @@ class TestValidateTopic:
         with pytest.raises(HTTPException) as exc_info:
             validate_topic([], "any")
         assert exc_info.value.status_code == 422
+
+
+@pytest.mark.unit
+class TestEscapeLike:
+    def test_escapes_percent(self):
+        assert escape_like("100%") == "100\\%"
+
+    def test_escapes_underscore(self):
+        assert escape_like("a_b") == "a\\_b"
+
+    def test_escapes_backslash(self):
+        assert escape_like("a\\b") == "a\\\\b"
+
+    def test_no_special_chars(self):
+        assert escape_like("hello world") == "hello world"
+
+    def test_all_special_chars(self):
+        assert escape_like("%_\\") == "\\%\\_\\\\"
+
+    def test_empty_string(self):
+        assert escape_like("") == ""

@@ -1,0 +1,73 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - button "Toggle navigation menu" [ref=e6] [cursor=pointer]: ☰
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - heading "Pronunciation Practice" [level=2] [ref=e9]
+      - paragraph [ref=e10]: "Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback."
+      - generic [ref=e11]:
+        - generic [ref=e12] [cursor=pointer]:
+          - paragraph [ref=e13]: Here's the menu for you.
+          - generic [ref=e14]: Restaurant Order
+          - img [ref=e15]
+        - generic [ref=e17] [cursor=pointer]:
+          - paragraph [ref=e18]: We also have a butternut squash ravioli in a sage brown butter if you're leaning toward something lighter.
+          - generic [ref=e19]: Restaurant Order
+          - img [ref=e20]
+        - generic [ref=e22] [cursor=pointer]:
+          - paragraph [ref=e23]: Take your time looking things over, and I'll be back in a few minutes to check on you.
+          - generic [ref=e24]: Restaurant Order
+          - img [ref=e25]
+        - generic [ref=e27] [cursor=pointer]:
+          - paragraph [ref=e28]: Can I grab you a water or anything to sip on while you decide?
+          - generic [ref=e29]: Restaurant Order
+          - img [ref=e30]
+        - generic [ref=e32] [cursor=pointer]:
+          - paragraph [ref=e33]: My name's Marco, and I'll be taking care of you today.
+          - generic [ref=e34]: Restaurant Order
+          - img [ref=e35]
+        - generic [ref=e37] [cursor=pointer]:
+          - paragraph [ref=e38]: Good afternoon and welcome to The Grand Meridian!
+          - generic [ref=e39]: Hotel Check-in
+          - img [ref=e40]
+        - generic [ref=e42] [cursor=pointer]:
+          - paragraph [ref=e43]: I hope you had a pleasant journey getting here.
+          - generic [ref=e44]: Hotel Check-in
+          - img [ref=e45]
+        - generic [ref=e47] [cursor=pointer]:
+          - paragraph [ref=e48]: My name is David, and I'll be taking care of your check-in today.
+          - generic [ref=e49]: Hotel Check-in
+          - img [ref=e50]
+        - generic [ref=e52] [cursor=pointer]:
+          - paragraph [ref=e53]: Do you have a reservation with us, or would you be looking to book a room for tonight?
+          - generic [ref=e54]: Hotel Check-in
+          - img [ref=e55]
+        - generic [ref=e57] [cursor=pointer]:
+          - paragraph [ref=e58]: I'd be happy to help you check in for your London flight.
+          - generic [ref=e59]: At the Airport
+          - img [ref=e60]
+        - generic [ref=e62] [cursor=pointer]:
+          - paragraph [ref=e63]: I'd like to check in, please. I have a reservation under Smith.
+          - generic [ref=e64]: hotel
+          - img [ref=e65]
+        - generic [ref=e67] [cursor=pointer]:
+          - paragraph [ref=e68]: Could I see the menu, please? Do you have any specials today?
+          - generic [ref=e69]: restaurant
+          - img [ref=e70]
+        - generic [ref=e72] [cursor=pointer]:
+          - paragraph [ref=e73]: I have three years of experience in software development.
+          - generic [ref=e74]: interview
+          - img [ref=e75]
+        - generic [ref=e77] [cursor=pointer]:
+          - paragraph [ref=e78]: I've been having a headache for the past two days.
+          - generic [ref=e79]: medical
+          - img [ref=e80]
+        - generic [ref=e82] [cursor=pointer]:
+          - paragraph [ref=e83]: Do you have this in a medium? I'd like to try it on.
+          - generic [ref=e84]: shopping
+          - img [ref=e85]
+        - generic [ref=e87] [cursor=pointer]:
+          - paragraph [ref=e88]: What gate does the flight to London depart from?
+          - generic [ref=e89]: airport
+          - img [ref=e90]
