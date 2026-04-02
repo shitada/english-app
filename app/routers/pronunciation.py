@@ -307,7 +307,7 @@ class SentenceHistoryResponse(BaseModel):
 
 @router.get("/sentence-history", response_model=SentenceHistoryResponse)
 async def get_sentence_history(
-    text: str = Query(..., min_length=1),
+    text: str = Query(..., min_length=1, max_length=1000),
     limit: int = Query(default=20, ge=1, le=100),
     db: aiosqlite.Connection = Depends(get_db_session),
 ):

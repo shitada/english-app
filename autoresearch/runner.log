@@ -13580,3 +13580,116 @@ Now add the race condition tests:
 ● Edit test_conversation_dal.py +16
   └ tests/unit/test_conversation_dal.py
 
+● Commit iteration 146 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: make end_conversation status transition atomic to prevent race condition
+  │
+  │ - WHERE clause now includes AND status = 'active'
+  │ - Returns bool (True if transitioned, False if already ended)…
+  └ 21 lines...
+
+● Run tests for iteration 146 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+609 passed. Record:
+
+● Record iteration 146 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "146" "a9062b2" "$TSTAMP" "80" "300" "55" "60" "$((T4-1775169806))" \
+  │ "609" "609" "pass" "8.0" "keep" "Make end_conversation status transition atomic to prevent …
+  └ 4 lines...
+
+Iteration 146: **KEEP** (8.0). 25/25 kept. Continuing 147-151:
+
+● Record T0 for iteration 147 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 147
+  │ List directory tests/integration
+  │   └ 12 files found
+  └ Read test_input_validation.py
+      │ tests/integration/test_input_validation.py
+      └ 173 lines read
+
+Good — text length limits. Let me implement:
+
+● Find keyword param (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'keyword.*Query\|keyword.*str'
+  │ app/routers/conversation.py | head -5
+  └ 2 lines...
+
+● Find SetGoalRequest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class SetGoalRequest\|goal_type'
+  │ app/routers/dashboard.py | head -5
+  └ 6 lines...
+
+● Find UpdateNotesRequest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class UpdateNotesRequest'
+  │ app/routers/vocabulary.py
+  └ 2 lines...
+
+● Find search query param (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'q:.*str\|query.*str'
+  │ app/routers/vocabulary.py | head -5
+  └ 2 lines...
+
+● Find pronunciation text param (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'text.*Query\|reference_text.*min_length' app/routers/pronunciation.py | head -5
+  └ 3 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L503:510 (8 lines read)
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L153:158 (6 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L225:233 (9 lines read)
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L219:228 (9 lines read)
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L308:315 (8 lines read)
+
+Now apply fixes:
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+● Edit dashboard.py +1 -1
+  └ app/routers/dashboard.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+Now add integration tests:
+
+● Check end of input validation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_input_validation.py
+  └ 20 lines...
+
+● Add text length limit tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_input_validation.py <<
+  │ 'ENDTEST'…
+  └ 22 lines...
+

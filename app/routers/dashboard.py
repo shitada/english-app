@@ -217,7 +217,7 @@ async def get_learning_insights(db: aiosqlite.Connection = Depends(get_db_sessio
 
 
 class SetGoalRequest(BaseModel):
-    goal_type: str
+    goal_type: str = Field(max_length=50)
     daily_target: int = Field(ge=1, le=100)
 
 

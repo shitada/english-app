@@ -225,7 +225,7 @@ async def get_history(conversation_id: int = Path(ge=1), db: aiosqlite.Connectio
 @router.get("/list", response_model=ConversationListResponse)
 async def list_conversations(
     topic: str | None = None,
-    keyword: str | None = None,
+    keyword: str | None = Query(default=None, max_length=200),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: aiosqlite.Connection = Depends(get_db_session),

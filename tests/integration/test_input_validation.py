@@ -171,3 +171,22 @@ class TestPathParameterValidation:
     async def test_bookmark_toggle_zero_id(self, client):
         res = await client.put("/api/conversation/messages/0/bookmark")
         assert res.status_code == 422
+
+
+@pytest.mark.integration
+class TestTextLengthLimits:
+    async def test_vocabulary_search_too_long(self, client):
+        res = await client.get("/api/vocabulary/words", params={"q": "x" * 201})
+        assert res.status_code == 422
+
+    async def test_conversation_keyword_too_long(self, client):
+        res = await client.get("/api/conversation/list", params={"keyword": "x" * 201})
+        assert res.status_code == 422
+
+    async def test_pronunciation_sentence_history_too_long(self, client):
+        res = await client.get("/api/pronunciation/sentence-history", params={"text": "x" * 1001})
+        assert res.status_code == 422
+
+    async def test_vocabulary_notes_too_long(self, client):
+        res = await client.put("/api/vocabulary/1/notes", json={"notes": "x" * 2001})
+        assert res.status_code == 422

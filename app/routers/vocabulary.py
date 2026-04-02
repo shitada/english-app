@@ -152,7 +152,7 @@ async def list_topics():
 
 @router.get("/words", response_model=WordBankResponse)
 async def browse_words(
-    q: str | None = None,
+    q: str | None = Query(default=None, max_length=200),
     topic: str | None = None,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
@@ -501,7 +501,7 @@ async def get_favorites(
 
 
 class UpdateNotesRequest(BaseModel):
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
 
 
 @router.put("/{word_id}/notes")
