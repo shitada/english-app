@@ -347,25 +347,24 @@ async def get_topic_recommendations(
 
 async def toggle_message_bookmark(db: aiosqlite.Connection, message_id: int) -> dict | None:
     """Toggle the is_bookmarked flag on a message. Returns updated message or None."""
+    cursor = await db.execute(
+        "UPDATE messages SET is_bookmarked = 1 - is_bookmarked WHERE id = ?",
+        (message_id,),
+    )
+    if cursor.rowcount == 0:
+        return None
+    await db.commit()
     rows = await db.execute_fetchall(
         "SELECT id, conversation_id, role, content, is_bookmarked, created_at FROM messages WHERE id = ?",
         (message_id,),
     )
-    if not rows:
-        return None
     row = rows[0]
-    new_value = 0 if row["is_bookmarked"] else 1
-    await db.execute(
-        "UPDATE messages SET is_bookmarked = ? WHERE id = ?",
-        (new_value, message_id),
-    )
-    await db.commit()
     return {
         "id": row["id"],
         "conversation_id": row["conversation_id"],
         "role": row["role"],
         "content": row["content"],
-        "is_bookmarked": new_value,
+        "is_bookmarked": row["is_bookmarked"],
         "created_at": row["created_at"],
     }
 

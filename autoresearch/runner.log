@@ -13181,3 +13181,81 @@ Now add pronunciation history test:
 ● Edit test_pronunciation_dal.py +13
   └ tests/unit/test_pronunciation_dal.py
 
+● Commit iteration 141 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: add try/except for json.loads in summary and pronunciation history
+  │
+  │ Protect against corrupted JSON in DB:
+  │ - get_conversation_summary: return None on parse failure…
+  └ 21 lines...
+
+● Run tests for iteration 141 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+605 passed. Record:
+
+● Record iteration 141 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "141" "cd1833f" "$TSTAMP" "55" "200" "55" "60" "$((T4-1775165190))" \
+  │ "605" "605" "pass" "7.75" "keep" "Add try/except for json.loads in summary and pronunciation…
+  └ 4 lines...
+
+Iteration 141: **KEEP** (7.75). 20/20 kept. Starting 142:
+
+● Record T0 for iteration 142 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 142
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1:50 (50 lines read)
+
+Good — atomic toggle operations. Let me implement:
+
+● Find toggle_favorite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def toggle_favorite'
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Find toggle_message_bookmark (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def toggle_message_bookmark'
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L348:380 (33 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L600:630 (31 lines read)
+
+● Edit vocabulary.py +8 -9
+  └ app/dal/vocabulary.py
+
+● Edit conversation.py +8 -9
+  └ app/dal/conversation.py
+
+Now add tests:
+
+● Find bookmark test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestToggleBookmark\|class
+  │ TestBookmark' tests/unit/test_conversation_dal.py | head -5
+  └ 1 line...
+
+● Find toggle tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'toggle_message_bookmark\|toggle_favorite' tests/unit/test_conversation_dal.py
+  │ tests/unit/test_vocabulary_dal.py | head -10
+  └ 11 lines...
+
+Tests already exist — the atomic change is backward-compatible. Let me commit and test:
+

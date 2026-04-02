@@ -601,19 +601,18 @@ async def toggle_favorite(
     db: aiosqlite.Connection, word_id: int
 ) -> dict[str, Any] | None:
     """Toggle a word's favorite status. Returns {word_id, is_favorite} or None."""
-    rows = await db.execute_fetchall(
-        "SELECT id, is_favorite FROM vocabulary_words WHERE id = ?",
+    cursor = await db.execute(
+        "UPDATE vocabulary_words SET is_favorite = 1 - is_favorite WHERE id = ?",
         (word_id,),
     )
-    if not rows:
+    if cursor.rowcount == 0:
         return None
-    new_val = 0 if rows[0]["is_favorite"] else 1
-    await db.execute(
-        "UPDATE vocabulary_words SET is_favorite = ? WHERE id = ?",
-        (new_val, word_id),
-    )
     await db.commit()
-    return {"word_id": word_id, "is_favorite": bool(new_val)}
+    rows = await db.execute_fetchall(
+        "SELECT is_favorite FROM vocabulary_words WHERE id = ?",
+        (word_id,),
+    )
+    return {"word_id": word_id, "is_favorite": bool(rows[0]["is_favorite"])}
 
 
 async def get_favorites(
