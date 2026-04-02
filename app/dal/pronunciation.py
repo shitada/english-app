@@ -187,7 +187,9 @@ async def get_score_trend(db: aiosqlite.Connection, window: int = 5) -> dict[str
     recent = [r["score"] for r in rows[:window]]
     previous = [r["score"] for r in rows[window:]]
     recent_avg = round(sum(recent) / len(recent), 2)
-    previous_avg = round(sum(previous) / len(previous), 2) if previous else recent_avg
+    if not previous:
+        return {"trend": "insufficient_data", "recent_avg": recent_avg, "previous_avg": 0, "change": 0}
+    previous_avg = round(sum(previous) / len(previous), 2)
     change = round(recent_avg - previous_avg, 2)
     
     if change > 0.5:

@@ -10849,3 +10849,115 @@ Now add tests. Let me check existing tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 125 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #125: Validate individual values in batch preferences endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 29 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+571 passed, TS pass. Smoke test (routers changed):
+
+● Smoke test + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+T3=1775143383 (test_sec=35). QA test:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 125
+  │ playwright-browser_click
+  │   └ ### Ran Playwright code
+  └ playwright-browser_snapshot
+      └ ### Page
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 125
+  │ Read preferences.py
+  │   │ app/routers/preferences.py
+  │   └ 89 lines read
+  └ Read test_preferences_api.py
+      │ tests/integration/test_preferences_api.py
+      └ 92 lines read
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "125" "7d12862" "2026-04-02T15:16:37+00:00" "326" "25" "35" "278" "664" \
+  │ "571" "571" "pass" "7.75" "keep" "Validate individual values in batch preferences endpoint"
+  │ \…
+  └ 3 lines...
+
+Iteration 125: **KEEP** (7.75). Starting iteration 126.
+
+● Record T0 for iteration 126 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 126
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L175:201 (26 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L299:326 (26 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find get_score_trend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_score_trend"
+  │ app/dal/pronunciation.py
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L175:210 (35 lines read)
+
+Now implement the fix:
+
+● Edit pronunciation.py +3 -1
+  └ app/dal/pronunciation.py
+
+Now add tests. Let me find the existing score trend tests:
+
+● Find trend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class TestScore\|def
+  │ test.*trend\|class TestTrend" tests/unit/test_pronunciation_dal.py
+  └ 4 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L299:360 (62 lines read)
+
+● Edit test_pronunciation_dal.py +23
+  └ tests/unit/test_pronunciation_dal.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

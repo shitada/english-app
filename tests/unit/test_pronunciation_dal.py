@@ -323,6 +323,29 @@ class TestScoreTrend:
         result = await get_score_trend(test_db)
         assert result["trend"] == "stable"
 
+    async def test_exactly_window_attempts_returns_insufficient(self, test_db):
+        """With exactly 5 attempts (default window), no previous window exists."""
+        from app.dal.pronunciation import get_score_trend
+        feedback = {"overall_score": 7}
+        for s in [6.0, 7.0, 8.0, 7.0, 7.0]:
+            await save_attempt(test_db, "Test.", "Test.", feedback, s)
+        result = await get_score_trend(test_db)
+        assert result["trend"] == "insufficient_data"
+        assert result["recent_avg"] == 7.0
+
+    async def test_window_plus_one_computes_trend(self, test_db):
+        """With 6 attempts, previous window has 1 score — trend is computed."""
+        from app.dal.pronunciation import get_score_trend
+        feedback = {"overall_score": 5}
+        # 1 old score
+        await save_attempt(test_db, "Test.", "Test.", feedback, 3.0)
+        # 5 recent scores
+        for s in [7.0, 8.0, 7.5, 8.0, 7.5]:
+            await save_attempt(test_db, "Test.", "Test.", feedback, s)
+        result = await get_score_trend(test_db)
+        assert result["trend"] == "improving"
+        assert result["previous_avg"] == 3.0
+
 
 @pytest.mark.unit
 class TestGetScoreDistribution:

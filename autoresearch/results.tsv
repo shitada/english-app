@@ -128,3 +128,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 122	79bfb2f	2026-04-02T14:38:10+00:00	307	63	33	341	744	561	561	pass	7.75	keep	Fix _estimate_difficulty ignoring conv_difficulty parameter
 123	afce40b	2026-04-02T14:51:15+00:00	305	57	33	311	706	562	562	pass	7.8	keep	Fix pronunciation sentences returning empty when filtering by difficulty
 124	3877f6a	2026-04-02T15:03:23+00:00	308	78	38	349	773	568	568	pass	8.1	keep	Escape SQL LIKE wildcards in search_words and conversation keyword filters
+125	7d12862	2026-04-02T15:16:37+00:00	326	25	35	278	664	571	571	pass	7.75	keep	Validate individual values in batch preferences endpoint
