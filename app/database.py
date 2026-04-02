@@ -68,11 +68,15 @@ CREATE TABLE IF NOT EXISTS vocabulary_progress (
 );
 
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_role_created ON messages(role, created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_bookmarked ON messages(is_bookmarked) WHERE is_bookmarked = 1;
+CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(status);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_topic ON vocabulary_words(topic);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(word_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_word_review ON vocabulary_progress(word_id, next_review_at);
 CREATE INDEX IF NOT EXISTS idx_pron_attempts_created ON pronunciation_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pron_attempts_reference ON pronunciation_attempts(reference_text);
 
 CREATE TABLE IF NOT EXISTS quiz_attempts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
