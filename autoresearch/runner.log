@@ -13398,3 +13398,33 @@ Now add a test for consistent feedback key:
 ● Edit test_conversation_api.py +14
   └ tests/integration/test_conversation_api.py
 
+● Commit iteration 144 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: ensure consistent message schema in conversation history
+  │
+  │ - Always include 'feedback' key (None when absent, not missing)
+  │ - Convert is_bookmarked from SQLite int to Python bool…
+  └ 19 lines...
+
+● Run tests for iteration 144 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+607 passed. Record:
+
+● Record iteration 144 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "144" "d17dbe0" "$TSTAMP" "50" "180" "55" "60" "$((T4-1775168748))" \
+  │ "607" "607" "pass" "7.75" "keep" "Ensure consistent message schema in conversation history" …
+  └ 4 lines...
+
+Iteration 144: **KEEP** (7.75). 23/23 kept. Let me clean up artifacts and continue:
+
+● Check cleanup needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f *.png &&
+  │ git add -A && git diff --cached --stat | head -5
+  └ 4 lines...
+
