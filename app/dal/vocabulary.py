@@ -172,7 +172,7 @@ async def get_progress(db: aiosqlite.Connection, topic: str | None = None) -> li
                FROM vocabulary_progress vp
                JOIN vocabulary_words vw ON vp.word_id = vw.id
                WHERE vw.topic = ?
-               ORDER BY vp.level ASC""",
+               ORDER BY vp.level ASC, vw.word ASC""",
             (topic,),
         )
     else:
@@ -181,7 +181,7 @@ async def get_progress(db: aiosqlite.Connection, topic: str | None = None) -> li
                       vp.level, vp.last_reviewed, vp.next_review_at
                FROM vocabulary_progress vp
                JOIN vocabulary_words vw ON vp.word_id = vw.id
-               ORDER BY vp.level ASC""",
+               ORDER BY vp.level ASC, vw.word ASC""",
         )
     return [dict(r) for r in rows]
 
@@ -323,7 +323,7 @@ async def get_weak_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict
            FROM vocabulary_progress vp
            JOIN vocabulary_words vw ON vp.word_id = vw.id
            WHERE (vp.correct_count + vp.incorrect_count) >= 2
-           ORDER BY error_rate DESC, vp.level ASC
+           ORDER BY error_rate DESC, vp.level ASC, vw.id ASC
            LIMIT ?""",
         (limit,),
     )
@@ -683,7 +683,7 @@ async def auto_adjust_difficulty(
     """
     attempts = await db.execute_fetchall(
         """SELECT is_correct FROM quiz_attempts
-           WHERE word_id = ? ORDER BY answered_at DESC LIMIT 5""",
+           WHERE word_id = ? ORDER BY answered_at DESC, id DESC LIMIT 5""",
         (word_id,),
     )
     if len(attempts) < 5:

@@ -151,8 +151,8 @@ async def test_pronunciation_history_ordering(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert len(data["attempts"]) == 2
-    assert data["attempts"][0]["reference_text"] == "Good morning"
-    assert data["attempts"][1]["reference_text"] == "Good evening"
+    assert data["attempts"][0]["reference_text"] == "Good evening"
+    assert data["attempts"][1]["reference_text"] == "Good morning"
 
 
 @pytest.mark.asyncio

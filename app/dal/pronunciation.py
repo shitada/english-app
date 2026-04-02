@@ -87,7 +87,7 @@ async def get_history(db: aiosqlite.Connection, limit: int = 20) -> list[dict[st
     rows = await db.execute_fetchall(
         """SELECT id, reference_text, user_transcription, feedback_json, score, difficulty, created_at
            FROM pronunciation_attempts
-           ORDER BY created_at DESC LIMIT ?""",
+           ORDER BY created_at DESC, id DESC LIMIT ?""",
         (limit,),
     )
     return [
@@ -271,13 +271,13 @@ async def get_personal_records(db: aiosqlite.Connection) -> dict[str, Any]:
         """SELECT reference_text, score, created_at
            FROM pronunciation_attempts
            WHERE score IS NOT NULL
-           ORDER BY score DESC LIMIT 3"""
+           ORDER BY score DESC, id ASC LIMIT 3"""
     )
     worst_rows = await db.execute_fetchall(
         """SELECT reference_text, score, created_at
            FROM pronunciation_attempts
            WHERE score IS NOT NULL
-           ORDER BY score ASC LIMIT 3"""
+           ORDER BY score ASC, id ASC LIMIT 3"""
     )
 
     return {

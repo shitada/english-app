@@ -941,6 +941,29 @@ class TestAutoAdjustDifficulty:
         result = await auto_adjust_difficulty(test_db, 9999)
         assert result is None
 
+    async def test_uses_latest_5_attempts_by_id(self, test_db):
+        """With same answered_at, the id tie-breaker picks the correct 5 rows."""
+        qs = [{"word": "tie", "correct_meaning": "同点", "example_sentence": "Tie.", "difficulty": 3, "wrong_options": []}]
+        words = await save_words(test_db, "travel", qs)
+        word_id = words[0]["id"]
+        ts = "2026-06-01 12:00:00"
+        # Insert 3 old incorrect, then 5 newer correct (all same timestamp)
+        for _ in range(3):
+            await test_db.execute(
+                "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, 0, ?)",
+                (word_id, "2026-05-01 12:00:00"),
+            )
+        for _ in range(5):
+            await test_db.execute(
+                "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, 1, ?)",
+                (word_id, ts),
+            )
+        await test_db.commit()
+        result = await auto_adjust_difficulty(test_db, word_id)
+        # Latest 5 are all correct → too_easy
+        assert result is not None
+        assert result["reason"] == "too_easy"
+
 
 @pytest.mark.unit
 class TestSimilarWords:

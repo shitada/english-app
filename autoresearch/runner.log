@@ -12216,3 +12216,268 @@ So the existing test `test_returns_word_ids_with_progress` will break because af
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 134 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #134: Fix get_due_word_ids returning non-due words in quiz generation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+591 passed! Smoke + QA:
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 134
+  │ playwright-browser_network_requests
+  │   └ ### Result
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 134
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L100:151 (51 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L166:206 (41 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "134" "2f0ead8" "2026-04-02T17:51:22+00:00" "1438" "159" "67" "431" "2095" \
+  │ "591" "591" "pass" "7.8" "keep" "Fix get_due_word_ids returning non-due words in quiz
+  │ generation" \…
+  └ 3 lines...
+
+Iteration 134: **KEEP** (7.8). 13/13 kept so far! Continuing with 135.
+
+● Record T0 for iteration 135 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 135
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L77:90 (13 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L46:52 (7 lines read)
+
+● Record T1 for iteration 135 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Find ORDER BY in vocabulary DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'ORDER BY' app/dal/vocabulary.py |
+  │ head -20
+  └ 21 lines...
+
+● Find ORDER BY in pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'ORDER BY' app/dal/pronunciation.py
+  │ | head -20
+  └ 15 lines...
+
+● Find ORDER BY in conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'ORDER BY' app/dal/conversation.py
+  │ | head -20
+  └ 8 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L148:160 (13 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L680:695 (16 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L170:190 (21 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L320:332 (11 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L85:95 (11 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L269:285 (17 lines read)
+
+Now I'll make all the fixes:
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+✗ Edit vocabulary.py
+  │ app/dal/vocabulary.py
+  └ No match found
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L170:186 (17 lines read)
+
+● Check exact whitespace (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '175p' app/dal/vocabulary.py | cat
+  │ -A
+  └ 3 lines...
+
+● Check exact whitespace (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '175p' app/dal/vocabulary.py | cat
+  │ -v
+  └ 2 lines...
+
+✗ Edit vocabulary.py
+  │ app/dal/vocabulary.py
+  └ No match found
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L168:186 (19 lines read)
+
+● Fix vocabulary progress ordering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' 's/ORDER BY vp.level ASC"""/ORDER
+  │ BY vp.level ASC, vw.word ASC"""/g' app/dal/vocabulary.py
+  └ 1 line...
+
+Now add tests. Let me check existing test files:Now add tests. Let me check the test files:
+
+✗ bash Running command
+  └ Multiple validation errors:
+    - "command": Required
+    - "description": Required
+
+● Check end of conversation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/unit/test_conversation_dal.py
+  └ 21 lines...
+
+● Check end of vocabulary test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_vocabulary_dal.py
+  └ 21 lines...
+
+● Check if list_conversations imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'list_conversations'
+  │ tests/unit/test_conversation_dal.py | head -5
+  └ 6 lines...
+
+● Check imports in conversation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from app.dal.conversation import'
+  │ tests/unit/test_conversation_dal.py | head -5
+  └ 6 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L250:270 (20 lines read)
+
+Now add tests for pagination determinism:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L265:280 (15 lines read)
+
+● Edit test_conversation_dal.py +19
+  └ tests/unit/test_conversation_dal.py
+
+Now add a test for auto_adjust_difficulty ordering:
+
+● Check if auto_adjust test exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'auto_adjust_difficulty'
+  │ tests/unit/test_vocabulary_dal.py | head -5
+  └ 6 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L887:940 (54 lines read)
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L940:960 (21 lines read)
+
+● Edit test_vocabulary_dal.py +23
+  └ tests/unit/test_vocabulary_dal.py
+
+Now commit and run tests:
+
+● Commit iteration 135 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: add id tie-breakers to remaining ORDER BY clauses for deterministic results
+  │
+  │ Add tie-breaker columns to 7 queries across 3 DAL files:
+  │ - list_conversations: ORDER BY started_at DESC, id DESC…
+  └ 44 lines...
+
+● Run tests for iteration 135 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -30
+  └ 31 lines...
+
+Two failures. Let me investigate:
+
+● Debug pagination test failure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit/test_conversation_
+  │ dal.py::TestListConversations::test_pagination_deterministic_same_started_at -v --tb=long 2>&1 |
+  │ tail -30
+  └ 31 lines...
+
+● Debug pronunciation history test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_pronunciation_api.py::test_pronunciation_history_ordering -v --tb=long
+  │ 2>&1 | tail -40
+  └ 41 lines...
+
+● View failing pronunciation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n -A 20
+  │ 'test_pronunciation_history_ordering' tests/integration/test_pronunciation_api.py
+  └ 22 lines...
+
+The test expects "Good morning" first (oldest first), but the query is `ORDER BY created_at DESC, id DESC` — so most recent should come first. The test was wrong before my change (relied on nondeterministic behavior). Now with the `id DESC` tie-breaker, the second insert ("Good evening") correctly appears first. Let me fix the test:
+
+● Edit test_pronunciation_api.py +2 -2
+  └ tests/integration/test_pronunciation_api.py
+
+Now fix my pagination test:
+
+● Edit test_conversation_dal.py +2 -3
+  └ tests/unit/test_conversation_dal.py
+

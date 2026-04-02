@@ -268,6 +268,24 @@ class TestListConversations:
         result = await list_conversations(test_db)
         assert result[0]["difficulty"] == "advanced"
 
+    async def test_pagination_deterministic_same_started_at(self, test_db):
+        """Conversations with identical started_at get stable ordering via id tie-breaker."""
+        ts = "2026-06-01 12:00:00"
+        ids = []
+        for i in range(4):
+            cursor = await test_db.execute(
+                "INSERT INTO conversations (topic, started_at) VALUES (?, ?)",
+                (f"topic_{i}", ts),
+            )
+            ids.append(cursor.lastrowid)
+        await test_db.commit()
+        page1 = await list_conversations(test_db, limit=2, offset=0)
+        page2 = await list_conversations(test_db, limit=2, offset=2)
+        all_ids = [r["id"] for r in page1] + [r["id"] for r in page2]
+        assert len(all_ids) == 4
+        assert len(set(all_ids)) == 4, "No duplicates across pages"
+        assert all_ids == sorted(all_ids, reverse=True), "Ordered by id DESC"
+
 
 @pytest.mark.unit
 class TestDeleteConversation:

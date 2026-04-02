@@ -150,7 +150,7 @@ async def list_conversations(
             LEFT JOIN messages m ON c.id = m.conversation_id
             {where_sql}
             GROUP BY c.id
-            ORDER BY c.started_at DESC
+            ORDER BY c.started_at DESC, c.id DESC
             LIMIT ? OFFSET ?""",
         params,
     )
