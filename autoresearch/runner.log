@@ -11424,3 +11424,67 @@ I need `log_attempt` from vocabulary DAL:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 129 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #129: Fix weekly comparison vocabulary count to use quiz_attempts for consistency
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 32 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+579 passed, TS pass. Smoke test (DAL changed):
+
+● Smoke + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3 && date +%s
+  └ 5 lines...
+
+QA test:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 129
+  │ playwright-browser_navigate http://localhost:8000/dashboard
+  │   └ ### Ran Playwright code
+  └ playwright-browser_evaluate
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null
+  └ 1 line...
+
+● Evaluator Evaluate iteration 129
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L528:561 (33 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L110:127 (17 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "129" "17da88a" "2026-04-02T16:27:49+00:00" "410" "45" "34" "609" "1098" \
+  │ "579" "579" "pass" "7.5" "keep" "Fix weekly comparison vocabulary count to use quiz_attempts
+  │ for consistency" \…
+  └ 3 lines...
+
+Iteration 129: **KEEP** (7.5). Let me clean up the .playwright-mcp files and screenshots to avoid ballooning the repo, then continue with iteration 130.
+
