@@ -63,3 +63,30 @@ async def test_invalid_key_format(client):
 async def test_empty_value_rejected(client):
     res = await client.put("/api/preferences/theme", json={"value": ""})
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_batch_empty_value_rejected(client):
+    res = await client.put(
+        "/api/preferences",
+        json={"preferences": {"theme": ""}},
+    )
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_batch_long_value_rejected(client):
+    res = await client.put(
+        "/api/preferences",
+        json={"preferences": {"theme": "x" * 501}},
+    )
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_batch_empty_dict_rejected(client):
+    res = await client.put(
+        "/api/preferences",
+        json={"preferences": {}},
+    )
+    assert res.status_code == 422

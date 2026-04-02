@@ -10737,3 +10737,115 @@ Now add unit tests. Check existing test_utils.py:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 124 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #124: Escape SQL LIKE wildcards in search_words and conversation keyword filters
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 28 lines...
+
+T2=1775142589 (implement_sec=78). Run tests.
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+568 passed, TS pass. Smoke test needed (DAL changed).
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+T3=1775142627 (test_sec=38). Now QA and evaluate.
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown; sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 124
+  │ playwright-browser_navigate http://localhost:8000
+  │   └ ### Ran Playwright code
+  └ playwright-browser_console_messages
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 124
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L70:130 (61 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L168:230 (63 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 124 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "124" "3877f6a" "2026-04-02T15:03:23+00:00" "308" "78" "38" "349" "773" \
+  │ "568" "568" "pass" "8.1" "keep" "Escape SQL LIKE wildcards in search_words and conversation
+  │ keyword filters" \…
+  └ 3 lines...
+
+Iteration 124: **KEEP** (8.1). Starting iteration 125.
+
+● Record T0 for iteration 125 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 125
+  │ Read test_preferences_api.py
+  │   │ tests/integration/test_preferences_api.py
+  │   └ 65 lines read
+  └ Read preferences.py
+      │ app/routers/preferences.py
+      └ L27:62 (36 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● View preferences router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/routers/preferences.py
+  └ 87 lines...
+
+I can see the issue. Let me fix it.
+
+● Edit preferences.py +1
+  └ app/routers/preferences.py
+
+● Edit preferences.py +3 -1
+  └ app/routers/preferences.py
+
+Now add tests. Let me check existing tests:
+
+● Check existing preferences tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ tests/integration/test_preferences_api.py
+  └ 66 lines...
+
+● Edit test_preferences_api.py +27
+  └ tests/integration/test_preferences_api.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

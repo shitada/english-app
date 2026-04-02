@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Annotated
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
@@ -29,7 +30,9 @@ class SetPreferenceRequest(BaseModel):
 
 
 class BatchPreferencesRequest(BaseModel):
-    preferences: dict[str, str] = Field(..., min_length=1)
+    preferences: dict[str, Annotated[str, Field(min_length=1, max_length=500)]] = Field(
+        ..., min_length=1, max_length=50
+    )
 
 
 class PreferenceItem(BaseModel):
