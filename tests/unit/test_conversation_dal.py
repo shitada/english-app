@@ -212,7 +212,8 @@ class TestEndConversation:
     async def test_saves_summary_json(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
         summary = {"key_vocabulary": ["hello"], "communication_level": "beginner", "tip": "Practice more"}
-        await end_conversation(test_db, cid, summary=summary)
+        result = await end_conversation(test_db, cid, summary=summary)
+        assert result is True
         result = await get_conversation_summary(test_db, cid)
         assert result == summary
 
@@ -236,6 +237,22 @@ class TestEndConversation:
         await test_db.commit()
         result = await get_conversation_summary(test_db, cid)
         assert result is None
+
+    async def test_end_returns_false_when_already_ended(self, test_db):
+        """Second end_conversation call should return False (already ended)."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        first = await end_conversation(test_db, cid, summary={"first": True})
+        assert first is True
+        second = await end_conversation(test_db, cid, summary={"second": True})
+        assert second is False
+
+    async def test_first_summary_preserved_on_double_end(self, test_db):
+        """The first end's summary should not be overwritten by the second."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary={"version": 1})
+        await end_conversation(test_db, cid, summary={"version": 2})
+        summary = await get_conversation_summary(test_db, cid)
+        assert summary["version"] == 1
 
 
 @pytest.mark.unit

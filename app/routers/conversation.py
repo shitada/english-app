@@ -181,7 +181,9 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
         context="end_conversation",
     )
 
-    await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
+    transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
+    if not transitioned:
+        raise HTTPException(status_code=409, detail="Conversation was already ended")
 
     return {"summary": summary}
 

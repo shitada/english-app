@@ -13464,3 +13464,119 @@ Good — adding missing indexes. Let me implement:
 
 Now commit and test:
 
+● Commit iteration 145 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "perf: add 4 missing indexes for frequently queried columns
+  │
+  │ - conversations(status): filtered by get_active_conversation, delete_ended
+  │ - messages(role, created_at): dashboard stats, streak, weekly comparison…
+  └ 20 lines...
+
+● Run tests for iteration 145 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+607 passed. Record:
+
+● Record iteration 145 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "145" "772fae9" "$TSTAMP" "50" "120" "55" "60" "$((T4-1775169451))" \
+  │ "607" "607" "pass" "7.5" "keep" "Add 4 missing indexes for frequently queried columns" \…
+  └ 3 lines...
+
+Iteration 145: **KEEP** (7.5). 24/24 kept. Continuing with 146-151 (6 remaining):
+
+● Record T0 for iteration 146 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 146
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L450:600 (151 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L600:700 (101 lines read)
+
+Let me verify the off-by-one before implementing:Let me verify the off-by-one before fixing:
+
+✗ bash Running command
+  └ Multiple validation errors:
+    - "command": Required
+    - "description": Required
+
+● Check daily activity test expectations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_daily_activity\|days.*==
+  │ 8\|days.*== 4\|len.*history' tests/unit/test_dashboard_dal.py | head -10
+  └ 7 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L224:260 (37 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L170:215 (46 lines read)
+
+The "off-by-one" is actually by design — `days=7` means "7 past days + today = 8 entries". Tests already match this. Let me pick a different improvement:
+
+● Proposer Propose iteration 146 alt
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L100:170 (71 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L185:250 (66 lines read)
+
+Good — atomic status transition. Let me implement:
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L88:108 (21 lines read)
+
+● Edit conversation.py +5 -3
+  └ app/dal/conversation.py
+
+Now update the router to check the return value:
+
+● Find router end_conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'end_conversation'
+  │ app/routers/conversation.py
+  └ 4 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L165:200 (36 lines read)
+
+● Edit conversation.py +3 -1
+  └ app/routers/conversation.py
+
+Now add tests:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L195:215 (21 lines read)
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L237:250 (14 lines read)
+
+● Edit test_conversation_dal.py +2 -1
+  └ tests/unit/test_conversation_dal.py
+
+Now add the race condition tests:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L233:245 (13 lines read)
+
+✗ Edit test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ Multiple matches found
+
+● Edit test_conversation_dal.py +16
+  └ tests/unit/test_conversation_dal.py
+

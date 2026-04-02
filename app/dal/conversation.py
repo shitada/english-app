@@ -93,13 +93,15 @@ async def end_conversation(
     db: aiosqlite.Connection,
     conversation_id: int,
     summary: dict[str, Any] | None = None,
-) -> None:
+) -> bool:
+    """End a conversation atomically. Returns True if transitioned, False if already ended."""
     summary_json = json.dumps(summary) if summary else None
-    await db.execute(
-        "UPDATE conversations SET status = 'ended', ended_at = datetime('now'), summary_json = ? WHERE id = ?",
+    cursor = await db.execute(
+        "UPDATE conversations SET status = 'ended', ended_at = datetime('now'), summary_json = ? WHERE id = ? AND status = 'active'",
         (summary_json, conversation_id),
     )
     await db.commit()
+    return cursor.rowcount > 0
 
 
 async def get_conversation_summary(
