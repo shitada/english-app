@@ -609,6 +609,28 @@ class TestGetPronunciationWeaknesses:
         result = await get_pronunciation_weaknesses(test_db, limit=3)
         assert len(result) <= 3
 
+    async def test_handles_null_fields_in_word_feedback(self, test_db):
+        """LLM may return null for expected/heard/tip fields."""
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        feedback = {
+            "word_feedback": [
+                {"expected": None, "heard": "helo", "is_correct": False, "tip": "Focus"},
+                {"expected": "world", "heard": None, "is_correct": False, "tip": None},
+            ]
+        }
+        await save_attempt(test_db, "Hello world", "Helo world", feedback, 5.0)
+        result = await get_pronunciation_weaknesses(test_db)
+        assert len(result) == 1
+        assert result[0]["word"] == "world"
+
+    async def test_handles_null_word_feedback_list(self, test_db):
+        """LLM may return null for the word_feedback field itself."""
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        feedback = {"overall_score": 8, "word_feedback": None}
+        await save_attempt(test_db, "Hello", "Hello", feedback, 8.0)
+        result = await get_pronunciation_weaknesses(test_db)
+        assert result == []
+
 
 @pytest.mark.unit
 class TestDifficultyTracking:

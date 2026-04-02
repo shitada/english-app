@@ -280,7 +280,7 @@ async def get_grammar_accuracy(db: aiosqlite.Connection) -> dict[str, Any]:
         if feedback.get("is_correct"):
             topic_stats[topic]["correct"] += 1
             total_correct += 1
-        errors = feedback.get("errors", [])
+        errors = feedback.get("errors") or []
         if isinstance(errors, list):
             topic_stats[topic]["error_count"] += len(errors)
 
@@ -469,7 +469,7 @@ async def get_conversation_replay(
                     feedback = json.loads(msg["feedback_json"])
                     turn["feedback"] = feedback
                     if isinstance(feedback, dict):
-                        turn["corrections"] = feedback.get("errors", [])
+                        turn["corrections"] = feedback.get("errors") or []
                 except (json.JSONDecodeError, TypeError):
                     pass
             turns.append(turn)

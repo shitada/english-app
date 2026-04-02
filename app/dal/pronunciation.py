@@ -412,7 +412,7 @@ async def get_pronunciation_weaknesses(
             continue
         if not isinstance(feedback, dict):
             continue
-        word_feedback = feedback.get("word_feedback", [])
+        word_feedback = feedback.get("word_feedback") or []
         if not isinstance(word_feedback, list):
             continue
         for wf in word_feedback:
@@ -420,7 +420,7 @@ async def get_pronunciation_weaknesses(
                 continue
             if wf.get("is_correct", True):
                 continue
-            expected = wf.get("expected", "").lower().strip()
+            expected = (wf.get("expected") or "").lower().strip()
             if not expected:
                 continue
             if expected not in word_stats:
@@ -431,12 +431,12 @@ async def get_pronunciation_weaknesses(
                     "tips": set(),
                 }
             word_stats[expected]["occurrence_count"] += 1
-            heard = wf.get("heard", "").lower().strip()
+            heard = (wf.get("heard") or "").lower().strip()
             if heard:
                 word_stats[expected]["heard_as"][heard] = (
                     word_stats[expected]["heard_as"].get(heard, 0) + 1
                 )
-            tip = wf.get("tip", "")
+            tip = wf.get("tip") or ""
             if tip:
                 word_stats[expected]["tips"].add(tip)
 

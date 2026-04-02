@@ -12764,3 +12764,116 @@ One existing test broken — it was using a score of 90.0 which now gets clamped
 ● Edit test_pronunciation_dal.py +3 -3
   └ tests/unit/test_pronunciation_dal.py
 
+● Amend commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m "fix:
+  │ clamp pronunciation score to 0-10 range in save_attempt
+  │
+  │ Prevent out-of-range scores from LLM output corrupting statistics:
+  │ - Score > 10 clamped to 10.0, < 0 clamped to 0.0…
+  └ 21 lines...
+
+● Rerun tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+599 passed! Record and evaluate:
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -2
+  └ 3 lines...
+
+● Record iteration 137 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "137" "5e270d2" "$TSTAMP" "40" "150" "55" "60" "$((T4-1775160033))" \
+  │ "599" "599" "pass" "7.8" "keep" "Clamp pronunciation score to 0-10 range in save_attempt" \…
+  └ 3 lines...
+
+Iteration 137: **KEEP** (7.8). 16/16 kept. Starting 138:
+
+● Record T0 for iteration 138 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 138
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L257:305 (48 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L440:495 (55 lines read)
+
+Good catch — `dict.get()` with explicit None values. Let me implement:
+
+● Find vocabulary questions get (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'result.get("questions"'
+  │ app/routers/vocabulary.py
+  └ 2 lines...
+
+● Find conversation feedback.get (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'feedback.get'
+  │ app/dal/conversation.py | head -10
+  └ 4 lines...
+
+● Find pronunciation .get calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'wf.get\|feedback.get'
+  │ app/dal/pronunciation.py | head -15
+  └ 6 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L200:210 (11 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L278:290 (13 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L468:478 (11 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L413:445 (33 lines read)
+
+Now apply the fixes:
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+Now add a test for `get_pronunciation_weaknesses` with null fields:
+
+● Find weakness test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class
+  │ TestGetPronunciationWeaknesses\|class TestWeakness' tests/unit/test_pronunciation_dal.py | head
+  │ -5
+  └ 2 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L573:630 (58 lines read)
+
+● Edit test_pronunciation_dal.py +22
+  └ tests/unit/test_pronunciation_dal.py
+
