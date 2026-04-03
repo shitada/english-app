@@ -14084,3 +14084,31 @@ Now add a test:
 
 Now let me clean up artifacts and generate the summary:
 
+● Final cleanup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -rf .playwright-mcp/ && rm -f *.png &&
+  │ git add -A && git commit -m "autoresearch: Clean up QA artifacts and record results 145-151
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3
+  └ 4 lines...
+
+Now generate `autoresearch/summary.md`:Now generate the summary:
+
+✗ create create file
+  └ Expected ',' or '}' after property value in JSON at position 81 (line 1 column 82)
+
+✗ Create summary.md
+  │ autoresearch/summary.md
+  └ Path already exists
+
+● Check existing summary (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l autoresearch/summary.md
+  └ 2 lines...
+
+● Write summary.md (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat > autoresearch/summary.md <<
+  │ 'ENDSUMMARY'
+  │ # Autoresearch Summary — Iterations 122–151
+  │
+  │ ## Overview…
+  └ 102 lines...
+
