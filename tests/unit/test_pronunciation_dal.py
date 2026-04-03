@@ -50,15 +50,25 @@ class TestGetSentencesFromConversations:
         texts = [s["text"] for s in sentences]
         assert len(texts) == len(set(texts))
 
-    async def test_caps_at_10_results(self, test_db):
+    async def test_caps_at_default_limit(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(25):
+            await add_message(
+                test_db, cid, "assistant",
+                f"This is a unique sentence number {i} for testing purposes."
+            )
+        sentences = await get_sentences_from_conversations(test_db)
+        assert len(sentences) <= 20  # default limit=20
+
+    async def test_respects_custom_limit(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
         for i in range(15):
             await add_message(
                 test_db, cid, "assistant",
                 f"This is a unique sentence number {i} for testing purposes."
             )
-        sentences = await get_sentences_from_conversations(test_db)
-        assert len(sentences) <= 10
+        sentences = await get_sentences_from_conversations(test_db, limit=5)
+        assert len(sentences) <= 5
 
     async def test_returns_empty_when_no_conversations(self, test_db):
         sentences = await get_sentences_from_conversations(test_db)

@@ -49,7 +49,7 @@ async def get_sentences_from_conversations(
                     continue
                 seen.add(sent)
                 sentences.append({"text": sent, "topic": r["topic"], "difficulty": est_difficulty})
-                if len(sentences) >= 10:
+                if len(sentences) >= limit:
                     return sentences
     return sentences
 

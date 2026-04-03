@@ -16275,3 +16275,94 @@ Good, no more old-signature calls.
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 168 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #168: Use message ID instead of content matching in update_message_feedback
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 168 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (DAL changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 168 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 168
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L61:160 (100 lines read)
+  └ List directory tests/integration
+      └ 12 files found
+
+● Record T4 for iteration 168 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.05, KEEP. Record:
+
+● Record iteration 168 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '168\tb652c71\t2026-04-03T21:22:28Z\t1135\t116\t69\t113\t1433\t655\t655\tpass\t8.05\tkeep\tUse
+  │ message ID instead of content matching in update_message_feedback\n' >> autoresearch/results.tsv
+  │ && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 168: **KEEP** (8.05). 17 of 20 iterations done. Starting iteration 169.
+
+● Record T0 for iteration 169 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 169
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L82:97 (15 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L53:65 (13 lines read)
+
+● Record T1 for iteration 169 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L40:60 (21 lines read)
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+Now update the test:
+
+● Find the cap test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'caps_at_10'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 2 lines...
+
+● Read test_pronunciation_dal.py
+  │ tests/unit/test_pronunciation_dal.py
+  └ L53:75 (23 lines read)
+
+● Edit test_pronunciation_dal.py +13 -3
+  └ tests/unit/test_pronunciation_dal.py
+
+● Record T2 for iteration 169 (shell)
+  │ date +%s
+  └ 2 lines...
+
