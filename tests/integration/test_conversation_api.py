@@ -592,3 +592,45 @@ async def test_send_message_with_partial_grammar_feedback(client, mock_copilot):
     assert fb["errors"] == []
     assert fb["suggestions"] == []
     assert fb["corrected_text"] == ""
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_normalizes_string_key_vocabulary(client, mock_copilot):
+    """LLM returns key_vocabulary as comma-separated string — should be split to list."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Brief chat.",
+        "key_vocabulary": "reservation, amenities, check-in",
+        "communication_level": "beginner",
+        "tip": "Practice greetings.",
+    })
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["summary"]["key_vocabulary"], list)
+    assert "reservation" in data["summary"]["key_vocabulary"]
+    assert len(data["summary"]["key_vocabulary"]) == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_normalizes_null_key_vocabulary(client, mock_copilot):
+    """LLM returns key_vocabulary as None — should default to empty list."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Short conversation.",
+        "key_vocabulary": None,
+        "communication_level": "beginner",
+    })
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["summary"]["key_vocabulary"] == []
+    assert data["summary"]["tip"] == ""

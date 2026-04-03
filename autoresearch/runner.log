@@ -15480,3 +15480,150 @@ Now add the integration test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 161 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #161: Normalize grammar feedback to prevent frontend crash on missing fields
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 161 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (router changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 161 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Frontend TSX changed — check QA: The proposal type is "bugfix" but frontend page was modified. Let me check:
+
+● Check QA condition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Frontend page changed — need QA. But the change is just adding `?? []` for defensive null guards (no visual change). I'll run the tester but keep it quick:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 161
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L155:170 (15 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:50 (50 lines read)
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+QA passed (ux_score=7). Now evaluator:
+
+● Evaluator Evaluate iteration 161
+  │ List directory tests/unit
+  │   └ 13 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 for iteration 161 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, KEEP. Record:
+
+● Record iteration 161 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf '161\tb091f01\t2026-04-03T18:43:26Z\
+  │ t1194\t103\t61\t902\t2260\t646\t646\tpass\t7.8\tkeep\tNormalize grammar feedback to prevent
+  │ frontend crash on missing fields\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 161: **KEEP** (7.8). Starting iteration 162.
+
+● Record T0 for iteration 162 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 162
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L1:60 (58 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L60:140 (81 lines read)
+
+● Record T1 for iteration 162 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L185:210 (26 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L213:225 (13 lines read)
+
+Now add the normalization function. Let me find a good place to add it, near the other normalize functions:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L112:127 (16 lines read)
+
+● Edit conversation.py +19
+  └ app/routers/conversation.py
+
+Now apply normalization in end_conversation (before storing):
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L205:230 (25 lines read)
+
+● Edit conversation.py +2
+  └ app/routers/conversation.py
+
+Now also normalize in get_summary:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L233:242 (8 lines read)
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now add integration tests:
+
+● Add summary normalization tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'PYEOF'…
+  └ 44 lines...
+
+● Record T2 for iteration 162 (shell)
+  │ date +%s
+  └ 2 lines...
+

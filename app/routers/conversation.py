@@ -122,6 +122,25 @@ def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _normalize_summary(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize LLM conversation summary to ensure consistent types."""
+    result = dict(raw)
+    kv = result.get("key_vocabulary")
+    if isinstance(kv, str):
+        result["key_vocabulary"] = [w.strip() for w in kv.split(",") if w.strip()]
+    elif isinstance(kv, list):
+        result["key_vocabulary"] = [str(item) for item in kv]
+    else:
+        result["key_vocabulary"] = []
+    if not isinstance(result.get("communication_level"), str):
+        result["communication_level"] = str(result.get("communication_level", "unknown"))
+    if not isinstance(result.get("tip"), str):
+        result["tip"] = str(result.get("tip") or "")
+    if not isinstance(result.get("summary"), str):
+        result["summary"] = str(result.get("summary") or "")
+    return result
+
+
 @router.post("/message", response_model=MessageResponse)
 async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
@@ -203,6 +222,8 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
             "tip": "",
         }
 
+    summary = _normalize_summary(summary)
+
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
         raise HTTPException(status_code=409, detail="Conversation was already ended")
@@ -216,7 +237,7 @@ async def get_summary(conversation_id: int = Path(ge=1), db: aiosqlite.Connectio
     summary = await conv_dal.get_conversation_summary(db, conversation_id)
     if summary is None:
         raise HTTPException(status_code=404, detail="Summary not found")
-    return {"summary": summary}
+    return {"summary": _normalize_summary(summary)}
 
 
 @router.get("/{conversation_id}/history")
