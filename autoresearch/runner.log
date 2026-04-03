@@ -14264,3 +14264,87 @@ Breakdown by AI model:
   │ | tail -5 && echo "---" && git --no-pager status --short | head -10
   └ 13 lines...
 
+● Commit pending changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "chore: commit
+  │ pending agent config and log changes
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | tail -5
+  └ 6 lines...
+
+Good. Clean state. Now starting iteration 152. Let me record T0 and call the proposer.
+
+● Record T0 for iteration 152 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 152
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L300:450 (151 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L450:560 (92 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "end_conversation\|def test_"
+  │ tests/integration/test_conversation_api.py | head -20
+  └ 21 lines...
+
+● Find end_conversation code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "end_conversation\|safe_llm_call\|summary" app/routers/conversation.py | head -30
+  └ 19 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L232:280 (49 lines read)
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L164:190 (25 lines read)
+
+Now I'll implement the fix. The summary LLM call should be non-fatal — if it fails, use a fallback summary and still end the conversation.
+
+● Edit conversation.py +16 -7
+  └ app/routers/conversation.py
+
+Now I need to check if `logger` is already imported in the file:
+
+● Check logger import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 app/routers/conversation.py | grep
+  │ -n "logger\|logging\|import"
+  └ 16 lines...
+
+● Check logger defined (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^logger"
+  │ app/routers/conversation.py
+  └ 2 lines...
+
+Good, logger is already defined. Now let me add the integration test:
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L300:320 (21 lines read)
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_conversation_api.py
+  └ 2 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L536:541 (6 lines read)
+
+● Edit test_conversation_api.py +27
+  └ tests/integration/test_conversation_api.py
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2 = 1775230583. Now commit and test:
+

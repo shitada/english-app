@@ -539,3 +539,30 @@ async def test_get_history_nonexistent_conversation(client):
     res = await client.get("/api/conversation/99999/history")
     assert res.status_code == 404
     assert "not found" in res.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_summary_failure_is_non_fatal(client, mock_copilot):
+    """Test that LLM summary failure doesn't prevent ending a conversation."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # LLM summary generation fails
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM service unavailable"))
+
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    # Should have a fallback summary
+    assert data["summary"]["communication_level"] == "unknown"
+    assert data["summary"]["key_vocabulary"] == []
+
+    # Conversation should be ended — trying to end again gives 404 (no active conv)
+    res2 = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res2.status_code == 404
+
+    # History should still be retrievable
+    res3 = await client.get(f"/api/conversation/{conv_id}/history")
+    assert res3.status_code == 200

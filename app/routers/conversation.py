@@ -173,13 +173,22 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
 
     copilot = get_copilot_service()
     summary_prompt = get_prompt("conversation_summary").format(conversation=history)
-    summary = await safe_llm_call(
-        lambda: copilot.ask_json(
-            "You are an English learning assistant. Return ONLY valid JSON.",
-            summary_prompt,
-        ),
-        context="end_conversation",
-    )
+    try:
+        summary = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English learning assistant. Return ONLY valid JSON.",
+                summary_prompt,
+            ),
+            context="end_conversation",
+        )
+    except HTTPException:
+        logger.warning("Summary generation failed for conversation %s; using fallback", req.conversation_id)
+        summary = {
+            "note": "Summary could not be generated",
+            "key_vocabulary": [],
+            "communication_level": "unknown",
+            "tip": "",
+        }
 
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
