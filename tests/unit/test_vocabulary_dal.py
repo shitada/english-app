@@ -1111,3 +1111,41 @@ class TestSRSAnalytics:
         assert ls["progressing"] >= 1
         assert ls["stalled"] >= 1
         assert ls["not_reviewed"] == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+class TestSafeDifficulty:
+    """Tests for the _safe_difficulty helper."""
+
+    async def test_normal_int(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(3) == 3
+
+    async def test_string_number(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty("4") == 4
+
+    async def test_string_word(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty("hard") == 1
+
+    async def test_float(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(3.5) == 3
+
+    async def test_none(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(None) == 1
+
+    async def test_zero_clamps_to_1(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(0) == 1
+
+    async def test_over_5_clamps_to_5(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(10) == 5
+
+    async def test_negative_clamps_to_1(self):
+        from app.dal.vocabulary import _safe_difficulty
+        assert _safe_difficulty(-3) == 1

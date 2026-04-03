@@ -14,6 +14,15 @@ from app.utils import escape_like
 SM2_INTERVALS = [0, 1, 3, 7, 14, 30, 60]
 
 
+def _safe_difficulty(val: Any) -> int:
+    """Coerce a difficulty value to int in range [1, 5]."""
+    try:
+        d = int(val)
+    except (TypeError, ValueError):
+        return 1
+    return max(1, min(5, d))
+
+
 async def get_words_by_topic(db: aiosqlite.Connection, topic: str) -> list[dict[str, Any]]:
     rows = await db.execute_fetchall(
         "SELECT id, word, meaning, example_sentence, difficulty FROM vocabulary_words WHERE topic = ?",
@@ -55,14 +64,14 @@ async def save_words(
             cursor = await db.execute(
                 """INSERT INTO vocabulary_words (topic, word, meaning, example_sentence, difficulty)
                    VALUES (?, ?, ?, ?, ?)""",
-                (topic, word, meaning, q.get("example_sentence") or "", q.get("difficulty") or 1),
+                (topic, word, meaning, q.get("example_sentence") or "", _safe_difficulty(q.get("difficulty"))),
             )
             words.append({
                 "id": cursor.lastrowid,
                 "word": word,
                 "meaning": meaning,
                 "example_sentence": q.get("example_sentence") or "",
-                "difficulty": q.get("difficulty") or 1,
+                "difficulty": _safe_difficulty(q.get("difficulty")),
                 "wrong_options": q.get("wrong_options") or [],
             })
     await db.commit()

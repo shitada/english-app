@@ -14502,3 +14502,108 @@ Now add integration tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 153 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #153: Normalize LLM pronunciation feedback and fix score default of 0
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 153 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -5
+  └ 6 lines...
+
+● Record T3 for iteration 153 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend files changed, type is "bugfix" — QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 153
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L55:95 (41 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L68:89 (22 lines read)
+
+● Record T4 for iteration 153 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.30, KEEP. Record results:
+
+● Record iteration 153 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '153\t5c2e002\t2026-04-03T15:53:19Z\t314\t52\t56\t441\t863\t625\t625\tpass\t7.3\tkeep\tNormalize
+  │ LLM pronunciation feedback and fix score default of 0\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 153: **KEEP** (7.3). Starting iteration 154.
+
+● Record T0 for iteration 154 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 154
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L25:70 (45 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L685:735 (49 lines read)
+
+● Record T1 for iteration 154 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L45:75 (31 lines read)
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L1:15 (14 lines read)
+
+● Edit vocabulary.py +9
+  └ app/dal/vocabulary.py
+
+Now update the two lines that use `q.get("difficulty") or 1`:
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+● Edit vocabulary.py +1 -1
+  └ app/dal/vocabulary.py
+
+Now add unit tests. Let me find the test file:
+
+● Check vocabulary DAL test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_vocabulary_dal.py &&
+  │ tail -20 tests/unit/test_vocabulary_dal.py
+  └ 22 lines...
+
+● Edit test_vocabulary_dal.py +38
+  └ tests/unit/test_vocabulary_dal.py
+
+● Record T2 for iteration 154 (shell)
+  │ date +%s
+  └ 2 lines...
+
