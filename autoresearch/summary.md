@@ -1,20 +1,99 @@
-# Autoresearch Summary — Iterations 122–151
+# Autoresearch Summary — Iterations 122–171
 
-## Overview
+## Overview (Cumulative)
+
+| Metric | 122–151 | 152–171 | Total |
+|--------|---------|---------|-------|
+| Iterations completed | 30 | 20 | 50 |
+| Kept | 30 (100%) | 20 (100%) | 50 (100%) |
+| Discarded | 0 | 0 | 0 |
+| Tests at start | 556 | 622 | 556 |
+| Tests at end | 621 (+65) | 670 (+48) | 670 (+114) |
+| Average score | 7.79 | 7.72 | 7.76 |
+| Score range | 7.5–8.1 | 6.5–8.35 | 6.5–8.35 |
+
+---
+
+## Run 3: Iterations 152–171
+
+### Timing
 
 | Metric | Value |
 |--------|-------|
-| Iterations completed | 30 (122–151) |
-| Kept | 30 (100%) |
-| Discarded | 0 |
-| Tests at start | 556 |
-| Tests at end | 621 (+65) |
-| Average score | 7.79 |
-| Score range | 7.5 – 8.1 |
-| TypeScript check | Pass (all iterations) |
-| Smoke test | Pass (all iterations) |
+| Average iteration time | 1,139s (~19 min) |
+| Fastest iteration | #155 — 469s (8 min) |
+| Slowest iteration | #154 — 2,532s (42 min) |
+| Total wall-clock time | ~22,843s (~6.3 hours) |
+| Proposer avg latency | ~730s |
 
-## Iteration Log
+### Iteration Log
+
+| # | Score | Type | Description |
+|---|-------|------|-------------|
+| 152 | 7.80 | bugfix | Make end_conversation summary generation non-fatal on LLM failure |
+| 153 | 7.30 | bugfix | Normalize LLM pronunciation feedback and fix score default of 0 |
+| 154 | 8.10 | bugfix | Validate and clamp LLM-generated difficulty in save_words |
+| 155 | 7.55 | bugfix | Clamp pronunciation scores in _normalize_feedback to [0, 10] |
+| 156 | 7.50 | bugfix | Fix fill-blank quiz word-boundary matching and missing-blank edge case |
+| 157 | 7.55 | bugfix | Fix truthiness check discarding empty dict feedback/summary in DAL |
+| 158 | 6.50 | bugfix | Handle null overall_score in frontend pronunciation result display |
+| 159 | 7.80 | bugfix | Fix streak dropping to 0 before daily activity despite active streak |
+| 160 | 7.80 | bugfix | Build proper wrong_options for LLM-generated vocabulary quiz path |
+| 161 | 7.80 | bugfix | Normalize grammar feedback to prevent frontend crash on missing fields |
+| 162 | 8.05 | bugfix | Normalize conversation summary to prevent frontend crash on non-array key_vocabulary |
+| 163 | 7.80 | bugfix | Clean up orphaned conversation when LLM fails in start_conversation |
+| 164 | 7.55 | bugfix | Include abandoned conversations in bulk delete cleanup |
+| 165 | 8.35 | bugfix | Fix get_vocabulary_stats miscounting total_words from wrong table |
+| 166 | 7.55 | bugfix | Clean up orphaned user message when LLM fails in send_message |
+| 167 | 7.80 | bugfix | Fix _parse_json returning list for markdown-fenced JSON arrays |
+| 168 | 8.05 | bugfix | Use message ID instead of content matching in update_message_feedback |
+| 169 | 8.05 | bugfix | Fix get_sentences_from_conversations ignoring limit parameter |
+| 170 | 7.80 | bugfix | Handle _parse_json items key fallback in generate_quiz endpoint |
+| 171 | 7.80 | bugfix | Fix bool coercion of LLM string 'false' in grammar feedback normalization |
+
+### Categories (152–171)
+
+#### LLM Response Normalization (8 iterations)
+- Pronunciation feedback normalization — score default, type coercion (#153)
+- Difficulty validation and clamping for save_words (#154)
+- Score clamping to [0, 10] in pronunciation feedback (#155)
+- Grammar feedback normalization — missing fields, type safety (#161)
+- Conversation summary normalization — non-array key_vocabulary (#162)
+- _parse_json array wrapping for markdown-fenced JSON (#167)
+- Quiz endpoint fallback for _parse_json "items" key (#170)
+- Bool coercion for LLM string "false" in is_correct fields (#171)
+
+#### Orphan Cleanup & Data Integrity (4 iterations)
+- Orphaned conversation cleanup on LLM failure in start_conversation (#163)
+- Orphaned user message cleanup on LLM failure in send_message (#166)
+- Abandoned conversations included in bulk delete (#164)
+- Content-matching → ID-based update_message_feedback (#168)
+
+#### Correctness Fixes (5 iterations)
+- Non-fatal summary generation on LLM failure (#152)
+- Truthiness check discarding empty dict (is not None) (#157)
+- Streak calculation allowing yesterday start (#159)
+- Vocabulary stats total_words from correct table (#165)
+- Sentence limit parameter respected (#169)
+
+#### Frontend Resilience (2 iterations)
+- Null guard for pronunciation overall_score display (#158)
+- Wrong_options for LLM-generated quiz path (#160)
+
+#### Regex/String Fixes (1 iteration)
+- Fill-blank word-boundary matching with \b (#156)
+
+### Key Technical Patterns (New in this run)
+
+1. **LLM boundary normalization**: Every LLM response field must be validated/coerced — strings for bools, nulls for numbers, lists for non-lists
+2. **Orphan cleanup**: Multi-step operations (create + LLM call) need try/except to remove partial state on failure
+3. **ID-based updates**: Content-matching in DB is fragile when duplicate content exists — prefer ID-based lookups
+4. **`is not None` vs truthiness**: Use `is not None` when empty containers ([], {}, "") are valid values
+5. **`coerce_bool()`**: Python `bool("false") == True` — always coerce LLM string booleans explicitly
+
+---
+
+## Run 2: Iterations 122–151 (Previous)
 
 | # | Score | Type | Description |
 |---|-------|------|-------------|

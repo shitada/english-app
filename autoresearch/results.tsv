@@ -174,3 +174,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 168	b652c71	2026-04-03T21:22:28Z	1135	116	69	113	1433	655	655	pass	8.05	keep	Use message ID instead of content matching in update_message_feedback
 169	f765426	2026-04-03T21:42:43Z	461	25	51	45	582	656	656	pass	8.05	keep	Fix get_sentences_from_conversations ignoring limit parameter
 170	8107441	2026-04-03T22:19:16Z	2202	38	49	127	2416	658	658	pass	7.8	keep	Handle _parse_json items key fallback in generate_quiz endpoint
+171	ee24ffd	2026-04-03T22:53:04Z	446	87	50	218	801	670	670	pass	7.8	keep	Fix bool coercion of LLM string false in grammar feedback normalization

@@ -16620,3 +16620,91 @@ Now add unit tests for coerce_bool:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 171 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #171: Fix bool coercion of LLM string 'false' in grammar feedback normalization
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 171 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -8
+  └ 9 lines...
+
+● Smoke test + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -1 && date +%s
+  └ 3 lines...
+
+● Evaluator Evaluate iteration 171
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:50 (50 lines read)
+  └ List directory autoresearch
+      └ 9 files found
+
+● Record T4 for iteration 171 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 171 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '171\tee24ffd\t2026-04-03T22:53:04Z\t446\t87\t50\t218\t801\t670\t670\tpass\t7.8\tkeep\tFix bool
+  │ coercion of LLM string false in grammar feedback normalization\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+All 20 iterations complete! Now generating the summary.
+
+● Compute summary stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>1 && NR>=153 {sum+=$9;
+  │ total+=$10; scores+=$12; count++} END {printf "kept=%d total=%d tests_start=622 tests_end=%d
+  │ avg_score=%.2f\n", count, count, sum, scores/count}' autoresearch/results.tsv
+  └ 2 lines...
+
+● Get iteration summaries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>=153 && NR<=172 {print
+  │ $1"\t"$8"\t"$12"\t"$13"\t"$14}' autoresearch/results.tsv
+  └ 21 lines...
+
+That only shows up to iteration 166 (rows 153-172 = iterations 147-166). Let me get the full range 152-171:
+
+● Full 152-171 stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>=153 {print
+  │ $1"\t"$8"\t"$12"\t"$13"\t"$14}' autoresearch/results.tsv | tail -20
+  └ 21 lines...
+
+Now let me generate the summary:
+
+● Avg timing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>=153 {sum+=$8; count++} END
+  │ {printf "avg_total_sec=%.0f min=%s max=%s\n", sum/count, "", ""}' autoresearch/results.tsv
+  └ 2 lines...
+
+● Average score for 152-171 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk -F'\t' 'NR>=153 && $1>=152
+  │ {scores+=$12; count++} END {printf "avg=%.2f count=%d\n", scores/count, count}'
+  │ autoresearch/results.tsv
+  └ 2 lines...
+
+● Check if summary exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls autoresearch/summary.md 2>/dev/null;
+  │ echo "---"
+  └ 3 lines...
+
+It exists, so I'll update it:
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ L1:5 (5 lines read)
+
+I'll append a new section for this run:
+
+● Read summary.md
+  │ autoresearch/summary.md
+  └ 103 lines read
+
+● Edit summary.md +91 -12
+  └ autoresearch/summary.md
+
