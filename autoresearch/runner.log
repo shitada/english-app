@@ -15627,3 +15627,89 @@ Now add integration tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 162 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #162: Normalize conversation summary to prevent frontend crash on non-array key_vocabulary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 162 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (router changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 162 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 162
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L400:600 (201 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L597:680 (40 lines read)
+
+● Record T4 for iteration 162 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.05, KEEP. Record:
+
+● Record iteration 162 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf '162\t01a43be\t2026-04-03T19:09:56Z\
+  │ t1330\t79\t84\t83\t1576\t648\t648\tpass\t8.05\tkeep\tNormalize conversation summary to prevent
+  │ frontend crash on non-array key_vocabulary\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 162: **KEEP** (8.05). Starting iteration 163.
+
+● Record T0 for iteration 163 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 163
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L1:80 (80 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L174:194 (20 lines read)
+
+● Record T1 for iteration 163 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L82:112 (29 lines read)
+
+● Edit conversation.py +8 -4
+  └ app/routers/conversation.py
+
+Now add the integration test:
+
+● Add orphan cleanup test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'PYEOF'…
+  └ 18 lines...
+
+● Record T2 for iteration 163 (shell)
+  │ date +%s
+  └ 2 lines...
+

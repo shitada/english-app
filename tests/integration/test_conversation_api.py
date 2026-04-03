@@ -634,3 +634,19 @@ async def test_end_conversation_normalizes_null_key_vocabulary(client, mock_copi
     data = res.json()
     assert data["summary"]["key_vocabulary"] == []
     assert data["summary"]["tip"] == ""
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_start_conversation_llm_failure_no_orphan(client, mock_copilot):
+    """If LLM fails during start, the conversation should be cleaned up (no orphan)."""
+    mock_copilot.ask = AsyncMock(side_effect=Exception("LLM unavailable"))
+
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    assert res.status_code == 502
+
+    # Verify no orphan conversation exists
+    list_res = await client.get("/api/conversation/list")
+    assert list_res.status_code == 200
+    conversations = list_res.json()["conversations"]
+    assert len(conversations) == 0

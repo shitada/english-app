@@ -96,10 +96,14 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         role=topic_data.get("scenario", "a conversation partner"),
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty]
-    opening = await safe_llm_call(
-        lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
-        context="start_conversation",
-    )
+    try:
+        opening = await safe_llm_call(
+            lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
+            context="start_conversation",
+        )
+    except Exception:
+        await conv_dal.delete_conversation(db, conversation_id)
+        raise
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
