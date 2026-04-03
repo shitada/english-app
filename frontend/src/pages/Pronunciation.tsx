@@ -366,7 +366,9 @@ export default function Pronunciation() {
 
   // Result phase
   if (phase === 'result' && feedback) {
-    const scoreClass = feedback.overall_score >= 8 ? 'score-high' : feedback.overall_score >= 5 ? 'score-mid' : 'score-low';
+    const scoreClass = feedback.overall_score != null
+      ? (feedback.overall_score >= 8 ? 'score-high' : feedback.overall_score >= 5 ? 'score-mid' : 'score-low')
+      : 'score-mid';
 
     return (
       <div className="card">
@@ -375,7 +377,7 @@ export default function Pronunciation() {
         <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 16 }}>
           <div style={{ textAlign: 'center' }}>
             <div className={`score-circle ${scoreClass}`}>
-              {feedback.overall_score}
+              {feedback.overall_score != null ? feedback.overall_score : '–'}
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Accuracy</p>
           </div>

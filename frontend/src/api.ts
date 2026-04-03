@@ -183,7 +183,7 @@ export interface ConversationSummary {
 }
 
 export interface PronunciationFeedback {
-  overall_score: number;
+  overall_score: number | null;
   overall_feedback: string;
   fluency_score?: number;
   fluency_feedback?: string;

@@ -70,7 +70,7 @@ async def save_attempt(
     reference_text: str,
     user_transcription: str,
     feedback: dict[str, Any],
-    score: float,
+    score: float | None,
     difficulty: str | None = None,
 ) -> int:
     clamped_score: float | None = None

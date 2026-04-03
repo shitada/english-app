@@ -14942,3 +14942,112 @@ Now add tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 157 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #157: Fix truthiness check discarding empty dict feedback/summary in DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 157 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Run smoke test (DAL changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 157 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 157
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L700:850 (151 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L850:960 (49 lines read)
+
+● Record T4 for iteration 157 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.55, KEEP. Record:
+
+● Record iteration 157 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '157\tac1f0de\t2026-04-03T17:12:54Z\t387\t51\t56\t118\t612\t640\t640\tpass\t7.55\tkeep\tFix
+  │ truthiness check discarding empty dict feedback/summary in DAL\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 157: **KEEP** (7.55). Starting iteration 158.
+
+● Record T0 for iteration 158 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 158
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ L366:395 (29 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L185:197 (13 lines read)
+
+● Record T1 for iteration 158 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find overall_score in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "overall_score" frontend/src/api.ts
+  │ | head -10
+  └ 2 lines...
+
+● Find save_attempt signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def save_attempt\|score:"
+  │ app/dal/pronunciation.py | head -10
+  └ 5 lines...
+
+● Find overall_score in Pronunciation.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "overall_score"
+  │ frontend/src/pages/Pronunciation.tsx | head -10
+  └ 3 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L182:195 (14 lines read)
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L68:85 (18 lines read)
+
+● Read Pronunciation.tsx
+  │ frontend/src/pages/Pronunciation.tsx
+  └ L365:395 (30 lines read)
+
+Now implement all three fixes:
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+● Edit Pronunciation.tsx +4 -2
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now fix the type hint in save_attempt:
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Record T2 for iteration 158 (shell)
+  │ date +%s
+  └ 2 lines...
+
