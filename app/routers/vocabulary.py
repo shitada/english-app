@@ -203,7 +203,9 @@ async def generate_quiz(
     words = await vocab_dal.save_words(db, topic, result.get("questions") or [])
     if mode == "fill_blank":
         return {"quiz_type": "fill_blank", "questions": vocab_dal.build_fill_blank_quiz(words)}
-    return {"quiz_type": "multiple_choice", "questions": words}
+    all_words = await vocab_dal.get_words_by_topic(db, topic)
+    all_meanings = [r["meaning"] for r in all_words]
+    return {"quiz_type": "multiple_choice", "questions": vocab_dal.build_quiz(words, all_meanings)}
 
 
 @router.post("/answer", response_model=AnswerResponse)

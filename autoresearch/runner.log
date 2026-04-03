@@ -15219,3 +15219,103 @@ Now add the streak tests. Let me find the end of the file:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 159 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #159: Fix streak dropping to 0 before daily activity despite active streak
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 159 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Run smoke test (DAL changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 159 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type "bugfix" — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 159
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L441:465 (25 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 for iteration 159 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.80, KEEP. Record:
+
+● Record iteration 159 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '159\taa80869\t2026-04-03T17:46:27Z\t520\t126\t51\t183\t880\t644\t644\tpass\t7.8\tkeep\tFix
+  │ streak dropping to 0 before daily activity despite active streak\n' >> autoresearch/results.tsv
+  │ && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 159: **KEEP** (7.8). Starting iteration 160.
+
+● Record T0 for iteration 160 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 160
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L166:207 (41 lines read)
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L183:210 (28 lines read)
+
+● Record T1 for iteration 160 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L185:215 (31 lines read)
+
+I see the issue. Line 206 returns `words` directly instead of going through `build_quiz`. Let me fix it:
+
+● Edit vocabulary.py +3 -1
+  └ app/routers/vocabulary.py
+
+Now add a test:
+
+● Find quiz tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test_quiz\|LLM\|wrong_options"
+  │ tests/integration/test_vocabulary_api.py | head -20
+  └ 18 lines...
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_vocabulary_api.py
+  └ 21 lines...
+
+● Add wrong_options test (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 26 lines...
+
+● Record T2 for iteration 160 (shell)
+  │ date +%s
+  └ 2 lines...
+

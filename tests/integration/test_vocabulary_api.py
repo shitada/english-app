@@ -723,3 +723,25 @@ async def test_answer_triggers_auto_adjust_difficulty(client, mock_copilot):
     assert data["difficulty_adjustment"]["old_difficulty"] == 3
     assert data["difficulty_adjustment"]["new_difficulty"] == 2
     assert data["difficulty_adjustment"]["reason"] == "too_easy"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_llm_generated_quiz_has_wrong_options(client, mock_copilot):
+    """LLM-generated quiz should build proper wrong_options via build_quiz, not rely on LLM."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "cat", "correct_meaning": "a small animal", "example_sentence": "The cat sat."},
+            {"word": "dog", "correct_meaning": "a pet animal", "example_sentence": "The dog barked."},
+            {"word": "bird", "correct_meaning": "a flying creature", "example_sentence": "A bird sang."},
+            {"word": "fish", "correct_meaning": "an aquatic animal", "example_sentence": "The fish swam."},
+        ],
+    })
+    res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["quiz_type"] == "multiple_choice"
+    for q in data["questions"]:
+        assert "wrong_options" in q
+        assert isinstance(q["wrong_options"], list)
+        assert len(q["wrong_options"]) > 0

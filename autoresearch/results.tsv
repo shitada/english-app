@@ -162,3 +162,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 156	676cd86	2026-04-03T17:02:29Z	740	54	53	262	1109	637	637	pass	7.5	keep	Fix fill-blank quiz word-boundary matching and missing-blank edge case
 157	ac1f0de	2026-04-03T17:12:54Z	387	51	56	118	612	640	640	pass	7.55	keep	Fix truthiness check discarding empty dict feedback/summary in DAL
 158	4f2e7b9	2026-04-03T17:31:32Z	409	33	48	612	1102	640	640	pass	6.5	keep	Handle null overall_score in frontend pronunciation result display
+159	aa80869	2026-04-03T17:46:27Z	520	126	51	183	880	644	644	pass	7.8	keep	Fix streak dropping to 0 before daily activity despite active streak
