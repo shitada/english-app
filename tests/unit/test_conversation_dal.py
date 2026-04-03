@@ -868,3 +868,31 @@ class TestMessageOrderDeterminism:
         await test_db.commit()
         text = await format_history_text(test_db, cid)
         assert text == "user: Hello\nassistant: Welcome"
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+class TestEmptyDictHandling:
+    """Verify empty dicts are stored (not discarded as None)."""
+
+    async def test_empty_dict_feedback_is_stored(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        msg_id = await add_message(test_db, cid, "user", "Hello", feedback={})
+        rows = await test_db.execute_fetchall(
+            "SELECT feedback_json FROM messages WHERE id = ?", (msg_id,)
+        )
+        assert rows[0]["feedback_json"] == "{}"
+
+    async def test_empty_dict_summary_is_stored(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary={})
+        rows = await test_db.execute_fetchall(
+            "SELECT summary_json FROM conversations WHERE id = ?", (cid,)
+        )
+        assert rows[0]["summary_json"] == "{}"
+
+    async def test_get_conversation_summary_returns_empty_dict(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary={})
+        result = await get_conversation_summary(test_db, cid)
+        assert result == {}

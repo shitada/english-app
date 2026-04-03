@@ -26,7 +26,7 @@ async def add_message(
     content: str,
     feedback: dict[str, Any] | None = None,
 ) -> int:
-    feedback_json = json.dumps(feedback) if feedback else None
+    feedback_json = json.dumps(feedback) if feedback is not None else None
     cursor = await db.execute(
         "INSERT INTO messages (conversation_id, role, content, feedback_json) VALUES (?, ?, ?, ?)",
         (conversation_id, role, content, feedback_json),
@@ -95,7 +95,7 @@ async def end_conversation(
     summary: dict[str, Any] | None = None,
 ) -> bool:
     """End a conversation atomically. Returns True if transitioned, False if already ended."""
-    summary_json = json.dumps(summary) if summary else None
+    summary_json = json.dumps(summary) if summary is not None else None
     cursor = await db.execute(
         "UPDATE conversations SET status = 'ended', ended_at = datetime('now'), summary_json = ? WHERE id = ? AND status = 'active'",
         (summary_json, conversation_id),

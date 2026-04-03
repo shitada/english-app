@@ -14823,3 +14823,122 @@ Now add the new tests after the existing `TestBuildFillBlankQuiz` tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 156 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #156: Fix fill-blank quiz word-boundary matching and missing-blank edge case
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 156 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Run smoke test (DAL changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 156 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type "bugfix" — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 156
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ L400:end (326 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1150:1165 (15 lines read)
+
+● Record T4 for iteration 156 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.5, KEEP. Record:
+
+● Record iteration 156 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '156\t676cd86\t2026-04-03T17:02:29Z\t740\t54\t53\t262\t1109\t637\t637\tpass\t7.5\tkeep\tFix
+  │ fill-blank quiz word-boundary matching and missing-blank edge case\n' >>
+  │ autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 156: **KEEP** (7.5). Starting iteration 157.
+
+● Record T0 for iteration 157 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 157
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L130:220 (90 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L220:280 (60 lines read)
+
+● Record T1 for iteration 157 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find truthiness checks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "json.dumps\|if feedback\|if
+  │ summary" app/dal/conversation.py | head -15
+  └ 5 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L26:35 (10 lines read)
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L95:105 (10 lines read)
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
+Now add tests:
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/unit/test_conversation_dal.py
+  └ 21 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app\|^import"
+  │ tests/unit/test_conversation_dal.py | head -15
+  └ 4 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "from app.dal.conversation import"
+  │ tests/unit/test_conversation_dal.py
+  └ 6 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L9:30 (22 lines read)
+
+● Add empty dict tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_conversation_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 27 lines...
+
+● Record T2 for iteration 157 (shell)
+  │ date +%s
+  └ 2 lines...
+

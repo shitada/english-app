@@ -159,3 +159,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 153	5c2e002	2026-04-03T15:53:19Z	314	52	56	441	863	625	625	pass	7.3	keep	Normalize LLM pronunciation feedback and fix score default of 0
 154	cc50172	2026-04-03T16:35:46Z	2170	43	78	241	2532	633	633	pass	8.1	keep	Validate and clamp LLM-generated difficulty in save_words
 155	7e96033	2026-04-03T16:43:47Z	292	32	57	88	469	635	635	pass	7.55	keep	Clamp pronunciation scores in _normalize_feedback to [0, 10]
+156	676cd86	2026-04-03T17:02:29Z	740	54	53	262	1109	637	637	pass	7.5	keep	Fix fill-blank quiz word-boundary matching and missing-blank edge case
