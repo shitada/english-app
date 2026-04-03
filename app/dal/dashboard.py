@@ -80,7 +80,7 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
 
 
 async def _calculate_streak(db: aiosqlite.Connection) -> int:
-    """Count consecutive days with learning activity ending at today."""
+    """Count consecutive days with learning activity ending at today or yesterday."""
     rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
             SELECT created_at FROM messages WHERE role = 'user'
@@ -93,13 +93,27 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
 
     streak = 0
     today = datetime.now(timezone.utc).date()
+    if not rows:
+        return 0
+
+    # Allow streak to start from yesterday if no activity today
+    try:
+        most_recent = date.fromisoformat(rows[0]["d"])
+    except (ValueError, TypeError):
+        return 0
+
+    gap = today.toordinal() - most_recent.toordinal()
+    if gap > 1:
+        return 0
+
+    # Start counting from the most recent activity day
+    start_ordinal = most_recent.toordinal()
     for i, r in enumerate(rows):
         try:
             day = date.fromisoformat(r["d"])
         except (ValueError, TypeError):
             break
-        expected = today.toordinal() - i
-        if day.toordinal() == expected:
+        if day.toordinal() == start_ordinal - i:
             streak += 1
         else:
             break
@@ -428,22 +442,22 @@ async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
     """Compute cross-module learning insights with personalized recommendations."""
     streak = await _calculate_streak(db)
 
-    # Streak at risk: no activity today but had activity yesterday
+    # Streak at risk: streak alive from yesterday but no activity today
     at_risk = False
-    if streak == 0:
-        rows = await db.execute_fetchall("""
+    if streak > 0:
+        today_rows = await db.execute_fetchall("""
             SELECT COUNT(*) as cnt FROM (
                 SELECT 1 FROM messages
-                    WHERE role = 'user' AND date(created_at) = date('now', '-1 day')
+                    WHERE role = 'user' AND date(created_at) = date('now')
                 UNION ALL
                 SELECT 1 FROM pronunciation_attempts
-                    WHERE date(created_at) = date('now', '-1 day')
+                    WHERE date(created_at) = date('now')
                 UNION ALL
                 SELECT 1 FROM quiz_attempts
-                    WHERE date(answered_at) = date('now', '-1 day')
+                    WHERE date(answered_at) = date('now')
             )
         """)
-        if rows[0]["cnt"] > 0:
+        if today_rows[0]["cnt"] == 0:
             at_risk = True
 
     # --- Module strengths (0-100) ---

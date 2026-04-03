@@ -500,3 +500,55 @@ class TestGetLearningSummary:
         await log_attempt(test_db, words[0]["id"], is_correct=False)
         result = await get_learning_summary(test_db)
         assert result["quiz_accuracy_percent"] == 50.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+class TestStreakYesterdayAlive:
+    """Verify streak stays alive when last activity was yesterday."""
+
+    async def test_streak_positive_when_activity_yesterday_only(self, test_db):
+        """Streak should be >= 1 when activity was yesterday but not today."""
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-1 day'))",
+            ("Hello", "Hello", 8.0),
+        )
+        await test_db.commit()
+        stats = await get_stats(test_db)
+        assert stats["streak"] >= 1
+
+    async def test_streak_zero_when_activity_two_days_ago(self, test_db):
+        """Streak should be 0 when last activity was 2+ days ago."""
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-2 days'))",
+            ("Hello", "Hello", 8.0),
+        )
+        await test_db.commit()
+        stats = await get_stats(test_db)
+        assert stats["streak"] == 0
+
+    async def test_streak_at_risk_when_no_today_activity(self, test_db):
+        """streak_at_risk should be True when streak alive but no activity today."""
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-1 day'))",
+            ("Hello", "Hello", 8.0),
+        )
+        await test_db.commit()
+        result = await get_learning_insights(test_db)
+        assert result["streak"] >= 1
+        assert result["streak_at_risk"] is True
+
+    async def test_multi_day_streak_alive_from_yesterday(self, test_db):
+        """Multi-day streak counted back from yesterday when today has no activity."""
+        for i in range(1, 4):
+            await test_db.execute(
+                "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+                "VALUES (?, ?, ?, datetime('now', ? || ' days'))",
+                ("Hello", "Hello", 8.0, f"-{i}"),
+            )
+        await test_db.commit()
+        stats = await get_stats(test_db)
+        assert stats["streak"] == 3

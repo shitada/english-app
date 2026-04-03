@@ -15051,3 +15051,171 @@ Now fix the type hint in save_attempt:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 158 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #158: Handle null overall_score in frontend pronunciation result display
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Record T3 for iteration 158 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Frontend TSX changed — check QA condition:
+
+● Check QA condition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Frontend page changed — need QA test. Let me start the server and run the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 158
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L99:169 (71 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L68:89 (22 lines read)
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 158
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L68:89 (22 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L328:337 (9 lines read)
+
+● Record T4 for iteration 158 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.5, KEEP. All conditions met (640/640, TS pass, QA passed, score >= 6.0). Record:
+
+● Record iteration 158 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '158\t4f2e7b9\t2026-04-03T17:31:32Z\t409\t33\t48\t612\t1102\t640\t640\tpass\t6.5\tkeep\tHandle
+  │ null overall_score in frontend pronunciation result display\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 158: **KEEP** (6.5). Starting iteration 159.
+
+● Record T0 for iteration 159 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 159
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L400:500 (101 lines read)
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L1:60 (60 lines read)
+
+● Record T1 for iteration 159 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find streak function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_calculate_streak\|def _calculate"
+  │ app/dal/dashboard.py | head -10
+  └ 6 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L82:130 (49 lines read)
+
+Now let me see the streak_at_risk logic:
+
+● Find streak_at_risk (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "streak_at_risk"
+  │ app/dal/dashboard.py
+  └ 2 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L490:520 (30 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L420:445 (26 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L445:455 (11 lines read)
+
+Now I understand the issue. Let me implement the fix:
+
+● Edit dashboard.py +17 -3
+  └ app/dal/dashboard.py
+
+Now update the streak_at_risk logic since streak won't be 0 when yesterday had activity:
+
+● Edit dashboard.py +7 -7
+  └ app/dal/dashboard.py
+
+Now add tests. Let me check existing dashboard DAL tests:
+
+● Check existing streak tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test.*streak\|class.*Streak"
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 7 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L390:430 (41 lines read)
+
+Now let me also check the streak test at line 94 to understand how test data is inserted:
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L94:150 (57 lines read)
+
+Now add the streak tests. Let me find the end of the file:
+
+● Find end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_dashboard_dal.py &&
+  │ tail -10 tests/unit/test_dashboard_dal.py
+  └ 12 lines...
+
+● Add streak tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ @pytest.mark.asyncio…
+  └ 55 lines...
+
+● Record T2 for iteration 159 (shell)
+  │ date +%s
+  └ 2 lines...
+
