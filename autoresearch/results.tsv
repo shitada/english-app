@@ -172,3 +172,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 166	2b971a2	2026-04-03T20:37:54Z	2287	66	88	71	2512	652	652	pass	7.55	keep	Clean up orphaned user message when LLM fails in send_message
 167	4895cbb	2026-04-03T21:04:58Z	1353	71	69	106	1599	654	654	pass	7.8	keep	Fix _parse_json returning list for markdown-fenced JSON arrays
 168	b652c71	2026-04-03T21:22:28Z	1135	116	69	113	1433	655	655	pass	8.05	keep	Use message ID instead of content matching in update_message_feedback
+169	f765426	2026-04-03T21:42:43Z	461	25	51	45	582	656	656	pass	8.05	keep	Fix get_sentences_from_conversations ignoring limit parameter

@@ -200,7 +200,10 @@ async def generate_quiz(
         context="generate_quiz",
     )
 
-    words = await vocab_dal.save_words(db, topic, result.get("questions") or [])
+    raw_questions = result.get("questions") or result.get("items") or []
+    if not isinstance(raw_questions, list):
+        raw_questions = []
+    words = await vocab_dal.save_words(db, topic, raw_questions)
     if mode == "fill_blank":
         return {"quiz_type": "fill_blank", "questions": vocab_dal.build_fill_blank_quiz(words)}
     all_words = await vocab_dal.get_words_by_topic(db, topic)

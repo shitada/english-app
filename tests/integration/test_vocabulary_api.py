@@ -745,3 +745,29 @@ async def test_llm_generated_quiz_has_wrong_options(client, mock_copilot):
         assert "wrong_options" in q
         assert isinstance(q["wrong_options"], list)
         assert len(q["wrong_options"]) > 0
+
+
+async def test_quiz_handles_items_key_from_parse_json(client, mock_copilot):
+    """When LLM returns array and _parse_json wraps it as {items: [...]}, quiz still works."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "items": [
+            {"word": "hello", "correct_meaning": "a greeting", "example_sentence": "Hello there."},
+            {"word": "goodbye", "correct_meaning": "a farewell", "example_sentence": "Goodbye friend."},
+            {"word": "thanks", "correct_meaning": "gratitude", "example_sentence": "Thanks a lot."},
+            {"word": "please", "correct_meaning": "polite request", "example_sentence": "Please help."},
+        ],
+    })
+    res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["quiz_type"] == "multiple_choice"
+    assert len(data["questions"]) == 4
+
+
+async def test_quiz_handles_non_list_questions(client, mock_copilot):
+    """When LLM returns {questions: 'not a list'}, quiz returns empty rather than crashing."""
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": "invalid"})
+    res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["questions"] == []
