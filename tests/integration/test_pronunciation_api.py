@@ -470,3 +470,47 @@ async def test_check_pronunciation_word_feedback_non_list(client, mock_copilot):
     data = res.json()
     assert data["word_feedback"] == []
     assert data["focus_areas"] == ["intonation"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_check_pronunciation_clamps_high_scores(client, mock_copilot):
+    """LLM returns scores above 10 — should be clamped to 10.0."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 15,
+        "overall_feedback": "Perfect",
+        "word_feedback": [],
+        "focus_areas": [],
+        "fluency_score": 12,
+        "fluency_feedback": "Great",
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Hello world",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 10.0
+    assert data["fluency_score"] == 10.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_check_pronunciation_clamps_negative_scores(client, mock_copilot):
+    """LLM returns negative scores — should be clamped to 0.0."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": -2,
+        "overall_feedback": "Poor",
+        "word_feedback": [],
+        "focus_areas": [],
+        "fluency_score": -5,
+        "fluency_feedback": "Needs work",
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Hello world",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 0.0
+    assert data["fluency_score"] == 0.0

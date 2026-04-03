@@ -14607,3 +14607,101 @@ Now add unit tests. Let me find the test file:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 154 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #154: Validate and clamp LLM-generated difficulty in save_words
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 154 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Check smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/" && echo "NEED_SMOKE" || echo "NO_SMOKE"
+  └ 3 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 154 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type is "bugfix" — QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 154
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L1:25 (23 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ 875 lines read
+
+● Record T4 for iteration 154 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1, KEEP. Record:
+
+● Record iteration 154 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf '154\tcc50172\t2026-04-03T16:35:46Z\
+  │ t2170\t43\t78\t241\t2532\t633\t633\tpass\t8.1\tkeep\tValidate and clamp LLM-generated difficulty
+  │ in save_words\n' >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 154: **KEEP** (8.1). Starting iteration 155.
+
+● Record T0 for iteration 155 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 155
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L99:170 (71 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L68:90 (22 lines read)
+
+● Record T1 for iteration 155 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L98:150 (53 lines read)
+
+● Edit pronunciation.py +2 -2
+  └ app/routers/pronunciation.py
+
+● Edit pronunciation.py +2 -2
+  └ app/routers/pronunciation.py
+
+Now add integration tests:
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -15
+  │ tests/integration/test_pronunciation_api.py
+  └ 16 lines...
+
+● Add clamping tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_pronunciation_api.py <<
+  │ 'PYEOF'…
+  └ 46 lines...
+
+● Record T2 for iteration 155 (shell)
+  │ date +%s
+  └ 2 lines...
+

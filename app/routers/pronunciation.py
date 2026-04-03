@@ -100,11 +100,11 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize LLM pronunciation feedback to ensure consistent types."""
     result = dict(raw)
 
-    # overall_score: float or None (never default to 0)
+    # overall_score: float or None (never default to 0), clamped to [0, 10]
     score = result.get("overall_score")
     if score is not None:
         try:
-            result["overall_score"] = float(score)
+            result["overall_score"] = max(0.0, min(10.0, float(score)))
         except (TypeError, ValueError):
             result["overall_score"] = None
     else:
@@ -128,11 +128,11 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     else:
         result["focus_areas"] = [str(item) for item in fa]
 
-    # fluency_score: float or None
+    # fluency_score: float or None, clamped to [0, 10]
     fs = result.get("fluency_score")
     if fs is not None:
         try:
-            result["fluency_score"] = float(fs)
+            result["fluency_score"] = max(0.0, min(10.0, float(fs)))
         except (TypeError, ValueError):
             result["fluency_score"] = None
 
