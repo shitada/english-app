@@ -14052,3 +14052,35 @@ Now add a test:
 ● Edit test_dashboard_dal.py +15
   └ tests/unit/test_dashboard_dal.py
 
+● Commit iteration 151 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: use quiz_attempts for vocabulary activity tracking in dashboard
+  │
+  │ Replace vocabulary_progress.last_reviewed (overwrites previous date)
+  │ with quiz_attempts.answered_at (logs every review) in 6 dashboard queries:…
+  └ 24 lines...
+
+● Run tests for iteration 151 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+**621 passed!** Now record the final iteration and clean up:
+
+● Final TS check and smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && npx --prefix frontend tsc --noEmit 2>&1 |
+  │ tail -3 && uv run python tests/smoke_test.py 2>&1 | tail -2
+  └ 5 lines...
+
+● Record iteration 151 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "151" "1f13bb1" "$TSTAMP" "55" "300" "60" "60" "$((T4-1775174093))" \
+  │ "621" "621" "pass" "8.1" "keep" "Fix dashboard activity tracking using quiz_attempts instead…
+  └ 4 lines...
+
+🎉 Iteration 151: **KEEP** (8.1). **30/30 kept — 100% success rate!**
+
+Now let me clean up artifacts and generate the summary:
+

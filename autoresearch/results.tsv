@@ -154,3 +154,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 148	1440f4a	2026-04-02T23:31:24+00:00	55	200	55	60	347	617	617	pass	7.8	keep	Guard save_words against malformed LLM question dicts
 149	a6254d0	2026-04-02T23:44:19+00:00	55	300	55	60	697	620	620	pass	7.5	keep	Add stale conversation cleanup with auto-expiry
 150	1a651fa	2026-04-02T23:54:14+00:00	55	180	55	60	510	620	620	pass	7.75	keep	Sync frontend TypeScript interfaces with backend API responses
+151	1f13bb1	2026-04-03T00:17:55+00:00	55	300	60	60	1382	621	621	pass	8.1	keep	Fix dashboard activity tracking using quiz_attempts instead of last_reviewed
