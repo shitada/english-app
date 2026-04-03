@@ -168,3 +168,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 162	01a43be	2026-04-03T19:09:56Z	1330	79	84	83	1576	648	648	pass	8.05	keep	Normalize conversation summary to prevent frontend crash on non-array key_vocabulary
 163	d2878d7	2026-04-03T19:20:30Z	421	36	69	91	617	649	649	pass	7.8	keep	Clean up orphaned conversation when LLM fails in start_conversation
 164	f9ed289	2026-04-03T19:35:52Z	716	49	61	78	904	650	650	pass	7.55	keep	Include abandoned conversations in bulk delete cleanup
+165	baffd36	2026-04-03T19:55:45Z	547	56	64	112	779	651	651	pass	8.35	keep	Fix get_vocabulary_stats miscounting total_words from wrong table

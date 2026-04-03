@@ -155,7 +155,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
     topic_label = topic_data["label"] if topic_data else conv["topic"]
 
-    await conv_dal.add_message(db, req.conversation_id, "user", req.content)
+    user_msg_id = await conv_dal.add_message(db, req.conversation_id, "user", req.content)
 
     history = await conv_dal.format_history_text(db, req.conversation_id)
 
@@ -184,10 +184,14 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
             logger.warning("Grammar check failed (non-fatal): %s", e)
             return None
 
-    feedback, ai_response = await asyncio.gather(
-        _safe_grammar_check(),
-        safe_llm_call(lambda: copilot.ask(system, conv_prompt), context="send_message"),
-    )
+    try:
+        feedback, ai_response = await asyncio.gather(
+            _safe_grammar_check(),
+            safe_llm_call(lambda: copilot.ask(system, conv_prompt), context="send_message"),
+        )
+    except Exception:
+        await conv_dal.delete_message(db, user_msg_id)
+        raise
     logger.info("Parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
     # Save feedback + AI response

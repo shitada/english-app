@@ -650,3 +650,30 @@ async def test_start_conversation_llm_failure_no_orphan(client, mock_copilot):
     assert list_res.status_code == 200
     conversations = list_res.json()["conversations"]
     assert len(conversations) == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_send_message_llm_failure_no_orphan_message(client, mock_copilot):
+    """If LLM fails during send_message, the user message should be cleaned up."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # Conversation response fails (safe_llm_call raises 502)
+    mock_copilot.ask = AsyncMock(side_effect=Exception("LLM unavailable"))
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM unavailable"))
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "I want to check in.",
+    })
+    assert res.status_code == 502
+
+    # Verify the orphan user message was cleaned up
+    history_res = await client.get(f"/api/conversation/{conv_id}/history")
+    assert history_res.status_code == 200
+    messages = history_res.json()["messages"]
+    # Should only have the initial assistant message, no orphaned user message
+    user_messages = [m for m in messages if m["role"] == "user"]
+    assert len(user_messages) == 0

@@ -198,6 +198,15 @@ async def delete_conversation(db: aiosqlite.Connection, conversation_id: int) ->
     return cursor.rowcount > 0
 
 
+async def delete_message(db: aiosqlite.Connection, message_id: int) -> bool:
+    """Delete a single message by ID. Returns True if deleted."""
+    cursor = await db.execute(
+        "DELETE FROM messages WHERE id = ?", (message_id,)
+    )
+    await db.commit()
+    return cursor.rowcount > 0
+
+
 async def delete_ended_conversations(db: aiosqlite.Connection) -> int:
     """Delete all ended and abandoned conversations. Returns count of deleted rows."""
     cursor = await db.execute(

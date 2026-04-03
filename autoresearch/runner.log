@@ -15921,3 +15921,105 @@ Now add the test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 165 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #165: Fix get_vocabulary_stats miscounting total_words from wrong table
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 165 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (DAL changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 165 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 165
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L330:400 (71 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L276:327 (51 lines read)
+
+● Record T4 for iteration 165 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.35, KEEP. Record:
+
+● Record iteration 165 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '165\tbaffd36\t2026-04-03T19:55:45Z\t547\t56\t64\t112\t779\t651\t651\tpass\t8.35\tkeep\tFix
+  │ get_vocabulary_stats miscounting total_words from wrong table\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 165: **KEEP** (8.35). Starting iteration 166.
+
+● Record T0 for iteration 166 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 166
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L99:115 (16 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L60:160 (101 lines read)
+
+● Record T1 for iteration 166 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L148:195 (48 lines read)
+
+Now implement the fix:
+
+● Edit conversation.py +9 -5
+  └ app/routers/conversation.py
+
+Now add the `delete_message` DAL function:
+
+● Find delete_conversation location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def delete_conversation"
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L192:210 (19 lines read)
+
+● Edit conversation.py +9
+  └ app/dal/conversation.py
+
+Now add integration test:
+
+● Add orphan message test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'PYEOF'…
+  └ 29 lines...
+
+● Record T2 for iteration 166 (shell)
+  │ date +%s
+  └ 2 lines...
+
