@@ -13953,3 +13953,102 @@ Good, it exists. Now add DifficultyAdjustment and update submitAnswer:
 
 TypeScript passes. Commit and test:
 
+● Commit iteration 150 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "fix: sync frontend TypeScript interfaces with backend API responses
+  │
+  │ - ChatMessage: add id, is_bookmarked, nullable feedback
+  │ - PronunciationAttempt: add feedback field…
+  └ 20 lines...
+
+● Run tests for iteration 150 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -3
+  └ 4 lines...
+
+620 passed. Record:
+
+● Record iteration 150 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && TSTAMP=$(date -u
+  │ +%Y-%m-%dT%H:%M:%S+00:00) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'
+  │ \
+  │ "150" "1a651fa" "$TSTAMP" "55" "180" "55" "60" "$((T4-1775173544))" \
+  │ "620" "620" "pass" "7.75" "keep" "Sync frontend TypeScript interfaces with backend API …
+  └ 4 lines...
+
+Iteration 150: **KEEP** (7.75). 29/29 kept. Final iteration 151:
+
+● Record T0 for iteration 151 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 151
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1:60 (60 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L60:end (428 lines read)
+
+Good — fixing vocabulary activity tracking for accurate dashboard stats. Let me implement:
+
+● Find last_reviewed references in dashboard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'last_reviewed\|vocabulary_progress' app/dal/dashboard.py | head -20
+  └ 21 lines...
+
+Let me focus on the key locations. Let me view each one:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L110:130 (21 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L200:215 (16 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L84:100 (17 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L265:280 (16 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L336:352 (17 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L440:455 (16 lines read)
+
+Now apply fixes — change `vocabulary_progress.last_reviewed` to `quiz_attempts.answered_at`:
+
+● Edit dashboard.py +1 -2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +3 -4
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +3 -4
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +1 -2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +1 -2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2 -3
+  └ app/dal/dashboard.py
+
+Now add a test:
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L94:130 (37 lines read)
+
+● Edit test_dashboard_dal.py +15
+  └ tests/unit/test_dashboard_dal.py
+

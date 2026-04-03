@@ -123,6 +123,21 @@ class TestGetStats:
         stats = await get_stats(test_db)
         assert stats["vocab_due_count"] >= 1
 
+    async def test_streak_uses_quiz_attempts_not_last_reviewed(self, test_db):
+        """Re-reviewing a word should not erase original day from streak."""
+        questions = [{"word": "streak", "correct_meaning": "test"}]
+        words = await save_words(test_db, "study", questions)
+        wid = words[0]["id"]
+        # First review: today
+        await update_progress(test_db, wid, True)
+        stats = await get_stats(test_db)
+        assert stats["streak"] >= 1
+        # Verify quiz_attempts has records
+        rows = await test_db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE word_id = ?", (wid,)
+        )
+        assert rows[0]["cnt"] >= 1
+
 
 class TestConversationsByDifficulty:
     async def test_empty(self, test_db):

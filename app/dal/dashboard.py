@@ -87,8 +87,7 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
             UNION ALL
             SELECT created_at FROM pronunciation_attempts
             UNION ALL
-            SELECT last_reviewed AS created_at FROM vocabulary_progress
-            WHERE last_reviewed IS NOT NULL
+            SELECT answered_at AS created_at FROM quiz_attempts
         ) ORDER BY d DESC
     """)
 
@@ -114,10 +113,9 @@ async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list
         UNION ALL
         SELECT 'pronunciation' as type, reference_text as detail, created_at as ts FROM pronunciation_attempts
         UNION ALL
-        SELECT 'vocabulary' as type, vw.word as detail, vp.last_reviewed as ts
-        FROM vocabulary_progress vp
-        JOIN vocabulary_words vw ON vp.word_id = vw.id
-        WHERE vp.last_reviewed IS NOT NULL
+        SELECT 'vocabulary' as type, vw.word as detail, qa.answered_at as ts
+        FROM quiz_attempts qa
+        JOIN vocabulary_words vw ON qa.word_id = vw.id
         ORDER BY ts DESC LIMIT ?
     """, (limit,))
     return [
@@ -203,10 +201,9 @@ async def get_daily_activity(
                FROM pronunciation_attempts GROUP BY date(created_at)
            ) pron ON dates.d = pron.d
            LEFT JOIN (
-               SELECT date(last_reviewed) AS d, COUNT(*) AS cnt
-               FROM vocabulary_progress
-               WHERE last_reviewed IS NOT NULL
-               GROUP BY date(last_reviewed)
+               SELECT date(answered_at) AS d, COUNT(*) AS cnt
+               FROM quiz_attempts
+               GROUP BY date(answered_at)
            ) vocab ON dates.d = vocab.d
            ORDER BY dates.d ASC""",
         (days,),
@@ -268,8 +265,7 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
             UNION ALL
             SELECT created_at FROM pronunciation_attempts
             UNION ALL
-            SELECT last_reviewed AS created_at FROM vocabulary_progress
-            WHERE last_reviewed IS NOT NULL
+            SELECT answered_at AS created_at FROM quiz_attempts
         ) ORDER BY d ASC
     """)
     if not rows:
@@ -339,8 +335,7 @@ async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
             UNION ALL
             SELECT created_at FROM pronunciation_attempts
             UNION ALL
-            SELECT last_reviewed AS created_at FROM vocabulary_progress
-            WHERE last_reviewed IS NOT NULL
+            SELECT answered_at AS created_at FROM quiz_attempts
         )
     """)
     study_days = rows[0]["study_days"] if rows else 0
@@ -444,9 +439,8 @@ async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
                 SELECT 1 FROM pronunciation_attempts
                     WHERE date(created_at) = date('now', '-1 day')
                 UNION ALL
-                SELECT 1 FROM vocabulary_progress
-                    WHERE last_reviewed IS NOT NULL
-                      AND date(last_reviewed) = date('now', '-1 day')
+                SELECT 1 FROM quiz_attempts
+                    WHERE date(answered_at) = date('now', '-1 day')
             )
         """)
         if rows[0]["cnt"] > 0:
