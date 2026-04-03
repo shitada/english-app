@@ -197,7 +197,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     # Save feedback + AI response
     if feedback is not None:
         feedback = _normalize_grammar_feedback(feedback)
-        await conv_dal.update_message_feedback(db, req.conversation_id, "user", req.content, feedback)
+        await conv_dal.update_message_feedback(db, user_msg_id, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
     return {"message": ai_response, "feedback": feedback}

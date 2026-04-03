@@ -90,21 +90,21 @@ class TestAddMessage:
 class TestUpdateMessageFeedback:
     async def test_updates_feedback_for_matching_message(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid, "user", "Hello")
+        msg_id = await add_message(test_db, cid, "user", "Hello")
         feedback = {"is_correct": False, "errors": ["grammar"]}
-        await update_message_feedback(test_db, cid, "user", "Hello", feedback)
+        await update_message_feedback(test_db, msg_id, feedback)
         rows = await test_db.execute_fetchall(
-            "SELECT feedback_json FROM messages WHERE conversation_id = ? AND role = 'user'",
-            (cid,),
+            "SELECT feedback_json FROM messages WHERE id = ?",
+            (msg_id,),
         )
         assert json.loads(rows[0]["feedback_json"]) == feedback
 
-    async def test_updates_matching_message(self, test_db):
+    async def test_updates_correct_message_by_id(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid, "user", "Hello")
-        await add_message(test_db, cid, "user", "Goodbye")
+        msg1_id = await add_message(test_db, cid, "user", "Hello")
+        msg2_id = await add_message(test_db, cid, "user", "Goodbye")
         feedback = {"is_correct": True, "errors": []}
-        await update_message_feedback(test_db, cid, "user", "Hello", feedback)
+        await update_message_feedback(test_db, msg1_id, feedback)
         rows = await test_db.execute_fetchall(
             "SELECT content, feedback_json FROM messages WHERE conversation_id = ? AND role = 'user' ORDER BY id",
             (cid,),
@@ -117,16 +117,29 @@ class TestUpdateMessageFeedback:
     async def test_feedback_committed_independently(self, test_db):
         """Regression: feedback should be committed without relying on subsequent operations."""
         cid = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid, "user", "Test commit")
+        msg_id = await add_message(test_db, cid, "user", "Test commit")
         feedback = {"is_correct": True, "errors": []}
-        await update_message_feedback(test_db, cid, "user", "Test commit", feedback)
-        # Verify data is readable (committed) without any other writes
+        await update_message_feedback(test_db, msg_id, feedback)
         rows = await test_db.execute_fetchall(
-            "SELECT feedback_json FROM messages WHERE conversation_id = ? AND content = 'Test commit'",
-            (cid,),
+            "SELECT feedback_json FROM messages WHERE id = ?",
+            (msg_id,),
         )
         assert len(rows) == 1
         assert json.loads(rows[0]["feedback_json"]) == feedback
+
+    async def test_duplicate_content_feedback_targets_correct_message(self, test_db):
+        """When two messages have identical content, feedback should target the specified ID."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        msg1_id = await add_message(test_db, cid, "user", "Hello")
+        msg2_id = await add_message(test_db, cid, "user", "Hello")
+        feedback = {"is_correct": True, "errors": []}
+        await update_message_feedback(test_db, msg2_id, feedback)
+        rows = await test_db.execute_fetchall(
+            "SELECT id, feedback_json FROM messages WHERE conversation_id = ? AND role = 'user' ORDER BY id",
+            (cid,),
+        )
+        assert rows[0]["feedback_json"] is None
+        assert json.loads(rows[1]["feedback_json"]) == feedback
 
 
 @pytest.mark.unit
@@ -480,9 +493,9 @@ class TestGetConversationExport:
 
     async def test_export_with_message_feedback(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid, "user", "Hello")
+        msg_id = await add_message(test_db, cid, "user", "Hello")
         feedback = {"grammar": 9, "vocabulary": 8}
-        await update_message_feedback(test_db, cid, "user", "Hello", feedback)
+        await update_message_feedback(test_db, msg_id, feedback)
         result = await get_conversation_export(test_db, cid)
         assert len(result["messages"]) == 1
         assert result["messages"][0]["feedback"] == feedback
@@ -580,12 +593,12 @@ class TestGrammarAccuracy:
 
     async def test_counts_correct_and_errors(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid, "user", "I want check in")
+        msg1_id = await add_message(test_db, cid, "user", "I want check in")
         feedback_wrong = {"is_correct": False, "errors": [{"original": "check in", "correction": "to check in"}], "suggestions": []}
-        await update_message_feedback(test_db, cid, "user", "I want check in", feedback_wrong)
-        await add_message(test_db, cid, "user", "Thank you very much")
+        await update_message_feedback(test_db, msg1_id, feedback_wrong)
+        msg2_id = await add_message(test_db, cid, "user", "Thank you very much")
         feedback_right = {"is_correct": True, "errors": [], "suggestions": []}
-        await update_message_feedback(test_db, cid, "user", "Thank you very much", feedback_right)
+        await update_message_feedback(test_db, msg2_id, feedback_right)
         result = await get_grammar_accuracy(test_db)
         assert result["total_checked"] == 2
         assert result["total_correct"] == 1
@@ -597,11 +610,11 @@ class TestGrammarAccuracy:
 
     async def test_multiple_topics(self, test_db):
         cid1 = await create_conversation(test_db, "hotel_checkin")
-        await add_message(test_db, cid1, "user", "Hello")
-        await update_message_feedback(test_db, cid1, "user", "Hello", {"is_correct": True, "errors": [], "suggestions": []})
+        msg1_id = await add_message(test_db, cid1, "user", "Hello")
+        await update_message_feedback(test_db, msg1_id, {"is_correct": True, "errors": [], "suggestions": []})
         cid2 = await create_conversation(test_db, "shopping")
-        await add_message(test_db, cid2, "user", "I want buy")
-        await update_message_feedback(test_db, cid2, "user", "I want buy", {"is_correct": False, "errors": [{"original": "buy", "correction": "to buy"}], "suggestions": []})
+        msg2_id = await add_message(test_db, cid2, "user", "I want buy")
+        await update_message_feedback(test_db, msg2_id, {"is_correct": False, "errors": [{"original": "buy", "correction": "to buy"}], "suggestions": []})
         result = await get_grammar_accuracy(test_db)
         assert result["total_checked"] == 2
         assert len(result["by_topic"]) == 2
@@ -741,7 +754,7 @@ class TestGetConversationReplay:
         cid = await create_conversation(test_db, "hotel")
         mid = await add_message(test_db, cid, "user", "I want check in.")
         feedback = {"is_correct": False, "errors": [{"original": "want", "correction": "want to"}]}
-        await update_message_feedback(test_db, cid, "user", "I want check in.", feedback)
+        await update_message_feedback(test_db, mid, feedback)
         await add_message(test_db, cid, "assistant", "Of course!")
         result = await get_conversation_replay(test_db, cid)
         user_turn = result["turns"][0]

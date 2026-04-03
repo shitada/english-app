@@ -16132,3 +16132,146 @@ Now check if there's a test file for copilot client:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 167 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #167: Fix _parse_json returning list for markdown-fenced JSON arrays
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 167 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Record T3 for iteration 167 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No router/DAL/database changes — no smoke test needed. No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 167
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L1:5 (5 lines read)
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ L167:168 (2 lines read)
+
+● Record T4 for iteration 167 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.80, KEEP. Record:
+
+● Record iteration 167 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '167\t4895cbb\t2026-04-03T21:04:58Z\t1353\t71\t69\t106\t1599\t654\t654\tpass\t7.8\tkeep\tFix
+  │ _parse_json returning list for markdown-fenced JSON arrays\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 167: **KEEP** (7.8). Starting iteration 168.
+
+● Record T0 for iteration 168 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 168
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L60:200 (141 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L148:205 (56 lines read)
+
+● Record T1 for iteration 168 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find update_message_feedback usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "update_message_feedback"
+  │ app/dal/conversation.py app/routers/conversation.py
+  └ 3 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L38:60 (23 lines read)
+
+Now implement the fix:
+
+● Edit conversation.py +3 -10
+  └ app/dal/conversation.py
+
+Now update the router caller:
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now update existing tests:
+
+● Find test usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "update_message_feedback\|TestUpdateMessage" tests/unit/test_conversation_dal.py
+  └ 12 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L90:130 (40 lines read)
+
+Now I need to update all the calls to use the new signature (message_id instead of conversation_id, role, content). The add_message function returns the message ID:
+
+● Edit test_conversation_dal.py +26 -13
+  └ tests/unit/test_conversation_dal.py
+
+Now update the other usages of the old signature in the test file:
+
+● Find remaining old-signature calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'update_message_feedback(test_db,
+  │ cid' tests/unit/test_conversation_dal.py
+  └ 7 lines...
+
+I need to update these. Let me view and fix each one:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L494:505 (12 lines read)
+
+● Edit test_conversation_dal.py +2 -2
+  └ tests/unit/test_conversation_dal.py
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L593:620 (28 lines read)
+
+● Edit test_conversation_dal.py +4 -4
+  └ tests/unit/test_conversation_dal.py
+
+● Edit test_conversation_dal.py +4 -4
+  └ tests/unit/test_conversation_dal.py
+
+Now the last one at line ~757:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L752:762 (11 lines read)
+
+● Edit test_conversation_dal.py +1 -1
+  └ tests/unit/test_conversation_dal.py
+
+● Verify no more old-signature calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'update_message_feedback(test_db,
+  │ cid' tests/unit/test_conversation_dal.py
+  └ 1 line...
+
+Good, no more old-signature calls.
+
+● Record T2 for iteration 168 (shell)
+  │ date +%s
+  └ 2 lines...
+

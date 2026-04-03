@@ -37,19 +37,12 @@ async def add_message(
 
 async def update_message_feedback(
     db: aiosqlite.Connection,
-    conversation_id: int,
-    role: str,
-    content: str,
+    message_id: int,
     feedback: dict[str, Any],
 ) -> None:
     await db.execute(
-        """UPDATE messages SET feedback_json = ?
-           WHERE id = (
-               SELECT id FROM messages
-               WHERE conversation_id = ? AND role = ? AND content = ?
-               ORDER BY created_at DESC, id DESC LIMIT 1
-           )""",
-        (json.dumps(feedback), conversation_id, role, content),
+        "UPDATE messages SET feedback_json = ? WHERE id = ?",
+        (json.dumps(feedback), message_id),
     )
     await db.commit()
 
