@@ -167,3 +167,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 161	b091f01	2026-04-03T18:43:26Z	1194	103	61	902	2260	646	646	pass	7.8	keep	Normalize grammar feedback to prevent frontend crash on missing fields
 162	01a43be	2026-04-03T19:09:56Z	1330	79	84	83	1576	648	648	pass	8.05	keep	Normalize conversation summary to prevent frontend crash on non-array key_vocabulary
 163	d2878d7	2026-04-03T19:20:30Z	421	36	69	91	617	649	649	pass	7.8	keep	Clean up orphaned conversation when LLM fails in start_conversation
+164	f9ed289	2026-04-03T19:35:52Z	716	49	61	78	904	650	650	pass	7.55	keep	Include abandoned conversations in bulk delete cleanup

@@ -353,6 +353,16 @@ class TestGetVocabularyStats:
         assert len(stats["level_distribution"]) > 0
         assert len(stats["topic_breakdown"]) == 2
 
+    async def test_total_words_counts_all_not_just_reviewed(self, test_db):
+        """total_words should count all vocabulary_words, not just those in vocabulary_progress."""
+        words = await save_words(test_db, "greetings", _make_questions(5))
+        # Only review 2 of the 5 words
+        await update_progress(test_db, words[0]["id"], True)
+        await update_progress(test_db, words[1]["id"], False)
+        stats = await get_vocabulary_stats(test_db)
+        assert stats["total_words"] == 5
+        assert stats["total_reviews"] == 2
+
 
 class TestTimezoneConsistency:
     """Verify that timestamps written by vocabulary DAL use UTC."""

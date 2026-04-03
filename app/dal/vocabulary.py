@@ -277,7 +277,8 @@ async def get_vocabulary_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get aggregate vocabulary mastery statistics."""
     rows = await db.execute_fetchall(
         """SELECT
-               COUNT(*) as total_words,
+               (SELECT COUNT(*) FROM vocabulary_words) as total_words,
+               COUNT(*) as reviewed_words,
                SUM(CASE WHEN level >= 3 THEN 1 ELSE 0 END) as total_mastered,
                SUM(correct_count + incorrect_count) as total_reviews,
                SUM(correct_count) as total_correct

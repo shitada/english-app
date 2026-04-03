@@ -15821,3 +15821,103 @@ Now add tests. First the unit test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 164 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #164: Include abandoned conversations in bulk delete cleanup
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 164 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 164 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 164
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L280:380 (101 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L380:400 (21 lines read)
+
+● Record T4 for iteration 164 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.55, KEEP. Record:
+
+● Record iteration 164 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '164\tf9ed289\t2026-04-03T19:35:52Z\t716\t49\t61\t78\t904\t650\t650\tpass\t7.55\tkeep\tInclude
+  │ abandoned conversations in bulk delete cleanup\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 164: **KEEP** (7.55). Starting iteration 165.
+
+● Record T0 for iteration 165 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 165
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L900:1050 (151 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1050:1150 (101 lines read)
+
+● Record T1 for iteration 165 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find vocabulary stats code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_vocabulary_stats\|total_words"
+  │ app/dal/vocabulary.py | head -15
+  └ 10 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L276:325 (50 lines read)
+
+I see. The `total_words` count comes from `vocabulary_progress` which only has reviewed words. Let me fix it:
+
+● Edit vocabulary.py +2 -1
+  └ app/dal/vocabulary.py
+
+Now add the test:
+
+● Find existing stats tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "TestGetVocabularyStats\|get_vocabulary_stats\|test.*vocab.*stats"
+  │ tests/unit/test_vocabulary_dal.py | head -10
+  └ 6 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L316:365 (50 lines read)
+
+● Edit test_vocabulary_dal.py +10
+  └ tests/unit/test_vocabulary_dal.py
+
+● Record T2 for iteration 165 (shell)
+  │ date +%s
+  └ 2 lines...
+
