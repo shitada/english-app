@@ -534,7 +534,7 @@ export default function Conversation() {
 function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
   const [expanded, setExpanded] = useState(true);
 
-  if (feedback.is_correct && feedback.suggestions.length === 0) {
+  if (feedback.is_correct && (feedback.suggestions ?? []).length === 0) {
     return (
       <div className="feedback-panel correct">
         ✅ Great! Your English is correct.
@@ -550,14 +550,14 @@ function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
       </div>
       {expanded && (
         <>
-          {feedback.errors.map((err, i) => (
+          {(feedback.errors ?? []).map((err, i) => (
             <div key={i} className="feedback-error">
               <strong>{err.original}</strong> → <em>{err.correction}</em>
               <br />
               <span style={{ fontSize: 12 }}>{err.explanation}</span>
             </div>
           ))}
-          {feedback.suggestions.map((sug, i) => (
+          {(feedback.suggestions ?? []).map((sug, i) => (
             <div key={i} className="feedback-suggestion">
               💡 "{sug.original}" → <em>"{sug.better}"</em>
               <br />

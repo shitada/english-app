@@ -15319,3 +15319,164 @@ Now add a test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 160 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #160: Build proper wrong_options for LLM-generated vocabulary quiz path
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 160 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (router changed) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 160 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type "bugfix" — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 160
+  │ Read COMMIT_EDITMSG
+  │   │ .git/COMMIT_EDITMSG
+  │   └ 3 lines read
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L728:748 (20 lines read)
+
+● Record T4 for iteration 160 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, KEEP. Record:
+
+● Record iteration 160 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '160\t03d5c01\t2026-04-03T18:05:33Z\t815\t45\t58\t215\t1133\t645\t645\tpass\t7.8\tkeep\tBuild
+  │ proper wrong_options for LLM-generated vocabulary quiz path\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 160: **KEEP** (7.8). Starting iteration 161.
+
+● Record T0 for iteration 161 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 161
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L200:350 (150 lines read)
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L1:80 (80 lines read)
+
+Proposer failed, retrying:
+
+● Proposer Propose iteration 161 retry
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L60:200 (141 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L200:400 (201 lines read)
+
+● Record T1 for iteration 161 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find grammar feedback code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "feedback\|grammar\|FeedbackPanel\|errors\|suggestions" app/routers/conversation.py | head -20
+  └ 21 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L138:165 (26 lines read)
+
+Now let me check the Conversation.tsx for the FeedbackPanel:
+
+● Find FeedbackPanel code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "FeedbackPanel\|feedback\.errors\|f
+  │ eedback\.suggestions\|feedback\.corrected\|feedback\.is_correct"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 11 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L534:575 (42 lines read)
+
+Now let me check the GrammarFeedback type:
+
+● Find GrammarFeedback type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "GrammarFeedback"
+  │ frontend/src/api.ts frontend/src/pages/Conversation.tsx
+  └ 7 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L155:175 (21 lines read)
+
+Now implement the fix. First, add the normalization function in the conversation router:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L120:142 (23 lines read)
+
+I'll add the normalization function before the send_message endpoint and apply it:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L106:116 (11 lines read)
+
+● Edit conversation.py +12
+  └ app/routers/conversation.py
+
+Now apply the normalization in send_message:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L164:180 (17 lines read)
+
+● Edit conversation.py +1
+  └ app/routers/conversation.py
+
+Now add defensive optional chaining in FeedbackPanel:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the integration test:
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_conversation_api.py
+  └ 6 lines...
+
+● Add grammar feedback test (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'PYEOF'…
+  └ 28 lines...
+
+● Record T2 for iteration 161 (shell)
+  │ date +%s
+  └ 2 lines...
+

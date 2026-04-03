@@ -566,3 +566,29 @@ async def test_end_conversation_summary_failure_is_non_fatal(client, mock_copilo
     # History should still be retrievable
     res3 = await client.get(f"/api/conversation/{conv_id}/history")
     assert res3.status_code == 200
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_send_message_with_partial_grammar_feedback(client, mock_copilot):
+    """LLM returns grammar feedback missing errors/suggestions — should be normalized."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # Grammar check returns only is_correct, missing errors/suggestions/corrected_text
+    mock_copilot.ask = AsyncMock(return_value="That sounds great!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True})
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "I want to check in.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    fb = data["feedback"]
+    assert fb is not None
+    assert fb["is_correct"] is True
+    assert fb["errors"] == []
+    assert fb["suggestions"] == []
+    assert fb["corrected_text"] == ""

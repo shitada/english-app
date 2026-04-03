@@ -110,6 +110,18 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     }
 
 
+def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize LLM grammar feedback to ensure consistent types."""
+    result = dict(raw)
+    result["is_correct"] = bool(result.get("is_correct", True))
+    result["corrected_text"] = str(result.get("corrected_text") or "")
+    errors = result.get("errors")
+    result["errors"] = [e for e in errors if isinstance(e, dict)] if isinstance(errors, list) else []
+    suggestions = result.get("suggestions")
+    result["suggestions"] = [s for s in suggestions if isinstance(s, dict)] if isinstance(suggestions, list) else []
+    return result
+
+
 @router.post("/message", response_model=MessageResponse)
 async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
@@ -157,6 +169,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Save feedback + AI response
     if feedback is not None:
+        feedback = _normalize_grammar_feedback(feedback)
         await conv_dal.update_message_feedback(db, req.conversation_id, "user", req.content, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
