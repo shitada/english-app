@@ -1,0 +1,4 @@
+[   41451ms] [LOG] [2026-04-03T15:03:22.203Z] [SpeechRecognition] [INFO] Stopping recognition... @ http://localhost:8000/assets/index-Br-Ilj-f.js:10
+[   80800ms] [LOG] [2026-04-03T15:04:01.553Z] [SpeechRecognition] [INFO] start() called. isSupported=true @ http://localhost:8000/assets/index-Br-Ilj-f.js:10
+[   80801ms] [LOG] [2026-04-03T15:04:01.555Z] [SpeechRecognition] [INFO] Requesting microphone permission via getUserMedia... @ http://localhost:8000/assets/index-Br-Ilj-f.js:10
+[   94999ms] [LOG] [2026-04-03T15:04:15.752Z] [SpeechRecognition] [INFO] Stopping recognition... @ http://localhost:8000/assets/index-Br-Ilj-f.js:10

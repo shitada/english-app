@@ -1,0 +1,30 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e288]:
+      - paragraph [ref=e290]: Question 1 of 10
+      - heading "What does this mean?" [level=3] [ref=e326]
+      - generic [ref=e296]:
+        - generic "Click to hear pronunciation" [ref=e327] [cursor=pointer]:
+          - text: complimentary
+          - img [ref=e328]
+        - generic [ref=e332]:
+          - img [ref=e333]
+          - slider [ref=e337]: "0.7"
+          - generic [ref=e338]: 70%
+      - paragraph [ref=e339]: "\"Your stay includes a complimentary breakfast buffet served from 7 to 10 a.m. in the ground-floor restaurant.\""
+      - generic [ref=e340]:
+        - 'button "Answer option: An available or unoccupied hotel room" [ref=e341] [cursor=pointer]': An available or unoccupied hotel room
+        - 'button "Answer option: Provided free of charge as part of the hotel''s service" [ref=e342] [cursor=pointer]': Provided free of charge as part of the hotel's service
+        - 'button "Answer option: To register at a hotel upon arrival and receive your room key" [ref=e343] [cursor=pointer]': To register at a hotel upon arrival and receive your room key
+        - 'button "Answer option: Useful features and services provided by the hotel for guests'' comfort" [ref=e344] [cursor=pointer]': Useful features and services provided by the hotel for guests' comfort

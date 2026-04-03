@@ -118,7 +118,20 @@ If smoke test fails → treat as test failure (discard the change).
 
 ### Step 5c — QA Test (Playwright MCP)
 
-**MANDATORY**: You MUST invoke the **tester** subagent via `runSubagent` for EVERY iteration. You are FORBIDDEN from skipping this step, replacing it with curl commands, or deciding "QA passed" yourself. If Playwright fails due to infrastructure issues (e.g., SingletonLock, browser busy), you MUST:
+**Run condition**: Only run the Playwright QA test when EITHER:
+1. The proposer's `type` is `"feature"` or `"ux"`, OR
+2. `changed_files` includes any file matching `frontend/src/pages/*.tsx` or `frontend/src/components/*.tsx`
+
+Check the condition:
+```bash
+git diff HEAD~1 --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+```
+
+If neither condition is met, **skip Step 5c entirely** and set `qa_passed=true, ux_score=7.0` (neutral defaults) for the evaluator. Log: "QA skipped — no frontend feature changes."
+
+**When running the QA test:**
+
+You MUST invoke the **tester** subagent via `runSubagent`. You are FORBIDDEN from skipping this step, replacing it with curl commands, or deciding "QA passed" yourself. If Playwright fails due to infrastructure issues (e.g., SingletonLock, browser busy), you MUST:
 1. Kill any existing browser processes: `pkill -f "chrome.*mcp" 2>/dev/null; rm -f /Users/shingotada/Library/Caches/ms-playwright/mcp-chrome-*/SingletonLock 2>/dev/null`
 2. Retry the tester subagent ONE more time
 3. If it fails again, record the iteration with ux_score=5.0 and add a note "Playwright infrastructure failure — QA skipped" but you MUST still call the evaluator with qa_passed=false

@@ -34,12 +34,11 @@ Evaluate the codebase from these angles (in priority order):
 4. **Edge case coverage** — unhappy paths not tested
 
 ### For iterations 3-20 (general improvements)
-1. **Listening/Speaking features** — improvements to conversation, pronunciation, shadowing
+1. **Listening/Speaking features & New features** — Feature improvements and new features focused on speaking and listening skills. The app's goal is to help users become fluent English speakers through short, efficient practice sessions. Prioritize proposals that include user-facing frontend functionality: conversation quality feedback, repetitive drill mechanics, learning progress visualization, and smoother interaction flows. Avoid backend-only endpoint additions without corresponding UI.
 2. **Bug detection** — logic errors, race conditions, missing error handling
 3. **Code quality** — duplicated logic, missing type hints, inconsistent patterns
-4. **New features** — ideas from config.yaml topics, UX improvements
-5. **Maintainability** — refactoring for testability, reducing coupling
-6. **Frontend improvements** — accessibility, state management, user experience, performance
+4. **Maintainability** — refactoring for testability, reducing coupling
+5. **Frontend improvements** — accessibility, state management, user experience, performance
 
 ## Constraints
 

@@ -1,0 +1,25 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "English Practice" [level=1] [ref=e5] [cursor=pointer]
+    - navigation [ref=e6]:
+      - link "Conversation" [ref=e7] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e8] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e9] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [ref=e10] [cursor=pointer]:
+        - /url: /dashboard
+  - main [ref=e11]:
+    - generic [ref=e165]:
+      - heading "Shadowing Practice" [level=3] [ref=e249]
+      - generic [ref=e250]: Wonderful, let me pull up your reservation right now, Mr.
+      - generic [ref=e251]: 🎙️ Now repeat the sentence!
+      - button "Stop recording" [ref=e272] [cursor=pointer]:
+        - img [ref=e273]
+        - text: Stop Recording
+      - generic [ref=e258]:
+        - img [ref=e259]
+        - slider [ref=e263]: "0.7"
+        - generic [ref=e264]: 70%
+      - button "Back" [ref=e266] [cursor=pointer]
