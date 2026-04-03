@@ -14705,3 +14705,121 @@ Now add integration tests:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 155 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #155: Clamp pronunciation scores in _normalize_feedback to [0, 10]
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 155 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Check smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/" && echo "NEED_SMOKE" || echo "NO_SMOKE"
+  └ 3 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 155 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type bugfix — QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 155
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L475:517 (42 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ 575 lines read
+
+● Record T4 for iteration 155 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.55, KEEP. Record:
+
+● Record iteration 155 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '155\t7e96033\t2026-04-03T16:43:47Z\t292\t32\t57\t88\t469\t635\t635\tpass\t7.55\tkeep\tClamp
+  │ pronunciation scores in _normalize_feedback to [0, 10]\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 155: **KEEP** (7.55). Starting iteration 156.
+
+● Record T0 for iteration 156 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 156
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L280:400 (121 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L400:440 (41 lines read)
+
+● Record T1 for iteration 156 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find fill-blank code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "build_fill_blank\|import re"
+  │ app/dal/vocabulary.py | head -15
+  └ 3 lines...
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L107:135 (29 lines read)
+
+Now implement the fix:
+
+● Read vocabulary.py
+  │ app/dal/vocabulary.py
+  └ L1:12 (11 lines read)
+
+● Edit vocabulary.py +1
+  └ app/dal/vocabulary.py
+
+● Edit vocabulary.py +8 -3
+  └ app/dal/vocabulary.py
+
+Now add unit tests:
+
+● Check existing fill-blank tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "build_fill_blank"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 6 lines...
+
+● Read test_vocabulary_dal.py
+  │ tests/unit/test_vocabulary_dal.py
+  └ L375:415 (41 lines read)
+
+Need to update the `test_word_not_in_sentence` test since behavior changed (now returns empty string instead of unchanged sentence):
+
+● Edit test_vocabulary_dal.py +2 -2
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add the new tests after the existing `TestBuildFillBlankQuiz` tests:
+
+● Edit test_vocabulary_dal.py +13
+  └ tests/unit/test_vocabulary_dal.py
+
+● Record T2 for iteration 156 (shell)
+  │ date +%s
+  └ 2 lines...
+

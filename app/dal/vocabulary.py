@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -111,9 +112,14 @@ def build_fill_blank_quiz(words: list[dict[str, Any]]) -> list[dict[str, Any]]:
         w_dict = dict(w)
         word = w_dict["word"]
         sentence = w_dict.get("example_sentence", "")
-        # Replace word in sentence (case-insensitive) with ___
-        import re
-        blanked = re.sub(re.escape(word), "___", sentence, flags=re.IGNORECASE) if sentence else ""
+        # Replace whole word in sentence (case-insensitive) with ___
+        if sentence:
+            pattern = r"\b" + re.escape(word) + r"\b"
+            blanked = re.sub(pattern, "___", sentence, flags=re.IGNORECASE)
+            if blanked == sentence:
+                blanked = ""
+        else:
+            blanked = ""
         hint = word[0] if word else ""
         questions.append({
             "id": w_dict["id"],

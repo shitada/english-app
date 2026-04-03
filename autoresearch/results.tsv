@@ -158,3 +158,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 152	e108735	2026-04-03T15:38:30Z	850	54	58	69	1031	622	622	pass	7.8	keep	Make end_conversation summary generation non-fatal on LLM failure
 153	5c2e002	2026-04-03T15:53:19Z	314	52	56	441	863	625	625	pass	7.3	keep	Normalize LLM pronunciation feedback and fix score default of 0
 154	cc50172	2026-04-03T16:35:46Z	2170	43	78	241	2532	633	633	pass	8.1	keep	Validate and clamp LLM-generated difficulty in save_words
+155	7e96033	2026-04-03T16:43:47Z	292	32	57	88	469	635	635	pass	7.55	keep	Clamp pronunciation scores in _normalize_feedback to [0, 10]

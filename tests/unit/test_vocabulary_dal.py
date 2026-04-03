@@ -389,8 +389,8 @@ class TestBuildFillBlankQuiz:
         words = [{"id": 2, "word": "run", "meaning": "to move quickly", "example_sentence": "He sprinted fast.", "difficulty": 1}]
         result = build_fill_blank_quiz(words)
         assert len(result) == 1
-        # Sentence stays unchanged since word is not present
-        assert result[0]["example_with_blank"] == "He sprinted fast."
+        # Sentence cleared to empty when word not found (no blank shown)
+        assert result[0]["example_with_blank"] == ""
         assert result[0]["hint"] == "r"
 
     def test_empty_list(self):
@@ -402,6 +402,19 @@ class TestBuildFillBlankQuiz:
         result = build_fill_blank_quiz(words)
         assert "___" in result[0]["example_with_blank"]
         assert "hello" not in result[0]["example_with_blank"].lower() or "___" in result[0]["example_with_blank"]
+
+    def test_word_boundary_no_partial_match(self):
+        """Word 'on' should NOT blank within 'onwards'."""
+        words = [{"id": 4, "word": "on", "meaning": "position", "example_sentence": "I went onwards.", "difficulty": 1}]
+        result = build_fill_blank_quiz(words)
+        # 'on' doesn't appear as a whole word, so blank should be empty
+        assert result[0]["example_with_blank"] == ""
+
+    def test_word_boundary_exact_match(self):
+        """Word 'on' should blank when it appears as a whole word."""
+        words = [{"id": 5, "word": "on", "meaning": "position", "example_sentence": "Put it on the table.", "difficulty": 1}]
+        result = build_fill_blank_quiz(words)
+        assert result[0]["example_with_blank"] == "Put it ___ the table."
 
 
 class TestResetProgress:
