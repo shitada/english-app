@@ -96,6 +96,53 @@ async def get_sentences(
     return {"sentences": sentences}
 
 
+def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize LLM pronunciation feedback to ensure consistent types."""
+    result = dict(raw)
+
+    # overall_score: float or None (never default to 0)
+    score = result.get("overall_score")
+    if score is not None:
+        try:
+            result["overall_score"] = float(score)
+        except (TypeError, ValueError):
+            result["overall_score"] = None
+    else:
+        result["overall_score"] = None
+
+    # overall_feedback: must be a string
+    if not isinstance(result.get("overall_feedback"), str):
+        result["overall_feedback"] = str(result.get("overall_feedback", ""))
+
+    # word_feedback: must be a list of dicts
+    wf = result.get("word_feedback")
+    if not isinstance(wf, list):
+        result["word_feedback"] = []
+    else:
+        result["word_feedback"] = [item for item in wf if isinstance(item, dict)]
+
+    # focus_areas: must be a list of strings
+    fa = result.get("focus_areas")
+    if not isinstance(fa, list):
+        result["focus_areas"] = []
+    else:
+        result["focus_areas"] = [str(item) for item in fa]
+
+    # fluency_score: float or None
+    fs = result.get("fluency_score")
+    if fs is not None:
+        try:
+            result["fluency_score"] = float(fs)
+        except (TypeError, ValueError):
+            result["fluency_score"] = None
+
+    # fluency_feedback: must be string if present
+    if "fluency_feedback" in result and not isinstance(result["fluency_feedback"], str):
+        result["fluency_feedback"] = str(result["fluency_feedback"])
+
+    return result
+
+
 @router.post("/check")
 async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     copilot = get_copilot_service()
@@ -104,7 +151,7 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         reference_text=req.reference_text,
         user_transcription=req.user_transcription,
     )
-    feedback = await safe_llm_call(
+    raw_feedback = await safe_llm_call(
         lambda: copilot.ask_json(
             "You are an English pronunciation coach. Return ONLY valid JSON.",
             prompt,
@@ -112,8 +159,10 @@ async def check_pronunciation(req: CheckRequest, db: aiosqlite.Connection = Depe
         context="check_pronunciation",
     )
 
+    feedback = _normalize_feedback(raw_feedback)
+
     attempt_id = await pron_dal.save_attempt(
-        db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score", 0),
+        db, req.reference_text, req.user_transcription, feedback, feedback.get("overall_score"),
         difficulty=req.difficulty,
     )
 

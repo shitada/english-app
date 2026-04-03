@@ -415,3 +415,58 @@ async def test_difficulty_progress_after_attempts(client, mock_copilot):
     advanced = next(i for i in data["items"] if i["difficulty"] == "advanced")
     assert advanced["attempt_count"] == 1
     assert advanced["best_score"] == 9
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_check_pronunciation_empty_llm_response(client, mock_copilot):
+    """LLM returns empty dict — should normalize to safe defaults."""
+    mock_copilot.ask_json = AsyncMock(return_value={})
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Hello world",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] is None
+    assert data["word_feedback"] == []
+    assert data["focus_areas"] == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_check_pronunciation_score_as_string(client, mock_copilot):
+    """LLM returns overall_score as string — should be coerced to float."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": "7.5",
+        "overall_feedback": "Good",
+        "word_feedback": [],
+        "focus_areas": [],
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Hello world",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 7.5
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_check_pronunciation_word_feedback_non_list(client, mock_copilot):
+    """LLM returns word_feedback as string — should be normalized to empty list."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 8,
+        "overall_feedback": "Nice",
+        "word_feedback": "some invalid string",
+        "focus_areas": ["intonation"],
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Hello world",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["word_feedback"] == []
+    assert data["focus_areas"] == ["intonation"]

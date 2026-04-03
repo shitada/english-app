@@ -14348,3 +14348,157 @@ Good, logger is already defined. Now let me add the integration test:
 
 T2 = 1775230583. Now commit and test:
 
+● Commit iteration 152 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #152: Make end_conversation summary generation non-fatal on LLM failure
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 152 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+622 passed, 0 failed. Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All tests pass. Now check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+Router changed, need smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -15
+  └ 16 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1775230641. QA test: check if frontend files changed:
+
+● Check if QA test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 1 line...
+
+No frontend changes, proposal type is "bugfix" not "feature"/"ux". QA skipped — set qa_passed=true, ux_score=7.0.
+
+Now call the evaluator:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 2>&1 | head -80
+  └ 81 lines...
+
+● Evaluator Evaluate iteration 152
+  │ Read utils.py
+  │   │ app/utils.py
+  │   └ L1:50 (50 lines read)
+  └ Read utils.py
+      │ app/utils.py
+      └ L50:80 (31 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, verdict: keep. All tests pass. Recording results:
+
+✗ Record iteration 152 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "152" "$HASH" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "850" "54" "58" "69" "1031" \
+  │ "622" "622" "pass" "7.8" "keep" "Make end_conversation summary generation non-fatal on LLM
+  │ failure" \…
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● Get commit hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short HEAD
+  └ 2 lines...
+
+● Record iteration 152 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '152\te108735\t2026-04-03T15:38:30Z\t850\t54\t58\t69\t1031\t622\t622\tpass\t7.8\tkeep\tMake
+  │ end_conversation summary generation non-fatal on LLM failure\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Iteration 152 complete: **KEEP** (7.8). Now starting iteration 153.
+
+● Record T0 for iteration 153 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 153
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L68:90 (22 lines read)
+  └ Read prompts.py
+      │ app/prompts.py
+      └ 23 lines read
+
+● Record T1 for iteration 153 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L100:135 (36 lines read)
+
+● Check existing pronunciation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def
+  │ test_\|overall_score\|word_feedback\|focus_areas" tests/integration/test_pronunciation_api.py |
+  │ head -20
+  └ 21 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L1:30 (30 lines read)
+
+Now implement the normalization function and fix:
+
+● Edit pronunciation.py +4 -2
+  └ app/routers/pronunciation.py
+
+Now add the `_normalize_feedback` function. Let me add it before the `check_pronunciation` endpoint:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L95:102 (7 lines read)
+
+● Edit pronunciation.py +47
+  └ app/routers/pronunciation.py
+
+Now add integration tests:
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_pronunciation_api.py
+  └ 2 lines...
+
+● Read test_pronunciation_api.py
+  │ tests/integration/test_pronunciation_api.py
+  └ L410:417 (8 lines read)
+
+● Edit test_pronunciation_api.py +55
+  └ tests/integration/test_pronunciation_api.py
+
+● Record T2 for iteration 153 (shell)
+  │ date +%s
+  └ 2 lines...
+
