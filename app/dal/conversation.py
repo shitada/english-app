@@ -199,9 +199,9 @@ async def delete_conversation(db: aiosqlite.Connection, conversation_id: int) ->
 
 
 async def delete_ended_conversations(db: aiosqlite.Connection) -> int:
-    """Delete all ended conversations. Returns count of deleted rows."""
+    """Delete all ended and abandoned conversations. Returns count of deleted rows."""
     cursor = await db.execute(
-        "DELETE FROM conversations WHERE status = 'ended'"
+        "DELETE FROM conversations WHERE status IN ('ended', 'abandoned')"
     )
     await db.commit()
     return cursor.rowcount

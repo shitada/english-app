@@ -362,6 +362,26 @@ class TestDeleteEndedConversations:
         count = await delete_ended_conversations(test_db)
         assert count == 3
 
+    async def test_deletes_abandoned_conversations(self, test_db):
+        """Abandoned conversations should also be deleted by bulk cleanup."""
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        cid2 = await create_conversation(test_db, "shopping")
+        cid3 = await create_conversation(test_db, "hotel_checkin")
+        # End one normally
+        await end_conversation(test_db, cid1)
+        # Mark one as abandoned
+        await test_db.execute(
+            "UPDATE conversations SET status = 'abandoned', started_at = datetime('now', '-25 hours') WHERE id = ?",
+            (cid2,),
+        )
+        await test_db.commit()
+        # cid3 is still active
+        count = await delete_ended_conversations(test_db)
+        assert count == 2
+        # Active conversation should remain
+        active = await get_active_conversation(test_db, cid3)
+        assert active is not None
+
 
 @pytest.mark.unit
 class TestCleanupStaleConversations:

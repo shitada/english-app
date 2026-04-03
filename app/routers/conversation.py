@@ -306,7 +306,7 @@ async def delete_conversation(conversation_id: int = Path(ge=1), db: aiosqlite.C
 
 @router.delete("/clear/ended", response_model=ClearResponse)
 async def clear_ended_conversations(db: aiosqlite.Connection = Depends(get_db_session)):
-    """Delete all ended conversations."""
+    """Delete all ended and abandoned conversations."""
     count = await conv_dal.delete_ended_conversations(db)
     return {"deleted_count": count}
 

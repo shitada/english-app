@@ -15713,3 +15713,111 @@ Now add the integration test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 163 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #163: Clean up orphaned conversation when LLM fails in start_conversation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 163 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 163 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes, type "bugfix" — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 163
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L150:220 (69 lines read)
+  └ Read utils.py
+      │ app/utils.py
+      └ 80 lines read
+
+● Record T4 for iteration 163 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, KEEP. Record:
+
+● Record iteration 163 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '163\td2878d7\t2026-04-03T19:20:30Z\t421\t36\t69\t91\t617\t649\t649\tpass\t7.8\tkeep\tClean up
+  │ orphaned conversation when LLM fails in start_conversation\n' >> autoresearch/results.tsv &&
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 163: **KEEP** (7.8). Starting iteration 164.
+
+● Record T0 for iteration 164 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 164
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L192:220 (27 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L340:400 (61 lines read)
+
+● Record T1 for iteration 164 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find delete_ended code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "delete_ended_conversations\|status.*ended\|abandoned" app/dal/conversation.py | head -15
+  └ 6 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L201:220 (18 lines read)
+
+● Edit conversation.py +2 -2
+  └ app/dal/conversation.py
+
+Now update the router endpoint docstring:
+
+● Find endpoint docstring (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "clear.*ended\|Delete all"
+  │ app/routers/conversation.py | head -10
+  └ 4 lines...
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now add tests. First the unit test:
+
+● Find existing delete tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "TestDeleteEnded\|delete_ended\|test_delete_ended\|test_clear_ended"
+  │ tests/unit/test_conversation_dal.py tests/integration/test_conversation_api.py
+  └ 7 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L342:380 (39 lines read)
+
+● Edit test_conversation_dal.py +20
+  └ tests/unit/test_conversation_dal.py
+
+● Record T2 for iteration 164 (shell)
+  │ date +%s
+  └ 2 lines...
+
