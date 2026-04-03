@@ -14,7 +14,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import get_topic_label, safe_llm_call
+from app.utils import coerce_bool, get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -114,12 +114,16 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(result.get("overall_feedback"), str):
         result["overall_feedback"] = str(result.get("overall_feedback", ""))
 
-    # word_feedback: must be a list of dicts
+    # word_feedback: must be a list of dicts, with is_correct coerced to bool
     wf = result.get("word_feedback")
     if not isinstance(wf, list):
         result["word_feedback"] = []
     else:
-        result["word_feedback"] = [item for item in wf if isinstance(item, dict)]
+        items = [item for item in wf if isinstance(item, dict)]
+        for item in items:
+            if "is_correct" in item:
+                item["is_correct"] = coerce_bool(item["is_correct"])
+        result["word_feedback"] = items
 
     # focus_areas: must be a list of strings
     fa = result.get("focus_areas")

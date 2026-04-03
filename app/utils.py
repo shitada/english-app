@@ -78,3 +78,17 @@ def validate_topic(topics: list[dict[str, Any]], topic_id: str) -> dict[str, Any
 def escape_like(value: str) -> str:
     """Escape SQL LIKE wildcard characters (%, _, \\) for safe use in LIKE patterns."""
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def coerce_bool(value: Any, *, default: bool = True) -> bool:
+    """Coerce a value to bool, handling string representations from LLM output.
+
+    String values like "false", "0", "no" are correctly treated as False.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower().strip() not in ("false", "0", "no", "")
+    if value is None:
+        return default
+    return bool(value)

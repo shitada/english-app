@@ -246,3 +246,56 @@ class TestEscapeLike:
 
     def test_empty_string(self):
         assert escape_like("") == ""
+
+
+class TestCoerceBool:
+    """Tests for coerce_bool handling LLM string booleans."""
+
+    def test_true_bool(self):
+        from app.utils import coerce_bool
+        assert coerce_bool(True) is True
+
+    def test_false_bool(self):
+        from app.utils import coerce_bool
+        assert coerce_bool(False) is False
+
+    def test_string_false(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("false") is False
+
+    def test_string_False(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("False") is False
+
+    def test_string_zero(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("0") is False
+
+    def test_string_no(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("no") is False
+
+    def test_empty_string(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("") is False
+
+    def test_string_true(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("true") is True
+
+    def test_string_yes(self):
+        from app.utils import coerce_bool
+        assert coerce_bool("yes") is True
+
+    def test_none_returns_default(self):
+        from app.utils import coerce_bool
+        assert coerce_bool(None) is True
+        assert coerce_bool(None, default=False) is False
+
+    def test_int_zero(self):
+        from app.utils import coerce_bool
+        assert coerce_bool(0) is False
+
+    def test_int_one(self):
+        from app.utils import coerce_bool
+        assert coerce_bool(1) is True

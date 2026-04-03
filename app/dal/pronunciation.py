@@ -8,6 +8,8 @@ from typing import Any
 
 import aiosqlite
 
+from app.utils import coerce_bool
+
 
 async def get_sentences_from_conversations(
     db: aiosqlite.Connection, limit: int = 20, difficulty: str | None = None
@@ -424,7 +426,7 @@ async def get_pronunciation_weaknesses(
         for wf in word_feedback:
             if not isinstance(wf, dict):
                 continue
-            if wf.get("is_correct", True):
+            if coerce_bool(wf.get("is_correct", True)):
                 continue
             expected = (wf.get("expected") or "").lower().strip()
             if not expected:

@@ -17,7 +17,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import safe_llm_call, validate_topic
+from app.utils import coerce_bool, safe_llm_call, validate_topic
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize LLM grammar feedback to ensure consistent types."""
     result = dict(raw)
-    result["is_correct"] = bool(result.get("is_correct", True))
+    result["is_correct"] = coerce_bool(result.get("is_correct", True))
     result["corrected_text"] = str(result.get("corrected_text") or "")
     errors = result.get("errors")
     result["errors"] = [e for e in errors if isinstance(e, dict)] if isinstance(errors, list) else []
