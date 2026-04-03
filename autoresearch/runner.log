@@ -16023,3 +16023,112 @@ Now add integration test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 166 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #166: Clean up orphaned user message when LLM fails in send_message
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 166 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 for iteration 166 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Evaluator:
+
+● Evaluator Evaluate iteration 166
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L550:end (130 lines read)
+
+● Record T4 for iteration 166 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.55, KEEP. Record:
+
+● Record iteration 166 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '166\t2b971a2\t2026-04-03T20:37:54Z\t2287\t66\t88\t71\t2512\t652\t652\tpass\t7.55\tkeep\tClean
+  │ up orphaned user message when LLM fails in send_message\n' >> autoresearch/results.tsv && tail
+  │ -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Iteration 166: **KEEP** (7.55). 15 iterations complete (152-166), all kept. Starting iteration 167.
+
+● Record T0 for iteration 167 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 167
+  │ Read copilot_client.py
+  │   │ app/copilot_client.py
+  │   └ L106:136 (30 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L190:209 (19 lines read)
+
+● Record T1 for iteration 167 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find _parse_json code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_parse_json\|json_match\|items"
+  │ app/copilot_client.py | head -20
+  └ 7 lines...
+
+● Read copilot_client.py
+  │ app/copilot_client.py
+  └ L107:135 (29 lines read)
+
+I see the bug. Line 113 returns directly without checking if the parsed result is a list. Fix:
+
+● Edit copilot_client.py +2 -1
+  └ app/copilot_client.py
+
+Now check if there's a test file for copilot client:
+
+● Find copilot test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && find tests -name "*copilot*" -o -name
+  │ "*client*" | head -5
+  └ 3 lines...
+
+● Find existing parse tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test_\|_parse_json"
+  │ tests/unit/test_copilot_client.py | head -20
+  └ 18 lines...
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 tests/unit/test_copilot_client.py
+  └ 11 lines...
+
+● Add parse_json array tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_copilot_client.py <<
+  │ 'PYEOF'
+  │
+  │ def test_markdown_fenced_array_wrapped(self):
+  │ """Markdown-fenced JSON arrays should be wrapped in {items: ...}."""…
+  └ 14 lines...
+
+● Record T2 for iteration 167 (shell)
+  │ date +%s
+  └ 2 lines...
+

@@ -110,7 +110,8 @@ class CopilotService:
         json_match = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", raw, re.DOTALL)
         if json_match:
             try:
-                return json.loads(json_match.group(1))
+                parsed = json.loads(json_match.group(1))
+                return {"items": parsed} if isinstance(parsed, list) else parsed
             except json.JSONDecodeError:
                 pass
 

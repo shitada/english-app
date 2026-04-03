@@ -46,3 +46,18 @@ class TestParseJson:
     def test_empty_string_raises(self):
         with pytest.raises(ValueError):
             CopilotService._parse_json("")
+
+    def test_markdown_fenced_array_wrapped(self):
+        """Markdown-fenced JSON arrays should be wrapped in {items: ...}."""
+        raw = '```json\n[{"word": "cat"}, {"word": "dog"}]\n```'
+        result = CopilotService._parse_json(raw)
+        assert "items" in result
+        assert isinstance(result["items"], list)
+        assert len(result["items"]) == 2
+
+    def test_markdown_fenced_object_not_wrapped(self):
+        """Markdown-fenced JSON objects should NOT be wrapped."""
+        raw = '```json\n{"questions": [{"word": "cat"}]}\n```'
+        result = CopilotService._parse_json(raw)
+        assert "items" not in result
+        assert "questions" in result
