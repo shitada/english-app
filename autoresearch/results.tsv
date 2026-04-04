@@ -179,3 +179,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 174	24f26ea	2026-04-04T02:46:12Z	687	124	69	72	952	673	673	pass	7.25	keep	Add phoneme-level pronunciation mistake patterns endpoint
 175	b5cf25b	2026-04-04T02:52:13Z	141	61	78	61	341	675	675	pass	7.55	keep	Add database migration version tracking with schema_migrations table
 176	c274d39	2026-04-04T03:04:56Z	595	23	62	62	742	675	675	pass	7.8	keep	Fix save_attempt defaulting non-numeric score to 0.0 instead of None
+177	2379b55	2026-04-04T03:16:41Z	510	51	74	60	695	679	679	pass	8.35	keep	Fix get_grammar_accuracy treating string false is_correct as truthy

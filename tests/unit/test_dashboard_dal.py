@@ -193,6 +193,39 @@ class TestGrammarStats:
         assert result["error_free"] == 1
         assert result["grammar_accuracy"] == 100.0
 
+    async def test_string_true_is_correct_counted(self, test_db):
+        """String 'true' is_correct should count as error_free."""
+        from app.dal.conversation import add_message, create_conversation
+        from app.dal.dashboard import get_grammar_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello", feedback={"is_correct": "true", "errors": [], "suggestions": []})
+        result = await get_grammar_stats(test_db)
+        assert result["error_free"] == 1
+        assert result["grammar_accuracy"] == 100.0
+
+    async def test_string_false_is_correct_not_counted(self, test_db):
+        """String 'false' is_correct should NOT count as error_free."""
+        from app.dal.conversation import add_message, create_conversation
+        from app.dal.dashboard import get_grammar_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I go yesterday", feedback={"is_correct": "false", "errors": [], "suggestions": []})
+        result = await get_grammar_stats(test_db)
+        assert result["error_free"] == 0
+
+    async def test_mixed_bool_and_string(self, test_db):
+        """Mix of True, 'true', False, 'false' should give correct accuracy."""
+        from app.dal.conversation import add_message, create_conversation
+        from app.dal.dashboard import get_grammar_stats
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hi", feedback={"is_correct": True, "errors": [], "suggestions": []})
+        await add_message(test_db, cid, "user", "OK", feedback={"is_correct": "true", "errors": [], "suggestions": []})
+        await add_message(test_db, cid, "user", "Bad", feedback={"is_correct": False, "errors": [], "suggestions": []})
+        await add_message(test_db, cid, "user", "Bad2", feedback={"is_correct": "false", "errors": [], "suggestions": []})
+        result = await get_grammar_stats(test_db)
+        assert result["total_checked"] == 4
+        assert result["error_free"] == 2
+        assert result["grammar_accuracy"] == 50.0
+
 
 class TestVocabLevelDistribution:
     async def test_empty(self, test_db):

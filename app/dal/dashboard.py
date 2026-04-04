@@ -153,7 +153,9 @@ async def get_grammar_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get aggregate grammar feedback statistics from conversation messages."""
     rows = await db.execute_fetchall(
         """SELECT COUNT(*) as total_checked,
-                  SUM(CASE WHEN json_extract(feedback_json, '$.is_correct') = 1 THEN 1 ELSE 0 END) as error_free
+                  SUM(CASE WHEN json_extract(feedback_json, '$.is_correct') = 1
+                            OR LOWER(json_extract(feedback_json, '$.is_correct')) IN ('true', 'yes', '1')
+                       THEN 1 ELSE 0 END) as error_free
            FROM messages
            WHERE role = 'user' AND feedback_json IS NOT NULL"""
     )
