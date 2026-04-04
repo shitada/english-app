@@ -746,7 +746,9 @@ async def get_word_with_notes(
     )
     if not rows:
         return None
-    return dict(rows[0])
+    result = dict(rows[0])
+    result["is_favorite"] = bool(result.get("is_favorite", 0))
+    return result
 
 
 async def auto_adjust_difficulty(
@@ -918,6 +920,7 @@ async def get_word_detail(
     if not word_rows:
         return None
     word = dict(word_rows[0])
+    word["is_favorite"] = bool(word.get("is_favorite", 0))
 
     progress_rows = await db.execute_fetchall(
         """SELECT correct_count, incorrect_count, level, last_reviewed, next_review_at

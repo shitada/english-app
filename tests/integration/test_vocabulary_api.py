@@ -659,6 +659,7 @@ async def test_word_detail(client, mock_copilot):
     data = res.json()
     assert "word" in data
     assert "similar_words" in data
+    assert isinstance(data.get("is_favorite"), bool), "is_favorite must be bool"
 
 
 @pytest.mark.integration
