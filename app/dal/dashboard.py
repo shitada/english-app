@@ -302,7 +302,7 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
             elif day_ord != prev_ord:
                 current = 1
         prev_ord = day_ord
-    return longest
+    return longest if prev_ord is not None else 0
 
 
 async def get_conversation_duration_stats(db: aiosqlite.Connection) -> dict[str, Any]:

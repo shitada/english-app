@@ -321,6 +321,19 @@ class TestStreakMilestones:
         assert isinstance(result, int)
         assert result >= 0
 
+    async def test_longest_streak_zero_with_null_dates(self, test_db):
+        """Longest streak should be 0 when all dates are unparseable."""
+        from app.dal.dashboard import _calculate_longest_streak
+        # Insert a message with an unparseable created_at to simulate corrupt data
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "corrupt", "not-a-date"),
+        )
+        await test_db.commit()
+        result = await _calculate_longest_streak(test_db)
+        assert result == 0
+
 
 @pytest.mark.unit
 class TestConversationDurationStats:
