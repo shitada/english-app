@@ -838,7 +838,7 @@ async def get_srs_analytics(db: aiosqlite.Connection) -> dict[str, Any]:
     retention_by_level = []
     for r in level_rows:
         total = r["total_correct"] + r["total_incorrect"]
-        accuracy = round(r["total_correct"] / total, 4) if total > 0 else 0.0
+        accuracy = round(r["total_correct"] / total * 100, 1) if total > 0 else 0.0
         retention_by_level.append({
             "level": r["level"],
             "word_count": r["word_count"],

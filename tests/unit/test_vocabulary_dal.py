@@ -1122,6 +1122,22 @@ class TestSRSAnalytics:
         )
         assert total_words_in_levels == 2
 
+    async def test_retention_accuracy_is_percentage(self, test_db):
+        """Verify retention_by_level accuracy is a percentage (0-100), not a decimal (0-1)."""
+        words = await save_words(test_db, "travel", _make_questions(1))
+        # 3 correct, 1 incorrect → accuracy should be 75.0 not 0.75
+        for _ in range(3):
+            await update_progress(test_db, words[0]["id"], is_correct=True)
+        await update_progress(test_db, words[0]["id"], is_correct=False)
+        result = await get_srs_analytics(test_db)
+        for level in result["retention_by_level"]:
+            assert level["accuracy"] >= 0
+            assert level["accuracy"] <= 100
+        # The level with our word should have accuracy around 75.0
+        matched = [l for l in result["retention_by_level"] if l["total_reviews"] == 4]
+        assert len(matched) == 1
+        assert matched[0]["accuracy"] == 75.0
+
     async def test_level_summary_all_states(self, test_db):
         """Verify level_summary when words are in all states simultaneously."""
         words = await save_words(test_db, "travel", _make_questions(4))
