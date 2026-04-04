@@ -119,3 +119,36 @@ async def test_pronunciation_attempt_insert(test_db: aiosqlite.Connection):
     rows = await test_db.execute_fetchall("SELECT * FROM pronunciation_attempts")
     assert len(rows) == 1
     assert rows[0]["score"] == 7.5
+
+
+@pytest.mark.asyncio
+async def test_apply_migrations_creates_tracking_table(test_db: aiosqlite.Connection):
+    """_apply_migrations creates schema_migrations table and records applied versions."""
+    from app.database import _apply_migrations, _MIGRATIONS
+
+    await _apply_migrations(test_db)
+
+    rows = await test_db.execute_fetchall(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'"
+    )
+    assert len(rows) == 1
+
+    applied = await test_db.execute_fetchall(
+        "SELECT version, description FROM schema_migrations ORDER BY version"
+    )
+    assert len(applied) == len(_MIGRATIONS)
+    for i, (desc, _sql) in enumerate(_MIGRATIONS):
+        assert applied[i]["version"] == i
+        assert applied[i]["description"] == desc
+
+
+@pytest.mark.asyncio
+async def test_apply_migrations_skips_already_applied(test_db: aiosqlite.Connection):
+    """Running _apply_migrations twice doesn't duplicate entries."""
+    from app.database import _apply_migrations, _MIGRATIONS
+
+    await _apply_migrations(test_db)
+    await _apply_migrations(test_db)
+
+    applied = await test_db.execute_fetchall("SELECT version FROM schema_migrations")
+    assert len(applied) == len(_MIGRATIONS)

@@ -245,3 +245,25 @@ async def delete_goal(goal_type: str, db: aiosqlite.Connection = Depends(get_db_
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Goal not found")
     return {"deleted": True}
+
+
+@router.get("/migration-status")
+async def migration_status(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Return current database migration version and history."""
+    try:
+        rows = await db.execute_fetchall(
+            "SELECT version, description, applied_at FROM schema_migrations ORDER BY version"
+        )
+        migrations = [
+            {"version": r["version"], "description": r["description"], "applied_at": r["applied_at"]}
+            for r in rows
+        ]
+    except Exception:
+        migrations = []
+    from app.database import _MIGRATIONS
+    return {
+        "total_defined": len(_MIGRATIONS),
+        "total_applied": len(migrations),
+        "current_version": migrations[-1]["version"] if migrations else -1,
+        "migrations": migrations,
+    }

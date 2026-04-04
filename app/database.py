@@ -147,18 +147,51 @@ _MIGRATIONS: list[tuple[str, str]] = [
 
 
 async def _apply_migrations(db: aiosqlite.Connection) -> None:
-    """Apply pending migrations to an existing database.
+    """Apply pending migrations with version tracking.
 
-    Each migration is attempted independently. If it fails (e.g. column already
-    exists), the error is silently ignored — this makes migrations idempotent.
+    Uses a schema_migrations table to track which migrations have been applied,
+    skipping already-applied ones and recording new ones.
     """
-    for desc, sql in _MIGRATIONS:
+    # Ensure tracking table exists
+    await db.execute(
+        """CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            description TEXT NOT NULL,
+            applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )"""
+    )
+    await db.commit()
+
+    # Find already-applied versions
+    rows = await db.execute_fetchall("SELECT version FROM schema_migrations")
+    applied = {r["version"] for r in rows}
+
+    for idx, (desc, sql) in enumerate(_MIGRATIONS):
+        if idx in applied:
+            continue
         try:
             await db.execute(sql)
-            logger.info("Migration applied: %s", desc)
-        except Exception:
-            # Already applied (e.g. "duplicate column name") — skip silently
-            pass
+            await db.execute(
+                "INSERT INTO schema_migrations (version, description) VALUES (?, ?)",
+                (idx, desc),
+            )
+            logger.info("Migration %d applied: %s", idx, desc)
+        except Exception as exc:
+            # Tolerate "duplicate column" / "already exists" errors for bootstrap
+            err_msg = str(exc).lower()
+            if "duplicate" in err_msg or "already exists" in err_msg:
+                # Record as applied so we don't retry
+                try:
+                    await db.execute(
+                        "INSERT OR IGNORE INTO schema_migrations (version, description) VALUES (?, ?)",
+                        (idx, desc),
+                    )
+                except Exception:
+                    pass
+                logger.debug("Migration %d already applied: %s", idx, desc)
+            else:
+                logger.error("Migration %d failed: %s — %s", idx, desc, exc)
+                raise
     await db.commit()
 
 

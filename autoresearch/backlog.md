@@ -27,7 +27,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [MEDIUM] Feature Improvements
 
 - [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)
-- [ ] Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns
+- [x] ✅ Improve pronunciation feedback granularity — add phoneme-level comparison and common mistake patterns (completed iteration #174)
 - [x] ✅ Preserve original punctuation (? !) in pronunciation sentence extraction (completed iteration #26)
 - [x] ✅ Diversify vocabulary quiz formats — fill-in-the-blank mode added (completed iteration #38-39)
 - [x] ✅ Add conversation history review page — backend endpoint added: GET /api/conversation/list with topic filter and pagination (completed iteration #11)
