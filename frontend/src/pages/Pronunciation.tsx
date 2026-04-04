@@ -401,20 +401,49 @@ export default function Pronunciation() {
           </p>
         )}
 
+        {(() => {
+          const total = feedback.word_feedback.length;
+          const correct = feedback.word_feedback.filter((w) => w.is_correct).length;
+          const partial = feedback.word_feedback.filter((w) => !w.is_correct && w.heard !== 'missing').length;
+          const incorrect = total - correct - partial;
+          return (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                <span style={{ color: '#22c55e' }}>✓ {correct}</span>
+                <span style={{ color: '#f59e0b' }}>~ {partial}</span>
+                <span style={{ color: '#ef4444' }}>✗ {incorrect}</span>
+              </div>
+              <div className="accuracy-bar" role="img" aria-label={`Accuracy: ${correct} correct, ${partial} partial, ${incorrect} incorrect out of ${total} words`}>
+                {correct > 0 && <div className="accuracy-segment correct" style={{ width: `${(correct / total) * 100}%` }} />}
+                {partial > 0 && <div className="accuracy-segment partial" style={{ width: `${(partial / total) * 100}%` }} />}
+                {incorrect > 0 && <div className="accuracy-segment incorrect" style={{ width: `${(incorrect / total) * 100}%` }} />}
+              </div>
+            </>
+          );
+        })()}
+
         <h4 style={{ marginBottom: 8 }}>Word-by-Word Analysis</h4>
         <div className="word-comparison">
-          {feedback.word_feedback.map((w, i) => (
-            <div
-              key={i}
-              className={`word-chip ${w.is_correct ? 'word-correct' : 'word-incorrect'}`}
-              title={w.tip || 'Correct!'}
-            >
-              {w.expected}
-              {!w.is_correct && w.heard !== 'missing' && (
-                <span style={{ fontSize: 11, display: 'block' }}>→ "{w.heard}"</span>
-              )}
-            </div>
-          ))}
+          {feedback.word_feedback.map((w, i) => {
+            const chipClass = w.is_correct ? 'word-correct' : (w.heard !== 'missing' ? 'word-partial' : 'word-incorrect');
+            return (
+              <div key={i} className={`word-chip ${chipClass}`} title={w.tip || 'Correct!'}>
+                {w.expected}
+                {!w.is_correct && w.heard !== 'missing' && (
+                  <span style={{ fontSize: 11, display: 'block' }}>→ "{w.heard}"</span>
+                )}
+                {!w.is_correct && w.phoneme_issues && w.phoneme_issues.length > 0 && (
+                  <div>
+                    {w.phoneme_issues.map((p, j) => (
+                      <span key={j} className="phoneme-badge">
+                        {p.target && p.produced ? `${p.target}→${p.produced}` : p.tip || '?'}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {feedback.word_feedback.some((w) => !w.is_correct) && (

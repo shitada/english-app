@@ -1,3 +1,3 @@
 [
-  {"check":"agent_skip","severity":"error","iterations":" 182  182","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 7 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
+  {"check":"playwright_shallow","severity":"warning","iterations":" 184(2) 185(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
 ]

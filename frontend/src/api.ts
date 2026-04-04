@@ -197,6 +197,7 @@ export interface PronunciationFeedback {
     heard: string;
     is_correct: boolean;
     tip: string;
+    phoneme_issues?: { target?: string; produced?: string; tip?: string }[];
   }[];
   focus_areas: string[];
 }

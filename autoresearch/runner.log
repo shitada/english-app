@@ -17822,3 +17822,220 @@ All 3 iterations complete (183-185). Now generate the summary:
 ● Edit summary.md +64 -3
   └ autoresearch/summary.md
 
+● Commit summary update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ Update summary and backlog for iterations 183-185
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+## Autoresearch Complete (Iterations 183–185)
+
+**3/3 kept** (100% success rate):
+
+| # | Score | Change |
+|---|-------|--------|
+| 183 | 6.70 | Conversation speed control (🐢/1×/🐇) |
+| 184 | 7.25 | Key phrase highlight with tap-to-hear |
+| 185 | 6.95 | Vocabulary quick drill (60s timed flashcards) |
+
+All 687 tests pass, TypeScript clean, smoke tests OK. Summary written to `autoresearch/summary.md`.
+
+
+Total usage est:        3 Premium requests
+API time spent:         47m 26s
+Total session time:     59m 26s
+Total code changes:     +451 -21
+Breakdown by AI model:
+ claude-opus-4.6          11.8m in, 69.3k out, 10.9m cached (Est. 3 Premium requests)
+[2026-04-04 16:47:45] Copilot invocation completed (duration: 3576s)
+[2026-04-04 16:47:45] Running post-invocation audit (iter 183-185)...
+============================================
+ Autoresearch Audit
+ Iterations: 183 — 185
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-04 16:47:45
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 184(2) 185(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-04 16:47:46] Audit passed — no issues
+[2026-04-04 16:47:49] Current iteration count: 185 / 185
+[2026-04-04 16:47:49] Target reached (185 >= 185) — done!
+[2026-04-04 16:47:50] ==========================================
+[2026-04-04 16:47:50] Runner finished
+[2026-04-04 16:47:50] Total invocations: 1
+[2026-04-04 16:47:50] Final iteration:   185 / 185
+[2026-04-04 16:47:50] Premium requests:  30
+[2026-04-04 16:47:50] ==========================================
+[2026-04-05 00:48:26] ==========================================
+[2026-04-05 00:48:26] Autoresearch CLI Runner started
+[2026-04-05 00:48:26] Current iteration: 185
+[2026-04-05 00:48:26] Additional iters:  20
+[2026-04-05 00:48:26] Target iteration:  205
+[2026-04-05 00:48:26] Max invocations:   10
+[2026-04-05 00:48:26] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-05 00:48:26] ==========================================
+[2026-04-05 00:48:26] WARNING: Working tree has uncommitted changes
+[2026-04-05 00:48:27]   M autoresearch/audit-report.json
+[2026-04-05 00:48:27]   M autoresearch/runner.log
+[2026-04-05 00:48:27] Continuing anyway...
+[2026-04-05 00:48:27] Current iteration count: 185 / 205
+[2026-04-05 00:48:27] ------------------------------------------
+[2026-04-05 00:48:27] Invocation 1 / 10
+[2026-04-05 00:48:27] Resuming from iteration 186
+[2026-04-05 00:48:27] ------------------------------------------
+[2026-04-05 00:48:27] Starting copilot invocation...
+
+
+
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L1:30 (30 lines read)
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 126 lines read
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L170:end (21 lines read)
+
+● Read backlog.md
+  └ autoresearch/backlog.md
+
+Let me check the remaining uncompleted backlog items and baseline test status.
+
+● Find uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[ \]' autoresearch/backlog.md
+  └ 7 lines...
+
+● Run baseline TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+● Run baseline tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+Baseline: 687 tests pass, TS check clean. Starting iteration 186.
+
+● Record T0 for iteration 186 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 186
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L99:163 (65 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L1:60 (60 lines read)
+
+● Record T1 for iteration 186 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now implementing. Let me read the relevant files.
+
+● Find pronunciation types in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "phoneme\|word_feedback\|PronunciationFeedback\|PronunciationAttempt\|WordFeedback"
+  │ frontend/src/api.ts | head -30
+  └ 8 lines...
+
+● Find pronunciation result rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "word_feedback\|is_correct\|word-correct\|word-incorrect\|phoneme\|WordChip\|result\|accuracy"
+  │ frontend/src/pages/Pronunciation.tsx | head -40
+  └ 11 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L188:210 (23 lines read)
+
+● Read Pronunciation.tsx
+  │ frontend/src/pages/Pronunciation.tsx
+  └ L365:440 (76 lines read)
+
+● Read Pronunciation.tsx
+  │ frontend/src/pages/Pronunciation.tsx
+  └ L440:470 (18 lines read)
+
+● Find word chip CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "word-correct\|word-incorrect\|word-chip\|word-comparison" frontend/src/index.css
+  └ 5 lines...
+
+● Read index.css
+  │ frontend/src/index.css
+  └ L365:400 (36 lines read)
+
+Now I have all the context. Let me implement the changes.
+
+● Edit index.css +32
+  └ frontend/src/index.css
+
+● Edit api.ts +1
+  └ frontend/src/api.ts
+
+Now update the Pronunciation.tsx to add accuracy bar and 3-tier coloring:
+
+● Edit Pronunciation.tsx +41 -12
+  └ frontend/src/pages/Pronunciation.tsx
+
+● Record T2 for iteration 186 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Step 4 — Commit:
+
