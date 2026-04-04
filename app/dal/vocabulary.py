@@ -98,7 +98,7 @@ def build_quiz(words: list[dict[str, Any]], all_meanings: list[str]) -> list[dic
     questions = []
     for w in words:
         w_dict = dict(w)
-        wrong = [m for m in all_meanings if m != w_dict["meaning"]]
+        wrong = list({m for m in all_meanings if m != w_dict["meaning"]})
         random.shuffle(wrong)
         w_dict["wrong_options"] = wrong[:3]
         questions.append(w_dict)

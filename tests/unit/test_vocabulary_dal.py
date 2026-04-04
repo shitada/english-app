@@ -200,6 +200,15 @@ class TestBuildQuiz:
         quiz = build_quiz([], ["meaning1", "meaning2"])
         assert quiz == []
 
+    def test_no_duplicate_wrong_options(self):
+        """Duplicate meanings in all_meanings should not produce duplicate wrong options."""
+        words = [{"id": 1, "word": "hello", "meaning": "greeting", "example_sentence": "Hi"}]
+        all_meanings = ["greeting", "farewell", "farewell", "thanks", "thanks", "thanks"]
+        quiz = build_quiz(words, all_meanings)
+        wrong = quiz[0]["wrong_options"]
+        assert len(wrong) == len(set(wrong)), f"Duplicate wrong options: {wrong}"
+        assert "greeting" not in wrong
+
 
 @pytest.mark.unit
 class TestGetWord:
