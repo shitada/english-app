@@ -44,6 +44,7 @@ export default function Conversation() {
   const [historySummary, setHistorySummary] = useState<ConversationSummary | null>(null);
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
+  const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -165,6 +166,7 @@ export default function Conversation() {
       setMessages([{ role: 'assistant', content: res.message }]);
       setPhase('chat');
       setTimeLeft(DURATION);
+      setPhraseSuggestions(res.phrase_suggestions || []);
       tts.speak(res.message);
     } catch (err) {
       alert('Failed to start conversation. Make sure the backend is running.');
@@ -182,6 +184,7 @@ export default function Conversation() {
     const userMsg = input.trim();
     setInput('');
     speech.reset();
+    setPhraseSuggestions([]);
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
 
@@ -198,6 +201,7 @@ export default function Conversation() {
         updated.push({ role: 'assistant', content: res.message });
         return updated;
       });
+      setPhraseSuggestions(res.phrase_suggestions || []);
       tts.speak(res.message);
     } catch (err) {
       console.error(err);
@@ -476,6 +480,30 @@ export default function Conversation() {
       {speech.error && (
         <div style={{ padding: '8px 16px', background: '#fef2f2', color: '#b91c1c', fontSize: 13, borderTop: '1px solid #fecaca' }}>
           {speech.error}
+        </div>
+      )}
+      {phraseSuggestions.length > 0 && !loading && !input.trim() && (
+        <div style={{ display: 'flex', gap: 8, padding: '8px 16px', overflowX: 'auto', borderTop: '1px solid var(--border, #e2e8f0)' }} aria-label="Reply suggestions">
+          {phraseSuggestions.map((phrase, i) => (
+            <button
+              key={i}
+              className="btn"
+              onClick={() => { setInput(phrase); setPhraseSuggestions([]); }}
+              style={{
+                whiteSpace: 'nowrap',
+                padding: '6px 14px',
+                fontSize: 13,
+                borderRadius: 20,
+                border: '1px solid var(--primary, #3b82f6)',
+                background: 'transparent',
+                color: 'var(--primary, #3b82f6)',
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              {phrase}
+            </button>
+          ))}
         </div>
       )}
       <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>

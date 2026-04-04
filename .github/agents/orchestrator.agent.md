@@ -42,12 +42,14 @@ Save this as `T0`.
 ### Step 2 — Propose
 **MANDATORY**: You MUST invoke the **proposer** subagent via `runSubagent`. You are FORBIDDEN from proposing changes yourself, deciding what to implement without the proposer, or skipping this step. Every iteration MUST call the proposer agent.
 
-Pass the proposer:
-- Current iteration number (N)
-- Contents of `autoresearch/results.tsv` (so it avoids duplicate proposals)
-- Contents of `autoresearch/backlog.md`
-- For iterations 1-2: Add instruction "PRIORITY: Focus on test coverage improvements (add missing unit tests, integration tests, input validation tests)"
-- For iterations 3-20: No special priority constraint
+**You MUST include the following in the prompt you pass to the proposer** (do NOT just reference file names — paste the actual content):
+
+1. The literal text: "Iteration: N" (current iteration number)
+2. The **full contents** of `autoresearch/backlog.md` — read the file and paste its content into the prompt
+3. The **last 20 rows** of `autoresearch/results.tsv` — read and paste so the proposer can avoid duplicates
+4. For iterations 1-2: Add "PRIORITY: Focus on test coverage"
+
+If the backlog contains uncompleted feature items, tell the proposer: "The backlog has uncompleted feature items. Prioritize those over finding new bugs."
 
 The proposer will return a JSON proposal: `{type, title, description, files_to_modify, priority, estimated_complexity}`
 

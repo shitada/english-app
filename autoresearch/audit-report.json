@@ -1,5 +1,3 @@
 [
-  {"check":"agent_skip","severity":"error","iterations":" 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151  137 138 139 140 141 142 143 144 145 146 147 148 149 150 151","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 7 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
-,
-  {"check":"playwright_shallow","severity":"warning","iterations":" 120(2) 121(2) 122(2) 123(1) 124(2) 125(2) 126(1) 127(2) 128(2) 129(2) 130(2) 131(2) 132(2) 133(1) 134(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 152 153 154 155 156 157 159 160 162 163 164 165 166 167 168 169 170 171 ","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 7 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
 ]

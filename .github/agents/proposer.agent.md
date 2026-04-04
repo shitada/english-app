@@ -18,10 +18,14 @@ You will receive:
 
 ## Analysis Process
 
-1. **Read the backlog** and identify the highest-priority uncompleted item
-2. **Search the codebase** to understand the current state of relevant files
-3. **Check results_tsv** to ensure you're not proposing something already tried
+**MANDATORY: Follow these steps IN ORDER. Do NOT skip to codebase scanning.**
+
+1. **Read the backlog provided in your input** — look for uncompleted items (lines starting with `- [ ]`). If any uncompleted feature item exists, you MUST propose that item. Do NOT scan the codebase for bugs when there are uncompleted feature items in the backlog.
+2. **Check results_tsv** to ensure you're not proposing something already tried
+3. **Search the codebase** to understand the current state of relevant files and assess feasibility
 4. **Assess feasibility** — prefer changes that can be implemented in a single iteration
+
+**RULE**: If the backlog has uncompleted feature items, you MUST propose a feature — not a bugfix. Only propose bugfixes when all backlog feature items are completed or when a critical bug is blocking functionality.
 
 ## Analysis Perspectives
 

@@ -11,6 +11,19 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 - [x] ✅ Add input validation tests for routers — test invalid request bodies, missing fields, boundary values (completed iteration #4)
 - [x] ✅ Add error handling tests — test database connection failures, LLM timeout scenarios (completed iteration #5)
 
+## [HIGH] Speaking & Listening Features
+
+The app's goal is to help users become fluent English speakers through short, efficient practice sessions. These features directly improve the core learning experience.
+
+- [ ] Add conversation phrase suggestions — after AI responds, show 2-3 clickable phrase options the user can use as reply starters (reduces blank-page anxiety for beginners)
+- [ ] Add pronunciation comparison playback — let users play back their recorded audio alongside the model audio so they can hear the difference
+- [ ] Add conversation speed control — let users adjust AI speech rate (slow/normal/fast) to match their listening level
+- [ ] Add quick drill mode for vocabulary — a timed flashcard-style rapid review (10 words in 60 seconds) with audio pronunciation
+- [ ] Add conversation key phrase highlight — highlight important phrases/idioms in AI messages with tap-to-hear pronunciation
+- [ ] Add pronunciation accuracy visual — show a simple waveform or per-word color indicator (green/yellow/red) for pronunciation attempts
+- [ ] Add daily practice reminder UI — show a "today's goal" card on home page with recommended activities based on weak areas
+- [ ] Add conversation replay — let users replay a completed conversation turn-by-turn with audio, reviewing what they said vs what would be natural
+
 ## [MEDIUM] Feature Improvements
 
 - [x] ✅ Add conversation difficulty level selection (beginner/intermediate/advanced) — adjust AI response complexity and vocabulary (completed iteration #6)

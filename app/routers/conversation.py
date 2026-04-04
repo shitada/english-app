@@ -42,11 +42,13 @@ class StartResponse(BaseModel):
     conversation_id: int
     message: str
     topic: str
+    phrase_suggestions: list[str] = []
 
 
 class MessageResponse(BaseModel):
     message: str
     feedback: dict[str, Any] | None
+    phrase_suggestions: list[str] = []
 
 
 class EndResponse(BaseModel):
@@ -73,6 +75,31 @@ class ConversationListResponse(BaseModel):
 @router.get("/topics")
 async def list_topics():
     return get_conversation_topics()
+
+
+async def _generate_phrase_suggestions(
+    copilot: Any, ai_message: str, topic_label: str, difficulty: str
+) -> list[str]:
+    """Generate 2-3 reply starter phrases for the user (non-fatal)."""
+    try:
+        prompt = (
+            f"Given this AI message in a {topic_label} conversation at {difficulty} level:\n"
+            f'"{ai_message}"\n\n'
+            "Suggest 2-3 short English phrases the user could reply with. "
+            "Keep them natural, varied, and appropriate for the difficulty level. "
+            'Return JSON: {"suggestions": ["phrase1", "phrase2", "phrase3"]}'
+        )
+        result = await copilot.ask_json(
+            "You are an English conversation helper. Return ONLY valid JSON.",
+            prompt,
+        )
+        suggestions = result.get("suggestions", [])
+        if isinstance(suggestions, list):
+            return [str(s) for s in suggestions[:3] if s]
+        return []
+    except Exception as e:
+        logger.warning("Phrase suggestion generation failed (non-fatal): %s", e)
+        return []
 
 
 @router.post("/start", response_model=StartResponse)
@@ -107,10 +134,13 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
+    suggestions = await _generate_phrase_suggestions(copilot, opening, topic_label, req.difficulty)
+
     return {
         "conversation_id": conversation_id,
         "message": opening,
         "topic": req.topic,
+        "phrase_suggestions": suggestions,
     }
 
 
@@ -200,7 +230,10 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         await conv_dal.update_message_feedback(db, user_msg_id, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
-    return {"message": ai_response, "feedback": feedback}
+    # Generate phrase suggestions (non-fatal)
+    suggestions = await _generate_phrase_suggestions(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
+
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions}
 
 
 @router.post("/end", response_model=EndResponse)
