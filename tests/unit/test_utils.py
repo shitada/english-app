@@ -299,3 +299,21 @@ class TestCoerceBool:
     def test_int_one(self):
         from app.utils import coerce_bool
         assert coerce_bool(1) is True
+
+
+class TestExtractRole:
+    def test_standard_scenario(self):
+        from app.utils import extract_role
+        assert extract_role("You are a hotel front desk clerk. The user is a guest checking in.") == "a hotel front desk clerk"
+
+    def test_doctor_scenario(self):
+        from app.utils import extract_role
+        assert extract_role("You are a doctor. The user is a patient describing their symptoms.") == "a doctor"
+
+    def test_no_prefix(self):
+        from app.utils import extract_role
+        assert extract_role("A conversation partner") == "A conversation partner"
+
+    def test_empty_string(self):
+        from app.utils import extract_role
+        assert extract_role("") == ""

@@ -63,6 +63,15 @@ def get_topic_label(topics: list[dict[str, Any]], topic_id: str) -> str:
     return topic_id
 
 
+def extract_role(scenario: str) -> str:
+    """Extract the AI role from a scenario string like 'You are a hotel clerk. The user is...'."""
+    first_sentence = scenario.split(".")[0].strip()
+    prefix = "You are "
+    if first_sentence.startswith(prefix):
+        return first_sentence[len(prefix):]
+    return first_sentence
+
+
 def validate_topic(topics: list[dict[str, Any]], topic_id: str) -> dict[str, Any]:
     """Validate that a topic ID exists in the config. Raises 422 if not found."""
     for t in topics:

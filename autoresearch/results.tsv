@@ -189,3 +189,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 184	d9ba608	2026-04-04T06:52:58Z	190	279	40	742	1211	687	687	pass	7.25	keep	Add conversation key phrase highlight with tap-to-hear pronunciation
 185	94dd210	2026-04-04T07:13:37Z	143	227	40	706	1116	687	687	pass	6.95	keep	Add quick drill mode for vocabulary with timed flashcard review
 188	none	2026-04-04T15:58:09Z	198	39	53	77	367	694	694	pass	5.95	discard	Add API versioning prefix via URL-rewriting middleware
+189	706ee7c	2026-04-04T16:04:32Z	453	68	59	72	652	687	687	pass	7.25	keep	Fix vocabulary sentences returning raw topic IDs instead of labels

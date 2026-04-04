@@ -17,7 +17,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import coerce_bool, safe_llm_call, validate_topic
+from app.utils import coerce_bool, extract_role, safe_llm_call, validate_topic
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     system = get_prompt("conversation_partner").format(
         scenario=topic_data.get("scenario", topic_label),
-        role=topic_data.get("scenario", "a conversation partner"),
+        role=extract_role(topic_data.get("scenario", "a conversation partner")),
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty]
     try:
@@ -229,7 +229,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     grammar_prompt = get_prompt("grammar_checker").format(user_message=req.content)
     system = get_prompt("conversation_partner").format(
         scenario=topic_data.get("scenario", topic_label) if topic_data else topic_label,
-        role=topic_data.get("scenario", "a conversation partner") if topic_data else "a conversation partner",
+        role=extract_role(topic_data.get("scenario", "a conversation partner")) if topic_data else "a conversation partner",
         goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
     )
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."
