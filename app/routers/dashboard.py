@@ -73,6 +73,11 @@ async def get_stats(db: aiosqlite.Connection = Depends(get_db_session)):
         for item in stats["recent_activity"]
     ]
 
+    stats["conversations_by_topic"] = [
+        {**item, "topic": get_topic_label(topics, item["topic"])}
+        for item in stats["conversations_by_topic"]
+    ]
+
     return stats
 
 

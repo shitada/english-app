@@ -17,7 +17,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import coerce_bool, extract_role, safe_llm_call, validate_topic
+from app.utils import coerce_bool, extract_role, get_topic_label, safe_llm_call, validate_topic
 
 logger = logging.getLogger(__name__)
 
@@ -432,7 +432,13 @@ async def export_conversation(
 @router.get("/grammar-accuracy")
 async def grammar_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get grammar accuracy statistics across all conversations."""
-    return await conv_dal.get_grammar_accuracy(db)
+    result = await conv_dal.get_grammar_accuracy(db)
+    topics = get_conversation_topics()
+    result["by_topic"] = [
+        {**item, "topic": get_topic_label(topics, item["topic"])}
+        for item in result["by_topic"]
+    ]
+    return result
 
 
 @router.get("/topic-recommendations")

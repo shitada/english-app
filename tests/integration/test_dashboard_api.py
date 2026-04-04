@@ -46,6 +46,10 @@ class TestDashboardStats:
         assert data["total_conversations"] >= 1
         assert data["total_messages"] >= 1
 
+        # Verify conversations_by_topic uses labels, not raw IDs
+        for item in data.get("conversations_by_topic", []):
+            assert item["topic"] != "hotel_checkin", "Topic should be a label, not a raw ID"
+
     async def test_stats_reflect_pronunciation(self, client: AsyncClient):
         """Stats should count pronunciation attempts and compute avg score."""
         resp = await client.post(
