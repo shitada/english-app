@@ -1,4 +1,70 @@
-# Autoresearch Summary — Iterations 122–171
+# Autoresearch Summary
+
+## Run: Iterations 172–181 (2026-04-04)
+
+### Run Overview
+- **Start**: 2026-04-04T01:48 UTC (iteration 172)
+- **End**: 2026-04-04T04:07 UTC (iteration 181)
+- **Total Duration**: ~2h 19m
+- **Iterations**: 10
+
+### Results Summary
+| Metric | Count |
+|--------|-------|
+| Total iterations | 10 |
+| Kept | 9 |
+| Discarded | 1 |
+| Crashed | 0 |
+| Success rate | **90%** |
+
+### Timing Analysis
+| Phase | Avg (sec) | Min | Max |
+|-------|-----------|-----|-----|
+| Propose | 440 | 116 | 782 |
+| Implement | 60 | 23 | 124 |
+| Test | 163 | 61 | 838 |
+| Evaluate | 133 | 55 | 797 |
+| **Total** | **813** | 341 | 1322 |
+
+### Key Improvements (Kept)
+
+| # | Score | Description |
+|---|-------|-------------|
+| 172 | 6.70 | Add conversation phrase suggestions with clickable reply starters |
+| 174 | 7.25 | Add phoneme-level pronunciation mistake patterns endpoint |
+| 175 | 7.55 | Add database migration version tracking with schema_migrations table |
+| 176 | 7.80 | Fix save_attempt defaulting non-numeric score to 0.0 instead of None |
+| 177 | 8.35 | Fix get_grammar_accuracy treating string 'false' is_correct as truthy |
+| 178 | 7.80 | Fix get_grammar_stats SQL miscounting string 'true' is_correct values |
+| 179 | 7.55 | Fix build_quiz producing duplicate wrong options from shared meanings |
+| 180 | 7.80 | Fix _parse_json greedy regex losing JSON when response has trailing braces |
+| 181 | 7.55 | Fix _calculate_longest_streak returning 1 when no valid dates exist |
+
+**Average score (kept)**: 7.59
+
+### Discarded Attempts
+
+| # | Score | Reason |
+|---|-------|--------|
+| 173 | 5.65 | Add pronunciation comparison playback — Playwright QA infrastructure locked, preventing frontend verification |
+
+### Test Growth
+- Start: 670 tests
+- End: 687 tests (+17 new tests)
+
+### Themes
+1. **LLM string coercion bugs** (iterations 177, 178): The LLM sometimes returns `"false"` as a string instead of boolean `false`. Multiple aggregation functions were affected.
+2. **Data integrity fixes** (176, 179, 180, 181): Subtle bugs in score handling, quiz deduplication, JSON parsing, and streak calculation.
+3. **New features** (172, 174, 175): Phrase suggestions, phoneme analysis, migration tracking.
+
+### Recommendations for Next Run
+1. **Fix Playwright browser lock** — unblock frontend QA testing so feature iterations aren't penalized
+2. **Frontend features** — many HIGH priority backlog items (speed control, key phrase highlight, drill mode) are frontend-only and waiting for QA
+3. **Expand common_patterns aggregation** — the phoneme-level endpoint (iteration 174) would benefit from a frontend visualization
+
+---
+
+## Previous Run Summary — Iterations 122–171
 
 ## Overview (Cumulative)
 
