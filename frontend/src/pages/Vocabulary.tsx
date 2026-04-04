@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Volume2, Check, X, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Volume2, Check, X, ArrowRight, Zap } from 'lucide-react';
 import { api, type QuizQuestion, type FillBlankQuestion } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
@@ -13,7 +13,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -24,6 +24,13 @@ export default function Vocabulary() {
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
+
+  // Drill mode state
+  const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
+  const [drillIndex, setDrillIndex] = useState(0);
+  const [drillAnswers, setDrillAnswers] = useState<boolean[]>([]);
+  const [drillTimeLeft, setDrillTimeLeft] = useState(60);
+  const drillTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const tts = useSpeechSynthesis();
 
@@ -120,6 +127,61 @@ export default function Vocabulary() {
     }
   };
 
+  // Drill mode functions
+  const startDrill = async () => {
+    setLoading(true);
+    try {
+      const res = await api.getDrillWords(10);
+      if (!res.words || res.words.length === 0) {
+        alert('No vocabulary words available for drill. Add words via a topic quiz first.');
+        return;
+      }
+      setDrillWords(res.words);
+      setDrillIndex(0);
+      setDrillAnswers([]);
+      setDrillTimeLeft(60);
+      setPhase('drill');
+      tts.speak(res.words[0].word);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to start drill. Make sure the backend is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const drillAnswer = useCallback((known: boolean) => {
+    const word = drillWords[drillIndex];
+    if (!word) return;
+    setDrillAnswers((prev) => [...prev, known]);
+    api.submitAnswer(word.id, known).catch(() => {});
+
+    const nextIdx = drillIndex + 1;
+    if (nextIdx >= drillWords.length) {
+      clearInterval(drillTimerRef.current);
+      setPhase('drill-result');
+    } else {
+      setDrillIndex(nextIdx);
+      tts.speak(drillWords[nextIdx].word);
+    }
+  }, [drillWords, drillIndex, tts]);
+
+  // Drill timer
+  useEffect(() => {
+    if (phase !== 'drill') return;
+    drillTimerRef.current = setInterval(() => {
+      setDrillTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(drillTimerRef.current);
+          setPhase('drill-result');
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(drillTimerRef.current);
+  }, [phase]);
+
   const getOptions = () => {
     if (!currentQ || quizMode === 'fill-blank') return [];
     const mcQ = currentQ as QuizQuestion;
@@ -161,6 +223,20 @@ export default function Vocabulary() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
         </p>
+
+        <button
+          onClick={startDrill}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #f59e0b', background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+            color: '#92400e', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start quick drill"
+        >
+          <Zap size={20} /> ⚡ Quick Drill — 10 words in 60 seconds
+        </button>
 
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
@@ -221,6 +297,101 @@ export default function Vocabulary() {
             ))}
           </div>
         )}
+      </div>
+    );
+  }
+
+  // Drill mode
+  if (phase === 'drill') {
+    const currentDrillWord = drillWords[drillIndex];
+    const progress = drillWords.length > 0 ? ((drillIndex) / drillWords.length) * 100 : 0;
+    const timerPct = (drillTimeLeft / 60) * 100;
+
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, marginBottom: 16, overflow: 'hidden' }}>
+          <div style={{ height: '100%', background: drillTimeLeft <= 10 ? '#ef4444' : '#f59e0b', width: `${timerPct}%`, transition: 'width 1s linear', borderRadius: 3 }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, fontSize: 14, color: 'var(--text-secondary)' }}>
+          <span>{drillIndex + 1} / {drillWords.length}</span>
+          <span style={{ color: drillTimeLeft <= 10 ? '#ef4444' : 'var(--text-secondary)', fontWeight: drillTimeLeft <= 10 ? 700 : 400 }}>{drillTimeLeft}s</span>
+        </div>
+
+        <div style={{ padding: 32, background: 'var(--surface)', borderRadius: 16, border: '1px solid var(--border)', marginBottom: 24 }}>
+          <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>{currentDrillWord?.word}</div>
+          <div style={{ fontSize: 16, color: 'var(--text-secondary)' }}>{currentDrillWord?.meaning}</div>
+          <button
+            onClick={() => currentDrillWord && tts.speak(currentDrillWord.word)}
+            style={{ marginTop: 12, background: 'none', border: 'none', cursor: 'pointer', fontSize: 20 }}
+            aria-label="Hear pronunciation"
+          >
+            🔊
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <button
+            onClick={() => drillAnswer(false)}
+            style={{ flex: 1, padding: '16px 24px', borderRadius: 12, border: '2px solid #ef4444', background: '#fef2f2', color: '#dc2626', fontSize: 18, fontWeight: 600, cursor: 'pointer' }}
+            aria-label="Don't know"
+          >
+            <X size={20} style={{ verticalAlign: 'middle' }} /> Don&apos;t Know
+          </button>
+          <button
+            onClick={() => drillAnswer(true)}
+            style={{ flex: 1, padding: '16px 24px', borderRadius: 12, border: '2px solid #22c55e', background: '#f0fdf4', color: '#16a34a', fontSize: 18, fontWeight: 600, cursor: 'pointer' }}
+            aria-label="Know"
+          >
+            <Check size={20} style={{ verticalAlign: 'middle' }} /> Know
+          </button>
+        </div>
+
+        <div style={{ marginTop: 16, height: 4, background: 'var(--border)', borderRadius: 2 }}>
+          <div style={{ height: '100%', background: 'var(--primary)', width: `${progress}%`, transition: 'width 0.3s', borderRadius: 2 }} />
+        </div>
+      </div>
+    );
+  }
+
+  // Drill result
+  if (phase === 'drill-result') {
+    const answered = drillAnswers.length;
+    const known = drillAnswers.filter(Boolean).length;
+    const timeUsed = 60 - drillTimeLeft;
+
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+        <h2 style={{ marginBottom: 8 }}>⚡ Drill Complete!</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+          You reviewed {answered} of {drillWords.length} words in {timeUsed} seconds.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#16a34a' }}>{known}</div>
+            <div style={{ fontSize: 14, color: '#166534' }}>Known</div>
+          </div>
+          <div style={{ padding: 16, background: '#fef2f2', borderRadius: 12, border: '1px solid #fecaca' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#dc2626' }}>{answered - known}</div>
+            <div style={{ fontSize: 14, color: '#991b1b' }}>Need Practice</div>
+          </div>
+        </div>
+
+        {answered > 0 && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Accuracy</div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{Math.round((known / answered) * 100)}%</div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button className="btn btn-primary" onClick={startDrill} style={{ flex: 1 }}>
+            ⚡ Drill Again
+          </button>
+          <button className="btn" onClick={() => setPhase('select')} style={{ flex: 1 }}>
+            Back to Topics
+          </button>
+        </div>
       </div>
     );
   }

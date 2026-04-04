@@ -271,6 +271,29 @@ async def get_weak_words(
     return {"words": words}
 
 
+class DrillWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    topic: str
+    difficulty: int
+
+
+class DrillResponse(BaseModel):
+    words: list[DrillWordItem]
+    count: int
+
+
+@router.get("/drill", response_model=DrillResponse)
+async def get_drill_words(
+    count: int = Query(default=10, ge=1, le=30),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get words for quick drill mode (prioritizes due and weak words)."""
+    words = await vocab_dal.get_drill_words(db, count)
+    return {"words": words, "count": len(words)}
+
+
 class DeleteWordResponse(BaseModel):
     deleted: bool
 

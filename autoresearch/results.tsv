@@ -186,3 +186,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 181	b1c02ce	2026-04-04T04:07:13Z	448	44	130	67	689	687	687	pass	7.55	keep	Fix _calculate_longest_streak returning 1 when no valid dates exist
 182	none	2026-04-04T06:21:39Z	124	58	48	831	1061	687	687	pass	5.95	discard	Add conversation speed control for AI speech rate (slow/normal/fast)
 183	b1d56b0	2026-04-04T06:48:58Z	152	87	40	701	980	687	687	pass	6.7	keep	Add conversation speed control for AI speech rate (slow/normal/fast)
+184	d9ba608	2026-04-04T06:52:58Z	190	279	40	742	1211	687	687	pass	7.25	keep	Add conversation key phrase highlight with tap-to-hear pronunciation

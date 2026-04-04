@@ -108,6 +108,11 @@ export const api = {
       { method: 'DELETE' }
     ),
 
+  getDrillWords: (count = 10) =>
+    request<{ words: { id: number; word: string; meaning: string; topic: string; difficulty: number }[]; count: number }>(
+      `/api/vocabulary/drill?count=${count}`
+    ),
+
   // Dashboard
   getDashboardStats: () => request<DashboardStats>('/api/dashboard/stats'),
 

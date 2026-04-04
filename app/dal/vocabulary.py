@@ -358,6 +358,57 @@ async def get_weak_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict
     return [dict(r) for r in rows]
 
 
+async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dict[str, Any]]:
+    """Get words for quick drill: prioritize due and weak words, fill with random."""
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    # Due words first
+    due_rows = await db.execute_fetchall(
+        """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           WHERE vp.next_review_at IS NOT NULL AND vp.next_review_at <= ?
+           ORDER BY vp.next_review_at ASC
+           LIMIT ?""",
+        (now, count),
+    )
+    results = [dict(r) for r in due_rows]
+    seen_ids = {r["id"] for r in results}
+
+    if len(results) < count:
+        # Weak words next
+        weak_rows = await db.execute_fetchall(
+            """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty
+               FROM vocabulary_progress vp
+               JOIN vocabulary_words vw ON vp.word_id = vw.id
+               WHERE (vp.correct_count + vp.incorrect_count) >= 2
+               ORDER BY CAST(vp.incorrect_count AS REAL) / (vp.correct_count + vp.incorrect_count) DESC
+               LIMIT ?""",
+            (count,),
+        )
+        for r in weak_rows:
+            d = dict(r)
+            if d["id"] not in seen_ids and len(results) < count:
+                results.append(d)
+                seen_ids.add(d["id"])
+
+    if len(results) < count:
+        # Fill with random words
+        remaining = count - len(results)
+        placeholders = ",".join("?" for _ in seen_ids) if seen_ids else "0"
+        random_rows = await db.execute_fetchall(
+            f"""SELECT id, word, meaning, topic, difficulty
+                FROM vocabulary_words
+                WHERE id NOT IN ({placeholders})
+                ORDER BY RANDOM()
+                LIMIT ?""",
+            (*seen_ids, remaining) if seen_ids else (remaining,),
+        )
+        results.extend(dict(r) for r in random_rows)
+
+    random.shuffle(results)
+    return results
+
+
 async def delete_word(db: aiosqlite.Connection, word_id: int) -> bool:
     """Delete a vocabulary word and its progress. Returns True if found."""
     await db.execute("DELETE FROM vocabulary_progress WHERE word_id = ?", (word_id,))
