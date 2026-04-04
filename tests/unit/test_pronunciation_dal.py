@@ -757,7 +757,11 @@ class TestGetSentenceAttempts:
             await save_attempt(test_db, "Repeat.", "Repeat.", feedback, 5.0 + i * 0.1)
         result = await get_sentence_attempts(test_db, "Repeat.", limit=3)
         assert len(result["attempts"]) == 3
-        assert result["summary"]["attempt_count"] == 3
+        # Summary reflects full history, not truncated window
+        assert result["summary"]["attempt_count"] == 10
+        assert result["summary"]["first_score"] == 5.0
+        assert result["summary"]["latest_score"] == 5.9
+        assert result["summary"]["best_score"] == 5.9
 
     async def test_does_not_include_other_sentences(self, test_db):
         from app.dal.pronunciation import get_sentence_attempts

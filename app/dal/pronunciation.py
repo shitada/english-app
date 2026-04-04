@@ -469,6 +469,49 @@ async def get_sentence_attempts(
     db: aiosqlite.Connection, reference_text: str, limit: int = 20
 ) -> dict[str, Any]:
     """Return all pronunciation attempts for a specific sentence with summary stats."""
+    # Compute summary from full history (not truncated by LIMIT)
+    summary_row = await db.execute_fetchall(
+        """SELECT COUNT(*) as total,
+                  MAX(score) as best
+           FROM pronunciation_attempts
+           WHERE reference_text = ? AND score IS NOT NULL""",
+        (reference_text,),
+    )
+    total = summary_row[0]["total"] if summary_row else 0
+
+    if total > 0:
+        first_row = await db.execute_fetchall(
+            """SELECT score FROM pronunciation_attempts
+               WHERE reference_text = ? AND score IS NOT NULL
+               ORDER BY id ASC LIMIT 1""",
+            (reference_text,),
+        )
+        latest_row = await db.execute_fetchall(
+            """SELECT score FROM pronunciation_attempts
+               WHERE reference_text = ? AND score IS NOT NULL
+               ORDER BY id DESC LIMIT 1""",
+            (reference_text,),
+        )
+        first_score = first_row[0]["score"]
+        latest_score = latest_row[0]["score"]
+        best_score = summary_row[0]["best"]
+        summary = {
+            "first_score": first_score,
+            "latest_score": latest_score,
+            "best_score": best_score,
+            "attempt_count": total,
+            "improvement": round(latest_score - first_score, 2),
+        }
+    else:
+        summary = {
+            "first_score": 0.0,
+            "latest_score": 0.0,
+            "best_score": 0.0,
+            "attempt_count": 0,
+            "improvement": 0.0,
+        }
+
+    # Paginated attempts list
     rows = await db.execute_fetchall(
         """SELECT id, user_transcription, score, difficulty, created_at
            FROM pronunciation_attempts
@@ -487,27 +530,6 @@ async def get_sentence_attempts(
         }
         for r in rows
     ]
-
-    if attempts:
-        scores = [a["score"] for a in attempts if a["score"] is not None]
-        first_score = scores[0] if scores else 0.0
-        latest_score = scores[-1] if scores else 0.0
-        best_score = max(scores) if scores else 0.0
-        summary = {
-            "first_score": first_score,
-            "latest_score": latest_score,
-            "best_score": best_score,
-            "attempt_count": len(attempts),
-            "improvement": round(latest_score - first_score, 2),
-        }
-    else:
-        summary = {
-            "first_score": 0.0,
-            "latest_score": 0.0,
-            "best_score": 0.0,
-            "attempt_count": 0,
-            "improvement": 0.0,
-        }
 
     return {"attempts": attempts, "summary": summary}
 
