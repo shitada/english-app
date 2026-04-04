@@ -281,6 +281,7 @@ async def test_vocabulary_sentences_with_data(client, mock_copilot):
     data = res.json()
     assert data["count"] >= 1
     assert data["sentences"][0]["word"] == "desk"
+    assert data["sentences"][0]["topic"] == "Hotel & Accommodation"
 
 
 @pytest.mark.integration

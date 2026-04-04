@@ -9,7 +9,7 @@ import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
-from app.config import get_conversation_topics, get_prompt
+from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
 from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
@@ -290,6 +290,11 @@ async def get_vocabulary_sentences(
     sentences = await pron_dal.get_sentences_from_vocabulary(
         db, limit=limit, difficulty=difficulty, topic=topic
     )
+    vocab_topics = get_vocabulary_topics()
+    sentences = [
+        {**s, "topic": get_topic_label(vocab_topics, s.get("topic", ""))}
+        for s in sentences
+    ]
     return {"sentences": sentences, "source": "vocabulary", "count": len(sentences)}
 
 
