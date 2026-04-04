@@ -8,7 +8,7 @@ from typing import Any
 
 import aiosqlite
 
-from app.utils import escape_like
+from app.utils import coerce_bool, escape_like
 
 
 async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate") -> int:
@@ -295,7 +295,7 @@ async def get_grammar_accuracy(db: aiosqlite.Connection) -> dict[str, Any]:
             topic_stats[topic] = {"correct": 0, "total": 0, "error_count": 0}
         topic_stats[topic]["total"] += 1
         total_checked += 1
-        if feedback.get("is_correct"):
+        if coerce_bool(feedback.get("is_correct", False)):
             topic_stats[topic]["correct"] += 1
             total_correct += 1
         errors = feedback.get("errors") or []

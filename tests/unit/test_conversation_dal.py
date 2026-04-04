@@ -619,6 +619,43 @@ class TestGrammarAccuracy:
         assert result["total_checked"] == 2
         assert len(result["by_topic"]) == 2
 
+    async def test_string_false_is_correct_not_counted(self, test_db):
+        """String 'false' is_correct should NOT be counted as correct."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I want check in")
+        await update_message_feedback(test_db, mid, {"is_correct": "false", "errors": [], "suggestions": []})
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_correct"] == 0
+        assert result["total_checked"] == 1
+
+    async def test_string_true_is_correct_counted(self, test_db):
+        """String 'true' is_correct should be counted as correct."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Thank you")
+        await update_message_feedback(test_db, mid, {"is_correct": "true", "errors": [], "suggestions": []})
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_correct"] == 1
+
+    async def test_missing_is_correct_not_counted(self, test_db):
+        """Missing is_correct should NOT be counted as correct."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Hello")
+        await update_message_feedback(test_db, mid, {"errors": [], "suggestions": []})
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_correct"] == 0
+        assert result["total_checked"] == 1
+
+    async def test_integer_is_correct(self, test_db):
+        """Integer 0/1 is_correct should be handled by coerce_bool."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid1 = await add_message(test_db, cid, "user", "OK")
+        await update_message_feedback(test_db, mid1, {"is_correct": 1, "errors": [], "suggestions": []})
+        mid2 = await add_message(test_db, cid, "user", "Bad")
+        await update_message_feedback(test_db, mid2, {"is_correct": 0, "errors": [], "suggestions": []})
+        result = await get_grammar_accuracy(test_db)
+        assert result["total_correct"] == 1
+        assert result["total_checked"] == 2
+
 
 @pytest.mark.unit
 class TestTopicRecommendations:
