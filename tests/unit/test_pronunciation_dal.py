@@ -193,11 +193,11 @@ class TestSaveAttempt:
         assert rows[0]["score"] == 0.0
         assert rows[1]["score"] == 10.0
 
-    async def test_non_numeric_score_defaults_to_zero(self, test_db):
+    async def test_non_numeric_score_stored_as_null(self, test_db):
         feedback = {"word_feedback": []}
         await save_attempt(test_db, "Test.", "Test.", feedback, "bad")
         rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
-        assert rows[0]["score"] == 0.0
+        assert rows[0]["score"] is None
 
     async def test_none_score_stored_as_null(self, test_db):
         feedback = {"word_feedback": []}

@@ -76,7 +76,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 ## [LOW] Infrastructure
 
-- [ ] Add database migration strategy — handle schema changes without data loss
+- [x] ✅ Add database migration strategy — handle schema changes without data loss (completed iteration #175)
 - [x] ✅ Add health check endpoint — monitor service availability (completed iteration #9)
 - [x] ✅ Add rate limiting — prevent abuse of LLM endpoints (completed iteration #26)
 - [x] ✅ Add compound indexes for vocabulary progress + pronunciation queries (completed iteration #57)

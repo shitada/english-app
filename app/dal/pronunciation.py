@@ -80,7 +80,7 @@ async def save_attempt(
         try:
             clamped_score = max(0.0, min(10.0, float(score)))
         except (TypeError, ValueError):
-            clamped_score = 0.0
+            clamped_score = None
     cursor = await db.execute(
         """INSERT INTO pronunciation_attempts
            (reference_text, user_transcription, feedback_json, score, difficulty)
