@@ -160,15 +160,25 @@ app.include_router(vocabulary.router)
 app.include_router(dashboard.router)
 app.include_router(preferences.router)
 
+def _safe_static_path(base: Path, user_path: str) -> Path | None:
+    """Resolve a user-provided path and verify it stays within the base directory."""
+    try:
+        candidate = (base / user_path).resolve()
+        candidate.relative_to(base.resolve())
+        return candidate if candidate.is_file() else None
+    except (ValueError, OSError):
+        return None
+
+
 # Serve React build — SPA fallback for client-side routing
 if FRONTEND_BUILD.is_dir():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_BUILD / "assets")), name="assets")
 
     @app.get("/{full_path:path}")
     async def spa_fallback(full_path: str):
-        file_path = FRONTEND_BUILD / full_path
-        if file_path.is_file():
-            return FileResponse(str(file_path))
+        safe_path = _safe_static_path(FRONTEND_BUILD, full_path)
+        if safe_path is not None:
+            return FileResponse(str(safe_path))
         return FileResponse(str(FRONTEND_BUILD / "index.html"))
 
 
