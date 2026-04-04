@@ -152,3 +152,24 @@ async def test_apply_migrations_skips_already_applied(test_db: aiosqlite.Connect
 
     applied = await test_db.execute_fetchall("SELECT version FROM schema_migrations")
     assert len(applied) == len(_MIGRATIONS)
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_get_db_closes_on_pragma_failure():
+    """Connection should be closed if PRAGMA execution fails in get_db()."""
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    mock_db = MagicMock()
+    mock_db.execute = AsyncMock(side_effect=OSError("disk full"))
+    mock_db.close = AsyncMock()
+
+    with patch("app.database.aiosqlite") as mock_aiosqlite:
+        mock_aiosqlite.connect = AsyncMock(return_value=mock_db)
+        mock_aiosqlite.Row = MagicMock()
+
+        from app.database import get_db
+        with pytest.raises(OSError, match="disk full"):
+            await get_db()
+
+    mock_db.close.assert_called_once()

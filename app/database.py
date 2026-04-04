@@ -198,9 +198,13 @@ async def _apply_migrations(db: aiosqlite.Connection) -> None:
 async def get_db() -> aiosqlite.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     db = await aiosqlite.connect(str(DB_PATH))
-    db.row_factory = aiosqlite.Row
-    await db.execute("PRAGMA journal_mode=WAL")
-    await db.execute("PRAGMA foreign_keys=ON")
+    try:
+        db.row_factory = aiosqlite.Row
+        await db.execute("PRAGMA journal_mode=WAL")
+        await db.execute("PRAGMA foreign_keys=ON")
+    except Exception:
+        await db.close()
+        raise
     return db
 
 
