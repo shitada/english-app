@@ -205,3 +205,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 202	Fix NaN pronunciation scores silently stored as 10.0	bugfix	709	709	pass	pass	true	7.0	7.8	keep	1004/100/56/64	1224
 203	Fix sentence-history summary computed from truncated window	bugfix	709	709	pass	pass	true	7.0	7.5	keep	364/35/58/78	535
 204	Fix off-by-one in activity-history returning days+1 entries	bugfix	709	709	pass	pass	true	7.0	7.25	keep	1373/50/52/63	1538
+205	Fix off-by-one in review forecast returning days+1 window	bugfix	710	710	pass	pass	true	7.0	7.55	keep	1168/39/47/71	1325
