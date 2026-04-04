@@ -16962,3 +16962,173 @@ Good, `Any` is already imported. Now record T2, commit, and test:
 
 T2=1775267589, implement_sec=101. Now commit and test:
 
+[2026-04-04 15:40:38] Copilot invocation completed (duration: 1167s)
+[2026-04-04 15:40:38] Running post-invocation audit (iter 182-182)...
+============================================
+ Autoresearch Audit
+ Iterations: 182 — 182
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-04 15:40:38
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 182[0m
+[0;31m  Tester: FAIL — missing: 182[0m
+[0;31m  Evaluator: FAIL — missing: 182[0m
+  [1mROOT CAUSE: Orchestrator self-implemented (7 occurrences)[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-04 15:40:39] Audit found 3 error(s) — fixes applied where possible
+[2026-04-04 15:40:42] Current iteration count: 182 / 182
+[2026-04-04 15:40:42] Target reached (182 >= 182) — done!
+[2026-04-04 15:40:42] ==========================================
+[2026-04-04 15:40:42] Runner finished
+[2026-04-04 15:40:42] Total invocations: 1
+[2026-04-04 15:40:42] Final iteration:   182 / 182
+[2026-04-04 15:40:42] Premium requests:  27
+[2026-04-04 15:40:42] ==========================================
+[2026-04-04 15:48:08] ==========================================
+[2026-04-04 15:48:08] Autoresearch CLI Runner started
+[2026-04-04 15:48:08] Current iteration: 182
+[2026-04-04 15:48:08] Additional iters:  3
+[2026-04-04 15:48:08] Target iteration:  185
+[2026-04-04 15:48:09] Max invocations:   10
+[2026-04-04 15:48:09] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-04 15:48:09] ==========================================
+[2026-04-04 15:48:09] WARNING: Working tree has uncommitted changes
+[2026-04-04 15:48:09]   M autoresearch/audit-report.json
+[2026-04-04 15:48:09]   M autoresearch/runner.log
+[2026-04-04 15:48:09] Continuing anyway...
+[2026-04-04 15:48:09] Current iteration count: 182 / 185
+[2026-04-04 15:48:09] ------------------------------------------
+[2026-04-04 15:48:09] Invocation 1 / 10
+[2026-04-04 15:48:09] Resuming from iteration 183
+[2026-04-04 15:48:09] ------------------------------------------
+[2026-04-04 15:48:09] Starting copilot invocation...
+
+
+
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 126 lines read
+
+● Read results.tsv
+  │ autoresearch/results.tsv
+  └ L1:30 (30 lines read)
+
+● Check recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Check last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Good. Last iteration was 182 (discarded). Starting iteration 183. Let me begin by recording T0 and preparing the proposer call.
+
+● Record T0 for iteration 183 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1775285338. Now calling the proposer subagent for iteration 183.
+
+● Proposer Propose iteration 183
+  │ Read test_preferences_api.py
+  │   │ tests/integration/test_preferences_api.py
+  │   └ 92 lines read
+  └ List directory tests/unit
+      └ 13 files found
+
+Good, proposer returned: **Add conversation speed control for AI speech rate**. Let me record T1 and implement.
+
+● Read useSpeechSynthesis.ts
+  │ frontend/src/hooks/useSpeechSynthesis.ts
+  └ 73 lines read
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L1:50 (50 lines read)
+
+● Record T1 for iteration 183 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L50:70 (21 lines read)
+
+Now let me find the volume slider in the chat header area:
+
+● Find volume/speed references (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "volume\|Volume\|speed\|Speed\|rate" frontend/src/pages/Conversation.tsx | head -20
+  └ 6 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L430:470 (41 lines read)
+
+Good, I can see the volume slider. Now let me implement the changes:
+
+1. Update `useSpeechSynthesis.ts` to add rate state
+2. Update `Conversation.tsx` to add speed selector buttons
+
+● Edit useSpeechSynthesis.ts +2
+  └ frontend/src/hooks/useSpeechSynthesis.ts
+
+● Edit useSpeechSynthesis.ts +2
+  └ frontend/src/hooks/useSpeechSynthesis.ts
+
+● Edit useSpeechSynthesis.ts +5
+  └ frontend/src/hooks/useSpeechSynthesis.ts
+
+● Edit useSpeechSynthesis.ts +1 -1
+  └ frontend/src/hooks/useSpeechSynthesis.ts
+
+● Edit useSpeechSynthesis.ts +1 -1
+  └ frontend/src/hooks/useSpeechSynthesis.ts
+
+Now update the Conversation.tsx to add speed selector buttons next to the volume slider:
+
+● Edit Conversation.tsx +26
+  └ frontend/src/pages/Conversation.tsx
+
+Good. Now let me commit and run tests:
+

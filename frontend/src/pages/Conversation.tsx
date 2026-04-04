@@ -453,6 +453,32 @@ export default function Conversation() {
               style={{ width: 60, accentColor: 'var(--primary)' }}
             />
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }} role="group" aria-label="Speech speed">
+            {([
+              { label: '🐢', value: 0.7 },
+              { label: '1×', value: 0.9 },
+              { label: '🐇', value: 1.2 },
+            ] as const).map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => tts.setRate(opt.value)}
+                aria-label={`Speed ${opt.label}`}
+                aria-pressed={tts.rate === opt.value}
+                style={{
+                  padding: '2px 6px',
+                  fontSize: 12,
+                  border: '1px solid var(--border)',
+                  borderRadius: 4,
+                  background: tts.rate === opt.value ? 'var(--primary)' : 'transparent',
+                  color: tts.rate === opt.value ? '#fff' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  lineHeight: 1.2,
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
           <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
           <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
             <Square size={14} /> End

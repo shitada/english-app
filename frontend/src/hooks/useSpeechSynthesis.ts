@@ -7,14 +7,18 @@ interface UseSpeechSynthesisReturn {
   isSupported: boolean;
   volume: number;
   setVolume: (v: number) => void;
+  rate: number;
+  setRate: (r: number) => void;
 }
 
 export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [volume, setVolumeState] = useState(0.7);
+  const [rate, setRateState] = useState(0.9);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const volumeRef = useRef(0.7);
+  const rateRef = useRef(0.9);
 
   const isSupported =
     typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -37,6 +41,11 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
     }
   }, []);
 
+  const setRate = useCallback((r: number) => {
+    rateRef.current = r;
+    setRateState(r);
+  }, []);
+
   const speak = useCallback(
     (text: string, lang = 'en-US') => {
       if (!isSupported) return;
@@ -44,7 +53,7 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
-      utterance.rate = 0.9;
+      utterance.rate = rateRef.current;
       utterance.pitch = 1;
       utterance.volume = volumeRef.current;
 
@@ -69,5 +78,5 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
     setIsSpeaking(false);
   }, []);
 
-  return { speak, stop, isSpeaking, isSupported, volume, setVolume };
+  return { speak, stop, isSpeaking, isSupported, volume, setVolume, rate, setRate };
 }
