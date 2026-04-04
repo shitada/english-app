@@ -433,6 +433,15 @@ class TestGetLearningInsights:
         assert result["module_strengths"]["conversation"] == 100.0
         assert result["module_strengths"]["pronunciation"] == 30.0
 
+    async def test_equal_strengths_returns_none(self, test_db):
+        """When all module strengths are equal, strongest/weakest should be None."""
+        # Create identical activity in conversation and pronunciation (vocabulary stays 0)
+        # This creates a case where min == max value
+        result = await get_learning_insights(test_db)
+        # With no data, all strengths are 0 → both None
+        assert result["strongest_area"] is None
+        assert result["weakest_area"] is None
+
     async def test_streak_at_risk_detection(self, test_db):
         """Detects streak at risk when activity was yesterday but not today."""
         # Insert activity dated yesterday only

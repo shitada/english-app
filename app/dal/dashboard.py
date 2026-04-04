@@ -488,6 +488,10 @@ async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
     if any(v > 0 for v in strengths.values()):
         strongest_area = max(strengths, key=strengths.get)
         weakest_area = min(strengths, key=strengths.get)
+        # When all strengths are equal, there's no meaningful distinction
+        if strengths[strongest_area] == strengths[weakest_area]:
+            strongest_area = None
+            weakest_area = None
     else:
         strongest_area = None
         weakest_area = None
