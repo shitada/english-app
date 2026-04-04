@@ -43,12 +43,14 @@ class StartResponse(BaseModel):
     message: str
     topic: str
     phrase_suggestions: list[str] = []
+    key_phrases: list[str] = []
 
 
 class MessageResponse(BaseModel):
     message: str
     feedback: dict[str, Any] | None
     phrase_suggestions: list[str] = []
+    key_phrases: list[str] = []
 
 
 class EndResponse(BaseModel):
@@ -102,6 +104,34 @@ async def _generate_phrase_suggestions(
         return []
 
 
+async def _extract_key_phrases(
+    copilot: Any, ai_message: str
+) -> list[str]:
+    """Extract 2-4 key phrases/idioms from AI message for highlighting (non-fatal)."""
+    try:
+        prompt = (
+            f"From this English conversation message:\n"
+            f'"{ai_message}"\n\n'
+            "Identify 2-4 useful English phrases, idioms, collocations, or expressions "
+            "that a language learner should pay attention to. Pick phrases that appear "
+            "verbatim in the message. "
+            'Return JSON: {"key_phrases": ["phrase1", "phrase2"]}'
+        )
+        result = await copilot.ask_json(
+            "You are an English language teaching assistant. Return ONLY valid JSON.",
+            prompt,
+        )
+        phrases = result.get("key_phrases", [])
+        if isinstance(phrases, list):
+            # Only keep phrases that actually appear in the message (case-insensitive)
+            lower_msg = ai_message.lower()
+            return [str(p) for p in phrases[:4] if p and str(p).lower() in lower_msg]
+        return []
+    except Exception as e:
+        logger.warning("Key phrase extraction failed (non-fatal): %s", e)
+        return []
+
+
 @router.post("/start", response_model=StartResponse)
 async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     topics = get_conversation_topics()
@@ -134,13 +164,17 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
-    suggestions = await _generate_phrase_suggestions(copilot, opening, topic_label, req.difficulty)
+    suggestions, key_phrases = await asyncio.gather(
+        _generate_phrase_suggestions(copilot, opening, topic_label, req.difficulty),
+        _extract_key_phrases(copilot, opening),
+    )
 
     return {
         "conversation_id": conversation_id,
         "message": opening,
         "topic": req.topic,
         "phrase_suggestions": suggestions,
+        "key_phrases": key_phrases,
     }
 
 
@@ -230,10 +264,13 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         await conv_dal.update_message_feedback(db, user_msg_id, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
-    # Generate phrase suggestions (non-fatal)
-    suggestions = await _generate_phrase_suggestions(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
+    # Generate phrase suggestions and extract key phrases (non-fatal, parallel)
+    suggestions, key_phrases = await asyncio.gather(
+        _generate_phrase_suggestions(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate")),
+        _extract_key_phrases(copilot, ai_response),
+    )
 
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions}
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions, "key_phrases": key_phrases}
 
 
 @router.post("/end", response_model=EndResponse)

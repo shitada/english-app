@@ -9,6 +9,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   feedback?: GrammarFeedback;
+  key_phrases?: string[];
 }
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -29,6 +30,48 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
   { value: 'intermediate', label: '📗 Intermediate', description: 'Natural conversation pace' },
   { value: 'advanced', label: '🚀 Advanced', description: 'Idioms, complex grammar, nuanced' },
 ];
+
+function HighlightedMessage({ content, keyPhrases, onSpeak }: {
+  content: string;
+  keyPhrases?: string[];
+  onSpeak: (text: string) => void;
+}) {
+  if (!keyPhrases || keyPhrases.length === 0) return <>{content}</>;
+
+  // Build regex matching any key phrase (case-insensitive, longest first)
+  const sorted = [...keyPhrases].sort((a, b) => b.length - a.length);
+  const escaped = sorted.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const regex = new RegExp(`(${escaped.join('|')})`, 'gi');
+
+  const parts = content.split(regex);
+  return (
+    <>
+      {parts.map((part, i) => {
+        const isMatch = keyPhrases.some((kp) => kp.toLowerCase() === part.toLowerCase());
+        if (!isMatch) return <span key={i}>{part}</span>;
+        return (
+          <span
+            key={i}
+            onClick={() => onSpeak(part)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') onSpeak(part); }}
+            title="Click to hear pronunciation"
+            style={{
+              background: '#dbeafe',
+              borderRadius: 3,
+              padding: '1px 2px',
+              cursor: 'pointer',
+              borderBottom: '2px solid #3b82f6',
+            }}
+          >
+            {part} <span style={{ fontSize: 10 }}>🔊</span>
+          </span>
+        );
+      })}
+    </>
+  );
+}
 
 export default function Conversation() {
   const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history'>('select');
@@ -163,7 +206,7 @@ export default function Conversation() {
     try {
       const res = await api.startConversation(topicId, difficulty);
       setConversationId(res.conversation_id);
-      setMessages([{ role: 'assistant', content: res.message }]);
+      setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] }]);
       setPhase('chat');
       setTimeLeft(DURATION);
       setPhraseSuggestions(res.phrase_suggestions || []);
@@ -198,7 +241,7 @@ export default function Conversation() {
           updated[lastUser] = { ...updated[lastUser], feedback: res.feedback };
         }
         // Add AI response
-        updated.push({ role: 'assistant', content: res.message });
+        updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] });
         return updated;
       });
       setPhraseSuggestions(res.phrase_suggestions || []);
@@ -490,7 +533,11 @@ export default function Conversation() {
         {messages.map((msg, i) => (
           <div key={i}>
             <div className={`message message-${msg.role}`}>
-              {msg.content}
+              {msg.role === 'assistant' ? (
+                <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} onSpeak={tts.speak} />
+              ) : (
+                msg.content
+              )}
             </div>
             {msg.feedback && <FeedbackPanel feedback={msg.feedback} />}
           </div>

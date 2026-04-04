@@ -17,13 +17,13 @@ export const api = {
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate') =>
-    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[] }>('/api/conversation/start', {
+    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[] }>('/api/conversation/start', {
       method: 'POST',
       body: JSON.stringify({ topic, difficulty }),
     }),
 
   sendMessage: (conversation_id: number, content: string) =>
-    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[] }>('/api/conversation/message', {
+    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[] }>('/api/conversation/message', {
       method: 'POST',
       body: JSON.stringify({ conversation_id, content }),
     }),
