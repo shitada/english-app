@@ -693,7 +693,7 @@ class TestToggleMessageBookmark:
         mid = await add_message(test_db, cid, "user", "Hello")
         result = await toggle_message_bookmark(test_db, mid)
         assert result is not None
-        assert result["is_bookmarked"] == 1
+        assert result["is_bookmarked"] is True
         assert result["id"] == mid
 
     async def test_toggle_off(self, test_db):
@@ -701,7 +701,7 @@ class TestToggleMessageBookmark:
         mid = await add_message(test_db, cid, "user", "Hello")
         await toggle_message_bookmark(test_db, mid)
         result = await toggle_message_bookmark(test_db, mid)
-        assert result["is_bookmarked"] == 0
+        assert result["is_bookmarked"] is False
 
     async def test_nonexistent_message(self, test_db):
         result = await toggle_message_bookmark(test_db, 99999)

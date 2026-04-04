@@ -379,7 +379,7 @@ async def toggle_message_bookmark(db: aiosqlite.Connection, message_id: int) -> 
         "conversation_id": row["conversation_id"],
         "role": row["role"],
         "content": row["content"],
-        "is_bookmarked": row["is_bookmarked"],
+        "is_bookmarked": bool(row["is_bookmarked"]),
         "created_at": row["created_at"],
     }
 
@@ -413,7 +413,7 @@ async def get_bookmarked_messages(
             "conversation_id": r["conversation_id"],
             "role": r["role"],
             "content": r["content"],
-            "is_bookmarked": r["is_bookmarked"],
+            "is_bookmarked": bool(r["is_bookmarked"]),
             "created_at": r["created_at"],
             "topic": r["topic"],
         }
