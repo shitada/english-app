@@ -79,3 +79,33 @@ class TestParseJson:
         raw = 'Result: {"score": 8}\nAlternative: {"score": 3}'
         result = CopilotService._parse_json(raw)
         assert result["score"] == 8
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_ensure_client_concurrent_no_race():
+    """Concurrent _ensure_client calls should not return an unstarted client."""
+    from unittest.mock import AsyncMock, patch, MagicMock
+
+    service = CopilotService.__new__(CopilotService)
+    service._model = "test"
+    service._timeout = 10
+    service._max_retries = 1
+    service._retry_delays = [0]
+    service._client = None
+    service._init_lock = __import__("asyncio").Lock()
+
+    mock_client = MagicMock()
+    mock_client.start = AsyncMock()
+
+    with patch("app.copilot_client.CopilotClient", return_value=mock_client):
+        results = await __import__("asyncio").gather(
+            service._ensure_client(),
+            service._ensure_client(),
+            service._ensure_client(),
+        )
+
+    # All should get the same fully-started client
+    assert all(r is mock_client for r in results)
+    # start() should only be called once (lock prevents duplicates)
+    assert mock_client.start.call_count == 1

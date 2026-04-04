@@ -27,18 +27,25 @@ class CopilotService:
         self._max_retries = cfg.get("max_retries", 3)
         self._retry_delays = cfg.get("retry_delays", [5, 15, 45])
         self._client: CopilotClient | None = None
+        self._init_lock = asyncio.Lock()
         logger.info(
             "CopilotService configured: model=%s, timeout=%d, retries=%d",
             self._model, self._timeout, self._max_retries,
         )
 
     async def _ensure_client(self) -> CopilotClient:
-        if self._client is None:
-            self._client = CopilotClient()
+        if self._client is not None:
+            return self._client
+        async with self._init_lock:
+            # Double-check after acquiring lock
+            if self._client is not None:
+                return self._client
+            client = CopilotClient()
             for attempt in range(self._max_retries):
                 try:
-                    await self._client.start()
+                    await client.start()
                     logger.info("CopilotClient started (model=%s)", self._model)
+                    self._client = client
                     return self._client
                 except Exception as exc:
                     delay = self._retry_delays[min(attempt, len(self._retry_delays) - 1)]
@@ -49,9 +56,8 @@ class CopilotService:
                     if attempt < self._max_retries - 1:
                         await asyncio.sleep(delay)
                     else:
-                        self._client = None
                         raise
-        return self._client
+        return self._client  # type: ignore[return-value]
 
     async def ask(
         self,
