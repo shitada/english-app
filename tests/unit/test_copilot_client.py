@@ -61,3 +61,21 @@ class TestParseJson:
         result = CopilotService._parse_json(raw)
         assert "items" not in result
         assert "questions" in result
+
+    def test_json_with_trailing_curly_braces(self):
+        """JSON followed by text with curly braces should parse correctly."""
+        raw = '{"score": 5, "feedback": "Good"}\nPractice words like {rain} and {shine}.'
+        result = CopilotService._parse_json(raw)
+        assert result == {"score": 5, "feedback": "Good"}
+
+    def test_json_with_trailing_braces_and_brackets(self):
+        """JSON followed by text with both {} and [] should parse correctly."""
+        raw = '{"is_correct": true, "errors": []}\nTip: Use patterns [A] or {B} for better flow.'
+        result = CopilotService._parse_json(raw)
+        assert result == {"is_correct": True, "errors": []}
+
+    def test_first_valid_json_object_returned(self):
+        """When multiple JSON objects in text, the first valid one is returned."""
+        raw = 'Result: {"score": 8}\nAlternative: {"score": 3}'
+        result = CopilotService._parse_json(raw)
+        assert result["score"] == 8

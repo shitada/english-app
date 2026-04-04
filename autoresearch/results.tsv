@@ -181,3 +181,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 176	c274d39	2026-04-04T03:04:56Z	595	23	62	62	742	675	675	pass	7.8	keep	Fix save_attempt defaulting non-numeric score to 0.0 instead of None
 177	2379b55	2026-04-04T03:16:41Z	510	51	74	60	695	679	679	pass	8.35	keep	Fix get_grammar_accuracy treating string false is_correct as truthy
 178	ce211ad	2026-04-04T03:23:20Z	201	48	72	65	386	682	682	pass	7.8	keep	Fix get_grammar_stats SQL miscounting string true is_correct values
+179	11bad7a	2026-04-04T03:39:23Z	782	43	74	55	954	683	683	pass	7.55	keep	Fix build_quiz producing duplicate wrong options from shared meanings

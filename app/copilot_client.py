@@ -115,22 +115,23 @@ class CopilotService:
             except json.JSONDecodeError:
                 pass
 
-        # Try raw JSON object
-        brace_match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if brace_match:
-            try:
-                return json.loads(brace_match.group(0))
-            except json.JSONDecodeError:
-                pass
-
-        # Try raw JSON array
-        bracket_match = re.search(r"\[.*\]", raw, re.DOTALL)
-        if bracket_match:
-            try:
-                result = json.loads(bracket_match.group(0))
-                return {"items": result} if isinstance(result, list) else result
-            except json.JSONDecodeError:
-                pass
+        # Try raw_decode at each '{' or '[' position for precise parsing
+        decoder = json.JSONDecoder()
+        for i, ch in enumerate(raw):
+            if ch == '{':
+                try:
+                    obj, _ = decoder.raw_decode(raw, i)
+                    if isinstance(obj, dict):
+                        return obj
+                except (json.JSONDecodeError, ValueError):
+                    continue
+            elif ch == '[':
+                try:
+                    obj, _ = decoder.raw_decode(raw, i)
+                    if isinstance(obj, list):
+                        return {"items": obj}
+                except (json.JSONDecodeError, ValueError):
+                    continue
 
         logger.error("Failed to parse JSON from response: %s", raw[:300])
         raise ValueError(f"Failed to parse JSON: {raw[:200]}")
