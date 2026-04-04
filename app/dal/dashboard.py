@@ -193,7 +193,7 @@ async def get_daily_activity(
     """Get daily learning activity counts for the past N days."""
     rows = await db.execute_fetchall(
         """WITH RECURSIVE dates(d) AS (
-               SELECT date('now', '-' || ? || ' days')
+               SELECT date('now', '-' || (? - 1) || ' days')
                UNION ALL
                SELECT date(d, '+1 day') FROM dates WHERE d < date('now')
            )

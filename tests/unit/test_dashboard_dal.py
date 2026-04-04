@@ -274,7 +274,7 @@ class TestGetDailyActivity:
         from app.dal.dashboard import get_daily_activity
         result = await get_daily_activity(test_db, days=7)
         assert isinstance(result, list)
-        assert len(result) == 8  # today + 7 past days
+        assert len(result) == 7  # 7 most recent days including today
         assert all(r["conversations"] == 0 for r in result)
         assert all(r["messages"] == 0 for r in result)
 
@@ -290,9 +290,9 @@ class TestGetDailyActivity:
     async def test_all_dates_present(self, test_db):
         from app.dal.dashboard import get_daily_activity
         result = await get_daily_activity(test_db, days=3)
-        assert len(result) == 4
+        assert len(result) == 3
         dates = [r["date"] for r in result]
-        assert len(set(dates)) == 4  # all unique
+        assert len(set(dates)) == 3  # all unique
 
 
 @pytest.mark.unit
