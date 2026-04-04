@@ -205,6 +205,27 @@ class TestSaveAttempt:
         rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
         assert rows[0]["score"] is None
 
+    async def test_nan_score_stored_as_null(self, test_db):
+        """NaN scores should be rejected, not stored as 10.0."""
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, float("nan"))
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] is None
+
+    async def test_nan_string_score_stored_as_null(self, test_db):
+        """String 'NaN' scores should be rejected."""
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, "NaN")
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] is None
+
+    async def test_inf_score_stored_as_null(self, test_db):
+        """Infinity scores should be rejected."""
+        feedback = {"word_feedback": []}
+        await save_attempt(test_db, "Test.", "Test.", feedback, float("inf"))
+        rows = await test_db.execute_fetchall("SELECT score FROM pronunciation_attempts")
+        assert rows[0]["score"] is None
+
 
 @pytest.mark.unit
 class TestGetHistory:

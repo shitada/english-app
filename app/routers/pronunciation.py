@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any, Literal
 
 import aiosqlite
@@ -104,7 +105,8 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     score = result.get("overall_score")
     if score is not None:
         try:
-            result["overall_score"] = max(0.0, min(10.0, float(score)))
+            val = float(score)
+            result["overall_score"] = max(0.0, min(10.0, val)) if math.isfinite(val) else None
         except (TypeError, ValueError):
             result["overall_score"] = None
     else:
@@ -145,7 +147,8 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     fs = result.get("fluency_score")
     if fs is not None:
         try:
-            result["fluency_score"] = max(0.0, min(10.0, float(fs)))
+            val = float(fs)
+            result["fluency_score"] = max(0.0, min(10.0, val)) if math.isfinite(val) else None
         except (TypeError, ValueError):
             result["fluency_score"] = None
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from typing import Any
 
@@ -78,7 +79,8 @@ async def save_attempt(
     clamped_score: float | None = None
     if score is not None:
         try:
-            clamped_score = max(0.0, min(10.0, float(score)))
+            val = float(score)
+            clamped_score = max(0.0, min(10.0, val)) if math.isfinite(val) else None
         except (TypeError, ValueError):
             clamped_score = None
     cursor = await db.execute(
