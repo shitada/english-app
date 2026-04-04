@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+from collections import deque
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -141,3 +143,37 @@ class TestRequireRateLimit:
         with patch.object(llm_rate_limiter, "check", return_value=0):
             require_rate_limit(request, response)
         assert response.headers["X-RateLimit-Remaining"] == "0"
+
+
+class TestSweepStale:
+    def test_stale_entries_removed(self):
+        """Stale IP entries should be cleaned up by sweep."""
+        limiter = RateLimiter(max_requests=5, window_seconds=10)
+        limiter._SWEEP_INTERVAL = 1  # Sweep every call
+        # Add an entry and make it stale
+        limiter._requests["stale_ip"] = deque([time.monotonic() - 20])
+        request = _make_request("active_ip")
+        limiter.check(request)
+        assert "stale_ip" not in limiter._requests
+        assert "active_ip" in limiter._requests
+
+    def test_active_entries_preserved(self):
+        """Active IP entries should survive sweep."""
+        limiter = RateLimiter(max_requests=5, window_seconds=60)
+        request = _make_request("active_ip")
+        limiter.check(request)
+        limiter._sweep_stale(time.monotonic())
+        assert "active_ip" in limiter._requests
+
+    def test_sweep_interval(self):
+        """Sweep only runs every _SWEEP_INTERVAL calls."""
+        limiter = RateLimiter(max_requests=100, window_seconds=1)
+        limiter._SWEEP_INTERVAL = 5
+        limiter._requests["stale"] = deque([time.monotonic() - 10])
+        # 4 calls: not enough to trigger sweep
+        for i in range(4):
+            limiter.check(_make_request(f"ip{i}"))
+        assert "stale" in limiter._requests
+        # 5th call triggers sweep
+        limiter.check(_make_request("ip4"))
+        assert "stale" not in limiter._requests

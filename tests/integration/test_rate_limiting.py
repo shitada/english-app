@@ -153,10 +153,10 @@ class TestRateLimiterUnit:
 
     def test_limiter_prunes_old_entries(self):
         import time
+        from collections import deque
         limiter = RateLimiter(max_requests=2, window_seconds=1)
         # Manually add old timestamps
-        limiter._requests["127.0.0.1"].append(time.monotonic() - 10)
-        limiter._requests["127.0.0.1"].append(time.monotonic() - 10)
+        limiter._requests["127.0.0.1"] = deque([time.monotonic() - 10, time.monotonic() - 10])
         # After pruning, these should be gone (next check would succeed)
         assert len(limiter._requests["127.0.0.1"]) == 2
         # The deque has old entries, but check() would prune them

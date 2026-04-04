@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from collections import defaultdict, deque
+from collections import deque
 
 from fastapi import HTTPException, Request, Response
 
@@ -11,13 +11,23 @@ from fastapi import HTTPException, Request, Response
 class RateLimiter:
     """Sliding window rate limiter that tracks requests per client IP."""
 
+    _SWEEP_INTERVAL = 100
+
     def __init__(self, max_requests: int = 20, window_seconds: int = 60):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._requests: dict[str, deque[float]] = defaultdict(deque)
+        self._requests: dict[str, deque[float]] = {}
+        self._check_count = 0
 
     def _client_key(self, request: Request) -> str:
         return request.client.host if request.client else "unknown"
+
+    def _sweep_stale(self, now: float) -> None:
+        """Remove entries whose newest timestamp is older than the window."""
+        cutoff = now - self.window_seconds
+        stale_keys = [k for k, dq in self._requests.items() if not dq or dq[-1] < cutoff]
+        for k in stale_keys:
+            del self._requests[k]
 
     def check(self, request: Request) -> int:
         """Raise HTTP 429 if the client has exceeded the rate limit.
@@ -26,6 +36,13 @@ class RateLimiter:
         """
         key = self._client_key(request)
         now = time.monotonic()
+
+        self._check_count += 1
+        if self._check_count % self._SWEEP_INTERVAL == 0:
+            self._sweep_stale(now)
+
+        if key not in self._requests:
+            self._requests[key] = deque()
         dq = self._requests[key]
 
         # Prune expired entries

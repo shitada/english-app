@@ -200,3 +200,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 197	637ab56	2026-04-04T16:57:16Z	136	53	58	76	323	694	694	pass	7.25	keep	Fix is_favorite returned as integer 0/1 instead of boolean
 198	9cc11ce	2026-04-04T17:02:55Z	305	36	55	53	449	701	701	pass	8.6	keep	Fix path traversal vulnerability in SPA fallback route
 199	0bc0c07	2026-04-04T17:07:20Z	120	46	53	52	271	702	702	pass	7.8	keep	Fix race condition in CopilotService._ensure_client allowing unstarted client use
+200	365ff4f	2026-04-04T17:18:46Z	869	61	75	45	1050	703	703	pass	7.8	keep	Fix connection leak in get_db() when PRAGMA execution fails
