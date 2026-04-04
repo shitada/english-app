@@ -248,7 +248,13 @@ async def get_due_words(
 @router.get("/stats", response_model=VocabularyStatsResponse)
 async def get_vocabulary_stats(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get aggregate vocabulary mastery statistics."""
-    return await vocab_dal.get_vocabulary_stats(db)
+    stats = await vocab_dal.get_vocabulary_stats(db)
+    topics = get_vocabulary_topics()
+    stats["topic_breakdown"] = [
+        {**item, "topic": get_topic_label(topics, item["topic"])}
+        for item in stats.get("topic_breakdown", [])
+    ]
+    return stats
 
 
 @router.delete("/progress", response_model=ResetProgressResponse)
@@ -387,7 +393,12 @@ class TopicSummaryResponse(BaseModel):
 @router.get("/topic-summary", response_model=TopicSummaryResponse)
 async def get_topic_summary(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get per-topic vocabulary progress summary."""
-    topics = await vocab_dal.get_topic_summary(db)
+    raw_topics = await vocab_dal.get_topic_summary(db)
+    vocab_topics = get_vocabulary_topics()
+    topics = [
+        {**item, "topic": get_topic_label(vocab_topics, item["topic"])}
+        for item in raw_topics
+    ]
     return {"topics": topics}
 
 
@@ -454,7 +465,12 @@ class TopicAccuracyResponse(BaseModel):
 @router.get("/topic-accuracy", response_model=TopicAccuracyResponse)
 async def get_topic_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get per-topic vocabulary quiz accuracy rates."""
-    topics = await vocab_dal.get_topic_accuracy(db)
+    raw_topics = await vocab_dal.get_topic_accuracy(db)
+    vocab_topics = get_vocabulary_topics()
+    topics = [
+        {**item, "topic": get_topic_label(vocab_topics, item["topic"])}
+        for item in raw_topics
+    ]
     return {"topics": topics}
 
 
