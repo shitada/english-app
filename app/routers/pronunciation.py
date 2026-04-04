@@ -123,6 +123,15 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
         for item in items:
             if "is_correct" in item:
                 item["is_correct"] = coerce_bool(item["is_correct"])
+            # Normalize phoneme_issues within each word feedback
+            pi = item.get("phoneme_issues")
+            if not isinstance(pi, list):
+                item["phoneme_issues"] = []
+            else:
+                item["phoneme_issues"] = [
+                    {k: str(v) for k, v in p.items()}
+                    for p in pi if isinstance(p, dict)
+                ]
         result["word_feedback"] = items
 
     # focus_areas: must be a list of strings
@@ -143,6 +152,13 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     # fluency_feedback: must be string if present
     if "fluency_feedback" in result and not isinstance(result["fluency_feedback"], str):
         result["fluency_feedback"] = str(result["fluency_feedback"])
+
+    # common_patterns: must be a list of strings
+    cp = result.get("common_patterns")
+    if not isinstance(cp, list):
+        result["common_patterns"] = []
+    else:
+        result["common_patterns"] = [str(item) for item in cp]
 
     return result
 
@@ -377,3 +393,25 @@ async def get_retry_suggestions(
     """Get sentences that need re-practicing based on low scores."""
     suggestions = await pron_dal.get_retry_suggestions(db, threshold=threshold, limit=limit)
     return {"suggestions": suggestions, "total": len(suggestions), "threshold": threshold}
+
+
+class MistakePatternItem(BaseModel):
+    target_sound: str
+    produced_sound: str
+    occurrence_count: int
+    example_words: list[str]
+
+
+class CommonMistakesResponse(BaseModel):
+    patterns: list[MistakePatternItem]
+    total: int
+
+
+@router.get("/common-mistakes", response_model=CommonMistakesResponse)
+async def get_common_mistakes(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get commonly confused sound patterns aggregated from pronunciation feedback."""
+    patterns = await pron_dal.get_common_mistake_patterns(db, limit=limit)
+    return {"patterns": patterns, "total": len(patterns)}

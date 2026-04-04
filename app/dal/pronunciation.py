@@ -575,3 +575,66 @@ async def get_retry_suggestions(
         }
         for r in rows
     ]
+
+
+async def get_common_mistake_patterns(
+    db: aiosqlite.Connection, limit: int = 10
+) -> list[dict[str, Any]]:
+    """Aggregate phoneme-level mistake patterns from pronunciation feedback."""
+    rows = await db.execute_fetchall(
+        """SELECT feedback_json FROM pronunciation_attempts
+           WHERE feedback_json IS NOT NULL"""
+    )
+
+    pattern_stats: dict[tuple[str, str], dict[str, Any]] = {}
+    for r in rows:
+        try:
+            feedback = json.loads(r["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        word_feedback = feedback.get("word_feedback") or []
+        if not isinstance(word_feedback, list):
+            continue
+        for wf in word_feedback:
+            if not isinstance(wf, dict):
+                continue
+            if coerce_bool(wf.get("is_correct", True)):
+                continue
+            phoneme_issues = wf.get("phoneme_issues") or []
+            if not isinstance(phoneme_issues, list):
+                continue
+            expected_word = (wf.get("expected") or "").strip()
+            for pi in phoneme_issues:
+                if not isinstance(pi, dict):
+                    continue
+                target = str(pi.get("target_sound") or "").strip()
+                produced = str(pi.get("produced_sound") or "").strip()
+                if not target or not produced:
+                    continue
+                key = (target, produced)
+                if key not in pattern_stats:
+                    pattern_stats[key] = {
+                        "target_sound": target,
+                        "produced_sound": produced,
+                        "occurrence_count": 0,
+                        "example_words": set(),
+                    }
+                pattern_stats[key]["occurrence_count"] += 1
+                if expected_word:
+                    pattern_stats[key]["example_words"].add(expected_word.lower())
+
+    ranked = sorted(
+        pattern_stats.values(), key=lambda x: x["occurrence_count"], reverse=True
+    )[:limit]
+
+    return [
+        {
+            "target_sound": p["target_sound"],
+            "produced_sound": p["produced_sound"],
+            "occurrence_count": p["occurrence_count"],
+            "example_words": sorted(p["example_words"])[:5],
+        }
+        for p in ranked
+    ]

@@ -514,3 +514,105 @@ async def test_check_pronunciation_clamps_negative_scores(client, mock_copilot):
     data = res.json()
     assert data["overall_score"] == 0.0
     assert data["fluency_score"] == 0.0
+
+
+@pytest.mark.integration
+async def test_common_mistakes_empty(client):
+    """Common mistakes on empty DB returns empty list."""
+    resp = await client.get("/api/pronunciation/common-mistakes")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["patterns"] == []
+    assert data["total"] == 0
+
+
+@pytest.mark.integration
+async def test_common_mistakes_after_attempts(client, mock_copilot):
+    """Common mistakes aggregates phoneme issues from feedback."""
+    mock_copilot.ask_json.return_value = {
+        "overall_score": 6,
+        "overall_feedback": "Good try",
+        "word_feedback": [
+            {
+                "expected": "three",
+                "heard": "tree",
+                "is_correct": False,
+                "tip": "θ sound",
+                "phoneme_issues": [
+                    {"target_sound": "θ", "produced_sound": "t", "position": "beginning"}
+                ],
+            },
+            {
+                "expected": "the",
+                "heard": "da",
+                "is_correct": False,
+                "tip": "ð sound",
+                "phoneme_issues": [
+                    {"target_sound": "ð", "produced_sound": "d", "position": "beginning"}
+                ],
+            },
+            {"expected": "cat", "heard": "cat", "is_correct": True, "tip": ""},
+        ],
+        "fluency_score": 7,
+        "fluency_feedback": "OK",
+        "focus_areas": ["th sounds"],
+        "common_patterns": ["θ replaced with t"],
+    }
+
+    # Make two attempts to accumulate data
+    await client.post(
+        "/api/pronunciation/check",
+        json={"reference_text": "three cats", "user_transcription": "tree cats"},
+    )
+    await client.post(
+        "/api/pronunciation/check",
+        json={"reference_text": "the dog", "user_transcription": "da dog"},
+    )
+
+    resp = await client.get("/api/pronunciation/common-mistakes")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] >= 1
+    # Should find θ→t pattern
+    patterns = data["patterns"]
+    assert len(patterns) >= 1
+    first = patterns[0]
+    assert "target_sound" in first
+    assert "produced_sound" in first
+    assert "occurrence_count" in first
+    assert "example_words" in first
+    assert first["occurrence_count"] >= 1
+
+
+@pytest.mark.integration
+async def test_check_pronunciation_normalizes_phoneme_issues(client, mock_copilot):
+    """Phoneme issues and common_patterns are normalized in check response."""
+    mock_copilot.ask_json.return_value = {
+        "overall_score": 8,
+        "overall_feedback": "Good",
+        "word_feedback": [
+            {
+                "expected": "think",
+                "heard": "sink",
+                "is_correct": False,
+                "tip": "th sound",
+                "phoneme_issues": "not a list",
+            },
+        ],
+        "fluency_score": 8,
+        "fluency_feedback": "OK",
+        "focus_areas": [],
+        "common_patterns": 42,
+    }
+
+    resp = await client.post(
+        "/api/pronunciation/check",
+        json={"reference_text": "think", "user_transcription": "sink"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    # phoneme_issues should be normalized to empty list
+    wf = data["word_feedback"][0]
+    assert wf["phoneme_issues"] == []
+    # common_patterns should be normalized to empty list
+    assert data["common_patterns"] == []

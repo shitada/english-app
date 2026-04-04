@@ -137,12 +137,20 @@ prompts:
           "expected": "the expected word",
           "heard": "what was recognized (or 'missing' if omitted)",
           "is_correct": true/false,
-          "tip": "Pronunciation tip for this word (if incorrect)"
+          "tip": "Pronunciation tip for this word (if incorrect)",
+          "phoneme_issues": [
+            {{
+              "target_sound": "the correct sound (e.g. θ, r, ʃ)",
+              "produced_sound": "what was likely produced (e.g. s, l, ʒ)",
+              "position": "beginning/middle/end of word"
+            }}
+          ]
         }}
       ],
       "fluency_score": 1-10,
       "fluency_feedback": "Assessment of rhythm, intonation, and natural flow",
-      "focus_areas": ["List of sounds or patterns to practice"]
+      "focus_areas": ["List of sounds or patterns to practice"],
+      "common_patterns": ["Description of recurring sound substitution patterns, e.g. 'θ replaced with s (th-fronting)'"]
     }}
 
     Rules:
