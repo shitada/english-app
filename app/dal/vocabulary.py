@@ -454,7 +454,7 @@ async def get_review_forecast(
     """Get review workload forecast for the next N days."""
     now = datetime.now(timezone.utc)
     today = now.strftime("%Y-%m-%d")
-    end_date = (now + timedelta(days=days)).strftime("%Y-%m-%d")
+    end_date = (now + timedelta(days=days - 1)).strftime("%Y-%m-%d")
 
     # Count overdue words (next_review_at < today)
     row = await db.execute_fetchall(
@@ -463,7 +463,7 @@ async def get_review_forecast(
     )
     overdue_count = row[0]["cnt"] if row else 0
 
-    # Get daily counts for today through today+days
+    # Get daily counts for today through today+(days-1)
     rows = await db.execute_fetchall(
         """SELECT date(next_review_at) as review_date, COUNT(*) as count
            FROM vocabulary_progress

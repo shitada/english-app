@@ -689,6 +689,25 @@ class TestGetReviewForecast:
             d["count"] for d in result["daily_forecast"]
         )
 
+    async def test_forecast_excludes_day_beyond_window(self, test_db):
+        """days=1 should include only today, not tomorrow."""
+        await save_words(test_db, "food", _make_questions(2))
+        words = await get_words_by_topic(test_db, "food")
+        # Put one word due today, one due tomorrow
+        await update_progress(test_db, words[0]["id"], is_correct=False)
+        await update_progress(test_db, words[1]["id"], is_correct=False)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now') WHERE word_id = ?",
+            (words[0]["id"],),
+        )
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '+1 day') WHERE word_id = ?",
+            (words[1]["id"],),
+        )
+        await test_db.commit()
+        result = await get_review_forecast(test_db, days=1)
+        assert result["total_upcoming"] == 1
+
 
 @pytest.mark.unit
 class TestGetDueWords:
