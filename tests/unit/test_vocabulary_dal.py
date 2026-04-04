@@ -1125,7 +1125,7 @@ class TestSRSAnalytics:
     async def test_level_summary_all_states(self, test_db):
         """Verify level_summary when words are in all states simultaneously."""
         words = await save_words(test_db, "travel", _make_questions(4))
-        # word 0: mastered (level 5+)
+        # word 0: mastered (level 3+ — consistent with dashboard threshold)
         for _ in range(6):
             await update_progress(test_db, words[0]["id"], is_correct=True)
         # word 1: progressing (level > 0)
@@ -1143,6 +1143,15 @@ class TestSRSAnalytics:
         assert ls["progressing"] >= 1
         assert ls["stalled"] >= 1
         assert ls["not_reviewed"] == 1
+
+    async def test_mastery_threshold_is_level_3(self, test_db):
+        """Ensure SRS analytics mastered count uses level >= 3 threshold (same as dashboard)."""
+        words = await save_words(test_db, "travel", _make_questions(1))
+        # Advance to exactly level 3 (3 correct answers)
+        for _ in range(3):
+            await update_progress(test_db, words[0]["id"], is_correct=True)
+        result = await get_srs_analytics(test_db)
+        assert result["level_summary"]["mastered"] == 1
 
 
 @pytest.mark.asyncio
