@@ -305,6 +305,8 @@ async def get_drill_words(
 ):
     """Get words for quick drill mode (prioritizes due and weak words)."""
     words = await vocab_dal.get_drill_words(db, count)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"words": words, "count": len(words)}
 
 
@@ -383,6 +385,8 @@ async def export_words(
 ):
     """Export vocabulary words with progress data."""
     words = await vocab_dal.export_words(db, topic)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"words": words, "total_count": len(words)}
 
 
@@ -453,9 +457,14 @@ async def get_attempt_history(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get vocabulary quiz attempt history with optional filters."""
-    return await vocab_dal.get_attempt_history(
+    result = await vocab_dal.get_attempt_history(
         db, word_id=word_id, topic=topic, limit=limit, offset=offset
     )
+    vocab_topics = get_vocabulary_topics()
+    result["attempts"] = [
+        {**a, "topic": get_topic_label(vocab_topics, a["topic"])} for a in result.get("attempts", [])
+    ]
+    return result
 
 
 class TopicAccuracyItem(BaseModel):
@@ -624,4 +633,6 @@ async def get_word_detail(
     detail = await vocab_dal.get_word_detail(db, word_id)
     if detail is None:
         raise HTTPException(status_code=404, detail="Word not found")
+    vocab_topics = get_vocabulary_topics()
+    detail["topic"] = get_topic_label(vocab_topics, detail["topic"])
     return detail
