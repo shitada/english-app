@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, MicOff, RotateCcw, ChevronRight, History } from 'lucide-react';
+import { Volume2, MicOff, RotateCcw, ChevronRight, ChevronDown, History } from 'lucide-react';
 import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -24,6 +24,7 @@ export default function Pronunciation() {
   const [shadowingState, setShadowingState] = useState<'idle' | 'listening' | 'recording' | 'done'>('idle');
   const [historyData, setHistoryData] = useState<PronunciationAttempt[]>([]);
   const [progressData, setProgressData] = useState<PronunciationProgress | null>(null);
+  const [expandedAttemptId, setExpandedAttemptId] = useState<number | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
 
@@ -162,10 +163,22 @@ export default function Pronunciation() {
           <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No attempts yet. Start practicing!</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {historyData.map((a, i) => (
-              <div key={i} className="card" style={{ padding: '12px 16px' }}>
+            {historyData.map((a) => (
+              <div
+                key={a.id}
+                className="card"
+                style={{ padding: '12px 16px', cursor: a.feedback?.word_feedback ? 'pointer' : 'default' }}
+                onClick={() => a.feedback?.word_feedback && setExpandedAttemptId(expandedAttemptId === a.id ? null : a.id)}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, flex: 1 }}>{a.reference_text.slice(0, 60)}{a.reference_text.length > 60 ? '...' : ''}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+                    {a.feedback?.word_feedback && (
+                      expandedAttemptId === a.id
+                        ? <ChevronDown size={14} color="var(--text-secondary)" />
+                        : <ChevronRight size={14} color="var(--text-secondary)" />
+                    )}
+                    <span style={{ fontSize: 14 }}>{a.reference_text.slice(0, 60)}{a.reference_text.length > 60 ? '...' : ''}</span>
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {a.score != null && (
                       <span style={{
@@ -179,6 +192,58 @@ export default function Pronunciation() {
                     <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{formatDateTime(a.created_at)}</span>
                   </div>
                 </div>
+
+                {expandedAttemptId === a.id && a.feedback?.word_feedback && (() => {
+                  const wf = a.feedback!.word_feedback;
+                  const total = wf.length;
+                  const correct = wf.filter((w) => w.is_correct).length;
+                  const partial = wf.filter((w) => !w.is_correct && w.heard !== 'missing').length;
+                  const incorrect = total - correct - partial;
+                  return (
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                      {a.user_transcription && (
+                        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                          <strong>You said:</strong> "{a.user_transcription}"
+                        </p>
+                      )}
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                        <span style={{ color: '#22c55e' }}>✓ {correct}</span>
+                        <span style={{ color: '#f59e0b' }}>~ {partial}</span>
+                        <span style={{ color: '#ef4444' }}>✗ {incorrect}</span>
+                      </div>
+                      <div className="accuracy-bar" role="img" aria-label={`Accuracy: ${correct} correct, ${partial} partial, ${incorrect} incorrect out of ${total} words`}>
+                        {correct > 0 && <div className="accuracy-segment correct" style={{ width: `${(correct / total) * 100}%` }} />}
+                        {partial > 0 && <div className="accuracy-segment partial" style={{ width: `${(partial / total) * 100}%` }} />}
+                        {incorrect > 0 && <div className="accuracy-segment incorrect" style={{ width: `${(incorrect / total) * 100}%` }} />}
+                      </div>
+
+                      <div className="word-comparison" style={{ marginTop: 8 }}>
+                        {wf.map((w, j) => {
+                          const chipClass = w.is_correct ? 'word-correct' : (w.heard !== 'missing' ? 'word-partial' : 'word-incorrect');
+                          return (
+                            <div key={j} className={`word-chip ${chipClass}`} title={w.tip || 'Correct!'}>
+                              {w.expected}
+                              {!w.is_correct && w.heard !== 'missing' && (
+                                <span style={{ fontSize: 11, display: 'block' }}>→ "{w.heard}"</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {wf.some((w) => !w.is_correct && w.tip) && (
+                        <div style={{ marginTop: 8 }}>
+                          {wf.filter((w) => !w.is_correct && w.tip).map((w, j) => (
+                            <p key={j} style={{ fontSize: 12, marginBottom: 2, color: 'var(--text-secondary)' }}>
+                              • <strong>{w.expected}:</strong> {w.tip}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
