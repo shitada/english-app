@@ -265,7 +265,14 @@ Edit `autoresearch/backlog.md`:
 - Adjust priorities based on what was learned
 
 ### Step 10 — Continue
-Move to the next iteration. Do NOT ask the user if you should continue. Do NOT pause.
+**BEFORE starting the next iteration**, re-read the **Mandatory Rules** section at the top of this file. Verify:
+- You called `proposer` via `runSubagent` in the iteration you just completed
+- You called `evaluator` via `runSubagent` in the iteration you just completed
+- If frontend changed: you called `tester` via `runSubagent`
+
+If you skipped any subagent, DO NOT continue. Go back and call it now.
+
+Then move to the next iteration. Do NOT ask the user if you should continue. Do NOT pause.
 
 ## Crash Recovery
 

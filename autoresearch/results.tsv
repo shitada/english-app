@@ -12,19 +12,19 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 11	087d7d7	2026-03-30T18:14:51+09:00	64	101	34	125	324	154	154	pass	7.25	keep	Add list-conversations endpoint for history review
 12	1f8bccd	2026-03-30T18:20:43+09:00	108	127	18	67	320	154	154	pass	7.05	keep	Unify LLM error handling with safe_llm_call helper
 13	dd9f764	2026-03-30T18:46:39+09:00	205	117	23	334	679	155	155	pass	7.8	keep	Make grammar check failure non-fatal in send_message
-17	none	2026-03-30T10:44:57.705787+00:00	155	74	4	51	287	153	155	pass	5.65	discard	Display fluency score and feedback in pronunciation results
-18	none	2026-03-30T10:49:45.029610+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
-19	none	2026-03-30T10:52:45.196792+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
-20	none	2026-03-30T10:55:45.417839+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
 14	none	2026-03-30T11:11:03.062898+00:00	0	0	0	0	182	0	0	skip	0.0	crash	Propose failed
+15	f912f94	2026-03-30T21:16:28+09:00	235	122	30	402	789	155	155	pass	7.25	keep	Add conversation history browsing UI
 15	none	2026-03-30T11:14:05.321583+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
 15	none	2026-03-30T11:27:38.642179+00:00	136	247	8	27	420	136	155	pass	4.95	discard	Add rate limiting for LLM endpoints
-15	f912f94	2026-03-30T21:16:28+09:00	235	122	30	402	789	155	155	pass	7.25	keep	Add conversation history browsing UI
 16	1a9db76	2026-03-30T21:43:20+09:00	124	118	19	48	309	155	155	pass	7.25	keep	Add ARIA labels and live regions for accessibility
 17	8600a84	2026-03-30T22:10:44+09:00	131	65	15	55	266	156	156	pass	7.55	keep	Include vocabulary activity in dashboard feed
+17	none	2026-03-30T10:44:57.705787+00:00	155	74	4	51	287	153	155	pass	5.65	discard	Display fluency score and feedback in pronunciation results
 18	bc7e457	2026-03-30T22:17:20+09:00	79	39	22	59	199	159	159	pass	7.3	keep	Enhance logging middleware with timing and request IDs
+18	none	2026-03-30T10:49:45.029610+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
 19	6495ea5	2026-03-30T22:19:19+09:00	50	83	14	54	201	159	159	pass	7.15	keep	Add skeleton loading screens to Dashboard and Vocabulary
+19	none	2026-03-30T10:52:45.196792+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
 20	8b19229	2026-03-30T22:29:41+09:00	64	76	13	67	220	159	159	pass	7.0	keep	Improve mobile responsiveness with hamburger nav and responsive grids
+20	none	2026-03-30T10:55:45.417839+00:00	0	0	0	0	180	0	0	skip	0.0	crash	Propose failed
 21	1cd6639	2026-03-30T22:45:41+09:00	172	124	24	52	372	164	164	pass	7.55	keep	Persist conversation summary in database
 22	53dfa7f	2026-03-30T22:52:08+09:00	133	144	12	125	414	164	164	pass	6.5	keep	Add reverse quiz mode (meaning-to-word) for vocabulary
 23	d435b01	2026-03-30T22:55:07+09:00	389	24	14	369	796	164	164	pass	7.0	keep	Add keyboard text input to conversation chat as speech fallback
@@ -202,10 +202,11 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 199	0bc0c07	2026-04-04T17:07:20Z	120	46	53	52	271	702	702	pass	7.8	keep	Fix race condition in CopilotService._ensure_client allowing unstarted client use
 200	365ff4f	2026-04-04T17:18:46Z	869	61	75	45	1050	703	703	pass	7.8	keep	Fix connection leak in get_db() when PRAGMA execution fails
 201	5e47b17	2026-04-04T17:31:41Z	440	83	129	57	709	706	706	pass	7.3	keep	Fix unbounded memory growth in RateLimiter._requests dict
-202	Fix NaN pronunciation scores silently stored as 10.0	bugfix	709	709	pass	pass	true	7.0	7.8	keep	1004/100/56/64	1224
-203	Fix sentence-history summary computed from truncated window	bugfix	709	709	pass	pass	true	7.0	7.5	keep	364/35/58/78	535
-204	Fix off-by-one in activity-history returning days+1 entries	bugfix	709	709	pass	pass	true	7.0	7.25	keep	1373/50/52/63	1538
-205	Fix off-by-one in review forecast returning days+1 window	bugfix	710	710	pass	pass	true	7.0	7.55	keep	1168/39/47/71	1325
+202	5de7c06	2026-04-05T04:10:48+09:00	0	100	56	64	1224	709	709	pass	7.8	keep	Fix NaN pronunciation scores silently stored as perfect 10.0
+203	a09b8d8	2026-04-05T04:19:43+09:00	0	35	58	78	535	709	709	pass	7.5	keep	Fix sentence-history summary computed from truncated window
+204	f5ec0df	2026-04-05T04:46:03+09:00	0	50	52	63	1538	709	709	pass	7.25	keep	Fix off-by-one in activity-history returning days+1 entries
+205	f40a9ff	2026-04-05T05:08:25+09:00	0	39	47	71	1325	710	710	pass	7.55	keep	Fix off-by-one in review forecast returning days+1 window
+206	14a332b	2026-04-05T09:54:26+09:00	0	0	0	0	0	710	710	pass	7.0	keep	Add daily practice reminder UI on home page
 207	none	2026-04-05T00:57:38Z	86	66	53	333	538	710	710	pass	5.7	discard	Add pronunciation comparison playback (model vs user recording)
 208	52ca20a	2026-04-05T01:03:47Z	544	154	72	63	833	710	710	pass	7.25	keep	Fix 5 conversation endpoints returning raw topic IDs instead of labels
 209	none	2026-04-05T03:47:18Z	131	161	512	94	898	710	710	pass	5.4	discard	Add conversation replay UI with turn-by-turn audio playback
@@ -228,3 +229,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 226	de106cf	2026-04-05 23:59:13	0	107	107	60	274	735	735	pass	7.55	kept	Fix suggestions/focus_areas/common_patterns non-list values dropped
 227	1e0cc6a	2026-04-05T15:19:50Z	133	114	46	491	784	735	735	pass	6.3	kept	Enhance daily practice card with module strengths, weekly progress, and goal setup
 228	9aea0cc	2026-04-05T15:35:12Z	110	138	43	606	897	735	735	pass	6.55	kept	Add conversation replay UI with turn-by-turn stepper and TTS
+229	9f86097	2026-04-05T15:43:14Z	101	146	42	170	459	735	735	pass	6.3	kept	Add pronunciation comparison playback with audio recorder hook

@@ -215,7 +215,7 @@ main() {
         # Execute copilot with session log
         local start_ts
         start_ts=$(date +%s)
-        local session_file="$LOGS_DIR/invocation-$(printf '%03d' "$invocation").md"
+        local session_file="$LOGS_DIR/session-iter-$((current + 1))-to-${TARGET_ITERATIONS}.md"
         log "Starting copilot invocation (session log: $session_file)..."
 
         set +e
