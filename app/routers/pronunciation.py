@@ -138,10 +138,12 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
 
     # focus_areas: must be a list of strings
     fa = result.get("focus_areas")
-    if not isinstance(fa, list):
-        result["focus_areas"] = []
-    else:
+    if isinstance(fa, list):
         result["focus_areas"] = [str(item) for item in fa if item is not None]
+    elif isinstance(fa, str) and fa.strip():
+        result["focus_areas"] = [fa.strip()]
+    else:
+        result["focus_areas"] = []
 
     # fluency_score: float or None, clamped to [0, 10]
     fs = result.get("fluency_score")
@@ -158,10 +160,12 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
 
     # common_patterns: must be a list of strings
     cp = result.get("common_patterns")
-    if not isinstance(cp, list):
-        result["common_patterns"] = []
-    else:
+    if isinstance(cp, list):
         result["common_patterns"] = [str(item) for item in cp if item is not None]
+    elif isinstance(cp, str) and cp.strip():
+        result["common_patterns"] = [cp.strip()]
+    else:
+        result["common_patterns"] = []
 
     return result
 

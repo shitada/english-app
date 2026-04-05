@@ -102,6 +102,20 @@ class TestNormalizeGrammarFeedback:
         assert result["suggestions"][0] == {"text": "Use 'the' here"}
         assert result["suggestions"][1] == {"text": "Try past tense"}
 
+    def test_suggestions_bare_string_wrapped(self):
+        """When suggestions is a single string, wrap as [{text: str}]."""
+        raw = {"errors": [], "suggestions": "Try using present tense"}
+        result = _normalize_grammar_feedback(raw)
+        assert len(result["suggestions"]) == 1
+        assert result["suggestions"][0] == {"text": "Try using present tense"}
+
+    def test_suggestions_bare_dict_wrapped(self):
+        """When suggestions is a single dict, wrap in a list."""
+        raw = {"errors": [], "suggestions": {"text": "Try X"}}
+        result = _normalize_grammar_feedback(raw)
+        assert len(result["suggestions"]) == 1
+        assert result["suggestions"][0] == {"text": "Try X"}
+
 
 @pytest.mark.unit
 class TestNormalizeSummaryNoneHandling:
@@ -163,3 +177,18 @@ class TestNormalizeSummaryNoneInLists:
         raw = {"communication_level": "B1", "key_vocabulary": ["apple", None, "banana"], "tip": "tip", "summary": "s"}
         result = _normalize_summary(raw)
         assert result["key_vocabulary"] == ["apple", "banana"]
+
+
+@pytest.mark.unit
+class TestPronunciationNonListWrapping:
+    def test_focus_areas_bare_string_wrapped(self):
+        """When focus_areas is a string, wrap as [str]."""
+        raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": "vowel sounds"}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["focus_areas"] == ["vowel sounds"]
+
+    def test_common_patterns_bare_string_wrapped(self):
+        """When common_patterns is a string, wrap as [str]."""
+        raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": [], "common_patterns": "dropping final consonants"}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["common_patterns"] == ["dropping final consonants"]
