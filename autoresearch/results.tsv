@@ -214,3 +214,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 212	36dc583	2026-04-05T04:30:43Z	530	90	59	57	736	710	710	pass	7.25	keep	Fix 6 vocabulary endpoints returning raw topic IDs instead of labels
 213	be1911e	2026-04-05T05:59:50Z	3902	233	774	426	5335	710	710	pass	7.25	keep	Fix 4 more vocabulary endpoints returning raw topic IDs instead of labels
 214	de6c33e	2026-04-05T10:56:36Z	17608	82	54	49	17793	710	710	pass	7.25	keep	Fix off-by-one in weekly comparison: this_week spans 8 days vs 7
+215	3826919	2026-04-05T11:12:54Z	824	24	57	54	959	710	710	pass	7.15	keep	Fix pronunciation get_progress total_attempts undercounting NULL-scored attempts

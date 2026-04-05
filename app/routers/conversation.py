@@ -181,12 +181,16 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize LLM grammar feedback to ensure consistent types."""
     result = dict(raw)
-    result["is_correct"] = coerce_bool(result.get("is_correct", True))
     result["corrected_text"] = str(result.get("corrected_text") or "")
     errors = result.get("errors")
     result["errors"] = [e for e in errors if isinstance(e, dict)] if isinstance(errors, list) else []
     suggestions = result.get("suggestions")
     result["suggestions"] = [s for s in suggestions if isinstance(s, dict)] if isinstance(suggestions, list) else []
+    # Infer is_correct from errors when LLM omits the field
+    if "is_correct" in raw:
+        result["is_correct"] = coerce_bool(raw["is_correct"])
+    else:
+        result["is_correct"] = len(result["errors"]) == 0
     return result
 
 
