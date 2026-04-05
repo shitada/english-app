@@ -225,7 +225,7 @@ async def test_list_conversations_filter_by_topic(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert len(data["conversations"]) == 1
-    assert data["conversations"][0]["topic"] == "hotel_checkin"
+    assert data["conversations"][0]["topic"] == "Hotel Check-in"
 
 
 @pytest.mark.asyncio
@@ -329,7 +329,7 @@ async def test_clear_ended_conversations(client, mock_copilot):
     list_res = await client.get("/api/conversation/list")
     conversations = list_res.json()["conversations"]
     assert len(conversations) == 1
-    assert conversations[0]["topic"] == "shopping"
+    assert conversations[0]["topic"] == "Shopping"
 
 
 @pytest.mark.asyncio
@@ -370,7 +370,7 @@ async def test_export_conversation(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert data["id"] == cid
-    assert data["topic"] == "hotel_checkin"
+    assert data["topic"] == "Hotel Check-in"
     assert data["difficulty"] == "beginner"
     assert data["status"] == "active"
     assert len(data["messages"]) >= 2  # assistant greeting + user + assistant reply
@@ -433,7 +433,7 @@ async def test_list_conversations_search_by_keyword(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert data["total_count"] >= 1
-    assert all("hotel_checkin" == c["topic"] for c in data["conversations"])
+    assert all("Hotel Check-in" == c["topic"] for c in data["conversations"])
 
 
 @pytest.mark.integration

@@ -354,6 +354,10 @@ async def list_conversations(
     """List past conversations with message counts."""
     conversations = await conv_dal.list_conversations(db, topic=topic, keyword=keyword, limit=limit, offset=offset)
     total_count = await conv_dal.count_conversations(db, topic=topic, keyword=keyword)
+    topics = get_conversation_topics()
+    conversations = [
+        {**c, "topic": get_topic_label(topics, c["topic"])} for c in conversations
+    ]
     return {
         "conversations": conversations,
         "total_count": total_count,
@@ -426,6 +430,8 @@ async def export_conversation(
     data = await conv_dal.get_conversation_export(db, conversation_id)
     if data is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    topics = get_conversation_topics()
+    data["topic"] = get_topic_label(topics, data["topic"])
     return data
 
 
@@ -446,7 +452,10 @@ async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_sessio
     """Get conversation topic recommendations based on practice history."""
     topics = get_conversation_topics()
     all_topic_keys = [t["id"] for t in topics]
-    return await conv_dal.get_topic_recommendations(db, all_topic_keys)
+    recs = await conv_dal.get_topic_recommendations(db, all_topic_keys)
+    return [
+        {**r, "topic": get_topic_label(topics, r["topic"])} for r in recs
+    ]
 
 
 @router.put("/messages/{message_id}/bookmark")
@@ -471,6 +480,8 @@ async def list_bookmarks(
     """List all bookmarked messages, optionally filtered by conversation."""
     items = await conv_dal.get_bookmarked_messages(db, conversation_id, limit, offset)
     total = await conv_dal.count_bookmarked_messages(db, conversation_id)
+    topics = get_conversation_topics()
+    items = [{**item, "topic": get_topic_label(topics, item["topic"])} for item in items]
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
@@ -483,6 +494,8 @@ async def get_conversation_replay(
     result = await conv_dal.get_conversation_replay(db, conversation_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    topics = get_conversation_topics()
+    result["conversation"]["topic"] = get_topic_label(topics, result["conversation"]["topic"])
     return result
 
 
