@@ -206,9 +206,20 @@ async def generate_quiz(
     if not isinstance(raw_questions, list):
         raw_questions = []
     words = await vocab_dal.save_words(db, topic, raw_questions)
+
+    # Supplement with existing topic words if LLM produced fewer than requested
+    all_words = await vocab_dal.get_words_by_topic(db, topic)
+    if len(words) < count:
+        word_ids = {w["id"] for w in words}
+        for w in all_words:
+            if w["id"] not in word_ids:
+                words.append(w)
+            if len(words) >= count:
+                break
+    words = words[:count]
+
     if mode == "fill_blank":
         return {"quiz_type": "fill_blank", "questions": vocab_dal.build_fill_blank_quiz(words)}
-    all_words = await vocab_dal.get_words_by_topic(db, topic)
     all_meanings = [r["meaning"] for r in all_words]
     return {"quiz_type": "multiple_choice", "questions": vocab_dal.build_quiz(words, all_meanings)}
 

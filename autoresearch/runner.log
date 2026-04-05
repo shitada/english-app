@@ -932,3 +932,149 @@ Now add tests:
   │ @pytest.mark.unit…
   └ 37 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #234: Fix is_correct=None in grammar/pronunciation normalizers defaulting to True
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775408010. Run tests:
+
+● Run tests for iteration 234 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 1 line...
+
+● Run specific test file first (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_normalize_feedback.py -v 2>&1 | tail -20
+  └ 21 lines...
+
+● Get full test results (shell)
+  │ read_bash 104 2>/dev/null; cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+766 tests pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775408413. No frontend/DAL/router changes needing smoke or QA. Call evaluator:
+
+● Evaluator Evaluate iteration 234
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L200:260 (61 lines read)
+  └ Read utils.py
+      │ app/utils.py
+      └ 103 lines read
+
+● Record T4 for iteration 234 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, keep. T0=1775407433, propose=524, implement=53, test=403, evaluate=378, total=1358
+
+● Record results for iteration 234 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "234" "$HASH" "$DATE" "524" "53" "403" "378" "1358" \
+  │ "766" "766" "pass" "7.8" "kept" "Fix is_correct=None in grammar/pronunciation normalizers …
+  └ 4 lines...
+
+Iteration 234 complete ✅. Moving to iteration 235.
+
+---
+
+● T0 for iteration 235 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 235
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L222:250 (28 lines read)
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+Proposer hit a transient error. Let me retry:
+
+● Proposer Propose iteration 235 retry
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ 1 line read
+  └ Read utils.py
+      │ app/utils.py
+      └ 103 lines read
+
+Connection issues. Let me wait a moment and retry:
+
+● Wait before retry (shell)
+  │ sleep 10 && echo "ready"
+  └ 2 lines...
+
+● Proposer Propose iteration 235
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L168:214 (46 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L35:84 (50 lines read)
+
+● Record T1 for iteration 235 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775433238. Let me examine the quiz generation code:
+
+● Find quiz generation code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "generate_quiz\|def
+  │ quiz\|all_words\|save_words" app/routers/vocabulary.py | head -20
+  └ 6 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L169:250 (82 lines read)
+
+I can see the issue. After save_words (line 208), if it returns fewer words than count, we should supplement from existing topic words. Let me fix:
+
+● Edit vocabulary.py +12 -1
+  └ app/routers/vocabulary.py
+
+Now add a test. Let me look at how the existing vocabulary API tests mock LLM:
+
+● Check for existing quiz gap tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "quiz.*empty\|quiz.*fewer\|quiz.*supplement\|quiz.*gap" tests/integration/test_vocabulary_api.py
+  │ | head -5
+  └ 2 lines...
+
+● See how tests mock LLM for vocab (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "mock_copilot\|ask_json"
+  │ tests/integration/test_vocabulary_api.py | head -10
+  └ 11 lines...
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L18:45 (26 lines read)
+
+Good. Now add a test for the supplementation logic:
+
+● See end of vocab integration tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -15
+  │ tests/integration/test_vocabulary_api.py
+  └ 16 lines...
+
+● Add quiz supplementation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_vocabulary_api.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 26 lines...
+

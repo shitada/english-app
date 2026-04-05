@@ -780,3 +780,25 @@ async def test_quiz_handles_non_list_questions(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert data["questions"] == []
+
+
+@pytest.mark.integration
+async def test_quiz_supplements_from_existing_when_llm_returns_few(client, mock_copilot):
+    """When LLM returns fewer words than count, quiz supplements from existing topic words."""
+    # First call: populate topic with 3 words
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "reservation", "correct_meaning": "a booking", "wrong_options": ["a", "b", "c"], "example_sentence": "I have a reservation.", "difficulty": 1},
+            {"word": "checkout", "correct_meaning": "leaving the hotel", "wrong_options": ["a", "b", "c"], "example_sentence": "Checkout is at noon.", "difficulty": 1},
+            {"word": "lobby", "correct_meaning": "the entrance hall", "wrong_options": ["a", "b", "c"], "example_sentence": "Meet me in the lobby.", "difficulty": 1},
+        ]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=3")
+
+    # Second call: LLM returns empty → quiz should still have questions from existing words
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": []})
+    res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=5")
+    assert res.status_code == 200
+    data = res.json()
+    # Should get at least the 3 existing words despite LLM returning nothing
+    assert len(data["questions"]) >= 3
