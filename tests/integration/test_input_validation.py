@@ -190,3 +190,8 @@ class TestTextLengthLimits:
     async def test_vocabulary_notes_too_long(self, client):
         res = await client.put("/api/vocabulary/1/notes", json={"notes": "x" * 2001})
         assert res.status_code == 422
+
+    async def test_vocabulary_update_empty_meaning(self, client):
+        """PUT /vocabulary/{id} with empty meaning returns 422."""
+        res = await client.put("/api/vocabulary/1", json={"meaning": ""})
+        assert res.status_code == 422

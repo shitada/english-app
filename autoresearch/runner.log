@@ -715,3 +715,114 @@ No existing parse_score tests. Let me check the end of the file:
   │ from app.routers.pronunciation import _parse_score…
   └ 55 lines...
 
+● Commit iteration 232 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #232: Fix pronunciation score parsing losing valid scores in string formats
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 for iteration 232 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run tests for iteration 232 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+762 tests all pass. TS check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+No DAL/router changes needing smoke test, no frontend .tsx changes. QA skipped.
+
+● Record T3 for iteration 232 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now call evaluator:
+
+● Evaluator Evaluate iteration 232
+  │ Read test_normalize_feedback.py
+  │   │ tests/unit/test_normalize_feedback.py
+  │   └ 248 lines read
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L1:8 (8 lines read)
+
+● Record T4 for iteration 232 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1, verdict: keep. All criteria met. KEEP.
+
+T0=1775405919, T1=1775406695, T2=1775406769, T3=1775406817, T4=1775406872
+- propose=776, implement=74, test=48, evaluate=55, total=953
+
+● Record results for iteration 232 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "232" "$HASH" "$DATE" "776" "74" "48" "55" "953" \
+  │ "762" "762" "pass" "8.1" "kept" "Fix pronunciation score parsing losing valid scores in …
+  └ 4 lines...
+
+Iteration 232 complete ✅. Moving to iteration 233.
+
+---
+
+● T0 and context for iteration 233 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git --no-pager log --oneline -3
+  └ 5 lines...
+
+T0=1775406887. Calling proposer:
+
+● Proposer Propose iteration 233
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L329:360 (31 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L493:526 (33 lines read)
+
+● Record T1 for iteration 233 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775407293. Implementing:
+
+● Find UpdateWordRequest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class UpdateWordRequest"
+  │ app/routers/vocabulary.py
+  └ 2 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L329:340 (12 lines read)
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+Now add a test. Let me find the right place in the input validation tests:
+
+● Find vocabulary tests in validation file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "vocabulary\|word"
+  │ tests/integration/test_input_validation.py | tail -20
+  └ 21 lines...
+
+● See end of validation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ tests/integration/test_input_validation.py
+  └ 11 lines...
+
+● Add empty meaning validation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_input_validation.py << 'PYEOF'
+  │
+  │ async def test_vocabulary_update_empty_meaning(self, client):
+  │ """PUT /vocabulary/{id} with empty meaning returns 422."""…
+  └ 6 lines...
+

@@ -327,7 +327,7 @@ async def delete_word(
 
 
 class UpdateWordRequest(BaseModel):
-    meaning: str | None = Field(default=None, max_length=500)
+    meaning: str | None = Field(default=None, min_length=1, max_length=500)
     example_sentence: str | None = Field(default=None, max_length=500)
     difficulty: int | None = Field(default=None, ge=1, le=5)
 
