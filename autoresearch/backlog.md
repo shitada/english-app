@@ -68,7 +68,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] ✅ Improve accessibility — add ARIA labels, keyboard navigation, screen reader support (completed iteration #16)
 - [x] ✅ Add loading states and skeleton screens — better UX during LLM processing delays (completed iteration #19)
 - [x] ✅ Add keyboard text input as speech fallback in conversation chat (completed iteration #23)
-- [ ] Add offline fallback for vocabulary review — cache previously fetched quiz data
+- [x] ✅ Add offline fallback for vocabulary review — cache previously fetched quiz data in localStorage (completed iteration #211)
 - [x] ✅ Improve mobile responsiveness — optimize layout for smaller screens (completed iteration #20)
 - [x] ✅ Display human-readable topic labels in dashboard and pronunciation pages — topics now fetched from API (completed iteration #25)
 - [x] ✅ Fix inconsistent date formatting — shared formatDate utility with relative and absolute time formatters (completed iteration #28)

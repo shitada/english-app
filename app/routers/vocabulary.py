@@ -160,6 +160,8 @@ async def browse_words(
 ):
     """Browse and search saved vocabulary words."""
     total, words = await vocab_dal.search_words(db, q, topic, limit, offset)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"total_count": total, "words": words}
 
 
@@ -231,6 +233,8 @@ async def get_progress(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     progress = await vocab_dal.get_progress(db, topic)
+    vocab_topics = get_vocabulary_topics()
+    progress = [{**p, "topic": get_topic_label(vocab_topics, p["topic"])} for p in progress]
     return {"progress": progress}
 
 
@@ -242,6 +246,8 @@ async def get_due_words(
 ):
     """Get vocabulary words that are due for review."""
     words = await vocab_dal.get_due_words(db, topic, limit)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"due_count": len(words), "words": words}
 
 
@@ -274,6 +280,8 @@ async def get_weak_words(
 ):
     """Get vocabulary words with highest error rates."""
     words = await vocab_dal.get_weak_words(db, limit)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"words": words}
 
 
@@ -541,7 +549,11 @@ async def get_favorites(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get favorited vocabulary words."""
-    return await vocab_dal.get_favorites(db, topic=topic, limit=limit, offset=offset)
+    result = await vocab_dal.get_favorites(db, topic=topic, limit=limit, offset=offset)
+    vocab_topics = get_vocabulary_topics()
+    if "words" in result:
+        result["words"] = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in result["words"]]
+    return result
 
 
 class UpdateNotesRequest(BaseModel):

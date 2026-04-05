@@ -12,7 +12,7 @@ import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
-from app.config import get_conversation_topics, get_prompt
+from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.database import get_db_session
@@ -508,4 +508,6 @@ async def get_conversation_vocabulary(
     result = await conv_dal.get_conversation_vocabulary(db, conversation_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    vocab_topics = get_vocabulary_topics()
+    result["words"] = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in result.get("words", [])]
     return result
