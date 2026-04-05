@@ -221,3 +221,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 219	7fb770d	2026-04-05T12:23:39Z	463	66	56	46	631	723	723	pass	8.35	keep	Fix str(None) producing literal None in summary and feedback normalizers
 220	ef6c4f7	2026-04-05T12:37:54Z	707	18	53	64	842	723	723	pass	7.65	keep	Fix get_drill_words excluding NULL next_review_at from due words
 221	69d8a1c	2026-04-05T13:55:06Z	4444	52	54	65	4615	723	723	pass	7.5	keep	Fix mastery_velocity using last_reviewed instead of actual mastery date
+222	88f49a2	2026-04-05T14:06:37Z	522	30	54	69	675	723	723	pass	6.7	keep	Fix save_words producing duplicate quiz questions from LLM batch

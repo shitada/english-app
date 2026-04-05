@@ -577,6 +577,14 @@ async def test_batch_import_skips_duplicates(client):
 
 
 @pytest.mark.asyncio
+async def test_batch_import_invalid_topic(client):
+    words = [{"word": "test", "meaning": "a test", "topic": "nonexistent_xyz"}]
+    res = await client.post("/api/vocabulary/import", json={"words": words})
+    assert res.status_code == 422
+    assert "Unknown topic" in res.json()["detail"]
+
+
+@pytest.mark.asyncio
 async def test_update_word(client, mock_copilot):
     mock_copilot.ask_json = AsyncMock(return_value={
         "questions": [{"word": "bed", "correct_meaning": "furniture for sleeping", "example_sentence": "Sleep on the bed.", "difficulty": 1}]
@@ -626,9 +634,9 @@ async def test_toggle_favorite_not_found(client):
 @pytest.mark.integration
 async def test_update_notes(client):
     await client.post("/api/vocabulary/import", json={
-        "words": [{"word": "hotel", "meaning": "宿泊施設", "topic": "travel", "example_sentence": "I stayed at a hotel.", "difficulty": 1}],
+        "words": [{"word": "hotel", "meaning": "宿泊施設", "topic": "hotel_checkin", "example_sentence": "I stayed at a hotel.", "difficulty": 1}],
     })
-    words_res = await client.get("/api/vocabulary/words?topic=travel")
+    words_res = await client.get("/api/vocabulary/words?topic=hotel_checkin")
     word_list = words_res.json()["words"]
     word_id = word_list[0]["id"]
     res = await client.put(f"/api/vocabulary/{word_id}/notes", json={"notes": "Important!"})

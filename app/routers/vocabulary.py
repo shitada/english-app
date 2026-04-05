@@ -515,6 +515,12 @@ async def batch_import(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Import a batch of vocabulary words."""
+    vocab_topics = get_vocabulary_topics()
+    seen_topics: set[str] = set()
+    for w in req.words:
+        if w.topic not in seen_topics:
+            validate_topic(vocab_topics, w.topic)
+            seen_topics.add(w.topic)
     words_data = [w.model_dump() for w in req.words]
     return await vocab_dal.batch_import_words(db, words_data)
 
