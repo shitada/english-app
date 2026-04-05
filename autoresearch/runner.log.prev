@@ -1,0 +1,21 @@
+[2026-04-06 00:05:30] Rotated previous runner.log to runner.log.prev
+[2026-04-06 00:05:30] Current iteration count: 226 / 227
+[2026-04-06 00:05:30] ------------------------------------------
+[2026-04-06 00:05:30] Invocation 1 / 10
+[2026-04-06 00:05:30] Resuming from iteration 227
+[2026-04-06 00:05:30] ------------------------------------------
+[2026-04-06 00:05:56] ==========================================
+[2026-04-06 00:05:56] Autoresearch CLI Runner started
+[2026-04-06 00:05:56] Current iteration: 226
+[2026-04-06 00:05:56] Additional iters:  20
+[2026-04-06 00:05:56] Target iteration:  246
+[2026-04-06 00:05:56] Max invocations:   10
+[2026-04-06 00:05:56] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-06 00:05:56] ==========================================
+[2026-04-06 00:05:56] WARNING: Working tree has uncommitted changes
+[2026-04-06 00:05:56]   M .github/agents/orchestrator.agent.md
+[2026-04-06 00:05:56]   M autoresearch/audit-report.json
+[2026-04-06 00:05:56]   M autoresearch/results.tsv
+[2026-04-06 00:05:56]   M autoresearch/runner.log
+[2026-04-06 00:05:56]   ?? autoresearch/runner.log.prev
+[2026-04-06 00:05:56] Continuing anyway...

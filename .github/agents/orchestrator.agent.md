@@ -289,3 +289,17 @@ After completing all 20 iterations (or reaching iteration 20), generate `autores
 7. **Recommendations**: Top 3 priorities for the next autoresearch run
 
 
+
+<!-- AUDIT-FIX-20260406: agent_skip -->
+## AUDIT FIX: Agent Skip Prevention
+
+Previous audit detected that subagents were skipped. This is a HARD FAILURE.
+
+**MANDATORY CHECKLIST — verify BEFORE recording each iteration's results:**
+- Did I call `proposer` subagent? → Must have received JSON proposal
+- Did I call `tester` subagent? → Must have received JSON with ux_score
+- Did I call `evaluator` subagent? → Must have received JSON with total_score
+- Does the score in results.tsv match evaluator's total_score exactly?
+
+**If ANY answer is NO, STOP. Call the missing subagent NOW before proceeding.**
+You are an orchestrator — you dispatch work. You do NOT implement, score, or QA test.

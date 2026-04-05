@@ -1,7 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, type LearningInsights, type LearningGoal } from '../api';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { getLearningInsights, getLearningGoals, setLearningGoal, type LearningInsights, type LearningGoal } from '../api';
+
+const MODULE_ROUTES: Record<string, string> = {
+  conversation: '/conversation',
+  vocabulary: '/vocabulary',
+  pronunciation: '/pronunciation',
+};
+
+const MODULE_LABELS: Record<string, string> = {
+  conversation: 'Conversation',
+  vocabulary: 'Vocabulary',
+  pronunciation: 'Pronunciation',
+};
+
+function strengthColor(value: number): string {
+  if (value < 30) return 'var(--danger, #ef4444)';
+  if (value < 60) return 'var(--warning, #f59e0b)';
+  return 'var(--success, #10b981)';
+}
 
 function mapRecommendationToRoute(rec: string): string | null {
   const lower = rec.toLowerCase();
@@ -9,6 +27,121 @@ function mapRecommendationToRoute(rec: string): string | null {
   if (lower.includes('pronunc') || lower.includes('speak')) return '/pronunciation';
   if (lower.includes('conversation') || lower.includes('chat')) return '/conversation';
   return null;
+}
+
+function ModuleStrengthsSection({ strengths }: { strengths: { conversation: number; vocabulary: number; pronunciation: number } }) {
+  const modules = (['conversation', 'vocabulary', 'pronunciation'] as const);
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Module Strengths</h4>
+      {modules.map(mod => (
+        <div key={mod} style={{ marginBottom: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: 2 }}>
+            <span>{MODULE_LABELS[mod]}</span>
+            <span>{Math.round(strengths[mod])}%</span>
+          </div>
+          <div style={{ background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+            <div style={{
+              width: `${Math.min(100, Math.max(0, strengths[mod]))}%`,
+              height: '100%',
+              background: strengthColor(strengths[mod]),
+              borderRadius: 4,
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function WeeklyProgressSection({ comparison }: { comparison: LearningInsights['weekly_comparison'] }) {
+  const modules = (['conversations', 'vocabulary', 'pronunciation'] as const);
+  const labels: Record<string, string> = { conversations: 'Conversations', vocabulary: 'Vocab Reviews', pronunciation: 'Pronunciation' };
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Weekly Progress</h4>
+      <div style={{ display: 'flex', gap: 12 }}>
+        {modules.map(mod => {
+          const data = comparison[mod];
+          const diff = data.this_week - data.last_week;
+          return (
+            <div key={mod} style={{ flex: 1, background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, padding: '0.5rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 4 }}>{labels[mod]}</div>
+              <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{data.this_week}</div>
+              <div style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                {diff > 0 ? <TrendingUp size={12} color="var(--success, #10b981)" /> :
+                 diff < 0 ? <TrendingDown size={12} color="var(--danger, #ef4444)" /> :
+                 <Minus size={12} color="var(--text-secondary, #6b7280)" />}
+                <span style={{ color: diff > 0 ? 'var(--success, #10b981)' : diff < 0 ? 'var(--danger, #ef4444)' : 'var(--text-secondary, #6b7280)' }}>
+                  {diff > 0 ? `+${diff}` : diff === 0 ? '—' : `${diff}`} vs last wk
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function FocusAreaCTA({ area }: { area: string }) {
+  const route = MODULE_ROUTES[area];
+  const label = MODULE_LABELS[area] || area;
+  if (!route) return null;
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <Link to={route} style={{
+        display: 'block', textAlign: 'center', padding: '0.75rem', borderRadius: 8,
+        background: 'var(--primary, #6366f1)', color: '#fff', textDecoration: 'none',
+        fontWeight: 600, fontSize: '0.9rem',
+      }}>
+        Focus on {label} — your weakest area →
+      </Link>
+    </div>
+  );
+}
+
+const QUICK_GOALS: { goalType: string; target: number; label: string }[] = [
+  { goalType: 'conversations', target: 3, label: '3 conversations/day' },
+  { goalType: 'vocabulary_reviews', target: 10, label: '10 vocab reviews/day' },
+  { goalType: 'pronunciation_attempts', target: 5, label: '5 pronunciations/day' },
+];
+
+function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal) => void }) {
+  const [creating, setCreating] = useState<string | null>(null);
+
+  const handleCreate = useCallback(async (goalType: string, target: number) => {
+    setCreating(goalType);
+    try {
+      const goal = await setLearningGoal(goalType, target);
+      onGoalCreated(goal);
+    } catch {
+      // Silently fail — user can try again
+    } finally {
+      setCreating(null);
+    }
+  }, [onGoalCreated]);
+
+  return (
+    <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Set a Daily Goal</h4>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {QUICK_GOALS.map(({ goalType, target, label }) => (
+          <button key={goalType} onClick={() => handleCreate(goalType, target)}
+            disabled={creating !== null}
+            style={{
+              padding: '0.4rem 0.75rem', borderRadius: 6, border: '1px solid var(--border, #e5e7eb)',
+              background: creating === goalType ? 'var(--primary, #6366f1)' : '#fff',
+              color: creating === goalType ? '#fff' : 'var(--text, #111827)',
+              cursor: creating !== null ? 'not-allowed' : 'pointer', fontSize: '0.8rem',
+            }}>
+            {creating === goalType ? '…' : label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function GoalProgressBar({ goal }: { goal: LearningGoal }) {
@@ -49,6 +182,10 @@ function DailyPracticeCard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleGoalCreated = useCallback((goal: LearningGoal) => {
+    setGoals(prev => [...prev, goal]);
+  }, []);
+
   if (error) return null;
 
   if (loading) {
@@ -85,11 +222,19 @@ function DailyPracticeCard() {
         </div>
       )}
 
-      {goals.length > 0 && (
+      {insights && <ModuleStrengthsSection strengths={insights.module_strengths} />}
+
+      {insights && insights.weekly_comparison && <WeeklyProgressSection comparison={insights.weekly_comparison} />}
+
+      {insights && insights.weakest_area && <FocusAreaCTA area={insights.weakest_area} />}
+
+      {goals.length > 0 ? (
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Daily Goals</h4>
           {goals.map(g => <GoalProgressBar key={g.id} goal={g} />)}
         </div>
+      ) : (
+        <GoalSetupPrompt onGoalCreated={handleGoalCreated} />
       )}
 
       {insights && insights.recommendations.length > 0 && (

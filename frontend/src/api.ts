@@ -432,6 +432,17 @@ export interface ModuleStrengths {
   pronunciation: number;
 }
 
+export interface WeeklyModuleComparison {
+  this_week: number;
+  last_week: number;
+}
+
+export interface WeeklyComparison {
+  conversations: WeeklyModuleComparison;
+  vocabulary: WeeklyModuleComparison;
+  pronunciation: WeeklyModuleComparison;
+}
+
 export interface LearningInsights {
   streak: number;
   streak_at_risk: boolean;
@@ -439,6 +450,7 @@ export interface LearningInsights {
   strongest_area: string | null;
   weakest_area: string | null;
   recommendations: string[];
+  weekly_comparison: WeeklyComparison;
 }
 
 export async function getLearningInsights(): Promise<LearningInsights> {
