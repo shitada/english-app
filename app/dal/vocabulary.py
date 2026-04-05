@@ -867,7 +867,7 @@ async def get_srs_analytics(db: aiosqlite.Connection) -> dict[str, Any]:
         """SELECT
                (SELECT COUNT(*) FROM vocabulary_words) as total_words,
                COUNT(*) as with_progress,
-               SUM(CASE WHEN level > 0 THEN 1 ELSE 0 END) as progressing,
+               SUM(CASE WHEN level > 0 AND level < 3 THEN 1 ELSE 0 END) as progressing,
                SUM(CASE WHEN level = 0 AND (correct_count + incorrect_count) > 0 THEN 1 ELSE 0 END) as stalled,
                SUM(CASE WHEN level >= 3 THEN 1 ELSE 0 END) as mastered
            FROM vocabulary_progress"""
