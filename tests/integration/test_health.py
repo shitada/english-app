@@ -18,4 +18,4 @@ class TestHealthCheck:
     async def test_response_has_required_fields(self, client):
         resp = await client.get("/api/health")
         data = resp.json()
-        assert set(data.keys()) == {"status", "database", "uptime_seconds"}
+        assert set(data.keys()) == {"status", "database", "uptime_seconds", "api_version"}

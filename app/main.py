@@ -113,6 +113,20 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def api_version_rewrite(request: Request, call_next):
+    """Rewrite /api/v1/* to /api/* and add version header."""
+    path = request.scope["path"]
+    if path == "/api/v1" or path == "/api/v1/":
+        request.scope["path"] = "/api"
+    elif path.startswith("/api/v1/"):
+        request.scope["path"] = "/api/" + path[8:]
+    response = await call_next(request)
+    if request.scope["path"].startswith("/api"):
+        response.headers["X-API-Version"] = "v1"
+    return response
+
+
 # Frontend log endpoint
 class FrontendLogEntry(BaseModel):
     level: str
@@ -147,6 +161,7 @@ async def health_check():
         "status": status,
         "database": db_status,
         "uptime_seconds": uptime,
+        "api_version": "v1",
     }
     if status == "degraded":
         return JSONResponse(content=response, status_code=503)

@@ -419,3 +419,153 @@ The tester correctly found a bug — `set_learning_goal` returns a raw goal with
 ● Edit dashboard.py +20 -1
   └ app/dal/dashboard.py
 
+● Amend with fix, re-run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+All 739 tests pass. Stop the server and proceed to evaluation:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server stopped"
+  └ 2 lines...
+
+Now call the evaluator:
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 12 lines...
+
+● Evaluator Evaluate iteration 230
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L30:120 (91 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L469:530 (62 lines read)
+
+● Record T4 for iteration 230 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.6, verdict: keep. All criteria met (739/739 tests, TS pass, smoke pass, score >= 6.0). KEEP.
+
+T0=1775404308, T1=1775404446, T2=1775404652, T3=1775404855, T4=1775405310
+- propose_sec=138, implement_sec=206, test_sec=203, evaluate_sec=455, total_sec=1002
+
+● Record results for iteration 230 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "230" "$HASH" "$DATE" "138" "206" "203" "455" "1002" \
+  │ "739" "739" "pass" "6.6" "kept" "Complete daily practice card with today's activity, goal …
+  └ 4 lines...
+
+Good, properly tab-separated. Now update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Iteration 230 complete ✅. Moving to iteration 231.
+
+---
+
+● Record T0 for iteration 231 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read recent results for iteration 231 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+T0=1775405334. Now call the proposer for iteration 231:
+
+● Proposer Propose iteration 231
+  │ Read smoke_test.py
+  │   │ tests/smoke_test.py
+  │   └ 87 lines read
+  └ Read main.py
+      │ app/main.py
+      └ L86:114 (28 lines read)
+
+● Record T1 for iteration 231 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775405636. Now implement the API versioning middleware:
+
+● Find middleware in main.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "middleware\|_SKIP_LOG\|async def
+  │ log_requests\|@app.middleware" app/main.py | head -20
+  └ 7 lines...
+
+● Read main.py
+  │ app/main.py
+  └ L85:115 (29 lines read)
+
+● Read main.py
+  │ app/main.py
+  └ L115:140 (26 lines read)
+
+● Read main.py
+  │ app/main.py
+  └ L140:155 (14 lines read)
+
+Now let me add the versioning middleware. In FastAPI, middlewares registered later wrap earlier ones, so I'll add it after log_requests:
+
+● Edit main.py +12 -1
+  └ app/main.py
+
+Wait, I need to fix the ordering. Let me re-check. In FastAPI/Starlette, `@app.middleware("http")` middlewares are applied in reverse order of registration — the last one registered is the outermost. So `api_version_rewrite` should be registered AFTER `log_requests` to be the outermost (runs first). That's correct.
+
+But I also need to add the `# Frontend log endpoint` back:
+
+● Read main.py
+  │ app/main.py
+  └ L126:140 (14 lines read)
+
+Need to fix the missing blank line:
+
+● Edit main.py +3
+  └ app/main.py
+
+Now add the `api_version` field to the health check response:
+
+● Edit main.py +1
+  └ app/main.py
+
+Now create the integration test file:
+
+● Create test_api_versioning.py +60
+  └ tests/integration/test_api_versioning.py
+
+● Commit iteration 231 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #231: Add API versioning prefix via URL-rewriting middleware
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 for iteration 231 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run tests for iteration 231 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 30 lines...
+
+Need to fix the existing health check test to account for the new `api_version` field:
+
+● Find health test assertion (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "required_fields\|set(data.keys"
+  │ tests/integration/test_health.py
+  └ 3 lines...
+
+● Edit test_health.py +1 -1
+  └ tests/integration/test_health.py
+

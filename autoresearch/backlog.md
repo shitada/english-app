@@ -21,7 +21,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] ✅ Add quick drill mode for vocabulary — a timed flashcard-style rapid review (10 words in 60 seconds) with audio pronunciation (completed iteration #185)
 - [x] ✅ Add conversation key phrase highlight — highlight important phrases/idioms in AI messages with tap-to-hear pronunciation (completed iteration #184)
 - [x] ✅ Add pronunciation accuracy visual — show per-word color indicator (green/yellow/red) in history with expandable word-level feedback (completed iteration #210)
-- [ ] Add daily practice reminder UI — show a "today's goal" card on home page with recommended activities based on weak areas *(partially completed #227: module strengths, weekly progress, focus area CTA, goal setup added)*
+- [x] ✅ Add daily practice reminder UI — show a "today's goal" card on home page with recommended activities based on weak areas *(completed: #227 added module strengths/weekly progress/goal setup, #230 added today's activity summary, goal edit/delete, celebration banner)*
 - [x] ✅ Add conversation replay — let users replay a completed conversation turn-by-turn with audio, reviewing what they said vs what would be natural (completed iteration #228)
 
 ## [MEDIUM] Feature Improvements
