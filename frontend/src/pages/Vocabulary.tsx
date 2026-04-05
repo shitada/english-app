@@ -24,6 +24,7 @@ export default function Vocabulary() {
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   // Drill mode state
   const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -51,15 +52,39 @@ export default function Vocabulary() {
         alert('No questions generated. Try again.');
         return;
       }
+      // Cache for offline use
+      try {
+        localStorage.setItem(`vocab-quiz-cache-${topicId}-${apiMode}`, JSON.stringify(res));
+      } catch { /* quota exceeded — ignore */ }
       setQuestions(res.questions);
       setCurrentIndex(0);
       setAnswers([]);
       setSelectedAnswer(null);
       setRevealed(false);
       setFillBlankInput('');
+      setIsOfflineMode(false);
       setPhase('quiz');
     } catch (err) {
       console.error(err);
+      // Try loading from cache
+      const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
+      const cached = localStorage.getItem(`vocab-quiz-cache-${topicId}-${apiMode}`);
+      if (cached) {
+        try {
+          const res = JSON.parse(cached);
+          if (res.questions?.length > 0) {
+            setQuestions(res.questions);
+            setCurrentIndex(0);
+            setAnswers([]);
+            setSelectedAnswer(null);
+            setRevealed(false);
+            setFillBlankInput('');
+            setIsOfflineMode(true);
+            setPhase('quiz');
+            return;
+          }
+        } catch { /* invalid cache */ }
+      }
       alert('Failed to generate quiz. Make sure the backend is running.');
     } finally {
       setLoading(false);
@@ -388,7 +413,7 @@ export default function Vocabulary() {
           <button className="btn btn-primary" onClick={startDrill} style={{ flex: 1 }}>
             ⚡ Drill Again
           </button>
-          <button className="btn" onClick={() => setPhase('select')} style={{ flex: 1 }}>
+          <button className="btn" onClick={() => { setPhase('select'); setIsOfflineMode(false); }} style={{ flex: 1 }}>
             Back to Topics
           </button>
         </div>
@@ -440,7 +465,7 @@ export default function Vocabulary() {
           </div>
         </div>
 
-        <button className="btn btn-primary" onClick={() => setPhase('select')}>
+        <button className="btn btn-primary" onClick={() => { setPhase('select'); setIsOfflineMode(false); }}>
           Try Another Topic
         </button>
       </div>
@@ -450,11 +475,18 @@ export default function Vocabulary() {
   // Quiz question
   if (!currentQ) return null;
 
+  const offlineBanner = isOfflineMode ? (
+    <div style={{ padding: '8px 12px', background: '#fef9c3', borderRadius: 8, marginBottom: 12, fontSize: '0.85rem', color: '#a16207', textAlign: 'center' }}>
+      📴 Offline — practicing with cached questions
+    </div>
+  ) : null;
+
   // Fill-in-the-blank mode
   if (quizMode === 'fill-blank') {
     const fbQ = currentQ as FillBlankQuestion;
     return (
       <div className="card">
+        {offlineBanner}
         <div className="quiz-progress">
           {questions.map((_, i) => (
             <div
@@ -541,6 +573,7 @@ export default function Vocabulary() {
 
   return (
     <div className="card">
+      {offlineBanner}
       {/* Progress bar */}
       <div className="quiz-progress">
         {questions.map((_, i) => (
