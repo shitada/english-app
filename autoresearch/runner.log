@@ -18039,3 +18039,217 @@ Now update the Pronunciation.tsx to add accuracy bar and 3-tier coloring:
 
 Step 4 — Commit:
 
+[2026-04-05 05:12:24] Copilot invocation completed (duration: 15837s)
+[2026-04-05 05:12:24] Running post-invocation audit (iter 186-205)...
+============================================
+ Autoresearch Audit
+ Iterations: 186 — 205
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-05 05:12:24
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;31m  FAIL: 4 malformed row(s)[0m
+  [1mROOT CAUSE: Unknown — no echo -e found in log[0m
+  [1mCONFIDENCE: LOW[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 186[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205[0m
+[0;31m  Tester: FAIL — missing: 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205[0m
+[0;31m  Evaluator: FAIL — missing: 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205[0m
+  [1mROOT CAUSE: Orchestrator self-implemented (7 occurrences)[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 2)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [tsv_format] LOW confidence → queued for prescriber[0m
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[2026-04-05 05:12:26] Audit found 1 error(s) — fixes applied where possible
+[2026-04-05 05:12:29] Current iteration count: 205 / 205
+[2026-04-05 05:12:29] Target reached (205 >= 205) — done!
+[2026-04-05 05:12:29] ==========================================
+[2026-04-05 05:12:29] Runner finished
+[2026-04-05 05:12:29] Total invocations: 1
+[2026-04-05 05:12:29] Final iteration:   205 / 205
+[2026-04-05 05:12:29] Premium requests:  30
+[2026-04-05 05:12:29] ==========================================
+[2026-04-05 09:50:11] ==========================================
+[2026-04-05 09:50:11] Autoresearch CLI Runner started
+[2026-04-05 09:50:11] Current iteration: 205
+[2026-04-05 09:50:11] Additional iters:  3
+[2026-04-05 09:50:11] Target iteration:  208
+[2026-04-05 09:50:11] Max invocations:   10
+[2026-04-05 09:50:11] Project dir:       /Users/shingotada/Documents/vscode/english-app
+[2026-04-05 09:50:11] ==========================================
+[2026-04-05 09:50:11] WARNING: Working tree has uncommitted changes
+[2026-04-05 09:50:11]   M .github/agents/orchestrator.agent.md
+[2026-04-05 09:50:11]   M autoresearch/audit-report.json
+[2026-04-05 09:50:11]   M autoresearch/runner.log
+[2026-04-05 09:50:11] Continuing anyway...
+[2026-04-05 09:50:11] Current iteration count: 205 / 208
+[2026-04-05 09:50:11] ------------------------------------------
+[2026-04-05 09:50:11] Invocation 1 / 10
+[2026-04-05 09:50:11] Resuming from iteration 206
+[2026-04-05 09:50:11] ------------------------------------------
+[2026-04-05 09:50:11] Starting copilot invocation...
+
+
+
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  │ 2>/dev/null
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md 2>/dev/null
+  └ 127 lines...
+
+● Read TSV header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -1 autoresearch/results.tsv
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-001.md
+  │ 2>/dev/null | head -50
+  └ 51 lines...
+
+Now I have the full picture. Starting iteration 206. Let me record the start timestamp and launch the proposer.
+
+● Record T0 for iteration 206 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1775350250. Now let me call the proposer subagent with the full context.
+
+● Proposer Propose iteration 206
+  │ List directory frontend/src/hooks
+  │   └ 2 files found
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:50 (50 lines read)
+
+Got the proposal. Let me record T1 and start implementing.
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ 59 lines read
+
+● Record T1 for iteration 206 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check existing API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "LearningInsights\|getLearningInsig
+  │ hts\|dashboard/insights\|getLearningGoals\|dashboard/goals\|dashboard/stats" frontend/src/api.ts
+  │ | head -30
+  └ 6 lines...
+
+● Check types for insights (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "LearningInsights\|insights\|DashboardStats\|LearningGoal" frontend/src/api.ts | head -30
+  └ 9 lines...
+
+● Check backend insights endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "insights" app/routers/*.py
+  │ app/dal/*.py 2>/dev/null | head -20
+  └ 7 lines...
+
+● Check response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "LearningInsightsResponse"
+  │ app/routers/dashboard.py | head -5
+  └ 3 lines...
+
+● Check insights response type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 30 "class LearningInsightsResponse"
+  │ app/routers/dashboard.py
+  └ 32 lines...
+
+● Check sub-types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B 5 -A 10 "class
+  │ ModuleStrengths\|class WeeklyComparison" app/routers/dashboard.py
+  └ 28 lines...
+
+● Check DashboardStats interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 10 "DashboardStats"
+  │ frontend/src/api.ts | head -20
+  └ 21 lines...
+
+● Check remaining DashboardStats fields (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 5 "vocab_mastered"
+  │ frontend/src/api.ts | head -10
+  └ 7 lines...
+
+● Check LearningGoal interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 10 "interface LearningGoal"
+  │ frontend/src/api.ts
+  └ 12 lines...
+
+Now I have all the context. Let me implement the changes - add `LearningInsights` interface and `getLearningInsights` function to `api.ts`, and create the daily practice card on `Home.tsx`.
+
+● Find insertion point in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "export async function
+  │ getLearningGoals" frontend/src/api.ts
+  └ 2 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L425:455 (31 lines read)
+
+Now let me add the LearningInsights interface and function to api.ts, and update Home.tsx:
+
+● Edit api.ts +20
+  └ frontend/src/api.ts
+
+Now update Home.tsx to add the daily practice card:
+
+● Edit Home.tsx +119 -1
+  └ frontend/src/pages/Home.tsx
+
+Now let me check if lucide-react has the icons I used:
+
+● Record T2 for iteration 206 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check icon usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && grep -r
+  │ "Flame\|AlertTriangle\|Target" src/ --include="*.tsx" --include="*.ts" | head -10
+  └ 9 lines...
+
+T2 = 1775350460. Now commit and test.
+

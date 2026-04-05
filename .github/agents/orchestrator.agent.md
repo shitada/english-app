@@ -17,21 +17,47 @@ Before starting the loop, read these files to understand the current state:
 
 Determine the next iteration number from `results.tsv` (start at 1 if empty, or resume from last iteration + 1).
 
+## Mandatory Rules (READ FIRST — before every iteration)
+
+You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do their jobs yourself.
+
+**For EVERY iteration, you MUST call these 3 subagents via `runSubagent`:**
+1. **proposer** → returns a JSON proposal. You MUST NOT decide what to implement yourself.
+2. **evaluator** → returns a JSON score. You MUST NOT assign scores yourself.
+3. **tester** → returns a QA JSON (only when frontend files changed or proposal type is feature/ux).
+
+**If you find yourself implementing without a proposer call, assigning a score without an evaluator call, or saying "QA passed" without a tester call — STOP. You are violating your instructions. Call the correct subagent NOW.**
+
+**Additional mandatory rules:**
+- NEVER stop between iterations — the user may be away
+- NEVER skip testing — every change must be tested
+- NEVER force-push or rewrite history beyond the immediate discard revert
+- Keep changes small — prefer focused, single-purpose changes
+- Schema changes in `database.py` MUST include corresponding `ALTER TABLE` statements in `_MIGRATIONS`
+- ALWAYS use `printf` (not `echo -e`) to write to results.tsv
+- ALWAYS compute timing as `T_end - T_start` (if negative, set to 0)
+- NEVER fabricate timestamps — all values MUST come from actual `date` commands
+
+**MANDATORY CHECKLIST — verify BEFORE recording each iteration's results:**
+- ✅ Did I call `proposer` subagent? → Must have received JSON proposal
+- ✅ Did I call `evaluator` subagent? → Must have received JSON with total_score
+- ✅ Does the score in results.tsv match evaluator's total_score exactly?
+- ✅ If frontend changed: Did I call `tester` subagent?
+
 ## The Experiment Loop
 
 **REPEAT for iterations 1 through 20:**
 
-### Step 1 — Context Restore (combat context exhaustion)
+### Step 1 — Context Restore
 At the START of every iteration, re-read:
-- `autoresearch/results.tsv` (past results & descriptions to avoid duplicates)
+- The **last 20 rows** of `autoresearch/results.tsv` (do NOT read the full file — use `tail -20`)
 - `autoresearch/backlog.md` (current priorities)
 - `git log --oneline -5` (recent changes)
-
-**SELF-CHECK (read this every iteration):** You are an ORCHESTRATOR. You dispatch work to 3 subagents — you do NOT do their jobs yourself:
-- **Step 2**: Call `proposer` subagent → get proposal JSON
-- **Step 5c**: Call `tester` subagent → get QA JSON (the tester MUST test at least 3 pages with Playwright)
-- **Step 6**: Call `evaluator` subagent → get score JSON
-If you find yourself writing code to implement without a proposer call, assigning a score without an evaluator call, or saying "QA passed" without a tester call, you are violating your instructions. STOP and call the correct subagent.
+- The latest session log in `autoresearch/logs/` if it exists:
+  ```bash
+  ls -t autoresearch/logs/invocation-*.md 2>/dev/null | head -1
+  ```
+  Read this file to understand what the previous invocation accomplished.
 
 Record the start timestamp:
 ```bash
@@ -262,38 +288,4 @@ After completing all 20 iterations (or reaching iteration 20), generate `autores
 6. **Remaining Backlog**: Current state of backlog.md
 7. **Recommendations**: Top 3 priorities for the next autoresearch run
 
-## Critical Rules
 
-1. **NEVER STOP** between iterations — the user may be away
-2. **NEVER skip testing** — every change must be tested
-3. **NEVER force-push or rewrite history** beyond the immediate discard revert
-4. **ALWAYS restore context** at the start of each iteration (read results.tsv + backlog.md)
-5. **Keep changes small** — prefer focused, single-purpose changes over ambitious refactors
-6. **Test-first for iterations 1-2** — prioritize adding test coverage before feature work
-7. **Record timing** at every checkpoint (T0-T4) for performance tracking
-8. **Schema changes require migrations** — if `database.py` SCHEMA is modified, `_MIGRATIONS` must be updated and smoke test must pass
-9. **NEVER skip the proposer** — every iteration MUST call the proposer subagent. You are an orchestrator, not a proposer. Do NOT decide what to implement yourself.
-10. **NEVER skip the evaluator** — every iteration MUST call the evaluator subagent. You MUST NOT assign scores or make keep/discard decisions yourself. The evaluator's score is the ONLY valid score.
-11. **NEVER skip the tester** — every iteration MUST call the tester subagent for Playwright QA. If Playwright has infrastructure issues, follow the recovery procedure in Step 5c. Never replace the tester with curl commands or self-assessment.
-12. **NEVER fabricate timestamps** — all timestamps in results.tsv MUST come from actual `date` commands, not hardcoded or estimated values.
-
-<!-- AUDIT-FIX-20260402: agent_skip -->
-## AUDIT FIX: Agent Skip Prevention
-
-Previous audit detected that subagents were skipped. This is a HARD FAILURE.
-
-**MANDATORY CHECKLIST — verify BEFORE recording each iteration's results:**
-- Did I call `proposer` subagent? → Must have received JSON proposal
-- Did I call `tester` subagent? → Must have received JSON with ux_score
-- Did I call `evaluator` subagent? → Must have received JSON with total_score
-- Does the score in results.tsv match evaluator's total_score exactly?
-
-**If ANY answer is NO, STOP. Call the missing subagent NOW before proceeding.**
-You are an orchestrator — you dispatch work. You do NOT implement, score, or QA test.
-
-<!-- AUDIT-FIX-20260402: timestamp -->
-## AUDIT FIX: Timestamp Calculation
-
-Always compute timing as: `phase_sec = T_end - T_start` where T_end > T_start.
-Record T0 before propose, T1 after propose, T2 after implement, T3 after tests, T4 after evaluate.
-If any result is negative, set it to 0.

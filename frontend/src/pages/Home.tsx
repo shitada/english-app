@@ -1,5 +1,121 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3 } from 'lucide-react';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target } from 'lucide-react';
+import { getLearningInsights, getLearningGoals, type LearningInsights, type LearningGoal } from '../api';
+
+function mapRecommendationToRoute(rec: string): string | null {
+  const lower = rec.toLowerCase();
+  if (lower.includes('vocab') || lower.includes('word')) return '/vocabulary';
+  if (lower.includes('pronunc') || lower.includes('speak')) return '/pronunciation';
+  if (lower.includes('conversation') || lower.includes('chat')) return '/conversation';
+  return null;
+}
+
+function GoalProgressBar({ goal }: { goal: LearningGoal }) {
+  const pct = Math.min(100, Math.round((goal.today_count / goal.daily_target) * 100));
+  const label = goal.goal_type.replace(/_/g, ' ');
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: 2 }}>
+        <span style={{ textTransform: 'capitalize' }}>{label}</span>
+        <span>{goal.today_count}/{goal.daily_target}{goal.completed ? ' ✓' : ''}</span>
+      </div>
+      <div style={{ background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+        <div style={{
+          width: `${pct}%`,
+          height: '100%',
+          background: goal.completed ? 'var(--success, #10b981)' : 'var(--primary, #6366f1)',
+          borderRadius: 4,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function DailyPracticeCard() {
+  const [insights, setInsights] = useState<LearningInsights | null>(null);
+  const [goals, setGoals] = useState<LearningGoal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    Promise.allSettled([getLearningInsights(), getLearningGoals()])
+      .then(([insightsResult, goalsResult]) => {
+        if (insightsResult.status === 'fulfilled') setInsights(insightsResult.value);
+        if (goalsResult.status === 'fulfilled') setGoals(goalsResult.value);
+        if (insightsResult.status === 'rejected' && goalsResult.status === 'rejected') setError(true);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (error) return null;
+
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ height: 20, width: '40%', background: 'var(--border, #e5e7eb)', borderRadius: 4, marginBottom: 12 }} />
+        <div style={{ height: 12, width: '70%', background: 'var(--border, #e5e7eb)', borderRadius: 4, marginBottom: 8 }} />
+        <div style={{ height: 12, width: '55%', background: 'var(--border, #e5e7eb)', borderRadius: 4 }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Target size={20} color="var(--primary, #6366f1)" />
+        Today's Practice
+      </h3>
+
+      {insights && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem', padding: '0.75rem', background: insights.streak_at_risk ? 'var(--danger-bg, #fef2f2)' : 'var(--success-bg, #f0fdf4)', borderRadius: 8 }}>
+          {insights.streak_at_risk
+            ? <AlertTriangle size={20} color="var(--danger, #ef4444)" />
+            : <Flame size={20} color="var(--warning, #f59e0b)" />
+          }
+          <div>
+            <strong>{insights.streak} day streak</strong>
+            {insights.streak_at_risk && (
+              <span style={{ color: 'var(--danger, #ef4444)', fontSize: '0.85rem', marginLeft: 8 }}>
+                Complete an activity to keep it!
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {goals.length > 0 && (
+        <div style={{ marginBottom: '1rem' }}>
+          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Daily Goals</h4>
+          {goals.map(g => <GoalProgressBar key={g.id} goal={g} />)}
+        </div>
+      )}
+
+      {insights && insights.recommendations.length > 0 && (
+        <div>
+          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Recommendations</h4>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {insights.recommendations.map((rec, i) => {
+              const route = mapRecommendationToRoute(rec);
+              return (
+                <li key={i} style={{ fontSize: '0.9rem' }}>
+                  {route ? (
+                    <Link to={route} style={{ color: 'var(--primary, #6366f1)', textDecoration: 'none' }}>
+                      → {rec}
+                    </Link>
+                  ) : (
+                    <span>→ {rec}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -8,6 +124,8 @@ export default function Home() {
         <h2>Improve Your English</h2>
         <p>Practice conversations, pronunciation, and vocabulary with AI</p>
       </div>
+
+      <DailyPracticeCard />
 
       <div className="feature-grid">
         <Link to="/conversation" className="feature-card">

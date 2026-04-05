@@ -425,6 +425,26 @@ export async function getTopicRecommendations(): Promise<TopicRecommendation[]> 
   return request<TopicRecommendation[]>("/api/conversation/topic-recommendations");
 }
 
+// Learning insights (from iteration 206)
+export interface ModuleStrengths {
+  conversation: number;
+  vocabulary: number;
+  pronunciation: number;
+}
+
+export interface LearningInsights {
+  streak: number;
+  streak_at_risk: boolean;
+  module_strengths: ModuleStrengths;
+  strongest_area: string | null;
+  weakest_area: string | null;
+  recommendations: string[];
+}
+
+export async function getLearningInsights(): Promise<LearningInsights> {
+  return request<LearningInsights>("/api/dashboard/insights");
+}
+
 // Learning goals (from iteration 92)
 export interface LearningGoal {
   id: number;
