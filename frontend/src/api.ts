@@ -58,6 +58,9 @@ export const api = {
   getConversationSummary: (conversation_id: number) =>
     request<{ summary: ConversationSummary }>(`/api/conversation/${conversation_id}/summary`),
 
+  getConversationReplay: (conversation_id: number) =>
+    request<ConversationReplay>(`/api/conversation/${conversation_id}/replay`),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';
@@ -185,6 +188,29 @@ export interface ConversationSummary {
   key_vocabulary: string[];
   communication_level: string;
   tip: string;
+}
+
+export interface ReplayTurn {
+  turn_number: number;
+  user_message: string | null;
+  user_timestamp: string | null;
+  assistant_message: string | null;
+  assistant_timestamp: string | null;
+  feedback: Record<string, unknown> | null;
+  corrections: { original: string; correction: string; explanation: string }[];
+}
+
+export interface ConversationReplay {
+  conversation: {
+    id: number;
+    topic: string;
+    difficulty: string;
+    started_at: string;
+    ended_at: string | null;
+    status: string;
+  };
+  turns: ReplayTurn[];
+  total_turns: number;
 }
 
 export interface PronunciationFeedback {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Flame, MessageSquare, Mic, BookOpen, Trophy, Clock } from 'lucide-react';
+import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
 

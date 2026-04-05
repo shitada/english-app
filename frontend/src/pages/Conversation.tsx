@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2 } from 'lucide-react';
-import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary } from '../api';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
@@ -74,7 +74,7 @@ function HighlightedMessage({ content, keyPhrases, onSpeak }: {
 }
 
 export default function Conversation() {
-  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history'>('select');
+  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history' | 'replay'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -88,6 +88,9 @@ export default function Conversation() {
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
+  const [replayTurns, setReplayTurns] = useState<ReplayTurn[]>([]);
+  const [replayIndex, setReplayIndex] = useState(0);
+  const [replayLoading, setReplayLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -174,9 +177,24 @@ export default function Conversation() {
       ]);
       setHistoryMessages(histRes.status === 'fulfilled' ? histRes.value.messages : []);
       setHistorySummary(sumRes.status === 'fulfilled' ? sumRes.value.summary : null);
+      setConversationId(id);
       setPhase('history');
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const startReplay = async (id: number) => {
+    setReplayLoading(true);
+    try {
+      const data = await api.getConversationReplay(id);
+      setReplayTurns(data.turns);
+      setReplayIndex(0);
+      setPhase('replay');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReplayLoading(false);
     }
   };
 
@@ -387,12 +405,24 @@ export default function Conversation() {
   if (phase === 'history') {
     return (
       <div>
-        <button
-          onClick={() => setPhase('select')}
-          style={{ marginBottom: 16, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
-        >
-          ← Back to scenarios
-        </button>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button
+            onClick={() => setPhase('select')}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
+          >
+            ← Back to scenarios
+          </button>
+          {conversationId && (
+            <button
+              onClick={() => startReplay(conversationId)}
+              disabled={replayLoading}
+              style={{ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: replayLoading ? 'not-allowed' : 'pointer', background: 'var(--primary, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <PlayCircle size={16} />
+              {replayLoading ? 'Loading…' : 'Replay'}
+            </button>
+          )}
+        </div>
         <h2 style={{ marginBottom: 16 }}>Conversation History</h2>
 
         {historySummary && (
@@ -433,6 +463,98 @@ export default function Conversation() {
               </span>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Replay view (turn-by-turn stepper)
+  if (phase === 'replay') {
+    const turn = replayTurns[replayIndex];
+    return (
+      <div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button
+            onClick={() => setPhase('history')}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
+          >
+            ← Back to history
+          </button>
+        </div>
+        <h2 style={{ marginBottom: 8 }}>Conversation Replay</h2>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 16 }}>
+          Turn {replayIndex + 1} of {replayTurns.length}
+        </p>
+
+        {turn && (
+          <div className="card" style={{ padding: '1.5rem', marginBottom: 16 }}>
+            {turn.assistant_message && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🤖 Assistant</strong>
+                  <button
+                    onClick={() => tts.speak(turn.assistant_message!)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                    aria-label="Listen to assistant message"
+                  >
+                    <Volume2 size={16} color="var(--primary, #6366f1)" />
+                  </button>
+                </div>
+                <div className="message-bubble assistant" style={{ marginBottom: 0 }}>
+                  <p>{turn.assistant_message}</p>
+                </div>
+              </div>
+            )}
+
+            {turn.user_message && (
+              <div style={{ marginBottom: turn.corrections.length > 0 ? 16 : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🗣️ You said</strong>
+                  <button
+                    onClick={() => tts.speak(turn.user_message!)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                    aria-label="Listen to your message"
+                  >
+                    <Volume2 size={16} color="var(--primary, #6366f1)" />
+                  </button>
+                </div>
+                <div className="message-bubble user" style={{ marginBottom: 0 }}>
+                  <p>{turn.user_message}</p>
+                </div>
+              </div>
+            )}
+
+            {turn.corrections.length > 0 && (
+              <div style={{ padding: '0.75rem', background: 'rgba(255,200,0,0.1)', borderRadius: 8 }}>
+                <strong style={{ fontSize: '0.85rem' }}>📝 Corrections</strong>
+                {turn.corrections.map((c, i) => (
+                  <div key={i} style={{ fontSize: '0.85rem', marginTop: 6 }}>
+                    <span style={{ color: 'var(--danger, #ef4444)', textDecoration: 'line-through' }}>{c.original}</span>
+                    {' → '}
+                    <span style={{ color: 'var(--success, #10b981)', fontWeight: 600 }}>{c.correction}</span>
+                    {c.explanation && <p style={{ margin: '2px 0 0', color: 'var(--text-secondary)' }}>{c.explanation}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center' }}>
+          <button
+            onClick={() => setReplayIndex(i => Math.max(0, i - 1))}
+            disabled={replayIndex === 0}
+            style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid var(--border)', cursor: replayIndex === 0 ? 'not-allowed' : 'pointer', background: 'transparent', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, opacity: replayIndex === 0 ? 0.4 : 1 }}
+          >
+            <ChevronLeft size={18} /> Previous
+          </button>
+          <button
+            onClick={() => setReplayIndex(i => Math.min(replayTurns.length - 1, i + 1))}
+            disabled={replayIndex >= replayTurns.length - 1}
+            style={{ padding: '10px 20px', borderRadius: 8, border: 'none', cursor: replayIndex >= replayTurns.length - 1 ? 'not-allowed' : 'pointer', background: 'var(--primary, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', gap: 4, opacity: replayIndex >= replayTurns.length - 1 ? 0.4 : 1 }}
+          >
+            Next <ChevronRight size={18} />
+          </button>
         </div>
       </div>
     );
