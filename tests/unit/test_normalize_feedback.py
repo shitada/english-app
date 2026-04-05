@@ -106,3 +106,35 @@ class TestNormalizePronunciationNoneHandling:
         raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": [], "fluency_feedback": None}
         result = _normalize_pronunciation_feedback(raw)
         assert result["fluency_feedback"] == ""
+
+    def test_focus_areas_filters_none_items(self):
+        """None items in focus_areas list should be filtered out."""
+        raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": ["vowels", None, "rhythm"]}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["focus_areas"] == ["vowels", "rhythm"]
+
+    def test_common_patterns_filters_none_items(self):
+        """None items in common_patterns list should be filtered out."""
+        raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": [], "common_patterns": [None, "pattern1", None]}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["common_patterns"] == ["pattern1"]
+
+    def test_phoneme_issues_none_values_become_empty_string(self):
+        """None values in phoneme_issues dicts should become empty string."""
+        raw = {
+            "overall_feedback": "ok", "score": 5, "focus_areas": [],
+            "word_feedback": [{"word": "test", "is_correct": True, "phoneme_issues": [{"target_sound": None, "advice": "try again"}]}],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        issues = result["word_feedback"][0]["phoneme_issues"]
+        assert issues[0]["target_sound"] == ""
+        assert issues[0]["advice"] == "try again"
+
+
+@pytest.mark.unit
+class TestNormalizeSummaryNoneInLists:
+    def test_key_vocabulary_filters_none_items(self):
+        """None items in key_vocabulary list should be filtered out."""
+        raw = {"communication_level": "B1", "key_vocabulary": ["apple", None, "banana"], "tip": "tip", "summary": "s"}
+        result = _normalize_summary(raw)
+        assert result["key_vocabulary"] == ["apple", "banana"]

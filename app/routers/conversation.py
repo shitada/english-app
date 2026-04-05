@@ -211,7 +211,7 @@ def _normalize_summary(raw: dict[str, Any]) -> dict[str, Any]:
     if isinstance(kv, str):
         result["key_vocabulary"] = [w.strip() for w in kv.split(",") if w.strip()]
     elif isinstance(kv, list):
-        result["key_vocabulary"] = [str(item) for item in kv]
+        result["key_vocabulary"] = [str(item) for item in kv if item is not None]
     else:
         result["key_vocabulary"] = []
     if not isinstance(result.get("communication_level"), str):

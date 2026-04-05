@@ -131,7 +131,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
                 item["phoneme_issues"] = []
             else:
                 item["phoneme_issues"] = [
-                    {k: str(v) for k, v in p.items()}
+                    {k: str(v) if v is not None else "" for k, v in p.items()}
                     for p in pi if isinstance(p, dict)
                 ]
         result["word_feedback"] = items
@@ -141,7 +141,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(fa, list):
         result["focus_areas"] = []
     else:
-        result["focus_areas"] = [str(item) for item in fa]
+        result["focus_areas"] = [str(item) for item in fa if item is not None]
 
     # fluency_score: float or None, clamped to [0, 10]
     fs = result.get("fluency_score")
@@ -161,7 +161,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(cp, list):
         result["common_patterns"] = []
     else:
-        result["common_patterns"] = [str(item) for item in cp]
+        result["common_patterns"] = [str(item) for item in cp if item is not None]
 
     return result
 
