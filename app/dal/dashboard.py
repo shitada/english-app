@@ -544,23 +544,23 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
     queries = [
         ("conversations", """
             SELECT
-                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-14 days')
-                              AND date(started_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-13 days')
+                              AND date(started_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM conversations
         """),
         ("vocabulary", """
             SELECT
-                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-14 days')
-                              AND date(answered_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-13 days')
+                              AND date(answered_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM quiz_attempts
         """),
         ("pronunciation", """
             SELECT
-                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-7 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-14 days')
-                              AND date(created_at) < date('now', '-7 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-13 days')
+                              AND date(created_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM pronunciation_attempts
         """),
     ]
