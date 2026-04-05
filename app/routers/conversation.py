@@ -215,7 +215,7 @@ def _normalize_summary(raw: dict[str, Any]) -> dict[str, Any]:
     else:
         result["key_vocabulary"] = []
     if not isinstance(result.get("communication_level"), str):
-        result["communication_level"] = str(result.get("communication_level", "unknown"))
+        result["communication_level"] = str(result.get("communication_level") or "unknown")
     if not isinstance(result.get("tip"), str):
         result["tip"] = str(result.get("tip") or "")
     if not isinstance(result.get("summary"), str):

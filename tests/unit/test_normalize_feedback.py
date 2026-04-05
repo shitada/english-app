@@ -1,7 +1,8 @@
-"""Unit tests for _normalize_grammar_feedback in app/routers/conversation.py."""
+"""Unit tests for normalization functions in routers."""
 
 import pytest
-from app.routers.conversation import _normalize_grammar_feedback
+from app.routers.conversation import _normalize_grammar_feedback, _normalize_summary
+from app.routers.pronunciation import _normalize_feedback as _normalize_pronunciation_feedback
 
 
 @pytest.mark.unit
@@ -75,3 +76,33 @@ class TestNormalizeGrammarFeedback:
         result = _normalize_grammar_feedback(raw)
         assert len(result["suggestions"]) == 1
         assert result["suggestions"][0]["text"] == "try this"
+
+
+@pytest.mark.unit
+class TestNormalizeSummaryNoneHandling:
+    def test_communication_level_none_defaults_to_unknown(self):
+        """When LLM returns null for communication_level, use 'unknown' not 'None'."""
+        raw = {"communication_level": None, "key_vocabulary": [], "tip": "tip", "summary": "s"}
+        result = _normalize_summary(raw)
+        assert result["communication_level"] == "unknown"
+
+    def test_communication_level_absent_defaults_to_unknown(self):
+        """When communication_level is absent, default to 'unknown'."""
+        raw = {"key_vocabulary": [], "tip": "tip", "summary": "s"}
+        result = _normalize_summary(raw)
+        assert result["communication_level"] == "unknown"
+
+
+@pytest.mark.unit
+class TestNormalizePronunciationNoneHandling:
+    def test_overall_feedback_none_defaults_to_empty(self):
+        """When LLM returns null for overall_feedback, use '' not 'None'."""
+        raw = {"overall_feedback": None, "word_feedback": [], "score": 5, "focus_areas": []}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["overall_feedback"] == ""
+
+    def test_fluency_feedback_none_defaults_to_empty(self):
+        """When LLM returns null for fluency_feedback, use '' not 'None'."""
+        raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": [], "fluency_feedback": None}
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["fluency_feedback"] == ""

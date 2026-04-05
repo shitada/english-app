@@ -114,7 +114,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
 
     # overall_feedback: must be a string
     if not isinstance(result.get("overall_feedback"), str):
-        result["overall_feedback"] = str(result.get("overall_feedback", ""))
+        result["overall_feedback"] = str(result.get("overall_feedback") or "")
 
     # word_feedback: must be a list of dicts, with is_correct coerced to bool
     wf = result.get("word_feedback")
@@ -154,7 +154,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
 
     # fluency_feedback: must be string if present
     if "fluency_feedback" in result and not isinstance(result["fluency_feedback"], str):
-        result["fluency_feedback"] = str(result["fluency_feedback"])
+        result["fluency_feedback"] = str(result.get("fluency_feedback") or "")
 
     # common_patterns: must be a list of strings
     cp = result.get("common_patterns")
