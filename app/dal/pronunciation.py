@@ -124,14 +124,16 @@ async def get_progress(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get aggregate pronunciation progress stats."""
 
     # Total attempts and scores
-    rows = await db.execute_fetchall(
-        """SELECT COUNT(*) as total, AVG(score) as avg_score,
-                  MAX(score) as best_score
+    count_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as total FROM pronunciation_attempts"
+    )
+    total = count_rows[0]["total"]
+    score_rows = await db.execute_fetchall(
+        """SELECT AVG(score) as avg_score, MAX(score) as best_score
            FROM pronunciation_attempts WHERE score IS NOT NULL"""
     )
-    total = rows[0]["total"]
-    avg_score = round(rows[0]["avg_score"] or 0, 1)
-    best_score = rows[0]["best_score"] or 0
+    avg_score = round(score_rows[0]["avg_score"] or 0, 1)
+    best_score = score_rows[0]["best_score"] or 0
 
     # Daily average scores for trend
     daily_rows = await db.execute_fetchall(
