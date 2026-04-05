@@ -1,8 +1,58 @@
-# Autoresearch Summary — Iterations 183–185
+# Autoresearch Summary — Iterations 206–208
 
 ## Run Overview
-- **Start time**: 2026-04-04T06:48:58Z (iteration 183)
-- **End time**: 2026-04-04T07:32:13Z (iteration 185)
+- **Start time**: 2026-04-05T00:50:50Z (iteration 206)
+- **End time**: 2026-04-05T01:11:00Z (iteration 208)
+- **Total duration**: ~20 minutes (3 iterations)
+
+## Results Summary
+| Metric | Value |
+|--------|-------|
+| Total iterations | 3 |
+| Kept | 2 (206, 208) |
+| Discarded | 1 (207) |
+| Crashed | 0 |
+| Success rate | 67% |
+
+## Timing Analysis
+| Iteration | Propose | Implement | Test | Evaluate | Total |
+|-----------|---------|-----------|------|----------|-------|
+| 206 | 136s | 74s | 58s | 694s | 962s |
+| 207 | 86s | 66s | 53s | 333s | 538s |
+| 208 | 544s | 154s | 72s | 63s | 833s |
+| **Average** | **255s** | **98s** | **61s** | **363s** | **778s** |
+
+## Key Improvements (Kept)
+
+| # | Score | Description |
+|---|-------|-------------|
+| 206 | 6.5 | **Add daily practice reminder UI on home page** — "Today's Practice" card with streak display, daily goal progress bars, and personalized recommendations |
+| 208 | 7.25 | **Fix 5 conversation endpoints returning raw topic IDs instead of labels** — list, export, replay, bookmarks, and topic-recommendations now show human-readable labels |
+
+## Discarded Attempts
+
+| # | Score | Description | Reason |
+|---|-------|-------------|--------|
+| 207 | 5.7 | Add pronunciation comparison playback (model vs user recording) | Playwright MCP browser locked — QA could not verify interactively; code review found stale closure bug in cleanup effect and unmanaged Audio instances |
+
+## Notes
+- **Playwright MCP issue**: The browser instance was locked throughout this run, preventing interactive QA testing. Frontend features were penalized. Iteration 208 pivoted to a backend-only bugfix to work around this.
+- **Test count stable**: 710 tests passing across all iterations.
+
+## Remaining Backlog
+### Uncompleted [HIGH] features:
+- Add pronunciation comparison playback (needs Playwright fix + code quality improvements)
+- Add pronunciation accuracy visual (green/yellow/red per-word)
+- Add conversation replay
+
+### Uncompleted [LOW] items:
+- Add offline fallback for vocabulary review
+- Add API versioning prefix
+
+## Recommendations for Next Run
+1. **Fix Playwright MCP lock** before running — clear `SingletonLock` in `~/Library/Caches/ms-playwright/mcp-chrome-*/` to enable interactive QA testing
+2. **Retry pronunciation comparison playback** (#207) with fixes: use ref-based cleanup in useAudioRecorder, manage Audio instance via ref to prevent overlapping playback
+3. **Continue with remaining HIGH-priority speaking features** — pronunciation accuracy visual and conversation replay
 - **Total duration**: ~43 minutes
 - **Iterations**: 183–185 (3 iterations)
 
