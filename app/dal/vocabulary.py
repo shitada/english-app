@@ -39,6 +39,7 @@ async def save_words(
 ) -> list[dict[str, Any]]:
     """Save LLM-generated words to DB, skipping duplicates (case-insensitive)."""
     words = []
+    seen_lower: set[str] = set()
     for q in questions:
         if not isinstance(q, dict):
             continue
@@ -46,6 +47,10 @@ async def save_words(
         meaning = q.get("correct_meaning") or q.get("meaning") or q.get("definition") or ""
         if not word or not meaning:
             continue
+        word_key = word.lower()
+        if word_key in seen_lower:
+            continue
+        seen_lower.add(word_key)
         # Check for existing word in same topic (case-insensitive)
         existing = await db.execute_fetchall(
             "SELECT id, word, meaning, example_sentence, difficulty FROM vocabulary_words WHERE topic = ? AND LOWER(word) = LOWER(?) LIMIT 1",
