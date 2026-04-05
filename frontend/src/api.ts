@@ -509,6 +509,16 @@ export async function deleteLearningGoal(goalType: string): Promise<void> {
   await request<unknown>(`/api/dashboard/goals/${goalType}`, { method: "DELETE" });
 }
 
+export interface TodayActivity {
+  conversations: number;
+  vocabulary_reviews: number;
+  pronunciation_attempts: number;
+}
+
+export async function getTodayActivity(): Promise<TodayActivity> {
+  return request<TodayActivity>("/api/dashboard/today");
+}
+
 // Word detail (from iteration 94)
 export interface WordDetail {
   id: number;

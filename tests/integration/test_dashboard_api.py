@@ -283,3 +283,14 @@ async def test_delete_goal(client):
 async def test_delete_goal_not_found(client):
     res = await client.delete("/api/dashboard/goals/nonexistent")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_get_today_activity(client):
+    res = await client.get("/api/dashboard/today")
+    assert res.status_code == 200
+    data = res.json()
+    assert "conversations" in data
+    assert "vocabulary_reviews" in data
+    assert "pronunciation_attempts" in data
+    assert data["conversations"] >= 0

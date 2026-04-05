@@ -16,7 +16,7 @@ Items marked with ✅ have been completed. Items marked with ❌ were attempted 
 The app's goal is to help users become fluent English speakers through short, efficient practice sessions. These features directly improve the core learning experience.
 
 - [x] ✅ Add conversation phrase suggestions — after AI responds, show 2-3 clickable phrase options the user can use as reply starters (reduces blank-page anxiety for beginners) (completed iteration #172)
-- [ ] Add pronunciation comparison playback — let users play back their recorded audio alongside the model audio so they can hear the difference
+- [x] ✅ Add pronunciation comparison playback — let users play back their recorded audio alongside the model audio so they can hear the difference (completed iteration #229)
 - [x] ✅ Add conversation speed control — let users adjust AI speech rate (slow/normal/fast) to match their listening level (completed iteration #183)
 - [x] ✅ Add quick drill mode for vocabulary — a timed flashcard-style rapid review (10 words in 60 seconds) with audio pronunciation (completed iteration #185)
 - [x] ✅ Add conversation key phrase highlight — highlight important phrases/idioms in AI messages with tap-to-hear pronunciation (completed iteration #184)

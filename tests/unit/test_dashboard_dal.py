@@ -11,6 +11,7 @@ from app.dal.dashboard import (
     get_learning_insights,
     get_learning_summary,
     get_stats,
+    get_today_activity,
     set_learning_goal,
 )
 from app.dal.pronunciation import save_attempt
@@ -607,3 +608,52 @@ class TestStreakYesterdayAlive:
         await test_db.commit()
         stats = await get_stats(test_db)
         assert stats["streak"] == 3
+
+
+@pytest.mark.unit
+class TestGetTodayActivity:
+    async def test_empty_database(self, test_db):
+        result = await get_today_activity(test_db)
+        assert result == {
+            "conversations": 0,
+            "vocabulary_reviews": 0,
+            "pronunciation_attempts": 0,
+        }
+
+    async def test_counts_today_activity(self, test_db):
+        # Create a conversation today
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, started_at) VALUES (?, ?, datetime('now'))",
+            ("hotel", "intermediate"),
+        )
+        # Create a pronunciation attempt today
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now'))",
+            ("Hello", "Hello", 9.0),
+        )
+        # Create a vocabulary word first (needed for FK)
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (word, meaning, topic) VALUES (?, ?, ?)",
+            ("hello", "a greeting", "greetings"),
+        )
+        # Create a quiz attempt today
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) "
+            "VALUES (?, ?, datetime('now'))",
+            (1, 1),
+        )
+        await test_db.commit()
+        result = await get_today_activity(test_db)
+        assert result["conversations"] == 1
+        assert result["pronunciation_attempts"] == 1
+        assert result["vocabulary_reviews"] == 1
+
+    async def test_ignores_yesterday_activity(self, test_db):
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, started_at) VALUES (?, ?, datetime('now', '-1 day'))",
+            ("restaurant", "beginner"),
+        )
+        await test_db.commit()
+        result = await get_today_activity(test_db)
+        assert result["conversations"] == 0

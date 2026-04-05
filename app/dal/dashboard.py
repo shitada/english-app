@@ -427,7 +427,26 @@ async def set_learning_goal(
         "SELECT id, goal_type, daily_target, created_at, updated_at FROM learning_goals WHERE goal_type = ?",
         (goal_type,),
     )
-    return dict(rows[0])
+    goal = dict(rows[0])
+    # Compute today_count so the frontend can display progress immediately
+    if goal_type == "conversations":
+        count_rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+        )
+    elif goal_type == "vocabulary_reviews":
+        count_rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+        )
+    elif goal_type == "pronunciation_attempts":
+        count_rows = await db.execute_fetchall(
+            "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+        )
+    else:
+        count_rows = [{"cnt": 0}]
+    today_count = count_rows[0]["cnt"] if count_rows else 0
+    goal["today_count"] = today_count
+    goal["completed"] = today_count >= goal["daily_target"]
+    return goal
 
 
 async def delete_learning_goal(db: aiosqlite.Connection, goal_type: str) -> bool:
@@ -572,3 +591,21 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
             "last_week": rows[0]["last_week"] or 0,
         }
     return result
+
+
+async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
+    """Get today's activity counts across all modules."""
+    conv_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+    )
+    vocab_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+    )
+    pron_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+    )
+    return {
+        "conversations": conv_rows[0]["cnt"] if conv_rows else 0,
+        "vocabulary_reviews": vocab_rows[0]["cnt"] if vocab_rows else 0,
+        "pronunciation_attempts": pron_rows[0]["cnt"] if pron_rows else 0,
+    }

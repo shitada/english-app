@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, type LearningInsights, type LearningGoal } from '../api';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle } from 'lucide-react';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, type LearningInsights, type LearningGoal, type TodayActivity } from '../api';
 
 const MODULE_ROUTES: Record<string, string> = {
   conversation: '/conversation',
@@ -144,14 +144,51 @@ function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal
   );
 }
 
-function GoalProgressBar({ goal }: { goal: LearningGoal }) {
+function GoalProgressBar({ goal, onDelete, onUpdate }: { goal: LearningGoal; onDelete: (goalType: string) => void; onUpdate: (goalType: string, newTarget: number) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [targetInput, setTargetInput] = useState(String(goal.daily_target));
   const pct = Math.min(100, Math.round((goal.today_count / goal.daily_target) * 100));
   const label = goal.goal_type.replace(/_/g, ' ');
+
+  const handleSave = () => {
+    const val = parseInt(targetInput, 10);
+    if (val > 0 && val <= 100 && val !== goal.daily_target) {
+      onUpdate(goal.goal_type, val);
+    }
+    setEditing(false);
+  };
+
   return (
     <div style={{ marginBottom: 8 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: 2 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', marginBottom: 2 }}>
         <span style={{ textTransform: 'capitalize' }}>{label}</span>
-        <span>{goal.today_count}/{goal.daily_target}{goal.completed ? ' ✓' : ''}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {editing ? (
+            <input
+              type="number" min={1} max={100} value={targetInput}
+              onChange={e => setTargetInput(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+              autoFocus
+              style={{ width: 48, textAlign: 'center', fontSize: '0.85rem', borderRadius: 4, border: '1px solid var(--border, #e5e7eb)', padding: '1px 4px' }}
+            />
+          ) : (
+            <span
+              onClick={() => { setTargetInput(String(goal.daily_target)); setEditing(true); }}
+              style={{ cursor: 'pointer' }}
+              title="Click to edit target"
+            >
+              {goal.today_count}/{goal.daily_target}{goal.completed ? ' ✓' : ''}
+            </span>
+          )}
+          <button
+            onClick={() => onDelete(goal.goal_type)}
+            title="Remove goal"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-secondary, #6b7280)', display: 'flex', alignItems: 'center' }}
+          >
+            <Trash2 size={14} />
+          </button>
+        </span>
       </div>
       <div style={{ background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
         <div style={{
@@ -169,14 +206,16 @@ function GoalProgressBar({ goal }: { goal: LearningGoal }) {
 function DailyPracticeCard() {
   const [insights, setInsights] = useState<LearningInsights | null>(null);
   const [goals, setGoals] = useState<LearningGoal[]>([]);
+  const [todayActivity, setTodayActivity] = useState<TodayActivity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    Promise.allSettled([getLearningInsights(), getLearningGoals()])
-      .then(([insightsResult, goalsResult]) => {
+    Promise.allSettled([getLearningInsights(), getLearningGoals(), getTodayActivity()])
+      .then(([insightsResult, goalsResult, todayResult]) => {
         if (insightsResult.status === 'fulfilled') setInsights(insightsResult.value);
         if (goalsResult.status === 'fulfilled') setGoals(goalsResult.value);
+        if (todayResult.status === 'fulfilled') setTodayActivity(todayResult.value);
         if (insightsResult.status === 'rejected' && goalsResult.status === 'rejected') setError(true);
       })
       .finally(() => setLoading(false));
@@ -184,6 +223,20 @@ function DailyPracticeCard() {
 
   const handleGoalCreated = useCallback((goal: LearningGoal) => {
     setGoals(prev => [...prev, goal]);
+  }, []);
+
+  const handleGoalDelete = useCallback(async (goalType: string) => {
+    try {
+      await deleteLearningGoal(goalType);
+      setGoals(prev => prev.filter(g => g.goal_type !== goalType));
+    } catch { /* user can try again */ }
+  }, []);
+
+  const handleGoalUpdate = useCallback(async (goalType: string, newTarget: number) => {
+    try {
+      const updated = await setLearningGoal(goalType, newTarget);
+      setGoals(prev => prev.map(g => g.goal_type === goalType ? updated : g));
+    } catch { /* user can try again */ }
   }, []);
 
   if (error) return null;
@@ -228,10 +281,34 @@ function DailyPracticeCard() {
 
       {insights && insights.weakest_area && <FocusAreaCTA area={insights.weakest_area} />}
 
+      {todayActivity && (
+        <div style={{ display: 'flex', gap: 12, marginBottom: '1rem' }}>
+          {([
+            { label: 'Conversations', count: todayActivity.conversations, icon: <MessageSquare size={16} /> },
+            { label: 'Vocab Reviews', count: todayActivity.vocabulary_reviews, icon: <BookOpen size={16} /> },
+            { label: 'Pronunciation', count: todayActivity.pronunciation_attempts, icon: <Mic size={16} /> },
+          ]).map(({ label, count, icon }) => (
+            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '0.5rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, marginBottom: 4, color: 'var(--text-secondary, #6b7280)' }}>
+                {icon}<span style={{ fontSize: '0.75rem' }}>{label}</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{count}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {goals.length > 0 && goals.every(g => g.completed) && (
+        <div style={{ marginBottom: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--success-bg, #f0fdf4)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--success, #10b981)' }}>
+          <CheckCircle size={18} />
+          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🎉 All daily goals complete!</span>
+        </div>
+      )}
+
       {goals.length > 0 ? (
         <div style={{ marginBottom: '1rem' }}>
           <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Daily Goals</h4>
-          {goals.map(g => <GoalProgressBar key={g.id} goal={g} />)}
+          {goals.map(g => <GoalProgressBar key={g.id} goal={g} onDelete={handleGoalDelete} onUpdate={handleGoalUpdate} />)}
         </div>
       ) : (
         <GoalSetupPrompt onGoalCreated={handleGoalCreated} />

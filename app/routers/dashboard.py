@@ -226,6 +226,12 @@ class SetGoalRequest(BaseModel):
     daily_target: int = Field(ge=1, le=100)
 
 
+@router.get("/today")
+async def get_today_activity(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get today's activity counts across all modules."""
+    return await dash_dal.get_today_activity(db)
+
+
 @router.get("/goals")
 async def get_goals(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get all learning goals with today's progress."""
