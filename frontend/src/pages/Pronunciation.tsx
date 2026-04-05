@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Volume2, MicOff, RotateCcw, ChevronRight, ChevronDown, History } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Volume2, MicOff, RotateCcw, ChevronRight, ChevronDown, History, Mic, Play } from 'lucide-react';
 import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { formatDateTime } from '../utils/formatDate';
 
 const SAMPLE_SENTENCES = [
@@ -30,6 +31,9 @@ export default function Pronunciation() {
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
+  const recorder = useAudioRecorder();
+  const userAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [comparePlaying, setComparePlaying] = useState(false);
 
   // Auto-start recording when TTS finishes (shadowing flow)
   useEffect(() => {
@@ -37,6 +41,7 @@ export default function Pronunciation() {
       // TTS finished → auto-start recording after brief pause
       const timer = setTimeout(() => {
         speech.start();
+        recorder.startRecording();
         setShadowingState('recording');
       }, 500);
       return () => clearTimeout(timer);
@@ -64,6 +69,8 @@ export default function Pronunciation() {
     setSelectedDifficulty(sentence?.difficulty);
     setFeedback(null);
     speech.reset();
+    recorder.reset();
+    setComparePlaying(false);
     setShadowingState('idle');
     setPhase('practice');
   };
@@ -72,6 +79,7 @@ export default function Pronunciation() {
     if (!speech.transcript.trim()) return;
 
     speech.stop();
+    recorder.stopRecording();
     setShadowingState('done');
     setLoading(true);
     try {
@@ -88,8 +96,10 @@ export default function Pronunciation() {
 
   const retry = () => {
     speech.reset();
+    recorder.reset();
     setFeedback(null);
     setShadowingState('idle');
+    setComparePlaying(false);
     setPhase('practice');
   };
 
@@ -346,6 +356,7 @@ export default function Pronunciation() {
               className="btn btn-danger"
               onClick={() => {
                 speech.stop();
+                recorder.stopRecording();
                 setShadowingState('done');
               }}
               aria-label="Stop recording"
@@ -534,6 +545,69 @@ export default function Pronunciation() {
             </div>
           </div>
         )}
+
+        {/* Comparison Playback */}
+        <div style={{ marginTop: 20, padding: '1rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+          <h4 style={{ marginBottom: 10, fontSize: '0.9rem' }}>🎧 Comparison Playback</h4>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => tts.speak(selectedSentence)}
+              disabled={tts.isSpeaking || comparePlaying}
+              style={{ fontSize: '0.85rem' }}
+            >
+              <Volume2 size={16} /> Model
+            </button>
+            {recorder.audioUrl && (
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  if (userAudioRef.current) {
+                    userAudioRef.current.pause();
+                    userAudioRef.current.currentTime = 0;
+                  }
+                  const audio = new Audio(recorder.audioUrl!);
+                  userAudioRef.current = audio;
+                  audio.play();
+                }}
+                disabled={comparePlaying}
+                style={{ fontSize: '0.85rem' }}
+              >
+                <Mic size={16} /> Your Recording
+              </button>
+            )}
+            {recorder.audioUrl && (
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setComparePlaying(true);
+                  tts.speak(selectedSentence);
+                  // Poll native API (not React state) to avoid stale closure
+                  const checkTts = setInterval(() => {
+                    if (!window.speechSynthesis.speaking) {
+                      clearInterval(checkTts);
+                      setTimeout(() => {
+                        const audio = new Audio(recorder.audioUrl!);
+                        userAudioRef.current = audio;
+                        audio.onended = () => setComparePlaying(false);
+                        audio.play();
+                      }, 500);
+                    }
+                  }, 100);
+                }}
+                disabled={tts.isSpeaking || comparePlaying}
+                style={{ fontSize: '0.85rem' }}
+              >
+                <Play size={16} /> Compare
+              </button>
+            )}
+          </div>
+          {!recorder.audioUrl && (
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center', marginTop: 8 }}>
+              Audio recording not available — try again with microphone permission
+            </p>
+          )}
+        </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 24 }}>
           <button className="btn btn-secondary" onClick={retry}>

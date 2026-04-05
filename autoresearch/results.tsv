@@ -227,3 +227,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 225	6a399a3	2026-04-05 23:46:14	0	81	81	55	217	731	731	pass	7.8	kept	Fix grammar errors list-of-strings silently dropped
 226	de106cf	2026-04-05 23:59:13	0	107	107	60	274	735	735	pass	7.55	kept	Fix suggestions/focus_areas/common_patterns non-list values dropped
 227	1e0cc6a	2026-04-05T15:19:50Z	133	114	46	491	784	735	735	pass	6.3	kept	Enhance daily practice card with module strengths, weekly progress, and goal setup
+228	9aea0cc	2026-04-05T15:35:12Z	110	138	43	606	897	735	735	pass	6.55	kept	Add conversation replay UI with turn-by-turn stepper and TTS
