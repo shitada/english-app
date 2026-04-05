@@ -218,3 +218,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 216	1fad2bf	2026-04-05T11:31:55Z	1936	63	55	73	1127	717	717	pass	8.35	keep	Fix _normalize_grammar_feedback defaulting is_correct to True despite errors
 217	c439baa	2026-04-05T11:51:01Z	965	23	56	89	1133	717	717	pass	7.45	keep	Fix double-counting of mastered words in SRS level_summary
 218	ae13446	2026-04-05T12:12:53Z	1158	37	54	48	1297	719	719	pass	7.8	keep	Fix _normalize_grammar_feedback inferring is_correct=True when errors is non-list
+219	7fb770d	2026-04-05T12:23:39Z	463	66	56	46	631	723	723	pass	8.35	keep	Fix str(None) producing literal None in summary and feedback normalizers

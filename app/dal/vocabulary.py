@@ -366,8 +366,8 @@ async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dic
         """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty
            FROM vocabulary_progress vp
            JOIN vocabulary_words vw ON vp.word_id = vw.id
-           WHERE vp.next_review_at IS NOT NULL AND vp.next_review_at <= ?
-           ORDER BY vp.next_review_at ASC
+           WHERE vp.next_review_at IS NULL OR vp.next_review_at <= ?
+           ORDER BY vp.next_review_at ASC NULLS FIRST
            LIMIT ?""",
         (now, count),
     )
