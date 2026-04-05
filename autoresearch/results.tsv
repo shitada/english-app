@@ -223,3 +223,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 221	69d8a1c	2026-04-05T13:55:06Z	4444	52	54	65	4615	723	723	pass	7.5	keep	Fix mastery_velocity using last_reviewed instead of actual mastery date
 222	88f49a2	2026-04-05T14:06:37Z	522	30	54	69	675	723	723	pass	6.7	keep	Fix save_words producing duplicate quiz questions from LLM batch
 223	e46b202	2026-04-05 23:18:42	0	44	124	88	256	724	724	pass	7.25	kept	Validate topics in vocabulary batch import endpoint
+224	c212495	2026-04-05 23:37:39	0	37	39	43	119	728	728	pass	7.8	kept	Fix str(None) in list items producing None in normalizers

@@ -1,7 +1,7 @@
 [
   {"check":"tsv_format","severity":"error","iterations":" 202 203 204 205","root_cause":"unknown","confidence":"LOW","evidence":"Malformed rows but no echo -e pattern found in runner.log","action":"none"}
 ,
-  {"check":"missing_iterations","severity":"error","iterations":" 186","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
+  {"check":"missing_iterations","severity":"error","iterations":" 224","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
 ,
-  {"check":"agent_skip","severity":"error","iterations":" 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205  186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 7 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224  209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 7 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
 ]

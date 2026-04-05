@@ -77,6 +77,31 @@ class TestNormalizeGrammarFeedback:
         assert len(result["suggestions"]) == 1
         assert result["suggestions"][0]["text"] == "try this"
 
+    def test_errors_list_of_strings_wrapped_as_dicts(self):
+        """When errors is a list of strings, each should be wrapped as {description: str}."""
+        raw = {"errors": ["Missing article", "Wrong tense"]}
+        result = _normalize_grammar_feedback(raw)
+        assert result["is_correct"] is False
+        assert len(result["errors"]) == 2
+        assert result["errors"][0] == {"description": "Missing article"}
+        assert result["errors"][1] == {"description": "Wrong tense"}
+
+    def test_errors_list_mixed_strings_and_dicts(self):
+        """Mixed list of strings and dicts should all be normalized."""
+        raw = {"errors": [{"original": "goed", "correction": "went"}, "Wrong article"]}
+        result = _normalize_grammar_feedback(raw)
+        assert len(result["errors"]) == 2
+        assert result["errors"][0]["original"] == "goed"
+        assert result["errors"][1] == {"description": "Wrong article"}
+
+    def test_suggestions_list_of_strings_wrapped(self):
+        """When suggestions is a list of strings, each should be wrapped as {text: str}."""
+        raw = {"errors": [], "suggestions": ["Use 'the' here", "Try past tense"]}
+        result = _normalize_grammar_feedback(raw)
+        assert len(result["suggestions"]) == 2
+        assert result["suggestions"][0] == {"text": "Use 'the' here"}
+        assert result["suggestions"][1] == {"text": "Try past tense"}
+
 
 @pytest.mark.unit
 class TestNormalizeSummaryNoneHandling:

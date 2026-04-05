@@ -185,7 +185,11 @@ def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     raw_errors = result.get("errors")
     # Normalize errors to list of dicts, preserving non-list truthy values
     if isinstance(raw_errors, list):
-        result["errors"] = [e for e in raw_errors if isinstance(e, dict)]
+        result["errors"] = [
+            e if isinstance(e, dict) else {"description": str(e)}
+            for e in raw_errors
+            if isinstance(e, (dict, str)) and (not isinstance(e, str) or e.strip())
+        ]
     elif isinstance(raw_errors, dict):
         result["errors"] = [raw_errors]
     elif isinstance(raw_errors, str) and raw_errors.strip():
@@ -193,7 +197,11 @@ def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     else:
         result["errors"] = []
     suggestions = result.get("suggestions")
-    result["suggestions"] = [s for s in suggestions if isinstance(s, dict)] if isinstance(suggestions, list) else []
+    result["suggestions"] = [
+        s if isinstance(s, dict) else {"text": str(s)}
+        for s in suggestions
+        if isinstance(s, (dict, str)) and (not isinstance(s, str) or s.strip())
+    ] if isinstance(suggestions, list) else []
     # Infer is_correct from errors when LLM omits the field
     if "is_correct" in raw:
         result["is_correct"] = coerce_bool(raw["is_correct"])
