@@ -46,9 +46,25 @@ class TestNormalizeGrammarFeedback:
         assert result["is_correct"] is True
         assert result["errors"] == []
 
-    def test_errors_non_list_ignored(self):
-        """When errors is not a list, normalize to empty list."""
-        raw = {"errors": "not a list"}
+    def test_errors_string_preserved_as_description(self):
+        """When errors is a non-empty string, wrap as dict and infer is_correct=False."""
+        raw = {"errors": "Missing article before 'store'"}
+        result = _normalize_grammar_feedback(raw)
+        assert result["is_correct"] is False
+        assert len(result["errors"]) == 1
+        assert result["errors"][0]["description"] == "Missing article before 'store'"
+
+    def test_errors_dict_wrapped_in_list(self):
+        """When errors is a single dict, wrap in a list and infer is_correct=False."""
+        raw = {"errors": {"original": "goed", "correction": "went", "explanation": "past tense"}}
+        result = _normalize_grammar_feedback(raw)
+        assert result["is_correct"] is False
+        assert len(result["errors"]) == 1
+        assert result["errors"][0]["original"] == "goed"
+
+    def test_errors_empty_string_treated_as_no_errors(self):
+        """When errors is an empty string, treat as no errors."""
+        raw = {"errors": ""}
         result = _normalize_grammar_feedback(raw)
         assert result["errors"] == []
         assert result["is_correct"] is True
