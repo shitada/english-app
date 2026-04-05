@@ -11,6 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 RESULTS_FILE="$SCRIPT_DIR/results.tsv"
 LOG_FILE="$SCRIPT_DIR/runner.log"
+LOGS_DIR="$SCRIPT_DIR/logs"
+MAX_SESSION_LOGS=5
 
 # Defaults
 ADDITIONAL_ITERATIONS=20
@@ -113,11 +115,20 @@ build_prompt() {
     local remaining=$((target - current_iter))
 
     cat <<EOF
-Read autoresearch/results.tsv and autoresearch/backlog.md to understand current state.
+## MANDATORY RULES — read before doing ANYTHING:
+1. You MUST call the **proposer** subagent via runSubagent for EVERY iteration. Do NOT propose changes yourself.
+2. You MUST call the **evaluator** subagent via runSubagent for EVERY iteration. Do NOT assign scores yourself.
+3. If frontend .tsx files changed OR proposal type is "feature"/"ux", you MUST call the **tester** subagent.
+4. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
+5. Read only the last 20 rows of results.tsv (use \`tail -20\`), not the full file.
+6. Before recording results, verify: Did I call proposer? Did I call evaluator? If NO → STOP and call them.
+
+## Task:
 Resume the autoresearch improvement loop starting from iteration ${next_iter}.
 Run up to ${remaining} more iterations (target: iteration ${target}).
-Follow your orchestrator instructions precisely — propose, implement, test, evaluate, keep/discard — for each iteration.
-Record timing at every checkpoint. If you complete all target iterations, generate autoresearch/summary.md.
+Read \`autoresearch/backlog.md\` and \`tail -20 autoresearch/results.tsv\` to understand current state.
+If a session log exists in \`autoresearch/logs/\`, read the latest one for context from the previous invocation.
+Follow your orchestrator instructions for each iteration: propose → implement → test → evaluate → keep/discard.
 EOF
 }
 
@@ -142,6 +153,15 @@ main() {
     log "=========================================="
 
     check_git_clean
+
+    # Rotate runner.log at start of each run
+    if [[ -f "$LOG_FILE" ]]; then
+        mv "$LOG_FILE" "${LOG_FILE}.prev"
+        log "Rotated previous runner.log to runner.log.prev"
+    fi
+
+    # Ensure logs directory exists
+    mkdir -p "$LOGS_DIR"
 
     local invocation=0
 
@@ -192,15 +212,17 @@ main() {
             continue
         fi
 
-        # Execute copilot
+        # Execute copilot with session log
         local start_ts
         start_ts=$(date +%s)
-        log "Starting copilot invocation..."
+        local session_file="$LOGS_DIR/invocation-$(printf '%03d' "$invocation").md"
+        log "Starting copilot invocation (session log: $session_file)..."
 
         set +e
         copilot -p "$prompt" \
             --agent=orchestrator \
             --allow-all-tools \
+            --share="$session_file" \
             2>&1 | tee -a "$LOG_FILE"
         local exit_code=$?
         set -e
@@ -232,6 +254,14 @@ main() {
             else
                 log "Audit passed — no issues"
             fi
+        fi
+
+        # Clean up old session logs (keep only MAX_SESSION_LOGS most recent)
+        local log_count
+        log_count=$(find "$LOGS_DIR" -name 'invocation-*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$log_count" -gt "$MAX_SESSION_LOGS" ]]; then
+            find "$LOGS_DIR" -name 'invocation-*.md' -type f | sort | head -n "$((log_count - MAX_SESSION_LOGS))" | xargs rm -f
+            log "Cleaned up old session logs (kept $MAX_SESSION_LOGS)"
         fi
 
         # Brief pause before next invocation
