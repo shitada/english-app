@@ -146,7 +146,8 @@ async def update_progress(
     progress = await db.execute_fetchall(
         "SELECT * FROM vocabulary_progress WHERE word_id = ?", (word_id,)
     )
-    now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+    now_dt = datetime.now(timezone.utc)
+    now = now_dt.strftime('%Y-%m-%d %H:%M:%S')
 
     if progress:
         p = progress[0]
@@ -160,7 +161,7 @@ async def update_progress(
             correct = p["correct_count"]
             incorrect = p["incorrect_count"] + 1
 
-        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
+        next_review = (now_dt + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
         await db.execute(
             """UPDATE vocabulary_progress
                SET correct_count = ?, incorrect_count = ?, level = ?,
@@ -172,7 +173,7 @@ async def update_progress(
         level = 1 if is_correct else 0
         correct = 1 if is_correct else 0
         incorrect = 0 if is_correct else 1
-        next_review = (datetime.now(timezone.utc) + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
+        next_review = (now_dt + timedelta(days=SM2_INTERVALS[level])).strftime('%Y-%m-%d %H:%M:%S')
         await db.execute(
             """INSERT INTO vocabulary_progress
                (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at)
@@ -884,14 +885,19 @@ async def get_srs_analytics(db: aiosqlite.Connection) -> dict[str, Any]:
         "not_reviewed": max(not_reviewed, 0),
     }
 
-    # Mastery velocity: words reaching level >= 3 grouped by week
+    # Mastery velocity: words reaching level >= 3, grouped by approximate mastery date
     velocity_rows = await db.execute_fetchall(
-        """SELECT strftime('%Y-W%W', last_reviewed) as week,
-                  COUNT(*) as words_mastered
-           FROM vocabulary_progress
-           WHERE level >= 3 AND last_reviewed IS NOT NULL
-           GROUP BY week
-           ORDER BY week"""
+        """SELECT strftime('%Y-W%W', mastery_date) as week, COUNT(*) as words_mastered
+           FROM (
+               SELECT vp.word_id,
+                   (SELECT qa.answered_at FROM quiz_attempts qa
+                    WHERE qa.word_id = vp.word_id AND qa.is_correct = 1
+                    ORDER BY qa.answered_at ASC, qa.id ASC
+                    LIMIT 1 OFFSET 2) as mastery_date
+               FROM vocabulary_progress vp WHERE vp.level >= 3
+           )
+           WHERE mastery_date IS NOT NULL
+           GROUP BY week ORDER BY week"""
     )
     mastery_velocity = [
         {"week": r["week"], "words_mastered": r["words_mastered"]}
