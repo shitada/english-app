@@ -192,3 +192,57 @@ class TestPronunciationNonListWrapping:
         raw = {"overall_feedback": "ok", "word_feedback": [], "score": 5, "focus_areas": [], "common_patterns": "dropping final consonants"}
         result = _normalize_pronunciation_feedback(raw)
         assert result["common_patterns"] == ["dropping final consonants"]
+
+
+from app.routers.pronunciation import _parse_score
+
+
+@pytest.mark.unit
+class TestParseScore:
+    def test_plain_float(self):
+        assert _parse_score(8.5) == 8.5
+
+    def test_plain_int(self):
+        assert _parse_score(7) == 7.0
+
+    def test_string_float(self):
+        assert _parse_score("8.5") == 8.5
+
+    def test_fraction_format(self):
+        assert _parse_score("8.5/10") == 8.5
+
+    def test_out_of_format(self):
+        assert _parse_score("8 out of 10") == 8.0
+
+    def test_score_prefix(self):
+        assert _parse_score("Score: 7.5") == 7.5
+
+    def test_percentage(self):
+        assert _parse_score("85%") == 8.5
+
+    def test_percentage_100(self):
+        assert _parse_score("100%") == 10.0
+
+    def test_none(self):
+        assert _parse_score(None) is None
+
+    def test_empty_string(self):
+        assert _parse_score("") is None
+
+    def test_na_string(self):
+        assert _parse_score("N/A") is None
+
+    def test_nan(self):
+        assert _parse_score(float("nan")) is None
+
+    def test_infinity(self):
+        assert _parse_score(float("inf")) is None
+
+    def test_clamp_high(self):
+        assert _parse_score(15.0) == 10.0
+
+    def test_clamp_low(self):
+        assert _parse_score(-2.0) == 0.0
+
+    def test_zero(self):
+        assert _parse_score(0) == 0.0

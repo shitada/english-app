@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from typing import Any, Literal
 
 import aiosqlite
@@ -97,20 +98,35 @@ async def get_sentences(
     return {"sentences": sentences}
 
 
+def _parse_score(value: Any) -> float | None:
+    """Parse a score value from various LLM string formats to float in [0, 10]."""
+    if value is None:
+        return None
+    try:
+        val = float(value)
+        return max(0.0, min(10.0, val)) if math.isfinite(val) else None
+    except (TypeError, ValueError):
+        pass
+    text = str(value).strip()
+    if not text:
+        return None
+    m = re.search(r"(\d+(?:\.\d+)?)", text)
+    if not m:
+        return None
+    val = float(m.group(1))
+    if "%" in text and val > 10:
+        val = val / 10.0
+    if not math.isfinite(val):
+        return None
+    return max(0.0, min(10.0, val))
+
+
 def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize LLM pronunciation feedback to ensure consistent types."""
     result = dict(raw)
 
     # overall_score: float or None (never default to 0), clamped to [0, 10]
-    score = result.get("overall_score")
-    if score is not None:
-        try:
-            val = float(score)
-            result["overall_score"] = max(0.0, min(10.0, val)) if math.isfinite(val) else None
-        except (TypeError, ValueError):
-            result["overall_score"] = None
-    else:
-        result["overall_score"] = None
+    result["overall_score"] = _parse_score(result.get("overall_score"))
 
     # overall_feedback: must be a string
     if not isinstance(result.get("overall_feedback"), str):
@@ -146,13 +162,7 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
         result["focus_areas"] = []
 
     # fluency_score: float or None, clamped to [0, 10]
-    fs = result.get("fluency_score")
-    if fs is not None:
-        try:
-            val = float(fs)
-            result["fluency_score"] = max(0.0, min(10.0, val)) if math.isfinite(val) else None
-        except (TypeError, ValueError):
-            result["fluency_score"] = None
+    result["fluency_score"] = _parse_score(result.get("fluency_score"))
 
     # fluency_feedback: must be string if present
     if "fluency_feedback" in result and not isinstance(result["fluency_feedback"], str):

@@ -117,7 +117,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] ✅ Add word detail with similar words and progress (completed iteration #94)
 - [x] ✅ Expand smoke test and add final TypeScript types (completed iteration #95)
 - [x] ✅ Add pronunciation sentence categorization by difficulty (completed iteration #97)
-- [ ] Add API versioning prefix
+- [x] ✅ Add API versioning prefix (completed iteration #231)
 - [x] ✅ Fix broken LLM retries — coroutine call sites wrapped in factory lambdas (completed iteration #120)
 - [x] ✅ Fix _SCORE_BUCKETS metadata to match _classify_score contiguous ranges (completed iteration #121)
 - [x] ✅ Add conversation message bookmarks (completed iteration #96)

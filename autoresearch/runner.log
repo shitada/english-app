@@ -569,3 +569,149 @@ Need to fix the existing health check test to account for the new `api_version` 
 ● Edit test_health.py +1 -1
   └ tests/integration/test_health.py
 
+● Fix health test and re-run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit tests/integration -v 2>&1 | tail -10
+  └ 27 lines...
+
+All 746 tests pass. Now TS check and smoke test:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No DAL/router/DB changes, smoke test not needed. Check frontend changes:
+
+● Check frontend changes for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 1 line...
+
+No frontend .tsx changes and proposal type is "feature" but infrastructure type. The middleware is backend-only. QA skipped — set qa_passed=true, ux_score=7.0.
+
+● Record T3 for iteration 231 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 231
+  │ Read test_api_versioning.py
+  │   │ tests/integration/test_api_versioning.py
+  │   └ 59 lines read
+  └ Read test_health.py
+      │ tests/integration/test_health.py
+      └ 21 lines read
+
+● Record T4 for iteration 231 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.5, verdict: keep. All criteria met (746/746, TS pass, score >= 6.0). KEEP.
+
+T0=1775405334, T1=1775405636, T2=1775405722, T3=1775405836, T4=1775405896
+- propose=302, implement=86, test=114, evaluate=60, total=562
+
+● Record results for iteration 231 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "231" "$HASH" "$DATE" "302" "86" "114" "60" "562" \
+  │ "746" "746" "pass" "6.5" "kept" "Add API versioning prefix via URL-rewriting middleware" \…
+  └ 3 lines...
+
+Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Iteration 231 complete ✅. Moving to iteration 232.
+
+---
+
+● T0 and context for iteration 232 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git --no-pager log --oneline -5
+  └ 7 lines...
+
+T0=1775405919. Calling proposer:
+
+● Proposer Propose iteration 232
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L173:197 (24 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L71:94 (23 lines read)
+
+● Record T1 for iteration 232 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775406695. Now implement. Let me examine the current code:
+
+● Find score parsing in pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "_normalize_feedback\|overall_score\|fluency_score\|float(" app/routers/pronunciation.py | head
+  │ -30
+  └ 15 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L1:10 (10 lines read)
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L100:160 (60 lines read)
+
+Now implement the `_parse_score` helper and replace the inline try/except blocks:
+
+● Edit pronunciation.py +1
+  └ app/routers/pronunciation.py
+
+Now add the helper and update the score parsing:
+
+● Edit pronunciation.py +24 -9
+  └ app/routers/pronunciation.py
+
+Now replace the fluency_score parsing:
+
+● Edit pronunciation.py +1 -7
+  └ app/routers/pronunciation.py
+
+Now add the unit tests. Let me check if the test file exists:
+
+● Check if test file exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/tests/unit/test_normalize_feedback.py
+  │ 2>/dev/null && echo "EXISTS" || echo "NOT FOUND"
+  └ 3 lines...
+
+● Check existing parse_score tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_parse_score\|parse_score"
+  │ tests/unit/test_normalize_feedback.py | head -5
+  └ 1 line...
+
+No existing parse_score tests. Let me check the end of the file:
+
+● See end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ tests/unit/test_normalize_feedback.py
+  └ 11 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import"
+  │ tests/unit/test_normalize_feedback.py | head -10
+  └ 4 lines...
+
+● Add parse_score tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_normalize_feedback.py << 'PYEOF'
+  │
+  │
+  │ from app.routers.pronunciation import _parse_score…
+  └ 55 lines...
+
