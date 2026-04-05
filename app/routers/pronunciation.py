@@ -139,8 +139,11 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     else:
         items = [item for item in wf if isinstance(item, dict)]
         for item in items:
-            if "is_correct" in item:
+            if "is_correct" in item and item["is_correct"] is not None:
                 item["is_correct"] = coerce_bool(item["is_correct"])
+            elif "is_correct" in item:
+                # Explicit null → conservatively mark as incorrect
+                item["is_correct"] = False
             # Normalize phoneme_issues within each word feedback
             pi = item.get("phoneme_issues")
             if not isinstance(pi, list):

@@ -233,3 +233,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 230	019d21b	2026-04-05T16:08:39Z	138	206	203	455	1002	739	739	pass	6.6	kept	Complete daily practice card with today's activity, goal management, and celebration
 231	da785c8	2026-04-05T16:18:26Z	302	86	114	60	562	746	746	pass	6.5	kept	Add API versioning prefix via URL-rewriting middleware
 232	6cfffe4	2026-04-05T16:34:41Z	776	74	48	55	953	762	762	pass	8.1	kept	Fix pronunciation score parsing losing valid scores in string formats
+233	8e34ffb	2026-04-05T16:43:47Z	406	38	44	44	532	763	763	pass	7.8	kept	Add min_length validation to UpdateWordRequest.meaning

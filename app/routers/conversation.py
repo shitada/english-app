@@ -209,8 +209,8 @@ def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
         result["suggestions"] = [{"text": suggestions}]
     else:
         result["suggestions"] = []
-    # Infer is_correct from errors when LLM omits the field
-    if "is_correct" in raw:
+    # Infer is_correct from errors when LLM omits the field or provides null
+    if "is_correct" in raw and raw["is_correct"] is not None:
         result["is_correct"] = coerce_bool(raw["is_correct"])
     else:
         # Use raw_errors truthiness to detect LLM-indicated errors even if normalization empties the list

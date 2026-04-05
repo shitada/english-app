@@ -826,3 +826,109 @@ Now add a test. Let me find the right place in the input validation tests:
   │ """PUT /vocabulary/{id} with empty meaning returns 422."""…
   └ 6 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #233: Add min_length validation to UpdateWordRequest.meaning
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775407331. Run tests:
+
+● Run tests for iteration 233 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+763 pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775407375. No DAL/router/frontend changes needing smoke or QA. Call evaluator:
+
+● Evaluator Evaluate iteration 233
+  │ List directory tests/integration
+  │   └ 13 files found
+  └ Read test_input_validation.py
+      │ tests/integration/test_input_validation.py
+      └ 197 lines read
+
+● Record T4 for iteration 233 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, keep. T0=1775406887, propose=406, implement=38, test=44, evaluate=44, total=532
+
+● Record results for iteration 233 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "233" "$HASH" "$DATE" "406" "38" "44" "44" "532" \
+  │ "763" "763" "pass" "7.8" "kept" "Add min_length validation to UpdateWordRequest.meaning" \…
+  └ 3 lines...
+
+Iteration 233 complete ✅. Moving to iteration 234.
+
+---
+
+● T0 for iteration 234 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 234
+  │ Read utils.py
+  │   │ app/utils.py
+  │   └ L92:104 (12 lines read)
+  └ Read test_normalize_feedback.py
+      │ tests/unit/test_normalize_feedback.py
+      └ L9:48 (40 lines read)
+
+● Record T1 for iteration 234 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775407957. Let me examine the code:
+
+● Find is_correct handling in conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "is_correct\|coerce_bool"
+  │ app/routers/conversation.py | head -20
+  └ 6 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L210:225 (16 lines read)
+
+● Check coerce_bool implementation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "coerce_bool" app/utils.py
+  └ 2 lines...
+
+● Read utils.py
+  │ app/utils.py
+  └ L92:115 (12 lines read)
+
+Confirmed: `coerce_bool(None)` returns `True` (default). Now fix both places:
+
+● Edit conversation.py +2 -2
+  └ app/routers/conversation.py
+
+Now fix pronunciation:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L136:150 (15 lines read)
+
+● Edit pronunciation.py +4 -1
+  └ app/routers/pronunciation.py
+
+Now add tests:
+
+● Add is_correct=None tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_normalize_feedback.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 37 lines...
+

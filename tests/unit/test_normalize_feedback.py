@@ -246,3 +246,39 @@ class TestParseScore:
 
     def test_zero(self):
         assert _parse_score(0) == 0.0
+
+
+@pytest.mark.unit
+class TestIsCorrectNone:
+    def test_grammar_is_correct_none_with_errors_inferred_false(self):
+        """is_correct=None with errors present should infer is_correct=False."""
+        raw = {
+            "is_correct": None,
+            "errors": [{"type": "grammar", "description": "missing article"}],
+            "suggestions": ["Use 'the' before nouns"],
+        }
+        result = _normalize_grammar_feedback(raw)
+        assert result["is_correct"] is False
+
+    def test_grammar_is_correct_none_no_errors_inferred_true(self):
+        """is_correct=None with no errors should infer is_correct=True."""
+        raw = {
+            "is_correct": None,
+            "errors": [],
+            "suggestions": [],
+        }
+        result = _normalize_grammar_feedback(raw)
+        assert result["is_correct"] is True
+
+    def test_pronunciation_word_feedback_is_correct_none(self):
+        """word_feedback item with is_correct=None should default to False."""
+        raw = {
+            "overall_feedback": "ok",
+            "overall_score": 7.0,
+            "word_feedback": [
+                {"word": "hello", "is_correct": None, "phoneme_issues": []},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        assert result["word_feedback"][0]["is_correct"] is False
