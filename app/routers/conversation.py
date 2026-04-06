@@ -287,6 +287,12 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         raise
     logger.info("Parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
+    # Re-check conversation status after slow LLM calls (auto-end or manual end may have fired)
+    still_active = await conv_dal.get_active_conversation(db, req.conversation_id)
+    if not still_active:
+        await conv_dal.delete_message(db, user_msg_id)
+        raise HTTPException(status_code=409, detail="Conversation ended while processing message")
+
     # Save feedback + AI response
     if feedback is not None:
         feedback = _normalize_grammar_feedback(feedback)

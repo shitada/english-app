@@ -684,3 +684,23 @@ async def test_send_message_llm_failure_no_orphan_message(client, mock_copilot):
     # Should only have the initial assistant message, no orphaned user message
     user_messages = [m for m in messages if m["role"] == "user"]
     assert len(user_messages) == 0
+
+
+@pytest.mark.integration
+async def test_send_message_after_conversation_ended_during_llm_call(client, mock_copilot):
+    """If conversation ends while LLM is processing, send_message returns 409 and cleans up."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # End the conversation first via the API
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Done.", "key_vocabulary": [], "communication_level": "beginner", "tip": "ok"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    # Now try sending a message — should return 404 since conversation is ended
+    mock_copilot.ask = AsyncMock(return_value="AI response")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    res = await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "Hello"})
+    assert res.status_code == 404

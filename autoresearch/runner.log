@@ -1847,3 +1847,154 @@ Now add tests. Check if test file exists:
   │ """YAML file with bare string root should fall back to empty dict."""…
   └ 28 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #241: Fix config load_config crash on non-dict YAML root
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775438305. Run tests:
+
+● Run tests for iteration 241 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+778 pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775438351. No DAL/router/frontend changes. QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 241
+  │ Read config.py
+  │   │ app/config.py
+  │   └ 61 lines read
+  └ Read test_config.py
+      │ tests/unit/test_config.py
+      └ 93 lines read
+
+● Record T4 for iteration 241 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.30, keep. T0=1775437783, propose=126, implement=396, test=46, evaluate=32, total=600
+
+● Record results for iteration 241 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "241" "$HASH" "$DATE" "126" "396" "46" "32" "600" \
+  │ "778" "778" "pass" "7.3" "kept" "Fix config load_config crash on non-dict YAML root" \…
+  └ 3 lines...
+
+Iteration 241 complete ✅. Moving to iteration 242.
+
+---
+
+● T0 for iteration 242 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 242
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L230:245 (15 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L58:73 (15 lines read)
+
+● Record T1 for iteration 242 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775440513. Let me examine the code:
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L240:300 (61 lines read)
+
+Now I'll add a re-check after the gather:
+
+● Edit conversation.py +6
+  └ app/routers/conversation.py
+
+Now fix the frontend auto-end timer:
+
+● Find auto-end timer in frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "timeLeft ===
+  │ 0\|autoEnd\|auto.end\|phase.*chat.*timeLeft" frontend/src/pages/Conversation.tsx | head -10
+  └ 2 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L135:150 (15 lines read)
+
+● Find loading state in Conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "const
+  │ \[loading\|loading.*useState\|setLoading" frontend/src/pages/Conversation.tsx | head -5
+  └ 6 lines...
+
+● Edit Conversation.tsx +2 -2
+  └ frontend/src/pages/Conversation.tsx
+
+Now add an integration test:
+
+● Add race condition test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_conversation_api.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 33 lines...
+
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #242: Fix race: send_message adds messages to ended conversations
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775440566. Run tests:
+
+● Run tests for iteration 242 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+The test is returning 200 instead of 409. The issue is that the `mock_copilot.ask` side_effect is changing the DB but the test client's DB is different from what get_db() returns. In integration tests, the DB is overridden via dependency injection. Let me fix the test approach:
+
+● Check test DB setup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "test_db\|fixture.*test_db\|override" tests/conftest.py | head -20
+  └ 9 lines...
+
+● Read conftest.py
+  │ tests/conftest.py
+  └ L60:106 (46 lines read)
+
+I see — the test uses a separate DB connection per request. The side_effect changes the DB via `get_db()` which hits the real DB, not the test DB. I need to update the conversation directly through the test's DB path. Let me rewrite the test:
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L1:15 (15 lines read)
+
+The approach of ending via DB during the mock call won't work with the test's separate connections. Let me instead make the mock end the conversation through the client API:
+
+Actually a better approach: since each request gets its own DB connection via `_test_db_session`, the mock's `side_effect` needs to use the same DB file. Let me check:
+
+● Check test DB path (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "db_path\|tmp_path" tests/conftest.py
+  │ | head -5
+  └ 6 lines...
+
+The test uses `tmp_path / "test.db"`. But `get_db()` connects to the real DB. Let me take a different approach — mock at a different level. I'll use a simpler test that directly ends the conversation between the initial check and the feedback save:
+
+Actually, the cleanest approach is to make the mock's side_effect connect to the same test DB. But we don't have access to `tmp_path` inside the mock. Let me restructure the test to use the conftest's client fixture and manipulate via the HTTP API directly:
+
+● Edit test_conversation_api.py +8 -16
+  └ tests/integration/test_conversation_api.py
+

@@ -136,10 +136,10 @@ export default function Conversation() {
 
   // Auto-end conversation when timer expires
   useEffect(() => {
-    if (phase === 'chat' && timeLeft === 0) {
+    if (phase === 'chat' && timeLeft === 0 && !loading) {
       endConversation();
     }
-  }, [timeLeft, phase, endConversation]);
+  }, [timeLeft, phase, loading, endConversation]);
 
   // Sync speech recognition transcript to input
   useEffect(() => {
