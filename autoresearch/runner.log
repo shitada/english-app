@@ -2420,3 +2420,99 @@ Now add new test for nonexistent conversation:
   │ @pytest.mark.integration…
   └ 13 lines...
 
+● Commit iteration 246 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #246: Return 409 for send_message to ended conversation (not 404)
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+● Run tests for 246 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+788 passed (+1). Smoke test since router changed:
+
+● Smoke test 246 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -3 && date +%s
+  └ 5 lines...
+
+● Evaluator Evaluate iteration 246
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L500:600 (101 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L600:750 (117 lines read)
+
+● Record iteration 246 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "246\t%s\t%s\t10\t43\t44\t%s\t%s\t788\t788\tpass\t7.25\tKEPT\tReturn 409 for …
+  └ 5 lines...
+
+Iteration 247:
+
+● Proposer Propose iteration 247
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L139:164 (26 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L430:452 (23 lines read)
+
+● Record T0 for 247 (shell)
+  │ T0_247=$(date +%s); echo "T0=$T0_247"
+  └ 2 lines...
+
+Let me verify the actual code to understand the issue:
+
+● View _normalize_feedback (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '124,175p'
+  │ app/routers/pronunciation.py
+  └ 53 lines...
+
+● Check how DAL uses word_feedback keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "expected\|wf.get\|word_feedback"
+  │ app/dal/pronunciation.py | head -15
+  └ 16 lines...
+
+The DAL does read `expected` and `heard`. The LLM returns `word`. The normalizer doesn't canonicalize. Let me add the canonicalization:
+
+● Edit pronunciation.py +5
+  └ app/routers/pronunciation.py
+
+Now add tests:
+
+● Find test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class TestPhoneme\|class
+  │ TestPronunc" tests/unit/test_normalize_feedback.py
+  └ 3 lines...
+
+● View phoneme canonicalization tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '297,340p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 38 lines...
+
+● See all test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^class "
+  │ tests/unit/test_normalize_feedback.py
+  └ 9 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/unit/test_normalize_feedback.py
+  └ 6 lines...
+
+● Add word feedback key tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_normalize_feedback.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 60 lines...
+

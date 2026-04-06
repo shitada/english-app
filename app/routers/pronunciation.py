@@ -144,6 +144,11 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
             elif "is_correct" in item:
                 # Explicit null → conservatively mark as incorrect
                 item["is_correct"] = False
+            # Canonicalize LLM key variants → expected/heard
+            if "word" in item and "expected" not in item:
+                item["expected"] = item.pop("word")
+            if "actual" in item and "heard" not in item:
+                item["heard"] = item.pop("actual")
             # Normalize phoneme_issues within each word feedback
             pi = item.get("phoneme_issues")
             if not isinstance(pi, list):

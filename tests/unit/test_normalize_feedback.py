@@ -331,3 +331,61 @@ class TestPhonemeIssuesCanonicalization:
         assert pi[0]["target"] == "ɹ"
         assert pi[0]["produced"] == "l"
         assert pi[0]["tip"] == "curl tongue"
+
+
+@pytest.mark.unit
+class TestWordFeedbackKeyCanonicalization:
+    def test_word_key_canonicalized_to_expected(self):
+        """LLM key 'word' is canonicalized to 'expected'."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 7.0,
+            "word_feedback": [
+                {"word": "hello", "is_correct": False, "phoneme_issues": []},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        item = result["word_feedback"][0]
+        assert item["expected"] == "hello"
+        assert "word" not in item
+
+    def test_expected_key_preserved(self):
+        """If already using canonical 'expected' key, it is preserved."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 8.0,
+            "word_feedback": [
+                {"expected": "world", "is_correct": True, "phoneme_issues": []},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        item = result["word_feedback"][0]
+        assert item["expected"] == "world"
+
+    def test_actual_key_canonicalized_to_heard(self):
+        """LLM key 'actual' is canonicalized to 'heard'."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 6.0,
+            "word_feedback": [
+                {"word": "test", "actual": "tast", "is_correct": False, "phoneme_issues": []},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        item = result["word_feedback"][0]
+        assert item["heard"] == "tast"
+        assert "actual" not in item
+
+    def test_both_word_and_expected_present(self):
+        """If both 'word' and 'expected' exist, 'expected' is preserved and 'word' left."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 7.0,
+            "word_feedback": [
+                {"word": "apple", "expected": "banana", "is_correct": True, "phoneme_issues": []},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        item = result["word_feedback"][0]
+        assert item["expected"] == "banana"
+        assert item["word"] == "apple"
