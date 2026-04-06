@@ -601,3 +601,24 @@ export async function checkDictation(
     body: JSON.stringify({ reference_text, user_typed_text }),
   });
 }
+
+// Mistake Journal (from iteration 251)
+export interface MistakeItem {
+  module: 'grammar' | 'pronunciation' | 'vocabulary';
+  detail: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface MistakeJournalResponse {
+  items: MistakeItem[];
+  total_count: number;
+}
+
+export async function getMistakeJournal(
+  module: 'all' | 'grammar' | 'pronunciation' | 'vocabulary' = 'all',
+  limit = 20,
+  offset = 0,
+): Promise<MistakeJournalResponse> {
+  const params = new URLSearchParams({ module, limit: String(limit), offset: String(offset) });
+  return request<MistakeJournalResponse>(`/api/dashboard/mistakes?${params}`);
+}

@@ -294,3 +294,53 @@ async def test_get_today_activity(client):
     assert "vocabulary_reviews" in data
     assert "pronunciation_attempts" in data
     assert data["conversations"] >= 0
+
+
+@pytest.mark.integration
+async def test_mistake_journal_empty(client):
+    """Mistake journal returns empty list when no mistakes exist."""
+    res = await client.get("/api/dashboard/mistakes")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["items"] == []
+    assert data["total_count"] == 0
+
+
+@pytest.mark.integration
+async def test_mistake_journal_with_pronunciation(client, mock_copilot):
+    """Low-score pronunciation attempts appear in mistake journal."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 3.0,
+        "overall_feedback": "Needs work",
+        "word_feedback": [],
+        "focus_areas": [],
+    })
+    await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello world",
+        "user_transcription": "Helo word",
+    })
+    res = await client.get("/api/dashboard/mistakes?module=pronunciation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    assert data["items"][0]["module"] == "pronunciation"
+
+
+@pytest.mark.integration
+async def test_mistake_journal_filter(client):
+    """Filter parameter restricts results to specified module."""
+    res = await client.get("/api/dashboard/mistakes?module=vocabulary")
+    assert res.status_code == 200
+    data = res.json()
+    for item in data["items"]:
+        assert item["module"] == "vocabulary"
+
+
+@pytest.mark.integration
+async def test_mistake_journal_pagination(client):
+    """Pagination params are accepted."""
+    res = await client.get("/api/dashboard/mistakes?limit=5&offset=0")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["items"]) <= 5

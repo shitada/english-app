@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
-import { api, type DashboardStats } from '../api';
+import { Flame, MessageSquare, Mic, BookOpen, Clock, AlertTriangle } from 'lucide-react';
+import { api, type DashboardStats, type MistakeItem, getMistakeJournal } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mistakes, setMistakes] = useState<MistakeItem[]>([]);
+  const [mistakeFilter, setMistakeFilter] = useState<'all' | 'grammar' | 'pronunciation' | 'vocabulary'>('all');
+  const [mistakeTotal, setMistakeTotal] = useState(0);
+  const [mistakeOffset, setMistakeOffset] = useState(0);
 
   useEffect(() => {
     api.getDashboardStats()
@@ -13,6 +17,20 @@ export default function Dashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    setMistakeOffset(0);
+    getMistakeJournal(mistakeFilter, 10, 0)
+      .then(res => { setMistakes(res.items); setMistakeTotal(res.total_count); })
+      .catch(() => {});
+  }, [mistakeFilter]);
+
+  const loadMoreMistakes = () => {
+    const newOffset = mistakeOffset + 10;
+    getMistakeJournal(mistakeFilter, 10, newOffset)
+      .then(res => { setMistakes(prev => [...prev, ...res.items]); setMistakeOffset(newOffset); })
+      .catch(() => {});
+  };
 
   if (loading) {
     return (
@@ -71,6 +89,49 @@ export default function Dashboard() {
           ))}
         </div>
       )}
+
+      {/* Mistake Journal */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <AlertTriangle size={20} color="#f59e0b" />
+          <h3 style={{ margin: 0 }}>Mistake Journal</h3>
+          {mistakeTotal > 0 && (
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 'auto' }}>
+              {mistakeTotal} total
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+          {(['all', 'grammar', 'pronunciation', 'vocabulary'] as const).map(f => (
+            <button
+              key={f}
+              className={`btn ${mistakeFilter === f ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setMistakeFilter(f)}
+              style={{ fontSize: 12, padding: '3px 10px' }}
+            >
+              {f === 'all' ? 'All' : f === 'grammar' ? '📝 Grammar' : f === 'pronunciation' ? '🎙️ Pronunciation' : '📚 Vocabulary'}
+            </button>
+          ))}
+        </div>
+
+        {mistakes.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14, padding: 16 }}>
+            No mistakes recorded yet. Keep practicing!
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {mistakes.map((m, i) => (
+              <MistakeCard key={`${m.module}-${i}`} item={m} />
+            ))}
+            {mistakes.length < mistakeTotal && (
+              <button className="btn btn-secondary" onClick={loadMoreMistakes} style={{ alignSelf: 'center', marginTop: 8 }}>
+                Load More
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -82,6 +143,38 @@ function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: s
       <div style={{ fontSize: 32, fontWeight: 700 }}>{value}</div>
       <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{label}</p>
       <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{sub}</p>
+    </div>
+  );
+}
+
+function MistakeCard({ item }: { item: MistakeItem }) {
+  const d = item.detail as Record<string, string | number>;
+  const icon = item.module === 'grammar' ? '📝' : item.module === 'pronunciation' ? '🎙️' : '📚';
+
+  return (
+    <div style={{ padding: '8px 12px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, fontSize: 13 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+        <span>{icon}</span>
+        <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{item.module}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 'auto' }}>
+          {formatRelativeTime(item.created_at)}
+        </span>
+      </div>
+      {item.module === 'grammar' && (
+        <div>
+          <p><span style={{ color: '#ef4444', textDecoration: 'line-through' }}>{String(d.original || '')}</span> → <span style={{ color: '#22c55e' }}>{String(d.correction || '')}</span></p>
+          {d.explanation && <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{String(d.explanation)}</p>}
+        </div>
+      )}
+      {item.module === 'pronunciation' && (
+        <div>
+          <p>Expected: <strong>{String(d.reference_text || '')}</strong></p>
+          <p>You said: "{String(d.user_transcription || '')}" <span style={{ color: Number(d.score) >= 5 ? '#f59e0b' : '#ef4444', fontWeight: 600 }}>({d.score}/10)</span></p>
+        </div>
+      )}
+      {item.module === 'vocabulary' && (
+        <p><strong>{String(d.word || '')}</strong> — {String(d.meaning || '')}</p>
+      )}
     </div>
   );
 }

@@ -278,3 +278,30 @@ async def migration_status(db: aiosqlite.Connection = Depends(get_db_session)):
         "current_version": migrations[-1]["version"] if migrations else -1,
         "migrations": migrations,
     }
+
+
+class MistakeDetail(BaseModel):
+    """Flexible detail field for different mistake types."""
+    model_config = {"extra": "allow"}
+
+
+class MistakeItem(BaseModel):
+    module: str
+    detail: dict[str, Any]
+    created_at: str
+
+
+class MistakeJournalResponse(BaseModel):
+    items: list[MistakeItem]
+    total_count: int
+
+
+@router.get("/mistakes", response_model=MistakeJournalResponse)
+async def get_mistake_journal(
+    module: str = Query(default="all", pattern="^(all|grammar|pronunciation|vocabulary)$"),
+    limit: int = Query(default=20, ge=1, le=50),
+    offset: int = Query(default=0, ge=0),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get aggregated mistakes from all learning modules."""
+    return await dash_dal.get_mistake_journal(db, module=module, limit=limit, offset=offset)

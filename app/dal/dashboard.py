@@ -616,3 +616,103 @@ async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
         "vocabulary_reviews": vocab_rows[0]["cnt"] if vocab_rows else 0,
         "pronunciation_attempts": pron_rows[0]["cnt"] if pron_rows else 0,
     }
+
+
+async def get_mistake_journal(
+    db: aiosqlite.Connection,
+    *,
+    module: str = "all",
+    limit: int = 20,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Aggregate mistakes from grammar, pronunciation, and vocabulary modules."""
+    import json as _json
+
+    items: list[dict[str, Any]] = []
+
+    # Grammar mistakes from messages with errors in feedback_json
+    if module in ("all", "grammar"):
+        grammar_rows = await db.execute_fetchall(
+            """
+            SELECT m.id, m.content, m.feedback_json, m.created_at, c.topic
+            FROM messages m
+            JOIN conversations c ON c.id = m.conversation_id
+            WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+            ORDER BY m.created_at DESC
+            LIMIT 200
+            """
+        )
+        for row in grammar_rows:
+            try:
+                fb = _json.loads(row["feedback_json"]) if isinstance(row["feedback_json"], str) else row["feedback_json"]
+            except (TypeError, _json.JSONDecodeError):
+                continue
+            if not isinstance(fb, dict):
+                continue
+            errors = fb.get("errors", [])
+            if not isinstance(errors, list) or not errors:
+                continue
+            for err in errors:
+                if not isinstance(err, dict):
+                    continue
+                items.append({
+                    "module": "grammar",
+                    "detail": {
+                        "original": err.get("original", ""),
+                        "correction": err.get("correction", ""),
+                        "explanation": err.get("explanation", ""),
+                        "topic": row["topic"],
+                    },
+                    "created_at": row["created_at"],
+                })
+
+    # Pronunciation mistakes (low scores)
+    if module in ("all", "pronunciation"):
+        pron_rows = await db.execute_fetchall(
+            """
+            SELECT id, reference_text, user_transcription, score, created_at
+            FROM pronunciation_attempts
+            WHERE score IS NOT NULL AND score < 7.0
+            ORDER BY created_at DESC
+            LIMIT 100
+            """
+        )
+        for row in pron_rows:
+            items.append({
+                "module": "pronunciation",
+                "detail": {
+                    "reference_text": row["reference_text"],
+                    "user_transcription": row["user_transcription"],
+                    "score": row["score"],
+                },
+                "created_at": row["created_at"],
+            })
+
+    # Vocabulary mistakes (incorrect quiz answers)
+    if module in ("all", "vocabulary"):
+        vocab_rows = await db.execute_fetchall(
+            """
+            SELECT qa.id, vw.word, vw.meaning, qa.answered_at
+            FROM quiz_attempts qa
+            JOIN vocabulary_words vw ON vw.id = qa.word_id
+            WHERE qa.is_correct = 0
+            ORDER BY qa.answered_at DESC
+            LIMIT 100
+            """
+        )
+        for row in vocab_rows:
+            items.append({
+                "module": "vocabulary",
+                "detail": {
+                    "word": row["word"],
+                    "meaning": row["meaning"],
+                },
+                "created_at": row["answered_at"],
+            })
+
+    # Sort all items by timestamp descending
+    items.sort(key=lambda x: x["created_at"] or "", reverse=True)
+    total_count = len(items)
+    paged = items[offset: offset + limit]
+
+    return {"items": paged, "total_count": total_count}
