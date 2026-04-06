@@ -110,6 +110,16 @@ def _parse_score(value: Any) -> float | None:
     text = str(value).strip()
     if not text:
         return None
+    # Handle fraction format (e.g. "80/100", "4/5", "8.5/10")
+    frac = re.search(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", text)
+    if frac:
+        numer = float(frac.group(1))
+        denom = float(frac.group(2))
+        if denom > 0:
+            val = numer / denom * 10.0
+            if math.isfinite(val):
+                return max(0.0, min(10.0, val))
+        return None
     m = re.search(r"(\d+(?:\.\d+)?)", text)
     if not m:
         return None

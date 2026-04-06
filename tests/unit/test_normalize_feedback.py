@@ -256,6 +256,24 @@ class TestParseScore:
     def test_low_percentage_10(self):
         assert _parse_score("10%") == 1.0
 
+    def test_fraction_80_of_100(self):
+        assert _parse_score("80/100") == 8.0
+
+    def test_fraction_4_of_5(self):
+        assert _parse_score("4/5") == 8.0
+
+    def test_fraction_16_of_20(self):
+        assert _parse_score("16/20") == 8.0
+
+    def test_fraction_0_of_10(self):
+        assert _parse_score("0/10") == 0.0
+
+    def test_fraction_10_of_10(self):
+        assert _parse_score("10/10") == 10.0
+
+    def test_fraction_zero_denominator(self):
+        assert _parse_score("5/0") is None
+
 
 @pytest.mark.unit
 class TestIsCorrectNone:

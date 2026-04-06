@@ -2656,3 +2656,58 @@ The return format uses `common_heard_as` (a sorted list of tuples), not `heard_a
   │ -v --tb=short 2>&1 | tail -5
   └ 6 lines...
 
+● Amend commit and run full tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit tests/integration --tb=short 2>&1 | tail -3
+  └ 19 lines...
+
+793 passed. Record iteration 248:
+
+● Record iteration 248 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "248\t%s\t%s\t10\t175\t60\t%s\t%s\t793\t793\tpass\t8.05\tKEPT\tFix pronunciation …
+  └ 5 lines...
+
+Now iteration 249 (final):
+
+● Proposer Propose iteration 249
+  │ List directory frontend/src/hooks
+  │   └ 3 files found
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ 579 lines read
+
+Proposer got 503 errors. Let me retry:
+
+● Proposer Propose iteration 249 retry
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L101:122 (21 lines read)
+  └ Read test_normalize_feedback.py
+      │ tests/unit/test_normalize_feedback.py
+      └ L200:258 (58 lines read)
+
+● Record T0 for 249 (shell)
+  │ T0_249=$(date +%s); echo "T0=$T0_249"
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L101:122 (21 lines read)
+
+● Edit pronunciation.py +10
+  └ app/routers/pronunciation.py
+
+Now add tests. Find the right spot in TestParseScore:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_low_percentage_10\|class
+  │ TestIsCorrectNone" tests/unit/test_normalize_feedback.py
+  └ 3 lines...
+
+● Edit test_normalize_feedback.py +18
+  └ tests/unit/test_normalize_feedback.py
+
