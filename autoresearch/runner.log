@@ -2711,3 +2711,48 @@ Now add tests. Find the right spot in TestParseScore:
 ● Edit test_normalize_feedback.py +18
   └ tests/unit/test_normalize_feedback.py
 
+● Commit iteration 249 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #249: Fix _parse_score mishandling fraction scores with non-10 denominators
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+● Run tests for 249 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+799 passed (+6). Now evaluate:
+
+● Evaluator Evaluate iteration 249
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L50:150 (101 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L101:132 (31 lines read)
+
+● Record iteration 249 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "249\t%s\t%s\t10\t28\t31\t%s\t%s\t799\t799\tpass\t8.35\tKEPT\tFix _parse_score …
+  └ 5 lines...
+
+All 20 iterations complete (230-249). Now let me write the session summary:
+
+● Review final results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Now write the session log:
+
+● Check existing logs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls autoresearch/logs/ | tail -3
+  └ 2 lines...
+
+● Create invocation-002.md +49
+  └ autoresearch/logs/invocation-002.md
+
