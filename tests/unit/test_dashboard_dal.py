@@ -657,3 +657,39 @@ class TestGetTodayActivity:
         await test_db.commit()
         result = await get_today_activity(test_db)
         assert result["conversations"] == 0
+
+
+@pytest.mark.unit
+class TestGetAchievementsStreakConsistency:
+    async def test_achievement_streak_matches_dashboard_streak(self, test_db):
+        """Achievements streak should match dashboard streak even with no activity today."""
+        from app.dal.dashboard import get_achievements, get_stats
+
+        # Insert user messages on yesterday and day before (consecutive, but not today)
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty) VALUES (?, ?)",
+            ("hotel_checkin", "beginner"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-1 day'))",
+            (1, "user", "hello"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-2 days'))",
+            (1, "user", "hi"),
+        )
+        await test_db.commit()
+
+        stats = await get_stats(test_db)
+        dashboard_streak = stats["streak"]
+
+        achievements_data = await get_achievements(test_db)
+        streak_badges = [a for a in achievements_data["achievements"] if a["id"] == "streak_7"]
+        achievement_streak = streak_badges[0]["progress"]["current"] if streak_badges else 0
+
+        assert dashboard_streak == achievement_streak, (
+            f"Dashboard streak ({dashboard_streak}) != achievement streak ({achievement_streak})"
+        )
+        assert dashboard_streak >= 2

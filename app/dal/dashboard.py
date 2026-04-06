@@ -788,25 +788,8 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
 
     total_activities = total_convs + total_quiz + total_pron
 
-    # Compute streak from daily activity
-    activity_rows = await db.execute_fetchall("""
-        SELECT DISTINCT d FROM (
-            SELECT date(started_at) as d FROM conversations
-            UNION SELECT date(answered_at) as d FROM quiz_attempts
-            UNION SELECT date(created_at) as d FROM pronunciation_attempts
-        ) ORDER BY d DESC
-    """)
-    streak = 0
-    today = date.today().isoformat()
-    expected = today
-    for row in activity_rows:
-        if row["d"] == expected:
-            streak += 1
-            # Move to previous day
-            from datetime import timedelta
-            expected = (date.fromisoformat(expected) - timedelta(days=1)).isoformat()
-        elif row["d"] < expected:
-            break
+    # Reuse canonical streak calculation
+    streak = await _calculate_streak(db)
 
     # Map progress values
     progress_map: dict[str, int] = {

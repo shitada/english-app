@@ -1677,3 +1677,208 @@ Now commit, test:
 
 T2=1775495268, implement_sec=38.
 
+● Commit 257 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #257: Fix missing topic emojis in past conversations list
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+Check smoke test and QA needs:
+
+● Check smoke/QA needs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "---" && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Both smoke and QA needed. Type is "bugfix" but frontend page changed:
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+Now start server for QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1 && cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 257
+  └ Agent started in background with agent_id: tester-257. You can use read_agent...
+
+<system_notification>Background agent `tester-257` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 257 results
+  │ Read (Tester agent — QA test iteration 257)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 257)
+      └ Completed
+
+QA passed (ux_score=7). Kill server and evaluate:
+
+● Kill server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1775495670, test_sec=402.
+
+● Evaluator Evaluate iteration 257
+  └ Agent started in background with agent_id: evaluator-257. You can use read_ag...
+
+<system_notification>Background agent `evaluator-257` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 257 results
+  │ Read (Evaluator agent — Evaluate iteration 257)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 257)
+      └ Completed
+
+Evaluator: 6.95, keep. Recording results:
+
+● Record results 257 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "257" "$HASH" "$DATE" "253" "38" "402" "$((T4-1775495670))" "$((T4-1775494977))" \
+  │ "830" "830" "pass" "6.95" "KEPT" "Fix missing topic emojis in past conversations list" \…
+  └ 3 lines...
+
+Iteration 257 KEPT (6.95, 830 tests). Starting iteration 258.
+
+● Context restore 258 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 258
+  └ Agent started in background with agent_id: proposer-258. You can use read_age...
+
+<system_notification>Background agent `proposer-258` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 258 results
+  │ Read (Proposer agent — Propose iteration 258)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 258)
+      └ Completed
+
+● Record T1 for 258 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read duplicated streak in get_achievements (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '785,820p' app/dal/dashboard.py
+  └ 37 lines...
+
+T1=1775496091, propose_sec=226. Clear bug — replace the duplicated logic with a call to `_calculate_streak`:
+
+● Edit dashboard.py +2 -19
+  └ app/dal/dashboard.py
+
+Now add a regression test. Let me check the existing test file:
+
+● Find achievement tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "achievement\|get_achievements\|streak" tests/unit/test_dashboard_dal.py | head -20
+  └ 21 lines...
+
+● Read end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_dashboard_dal.py
+  └ 21 lines...
+
+● Check if get_achievements already tested (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_achievements"
+  │ tests/unit/test_dashboard_dal.py
+  └ 1 line...
+
+No existing tests. Let me add a regression test:
+
+● Add regression test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_dashboard_dal.py
+  │ << 'PYTEST_EOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 33 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775496129, implement_sec=38. Commit and test:
+
+● Commit 258 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #258: Fix achievements streak showing 0 when no activity today
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+Test failure — `get_achievements` returns Achievement objects, not dicts. Let me fix the test:
+
+● Check return type of get_achievements (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ Achievement\|get_achievements.*return\|progress_map" app/dal/dashboard.py | head -10
+  └ 3 lines...
+
+● See how achievements are returned (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '800,825p' app/dal/dashboard.py
+  └ 25 lines...
+
+Ah, returns a dict with "achievements" key, and each has `progress.current`. Fix the test:
+
+● Edit test_dashboard_dal.py +3 -3
+  └ tests/unit/test_dashboard_dal.py
+
+● Fix test and run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #258: Fix achievements streak showing 0 when no activity today
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetAchievementsStreakConsistency -v 2>&1 | tail -10
+  └ 26 lines...
+
+The test inserts into `conversations` but `_calculate_streak` queries `messages`. Let me fix:
+
+● Edit test_dashboard_dal.py +10 -7
+  └ tests/unit/test_dashboard_dal.py
+
+● Run fixed test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetAchievementsStreakConsistency -v 2>&1 | tail -10
+  └ 11 lines...
+
+The value is capped at target. Use streak_7 (target=7) instead:
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
+● Run test again (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetAchievementsStreakConsistency -v 2>&1 | tail -5
+  └ 6 lines...
+
+Now run full suite:
+
