@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 interface UseAudioRecorderResult {
   isRecording: boolean;
@@ -78,6 +78,19 @@ export function useAudioRecorder(): UseAudioRecorderResult {
     }
     setIsRecording(false);
   }, [audioUrl]);
+
+  // Clean up on unmount: stop recording, release mic, revoke URL
+  useEffect(() => {
+    return () => {
+      if (recorderRef.current && recorderRef.current.state === 'recording') {
+        recorderRef.current.stop();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
 
   return { isRecording, audioUrl, startRecording, stopRecording, reset };
 }

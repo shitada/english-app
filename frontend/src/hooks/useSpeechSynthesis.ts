@@ -78,5 +78,12 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
     setIsSpeaking(false);
   }, []);
 
+  // Cancel TTS on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
   return { speak, stop, isSpeaking, isSupported, volume, setVolume, rate, setRate };
 }
