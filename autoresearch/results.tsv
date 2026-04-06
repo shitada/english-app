@@ -244,3 +244,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 241	60f04e8	2026-04-06T01:19:52Z	126	396	46	32	600	778	778	pass	7.3	kept	Fix config load_config crash on non-dict YAML root
 242	48fb4b3	2026-04-06T02:00:31Z	2115	53	128	127	2423	779	779	pass	6.3	kept	Fix race: send_message adds messages to ended conversations
 243	c952e0b	2026-04-06T02:13:28Z	512	56	118	76	762	782	782	pass	7.8	kept	Fix IndexError in update_progress when level exceeds SM2_INTERVALS bounds
+244	c88fa32	2026-04-06	342	44	46	70	502	784	784	pass	7.0	KEPT	Add Retry-After and rate limit headers to 429 responses

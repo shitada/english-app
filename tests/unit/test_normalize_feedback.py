@@ -247,6 +247,15 @@ class TestParseScore:
     def test_zero(self):
         assert _parse_score(0) == 0.0
 
+    def test_low_percentage_5(self):
+        assert _parse_score("5%") == 0.5
+
+    def test_low_percentage_3(self):
+        assert _parse_score("3%") == 0.3
+
+    def test_low_percentage_10(self):
+        assert _parse_score("10%") == 1.0
+
 
 @pytest.mark.unit
 class TestIsCorrectNone:

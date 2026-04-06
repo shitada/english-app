@@ -114,7 +114,7 @@ def _parse_score(value: Any) -> float | None:
     if not m:
         return None
     val = float(m.group(1))
-    if "%" in text and val > 10:
+    if "%" in text:
         val = val / 10.0
     if not math.isfinite(val):
         return None

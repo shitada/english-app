@@ -2235,3 +2235,103 @@ Now add unit tests:
   │ """429 response should include Retry-After header."""…
   └ 26 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #244: Add Retry-After and rate limit headers to 429 responses
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775441999. Run tests:
+
+● Run tests for iteration 244 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+784 passed. Run smoke test (router-adjacent change):
+
+● Smoke test iteration 244 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -5 && date +%s
+  └ 7 lines...
+
+T3=1775442045. Now call the evaluator:
+
+● Evaluator Evaluate iteration 244
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L246:250 (1 line read)
+  └ Read rate_limit.py
+      │ app/rate_limit.py
+      └ 79 lines read
+
+✗ Record iteration 244 results (shell)
+  │ T4=$(date +%s)
+  │ HASH=$(cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short HEAD)
+  │ T0=1775441613; T1=1775441955; T2=1775441999; T3=1775442045
+  │ propose=$((T1-T0)); impl=$((T2-T1)); test=$((T3-T2)); eval=$((T4-T3)); total=$((T4-T0))
+  │ cd /Users/shingotada/Documents/vscode/english-app…
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● Record iteration 244 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "244\t%s\t%s\t342\t44\t46\t%s\t%s\t784\t784\tpass\t7.0\tKEPT\tAdd Retry-After and rate …
+  └ 5 lines...
+
+Good. Iteration 244 KEPT. Now iteration 245:
+
+● Proposer Propose iteration 245
+  │ Read test_normalize_feedback.py
+  │   │ tests/unit/test_normalize_feedback.py
+  │   └ 324 lines read
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L101:122 (21 lines read)
+
+● Record T0 for 245 (shell)
+  │ T0_245=$(date +%s); echo "T0=$T0_245"
+  └ 2 lines...
+
+● Find the percentage check line (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "% .* val > 10"
+  │ app/routers/pronunciation.py
+  └ 1 line...
+
+● Find percentage handling (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "%" app/routers/pronunciation.py |
+  │ head -10
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L100:125 (26 lines read)
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Now add tests. Let me find the test class:
+
+● Find test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class TestParseScore"
+  │ tests/unit/test_normalize_feedback.py
+  └ 2 lines...
+
+● View TestParseScore class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '201,280p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 81 lines...
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_clamp_low\|test_zero"
+  │ tests/unit/test_normalize_feedback.py | tail -3
+  └ 3 lines...
+
+● Edit test_normalize_feedback.py +9
+  └ tests/unit/test_normalize_feedback.py
+
