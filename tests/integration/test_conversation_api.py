@@ -103,8 +103,15 @@ async def test_end_already_ended_conversation(client, mock_copilot):
     })
     await client.post("/api/conversation/end", json={"conversation_id": conv_id})
 
-    # Try ending again
+    # Try ending again — should be 409 (conflict), not 404
     res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 409
+
+
+@pytest.mark.integration
+async def test_end_nonexistent_conversation(client):
+    """Ending a conversation that doesn't exist should return 404."""
+    res = await client.post("/api/conversation/end", json={"conversation_id": 99999})
     assert res.status_code == 404
 
 
@@ -559,9 +566,9 @@ async def test_end_conversation_summary_failure_is_non_fatal(client, mock_copilo
     assert data["summary"]["communication_level"] == "unknown"
     assert data["summary"]["key_vocabulary"] == []
 
-    # Conversation should be ended — trying to end again gives 404 (no active conv)
+    # Conversation should be ended — trying to end again gives 409 (conflict)
     res2 = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
-    assert res2.status_code == 404
+    assert res2.status_code == 409
 
     # History should still be retrievable
     res3 = await client.get(f"/api/conversation/{conv_id}/history")

@@ -21,6 +21,7 @@ from app.dal.conversation import (
     get_conversation_export,
     get_conversation_history,
     get_conversation_replay,
+    get_conversation_status,
     get_conversation_summary,
     get_conversation_vocabulary,
     get_grammar_accuracy,
@@ -966,3 +967,21 @@ class TestEmptyDictHandling:
         await end_conversation(test_db, cid, summary={})
         result = await get_conversation_summary(test_db, cid)
         assert result == {}
+
+
+@pytest.mark.unit
+class TestGetConversationStatus:
+    async def test_active_conversation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        status = await get_conversation_status(test_db, cid)
+        assert status == "active"
+
+    async def test_ended_conversation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary={"note": "done"})
+        status = await get_conversation_status(test_db, cid)
+        assert status == "ended"
+
+    async def test_nonexistent_conversation(self, test_db):
+        status = await get_conversation_status(test_db, 99999)
+        assert status is None

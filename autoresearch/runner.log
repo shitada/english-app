@@ -1078,3 +1078,174 @@ Good. Now add a test for the supplementation logic:
   │ @pytest.mark.integration…
   └ 26 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #235: Fix quiz returning fewer questions than requested when LLM path produces gaps
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775433306. Run tests:
+
+● Run tests for iteration 235 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+767 pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775433351. No frontend changes, no DAL changes. QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 235
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L1:60 (60 lines read)
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L205:224 (20 lines read)
+
+● Record T4 for iteration 235 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, keep. T0=1775405919 (using actual start before proposer errors), but I should use the actual T0=1775408805... wait, the proposer had connection errors. Let me recalculate properly from the working start:
+
+Actually T0=1775408805 was the initial start, T1=1775433238 (proposer succeeded on third try), T2=1775433306, T3=1775433351, T4=1775433424.
+- propose=24433 (includes retries), implement=68, test=45, evaluate=73, total=24619
+
+That's too large because of the proposer connection errors. Let me record it accurately:
+
+● Record results for iteration 235 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "235" "$HASH" "$DATE" "24433" "68" "45" "73" "24619" \
+  │ "767" "767" "pass" "7.8" "kept" "Fix quiz returning fewer questions than requested when LLM …
+  └ 4 lines...
+
+Iteration 235 complete ✅. Moving to iteration 236.
+
+---
+
+● T0 for iteration 236 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 236
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L50:65 (14 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L1:50 (50 lines read)
+
+● Record T1 for iteration 236 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775434524. Let me examine the code:
+
+● Find end_conversation code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "end_conversation\|get_active_conversation\|already.*ended\|409" app/routers/conversation.py |
+  │ head -15
+  └ 8 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L305:340 (34 lines read)
+
+Now let me check the DAL functions:
+
+● Find DAL conversation functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_active_conversation\|def
+  │ end_conversation\|def get_conversation" app/dal/conversation.py | head -10
+  └ 8 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L58:70 (13 lines read)
+
+Now I'll add a `get_conversation_status` function and fix the router:
+
+● Edit conversation.py +9
+  └ app/dal/conversation.py
+
+Now fix the router to distinguish 404 vs 409:
+
+● Edit conversation.py +4 -2
+  └ app/routers/conversation.py
+
+Now check and update the existing test:
+
+● Find end conversation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "end.*already\|already.*ended\|end.*nonexist\|end.*404\|end.*409"
+  │ tests/integration/test_conversation_api.py | head -10
+  └ 3 lines...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L93:120 (28 lines read)
+
+● Edit test_conversation_api.py +2 -2
+  └ tests/integration/test_conversation_api.py
+
+Also fix line 562:
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L558:570 (11 lines read)
+
+● Edit test_conversation_api.py +2 -2
+  └ tests/integration/test_conversation_api.py
+
+Now add a test for truly nonexistent conversation:
+
+● Check if nonexistent end test exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "test_end_nonexistent\|test_end_not_found" tests/integration/test_conversation_api.py | head -5
+  └ 1 line...
+
+● Read test_conversation_api.py
+  │ tests/integration/test_conversation_api.py
+  └ L108:115 (8 lines read)
+
+● Edit test_conversation_api.py +7
+  └ tests/integration/test_conversation_api.py
+
+Now add unit tests for get_conversation_status:
+
+● See end of conversation DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/unit/test_conversation_dal.py
+  └ 21 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal.conversation import"
+  │ tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L9:25 (17 lines read)
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L25:35 (11 lines read)
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+● Add conversation status unit tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_conversation_dal.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 19 lines...
+

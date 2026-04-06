@@ -304,9 +304,11 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
 @router.post("/end", response_model=EndResponse)
 async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
-    conv = await conv_dal.get_active_conversation(db, req.conversation_id)
-    if not conv:
+    status = await conv_dal.get_conversation_status(db, req.conversation_id)
+    if status is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    if status != "active":
+        raise HTTPException(status_code=409, detail="Conversation is already ended")
 
     history = await conv_dal.format_history_text(db, req.conversation_id)
 

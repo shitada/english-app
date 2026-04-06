@@ -63,6 +63,15 @@ async def get_active_conversation(db: aiosqlite.Connection, conversation_id: int
     return dict(rows[0]) if rows else None
 
 
+async def get_conversation_status(db: aiosqlite.Connection, conversation_id: int) -> str | None:
+    """Return the conversation's status string, or None if not found."""
+    rows = await db.execute_fetchall(
+        "SELECT status FROM conversations WHERE id = ?",
+        (conversation_id,),
+    )
+    return rows[0]["status"] if rows else None
+
+
 async def get_conversation_history(
     db: aiosqlite.Connection,
     conversation_id: int,
