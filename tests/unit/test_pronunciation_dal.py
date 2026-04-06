@@ -675,6 +675,21 @@ class TestGetPronunciationWeaknesses:
         result = await get_pronunciation_weaknesses(test_db)
         assert result == []
 
+    async def test_old_format_word_key(self, test_db):
+        """Pre-normalization feedback with 'word' key should still be found."""
+        from app.dal.pronunciation import get_pronunciation_weaknesses
+        feedback = {
+            "word_feedback": [
+                {"word": "hello", "actual": "helo", "is_correct": False, "tip": "L sound"},
+            ]
+        }
+        await save_attempt(test_db, "Hello", "Helo", feedback, 5.0)
+        result = await get_pronunciation_weaknesses(test_db)
+        assert len(result) == 1
+        assert result[0]["word"] == "hello"
+        heard_words = [h[0] for h in result[0]["common_heard_as"]]
+        assert "helo" in heard_words
+
 
 @pytest.mark.unit
 class TestDifficultyTracking:

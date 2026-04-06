@@ -2516,3 +2516,143 @@ Now add tests:
   │ @pytest.mark.unit…
   └ 60 lines...
 
+● Commit iteration 247 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #247: Fix word_feedback key mismatch: word→expected in normalizer
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+● Run tests for 247 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+792 passed (+4). Now evaluate:
+
+● Evaluator Evaluate iteration 247
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L310:420 (111 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L420:500 (81 lines read)
+
+● Record iteration 247 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "247\t%s\t%s\t10\t53\t32\t%s\t%s\t792\t792\tpass\t8.05\tKEPT\tFix word_feedback key …
+  └ 5 lines...
+
+Iteration 248:
+
+● Proposer Propose iteration 248
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L484:600 (117 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L600:897 (297 lines read)
+
+● Record T0 for 248 (shell)
+  │ T0_248=$(date +%s); echo "T0=$T0_248"
+  └ 2 lines...
+
+● View get_pronunciation_weaknesses (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '425,455p' app/dal/pronunciation.py
+  └ 32 lines...
+
+● View get_common_mistake_patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '625,660p' app/dal/pronunciation.py
+  └ 37 lines...
+
+Now apply the three fixes:
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+Now the `expected_word` in `get_common_mistake_patterns`:
+
+● Edit pronunciation.py +1 -1
+  └ app/dal/pronunciation.py
+
+Now add tests. Let me check the existing test structure:
+
+● Check for pronunciation dal tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_pronunciation_dal.py
+  │ 2>/dev/null && echo "EXISTS" || echo "NOT FOUND"
+  └ 3 lines...
+
+● View test structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ \|get_pronunciation_weaknesses\|get_common_mistake" tests/unit/test_pronunciation_dal.py
+  └ 31 lines...
+
+● View existing weakness tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '617,680p'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 65 lines...
+
+● Edit test_pronunciation_dal.py +14
+  └ tests/unit/test_pronunciation_dal.py
+
+● Commit iteration 248 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #248: Fix pronunciation analysis ignoring pre-normalization feedback keys
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+● Run tests for 248 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 1 line...
+
+● Smoke test 248 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -3
+  └ 4 lines...
+
+● Evaluator Evaluate iteration 248
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L600:760 (161 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L630:650 (21 lines read)
+
+● Verify test count for 248 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && read_output=$(cat /dev/null) # just get the
+  │ test count from the completed run
+  │ # Re-check quickly
+  │ uv run pytest tests/unit tests/integration --tb=short 2>&1 | tail -3
+  └ 4 lines...
+
+● Debug failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_pronunciation_dal.py::TestGetPronunciationWeaknesses::test_old_format_word_key
+  │ -v --tb=long 2>&1 | tail -30
+  └ 31 lines...
+
+The result dict keys are different. Let me check what the return format is:
+
+● View return format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '455,475p' app/dal/pronunciation.py
+  └ 22 lines...
+
+The return format uses `common_heard_as` (a sorted list of tuples), not `heard_as`. Let me fix the test:
+
+● Edit test_pronunciation_dal.py +2 -1
+  └ tests/unit/test_pronunciation_dal.py
+
+● Re-run fixed test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_pronunciation_dal.py::TestGetPronunciationWeaknesses::test_old_format_word_key
+  │ -v --tb=short 2>&1 | tail -5
+  └ 6 lines...
+

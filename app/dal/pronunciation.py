@@ -432,7 +432,7 @@ async def get_pronunciation_weaknesses(
                 continue
             if coerce_bool(wf.get("is_correct", True)):
                 continue
-            expected = (wf.get("expected") or "").lower().strip()
+            expected = (wf.get("expected") or wf.get("word") or "").lower().strip()
             if not expected:
                 continue
             if expected not in word_stats:
@@ -443,7 +443,7 @@ async def get_pronunciation_weaknesses(
                     "tips": set(),
                 }
             word_stats[expected]["occurrence_count"] += 1
-            heard = (wf.get("heard") or "").lower().strip()
+            heard = (wf.get("heard") or wf.get("actual") or "").lower().strip()
             if heard:
                 word_stats[expected]["heard_as"][heard] = (
                     word_stats[expected]["heard_as"].get(heard, 0) + 1
@@ -631,7 +631,7 @@ async def get_common_mistake_patterns(
             phoneme_issues = wf.get("phoneme_issues") or []
             if not isinstance(phoneme_issues, list):
                 continue
-            expected_word = (wf.get("expected") or "").strip()
+            expected_word = (wf.get("expected") or wf.get("word") or "").strip()
             for pi in phoneme_issues:
                 if not isinstance(pi, dict):
                     continue
