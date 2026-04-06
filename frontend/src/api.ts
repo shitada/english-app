@@ -223,7 +223,7 @@ export interface PronunciationFeedback {
     heard: string;
     is_correct: boolean;
     tip: string;
-    phoneme_issues?: { target?: string; produced?: string; tip?: string }[];
+    phoneme_issues?: { target?: string; produced?: string; tip?: string; position?: string }[];
   }[];
   focus_areas: string[];
 }

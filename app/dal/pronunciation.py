@@ -635,8 +635,8 @@ async def get_common_mistake_patterns(
             for pi in phoneme_issues:
                 if not isinstance(pi, dict):
                     continue
-                target = str(pi.get("target_sound") or "").strip()
-                produced = str(pi.get("produced_sound") or "").strip()
+                target = str(pi.get("target") or pi.get("target_sound") or "").strip()
+                produced = str(pi.get("produced") or pi.get("produced_sound") or "").strip()
                 if not target or not produced:
                     continue
                 key = (target, produced)

@@ -166,7 +166,7 @@ class TestNormalizePronunciationNoneHandling:
         }
         result = _normalize_pronunciation_feedback(raw)
         issues = result["word_feedback"][0]["phoneme_issues"]
-        assert issues[0]["target_sound"] == ""
+        assert issues[0]["target"] == ""
         assert issues[0]["advice"] == "try again"
 
 
@@ -282,3 +282,43 @@ class TestIsCorrectNone:
         }
         result = _normalize_pronunciation_feedback(raw)
         assert result["word_feedback"][0]["is_correct"] is False
+
+
+@pytest.mark.unit
+class TestPhonemeIssuesCanonicalization:
+    def test_target_sound_renamed_to_target(self):
+        """LLM key target_sound is canonicalized to target."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 7.0,
+            "word_feedback": [
+                {"word": "hello", "is_correct": False, "phoneme_issues": [
+                    {"target_sound": "h", "produced_sound": "ʔ", "position": "initial"}
+                ]},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        pi = result["word_feedback"][0]["phoneme_issues"]
+        assert len(pi) == 1
+        assert pi[0]["target"] == "h"
+        assert pi[0]["produced"] == "ʔ"
+        assert pi[0]["position"] == "initial"
+        assert "target_sound" not in pi[0]
+        assert "produced_sound" not in pi[0]
+
+    def test_canonical_keys_preserved(self):
+        """If already using canonical target/produced, they are preserved."""
+        raw = {
+            "overall_feedback": "ok", "overall_score": 8.0,
+            "word_feedback": [
+                {"word": "world", "is_correct": True, "phoneme_issues": [
+                    {"target": "ɹ", "produced": "l", "tip": "curl tongue"}
+                ]},
+            ],
+            "focus_areas": [],
+        }
+        result = _normalize_pronunciation_feedback(raw)
+        pi = result["word_feedback"][0]["phoneme_issues"]
+        assert pi[0]["target"] == "ɹ"
+        assert pi[0]["produced"] == "l"
+        assert pi[0]["tip"] == "curl tongue"

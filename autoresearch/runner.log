@@ -1484,3 +1484,148 @@ Now add to _MIGRATIONS:
 ● Edit database.py +4
   └ app/database.py
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #238: Fix unbounded full-table scans in get_daily_activity and add missing index
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775436621. Run tests:
+
+● Run tests for iteration 238 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+772 pass. TS check and smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -5
+  └ 6 lines...
+
+● Record T3 for iteration 238 (shell)
+  │ date +%s
+  └ 2 lines...
+
+QA skipped (no frontend changes). Call evaluator:
+
+● Evaluator Evaluate iteration 238
+  │ List directory tests/unit
+  │   └ 15 files found
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ 1 line read
+
+● Record T4 for iteration 238 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.25, keep. T0=1775435842, propose=717, implement=62, test=57, evaluate=72, total=908
+
+● Record results for iteration 238 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "238" "$HASH" "$DATE" "717" "62" "57" "72" "908" \
+  │ "772" "772" "pass" "7.25" "kept" "Fix unbounded full-table scans in get_daily_activity and …
+  └ 4 lines...
+
+Iteration 238 complete ✅. Moving to iteration 239.
+
+---
+
+● T0 for iteration 239 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 239
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L124:183 (60 lines read)
+  └ Read config.yaml
+      └ 211 lines read
+
+● Record T1 for iteration 239 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775437017. Let me examine the code:
+
+● Read phoneme_issues normalization (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '145,160p'
+  │ app/routers/pronunciation.py
+  └ 17 lines...
+
+● Find phoneme key usage in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "target_sound\|produced_sound\|target.*produced" app/dal/pronunciation.py | head -10
+  └ 9 lines...
+
+● Check frontend phoneme type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "PhonemeIssue\|phoneme_issue\|target.*produced.*tip" frontend/src/api.ts | head -10
+  └ 2 lines...
+
+Confirmed the mismatch. Now fix:
+
+1. Normalize phoneme_issues keys in _normalize_feedback
+2. Update DAL to use canonical names
+3. Update frontend type
+
+● Edit pronunciation.py +12 -4
+  └ app/routers/pronunciation.py
+
+Now update the DAL to use canonical names:
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L633:670 (34 lines read)
+
+● Edit pronunciation.py +2 -2
+  └ app/dal/pronunciation.py
+
+Now update the frontend type to include position:
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+Now add tests:
+
+● Add phoneme canonicalization tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_normalize_feedback.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 41 lines...
+
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #239: Fix phoneme_issues key mismatch between normalizer, DAL, and frontend
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775437075. Run tests:
+
+● Run tests for iteration 239 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 10 lines...
+
+One existing test expects `target_sound` key but we're now canonicalizing it. Let me fix:
+
+● See failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '165,180p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 16 lines...
+
+● Edit test_normalize_feedback.py +1 -1
+  └ tests/unit/test_normalize_feedback.py
+

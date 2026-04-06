@@ -149,10 +149,18 @@ def _normalize_feedback(raw: dict[str, Any]) -> dict[str, Any]:
             if not isinstance(pi, list):
                 item["phoneme_issues"] = []
             else:
-                item["phoneme_issues"] = [
-                    {k: str(v) if v is not None else "" for k, v in p.items()}
-                    for p in pi if isinstance(p, dict)
-                ]
+                normalized_pi = []
+                for p in pi:
+                    if not isinstance(p, dict):
+                        continue
+                    item_d = {k: str(v) if v is not None else "" for k, v in p.items()}
+                    # Canonicalize LLM key variants → target/produced
+                    if "target_sound" in item_d and "target" not in item_d:
+                        item_d["target"] = item_d.pop("target_sound")
+                    if "produced_sound" in item_d and "produced" not in item_d:
+                        item_d["produced"] = item_d.pop("produced_sound")
+                    normalized_pi.append(item_d)
+                item["phoneme_issues"] = normalized_pi
         result["word_feedback"] = items
 
     # focus_areas: must be a list of strings
