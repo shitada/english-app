@@ -53,7 +53,7 @@ class TestNormalizeGrammarFeedback:
         result = _normalize_grammar_feedback(raw)
         assert result["is_correct"] is False
         assert len(result["errors"]) == 1
-        assert result["errors"][0]["description"] == "Missing article before 'store'"
+        assert result["errors"][0]["explanation"] == "Missing article before 'store'"
 
     def test_errors_dict_wrapped_in_list(self):
         """When errors is a single dict, wrap in a list and infer is_correct=False."""
@@ -71,20 +71,20 @@ class TestNormalizeGrammarFeedback:
         assert result["is_correct"] is True
 
     def test_suggestions_normalized(self):
-        """Suggestions should be normalized to list of dicts."""
+        """Suggestions should be normalized to list of dicts with canonical keys."""
         raw = {"suggestions": [{"text": "try this"}], "errors": []}
         result = _normalize_grammar_feedback(raw)
         assert len(result["suggestions"]) == 1
-        assert result["suggestions"][0]["text"] == "try this"
+        assert result["suggestions"][0]["original"] == "try this"
 
     def test_errors_list_of_strings_wrapped_as_dicts(self):
-        """When errors is a list of strings, each should be wrapped as {description: str}."""
+        """When errors is a list of strings, each should be wrapped with canonical keys."""
         raw = {"errors": ["Missing article", "Wrong tense"]}
         result = _normalize_grammar_feedback(raw)
         assert result["is_correct"] is False
         assert len(result["errors"]) == 2
-        assert result["errors"][0] == {"description": "Missing article"}
-        assert result["errors"][1] == {"description": "Wrong tense"}
+        assert result["errors"][0] == {"original": "", "correction": "", "explanation": "Missing article"}
+        assert result["errors"][1] == {"original": "", "correction": "", "explanation": "Wrong tense"}
 
     def test_errors_list_mixed_strings_and_dicts(self):
         """Mixed list of strings and dicts should all be normalized."""
@@ -92,29 +92,29 @@ class TestNormalizeGrammarFeedback:
         result = _normalize_grammar_feedback(raw)
         assert len(result["errors"]) == 2
         assert result["errors"][0]["original"] == "goed"
-        assert result["errors"][1] == {"description": "Wrong article"}
+        assert result["errors"][1] == {"original": "", "correction": "", "explanation": "Wrong article"}
 
     def test_suggestions_list_of_strings_wrapped(self):
-        """When suggestions is a list of strings, each should be wrapped as {text: str}."""
+        """When suggestions is a list of strings, each should be wrapped with canonical keys."""
         raw = {"errors": [], "suggestions": ["Use 'the' here", "Try past tense"]}
         result = _normalize_grammar_feedback(raw)
         assert len(result["suggestions"]) == 2
-        assert result["suggestions"][0] == {"text": "Use 'the' here"}
-        assert result["suggestions"][1] == {"text": "Try past tense"}
+        assert result["suggestions"][0] == {"original": "", "better": "Use 'the' here", "explanation": ""}
+        assert result["suggestions"][1] == {"original": "", "better": "Try past tense", "explanation": ""}
 
     def test_suggestions_bare_string_wrapped(self):
-        """When suggestions is a single string, wrap as [{text: str}]."""
+        """When suggestions is a single string, wrap with canonical keys."""
         raw = {"errors": [], "suggestions": "Try using present tense"}
         result = _normalize_grammar_feedback(raw)
         assert len(result["suggestions"]) == 1
-        assert result["suggestions"][0] == {"text": "Try using present tense"}
+        assert result["suggestions"][0] == {"original": "", "better": "Try using present tense", "explanation": ""}
 
     def test_suggestions_bare_dict_wrapped(self):
-        """When suggestions is a single dict, wrap in a list."""
+        """When suggestions is a single dict, wrap in a list with canonical keys."""
         raw = {"errors": [], "suggestions": {"text": "Try X"}}
         result = _normalize_grammar_feedback(raw)
         assert len(result["suggestions"]) == 1
-        assert result["suggestions"][0] == {"text": "Try X"}
+        assert result["suggestions"][0] == {"original": "Try X"}
 
 
 @pytest.mark.unit
@@ -407,3 +407,38 @@ class TestWordFeedbackKeyCanonicalization:
         item = result["word_feedback"][0]
         assert item["expected"] == "banana"
         assert item["word"] == "apple"
+
+
+@pytest.mark.unit
+class TestGrammarKeyCanonicalization:
+    def test_error_wrong_key_canonicalized_to_original(self):
+        raw = {"errors": [{"wrong": "goed", "correct": "went", "reason": "irregular verb"}]}
+        result = _normalize_grammar_feedback(raw)
+        err = result["errors"][0]
+        assert err["original"] == "goed"
+        assert err["correction"] == "went"
+        assert err["explanation"] == "irregular verb"
+
+    def test_error_incorrect_key_canonicalized(self):
+        raw = {"errors": [{"incorrect": "he go", "fixed": "he goes", "why": "third person"}]}
+        result = _normalize_grammar_feedback(raw)
+        err = result["errors"][0]
+        assert err["original"] == "he go"
+        assert err["correction"] == "he goes"
+        assert err["explanation"] == "third person"
+
+    def test_suggestion_improved_key_canonicalized(self):
+        raw = {"errors": [], "suggestions": [{"current": "I go store", "improved": "I go to the store", "reason": "missing preposition"}]}
+        result = _normalize_grammar_feedback(raw)
+        sug = result["suggestions"][0]
+        assert sug["original"] == "I go store"
+        assert sug["better"] == "I go to the store"
+        assert sug["explanation"] == "missing preposition"
+
+    def test_existing_canonical_keys_preserved(self):
+        raw = {"errors": [{"original": "goed", "correction": "went", "explanation": "irregular"}]}
+        result = _normalize_grammar_feedback(raw)
+        err = result["errors"][0]
+        assert err["original"] == "goed"
+        assert err["correction"] == "went"
+        assert err["explanation"] == "irregular"

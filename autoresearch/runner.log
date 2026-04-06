@@ -2379,3 +2379,180 @@ Now add cleanup to useAudioRecorder — need to add `useEffect` import:
 
 T2=1775498977, implement_sec=32. Commit and test:
 
+● Commit and test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #262: Fix TTS and audio recorder not cleaned up on component unmount
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 20 lines...
+
+834 passed. No backend changes — no smoke test needed. No frontend pages changed (only hooks), type is "bugfix" — QA skipped.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775499027, test_sec=50. QA skipped — no pages/components changed. Evaluate:
+
+● Evaluator Evaluate iteration 262
+  └ Agent started in background with agent_id: evaluator-262. You can use read_ag...
+
+<system_notification>Background agent `evaluator-262` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 262 results
+  │ Read (Evaluator agent — Evaluate iteration 262)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 262)
+      └ Completed
+
+Evaluator: 7.5, keep. Recording:
+
+● Record results 262 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "262" "$HASH" "$DATE" "490" "32" "50" "$((T4-1775499027))" "$((T4-1775498455))" \
+  │ "834" "834" "pass" "7.5" "KEPT" "Fix TTS and audio recorder not cleaned up on component …
+  └ 4 lines...
+
+Iteration 262 KEPT (7.5, 834 tests). Starting iteration 263.
+
+● Context restore 263 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 263
+  └ Agent started in background with agent_id: proposer-263. You can use read_age...
+
+<system_notification>Background agent `proposer-263` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 263 results
+  │ Read (Proposer agent — Propose iteration 263)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 263)
+      └ Completed
+
+● Record T1 for 263 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find grammar normalizer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_normalize_grammar_feedback"
+  │ app/routers/conversation.py
+  └ 3 lines...
+
+● Read grammar normalizer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '182,240p'
+  │ app/routers/conversation.py
+  └ 59 lines...
+
+● Check frontend feedback rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "err\.\|sug\.\|original\|correction\|explanation\|better" frontend/src/pages/Conversation.tsx |
+  │ head -20
+  └ 14 lines...
+
+Now I see the frontend uses `err.original`, `err.correction`, `err.explanation` and `sug.original`, `sug.better`, `sug.explanation`. Let me check existing tests:
+
+● Find tests using old keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "description.*str\|text.*str\|string error\|string sug" tests/unit/test_normalize_feedback.py |
+  │ head -10
+  └ 4 lines...
+
+● Read tests that need updating (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '78,115p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 39 lines...
+
+T1=1775499566, propose_sec=450. Now implement the fix — add key canonicalization and fix string conversions:
+
+● Edit conversation.py +36 -6
+  └ app/routers/conversation.py
+
+Now update the tests to match new key names:
+
+● Edit test_normalize_feedback.py +3 -3
+  └ tests/unit/test_normalize_feedback.py
+
+● Edit test_normalize_feedback.py +1 -1
+  └ tests/unit/test_normalize_feedback.py
+
+● Edit test_normalize_feedback.py +5 -5
+  └ tests/unit/test_normalize_feedback.py
+
+Now update the `text` key test for suggestions dict:
+
+● Find suggestion dict test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '"text".*"Try
+  │ X"\|suggestions.*bare.*dict' tests/unit/test_normalize_feedback.py
+  └ 4 lines...
+
+● Read bare dict test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '112,118p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 7 lines...
+
+The `text` key should now be canonicalized to `original`:
+
+● Edit test_normalize_feedback.py +2 -2
+  └ tests/unit/test_normalize_feedback.py
+
+Also fix the remaining test that checks `{"text": "try this"}`:
+
+● Find remaining text key reference (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '"text".*try this'
+  │ tests/unit/test_normalize_feedback.py
+  └ 3 lines...
+
+● Read that test context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '72,80p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 9 lines...
+
+The `text` key in a suggestion dict should be canonicalized to `original`:
+
+● Edit test_normalize_feedback.py +2 -2
+  └ tests/unit/test_normalize_feedback.py
+
+Now add new canonicalization tests at the end:
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/unit/test_normalize_feedback.py
+  └ 6 lines...
+
+● Add canonicalization tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_normalize_feedback.py << 'PYTEST_EOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 36 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775499691, implement_sec=125. Commit and test:
+
+● Commit and test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #263: Fix grammar feedback normalizer producing undefined renders in UI
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 25 lines...
+
+One more test with old `description` key:
+
+● Read failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '52,60p'
+  │ tests/unit/test_normalize_feedback.py
+  └ 10 lines...
+
+● Edit test_normalize_feedback.py +1 -1
+  └ tests/unit/test_normalize_feedback.py
+

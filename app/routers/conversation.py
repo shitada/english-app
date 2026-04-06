@@ -179,6 +179,36 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     }
 
 
+def _canonicalize_error(e: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize error dict keys to {original, correction, explanation}."""
+    result = dict(e)
+    for key in ("wrong", "incorrect", "incorrect_part"):
+        if key in result and "original" not in result:
+            result["original"] = result.pop(key)
+    for key in ("correct", "corrected", "right", "fixed"):
+        if key in result and "correction" not in result:
+            result["correction"] = result.pop(key)
+    for key in ("reason", "why", "note", "description"):
+        if key in result and "explanation" not in result:
+            result["explanation"] = result.pop(key)
+    return result
+
+
+def _canonicalize_suggestion(s: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize suggestion dict keys to {original, better, explanation}."""
+    result = dict(s)
+    for key in ("current", "text", "sentence"):
+        if key in result and "original" not in result:
+            result["original"] = result.pop(key)
+    for key in ("improved", "suggested", "alternative", "better_version"):
+        if key in result and "better" not in result:
+            result["better"] = result.pop(key)
+    for key in ("reason", "why", "note"):
+        if key in result and "explanation" not in result:
+            result["explanation"] = result.pop(key)
+    return result
+
+
 def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize LLM grammar feedback to ensure consistent types."""
     result = dict(raw)
@@ -187,27 +217,27 @@ def _normalize_grammar_feedback(raw: dict[str, Any]) -> dict[str, Any]:
     # Normalize errors to list of dicts, preserving non-list truthy values
     if isinstance(raw_errors, list):
         result["errors"] = [
-            e if isinstance(e, dict) else {"description": str(e)}
+            _canonicalize_error(e) if isinstance(e, dict) else {"original": "", "correction": "", "explanation": str(e)}
             for e in raw_errors
             if isinstance(e, (dict, str)) and (not isinstance(e, str) or e.strip())
         ]
     elif isinstance(raw_errors, dict):
-        result["errors"] = [raw_errors]
+        result["errors"] = [_canonicalize_error(raw_errors)]
     elif isinstance(raw_errors, str) and raw_errors.strip():
-        result["errors"] = [{"description": raw_errors}]
+        result["errors"] = [{"original": "", "correction": "", "explanation": raw_errors}]
     else:
         result["errors"] = []
     suggestions = result.get("suggestions")
     if isinstance(suggestions, list):
         result["suggestions"] = [
-            s if isinstance(s, dict) else {"text": str(s)}
+            _canonicalize_suggestion(s) if isinstance(s, dict) else {"original": "", "better": str(s), "explanation": ""}
             for s in suggestions
             if isinstance(s, (dict, str)) and (not isinstance(s, str) or s.strip())
         ]
     elif isinstance(suggestions, dict):
-        result["suggestions"] = [suggestions]
+        result["suggestions"] = [_canonicalize_suggestion(suggestions)]
     elif isinstance(suggestions, str) and suggestions.strip():
-        result["suggestions"] = [{"text": suggestions}]
+        result["suggestions"] = [{"original": "", "better": suggestions, "explanation": ""}]
     else:
         result["suggestions"] = []
     # Infer is_correct from errors when LLM omits the field or provides null
