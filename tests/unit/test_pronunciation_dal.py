@@ -11,9 +11,12 @@ from app.dal.pronunciation import (
     _estimate_difficulty,
     clear_history,
     delete_attempt,
+    get_common_mistake_patterns,
     get_history,
     get_progress,
     get_progress_by_difficulty,
+    get_pronunciation_weaknesses,
+    get_score_distribution,
     get_sentences_from_conversations,
     get_sentences_from_vocabulary,
     get_weekly_progress,
@@ -909,3 +912,37 @@ class TestEstimateDifficulty:
         assert _estimate_difficulty(8, "advanced") == "beginner"
         assert _estimate_difficulty(14, "beginner") == "beginner"
         assert _estimate_difficulty(15, "beginner") == "advanced"
+
+
+@pytest.mark.unit
+class TestGetCommonMistakePatterns:
+    async def test_empty_database(self, test_db):
+        result = await get_common_mistake_patterns(test_db)
+        assert result == []
+
+    async def test_aggregates_phoneme_issues(self, test_db):
+        feedback = {
+            "word_feedback": [
+                {
+                    "expected": "three",
+                    "is_correct": False,
+                    "phoneme_issues": [
+                        {"target": "θ", "produced": "s"},
+                        {"target": "θ", "produced": "s"},
+                    ],
+                },
+            ]
+        }
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, feedback_json, created_at) "
+            "VALUES (?, ?, ?, ?, datetime('now'))",
+            ("three", "sree", 4.0, json.dumps(feedback)),
+        )
+        await test_db.commit()
+        result = await get_common_mistake_patterns(test_db)
+        assert len(result) >= 1
+        top = result[0]
+        assert top["target_sound"] == "θ"
+        assert top["produced_sound"] == "s"
+        assert top["occurrence_count"] == 2
+        assert "three" in top["example_words"]

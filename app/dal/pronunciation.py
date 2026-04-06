@@ -249,12 +249,24 @@ def _classify_score(score: float) -> str:
 async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get pronunciation scores grouped into quality buckets."""
     rows = await db.execute_fetchall(
-        "SELECT score FROM pronunciation_attempts WHERE score IS NOT NULL"
+        """SELECT
+            COUNT(*) as total,
+            COALESCE(SUM(CASE WHEN score < 3 THEN 1 ELSE 0 END), 0) as poor,
+            COALESCE(SUM(CASE WHEN score >= 3 AND score < 5 THEN 1 ELSE 0 END), 0) as fair,
+            COALESCE(SUM(CASE WHEN score >= 5 AND score < 7 THEN 1 ELSE 0 END), 0) as good,
+            COALESCE(SUM(CASE WHEN score >= 7 AND score < 9 THEN 1 ELSE 0 END), 0) as very_good,
+            COALESCE(SUM(CASE WHEN score >= 9 THEN 1 ELSE 0 END), 0) as excellent
+        FROM pronunciation_attempts
+        WHERE score IS NOT NULL"""
     )
-    bucket_counts = {name: 0 for name, _, _ in _SCORE_BUCKETS}
-    for r in rows:
-        bucket = _classify_score(r["score"])
-        bucket_counts[bucket] += 1
+    r = rows[0]
+    bucket_counts = {
+        "poor": r["poor"],
+        "fair": r["fair"],
+        "good": r["good"],
+        "very_good": r["very_good"],
+        "excellent": r["excellent"],
+    }
 
     distribution = [
         {
@@ -267,7 +279,7 @@ async def get_score_distribution(db: aiosqlite.Connection) -> dict[str, Any]:
         for name, lo, hi in _SCORE_BUCKETS
     ]
     return {
-        "total_attempts": len(rows),
+        "total_attempts": r["total"],
         "distribution": distribution,
     }
 
@@ -413,7 +425,10 @@ async def get_pronunciation_weaknesses(
     """Aggregate commonly mispronounced words from pronunciation feedback data."""
     rows = await db.execute_fetchall(
         """SELECT feedback_json FROM pronunciation_attempts
-           WHERE feedback_json IS NOT NULL"""
+           WHERE feedback_json IS NOT NULL
+             AND created_at >= date('now', '-180 days')
+           ORDER BY created_at DESC
+           LIMIT 500"""
     )
 
     word_stats: dict[str, dict[str, Any]] = {}
@@ -609,7 +624,10 @@ async def get_common_mistake_patterns(
     """Aggregate phoneme-level mistake patterns from pronunciation feedback."""
     rows = await db.execute_fetchall(
         """SELECT feedback_json FROM pronunciation_attempts
-           WHERE feedback_json IS NOT NULL"""
+           WHERE feedback_json IS NOT NULL
+             AND created_at >= date('now', '-180 days')
+           ORDER BY created_at DESC
+           LIMIT 500"""
     )
 
     pattern_stats: dict[tuple[str, str], dict[str, Any]] = {}
