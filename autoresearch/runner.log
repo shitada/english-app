@@ -1249,3 +1249,120 @@ Now add unit tests for get_conversation_status:
   │ @pytest.mark.unit…
   └ 19 lines...
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #236: Return 409 instead of 404 when ending an already-ended conversation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775434640. Run tests:
+
+● Run tests for iteration 236 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+771 pass. TS check and smoke test check:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+● Record T3 for iteration 236 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes. QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 236
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L980:1000 (8 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 for iteration 236 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.55, keep. T0=1775433441, propose=1083, implement=116, test=62, evaluate=77, total=1338
+
+● Record results for iteration 236 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "236" "$HASH" "$DATE" "1083" "116" "62" "77" "1338" \
+  │ "771" "771" "pass" "7.55" "kept" "Return 409 instead of 404 when ending an already-ended …
+  └ 4 lines...
+
+Iteration 236 complete ✅. Moving to iteration 237.
+
+---
+
+● T0 for iteration 237 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 237
+  │ Read conftest.py
+  │   │ tests/conftest.py
+  │   └ 105 lines read
+  └ Read database.py
+      │ app/database.py
+      └ L198:231 (33 lines read)
+
+● Record T1 for iteration 237 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775435677. Let me examine the current code:
+
+● Read main.py
+  │ app/main.py
+  └ L143:170 (26 lines read)
+
+● Check imports in main.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_db_session\|get_db\b"
+  │ app/main.py | head -10
+  └ 3 lines...
+
+● Find get_db functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_db_session\|def
+  │ get_db\|async def get_db" app/database.py
+  └ 3 lines...
+
+● Read database.py
+  │ app/database.py
+  └ L198:225 (28 lines read)
+
+Now fix the health check to use `get_db()` directly with proper cleanup:
+
+● Edit main.py +1 -1
+  └ app/main.py
+
+● Edit main.py +5 -3
+  └ app/main.py
+
+Now add a test for degraded health status. Let me check existing health tests:
+
+● Read test_health.py
+  │ tests/integration/test_health.py
+  └ 21 lines read
+
+● Edit test_health.py +11
+  └ tests/integration/test_health.py
+

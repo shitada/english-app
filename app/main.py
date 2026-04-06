@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.config import load_config, get_logging_config
-from app.database import init_db, get_db_session
+from app.database import init_db, get_db, get_db_session
 from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
 from app.routers import preferences
@@ -148,10 +148,12 @@ async def health_check():
     """Check service health and database connectivity."""
     uptime = round(time.monotonic() - _startup_time, 1) if _startup_time else 0.0
     try:
-        async for db in get_db_session():
+        db = await get_db()
+        try:
             await db.execute("SELECT 1")
-            break
-        db_status = "ok"
+            db_status = "ok"
+        finally:
+            await db.close()
     except Exception as e:
         logger.warning("Health check DB failure: %s", e)
         db_status = "error"

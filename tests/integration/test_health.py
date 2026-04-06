@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 
@@ -19,3 +21,12 @@ class TestHealthCheck:
         resp = await client.get("/api/health")
         data = resp.json()
         assert set(data.keys()) == {"status", "database", "uptime_seconds", "api_version"}
+
+    async def test_degraded_when_db_unavailable(self, client):
+        """Health check returns 503 with degraded status when DB is unreachable."""
+        with patch("app.main.get_db", new_callable=AsyncMock, side_effect=Exception("DB down")):
+            resp = await client.get("/api/health")
+        assert resp.status_code == 503
+        data = resp.json()
+        assert data["status"] == "degraded"
+        assert data["database"] == "error"
