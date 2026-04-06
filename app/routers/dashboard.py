@@ -305,3 +305,31 @@ async def get_mistake_journal(
 ):
     """Get aggregated mistakes from all learning modules."""
     return await dash_dal.get_mistake_journal(db, module=module, limit=limit, offset=offset)
+
+
+class AchievementProgress(BaseModel):
+    current: int
+    target: int
+
+
+class AchievementItem(BaseModel):
+    id: str
+    title: str
+    description: str
+    emoji: str
+    category: str
+    target: int
+    unlocked: bool
+    progress: AchievementProgress
+
+
+class AchievementsResponse(BaseModel):
+    achievements: list[AchievementItem]
+    unlocked_count: int
+    total_count: int
+
+
+@router.get("/achievements", response_model=AchievementsResponse)
+async def get_achievements(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get computed achievement badges based on learning progress."""
+    return await dash_dal.get_achievements(db)

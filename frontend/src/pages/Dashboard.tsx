@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Flame, MessageSquare, Mic, BookOpen, Clock, AlertTriangle } from 'lucide-react';
-import { api, type DashboardStats, type MistakeItem, getMistakeJournal } from '../api';
+import { Flame, MessageSquare, Mic, BookOpen, Clock, AlertTriangle, Award } from 'lucide-react';
+import { api, type DashboardStats, type MistakeItem, type Achievement, getMistakeJournal, getAchievements } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
 
 export default function Dashboard() {
@@ -10,12 +10,22 @@ export default function Dashboard() {
   const [mistakeFilter, setMistakeFilter] = useState<'all' | 'grammar' | 'pronunciation' | 'vocabulary'>('all');
   const [mistakeTotal, setMistakeTotal] = useState(0);
   const [mistakeOffset, setMistakeOffset] = useState(0);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [achievementsUnlocked, setAchievementsUnlocked] = useState(0);
+  const [achievementsTotal, setAchievementsTotal] = useState(0);
 
   useEffect(() => {
     api.getDashboardStats()
       .then(setStats)
       .catch(console.error)
       .finally(() => setLoading(false));
+    getAchievements()
+      .then(res => {
+        setAchievements(res.achievements);
+        setAchievementsUnlocked(res.unlocked_count);
+        setAchievementsTotal(res.total_count);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -71,6 +81,41 @@ export default function Dashboard() {
         <StatCard icon={<BookOpen size={24} color="#10b981" />} label="Words Reviewed" value={stats.total_vocab_reviewed} sub={`${stats.vocab_mastered} mastered`} />
         <StatCard icon={<Clock size={24} color={stats.vocab_due_count > 0 ? '#ef4444' : '#6b7280'} />} label="Due for Review" value={stats.vocab_due_count} sub={stats.vocab_due_count > 0 ? 'Words need review!' : 'All caught up!'} />
       </div>
+
+      {/* Achievements */}
+      {achievements.length > 0 && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Award size={20} color="#f59e0b" />
+            <h3 style={{ margin: 0 }}>Achievements</h3>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 'auto' }}>
+              {achievementsUnlocked}/{achievementsTotal} earned
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+            {achievements.map(a => (
+              <div key={a.id} style={{
+                padding: '10px', borderRadius: 8, textAlign: 'center',
+                background: a.unlocked ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : 'var(--bg-secondary, #f3f4f6)',
+                opacity: a.unlocked ? 1 : 0.6,
+                border: a.unlocked ? '1px solid #f59e0b' : '1px solid var(--border)',
+              }}>
+                <div style={{ fontSize: 28 }}>{a.emoji}</div>
+                <p style={{ fontSize: 12, fontWeight: 600, marginTop: 4 }}>{a.title}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{a.description}</p>
+                {!a.unlocked && (
+                  <div style={{ marginTop: 4, height: 4, borderRadius: 2, background: '#e5e7eb', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 2, background: '#f59e0b', width: `${Math.min(100, (a.progress.current / a.progress.target) * 100)}%` }} />
+                  </div>
+                )}
+                {!a.unlocked && (
+                  <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{a.progress.current}/{a.progress.target}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent activity */}
       {stats.recent_activity.length > 0 && (

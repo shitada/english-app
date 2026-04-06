@@ -726,3 +726,147 @@ Now add integration tests for the sentence-build endpoints:
 
 Now commit and test:
 
+● Commit iteration 252 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #252: Add sentence reordering exercise mode to vocabulary practice
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests iteration 252 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Tester-251 done (already recorded). Continuing with 252 - smoke test + evaluate:
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE" || echo "NO_SMOKE"
+  └ 4 lines...
+
+● Smoke test iteration 252 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 2>/dev/null | head -1 | xargs
+  │ -I{} kill -9 {} 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. Now call evaluator (frontend changed + feature type, so tester needed too but I'll dispatch both):
+
+● Record T3 for iteration 252 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Tester QA test iteration 252
+  └ Agent started in background with agent_id: tester-252. You can use read_agent...
+
+● Evaluator Evaluate iteration 252
+  └ Agent started in background with agent_id: evaluator-252. You can use read_ag...
+
+While waiting for agents, let me prepare for the next iteration by starting the proposer for 253:
+
+● Wait for agents (shell)
+  │ sleep 30 && echo "waited"
+  └ 2 lines...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+
+Execution failed: Error: Failed to get response from the AI model; retried 5 times (total retry wait time: 6.05980198909796 seconds) Last error: Unknown error
+Evaluator-252 done. Recording results and moving to iteration 253:
+
+● Record T4 for iteration 252 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 252 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ # T0=1775491246 T1=1775491370 T3=1775491658 T4=1775491766
+  │ # propose=124 implement=288 test=108 evaluate=108 total=520
+  │ HASH=$(git rev-parse --short HEAD)
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \…
+  └ 7 lines...
+
+Good. Now iteration 253:
+
+● Record T0 for iteration 253 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 253
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L180:350 (170 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L350:end (369 lines read)
+
+● Record T1 for iteration 253 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Achievement badge system - great final feature. Let me implement it:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1:12 (12 lines read)
+
+● Read end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/dashboard.py
+  └ 6 lines...
+
+● Edit dashboard.py +115
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L295:315 (13 lines read)
+
+● Edit dashboard.py +28
+  └ app/routers/dashboard.py
+
+Now add frontend API types:
+
+● Edit api.ts +27
+  └ frontend/src/api.ts
+
+Now update Dashboard.tsx to show achievements:
+
+● Edit Dashboard.tsx +2 -2
+  └ frontend/src/pages/Dashboard.tsx
+
+Add achievements state:
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Add achievements fetch in the initial useEffect:
+
+● Edit Dashboard.tsx +7
+  └ frontend/src/pages/Dashboard.tsx
+
+Now add the Achievements card between stats grid and recent activity:
+
+● Edit Dashboard.tsx +35
+  └ frontend/src/pages/Dashboard.tsx
+
+Now add tests:
+
+● Edit test_dashboard_api.py +44
+  └ tests/integration/test_dashboard_api.py
+
+Now commit and test:
+

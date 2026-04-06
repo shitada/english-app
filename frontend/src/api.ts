@@ -656,3 +656,30 @@ export async function checkSentenceBuild(
     body: JSON.stringify({ word_id, user_sentence }),
   });
 }
+
+// Achievement badges (from iteration 253)
+export interface AchievementProgress {
+  current: number;
+  target: number;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  category: string;
+  target: number;
+  unlocked: boolean;
+  progress: AchievementProgress;
+}
+
+export interface AchievementsResponse {
+  achievements: Achievement[];
+  unlocked_count: number;
+  total_count: number;
+}
+
+export async function getAchievements(): Promise<AchievementsResponse> {
+  return request<AchievementsResponse>('/api/dashboard/achievements');
+}

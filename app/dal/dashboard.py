@@ -716,3 +716,118 @@ async def get_mistake_journal(
     paged = items[offset: offset + limit]
 
     return {"items": paged, "total_count": total_count}
+
+
+# Achievement definitions: id, title, description, emoji, category, target
+_ACHIEVEMENT_DEFS: list[dict[str, Any]] = [
+    # Streak
+    {"id": "streak_1", "title": "Getting Started", "description": "Study for 1 day", "emoji": "🌱", "category": "streak", "target": 1},
+    {"id": "streak_7", "title": "Week Warrior", "description": "7-day study streak", "emoji": "🔥", "category": "streak", "target": 7},
+    {"id": "streak_30", "title": "Monthly Master", "description": "30-day study streak", "emoji": "👑", "category": "streak", "target": 30},
+    # Conversation
+    {"id": "conv_1", "title": "First Chat", "description": "Complete 1 conversation", "emoji": "💬", "category": "conversation", "target": 1},
+    {"id": "conv_10", "title": "Chatterbox", "description": "Complete 10 conversations", "emoji": "🗣️", "category": "conversation", "target": 10},
+    {"id": "conv_25", "title": "Polyglot", "description": "Complete 25 conversations", "emoji": "🌍", "category": "conversation", "target": 25},
+    # Vocabulary
+    {"id": "vocab_1", "title": "Word Learner", "description": "Master 1 word", "emoji": "📖", "category": "vocabulary", "target": 1},
+    {"id": "vocab_10", "title": "Vocab Builder", "description": "Master 10 words", "emoji": "📚", "category": "vocabulary", "target": 10},
+    {"id": "vocab_50", "title": "Lexicon", "description": "Master 50 words", "emoji": "🏆", "category": "vocabulary", "target": 50},
+    # Pronunciation
+    {"id": "pron_1", "title": "First Try", "description": "Complete 1 pronunciation attempt", "emoji": "🎙️", "category": "pronunciation", "target": 1},
+    {"id": "pron_25", "title": "Sound Scholar", "description": "Complete 25 pronunciation attempts", "emoji": "🎓", "category": "pronunciation", "target": 25},
+    {"id": "pron_perfect", "title": "Perfect Score", "description": "Score 9.0+ on pronunciation", "emoji": "⭐", "category": "pronunciation", "target": 1},
+    # General
+    {"id": "all_rounder", "title": "All-Rounder", "description": "Use all 3 learning modules", "emoji": "🎯", "category": "general", "target": 3},
+    {"id": "dedicated_10", "title": "Dedicated", "description": "Study for 10 different days", "emoji": "📅", "category": "general", "target": 10},
+    {"id": "century", "title": "Century", "description": "Complete 100 total activities", "emoji": "💯", "category": "general", "target": 100},
+]
+
+
+async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Compute achievements from existing learning data."""
+
+    # Gather counts from existing tables
+    streak_rows = await db.execute_fetchall(
+        "SELECT COUNT(DISTINCT date(started_at)) as days FROM conversations"
+    )
+    study_days = streak_rows[0]["days"] if streak_rows else 0
+
+    # Current streak (from get_stats logic)
+    conv_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM conversations WHERE ended_at IS NOT NULL")
+    total_convs = conv_rows[0]["cnt"] if conv_rows else 0
+
+    vocab_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 5"
+    )
+    vocab_mastered = vocab_rows[0]["cnt"] if vocab_rows else 0
+
+    pron_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM pronunciation_attempts")
+    total_pron = pron_rows[0]["cnt"] if pron_rows else 0
+
+    perfect_rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE score >= 9.0"
+    )
+    perfect_count = perfect_rows[0]["cnt"] if perfect_rows else 0
+
+    quiz_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
+    total_quiz = quiz_rows[0]["cnt"] if quiz_rows else 0
+
+    # Modules used
+    modules_used = sum([
+        1 if total_convs > 0 else 0,
+        1 if total_quiz > 0 else 0,
+        1 if total_pron > 0 else 0,
+    ])
+
+    total_activities = total_convs + total_quiz + total_pron
+
+    # Compute streak from daily activity
+    activity_rows = await db.execute_fetchall("""
+        SELECT DISTINCT d FROM (
+            SELECT date(started_at) as d FROM conversations
+            UNION SELECT date(answered_at) as d FROM quiz_attempts
+            UNION SELECT date(created_at) as d FROM pronunciation_attempts
+        ) ORDER BY d DESC
+    """)
+    streak = 0
+    today = date.today().isoformat()
+    expected = today
+    for row in activity_rows:
+        if row["d"] == expected:
+            streak += 1
+            # Move to previous day
+            from datetime import timedelta
+            expected = (date.fromisoformat(expected) - timedelta(days=1)).isoformat()
+        elif row["d"] < expected:
+            break
+
+    # Map progress values
+    progress_map: dict[str, int] = {
+        "streak_1": streak, "streak_7": streak, "streak_30": streak,
+        "conv_1": total_convs, "conv_10": total_convs, "conv_25": total_convs,
+        "vocab_1": vocab_mastered, "vocab_10": vocab_mastered, "vocab_50": vocab_mastered,
+        "pron_1": total_pron, "pron_25": total_pron,
+        "pron_perfect": perfect_count,
+        "all_rounder": modules_used,
+        "dedicated_10": study_days,
+        "century": total_activities,
+    }
+
+    achievements = []
+    unlocked_count = 0
+    for defn in _ACHIEVEMENT_DEFS:
+        current = min(progress_map.get(defn["id"], 0), defn["target"])
+        unlocked = current >= defn["target"]
+        if unlocked:
+            unlocked_count += 1
+        achievements.append({
+            **defn,
+            "unlocked": unlocked,
+            "progress": {"current": current, "target": defn["target"]},
+        })
+
+    return {
+        "achievements": achievements,
+        "unlocked_count": unlocked_count,
+        "total_count": len(_ACHIEVEMENT_DEFS),
+    }

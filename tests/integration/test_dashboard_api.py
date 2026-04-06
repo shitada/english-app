@@ -344,3 +344,47 @@ async def test_mistake_journal_pagination(client):
     assert res.status_code == 200
     data = res.json()
     assert len(data["items"]) <= 5
+
+
+@pytest.mark.integration
+async def test_achievements_empty(client):
+    """Achievements endpoint returns all badges with none unlocked when fresh."""
+    res = await client.get("/api/dashboard/achievements")
+    assert res.status_code == 200
+    data = res.json()
+    assert "achievements" in data
+    assert data["total_count"] == 15
+    assert data["unlocked_count"] == 0
+    for a in data["achievements"]:
+        assert "id" in a
+        assert "title" in a
+        assert "emoji" in a
+        assert "unlocked" in a
+        assert "progress" in a
+
+
+@pytest.mark.integration
+async def test_achievements_unlocked_after_activity(client, mock_copilot):
+    """Achievements unlock after completing activities."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask = AsyncMock(return_value="Hello, welcome!")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 9.5, "overall_feedback": "Perfect",
+        "word_feedback": [], "focus_areas": [],
+    })
+    # Start a conversation (unlocks First Chat + All-Rounder progress)
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start.json()["conversation_id"]
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    # Do a pronunciation attempt (unlocks First Try + Perfect Score)
+    await client.post("/api/pronunciation/check", json={
+        "reference_text": "Hello", "user_transcription": "Hello",
+    })
+
+    res = await client.get("/api/dashboard/achievements")
+    data = res.json()
+    assert data["unlocked_count"] >= 2  # At least First Chat + First Try
+    unlocked_ids = [a["id"] for a in data["achievements"] if a["unlocked"]]
+    assert "conv_1" in unlocked_ids
+    assert "pron_1" in unlocked_ids
