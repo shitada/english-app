@@ -254,3 +254,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 251	fedb192	2026-04-06	159	197	133	133	489	814	814	pass	7.5	KEPT	Add mistake journal to review errors across all modules
 252	6a5bbc7	2026-04-06	124	288	108	108	520	823	823	pass	7.8	KEPT	Add sentence reordering exercise mode to vocabulary practice
 253	d4bcd79	2026-04-07T01:13:00+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add achievement badge system for learning motivation
+254	22ca375	2026-04-06T16:37:08Z	39	544	569	99	1251	830	830	pass	7.3	KEPT	Add per-conversation performance metrics to summary view

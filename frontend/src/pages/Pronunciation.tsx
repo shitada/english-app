@@ -388,6 +388,32 @@ export default function Pronunciation() {
             <span style={{ fontSize: 12, color: 'var(--text-secondary)', width: 36, textAlign: 'right' }}>
               {Math.round(tts.volume * 100)}%
             </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 8 }} role="group" aria-label="Speech speed">
+              {([
+                { label: '🐢', value: 0.7 },
+                { label: '1×', value: 0.9 },
+                { label: '🐇', value: 1.2 },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => tts.setRate(opt.value)}
+                  aria-label={`Speed ${opt.label}`}
+                  aria-pressed={tts.rate === opt.value}
+                  style={{
+                    padding: '2px 6px',
+                    fontSize: 12,
+                    border: '1px solid var(--border)',
+                    borderRadius: 4,
+                    background: tts.rate === opt.value ? 'var(--primary)' : 'transparent',
+                    color: tts.rate === opt.value ? '#fff' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {dictationPlayed && (
@@ -508,6 +534,32 @@ export default function Pronunciation() {
           <span style={{ fontSize: 12, color: 'var(--text-secondary)', width: 36, textAlign: 'right' }}>
             {Math.round(tts.volume * 100)}%
           </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 8 }} role="group" aria-label="Speech speed">
+            {([
+              { label: '🐢', value: 0.7 },
+              { label: '1×', value: 0.9 },
+              { label: '🐇', value: 1.2 },
+            ] as const).map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => tts.setRate(opt.value)}
+                aria-label={`Speed ${opt.label}`}
+                aria-pressed={tts.rate === opt.value}
+                style={{
+                  padding: '2px 6px',
+                  fontSize: 12,
+                  border: '1px solid var(--border)',
+                  borderRadius: 4,
+                  background: tts.rate === opt.value ? 'var(--primary)' : 'transparent',
+                  color: tts.rate === opt.value ? '#fff' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  lineHeight: 1.2,
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {(speech.transcript || speech.interimTranscript) && (

@@ -1172,3 +1172,265 @@ Now commit and test:
 
 T2=1775492753, implement_sec=544. Now commit and test.
 
+● Commit iteration 254 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #254: Add per-conversation performance metrics to summary view
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 830 tests passed. Now run TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS check passed. Check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed. Also check if frontend pages changed for QA:
+
+● Check frontend changes for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passed. Frontend page changed, and proposal type is "feature", so QA tester is needed. Let me start the server and run the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now calling tester subagent:
+
+● Tester QA test iteration 254
+  └ Agent started in background with agent_id: tester-254. You can use read_agent...
+
+Tester running in background. Waiting...
+
+<system_notification>Background agent `tester-254` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 254 results
+  │ Read (Tester agent — QA test iteration 254)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 254)
+      └ Completed
+
+Tester passed (ux_score=7). Now record T3 and call evaluator:
+
+● Kill server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 10 lines...
+
+T3=1775493322, test_sec=569. Now calling evaluator:
+
+● Evaluator Evaluate iteration 254
+  └ Agent started in background with agent_id: evaluator-254. You can use read_ag...
+
+<system_notification>Background agent `evaluator-254` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 254 results
+  │ Read (Evaluator agent — Evaluate iteration 254)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 254)
+      └ Completed
+
+Evaluator: 7.3, keep. Now record results:
+
+● Record T4 (shell)
+  │ T4=$(date +%s); echo "T4=$T4 evaluate_sec=$((T4-1775493322)) total_sec=$((T4-1775492170))"
+  └ 2 lines...
+
+● Record results for iteration 254 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "254" "$HASH" "$DATE" "39" "544" "569" "99" "1251" \
+  │ "830" "830" "pass" "7.3" "KEPT" "Add per-conversation performance metrics to summary view" \…
+  └ 3 lines...
+
+Row verified with tabs. Iteration 254 complete — KEPT (7.3, 830 tests). Moving to iteration 255.
+
+● Context restore for iteration 255 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 27 lines...
+
+● T0 for iteration 255 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 255
+  └ Agent started in background with agent_id: proposer-255. You can use read_age...
+
+<system_notification>Background agent `proposer-255` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 255 results
+  │ Read (Proposer agent — Propose iteration 255)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 255)
+      └ Completed
+
+● Record T1 for iteration 255 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find rate/speed usage in Pronunciation.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "rate\|setRate\|speed\|volume\|Volume\|useSpeechSynthesis" frontend/src/pages/Pronunciation.tsx
+  │ | head -30
+  └ 16 lines...
+
+T1=1775493643, propose_sec=204. Let me look at the speed control pattern in the Conversation page, plus the relevant areas in Pronunciation.tsx:
+
+● Shadowing volume area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '490,520p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 32 lines...
+
+● Find speed control pattern in Conversation.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speed\|rate\|setRate\|🐢\|🐇"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 11 lines...
+
+● Dictation volume area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '370,400p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 32 lines...
+
+Now let me see the full speed control pattern in Conversation.tsx:
+
+● Full speed control pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '660,690p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 32 lines...
+
+Good. Now I'll add the speed control to both the dictation and shadowing areas in Pronunciation.tsx. Let me create a reusable speed control snippet and add it after each volume slider:
+
+● Edit Pronunciation.tsx +26 -2
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now find and update the shadowing volume slider. Let me check the exact text again:
+
+● Find remaining volume slider areas (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "justifyContent: 'center',
+  │ marginBottom: 16" frontend/src/pages/Pronunciation.tsx
+  └ 3 lines...
+
+● Check shadowing volume area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '521,540p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 21 lines...
+
+● Edit Pronunciation.tsx +26
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now let me also add the `{dictationPlayed &&` back that I accidentally removed:
+
+● Verify dictationPlayed block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '410,420p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 12 lines...
+
+I see — the `{dictationPlayed && (` block is missing. Let me fix that:
+
+● Edit Pronunciation.tsx +2
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now verify the file compiles:
+
+● Quick TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Good. Now commit and test:
+
+● Record T2 for iteration 255 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775493705, implement_sec=62.
+
+● Commit iteration 255 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #255: Add speech speed control to Pronunciation practice page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+830 passed. TS already checked. This is frontend-only (no DAL/router changes), so no smoke test. Proposal type is "ux" so QA tester is needed:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 255
+  └ Agent started in background with agent_id: tester-255. You can use read_agent...
+
+<system_notification>Background agent `tester-255` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 255 results
+  │ Read (Tester agent — QA test iteration 255)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 255)
+      └ Completed
+
+Good catch — default rate mismatch. Let me fix the speed values to match the hook default (0.9):
+
+● Find speed values to fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "0.6\|0.85\|1.1"
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 12 lines...
+
+● Edit Pronunciation.tsx +3 -3
+  └ frontend/src/pages/Pronunciation.tsx
+
+● Edit Pronunciation.tsx +3 -3
+  └ frontend/src/pages/Pronunciation.tsx
+
+● Verify TS after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
