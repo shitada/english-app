@@ -2556,3 +2556,103 @@ One more test with old `description` key:
 ● Edit test_normalize_feedback.py +1 -1
   └ tests/unit/test_normalize_feedback.py
 
+● Fix and retest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #263: Fix grammar feedback normalizer producing undefined renders in UI
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+838 passed (+4 new). TS check and smoke:
+
+● Check smoke needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. No frontend pages changed — QA skipped. Evaluate:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 263
+  └ Agent started in background with agent_id: evaluator-263. You can use read_ag...
+
+<system_notification>Background agent `evaluator-263` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 263 results
+  │ Read (Evaluator agent — Evaluate iteration 263)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 263)
+      └ Completed
+
+Evaluator: 7.8, keep. Recording:
+
+● Record results 263 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "263" "$HASH" "$DATE" "450" "125" "117" "$((T4-1775499808))" "$((T4-1775499116))" \
+  │ "838" "838" "pass" "7.8" "KEPT" "Fix grammar feedback normalizer producing undefined renders…
+  └ 4 lines...
+
+Iteration 263 KEPT (7.8, 838 tests). Starting iteration 264.
+
+● Context restore 264 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 264
+  └ Agent started in background with agent_id: proposer-264. You can use read_age...
+
+<system_notification>Background agent `proposer-264` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 264 results
+  │ Read (Proposer agent — Propose iteration 264)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 264)
+      └ Completed
+
+● Record T1 for 264 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find FeedbackPanel usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "FeedbackPanel"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 3 lines...
+
+● Read history view feedback (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '490,510p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+T1=1775500128, propose_sec=234. Simple fix — replace inline feedback with FeedbackPanel:
+
+● Edit Conversation.tsx +1 -5
+  └ frontend/src/pages/Conversation.tsx
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775500149, implement_sec=21. Commit and test:
+

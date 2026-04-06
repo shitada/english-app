@@ -494,11 +494,7 @@ export default function Conversation() {
             <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
               <div className={`message-bubble ${msg.role}`}>
                 <p>{msg.content}</p>
-                {msg.feedback && !msg.feedback.is_correct && (
-                  <div style={{ fontSize: '0.85rem', marginTop: 8, padding: 8, background: 'rgba(255,200,0,0.1)', borderRadius: 4 }}>
-                    <strong>Correction:</strong> {msg.feedback.corrected_text}
-                  </div>
-                )}
+                {msg.feedback && <FeedbackPanel feedback={msg.feedback} />}
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                 {formatDateTime(msg.created_at)}
