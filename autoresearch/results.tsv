@@ -242,3 +242,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 239	549c08d	2026-04-06T01:00:49Z	253	58	96	69	476	774	774	pass	7.8	kept	Fix phoneme_issues key mismatch between normalizer, DAL, and frontend
 240	b43cd60	2026-04-06T01:09:37Z	278	48	102	85	513	775	775	pass	7.8	kept	Fix vocabulary export/import round-trip: export includes topic_id
 241	60f04e8	2026-04-06T01:19:52Z	126	396	46	32	600	778	778	pass	7.3	kept	Fix config load_config crash on non-dict YAML root
+242	48fb4b3	2026-04-06T02:00:31Z	2115	53	128	127	2423	779	779	pass	6.3	kept	Fix race: send_message adds messages to ended conversations

@@ -297,9 +297,38 @@ class TestUpdateProgress:
         )
         assert rows[0]["cnt"] == 1
 
+    async def test_correct_at_max_level_stays_at_max(self, test_db):
+        """Answering correctly at max SM2 level (6) stays at level 6."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(1))
+        wid = words[0]["id"]
+        # Advance to max level (6) by answering correctly 7 times
+        for _ in range(7):
+            result = await update_progress(test_db, wid, True)
+        assert result["new_level"] == 6
 
-@pytest.mark.unit
-class TestGetProgress:
+    async def test_incorrect_at_max_level_drops(self, test_db):
+        """Answering incorrectly at max SM2 level drops to level 5."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(1))
+        wid = words[0]["id"]
+        for _ in range(7):
+            await update_progress(test_db, wid, True)
+        result = await update_progress(test_db, wid, False)
+        assert result["new_level"] == 5
+
+    async def test_corrupted_level_above_max(self, test_db):
+        """Level corrupted above max should be clamped without crashing."""
+        words = await save_words(test_db, "hotel_checkin", _make_questions(1))
+        wid = words[0]["id"]
+        await update_progress(test_db, wid, True)
+        # Manually corrupt the level to an out-of-bounds value
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET level = 10 WHERE word_id = ?",
+            (wid,),
+        )
+        await test_db.commit()
+        # Should not crash with IndexError
+        result = await update_progress(test_db, wid, False)
+        assert result["new_level"] <= 6
     async def test_returns_progress_by_topic(self, test_db):
         words = await save_words(test_db, "hotel_checkin", _make_questions(2))
         for w in words:

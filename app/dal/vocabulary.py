@@ -156,7 +156,7 @@ async def update_progress(
 
     if progress:
         p = progress[0]
-        level = p["level"]
+        level = min(max(p["level"], 0), len(SM2_INTERVALS) - 1)
         if is_correct:
             level = min(level + 1, len(SM2_INTERVALS) - 1)
             correct = p["correct_count"] + 1
