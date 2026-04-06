@@ -17,6 +17,7 @@ MAX_SESSION_LOGS=5
 # Defaults
 ADDITIONAL_ITERATIONS=20
 MAX_INVOCATIONS=10
+FEATURE_RATIO=20
 DRY_RUN=false
 
 # ============================================================================
@@ -33,12 +34,14 @@ The script automatically re-invokes until the target iteration count is reached.
 Options:
   -n, --iterations <N>      Number of additional iterations to run (default: $ADDITIONAL_ITERATIONS)
   -m, --max-invocations <N> Maximum copilot invocations to prevent runaway (default: $MAX_INVOCATIONS)
+  --feature-ratio <N>       Percentage of iterations that should be features (default: $FEATURE_RATIO)
   --dry-run                 Show what would be executed without running
   -h, --help                Show this help message
 
 Examples:
   $(basename "$0") -n 10                # Run 10 more iterations from current state
   $(basename "$0") -n 10 -m 5           # Run 10 more, max 5 copilot calls
+  $(basename "$0") -n 10 --feature-ratio 30  # 30% features (3 of 10)
   $(basename "$0") --dry-run -n 20      # Preview without executing
 EOF
     exit 0
@@ -53,6 +56,8 @@ while [[ $# -gt 0 ]]; do
             ADDITIONAL_ITERATIONS="$2"; shift 2 ;;
         -m|--max-invocations)
             MAX_INVOCATIONS="$2"; shift 2 ;;
+        --feature-ratio)
+            FEATURE_RATIO="$2"; shift 2 ;;
         --dry-run)
             DRY_RUN=true; shift ;;
         -h|--help)
@@ -114,6 +119,26 @@ build_prompt() {
     local next_iter=$((current_iter + 1))
     local remaining=$((target - current_iter))
 
+    # Calculate feature quota for this run
+    local feature_target=$(( ADDITIONAL_ITERATIONS * FEATURE_RATIO / 100 ))
+    [[ "$feature_target" -lt 1 ]] && feature_target=1
+
+    # Count features already kept in this run (from START_ITER onwards)
+    local features_done=0
+    if [[ -f "$RESULTS_FILE" ]]; then
+        features_done=$(awk -F'\t' -v start="$START_ITER" \
+            'NR>1 && $1>start && ($13=="keep" || $13=="kept" || $13=="KEPT") && $14 ~ /^(Add|Enhance|Implement|Wire|Create)/' \
+            "$RESULTS_FILE" | wc -l | tr -d ' ')
+    fi
+    local features_remaining=$((feature_target - features_done))
+    [[ "$features_remaining" -lt 0 ]] && features_remaining=0
+
+    # Determine if this iteration should be forced to feature
+    local feature_instruction=""
+    if [[ "$features_remaining" -gt 0 ]]; then
+        feature_instruction="7. **FEATURE REQUIRED**: This run targets ${feature_target} features (${features_done} done, ${features_remaining} remaining). Tell the proposer: 'You MUST return type=feature or type=ux. Do NOT return type=bugfix. Pick the highest priority uncompleted feature from the backlog.'"
+    fi
+
     cat <<EOF
 ## MANDATORY RULES — read before doing ANYTHING:
 1. You MUST call the **proposer** subagent via runSubagent for EVERY iteration. Do NOT propose changes yourself.
@@ -122,6 +147,7 @@ build_prompt() {
 4. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
 5. Read only the last 20 rows of results.tsv (use \`tail -20\`), not the full file.
 6. Before recording results, verify: Did I call proposer? Did I call evaluator? If NO → STOP and call them.
+${feature_instruction}
 
 ## Task:
 Resume the autoresearch improvement loop starting from iteration ${next_iter}.
@@ -141,6 +167,7 @@ main() {
     # Calculate absolute target from current state + additional
     local start_iter
     start_iter=$(get_current_iteration)
+    START_ITER=$start_iter
     TARGET_ITERATIONS=$((start_iter + ADDITIONAL_ITERATIONS))
 
     log "=========================================="
@@ -148,6 +175,7 @@ main() {
     log "Current iteration: $start_iter"
     log "Additional iters:  $ADDITIONAL_ITERATIONS"
     log "Target iteration:  $TARGET_ITERATIONS"
+    log "Feature ratio:     ${FEATURE_RATIO}% ($(( ADDITIONAL_ITERATIONS * FEATURE_RATIO / 100 )) features target)"
     log "Max invocations:   $MAX_INVOCATIONS"
     log "Project dir:       $PROJECT_DIR"
     log "=========================================="
