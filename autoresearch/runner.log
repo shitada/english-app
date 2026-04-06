@@ -1629,3 +1629,121 @@ One existing test expects `target_sound` key but we're now canonicalizing it. Le
 ● Edit test_normalize_feedback.py +1 -1
   └ tests/unit/test_normalize_feedback.py
 
+● Fix test and re-run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit tests/integration --tb=short 2>&1 | tail -5
+  └ 21 lines...
+
+774 pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775437171. No DAL/router changes needing smoke. No frontend .tsx page changes. QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 239
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L380:580 (201 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L580:700 (87 lines read)
+
+● Record T4 for iteration 239 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, keep. T0=1775436764, propose=253, implement=58, test=96, evaluate=69, total=476
+
+● Record results for iteration 239 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "239" "$HASH" "$DATE" "253" "58" "96" "69" "476" \
+  │ "774" "774" "pass" "7.8" "kept" "Fix phoneme_issues key mismatch between normalizer, DAL, …
+  └ 4 lines...
+
+Iteration 239 complete ✅. Moving to iteration 240 — halfway point!
+
+---
+
+● T0 for iteration 240 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 240
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ L50:end (550 lines read)
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ L60:90 (31 lines read)
+
+● Record T1 for iteration 240 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775437533. Let me examine the export/import code:
+
+● Find export code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ ExportWordItem\|export_words\|def export" app/routers/vocabulary.py | head -10
+  └ 4 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L373:420 (48 lines read)
+
+Now fix:
+
+● Edit vocabulary.py +1
+  └ app/routers/vocabulary.py
+
+● Edit vocabulary.py +1 -1
+  └ app/routers/vocabulary.py
+
+Now add a test for export/import round-trip:
+
+● Check existing export tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_export\|test_import"
+  │ tests/integration/test_vocabulary_api.py | head -10
+  └ 3 lines...
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L425:460 (36 lines read)
+
+● Edit test_vocabulary_api.py +25
+  └ tests/integration/test_vocabulary_api.py
+
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #240: Fix vocabulary export/import round-trip: export includes topic_id
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775437581. Run tests:
+
+● Run tests for iteration 240 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+The import is getting 422. Let me check the import endpoint:
+
+● Find import endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "import\|WordImportItem"
+  │ app/routers/vocabulary.py | grep -i "import" | head -15
+  └ 16 lines...
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L506:545 (40 lines read)
+
+I see — the import endpoint expects `topic` field in each word, not as a query param. Let me fix the test:
+
+● Edit test_vocabulary_api.py +2 -2
+  └ tests/integration/test_vocabulary_api.py
+

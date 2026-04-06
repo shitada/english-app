@@ -376,6 +376,7 @@ class ExportWordItem(BaseModel):
     meaning: str
     example_sentence: str
     topic: str
+    topic_id: str
     difficulty: int
     correct_count: int
     incorrect_count: int
@@ -397,7 +398,7 @@ async def export_words(
     """Export vocabulary words with progress data."""
     words = await vocab_dal.export_words(db, topic)
     vocab_topics = get_vocabulary_topics()
-    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
+    words = [{**w, "topic_id": w["topic"], "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
     return {"words": words, "total_count": len(words)}
 
 

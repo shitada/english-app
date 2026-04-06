@@ -442,6 +442,31 @@ async def test_export_words_with_data(client, mock_copilot):
     assert data["total_count"] >= 1
     assert "word" in data["words"][0]
     assert "correct_count" in data["words"][0]
+    assert "topic_id" in data["words"][0]
+    assert data["words"][0]["topic_id"] == "hotel_checkin"
+
+
+@pytest.mark.integration
+async def test_export_import_round_trip(client, mock_copilot):
+    """Exported words should be re-importable using topic_id."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "towel", "correct_meaning": "drying cloth", "example_sentence": "Use a towel.", "difficulty": 1}]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    export_res = await client.get("/api/vocabulary/export?topic=hotel_checkin")
+    assert export_res.status_code == 200
+    exported = export_res.json()["words"]
+    assert len(exported) >= 1
+    # Re-import using topic_id (raw ID)
+    import_payload = [
+        {"word": w["word"], "meaning": w["meaning"], "example_sentence": w["example_sentence"], "difficulty": w["difficulty"], "topic": w["topic_id"]}
+        for w in exported
+    ]
+    import_res = await client.post(
+        "/api/vocabulary/import",
+        json={"words": import_payload},
+    )
+    assert import_res.status_code == 200
 
 
 @pytest.mark.asyncio
