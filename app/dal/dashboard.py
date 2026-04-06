@@ -206,23 +206,30 @@ async def get_daily_activity(
            FROM dates
            LEFT JOIN (
                SELECT date(started_at) AS d, COUNT(*) AS cnt
-               FROM conversations GROUP BY date(started_at)
+               FROM conversations
+               WHERE started_at >= date('now', '-' || (? - 1) || ' days')
+               GROUP BY date(started_at)
            ) conv ON dates.d = conv.d
            LEFT JOIN (
                SELECT date(created_at) AS d, COUNT(*) AS cnt
-               FROM messages WHERE role = 'user' GROUP BY date(created_at)
+               FROM messages WHERE role = 'user'
+                 AND created_at >= date('now', '-' || (? - 1) || ' days')
+               GROUP BY date(created_at)
            ) msg ON dates.d = msg.d
            LEFT JOIN (
                SELECT date(created_at) AS d, COUNT(*) AS cnt
-               FROM pronunciation_attempts GROUP BY date(created_at)
+               FROM pronunciation_attempts
+               WHERE created_at >= date('now', '-' || (? - 1) || ' days')
+               GROUP BY date(created_at)
            ) pron ON dates.d = pron.d
            LEFT JOIN (
                SELECT date(answered_at) AS d, COUNT(*) AS cnt
                FROM quiz_attempts
+               WHERE answered_at >= date('now', '-' || (? - 1) || ' days')
                GROUP BY date(answered_at)
            ) vocab ON dates.d = vocab.d
            ORDER BY dates.d ASC""",
-        (days,),
+        (days, days, days, days, days),
     )
     return [
         {

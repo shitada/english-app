@@ -71,6 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id
 CREATE INDEX IF NOT EXISTS idx_messages_role_created ON messages(role, created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_bookmarked ON messages(is_bookmarked) WHERE is_bookmarked = 1;
 CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(status);
+CREATE INDEX IF NOT EXISTS idx_conversations_started_at ON conversations(started_at);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_topic ON vocabulary_words(topic);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_vocabulary_progress_word ON vocabulary_progress(word_id);
 CREATE INDEX IF NOT EXISTS idx_vocabulary_progress_review ON vocabulary_progress(next_review_at);
@@ -142,6 +143,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add unique index on vocabulary_progress word_id",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_vp_word_id_unique ON vocabulary_progress(word_id)",
+    ),
+    (
+        "add index on conversations started_at for dashboard queries",
+        "CREATE INDEX IF NOT EXISTS idx_conversations_started_at ON conversations(started_at)",
     ),
 ]
 

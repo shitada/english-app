@@ -1366,3 +1366,121 @@ Now add a test for degraded health status. Let me check existing health tests:
 ● Edit test_health.py +11
   └ tests/integration/test_health.py
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #237: Fix health check DB connection leak from misused async generator
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775435730. Run tests:
+
+● Run tests for iteration 237 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -10
+  └ 11 lines...
+
+772 pass. TS check and smoke test:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Record T3 for iteration 237 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+No frontend changes, no DAL/router files. QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 237
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L100:170 (71 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L170:230 (61 lines read)
+
+● Record T4 for iteration 237 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.05, keep. T0=1775434794, propose=883, implement=53, test=49, evaluate=49, total=1034
+
+● Record results for iteration 237 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "237" "$HASH" "$DATE" "883" "53" "49" "49" "1034" \
+  │ "772" "772" "pass" "8.05" "kept" "Fix health check DB connection leak from misused async …
+  └ 4 lines...
+
+Iteration 237 complete ✅. Moving to iteration 238.
+
+---
+
+● T0 for iteration 238 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 238
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L190:237 (47 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L68:93 (26 lines read)
+
+● Record T1 for iteration 238 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775436559. Let me examine the code:
+
+● Read get_daily_activity function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '190,240p' app/dal/dashboard.py
+  └ 52 lines...
+
+Now fix the subqueries to add WHERE clauses:
+
+● Edit dashboard.py +11 -4
+  └ app/dal/dashboard.py
+
+Now add the missing index. Let me check the SCHEMA and _MIGRATIONS:
+
+● Check existing conversation indexes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "idx_conversations\|CREATE
+  │ INDEX.*conversations" app/database.py
+  └ 2 lines...
+
+● Read database.py
+  │ app/database.py
+  └ L72:80 (8 lines read)
+
+● Edit database.py +1
+  └ app/database.py
+
+Now add to _MIGRATIONS:
+
+● Find _MIGRATIONS list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_MIGRATIONS" app/database.py |
+  │ head -5
+  └ 3 lines...
+
+✗ See end of _MIGRATIONS list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -15 <(sed -n '114,168p'
+  │ app/database.py)
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● Read database.py
+  │ app/database.py
+  └ L155:170 (16 lines read)
+
+● Read database.py
+  │ app/database.py
+  └ L143:156 (14 lines read)
+
+● Edit database.py +4
+  └ app/database.py
+
