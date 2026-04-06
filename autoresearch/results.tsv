@@ -259,3 +259,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 256	ba4e458	2026-04-06T17:02:52Z	427	38	66	108	639	830	830	pass	7.0	KEPT	Fix unbounded full-table scans in _get_recent_activity and streak helpers
 257	28e6b9a	2026-04-06T17:17:37Z	253	38	402	187	880	830	830	pass	6.95	KEPT	Fix missing topic emojis in past conversations list
 258	9ce1f89	2026-04-06T17:26:47Z	226	38	180	98	542	831	831	pass	8.1	KEPT	Fix achievements streak showing 0 when no activity today
+259	df1e1bd	2026-04-06T17:35:28Z	277	24	122	91	514	832	832	pass	8.05	KEPT	Fix achievements vocab mastery threshold inconsistent with rest of app

@@ -2011,3 +2011,123 @@ Key is `vocab_mastered`:
 ● Edit test_dashboard_dal.py +1 -1
   └ tests/unit/test_dashboard_dal.py
 
+● Fix test and run full suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #259: Fix achievements vocab mastery threshold inconsistent with rest of app
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+832 passed. TS and smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. No frontend changes, type is bugfix — QA skipped. Evaluate:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 259
+  └ Agent started in background with agent_id: evaluator-259. You can use read_ag...
+
+<system_notification>Background agent `evaluator-259` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 259 results
+  │ Read (Evaluator agent — Evaluate iteration 259)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 259)
+      └ Completed
+
+Evaluator: 8.05, keep. Recording:
+
+● Record results 259 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "259" "$HASH" "$DATE" "277" "24" "122" "$((T4-1775496837))" "$((T4-1775496414))" \
+  │ "832" "832" "pass" "8.05" "KEPT" "Fix achievements vocab mastery threshold inconsistent with…
+  └ 4 lines...
+
+Iteration 259 KEPT (8.05, 832 tests). Starting iteration 260.
+
+● Context restore 260 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 260
+  └ Agent started in background with agent_id: proposer-260. You can use read_age...
+
+<system_notification>Background agent `proposer-260` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 260 results
+  │ Read (Proposer agent — Propose iteration 260)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 260)
+      └ Completed
+
+● Record T1 for 260 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read study_days query (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '755,765p' app/dal/dashboard.py
+  └ 10 lines...
+
+T1=1775497297, propose_sec=362. Clear bug — fix the study_days query:
+
+● Edit dashboard.py +9 -3
+  └ app/dal/dashboard.py
+
+Now add the regression test:
+
+● Add study days regression tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_dashboard_dal.py
+  │ << 'PYTEST_EOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 55 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775497323, implement_sec=26. Commit and test:
+
+● Commit and test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #260: Fix achievements dedicated_10 study_days counting only conversation days
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 20 lines...
+
+● Full error for failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit/test_dashboard_dal
+  │ .py::TestGetAchievementsStudyDays::test_study_days_counts_pronunciation_only_days -v 2>&1 | tail
+  │ -20
+  └ 20 lines...
+
+The `pronunciation_attempts` table doesn't have a `transcript` column. Let me check the schema:
+
+● Check pronunciation_attempts schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 10 "pronunciation_attempts"
+  │ app/database.py | head -15
+  └ 15 lines...
+
+Column is `user_transcription`, not `transcript`:
+
+● Edit test_dashboard_dal.py +2 -2
+  └ tests/unit/test_dashboard_dal.py
+

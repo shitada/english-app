@@ -721,3 +721,55 @@ class TestGetAchievementsVocabMastery:
         assert vocab_badges[0]["progress"]["current"] >= 1, (
             "Achievement should count level 3 as mastered (same threshold as dashboard)"
         )
+
+
+@pytest.mark.unit
+class TestGetAchievementsStudyDays:
+    async def test_study_days_counts_pronunciation_only_days(self, test_db):
+        """Days with only pronunciation activity should count toward dedicated_10."""
+        from app.dal.dashboard import get_achievements
+
+        # Insert pronunciation attempts on two different days (no conversations)
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-1 day'))",
+            ("hello world", "hello world", 9.0),
+        )
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (?, ?, ?, datetime('now', '-2 days'))",
+            ("good morning", "good morning", 8.5),
+        )
+        await test_db.commit()
+
+        achievements_data = await get_achievements(test_db)
+        dedicated = [a for a in achievements_data["achievements"] if a["id"] == "dedicated_10"]
+        assert dedicated[0]["progress"]["current"] >= 2, (
+            "Pronunciation-only days should count toward dedicated_10 achievement"
+        )
+
+    async def test_study_days_counts_vocabulary_only_days(self, test_db):
+        """Days with only vocabulary activity should count toward dedicated_10."""
+        from app.dal.dashboard import get_achievements
+
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (word, meaning, topic) VALUES (?, ?, ?)",
+            ("test", "テスト", "daily_life"),
+        )
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) "
+            "VALUES (?, ?, datetime('now', '-1 day'))",
+            (1, 1),
+        )
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) "
+            "VALUES (?, ?, datetime('now', '-3 days'))",
+            (1, 0),
+        )
+        await test_db.commit()
+
+        achievements_data = await get_achievements(test_db)
+        dedicated = [a for a in achievements_data["achievements"] if a["id"] == "dedicated_10"]
+        assert dedicated[0]["progress"]["current"] >= 2, (
+            "Vocabulary-only days should count toward dedicated_10 achievement"
+        )

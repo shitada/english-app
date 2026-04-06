@@ -754,9 +754,15 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     """Compute achievements from existing learning data."""
 
     # Gather counts from existing tables
-    streak_rows = await db.execute_fetchall(
-        "SELECT COUNT(DISTINCT date(started_at)) as days FROM conversations"
-    )
+    streak_rows = await db.execute_fetchall("""
+        SELECT COUNT(DISTINCT date(created_at)) as days FROM (
+            SELECT created_at FROM messages WHERE role = 'user'
+            UNION ALL
+            SELECT created_at FROM pronunciation_attempts
+            UNION ALL
+            SELECT answered_at AS created_at FROM quiz_attempts
+        )
+    """)
     study_days = streak_rows[0]["days"] if streak_rows else 0
 
     # Current streak (from get_stats logic)
