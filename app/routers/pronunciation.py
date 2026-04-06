@@ -16,7 +16,7 @@ from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import coerce_bool, get_topic_label, safe_llm_call
+from app.utils import coerce_bool, compute_dictation_score, get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -453,6 +453,41 @@ class MistakePatternItem(BaseModel):
 class CommonMistakesResponse(BaseModel):
     patterns: list[MistakePatternItem]
     total: int
+
+
+class DictationRequest(BaseModel):
+    reference_text: str = Field(min_length=1, max_length=1000)
+    user_typed_text: str = Field(max_length=2000)
+
+
+class DictationWordResult(BaseModel):
+    expected: str
+    typed: str
+    is_correct: bool
+
+
+class DictationResponse(BaseModel):
+    score: float
+    total_words: int
+    correct_words: int
+    word_results: list[DictationWordResult]
+
+
+@router.post("/dictation-check", response_model=DictationResponse)
+async def check_dictation(req: DictationRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Check dictation accuracy by comparing typed text to reference."""
+    result = compute_dictation_score(req.reference_text, req.user_typed_text)
+
+    # Persist as a pronunciation attempt so it shows in history
+    await pron_dal.save_attempt(
+        db,
+        req.reference_text,
+        req.user_typed_text,
+        {"mode": "dictation", "word_results": result["word_results"]},
+        result["score"],
+    )
+
+    return result
 
 
 @router.get("/common-mistakes", response_model=CommonMistakesResponse)

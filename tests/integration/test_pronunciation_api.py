@@ -617,3 +617,66 @@ async def test_check_pronunciation_normalizes_phoneme_issues(client, mock_copilo
     assert wf["phoneme_issues"] == []
     # common_patterns should be normalized to empty list
     assert data["common_patterns"] == []
+
+
+@pytest.mark.asyncio
+async def test_dictation_check_perfect(client):
+    """Dictation check returns perfect score for exact match."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "The quick brown fox jumps over the lazy dog",
+            "user_typed_text": "The quick brown fox jumps over the lazy dog",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["score"] == 10.0
+    assert data["correct_words"] == data["total_words"]
+    assert all(w["is_correct"] for w in data["word_results"])
+
+
+@pytest.mark.asyncio
+async def test_dictation_check_partial(client):
+    """Dictation check returns partial score for partial match."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "Hello world",
+            "user_typed_text": "Hello word",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_words"] == 2
+    assert data["correct_words"] == 1
+    assert data["score"] == 5.0
+
+
+@pytest.mark.asyncio
+async def test_dictation_check_empty_typed(client):
+    """Dictation check with empty typed text returns zero score."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "Hello world",
+            "user_typed_text": " ",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["score"] == 0.0
+    assert data["correct_words"] == 0
+
+
+@pytest.mark.asyncio
+async def test_dictation_check_validation(client):
+    """Dictation check rejects empty reference text."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "",
+            "user_typed_text": "hello",
+        },
+    )
+    assert resp.status_code == 422

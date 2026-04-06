@@ -317,3 +317,57 @@ class TestExtractRole:
     def test_empty_string(self):
         from app.utils import extract_role
         assert extract_role("") == ""
+
+
+class TestComputeDictationScore:
+    def test_perfect_match(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score(
+            "I'd like to check in please",
+            "I'd like to check in please",
+        )
+        assert result["score"] == 10.0
+        assert result["correct_words"] == result["total_words"]
+        assert all(w["is_correct"] for w in result["word_results"])
+
+    def test_partial_match(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score(
+            "The quick brown fox",
+            "The quick red fox",
+        )
+        assert result["total_words"] == 4
+        assert result["correct_words"] == 3
+        assert result["score"] == 7.5
+
+    def test_empty_typed(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score("Hello world", "")
+        assert result["score"] == 0.0
+        assert result["correct_words"] == 0
+        assert result["total_words"] == 2
+
+    def test_empty_reference(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score("", "hello")
+        assert result["score"] == 0.0
+        assert result["total_words"] == 0
+
+    def test_case_insensitive(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score("Hello World", "hello world")
+        assert result["score"] == 10.0
+
+    def test_punctuation_ignored(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score(
+            "Hello, world!",
+            "hello world",
+        )
+        assert result["score"] == 10.0
+
+    def test_extra_words(self):
+        from app.utils import compute_dictation_score
+        result = compute_dictation_score("one two", "one two three four")
+        assert result["total_words"] == 2
+        assert result["correct_words"] == 2

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from collections.abc import Awaitable, Callable
+from difflib import SequenceMatcher
 from typing import Any, TypeVar
 
 from fastapi import HTTPException
@@ -101,3 +103,76 @@ def coerce_bool(value: Any, *, default: bool = True) -> bool:
     if value is None:
         return default
     return bool(value)
+
+
+def _tokenize(text: str) -> list[str]:
+    """Tokenize text into lowercase words, stripping punctuation."""
+    return re.findall(r"[a-zA-Z']+", text.lower())
+
+
+def compute_dictation_score(reference: str, typed: str) -> dict[str, Any]:
+    """Compare a reference sentence with user-typed text word-by-word.
+
+    Returns a dict with score (0-10), word counts, and per-word results.
+    """
+    ref_words = _tokenize(reference)
+    typed_words = _tokenize(typed)
+
+    if not ref_words:
+        return {
+            "score": 0.0,
+            "total_words": 0,
+            "correct_words": 0,
+            "word_results": [],
+        }
+
+    matcher = SequenceMatcher(None, ref_words, typed_words)
+    word_results: list[dict[str, Any]] = []
+    matched_ref: set[int] = set()
+
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            for k in range(i2 - i1):
+                word_results.append({
+                    "expected": ref_words[i1 + k],
+                    "typed": typed_words[j1 + k],
+                    "is_correct": True,
+                })
+                matched_ref.add(i1 + k)
+        elif tag == "replace":
+            for k in range(max(i2 - i1, j2 - j1)):
+                ref_idx = i1 + k if k < (i2 - i1) else None
+                typ_idx = j1 + k if k < (j2 - j1) else None
+                word_results.append({
+                    "expected": ref_words[ref_idx] if ref_idx is not None else "",
+                    "typed": typed_words[typ_idx] if typ_idx is not None else "",
+                    "is_correct": False,
+                })
+                if ref_idx is not None:
+                    matched_ref.add(ref_idx)
+        elif tag == "delete":
+            for k in range(i1, i2):
+                word_results.append({
+                    "expected": ref_words[k],
+                    "typed": "",
+                    "is_correct": False,
+                })
+                matched_ref.add(k)
+        elif tag == "insert":
+            for k in range(j1, j2):
+                word_results.append({
+                    "expected": "",
+                    "typed": typed_words[k],
+                    "is_correct": False,
+                })
+
+    correct_words = sum(1 for r in word_results if r["is_correct"])
+    total_words = len(ref_words)
+    score = round((correct_words / total_words) * 10.0, 1) if total_words > 0 else 0.0
+
+    return {
+        "score": score,
+        "total_words": total_words,
+        "correct_words": correct_words,
+        "word_results": word_results,
+    }

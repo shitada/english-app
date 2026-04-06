@@ -577,3 +577,27 @@ export async function getBookmarkedMessages(params?: {
   const qs = sp.toString();
   return request<BookmarkedMessagesResponse>(`/api/conversation/bookmarks${qs ? `?${qs}` : ''}`);
 }
+
+// Dictation mode (from iteration 250)
+export interface DictationWordResult {
+  expected: string;
+  typed: string;
+  is_correct: boolean;
+}
+
+export interface DictationResult {
+  score: number;
+  total_words: number;
+  correct_words: number;
+  word_results: DictationWordResult[];
+}
+
+export async function checkDictation(
+  reference_text: string,
+  user_typed_text: string,
+): Promise<DictationResult> {
+  return request<DictationResult>('/api/pronunciation/dictation-check', {
+    method: 'POST',
+    body: JSON.stringify({ reference_text, user_typed_text }),
+  });
+}

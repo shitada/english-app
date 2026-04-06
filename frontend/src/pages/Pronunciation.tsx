@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Volume2, MicOff, RotateCcw, ChevronRight, ChevronDown, History, Mic, Play } from 'lucide-react';
-import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress } from '../api';
+import { Volume2, MicOff, RotateCcw, ChevronRight, ChevronDown, History, Mic, Play, Keyboard } from 'lucide-react';
+import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress, type DictationResult, checkDictation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
@@ -28,6 +28,10 @@ export default function Pronunciation() {
   const [expandedAttemptId, setExpandedAttemptId] = useState<number | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const [practiceMode, setPracticeMode] = useState<'shadowing' | 'dictation'>('shadowing');
+  const [dictationText, setDictationText] = useState('');
+  const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
+  const [dictationPlayed, setDictationPlayed] = useState(false);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -72,6 +76,9 @@ export default function Pronunciation() {
     recorder.reset();
     setComparePlaying(false);
     setShadowingState('idle');
+    setDictationText('');
+    setDictationResult(null);
+    setDictationPlayed(false);
     setPhase('practice');
   };
 
@@ -100,7 +107,25 @@ export default function Pronunciation() {
     setFeedback(null);
     setShadowingState('idle');
     setComparePlaying(false);
+    setDictationText('');
+    setDictationResult(null);
+    setDictationPlayed(false);
     setPhase('practice');
+  };
+
+  const submitDictation = async () => {
+    if (!dictationText.trim()) return;
+    setLoading(true);
+    try {
+      const res = await checkDictation(selectedSentence, dictationText);
+      setDictationResult(res);
+      setPhase('result');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to check dictation. Make sure the backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadHistory = async () => {
@@ -271,6 +296,23 @@ export default function Pronunciation() {
           Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback.
         </p>
 
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button
+            className={`btn ${practiceMode === 'shadowing' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setPracticeMode('shadowing')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Mic size={16} /> Shadowing
+          </button>
+          <button
+            className={`btn ${practiceMode === 'dictation' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setPracticeMode('dictation')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Keyboard size={16} /> Dictation
+          </button>
+        </div>
+
         <div style={{ marginBottom: 16, textAlign: 'right' }}>
           <button
             className="btn btn-secondary"
@@ -315,6 +357,68 @@ export default function Pronunciation() {
 
   // Practice phase
   if (phase === 'practice') {
+    if (practiceMode === 'dictation') {
+      return (
+        <div className="card">
+          <h3 style={{ marginBottom: 16, textAlign: 'center' }}>Dictation Practice</h3>
+
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
+            Listen to the sentence, then type what you hear.
+          </p>
+
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => { tts.speak(selectedSentence); setDictationPlayed(true); }}
+              disabled={tts.isSpeaking}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <Volume2 size={18} /> {dictationPlayed ? 'Play Again' : 'Play Sentence'}
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+            <Volume2 size={16} color="var(--text-secondary)" />
+            <input
+              type="range" min={0} max={1} step={0.05}
+              value={tts.volume}
+              onChange={(e) => tts.setVolume(parseFloat(e.target.value))}
+              style={{ width: 120, accentColor: 'var(--primary)' }}
+            />
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', width: 36, textAlign: 'right' }}>
+              {Math.round(tts.volume * 100)}%
+            </span>
+          </div>
+
+          {dictationPlayed && (
+            <textarea
+              value={dictationText}
+              onChange={(e) => setDictationText(e.target.value)}
+              placeholder="Type what you heard..."
+              rows={3}
+              style={{
+                width: '100%', padding: '12px', fontSize: 16, borderRadius: 8,
+                border: '1px solid var(--border)', resize: 'vertical',
+                fontFamily: 'inherit', marginBottom: 16, boxSizing: 'border-box',
+              }}
+              autoFocus
+            />
+          )}
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <button className="btn btn-secondary" onClick={() => setPhase('select')}>Back</button>
+            {dictationText.trim() && (
+              <button className="btn btn-primary" onClick={submitDictation} disabled={loading}>
+                {loading ? (
+                  <><div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, margin: 0 }} /> Checking...</>
+                ) : 'Check Dictation'}
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="card">
         <h3 style={{ marginBottom: 16, textAlign: 'center' }}>Shadowing Practice</h3>
@@ -441,7 +545,63 @@ export default function Pronunciation() {
   }
 
   // Result phase
-  if (phase === 'result' && feedback) {
+  if (phase === 'result' && (feedback || dictationResult)) {
+    // Dictation result
+    if (dictationResult) {
+      const dScoreClass = dictationResult.score >= 8 ? 'score-high' : dictationResult.score >= 5 ? 'score-mid' : 'score-low';
+      return (
+        <div className="card">
+          <h3 style={{ textAlign: 'center', marginBottom: 16 }}>Dictation Result</h3>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 16 }}>
+            <div style={{ textAlign: 'center' }}>
+              <div className={`score-circle ${dScoreClass}`}>{dictationResult.score}</div>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Score</p>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary)' }}>
+                {dictationResult.correct_words}/{dictationResult.total_words}
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>Words Correct</p>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 16, padding: '12px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>Reference:</p>
+            <p style={{ fontSize: 15, fontWeight: 500 }}>{selectedSentence}</p>
+          </div>
+
+          <h4 style={{ marginBottom: 8 }}>Word-by-Word Comparison</h4>
+          <div className="word-comparison">
+            {dictationResult.word_results.map((w, i) => {
+              const chipClass = w.is_correct ? 'word-correct' : 'word-incorrect';
+              return (
+                <div key={i} className={`word-chip ${chipClass}`}>
+                  {w.expected || '(extra)'}
+                  {!w.is_correct && w.typed && (
+                    <span style={{ fontSize: 11, display: 'block' }}>→ "{w.typed}"</span>
+                  )}
+                  {!w.is_correct && !w.typed && (
+                    <span style={{ fontSize: 11, display: 'block', color: '#999' }}>(missed)</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 24 }}>
+            <button className="btn btn-secondary" onClick={retry}>
+              <RotateCcw size={16} /> Try Again
+            </button>
+            <button className="btn btn-primary" onClick={() => setPhase('select')}>
+              Next Sentence
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Shadowing result (existing)
     const scoreClass = feedback.overall_score != null
       ? (feedback.overall_score >= 8 ? 'score-high' : feedback.overall_score >= 5 ? 'score-mid' : 'score-low')
       : 'score-mid';

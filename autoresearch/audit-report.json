@@ -1,7 +1,5 @@
 [
-  {"check":"tsv_format","severity":"error","iterations":" 202 203 204 205","root_cause":"unknown","confidence":"LOW","evidence":"Malformed rows but no echo -e pattern found in runner.log","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 ","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ,
-  {"check":"missing_iterations","severity":"error","iterations":" 206","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
-,
-  {"check":"agent_skip","severity":"error","iterations":" 202 203 204 205  202 203 204 205","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"playwright_shallow","severity":"warning","iterations":" 230(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
 ]
