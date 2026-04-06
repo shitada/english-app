@@ -1434,3 +1434,101 @@ Good catch — default rate mismatch. Let me fix the speed values to match the h
   │ OK"
   └ 2 lines...
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #255: Add speech speed control to Pronunciation practice page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now record T3 and kill server, then evaluate:
+
+● Kill server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1775494228, test_sec=523. Now call evaluator:
+
+● Evaluator Evaluate iteration 255
+  └ Agent started in background with agent_id: evaluator-255. You can use read_ag...
+
+<system_notification>Background agent `evaluator-255` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 255 results
+  │ Read (Evaluator agent — Evaluate iteration 255)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 255)
+      └ Completed
+
+Evaluator: 6.5, keep. Recording results:
+
+● Record results for iteration 255 (shell)
+  │ T4=$(date +%s) && echo "T4=$T4 evaluate_sec=$((T4-1775494228)) total_sec=$((T4-1775493439))"
+  │ && \
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \…
+  └ 6 lines...
+
+Iteration 255 KEPT (6.5, 830 tests). Starting iteration 256.
+
+● Context restore for 256 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 256
+  └ Agent started in background with agent_id: proposer-256. You can use read_age...
+
+<system_notification>Background agent `proposer-256` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 256 results
+  │ Read (Proposer agent — Propose iteration 256)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 256)
+      └ Completed
+
+● Record T1 for iteration 256 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read _calculate_longest_streak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '275,330p' app/dal/dashboard.py
+  └ 57 lines...
+
+● Read _calculate_streak and _get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '75,140p' app/dal/dashboard.py
+  └ 65 lines...
+
+T1=1775494759, propose_sec=427. Now implement the fixes:
+
+● Edit dashboard.py +3 -3
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +13 -6
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +3 -3
+  └ app/dal/dashboard.py
+
+Now let me check if there are existing dashboard tests and add tests:
+
+● Find dashboard test files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_dashboard*  2>/dev/null
+  │ && ls tests/integration/test_dashboard* 2>/dev/null
+  └ 3 lines...
+
+● Check existing dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class\|def
+  │ test\|_calculate_streak\|_get_recent\|_calculate_longest" tests/unit/test_dashboard_dal.py |
+  │ head -30
+  └ 31 lines...
+
+The existing tests for `_get_recent_activity` and streak already exist at lines 72-140. The optimized queries should still pass these. Let me now commit and test:
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775494797, implement_sec=38.
+

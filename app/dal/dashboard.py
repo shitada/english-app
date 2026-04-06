@@ -83,11 +83,11 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
     """Count consecutive days with learning activity ending at today or yesterday."""
     rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
-            SELECT created_at FROM messages WHERE role = 'user'
+            SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-366 days')
             UNION ALL
-            SELECT created_at FROM pronunciation_attempts
+            SELECT created_at FROM pronunciation_attempts WHERE created_at >= date('now', '-366 days')
             UNION ALL
-            SELECT answered_at AS created_at FROM quiz_attempts
+            SELECT answered_at AS created_at FROM quiz_attempts WHERE answered_at >= date('now', '-366 days')
         ) ORDER BY d DESC
     """)
 
@@ -123,15 +123,22 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
 async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list[dict[str, Any]]:
     """Get recent learning activity feed."""
     rows = await db.execute_fetchall("""
-        SELECT 'conversation' as type, topic as detail, started_at as ts FROM conversations
+        SELECT type, detail, ts FROM (
+            SELECT 'conversation' as type, topic as detail, started_at as ts FROM conversations ORDER BY started_at DESC LIMIT ?
+        )
         UNION ALL
-        SELECT 'pronunciation' as type, reference_text as detail, created_at as ts FROM pronunciation_attempts
+        SELECT type, detail, ts FROM (
+            SELECT 'pronunciation' as type, reference_text as detail, created_at as ts FROM pronunciation_attempts ORDER BY created_at DESC LIMIT ?
+        )
         UNION ALL
-        SELECT 'vocabulary' as type, vw.word as detail, qa.answered_at as ts
-        FROM quiz_attempts qa
-        JOIN vocabulary_words vw ON qa.word_id = vw.id
+        SELECT type, detail, ts FROM (
+            SELECT 'vocabulary' as type, vw.word as detail, qa.answered_at as ts
+            FROM quiz_attempts qa
+            JOIN vocabulary_words vw ON qa.word_id = vw.id
+            ORDER BY qa.answered_at DESC LIMIT ?
+        )
         ORDER BY ts DESC LIMIT ?
-    """, (limit,))
+    """, (limit, limit, limit, limit))
     return [
         {"type": r["type"], "detail": r["detail"][:60], "timestamp": r["ts"]}
         for r in rows
@@ -284,11 +291,11 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
     """Find the longest consecutive streak in all activity history."""
     rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
-            SELECT created_at FROM messages WHERE role = 'user'
+            SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-1095 days')
             UNION ALL
-            SELECT created_at FROM pronunciation_attempts
+            SELECT created_at FROM pronunciation_attempts WHERE created_at >= date('now', '-1095 days')
             UNION ALL
-            SELECT answered_at AS created_at FROM quiz_attempts
+            SELECT answered_at AS created_at FROM quiz_attempts WHERE answered_at >= date('now', '-1095 days')
         ) ORDER BY d ASC
     """)
     if not rows:
