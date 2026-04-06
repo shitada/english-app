@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { api, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn } from '../api';
+import { api, ApiError, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
@@ -111,7 +111,21 @@ export default function Conversation() {
       setSummary(res.summary);
       setPhase('summary');
     } catch (err) {
-      console.error(err);
+      if (err instanceof ApiError && err.status === 409) {
+        try {
+          const sumRes = await api.getConversationSummary(conversationId);
+          setSummary(sumRes.summary);
+          setPhase('summary');
+        } catch {
+          setPhase('select');
+        }
+      } else {
+        console.error(err);
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Failed to end conversation. Please try again.' },
+        ]);
+      }
     } finally {
       setLoading(false);
       clearInterval(timerRef.current);
@@ -266,10 +280,28 @@ export default function Conversation() {
       tts.speak(res.message);
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' },
-      ]);
+      if (err instanceof ApiError && err.status === 409) {
+        try {
+          const sumRes = await api.getConversationSummary(conversationId!);
+          setSummary(sumRes.summary);
+          setPhase('summary');
+        } catch {
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'This conversation has ended. Please start a new one.' },
+          ]);
+        }
+      } else if (err instanceof ApiError && err.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Too many requests. Please wait a moment before trying again.' },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' },
+        ]);
+      }
     } finally {
       setLoading(false);
     }

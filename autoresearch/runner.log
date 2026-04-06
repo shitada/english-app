@@ -2131,3 +2131,129 @@ Column is `user_transcription`, not `transcript`:
 ● Edit test_dashboard_dal.py +2 -2
   └ tests/unit/test_dashboard_dal.py
 
+● Fix test and run full suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #260: Fix achievements dedicated_10 study_days counting only conversation days
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+834 passed (+2 new). TS and smoke:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. No frontend changes, QA skipped. Evaluate:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 260
+  └ Agent started in background with agent_id: evaluator-260. You can use read_ag...
+
+<system_notification>Background agent `evaluator-260` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 260 results
+  │ Read (Evaluator agent — Evaluate iteration 260)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 260)
+      └ Completed
+
+Evaluator: 7.8, keep. Recording:
+
+● Record results 260 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "260" "$HASH" "$DATE" "362" "26" "118" "$((T4-1775497441))" "$((T4-1775496935))" \
+  │ "834" "834" "pass" "7.8" "KEPT" "Fix achievements dedicated_10 study_days counting only …
+  └ 4 lines...
+
+Iteration 260 KEPT (7.8, 834 tests). Starting iteration 261.
+
+● Context restore 261 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 261
+  └ Agent started in background with agent_id: proposer-261. You can use read_age...
+
+<system_notification>Background agent `proposer-261` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 261 results
+  │ Read (Proposer agent — Propose iteration 261)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 261)
+      └ Completed
+
+Good UX bug find. Let me implement:
+
+● Record T1 for 261 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find request function in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "request\|throw\|Error\|ApiError"
+  │ frontend/src/api.ts | head -20
+  └ 21 lines...
+
+● Read full request function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,15p' frontend/src/api.ts
+  └ 16 lines...
+
+● Read endConversation handler (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '105,120p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 15 lines...
+
+● Read sendMessage error handling (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '260,280p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+T1=1775498022, propose_sec=493. Now implement:
+
+● Edit api.ts +10 -1
+  └ frontend/src/api.ts
+
+Now fix the `endConversation` handler:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now fix `endConversation` to handle 409:
+
+● Edit Conversation.tsx +15 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now fix `sendMessage` error handling:
+
+● Edit Conversation.tsx +22 -4
+  └ frontend/src/pages/Conversation.tsx
+
+Now verify TS compiles:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775498079, implement_sec=57. Commit and test:
+
