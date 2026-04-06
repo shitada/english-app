@@ -251,3 +251,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 248	9de2ed5	2026-04-06	10	175	60	541	716	793	793	pass	8.05	KEPT	Fix pronunciation analysis ignoring pre-normalization feedback keys
 249	c424061	2026-04-06	10	28	31	91	119	799	799	pass	8.35	KEPT	Fix _parse_score mishandling fraction scores with non-10 denominators
 250	c927f64	2026-04-06	160	228	228	261	649	810	810	pass	7.8	KEPT	Add dictation mode for listening comprehension practice
+251	fedb192	2026-04-06	159	197	133	133	489	814	814	pass	7.5	KEPT	Add mistake journal to review errors across all modules

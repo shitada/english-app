@@ -945,3 +945,57 @@ async def get_word_detail(
 
     word["similar_words"] = await get_similar_words(db, word_id)
     return word
+
+
+async def get_sentence_build_exercises(
+    db: aiosqlite.Connection,
+    topic: str,
+    count: int = 8,
+) -> list[dict[str, Any]]:
+    """Fetch vocabulary words with example sentences and scramble them for reordering."""
+    import random
+    import re as _re
+
+    rows = await db.execute_fetchall(
+        """
+        SELECT id, word, example_sentence, difficulty
+        FROM vocabulary_words
+        WHERE topic = ? AND example_sentence IS NOT NULL AND example_sentence != ''
+        ORDER BY RANDOM()
+        LIMIT ?
+        """,
+        (topic, count),
+    )
+
+    exercises = []
+    for row in rows:
+        sentence = row["example_sentence"].strip()
+        # Tokenize preserving punctuation attached to words
+        words = sentence.split()
+        if len(words) < 3:
+            continue
+        scrambled = list(words)
+        # Shuffle until different from original (max 10 attempts)
+        for _ in range(10):
+            random.shuffle(scrambled)
+            if scrambled != words:
+                break
+        exercises.append({
+            "word_id": row["id"],
+            "hint_word": row["word"],
+            "scrambled_words": scrambled,
+            "correct_sentence": sentence,
+            "difficulty": row["difficulty"],
+        })
+
+    return exercises
+
+
+def check_sentence_build(correct_sentence: str, user_sentence: str) -> bool:
+    """Compare user-built sentence to correct one (case-insensitive, punctuation-normalized)."""
+    import re as _re
+
+    def _normalize(s: str) -> str:
+        return _re.sub(r"[^\w\s]", "", s.lower()).strip()
+
+    return _normalize(correct_sentence) == _normalize(user_sentence)

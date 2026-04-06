@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, Check, X, ArrowRight, Zap } from 'lucide-react';
-import { api, type QuizQuestion, type FillBlankQuestion } from '../api';
+import { Volume2, Check, X, ArrowRight, Zap, Puzzle } from 'lucide-react';
+import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, getSentenceBuildExercises, checkSentenceBuild } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -13,14 +13,14 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank'>('word-to-meaning');
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build'>('word-to-meaning');
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
@@ -32,6 +32,15 @@ export default function Vocabulary() {
   const [drillAnswers, setDrillAnswers] = useState<boolean[]>([]);
   const [drillTimeLeft, setDrillTimeLeft] = useState(60);
   const drillTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Sentence build state
+  const [sbExercises, setSbExercises] = useState<SentenceBuildExercise[]>([]);
+  const [sbIndex, setSbIndex] = useState(0);
+  const [sbBank, setSbBank] = useState<string[]>([]);
+  const [sbBuilt, setSbBuilt] = useState<string[]>([]);
+  const [sbResults, setSbResults] = useState<{ correct: boolean; correctSentence: string }[]>([]);
+  const [sbRevealed, setSbRevealed] = useState(false);
+  const [sbCorrect, setSbCorrect] = useState<boolean | null>(null);
 
   const tts = useSpeechSynthesis();
 
@@ -46,6 +55,23 @@ export default function Vocabulary() {
   const startQuiz = async (topicId: string) => {
     setLoading(true);
     try {
+      // Sentence build mode uses a different endpoint
+      if (quizMode === 'sentence-build') {
+        const res = await getSentenceBuildExercises(topicId, 8);
+        if (!res.exercises || res.exercises.length === 0) {
+          alert('No sentence exercises available for this topic. Try another topic.');
+          return;
+        }
+        setSbExercises(res.exercises);
+        setSbIndex(0);
+        setSbResults([]);
+        setSbBank([...res.exercises[0].scrambled_words]);
+        setSbBuilt([]);
+        setSbRevealed(false);
+        setSbCorrect(null);
+        setPhase('sentence-build');
+        return;
+      }
       const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
       const res = await api.generateQuiz(topicId, 10, apiMode);
       if (!res.questions || res.questions.length === 0) {
@@ -299,6 +325,18 @@ export default function Vocabulary() {
             >
               Fill in Blank
             </button>
+            <button
+              onClick={() => setQuizMode('sentence-build')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'sentence-build' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'sentence-build' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'sentence-build' ? 'white' : 'var(--text)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              🧩 Sentence Build
+            </button>
           </div>
         </div>
 
@@ -466,6 +504,153 @@ export default function Vocabulary() {
         </div>
 
         <button className="btn btn-primary" onClick={() => { setPhase('select'); setIsOfflineMode(false); }}>
+          Try Another Topic
+        </button>
+      </div>
+    );
+  }
+
+  // Sentence Build phase
+  if (phase === 'sentence-build' && sbExercises.length > 0) {
+    const exercise = sbExercises[sbIndex];
+    const progress = `${sbIndex + 1}/${sbExercises.length}`;
+
+    const addWord = (word: string, idx: number) => {
+      if (sbRevealed) return;
+      setSbBuilt(prev => [...prev, word]);
+      setSbBank(prev => prev.filter((_, i) => i !== idx));
+    };
+
+    const removeWord = (idx: number) => {
+      if (sbRevealed) return;
+      const word = sbBuilt[idx];
+      setSbBuilt(prev => prev.filter((_, i) => i !== idx));
+      setSbBank(prev => [...prev, word]);
+    };
+
+    const handleCheck = async () => {
+      const sentence = sbBuilt.join(' ');
+      try {
+        const res = await checkSentenceBuild(exercise.word_id, sentence);
+        setSbCorrect(res.is_correct);
+        setSbRevealed(true);
+        setSbResults(prev => [...prev, { correct: res.is_correct, correctSentence: res.correct_sentence }]);
+      } catch {
+        alert('Failed to check sentence.');
+      }
+    };
+
+    const handleNext = () => {
+      const nextIdx = sbIndex + 1;
+      if (nextIdx >= sbExercises.length) {
+        setPhase('sentence-build-result');
+        return;
+      }
+      setSbIndex(nextIdx);
+      setSbBank([...sbExercises[nextIdx].scrambled_words]);
+      setSbBuilt([]);
+      setSbRevealed(false);
+      setSbCorrect(null);
+    };
+
+    return (
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3>🧩 Sentence Build</h3>
+          <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{progress}</span>
+        </div>
+
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 8 }}>
+          Arrange the words to form a correct sentence for: <strong>{exercise.hint_word}</strong>
+        </p>
+
+        {/* Built sentence area */}
+        <div style={{
+          minHeight: 50, padding: 12, marginBottom: 12, borderRadius: 8,
+          border: sbRevealed ? (sbCorrect ? '2px solid #22c55e' : '2px solid #ef4444') : '2px dashed var(--border)',
+          background: sbRevealed ? (sbCorrect ? '#f0fdf4' : '#fef2f2') : 'transparent',
+          display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center',
+        }}>
+          {sbBuilt.length === 0 && !sbRevealed && (
+            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Tap words below to build the sentence...</span>
+          )}
+          {sbBuilt.map((w, i) => (
+            <button key={i} onClick={() => removeWord(i)} disabled={sbRevealed}
+              style={{
+                padding: '6px 12px', borderRadius: 6, border: '1px solid var(--border)',
+                background: 'var(--primary)', color: 'white', cursor: sbRevealed ? 'default' : 'pointer',
+                fontSize: 15,
+              }}
+            >{w}</button>
+          ))}
+        </div>
+
+        {sbRevealed && !sbCorrect && (
+          <p style={{ fontSize: 13, color: '#15803d', marginBottom: 8 }}>
+            Correct: <strong>{exercise.correct_sentence}</strong>
+          </p>
+        )}
+
+        {/* Word bank */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16, justifyContent: 'center' }}>
+          {sbBank.map((w, i) => (
+            <button key={i} onClick={() => addWord(w, i)} disabled={sbRevealed}
+              style={{
+                padding: '6px 12px', borderRadius: 6, border: '1px solid var(--border)',
+                background: 'var(--bg-secondary, #f3f4f6)', cursor: sbRevealed ? 'default' : 'pointer',
+                fontSize: 15,
+              }}
+            >{w}</button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <button className="btn btn-secondary" onClick={() => setPhase('select')}>Quit</button>
+          {!sbRevealed && sbBuilt.length > 0 && (
+            <button className="btn btn-primary" onClick={handleCheck}>Check</button>
+          )}
+          {sbRevealed && (
+            <>
+              <button className="btn btn-secondary" onClick={() => tts.speak(exercise.correct_sentence)}>
+                <Volume2 size={16} /> Listen
+              </button>
+              <button className="btn btn-primary" onClick={handleNext}>
+                {sbIndex + 1 >= sbExercises.length ? 'See Results' : 'Next'} <ArrowRight size={16} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Sentence Build results
+  if (phase === 'sentence-build-result') {
+    const correct = sbResults.filter(r => r.correct).length;
+    const total = sbResults.length;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+    return (
+      <div className="card" style={{ textAlign: 'center' }}>
+        <h3 style={{ marginBottom: 16 }}>Sentence Build Results</h3>
+        <div className={`score-circle ${pct >= 80 ? 'score-high' : pct >= 50 ? 'score-mid' : 'score-low'}`} style={{ margin: '0 auto 16px' }}>
+          {pct}%
+        </div>
+        <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>{correct} / {total} correct</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+          {pct >= 80 ? 'Great sentence building!' : pct >= 50 ? 'Good effort!' : 'Keep practicing word order!'}
+        </p>
+
+        <div style={{ marginBottom: 24, textAlign: 'left' }}>
+          {sbResults.map((r, i) => (
+            <div key={i} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>{r.correct ? '✅' : '❌'}</span>
+              <span style={{ fontSize: 14 }}>{r.correctSentence}</span>
+            </div>
+          ))}
+        </div>
+
+        <button className="btn btn-primary" onClick={() => setPhase('select')}>
           Try Another Topic
         </button>
       </div>

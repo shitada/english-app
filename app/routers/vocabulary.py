@@ -654,3 +654,63 @@ async def get_word_detail(
     vocab_topics = get_vocabulary_topics()
     detail["topic"] = get_topic_label(vocab_topics, detail["topic"])
     return detail
+
+
+class SentenceBuildItem(BaseModel):
+    word_id: int
+    hint_word: str
+    scrambled_words: list[str]
+    correct_sentence: str
+    difficulty: int
+
+
+class SentenceBuildResponse(BaseModel):
+    exercises: list[SentenceBuildItem]
+    count: int
+
+
+class SentenceBuildCheckRequest(BaseModel):
+    word_id: int = Field(ge=1)
+    user_sentence: str = Field(min_length=1, max_length=2000)
+
+
+class SentenceBuildCheckResponse(BaseModel):
+    is_correct: bool
+    correct_sentence: str
+    word_id: int
+
+
+@router.get("/sentence-build", response_model=SentenceBuildResponse)
+async def get_sentence_build(
+    topic: str = Query(..., min_length=1),
+    count: int = Query(default=8, ge=1, le=20),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get scrambled sentence exercises for a vocabulary topic."""
+    vocab_topics = get_vocabulary_topics()
+    validate_topic(vocab_topics, topic)
+    exercises = await vocab_dal.get_sentence_build_exercises(db, topic, count)
+    return {"exercises": exercises, "count": len(exercises)}
+
+
+@router.post("/sentence-build/check", response_model=SentenceBuildCheckResponse)
+async def check_sentence_build(
+    req: SentenceBuildCheckRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Check a user-built sentence against the correct sentence."""
+    # Look up the correct sentence
+    rows = await db.execute_fetchall(
+        "SELECT example_sentence FROM vocabulary_words WHERE id = ?",
+        (req.word_id,),
+    )
+    if not rows or not rows[0]["example_sentence"]:
+        raise HTTPException(status_code=404, detail="Word not found or no example sentence")
+
+    correct = rows[0]["example_sentence"].strip()
+    is_correct = vocab_dal.check_sentence_build(correct, req.user_sentence)
+
+    # Record progress
+    await vocab_dal.update_progress(db, req.word_id, is_correct)
+
+    return {"is_correct": is_correct, "correct_sentence": correct, "word_id": req.word_id}

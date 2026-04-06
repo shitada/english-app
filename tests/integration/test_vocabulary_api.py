@@ -827,3 +827,67 @@ async def test_quiz_supplements_from_existing_when_llm_returns_few(client, mock_
     data = res.json()
     # Should get at least the 3 existing words despite LLM returning nothing
     assert len(data["questions"]) >= 3
+
+
+@pytest.mark.asyncio
+async def test_sentence_build_empty_topic(client, mock_copilot):
+    """Sentence build returns empty when topic has no words."""
+    res = await client.get("/api/vocabulary/sentence-build?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["exercises"] == []
+    assert data["count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_sentence_build_with_words(client, mock_copilot):
+    """Sentence build returns exercises when words have example sentences."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "reservation", "meaning": "予約", "example_sentence": "I have a reservation for tonight", "difficulty": 2},
+            {"word": "check-in", "meaning": "チェックイン", "example_sentence": "I would like to check in please", "difficulty": 1},
+        ]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2")
+
+    res = await client.get("/api/vocabulary/sentence-build?topic=hotel_checkin&count=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["count"] >= 1
+    ex = data["exercises"][0]
+    assert "word_id" in ex
+    assert "scrambled_words" in ex
+    assert "correct_sentence" in ex
+    assert "hint_word" in ex
+
+
+@pytest.mark.asyncio
+async def test_sentence_build_invalid_topic(client):
+    """Sentence build rejects invalid topic."""
+    res = await client.get("/api/vocabulary/sentence-build?topic=nonexistent")
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_sentence_build_check(client, mock_copilot):
+    """Sentence build check validates user sentence."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "reservation", "meaning": "予約", "example_sentence": "I have a reservation", "difficulty": 2},
+        ]
+    })
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+
+    # Get exercises to find word_id
+    ex_res = await client.get("/api/vocabulary/sentence-build?topic=hotel_checkin")
+    exercises = ex_res.json()["exercises"]
+    if exercises:
+        word_id = exercises[0]["word_id"]
+        # Check correct
+        res = await client.post("/api/vocabulary/sentence-build/check", json={
+            "word_id": word_id, "user_sentence": "I have a reservation"
+        })
+        assert res.status_code == 200
+        assert res.json()["is_correct"] is True

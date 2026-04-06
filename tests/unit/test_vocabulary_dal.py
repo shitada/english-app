@@ -1254,3 +1254,25 @@ class TestSafeDifficulty:
     async def test_negative_clamps_to_1(self):
         from app.dal.vocabulary import _safe_difficulty
         assert _safe_difficulty(-3) == 1
+
+
+class TestCheckSentenceBuild:
+    def test_exact_match(self):
+        from app.dal.vocabulary import check_sentence_build
+        assert check_sentence_build("Hello world!", "Hello world!") is True
+
+    def test_case_insensitive(self):
+        from app.dal.vocabulary import check_sentence_build
+        assert check_sentence_build("Hello World", "hello world") is True
+
+    def test_punctuation_ignored(self):
+        from app.dal.vocabulary import check_sentence_build
+        assert check_sentence_build("Hello, world!", "Hello world") is True
+
+    def test_wrong_order(self):
+        from app.dal.vocabulary import check_sentence_build
+        assert check_sentence_build("The quick fox", "fox quick The") is False
+
+    def test_missing_word(self):
+        from app.dal.vocabulary import check_sentence_build
+        assert check_sentence_build("I like cats", "I like") is False

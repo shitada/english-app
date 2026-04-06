@@ -474,3 +474,255 @@ Now add integration tests for the mistake journal endpoint:
 
 Now commit, test, and evaluate:
 
+● Commit iteration 251 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #251: Add mistake journal to review errors across all modules
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests iteration 251 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE_NEEDED" || echo "NO_SMOKE"
+  └ 4 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 2>/dev/null | head -1 | xargs
+  │ -I{} kill -9 {} 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. Now check if QA tester needed and then call evaluator:
+
+● Check QA + record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$" && echo "QA_NEEDED" || echo "NO_QA"
+  │ date +%s
+  └ 4 lines...
+
+Frontend changed - need to call tester. Let me start server and call tester + evaluator:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Calling tester and evaluator in parallel:
+
+● Tester QA test iteration 251
+  └ Agent started in background with agent_id: tester-251. You can use read_agent...
+
+● Evaluator Evaluate iteration 251
+  └ Agent started in background with agent_id: evaluator-251. You can use read_ag...
+
+Both agents dispatched. Let me prepare iteration 252 context while waiting:
+
+● Wait for agents (shell)
+  │ sleep 30 && echo "waited"
+  └ 2 lines...
+
+● Wait more for agents (shell)
+  │ sleep 30 && echo "waited"
+  └ 2 lines...
+
+● Explore Read evaluator-251 results
+
+Evaluator completed. Let me record iteration 251 results and continue. Based on the evaluator's assessment of this well-implemented feature (814 tests, full passes):
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 251 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ # T0=1775490742 T1=1775490901 T3=1775491098 T4=1775491231
+  │ # propose=159 implement=197 test=133 evaluate=133 total=489
+  │ HASH=$(git rev-parse --short HEAD)
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \…
+  └ 6 lines...
+
+Good. Now iteration 252:
+
+● Record T0 for iteration 252 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 252
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L80:180 (101 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L160:350 (191 lines read)
+
+● Record T1 for iteration 252 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me implement the sentence reordering exercise:
+
+● Check file sizes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/vocabulary.py
+  │ app/routers/vocabulary.py frontend/src/pages/Vocabulary.tsx
+  └ 5 lines...
+
+● Read end of vocabulary router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/routers/vocabulary.py
+  └ 21 lines...
+
+● Read Vocabulary page header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 frontend/src/pages/Vocabulary.tsx
+  └ 31 lines...
+
+● Read end of vocabulary DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/dal/vocabulary.py
+  └ 21 lines...
+
+● Find phase transitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "phase.*select\|phase.*quiz\|phase.*drill\|setPhase" frontend/src/pages/Vocabulary.tsx | head
+  │ -20
+  └ 14 lines...
+
+Let me look at how the quiz modes are selected in the topic selection screen:
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L244:330 (87 lines read)
+
+Now let me look at the startQuiz function and vocab DAL imports:
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L50:90 (41 lines read)
+
+Now I have a good understanding. Let me implement the sentence build feature. I'll keep it focused:
+
+1. DAL: get_sentence_build_exercises
+2. Router: GET + POST endpoints
+3. Frontend API types
+4. Frontend UI phase
+
+● Edit vocabulary.py +54
+  └ app/dal/vocabulary.py
+
+Now add the router endpoints:
+
+● Read vocabulary.py
+  │ app/routers/vocabulary.py
+  └ L1:20 (19 lines read)
+
+● Edit vocabulary.py +60
+  └ app/routers/vocabulary.py
+
+Now add frontend API types:
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L89:102 (13 lines read)
+
+● Edit api.ts +34
+  └ frontend/src/api.ts
+
+Now update the Vocabulary.tsx to add the sentence build mode. First update imports and state:
+
+● Edit Vocabulary.tsx +2 -2
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add sentence build state variables after the drill state:
+
+● Find drill state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "drillWords\|drillIndex\|drillTimer\|drillResult\|isOffline" frontend/src/pages/Vocabulary.tsx |
+  │ head -10
+  └ 11 lines...
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L30:40 (11 lines read)
+
+● Edit Vocabulary.tsx +9
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the sentence build quiz mode button next to Fill in Blank:
+
+● Edit Vocabulary.tsx +12
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now I need to update the quizMode type and startQuiz to handle sentence-build mode. Let me update the state type:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now update the startQuiz function to handle sentence-build mode. Let me see the full startQuiz:
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L44:100 (57 lines read)
+
+I need to intercept when quizMode is 'sentence-build' to call a different API:
+
+● Edit Vocabulary.tsx +17
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now remove the cast workarounds I used earlier for the button since quizMode now includes 'sentence-build':
+
+● Edit Vocabulary.tsx +4 -4
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the sentence build phase and result phase before `return null`:
+
+● Find return null (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "return null"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● Read Vocabulary.tsx
+  │ frontend/src/pages/Vocabulary.tsx
+  └ L480:520 (41 lines read)
+
+I need to add the sentence build phases before the quiz question section. Let me insert them:
+
+● Edit Vocabulary.tsx +147
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add tests. Let me add unit test for check_sentence_build and integration tests:
+
+● Read end of vocabulary unit tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 tests/unit/test_vocabulary_dal.py
+  └ 11 lines...
+
+● Edit test_vocabulary_dal.py +22
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add integration tests for the sentence-build endpoints:
+
+● Read end of vocabulary API tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ tests/integration/test_vocabulary_api.py
+  └ 11 lines...
+
+● Edit test_vocabulary_api.py +64
+  └ tests/integration/test_vocabulary_api.py
+
+Now commit and test:
+

@@ -622,3 +622,37 @@ export async function getMistakeJournal(
   const params = new URLSearchParams({ module, limit: String(limit), offset: String(offset) });
   return request<MistakeJournalResponse>(`/api/dashboard/mistakes?${params}`);
 }
+
+// Sentence Build exercises (from iteration 252)
+export interface SentenceBuildExercise {
+  word_id: number;
+  hint_word: string;
+  scrambled_words: string[];
+  correct_sentence: string;
+  difficulty: number;
+}
+
+export interface SentenceBuildCheckResult {
+  is_correct: boolean;
+  correct_sentence: string;
+  word_id: number;
+}
+
+export async function getSentenceBuildExercises(
+  topic: string,
+  count = 8,
+): Promise<{ exercises: SentenceBuildExercise[]; count: number }> {
+  return request<{ exercises: SentenceBuildExercise[]; count: number }>(
+    `/api/vocabulary/sentence-build?topic=${encodeURIComponent(topic)}&count=${count}`,
+  );
+}
+
+export async function checkSentenceBuild(
+  word_id: number,
+  user_sentence: string,
+): Promise<SentenceBuildCheckResult> {
+  return request<SentenceBuildCheckResult>('/api/vocabulary/sentence-build/check', {
+    method: 'POST',
+    body: JSON.stringify({ word_id, user_sentence }),
+  });
+}
