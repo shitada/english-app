@@ -685,6 +685,80 @@ export default function Conversation() {
           </div>
         )}
 
+        {/* Corrections Review */}
+        {(() => {
+          const allErrors = messages
+            .filter((m) => m.feedback && !m.feedback.is_correct)
+            .flatMap((m) => m.feedback!.errors || []);
+          const allSuggestions = messages
+            .filter((m) => m.feedback?.suggestions?.length)
+            .flatMap((m) => m.feedback!.suggestions || []);
+
+          if (allErrors.length === 0 && allSuggestions.length === 0) {
+            return (
+              <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8, textAlign: 'center' }}>
+                <span style={{ fontSize: 24 }}>✅</span>
+                <p style={{ margin: '8px 0 0', fontWeight: 600, color: 'var(--success, #22c55e)' }}>Perfect grammar!</p>
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+              {allErrors.length > 0 && (
+                <>
+                  <h4 style={{ marginBottom: 8 }}>Your Corrections</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: allSuggestions.length > 0 ? 16 : 0 }}>
+                    {allErrors.map((err, i) => (
+                      <div key={`err-${i}`} style={{ padding: 10, background: 'var(--card-bg, #fff)', borderRadius: 6, borderLeft: '3px solid var(--danger, #ef4444)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ textDecoration: 'line-through', color: 'var(--danger, #ef4444)', fontSize: 14 }}>{err.original}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>→</span>
+                          <span style={{ color: 'var(--success, #22c55e)', fontWeight: 600, fontSize: 14 }}>{err.correction}</span>
+                          <button
+                            onClick={() => tts.speak(err.correction)}
+                            disabled={tts.isSpeaking}
+                            aria-label={`Listen to correction: ${err.correction}`}
+                            style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 0.7 }}
+                          >
+                            <Volume2 size={14} color="var(--primary, #6366f1)" />
+                          </button>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{err.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {allSuggestions.length > 0 && (
+                <>
+                  <h4 style={{ marginBottom: 8 }}>Style Suggestions</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {allSuggestions.map((sug, i) => (
+                      <div key={`sug-${i}`} style={{ padding: 10, background: 'var(--card-bg, #fff)', borderRadius: 6, borderLeft: '3px solid var(--primary, #6366f1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{sug.original}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>→</span>
+                          <span style={{ color: 'var(--primary, #6366f1)', fontWeight: 600, fontSize: 14 }}>{sug.better}</span>
+                          <button
+                            onClick={() => tts.speak(sug.better)}
+                            disabled={tts.isSpeaking}
+                            aria-label={`Listen to suggestion: ${sug.better}`}
+                            style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 0.7 }}
+                          >
+                            <Volume2 size={14} color="var(--primary, #6366f1)" />
+                          </button>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{sug.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
+
         <button className="btn btn-primary" onClick={() => {
           setPhase('select');
           setMessages([]);

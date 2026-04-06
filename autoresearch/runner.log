@@ -3064,3 +3064,98 @@ QA passed (code review), ux_score=7. The minor issue about replay view buttons l
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
   └ 1 line...
 
+● Amend commit with consistency fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && date +%s
+  └ 17 lines...
+
+Now kill server and evaluate:
+
+● Evaluator Evaluate iteration 266
+  └ Agent started in background with agent_id: evaluator-266. You can use read_ag...
+
+● Kill server, T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1775502694. Waiting for evaluator...
+
+<system_notification>Background agent `evaluator-266` (evaluator) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 266 results
+  │ Read (Evaluator agent — Evaluate iteration 266)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 266)
+      └ Completed
+
+
+
+Score 7.25, KEPT. Record and move to iteration 267.
+
+● Record iteration 266 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ T4=$(date +%s)
+  │ # T0=1775501841, T1=1775501995, T2=1775502083, T3=1775502694
+  │ propose_sec=$((1775501995 - 1775501841))
+  │ implement_sec=$((1775502083 - 1775501995))…
+  └ 12 lines...
+
+Now iteration 267:
+
+● Proposer Propose iteration 267
+  └ Agent started in background with agent_id: proposer-267. You can use read_age...
+
+● T0 for iteration 267 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775502789. Waiting for proposer...
+
+<system_notification>Background agent `proposer-267` (proposer) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 267 results
+  │ Read (Proposer agent — Propose iteration 267)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 267)
+      └ Completed
+
+● T1 for iteration 267 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775502976. Implementing corrections review in the summary screen.
+
+● Find summary view section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ 'phase.*summary\|summary.*phase\|Start New Conversation\|Performance\|performance\.'
+  │ Conversation.tsx | head -20
+  └ 17 lines...
+
+● Read full summary view (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && sed -n '634,700p'
+  │ Conversation.tsx
+  └ 68 lines...
+
+Now let me check the Message/feedback structure to understand what fields are available:
+
+● Check GrammarFeedback type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -A 15 'type
+  │ GrammarFeedback\|interface GrammarFeedback\|export type GrammarFeedback' api.ts
+  └ 16 lines...
+
+Now I have the full picture. The `messages` state holds `Message[]` which has `feedback?: GrammarFeedback`. I'll add a corrections review section between the Performance block and the Start New Conversation button:
+
+● Edit Conversation.tsx +74
+  └ frontend/src/pages/Conversation.tsx
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+All passing. Commit:
+
