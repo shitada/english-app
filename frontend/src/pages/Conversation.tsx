@@ -562,7 +562,8 @@ export default function Conversation() {
                   <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🤖 Assistant</strong>
                   <button
                     onClick={() => tts.speak(turn.assistant_message!)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                    disabled={tts.isSpeaking}
+                    style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 1 }}
                     aria-label="Listen to assistant message"
                   >
                     <Volume2 size={16} color="var(--primary, #6366f1)" />
@@ -580,7 +581,8 @@ export default function Conversation() {
                   <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🗣️ You said</strong>
                   <button
                     onClick={() => tts.speak(turn.user_message!)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                    disabled={tts.isSpeaking}
+                    style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 1 }}
                     aria-label="Listen to your message"
                   >
                     <Volume2 size={16} color="var(--primary, #6366f1)" />
@@ -782,6 +784,25 @@ export default function Conversation() {
               ) : (
                 msg.content
               )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', padding: '0 8px' }}>
+              <button
+                onClick={() => tts.speak(msg.content)}
+                disabled={tts.isSpeaking}
+                aria-label={`Listen to ${msg.role} message`}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: tts.isSpeaking ? 'default' : 'pointer',
+                  padding: '2px 4px',
+                  opacity: tts.isSpeaking ? 0.4 : 0.6,
+                  transition: 'opacity 0.15s',
+                }}
+                onMouseEnter={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '1'; }}
+                onMouseLeave={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '0.6'; }}
+              >
+                <Volume2 size={14} color="var(--primary, #6366f1)" />
+              </button>
             </div>
             {msg.feedback && <FeedbackPanel feedback={msg.feedback} />}
           </div>

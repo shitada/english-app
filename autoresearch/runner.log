@@ -2855,3 +2855,212 @@ Now let's verify TypeScript compiles and tests pass:
 
 All 838 tests pass, TS clean. Let me commit and record T2:
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "feat: add
+  │ conversation session duration selector and extend button
+  │
+  │ Add duration selector (3min/5min/10min/No limit) to the topic selection
+  │ screen. Users can now choose session length before starting a conversation.…
+  └ 20 lines...
+
+T2=1775501345. Now start server for QA tester:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main &
+  │ sleep 3 && curl -s http://localhost:8000/api/health | head -5
+  └ 11 lines...
+
+● Check server health (shell)
+  │ curl -sk https://localhost:8000/api/health 2>&1 | head -5
+  └ 1 line...
+
+● Check API endpoint (shell)
+  │ curl -sk https://localhost:8000/api/topics 2>&1 | head -5
+  └ 1 line...
+
+● Check API with status code (shell)
+  │ curl -sk https://localhost:8000/api/topics -w "%{http_code}" 2>&1
+  └ 2 lines...
+
+● Check HTTPS (shell)
+  │ curl -k https://localhost:8000/ -w "%{http_code}" 2>&1 | tail -3
+  └ 4 lines...
+
+● Check port 8000 (shell)
+  │ lsof -i :8000 2>&1 | head -5
+  └ 1 line...
+
+Server didn't start properly. Let me try again:
+
+● Retry server start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main > /dev/null 2>&1
+  │ &
+  │ sleep 4 && lsof -i :8000 2>&1 | head -5
+  └ 5 lines...
+
+Server is running. Now launch QA tester:
+
+● Tester QA test iteration 265
+  └ Agent started in background with agent_id: tester-265. You can use read_agent...
+
+<system_notification>Background agent `tester-265` (tester) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 265 results
+  │ Read (Tester agent — QA test iteration 265)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 265)
+      └ Completed
+
+
+
+QA passed (code review only), ux_score=7. Now evaluate:
+
+● Evaluator Evaluate iteration 265
+  └ Agent started in background with agent_id: evaluator-265. You can use read_ag...
+
+● Kill server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+<system_notification>Background agent `evaluator-265` (evaluator) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 265 results
+  │ Read (Evaluator agent — Evaluate iteration 265)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 265)
+      └ Completed
+
+
+
+Score 6.7, verdict KEEP. Record and continue to iteration 266.
+
+● Record iteration 265 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ T4=$(date +%s)
+  │ # T0=1775501185, T1=1775501185+291=~1775501185, T2=1775501345, T3=1775501768
+  │ propose_sec=$((1775501185 - 1775500894))
+  │ implement_sec=$((1775501345 - 1775501185))…
+  └ 12 lines...
+
+Good. Now iteration 266:
+
+● Proposer Propose iteration 266
+  └ Agent started in background with agent_id: proposer-266. You can use read_age...
+
+● T0 for iteration 266 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775501841. Waiting for proposer...
+
+<system_notification>Background agent `proposer-266` (proposer) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 266 results
+  │ Read (Proposer agent — Propose iteration 266)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 266)
+      └ Completed
+
+● T1 for iteration 266 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775501995. Implementing per-message listen button in chat bubbles.
+
+● Find chat message rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ 'chat-messages\|message
+  │ message-\|msg.role.*assistant\|msg.content\|msg.feedback\|FeedbackPanel\|HighlightedMessage'
+  │ Conversation.tsx | grep -A0 '' | head -25
+  └ 12 lines...
+
+● Read chat message rendering block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && sed -n '770,800p'
+  │ Conversation.tsx
+  └ 32 lines...
+
+Now let me check if `tts.speaking` is available:
+
+● Check TTS hook API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/hooks && grep -n
+  │ 'speaking\|return' useSpeechSynthesis.ts | head -15
+  └ 6 lines...
+
+Good, `isSpeaking` is available. Now check how `tts` is used in this component:
+
+● Check tts usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n 'tts\.'
+  │ Conversation.tsx | head -15
+  └ 12 lines...
+
+Now let me also check the replay view pattern (lines 560-585) to mirror the style:
+
+● Read replay view listen buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && sed -n '555,590p'
+  │ Conversation.tsx
+  └ 37 lines...
+
+Good, the replay view already has this pattern. Now I'll add a listen button below each message bubble in the live chat. I'll add it as a small button beneath the message bubble:
+
+● Edit Conversation.tsx +19
+  └ frontend/src/pages/Conversation.tsx
+
+Now verify TypeScript and tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+All passing. Commit and run QA:
+
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "feat: add
+  │ per-message listen button to conversation chat bubbles
+  │
+  │ Add a Volume2 icon button below each message bubble in the live chat,
+  │ allowing users to replay any assistant or user message via TTS. Buttons…
+  └ 20 lines...
+
+T2=1775502083. Start server and run QA:
+
+● Tester QA test iteration 266
+  └ Agent started in background with agent_id: tester-266. You can use read_agent...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main > /dev/null 2>&1
+  │ &
+  │ sleep 4 && lsof -i :8000 | head -3
+  └ 5 lines...
+
+<system_notification>Background agent `tester-266` (tester) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 266 results
+  │ Read (Tester agent — QA test iteration 266)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 266)
+      └ Completed
+
+
+
+QA passed (code review), ux_score=7. The minor issue about replay view buttons lacking disable is a good catch — let me fix that quickly before evaluating.
+
+● Read replay view buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && sed -n '560,590p'
+  │ Conversation.tsx
+  └ 32 lines...
+
+● Edit Conversation.tsx +2 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +2 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● TS check after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
