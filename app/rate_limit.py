@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import time
 from collections import deque
 
@@ -51,9 +52,16 @@ class RateLimiter:
             dq.popleft()
 
         if len(dq) >= self.max_requests:
+            retry_after = max(1, math.ceil(dq[0] + self.window_seconds - now))
             raise HTTPException(
                 status_code=429,
                 detail="Rate limit exceeded. Please try again later.",
+                headers={
+                    "Retry-After": str(retry_after),
+                    "X-RateLimit-Limit": str(self.max_requests),
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Window": str(self.window_seconds),
+                },
             )
         dq.append(now)
         return self.max_requests - len(dq)

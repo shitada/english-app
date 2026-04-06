@@ -177,3 +177,28 @@ class TestSweepStale:
         # 5th call triggers sweep
         limiter.check(_make_request("ip4"))
         assert "stale" not in limiter._requests
+
+    def test_429_includes_retry_after_header(self):
+        """429 response should include Retry-After header."""
+        limiter = RateLimiter(max_requests=2, window_seconds=60)
+        req = _make_request("10.0.0.1")
+        limiter.check(req)
+        limiter.check(req)
+        with pytest.raises(HTTPException) as exc_info:
+            limiter.check(req)
+        assert exc_info.value.status_code == 429
+        assert "Retry-After" in exc_info.value.headers
+        retry_after = int(exc_info.value.headers["Retry-After"])
+        assert retry_after >= 1
+
+    def test_429_includes_rate_limit_headers(self):
+        """429 response should include X-RateLimit-* headers."""
+        limiter = RateLimiter(max_requests=1, window_seconds=30)
+        req = _make_request("10.0.0.2")
+        limiter.check(req)
+        with pytest.raises(HTTPException) as exc_info:
+            limiter.check(req)
+        h = exc_info.value.headers
+        assert h["X-RateLimit-Limit"] == "1"
+        assert h["X-RateLimit-Remaining"] == "0"
+        assert h["X-RateLimit-Window"] == "30"
