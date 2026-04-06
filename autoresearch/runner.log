@@ -1747,3 +1747,103 @@ I see — the import endpoint expects `topic` field in each word, not as a query
 ● Edit test_vocabulary_api.py +2 -2
   └ tests/integration/test_vocabulary_api.py
 
+● Fix test and re-run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit tests/integration --tb=short 2>&1 | tail -5
+  └ 21 lines...
+
+775 pass. TS check:
+
+● TS check and T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775437683. No DAL/router changes needing smoke (router changed but the diff is minimal model change), let me verify:
+
+● Check if smoke needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+QA skipped (no frontend page changes). Call evaluator:
+
+● Evaluator Evaluate iteration 240
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L373:402 (30 lines read)
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L400:550 (151 lines read)
+
+● Record T4 for iteration 240 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, keep. T0=1775437255, propose=278, implement=48, test=102, evaluate=85, total=513
+
+● Record results for iteration 240 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "240" "$HASH" "$DATE" "278" "48" "102" "85" "513" \
+  │ "775" "775" "pass" "7.8" "kept" "Fix vocabulary export/import round-trip: export includes …
+  └ 4 lines...
+
+Iteration 240 complete ✅. Moving to iteration 241.
+
+---
+
+● T0 for iteration 241 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 241
+  │ Read test_config.py
+  │   │ tests/unit/test_config.py
+  │   └ 66 lines read
+  └ Read config.py
+      │ app/config.py
+      └ L19:33 (15 lines read)
+
+● Record T1 for iteration 241 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775437909. Let me examine the code:
+
+● Read config.py
+  │ app/config.py
+  └ L1:40 (40 lines read)
+
+● Edit config.py +5 -1
+  └ app/config.py
+
+Now add tests. Check if test file exists:
+
+● Check if test file exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/tests/unit/test_config.py 2>/dev/null && echo
+  │ "EXISTS" || echo "NOT FOUND"
+  └ 3 lines...
+
+● See end of config test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_config.py
+  └ 20 lines...
+
+● Check imports in config test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import"
+  │ tests/unit/test_config.py | head -10
+  └ 5 lines...
+
+● Add config edge case tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_config.py <<
+  │ 'PYEOF'
+  │
+  │ def test_non_dict_yaml_string(self, tmp_path):
+  │ """YAML file with bare string root should fall back to empty dict."""…
+  └ 28 lines...
+

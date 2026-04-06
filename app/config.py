@@ -27,7 +27,11 @@ def load_config() -> dict[str, Any]:
         return _config
 
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        _config = yaml.safe_load(f) or {}
+        raw = yaml.safe_load(f)
+    if not isinstance(raw, dict):
+        logger.warning("Config file %s has non-mapping root (%s), using defaults", CONFIG_PATH, type(raw).__name__)
+        raw = {}
+    _config = raw
 
     logger.info("Config loaded from %s", CONFIG_PATH)
     return _config
