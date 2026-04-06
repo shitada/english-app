@@ -407,15 +407,15 @@ async def get_learning_goals(db: aiosqlite.Connection) -> list[dict[str, Any]]:
         # Count today's activity
         if goal_type == "conversations":
             rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+                "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
             )
         elif goal_type == "vocabulary_reviews":
             rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+                "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
             )
         elif goal_type == "pronunciation_attempts":
             rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+                "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
             )
         else:
             rows = [{"cnt": 0}]
@@ -445,15 +445,15 @@ async def set_learning_goal(
     # Compute today_count so the frontend can display progress immediately
     if goal_type == "conversations":
         count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+            "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
         )
     elif goal_type == "vocabulary_reviews":
         count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+            "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
         )
     elif goal_type == "pronunciation_attempts":
         count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+            "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
         )
     else:
         count_rows = [{"cnt": 0}]
@@ -578,23 +578,23 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
         ("conversations", """
             SELECT
                 COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(started_at) >= date('now', '-13 days')
-                              AND date(started_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(started_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM conversations
+            WHERE started_at >= date('now', '-13 days')
         """),
         ("vocabulary", """
             SELECT
                 COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(answered_at) >= date('now', '-13 days')
-                              AND date(answered_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(answered_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM quiz_attempts
+            WHERE answered_at >= date('now', '-13 days')
         """),
         ("pronunciation", """
             SELECT
                 COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
-                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-13 days')
-                              AND date(created_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
+                COALESCE(SUM(CASE WHEN date(created_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
             FROM pronunciation_attempts
+            WHERE created_at >= date('now', '-13 days')
         """),
     ]
     result = {}
@@ -610,13 +610,13 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
 async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
     """Get today's activity counts across all modules."""
     conv_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM conversations WHERE date(started_at) = date('now')"
+        "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
     )
     vocab_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE date(answered_at) = date('now')"
+        "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
     )
     pron_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE date(created_at) = date('now')"
+        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
     )
     return {
         "conversations": conv_rows[0]["cnt"] if conv_rows else 0,

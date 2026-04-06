@@ -267,3 +267,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 264	9a8a09d	2026-04-07	31	269	320	112	732	838	838	pass	7.05	KEPT	Fix conversation history view missing detailed grammar feedback
 265	7037746	2026-04-07	291	160	423	59	933	838	838	pass	6.7	KEPT	Add conversation session duration selector and extend button
 266	ea2b347	2026-04-07	154	88	611	80	933	838	838	pass	7.25	KEPT	Add per-message listen button to conversation chat bubbles
+267	cbf8a9c	2026-04-07	187	87	369	67	710	838	838	pass	6.95	KEPT	Add corrections review with TTS to conversation summary screen

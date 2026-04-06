@@ -512,6 +512,17 @@ class TestGetLearningInsights:
         result = await get_learning_insights(test_db)
         assert result["weekly_comparison"]["vocabulary"]["this_week"] == 3
 
+    async def test_weekly_comparison_excludes_old_data(self, test_db):
+        """Rows older than 14 days should not appear in either this_week or last_week."""
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, started_at) VALUES (?, ?, datetime('now', '-20 days'))",
+            ("hotel_checkin", "beginner"),
+        )
+        await test_db.commit()
+        result = await get_learning_insights(test_db)
+        assert result["weekly_comparison"]["conversations"]["this_week"] == 0
+        assert result["weekly_comparison"]["conversations"]["last_week"] == 0
+
 
 def _make_questions(count=1):
     return [

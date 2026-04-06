@@ -3159,3 +3159,178 @@ Now I have the full picture. The `messages` state holds `Message[]` which has `f
 
 All passing. Commit:
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "feat: add
+  │ corrections review with TTS to conversation summary screen
+  │
+  │ Show 'Your Corrections' and 'Style Suggestions' sections in the
+  │ post-conversation summary. Each correction displays original→corrected…
+  └ 20 lines...
+
+T2=1775503063. Start server and QA:
+
+● Tester QA test iteration 267
+  └ Agent started in background with agent_id: tester-267. You can use read_agent...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main > /dev/null 2>&1
+  │ &
+  │ sleep 4 && lsof -i :8000 | head -3
+  └ 5 lines...
+
+<system_notification>Background agent `tester-267` (tester) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read tester 267 results
+  │ Read (Tester agent — QA test iteration 267)
+  │   └ Running
+  └ Read (Tester agent — QA test iteration 267)
+      └ Completed
+
+
+
+QA passed (code review), ux_score=7. Kill server and evaluate:
+
+● Evaluator Evaluate iteration 267
+  └ Agent started in background with agent_id: evaluator-267. You can use read_ag...
+
+● Kill server, T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1775503432. Waiting for evaluator...
+
+<system_notification>Background agent `evaluator-267` (evaluator) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 267 results
+  │ Read (Evaluator agent — Evaluate iteration 267)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 267)
+      └ Completed
+
+
+
+Score 6.95, KEPT. Record and move to iteration 268.
+
+● Record iteration 267 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ T4=$(date +%s)
+  │ # T0=1775502789, T1=1775502976, T2=1775503063, T3=1775503432
+  │ propose_sec=$((1775502976 - 1775502789))
+  │ implement_sec=$((1775503063 - 1775502976))…
+  └ 12 lines...
+
+Now iteration 268:
+
+● Proposer Propose iteration 268
+  └ Agent started in background with agent_id: proposer-268. You can use read_age...
+
+● T0 for iteration 268 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775503516. Waiting for proposer...
+
+<system_notification>Background agent `proposer-268` (proposer) has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 268 results
+  │ Read (Proposer agent — Propose iteration 268)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 268)
+      └ Completed
+
+● T1 for iteration 268 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775503852. Backend performance fix — let me examine the target functions:
+
+● Read _get_weekly_comparison (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '575,630p' app/dal/dashboard.py
+  └ 57 lines...
+
+● Read get_learning_goals and set_learning_goal (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '395,465p' app/dal/dashboard.py
+  └ 70 lines...
+
+Clear picture. Three functions to fix:
+
+1. `_get_weekly_comparison` — add `WHERE col >= date('now', '-13 days')` to each query
+2. `get_today_activity` — replace `date(col) = date('now')` with range comparison
+3. `get_learning_goals` and `set_learning_goal` — same `date(col) = date('now')` pattern
+
+Let me also create a helper to DRY up the today-count pattern:
+
+● Edit dashboard.py +6 -6
+  └ app/dal/dashboard.py
+
+Now fix `get_today_activity`:
+
+● Edit dashboard.py +3 -3
+  └ app/dal/dashboard.py
+
+Now fix `get_learning_goals`:
+
+● Edit dashboard.py +3 -3
+  └ app/dal/dashboard.py
+
+Now fix `set_learning_goal`:
+
+● Edit dashboard.py +3 -3
+  └ app/dal/dashboard.py
+
+Now run tests:
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -10
+  └ 11 lines...
+
+All 838 pass. Now add a test to verify the range-based queries work correctly:
+
+● Check existing dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'test_today_activity\|test_weekly_comparison\|test_learning_goal'
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 3 lines...
+
+● Read existing weekly comparison tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '495,540p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 47 lines...
+
+Let me add a test for `get_today_activity` with the range-based queries:
+
+● Find test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class
+  │ Test\|get_today_activity\|_get_weekly_comparison' tests/unit/test_dashboard_dal.py | head -20
+  └ 21 lines...
+
+● Read existing today activity tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '614,665p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 53 lines...
+
+The existing tests already cover today_activity including yesterday-exclusion. They should still pass with the range-based queries (they do — 838 passed). Let me add a test for the weekly comparison date bounds to confirm old data is excluded:
+
+● Read after weekly comparison tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '510,524p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 16 lines...
+
+● Edit test_dashboard_dal.py +11
+  └ tests/unit/test_dashboard_dal.py
+
+● Run dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py -q 2>&1 | tail -10
+  └ 3 lines...
+
+All 67 dashboard tests pass (was 66 + 1 new). Run full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+839 tests pass (838 + 1 new). Commit:
+
