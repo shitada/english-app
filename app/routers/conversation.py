@@ -242,7 +242,10 @@ def _normalize_summary(raw: dict[str, Any]) -> dict[str, Any]:
 async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     conv = await conv_dal.get_active_conversation(db, req.conversation_id)
     if not conv:
-        raise HTTPException(status_code=404, detail="Conversation not found or already ended")
+        status = await conv_dal.get_conversation_status(db, req.conversation_id)
+        if status is not None:
+            raise HTTPException(status_code=409, detail="Conversation is already ended")
+        raise HTTPException(status_code=404, detail="Conversation not found")
 
     topics = get_conversation_topics()
     topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)

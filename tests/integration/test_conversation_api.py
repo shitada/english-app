@@ -699,8 +699,18 @@ async def test_send_message_after_conversation_ended_during_llm_call(client, moc
     })
     await client.post("/api/conversation/end", json={"conversation_id": conv_id})
 
-    # Now try sending a message — should return 404 since conversation is ended
+    # Now try sending a message — should return 409 since conversation is ended
     mock_copilot.ask = AsyncMock(return_value="AI response")
     mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
     res = await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "Hello"})
+    assert res.status_code == 409
+
+
+@pytest.mark.integration
+async def test_send_message_to_nonexistent_conversation_returns_404(client, mock_copilot):
+    """Sending a message to a completely nonexistent conversation returns 404."""
+    mock_copilot.ask = AsyncMock(return_value="AI response")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    res = await client.post("/api/conversation/message", json={"conversation_id": 99999, "content": "Hello"})
     assert res.status_code == 404
+    assert "not found" in res.json()["detail"].lower()

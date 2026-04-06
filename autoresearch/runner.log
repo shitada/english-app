@@ -2335,3 +2335,88 @@ Now add tests. Let me find the test class:
 ● Edit test_normalize_feedback.py +9
   └ tests/unit/test_normalize_feedback.py
 
+● Commit iteration 245 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #245: Fix _parse_score mishandling low percentage scores
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+● Run tests for 245 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ --tb=short 2>&1 | tail -5
+  └ 6 lines...
+
+787 passed (+3). Now evaluate:
+
+● Evaluator Evaluate iteration 245
+  │ Read test_normalize_feedback.py
+  │   │ tests/unit/test_normalize_feedback.py
+  │   └ 333 lines read
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L113:121 (9 lines read)
+
+● Record iteration 245 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app
+  │ HASH=$(git rev-parse --short HEAD)
+  │ TODAY=$(date +%Y-%m-%d)
+  │ T4=$(date +%s)
+  │ printf "245\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t787\t787\tpass\t7.55\tKEPT\tFix _parse_score …
+  └ 6 lines...
+
+Now iteration 246:
+
+● Proposer Propose iteration 246
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L550:700 (151 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L700:800 (7 lines read)
+
+● Record T0 for 246 (shell)
+  │ T0_246=$(date +%s); echo "T0=$T0_246"
+  └ 2 lines...
+
+● View send_message endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '230,310p'
+  │ app/routers/conversation.py
+  └ 80 lines...
+
+● Check existing DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_conversation_status\|conversation_exists" app/dal/conversation.py | head -10
+  └ 3 lines...
+
+Good - `get_conversation_status` already exists from iteration 236. Now fix the send_message endpoint:
+
+● Edit conversation.py +4 -1
+  └ app/routers/conversation.py
+
+Now update existing test and add new tests:
+
+● Find test to update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "send_message_after_conversation_ended_during_llm\|404.*ended\|404.*not found or"
+  │ tests/integration/test_conversation_api.py
+  └ 3 lines...
+
+● View test to update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '690,720p'
+  │ tests/integration/test_conversation_api.py
+  └ 18 lines...
+
+● Edit test_conversation_api.py +2 -2
+  └ tests/integration/test_conversation_api.py
+
+Now add new test for nonexistent conversation:
+
+● Add nonexistent conversation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_conversation_api.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 13 lines...
+
