@@ -353,7 +353,6 @@ export default function Conversation() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {pastConversations.slice(0, 5).map((c) => {
-                const topic = topics.find((t) => t.id === c.topic);
                 return (
                   <button
                     key={c.id}
@@ -371,7 +370,7 @@ export default function Conversation() {
                     }}
                   >
                     <div>
-                      <strong>{TOPIC_EMOJIS[c.topic] || '💬'} {topic?.label || c.topic}</strong>
+                      <strong>{TOPIC_EMOJIS[c.topic_id] || '💬'} {c.topic}</strong>
                       <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontSize: '0.85rem' }}>
                         {c.difficulty} · {c.message_count} messages
                       </span>

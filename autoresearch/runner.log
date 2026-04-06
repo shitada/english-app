@@ -1532,3 +1532,148 @@ The existing tests for `_get_recent_activity` and streak already exist at lines 
 
 T2=1775494797, implement_sec=38.
 
+● Commit iteration 256 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #256: Fix unbounded full-table scans in _get_recent_activity and streak helpers
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+830 passed. Check TS and smoke:
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -5
+  └ 6 lines...
+
+All pass. No frontend pages changed, type is "bugfix" — QA skipped.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775494863, test_sec=66. Now evaluator:
+
+● Evaluator Evaluate iteration 256
+  └ Agent started in background with agent_id: evaluator-256. You can use read_ag...
+
+<system_notification>Background agent `evaluator-256` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 256 results
+  │ Read (Evaluator agent — Evaluate iteration 256)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 256)
+      └ Completed
+
+Evaluator: 7.0, keep. Recording results:
+
+● Record results 256 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "256" "$HASH" "$DATE" "427" "38" "66" "$((T4-1775494863))" "$((T4-1775494332))" \
+  │ "830" "830" "pass" "7.0" "KEPT" "Fix unbounded full-table scans in _get_recent_activity and …
+  └ 4 lines...
+
+Iteration 256 KEPT (7.0, 830 tests). Starting iteration 257.
+
+● Context restore 257 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 257
+  └ Agent started in background with agent_id: proposer-257. You can use read_age...
+
+<system_notification>Background agent `proposer-257` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 257 results
+  │ Read (Proposer agent — Propose iteration 257)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 257)
+      └ Completed
+
+Good bug find! Let me implement:
+
+● Record T1 for 257 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find ConversationListItem type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ConversationListItem"
+  │ frontend/src/api.ts
+  └ 3 lines...
+
+● Find emoji lookup in frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "TOPIC_EMOJIS\|topic_id\|ConversationListItem" frontend/src/pages/Conversation.tsx | head -20
+  └ 6 lines...
+
+● Find relevant lines in router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ConversationListItem\|get_topic_label\|topic_label\|conversations = \["
+  │ app/routers/conversation.py | head -10
+  └ 11 lines...
+
+● Read ConversationListItem model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '58,70p' app/routers/conversation.py
+  └ 10 lines...
+
+● Read list endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '395,415p'
+  │ app/routers/conversation.py
+  └ 22 lines...
+
+● Read ConversationListItem interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '280,295p' frontend/src/api.ts
+  └ 17 lines...
+
+● Read emoji usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '350,380p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 32 lines...
+
+Now I have full context. The fix is to preserve the raw topic_id in the API response:
+
+● Edit conversation.py +1
+  └ app/routers/conversation.py
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+
+Now update the frontend interface:
+
+● Edit api.ts +1
+  └ frontend/src/api.ts
+
+Now fix the frontend to use `topic_id` for emoji lookup:
+
+● Edit Conversation.tsx -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit, test:
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775495268, implement_sec=38.
+

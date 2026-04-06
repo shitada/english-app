@@ -60,6 +60,7 @@ class EndResponse(BaseModel):
 class ConversationListItem(BaseModel):
     id: int
     topic: str
+    topic_id: str = ""
     difficulty: str
     started_at: str
     ended_at: str | None
@@ -402,7 +403,7 @@ async def list_conversations(
     total_count = await conv_dal.count_conversations(db, topic=topic, keyword=keyword)
     topics = get_conversation_topics()
     conversations = [
-        {**c, "topic": get_topic_label(topics, c["topic"])} for c in conversations
+        {**c, "topic_id": c["topic"], "topic": get_topic_label(topics, c["topic"])} for c in conversations
     ]
     return {
         "conversations": conversations,

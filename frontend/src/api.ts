@@ -282,6 +282,7 @@ export interface DashboardStats {
 export interface ConversationListItem {
   id: number;
   topic: string;
+  topic_id: string;
   difficulty: string;
   started_at: string;
   ended_at: string | null;
