@@ -20,6 +20,7 @@ from app.dal.conversation import (
     get_bookmarked_messages,
     get_conversation_export,
     get_conversation_history,
+    get_conversation_metrics,
     get_conversation_replay,
     get_conversation_status,
     get_conversation_summary,
@@ -985,3 +986,54 @@ class TestGetConversationStatus:
     async def test_nonexistent_conversation(self, test_db):
         status = await get_conversation_status(test_db, 99999)
         assert status is None
+
+
+@pytest.mark.unit
+class TestGetConversationMetrics:
+    async def test_no_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["total_user_messages"] == 0
+        assert metrics["grammar_checked"] == 0
+        assert metrics["grammar_correct"] == 0
+        assert metrics["grammar_accuracy_rate"] == 0.0
+
+    async def test_messages_with_feedback(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello", {"is_correct": True})
+        await add_message(test_db, cid, "assistant", "Hi there!")
+        await add_message(test_db, cid, "user", "I wants room", {"is_correct": False, "errors": [{"original": "wants", "correction": "want"}]})
+        await add_message(test_db, cid, "assistant", "Sure!")
+        await add_message(test_db, cid, "user", "Thank you", {"is_correct": True})
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["total_user_messages"] == 3
+        assert metrics["grammar_checked"] == 3
+        assert metrics["grammar_correct"] == 2
+        assert metrics["grammar_accuracy_rate"] == 66.7
+
+    async def test_messages_without_feedback(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        await add_message(test_db, cid, "user", "Another message")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["total_user_messages"] == 2
+        assert metrics["grammar_checked"] == 0
+        assert metrics["grammar_correct"] == 0
+        assert metrics["grammar_accuracy_rate"] == 0.0
+
+    async def test_mixed_feedback_with_null_is_correct(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello", {"is_correct": True})
+        await add_message(test_db, cid, "user", "World", {"some_key": "value"})
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["total_user_messages"] == 2
+        assert metrics["grammar_checked"] == 1
+        assert metrics["grammar_correct"] == 1
+        assert metrics["grammar_accuracy_rate"] == 100.0
+
+    async def test_all_correct(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Good morning", {"is_correct": True})
+        await add_message(test_db, cid, "user", "Nice weather", {"is_correct": True})
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["grammar_accuracy_rate"] == 100.0

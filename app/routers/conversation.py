@@ -342,6 +342,9 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
 
     summary = _normalize_summary(summary)
 
+    metrics = await conv_dal.get_conversation_metrics(db, req.conversation_id)
+    summary["performance"] = metrics
+
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
         raise HTTPException(status_code=409, detail="Conversation was already ended")
@@ -355,7 +358,10 @@ async def get_summary(conversation_id: int = Path(ge=1), db: aiosqlite.Connectio
     summary = await conv_dal.get_conversation_summary(db, conversation_id)
     if summary is None:
         raise HTTPException(status_code=404, detail="Summary not found")
-    return {"summary": _normalize_summary(summary)}
+    normalized = _normalize_summary(summary)
+    if "performance" not in normalized:
+        normalized["performance"] = await conv_dal.get_conversation_metrics(db, conversation_id)
+    return {"summary": normalized}
 
 
 @router.get("/{conversation_id}/history")

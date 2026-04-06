@@ -520,6 +520,40 @@ async def get_conversation_replay(
     }
 
 
+async def get_conversation_metrics(
+    db: aiosqlite.Connection, conversation_id: int
+) -> dict[str, Any]:
+    """Compute quantitative performance metrics for a conversation."""
+    rows = await db.execute_fetchall(
+        "SELECT feedback_json FROM messages WHERE conversation_id = ? AND role = 'user'",
+        (conversation_id,),
+    )
+    total_user_messages = len(rows)
+    grammar_checked = 0
+    grammar_correct = 0
+    for row in rows:
+        if not row["feedback_json"]:
+            continue
+        try:
+            feedback = json.loads(row["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        if "is_correct" not in feedback:
+            continue
+        grammar_checked += 1
+        if coerce_bool(feedback["is_correct"]):
+            grammar_correct += 1
+    accuracy_rate = round(grammar_correct / grammar_checked * 100, 1) if grammar_checked > 0 else 0.0
+    return {
+        "total_user_messages": total_user_messages,
+        "grammar_checked": grammar_checked,
+        "grammar_correct": grammar_correct,
+        "grammar_accuracy_rate": accuracy_rate,
+    }
+
+
 async def get_conversation_vocabulary(
     db: aiosqlite.Connection, conversation_id: int
 ) -> dict[str, Any] | None:

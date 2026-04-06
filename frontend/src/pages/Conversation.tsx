@@ -444,6 +444,17 @@ export default function Conversation() {
             <p style={{ fontSize: 13, color: 'var(--primary-dark)' }}>
               <strong>Tip:</strong> {historySummary.tip}
             </p>
+            {historySummary.performance && historySummary.performance.total_user_messages > 0 && (
+              <div style={{ marginTop: 12, padding: 12, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+                <strong style={{ fontSize: 13 }}>Performance:</strong>
+                <div style={{ display: 'flex', gap: 16, marginTop: 4, fontSize: 13 }}>
+                  <span>{historySummary.performance.total_user_messages} messages</span>
+                  {historySummary.performance.grammar_checked > 0 && (
+                    <span>{historySummary.performance.grammar_accuracy_rate}% grammar accuracy ({historySummary.performance.grammar_correct}/{historySummary.performance.grammar_checked})</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -584,6 +595,36 @@ export default function Conversation() {
         <p style={{ marginBottom: 24, color: 'var(--primary-dark)' }}>
           <strong>Tip:</strong> {summary.tip}
         </p>
+
+        {summary.performance && summary.performance.total_user_messages > 0 && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+            <h4 style={{ marginBottom: 8 }}>Performance</h4>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>
+                  {summary.performance.total_user_messages}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Messages</div>
+              </div>
+              {summary.performance.grammar_checked > 0 && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: summary.performance.grammar_accuracy_rate >= 80 ? 'var(--success, #22c55e)' : summary.performance.grammar_accuracy_rate >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
+                    {summary.performance.grammar_accuracy_rate}%
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Grammar Accuracy</div>
+                </div>
+              )}
+              {summary.performance.grammar_checked > 0 && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, fontWeight: 700 }}>
+                    {summary.performance.grammar_correct}/{summary.performance.grammar_checked}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Correct</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <button className="btn btn-primary" onClick={() => {
           setPhase('select');

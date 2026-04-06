@@ -870,3 +870,305 @@ Now add tests:
 
 Now commit and test:
 
+● Commit iteration 253 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #253: Add achievement badge system for learning motivation
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests iteration 253 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Smoke test iteration 253 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 2>/dev/null | head -1 | xargs
+  │ -I{} kill -9 {} 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. Now call tester and evaluator:
+
+● Record T3 for iteration 253 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Tester QA test iteration 253
+  └ Agent started in background with agent_id: tester-253. You can use read_agent...
+
+● Evaluator Evaluate iteration 253
+  └ Agent started in background with agent_id: evaluator-253. You can use read_ag...
+
+While waiting, let me update the backlog with completed features from this run and prepare for future iterations. The task says 4 features targeted, and we've done all 4 (#250-253). The remaining iterations 254-269 can be bugfixes or smaller improvements. Let me wait for evaluator then continue:
+
+● Wait for evaluator (shell)
+  │ sleep 45 && echo "waited"
+  └ 2 lines...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+● Response was interrupted due to a server error. Retrying...
+
+
+Total usage est:        3 Premium requests
+API time spent:         44m 37s
+Total session time:     34m 55s
+Total code changes:     +1396 -16
+Breakdown by AI model:
+ claude-opus-4.6          20.5m in, 112.4k out, 19.4m cached (Est. 3 Premium requests)
+ gpt-5.4-mini             5.6k in, 19 out, 3.1k cached (Est. 0 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-250-to-269.md
+[2026-04-07 01:15:30] Copilot invocation completed (duration: 2098s)
+[2026-04-07 01:15:30] Running post-invocation audit (iter 250-252)...
+============================================
+ Autoresearch Audit
+ Iterations: 250 — 252
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-07 01:15:30
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 253[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 253 (d4bcd79)[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-07 01:15:31] Audit found 1 error(s) — fixes applied where possible
+[2026-04-07 01:15:34] Current iteration count: 253 / 269
+[2026-04-07 01:15:34] ------------------------------------------
+[2026-04-07 01:15:34] Invocation 2 / 10
+[2026-04-07 01:15:34] Resuming from iteration 254
+[2026-04-07 01:15:34] ------------------------------------------
+[2026-04-07 01:15:34] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-254-to-269.md)...
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 126 lines read
+
+● Recent git commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read TSV header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -1 autoresearch/results.tsv
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-002.md | head
+  │ -80
+  └ 49 lines...
+
+● Record T0 for iteration 254 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check for uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l autoresearch/backlog.md && grep -c
+  │ "^\- \[ \]" autoresearch/backlog.md
+  └ 3 lines...
+
+Good. All backlog items completed. Starting iteration 254 with T0=1775492170. Let me call the proposer.
+
+● Proposer Propose iteration 254
+  └ Agent started in background with agent_id: proposer-254. You can use read_age...
+
+Proposer running in background. Waiting for results...
+
+<system_notification>Background agent `proposer-254` has completed. Use read_agent to retrieve results.</system_notification>
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● General-purpose Read proposer 254 results
+  │ Read (Proposer agent — Propose iteration 254)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 254)
+      └ Completed
+
+Got the proposal. T1=1775492209, propose_sec=39. Now implementing: "Add per-conversation performance metrics to summary view".
+
+● Read conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/dal/conversation.py
+  └ 568 lines...
+
+● Check frontend API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ConversationSummary\|EndResponse\|summary" frontend/src/api.ts | head -30
+  └ 7 lines...
+
+● Read conversation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/routers/conversation.py
+  └ 24 lines...
+
+● Read ConversationSummary type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '180,200p' frontend/src/api.ts
+  └ 22 lines...
+
+● Find end_conversation in router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "end_conversation\|get_summary\|EndResponse\|SummaryResponse"
+  │ /var/folders/8_/bqrlbtbd48q791qfl1kwwthc0000gn/T/copilot-tool-output-1775492616886-pmvpbx.txt |
+  │ head -20
+  └ 7 lines...
+
+● Read EndResponse model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '50,70p'
+  │ /var/folders/8_/bqrlbtbd48q791qfl1kwwthc0000gn/T/copilot-tool-output-1775492616886-pmvpbx.txt
+  └ 20 lines...
+
+● Read end_conversation handler (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '310,370p'
+  │ /var/folders/8_/bqrlbtbd48q791qfl1kwwthc0000gn/T/copilot-tool-output-1775492616886-pmvpbx.txt
+  └ 61 lines...
+
+● Find coerce_bool in utils (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "coerce_bool" app/utils.py
+  └ 2 lines...
+
+● Find summary display in Conversation.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "summary\|Summary\|ended\|phase"
+  │ frontend/src/pages/Conversation.tsx | head -30
+  └ 31 lines...
+
+● Read summary rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '560,620p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 62 lines...
+
+● Read history summary rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '420,460p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 42 lines...
+
+Good, I have full context. Now let me implement the changes across all files.
+
+● Edit conversation.py +34
+  └ app/dal/conversation.py
+
+Now update the router to call metrics in `end_conversation` and `get_summary`:
+
+● Check exact lines around summary storage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '340,350p'
+  │ /var/folders/8_/bqrlbtbd48q791qfl1kwwthc0000gn/T/copilot-tool-output-1775492616886-pmvpbx.txt
+  └ 11 lines...
+
+● Edit conversation.py +3
+  └ app/routers/conversation.py
+
+Now update `get_summary` to also compute metrics on the fly for past conversations:
+
+● Edit conversation.py +4 -1
+  └ app/routers/conversation.py
+
+Now update the frontend TypeScript types:
+
+● Edit api.ts +6
+  └ frontend/src/api.ts
+
+Now update the summary display in `Conversation.tsx` — both the "summary" phase and "history" phase:
+
+● Edit Conversation.tsx +30
+  └ frontend/src/pages/Conversation.tsx
+
+Now add performance display in the history summary view:
+
+● Edit Conversation.tsx +11
+  └ frontend/src/pages/Conversation.tsx
+
+Now add unit tests for `get_conversation_metrics`:
+
+● Find existing conversation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_conversation*
+  │ tests/integration/test_conversation* 2>/dev/null
+  └ 2 lines...
+
+● Read end of conversation DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/unit/test_conversation_dal.py
+  └ 31 lines...
+
+● Read imports in conversation DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10
+  │ tests/unit/test_conversation_dal.py
+  └ 11 lines...
+
+● Read full imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '10,30p'
+  │ tests/unit/test_conversation_dal.py
+  └ 22 lines...
+
+● Check remaining imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,35p'
+  │ tests/unit/test_conversation_dal.py
+  └ 7 lines...
+
+Now add the import and test class:
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+Now append tests at the end of the file:
+
+● Edit test_conversation_dal.py +51
+  └ tests/unit/test_conversation_dal.py
+
+Now commit and test:
+
+● Record T2 after implementation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775492753, implement_sec=544. Now commit and test.
+

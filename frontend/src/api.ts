@@ -188,6 +188,12 @@ export interface ConversationSummary {
   key_vocabulary: string[];
   communication_level: string;
   tip: string;
+  performance?: {
+    total_user_messages: number;
+    grammar_checked: number;
+    grammar_correct: number;
+    grammar_accuracy_rate: number;
+  };
 }
 
 export interface ReplayTurn {
