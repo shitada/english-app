@@ -21,7 +21,13 @@ const TOPIC_EMOJIS: Record<string, string> = {
   airport: '✈️',
 };
 
-const DURATION = 5 * 60; // 5 minutes in seconds
+type DurationOption = { value: number; label: string; description: string };
+const DURATION_OPTIONS: DurationOption[] = [
+  { value: 3 * 60, label: '3 min', description: 'Quick practice' },
+  { value: 5 * 60, label: '5 min', description: 'Standard session' },
+  { value: 10 * 60, label: '10 min', description: 'Deep conversation' },
+  { value: 0, label: 'No limit', description: 'Practice at your own pace' },
+];
 
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 
@@ -79,7 +85,8 @@ export default function Conversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(DURATION);
+  const [duration, setDuration] = useState(5 * 60);
+  const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [summary, setSummary] = useState<any>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
@@ -132,9 +139,9 @@ export default function Conversation() {
     }
   }, [conversationId]);
 
-  // Timer
+  // Timer (skip when no limit)
   useEffect(() => {
-    if (phase === 'chat') {
+    if (phase === 'chat' && duration > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -146,11 +153,11 @@ export default function Conversation() {
       }, 1000);
     }
     return () => clearInterval(timerRef.current);
-  }, [phase]);
+  }, [phase, duration]);
 
   // Auto-end conversation when timer expires
   useEffect(() => {
-    if (phase === 'chat' && timeLeft === 0 && !loading) {
+    if (phase === 'chat' && duration > 0 && timeLeft === 0 && !loading) {
       endConversation();
     }
   }, [timeLeft, phase, loading, endConversation]);
@@ -240,7 +247,7 @@ export default function Conversation() {
       setConversationId(res.conversation_id);
       setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] }]);
       setPhase('chat');
-      setTimeLeft(DURATION);
+      setTimeLeft(duration);
       setPhraseSuggestions(res.phrase_suggestions || []);
       tts.speak(res.message);
     } catch (err) {
@@ -334,6 +341,29 @@ export default function Conversation() {
                       border: difficulty === d.value ? '2px solid var(--primary)' : '2px solid var(--border)',
                       background: difficulty === d.value ? 'var(--primary)' : 'transparent',
                       color: difficulty === d.value ? 'white' : 'var(--text)',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                    }}
+                    title={d.description}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Session Duration</h3>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {DURATION_OPTIONS.map((d) => (
+                  <button
+                    key={d.value}
+                    onClick={() => setDuration(d.value)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      border: duration === d.value ? '2px solid var(--primary)' : '2px solid var(--border)',
+                      background: duration === d.value ? 'var(--primary)' : 'transparent',
+                      color: duration === d.value ? 'white' : 'var(--text)',
                       cursor: 'pointer',
                       fontSize: '0.9rem',
                     }}
@@ -666,7 +696,7 @@ export default function Conversation() {
   }
 
   // Chat
-  const timerClass = timeLeft <= 30 ? 'danger' : timeLeft <= 60 ? 'warning' : '';
+  const timerClass = duration > 0 ? (timeLeft <= 30 ? 'danger' : timeLeft <= 60 ? 'warning' : '') : '';
 
   return (
     <div className="chat-container">
@@ -712,7 +742,31 @@ export default function Conversation() {
               </button>
             ))}
           </div>
-          <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
+          {duration > 0 ? (
+            <>
+              <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
+              {timeLeft > 0 && timeLeft <= 60 && (
+                <button
+                  onClick={() => setTimeLeft((prev) => prev + 120)}
+                  aria-label="Extend by 2 minutes"
+                  style={{
+                    padding: '2px 8px',
+                    fontSize: 12,
+                    borderRadius: 4,
+                    border: '1px solid var(--border)',
+                    background: 'transparent',
+                    color: 'var(--primary)',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                  }}
+                >
+                  +2m
+                </button>
+              )}
+            </>
+          ) : (
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>∞ No limit</span>
+          )}
           <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
             <Square size={14} /> End
           </button>
