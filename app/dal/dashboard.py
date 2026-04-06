@@ -764,7 +764,7 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     total_convs = conv_rows[0]["cnt"] if conv_rows else 0
 
     vocab_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 5"
+        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 3"
     )
     vocab_mastered = vocab_rows[0]["cnt"] if vocab_rows else 0
 

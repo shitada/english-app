@@ -693,3 +693,31 @@ class TestGetAchievementsStreakConsistency:
             f"Dashboard streak ({dashboard_streak}) != achievement streak ({achievement_streak})"
         )
         assert dashboard_streak >= 2
+
+
+@pytest.mark.unit
+class TestGetAchievementsVocabMastery:
+    async def test_vocab_mastery_threshold_matches_dashboard(self, test_db):
+        """Achievements should count vocab as mastered at level >= 3, same as dashboard."""
+        from app.dal.dashboard import get_achievements, get_stats
+
+        # Insert a word at level 3 (mastered threshold)
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (word, meaning, topic) VALUES (?, ?, ?)",
+            ("test", "テスト", "daily_life"),
+        )
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, level, correct_count, incorrect_count) "
+            "VALUES (?, ?, ?, ?)",
+            (1, 3, 5, 1),
+        )
+        await test_db.commit()
+
+        stats = await get_stats(test_db)
+        assert stats["vocab_mastered"] >= 1, "Dashboard should count level 3 as mastered"
+
+        achievements_data = await get_achievements(test_db)
+        vocab_badges = [a for a in achievements_data["achievements"] if a["id"] == "vocab_1"]
+        assert vocab_badges[0]["progress"]["current"] >= 1, (
+            "Achievement should count level 3 as mastered (same threshold as dashboard)"
+        )

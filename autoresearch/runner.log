@@ -1882,3 +1882,132 @@ The value is capped at target. Use streak_7 (target=7) instead:
 
 Now run full suite:
 
+● Amend and run full tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #258: Fix achievements streak showing 0 when no activity today
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+831 passed (+1 new test). TS check and smoke:
+
+● Check smoke needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo "TS
+  │ OK"
+  └ 2 lines...
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. No frontend changes, type is bugfix — QA skipped. Record T3 and evaluate:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775496309, test_sec=180.
+
+● Evaluator Evaluate iteration 258
+  └ Agent started in background with agent_id: evaluator-258. You can use read_ag...
+
+<system_notification>Background agent `evaluator-258` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read evaluator 258 results
+  │ Read (Evaluator agent — Evaluate iteration 258)
+  │   └ Running
+  └ Read (Evaluator agent — Evaluate iteration 258)
+      └ Completed
+
+Evaluator: 8.1, keep. Recording:
+
+● Record results 258 (shell)
+  │ T4=$(date +%s) && cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short=7 HEAD) && DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "258" "$HASH" "$DATE" "226" "38" "180" "$((T4-1775496309))" "$((T4-1775495865))" \
+  │ "831" "831" "pass" "8.1" "KEPT" "Fix achievements streak showing 0 when no activity today" \…
+  └ 3 lines...
+
+Iteration 258 KEPT (8.1, 831 tests). Starting iteration 259.
+
+● Context restore 259 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" && git
+  │ --no-pager log --oneline -5
+  └ 7 lines...
+
+● Proposer Propose iteration 259
+  └ Agent started in background with agent_id: proposer-259. You can use read_age...
+
+<system_notification>Background agent `proposer-259` has completed. Use read_agent to retrieve results.</system_notification>
+
+● General-purpose Read proposer 259 results
+  │ Read (Proposer agent — Propose iteration 259)
+  │   └ Running
+  └ Read (Proposer agent — Propose iteration 259)
+      └ Completed
+
+● Record T1 for 259 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read vocab mastery in get_achievements (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '760,775p' app/dal/dashboard.py
+  └ 17 lines...
+
+● Verify mastery threshold inconsistency (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "level >= " app/dal/dashboard.py
+  │ app/dal/vocabulary.py | head -10
+  └ 11 lines...
+
+T1=1775496691, propose_sec=277. Confirmed: line 767 uses `>= 5` while everywhere else uses `>= 3`. Simple fix:
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+Now add a regression test:
+
+● Add vocab mastery threshold test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_dashboard_dal.py
+  │ << 'PYTEST_EOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 28 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+T2=1775496715, implement_sec=24. Commit and test:
+
+● Commit and test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #259: Fix achievements vocab mastery threshold inconsistent with rest of app
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -5
+  └ 20 lines...
+
+● See full error (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetAchievementsVocabMastery -v 2>&1 | tail -15
+  └ 16 lines...
+
+● Find correct key name (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "mastered\|vocab"
+  │ app/dal/dashboard.py | head -10
+  └ 11 lines...
+
+Key is `vocab_mastered`:
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
