@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from app.dal.conversation import add_message, create_conversation
+from app.dal.conversation import add_message, create_conversation, update_message_feedback
 from app.dal.dashboard import (
     delete_learning_goal,
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
+    get_mistake_journal,
     get_stats,
     get_today_activity,
     set_learning_goal,
@@ -784,3 +785,84 @@ class TestGetAchievementsStudyDays:
         assert dedicated[0]["progress"]["current"] >= 2, (
             "Vocabulary-only days should count toward dedicated_10 achievement"
         )
+
+
+@pytest.mark.unit
+class TestGetMistakeJournal:
+    async def test_empty_database(self, test_db):
+        result = await get_mistake_journal(test_db)
+        assert result["items"] == []
+        assert result["total_count"] == 0
+
+    async def test_grammar_mistakes_extracted(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I want check in")
+        feedback = {
+            "is_correct": False,
+            "errors": [{"original": "check in", "correction": "to check in", "explanation": "Use infinitive"}],
+            "suggestions": [],
+        }
+        await update_message_feedback(test_db, mid, feedback)
+        result = await get_mistake_journal(test_db)
+        assert result["total_count"] == 1
+        item = result["items"][0]
+        assert item["module"] == "grammar"
+        assert item["detail"]["original"] == "check in"
+        assert item["detail"]["correction"] == "to check in"
+
+    async def test_pronunciation_mistakes_low_scores(self, test_db):
+        await save_attempt(test_db, "Hello there", "Hello dare", {"overall_score": 5.0}, 5.0)
+        await save_attempt(test_db, "Good morning", "Good morning", {"overall_score": 9.0}, 9.0)
+        result = await get_mistake_journal(test_db, module="pronunciation")
+        assert result["total_count"] == 1
+        assert result["items"][0]["detail"]["score"] == 5.0
+
+    async def test_module_filter_grammar(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Bad grammar")
+        await update_message_feedback(test_db, mid, {
+            "is_correct": False,
+            "errors": [{"original": "Bad", "correction": "Poor", "explanation": "word choice"}],
+            "suggestions": [],
+        })
+        await save_attempt(test_db, "Test", "Tset", {"overall_score": 3.0}, 3.0)
+        # Grammar-only filter
+        result = await get_mistake_journal(test_db, module="grammar")
+        assert all(item["module"] == "grammar" for item in result["items"])
+        assert result["total_count"] >= 1
+
+    async def test_pagination(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(5):
+            mid = await add_message(test_db, cid, "user", f"Mistake {i}")
+            await update_message_feedback(test_db, mid, {
+                "is_correct": False,
+                "errors": [{"original": f"err{i}", "correction": f"fix{i}", "explanation": "test"}],
+                "suggestions": [],
+            })
+        result = await get_mistake_journal(test_db, limit=2, offset=0)
+        assert len(result["items"]) == 2
+        assert result["total_count"] == 5
+        result2 = await get_mistake_journal(test_db, limit=2, offset=2)
+        assert len(result2["items"]) == 2
+
+    async def test_malformed_feedback_handled(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "test")
+        # Store malformed JSON
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?",
+            ("not valid json{{{", mid),
+        )
+        await test_db.commit()
+        result = await get_mistake_journal(test_db, module="grammar")
+        assert result["total_count"] == 0
+
+    async def test_no_errors_not_included(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Perfect sentence")
+        await update_message_feedback(test_db, mid, {
+            "is_correct": True, "errors": [], "suggestions": [],
+        })
+        result = await get_mistake_journal(test_db, module="grammar")
+        assert result["total_count"] == 0
