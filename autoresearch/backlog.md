@@ -166,3 +166,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add shadowing exercise to conversation summary — listen and repeat speaking practice (#304)
 - [x] Add per-conversation grammar accuracy trend chart to dashboard (#305)
 - [x] Add fluency metrics (words/msg, vocab diversity) to conversation summary (#306)
+- [x] Add dictation exercise to conversation summary for listening practice (#307)

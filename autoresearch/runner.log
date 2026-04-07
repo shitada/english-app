@@ -5646,3 +5646,81 @@ Now build and test:
 
 906 passed, TS check pass, build success. Commit and run QA:
 
+● Commit iteration 307 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #307: Add dictation exercise to conversation summary for listening practice"
+  └ 16 lines...
+
+Check for smoke test and QA:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE NEEDED" || echo "NO SMOKE"
+  └ 2 lines...
+
+● Check if QA test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && FRONTEND_UI_CHANGED=$(git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"); echo "Frontend changed:
+  │ $FRONTEND_UI_CHANGED"
+  └ 3 lines...
+
+No smoke test needed (no backend changes). QA test MUST run (frontend changed + feature type). Let me restart the server and run tester:
+
+● Restart server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 2; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA test iteration 307
+  │ playwright-browser_navigate http://localhost:8000/ · url: "http://localhost:8000/"
+  │   └ ### Ran Playwright code
+  └ playwright-browser_console_messages level: "error"
+      └ ### Result
+
+QA passed with ux_score 9, no issues. Now record timestamp and call evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 307
+  │ Read index.ts
+  │   │ frontend/src/components/conversation/index.ts
+  │   └ 10 lines read
+  └ Read ShadowingExercise.tsx
+      │ frontend/src/components/conversation/ShadowingExercise.tsx
+      └ 250 lines read
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator says KEEP with 7.35. Record results:
+
+● Record iteration 307 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "307" "f99bb91" "2026-04-08" "96" "199" "289" "63" "647" \
+  │ "906" "906" "pass" "7.35" "KEPT" "Add dictation exercise to conversation summary for
+  │ listening practice" \…
+  └ 3 lines...
+
+Update backlog and clean up:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Kill the server:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Now write the session log:
+
+● Create invocation-008.md +45
+  └ autoresearch/logs/invocation-008.md
+
