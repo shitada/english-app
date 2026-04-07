@@ -12,3 +12,4 @@ frontend/dist/
 .vscode/
 pic/
 .playwright-mcp/
+*.png

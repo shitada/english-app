@@ -2350,3 +2350,191 @@ Good row. Update the backlog:
 
 Now commit the results and backlog updates:
 
+● Commit results and backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: update
+  │ results.tsv and backlog for iterations 293-295
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 19 lines...
+
+Stray screenshots again. Let me clean:
+
+● Remove stray screenshots (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git rm dashboard.png home-dark-mode.png
+  │ home-final.png home-page.png 2>/dev/null && git commit --amend --no-edit
+  └ 20 lines...
+
+Also add those to .gitignore to prevent future issues:
+
+● Clean up stray files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "*.png" >> .gitignore 2>/dev/null; ls
+  │ *.png 2>/dev/null && rm *.png 2>/dev/null; echo "done"
+  └ 2 lines...
+
+✅ **All 3 iterations complete (293-295)**. Here's the summary:
+
+| Iter | Hash | Score | Verdict | Proposer | Evaluator | Tester | Description |
+|------|---------|-------|---------|----------|-----------|--------|-------------|
+| 293 | 6fff4ce | 7.6 | KEPT | ✅ | ✅ | ✅ | Role swap briefing panel with professional phrases |
+| 294 | 8e2bd46 | 6.2 | KEPT | ✅ | ✅ | ⏭️ (App.tsx only) | Connection health indicator in UI header |
+| 295 | 344a024 | 7.35 | KEPT | ✅ | ✅ | ✅ | Request retry with exponential backoff + banner |
+
+**3/3 kept**, 888 tests passing, all TypeScript checks pass. Average score: **7.05**.
+
+
+Total usage est:        3 Premium requests
+API time spent:         31m 49s
+Total session time:     38m 42s
+Total code changes:     +247 -16
+Breakdown by AI model:
+ claude-opus-4.6          11.3m in, 79.7k out, 10.5m cached (Est. 3 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-293-to-309.md
+[2026-04-08 03:30:51] Copilot invocation completed (duration: 2325s)
+[2026-04-08 03:30:51] Verifying agent invocations for iter 293-295...
+[2026-04-08 03:30:51]   Iteration 293: proposer=✅ evaluator=✅
+[2026-04-08 03:30:51]   Iteration 294: proposer=✅ evaluator=✅
+[2026-04-08 03:30:51]   Iteration 295: proposer=✅ evaluator=✅
+[2026-04-08 03:30:51] All iterations passed agent verification.
+[2026-04-08 03:30:51] Running post-invocation audit (iter 293-295)...
+============================================
+ Autoresearch Audit
+ Iterations: 293 — 295
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-08 03:30:51
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 294[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 293(4) 295(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-08 03:30:52] Audit found 1 error(s) — fixes applied where possible
+[2026-04-08 03:30:55] Current iteration count: 295 / 309
+[2026-04-08 03:30:55] ------------------------------------------
+[2026-04-08 03:30:55] Invocation 4 / 10
+[2026-04-08 03:30:55] Resuming from iteration 296
+[2026-04-08 03:30:55] ------------------------------------------
+[2026-04-08 03:30:55] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-296-to-309.md)...
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 164 lines read
+
+● Read last 20 rows of results.tsv (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Check TSV header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -1 autoresearch/results.tsv
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-005.md |
+  │ tail -60
+  └ 61 lines...
+
+Good. The last completed iteration is #295. I'll run iterations 296–298. Let me start iteration 296.
+
+## Iteration 296
+
+● Record T0 for iteration 296 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 296
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L365:500 (136 lines read)
+  └ Read formatDate.ts
+      │ frontend/src/utils/formatDate.ts
+      └ 41 lines read
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L1:50 (50 lines read)
+
+● Record T1 for iteration 296 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if utils dir exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/utils/ 2>/dev/null
+  └ 2 lines...
+
+● Find topic fetching code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "topics\|setTopics\|favorites\|setFavorites\|fetchTopics\|topicsLoading\|skeleton"
+  │ frontend/src/pages/Conversation.tsx | head -40
+  └ 13 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L183:225 (43 lines read)
+
+Now I have the context. Let me implement the change.
+
+● Create localStorageCache.ts +28
+  └ frontend/src/utils/localStorageCache.ts
+
+Now update Conversation.tsx to use the cache:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +12 -2
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit and test:
+

@@ -1,5 +1,5 @@
 [
-  {"check":"agent_skip","severity":"error","iterations":" 291 292 ","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 294 ","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ,
-  {"check":"playwright_shallow","severity":"warning","iterations":" 290(4)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
+  {"check":"playwright_shallow","severity":"warning","iterations":" 293(4) 295(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
 ]

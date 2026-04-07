@@ -4,6 +4,7 @@ import { api, ApiError, type GrammarFeedback, type ConversationListItem, type Co
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
+import { getCache, setCache } from '../utils/localStorageCache';
 import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory } from '../components/conversation';
 
 interface Message {
@@ -182,15 +183,25 @@ export default function Conversation() {
     }
   }, [speech.transcript]);
 
-  // Fetch topics and favorites from API
+  // Fetch topics and favorites with stale-while-revalidate cache (10 min TTL)
   useEffect(() => {
+    const CACHE_TTL = 10 * 60 * 1000;
+    const cachedTopics = getCache<{ id: string; label: string; description: string }[]>('conv_topics', CACHE_TTL);
+    const cachedFavs = getCache<string[]>('conv_favorites', CACHE_TTL);
+    if (cachedTopics) {
+      setTopics(cachedTopics);
+      if (cachedFavs) setFavoriteTopics(new Set(cachedFavs));
+      setTopicsLoading(false);
+    }
     Promise.all([
       api.getConversationTopics(),
-      api.getFavoriteTopics().catch(() => ({ favorites: [] })),
+      api.getFavoriteTopics().catch(() => ({ favorites: [] as string[] })),
     ])
       .then(([topicsData, favData]) => {
         setTopics(topicsData);
         setFavoriteTopics(new Set(favData.favorites));
+        setCache('conv_topics', topicsData);
+        setCache('conv_favorites', favData.favorites);
       })
       .catch(() => {})
       .finally(() => setTopicsLoading(false));
