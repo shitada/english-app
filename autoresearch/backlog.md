@@ -153,7 +153,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ✅ Add connection health indicator — show backend connectivity status in UI header (completed iteration #294)
 - [x] ✅ Add request retry with exponential backoff in frontend api.ts for transient failures (completed iteration #295)
-- [ ] Cache conversation topics in localStorage to reduce API calls on page load
+- [x] Cache conversation topics in localStorage to reduce API calls on page load (#296)
 - [ ] Add database WAL checkpoint scheduling for long-running instances
 
 ## [LOW] UX & Frontend

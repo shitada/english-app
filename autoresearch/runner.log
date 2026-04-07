@@ -2538,3 +2538,271 @@ Now update Conversation.tsx to use the cache:
 
 Now commit and test:
 
+● Commit iteration 296 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #296: Cache conversation topics in localStorage with stale-while-revalidate
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 888 tests passed, TypeScript check passed. Now record T3 and check if frontend UI changed for tester requirement:
+
+● Record T3 and check frontend changes (shell)
+  │ date +%s && echo "---" && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Proposal type is `feature` and `Conversation.tsx` changed — I **must** call the tester. Let me start the server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Get changed files list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 6 lines...
+
+● Tester QA test iteration 296
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ playwright-browser_take_screenshot element: "Topic cards grid", ref: "e35", type: "png"
+      └ ### Result
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server stopped"
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/utils/localStorageCache.ts frontend/src/pages/Conversation.tsx
+  └ 74 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 296
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L50:130 (81 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L130:220 (91 lines read)
+
+● Record T4 for iteration 296 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.45 ≥ 6.0, tests pass, QA passed. **KEEP**. Let me record results:
+
+● Record results for iteration 296 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "296" "7258a2e" "2026-04-08" "106" "78" "400" "77" "661" \
+  │ "888" "888" "pass" "6.45" "KEPT" "Cache conversation topics in localStorage with
+  │ stale-while-revalidate" \…
+  └ 3 lines...
+
+Good, row written correctly with tab separators. Now update the backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+## Iteration 297
+
+● Record T0 for iteration 297 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 297
+  │ List directory frontend/src/utils
+  │   └ 2 files found
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:50 (50 lines read)
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L50:80 (31 lines read)
+
+● Record T1 for iteration 297 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find key functions in Conversation.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Conversation.tsx
+  │ && grep -n "chat-header\|endConversation\|sendMessage\|handleSend\|handleEnd"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 12 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L620:640 (21 lines read)
+
+● List existing hooks and components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/hooks/ && ls
+  │ frontend/src/components/ | head -20
+  └ 9 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L706:720 (15 lines read)
+
+● Check end of CSS file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "index.css\|shortcuts"
+  │ frontend/src/index.css | head -5 && tail -20 frontend/src/index.css
+  └ 21 lines...
+
+Now I have enough context. Let me implement the keyboard shortcuts:
+
+● Create useKeyboardShortcuts.ts +41
+  └ frontend/src/hooks/useKeyboardShortcuts.ts
+
+● Create KeyboardShortcutsPanel.tsx +48
+  └ frontend/src/components/KeyboardShortcutsPanel.tsx
+
+Now integrate into Conversation.tsx and add CSS:
+
+● Edit Conversation.tsx +3 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the state variable for the shortcuts panel. Let me find a good insertion point:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L72:82 (11 lines read)
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the keyboard shortcuts hook after the `tts` line:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L82:95 (14 lines read)
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L319:340 (22 lines read)
+
+Good. Now I need to add the `useKeyboardShortcuts` hook call. I'll add it after the `tts` line:
+
+● Edit Conversation.tsx +25
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the keyboard button in the chat header and the shortcuts panel overlay. Let me find the right spot:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L732:742 (11 lines read)
+
+● Edit Conversation.tsx +3
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the KeyboardShortcutsPanel component rendering. Let me find the end of the component return:
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ frontend/src/pages/Conversation.tsx
+  └ 11 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L643:655 (13 lines read)
+
+I need to add the shortcuts panel inside the chat container. Let me add it right after the opening `<div className="chat-container">`:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add CSS for the shortcuts panel:
+
+● Add CSS for shortcuts panel (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/index.css << 'CSS'
+  │
+  │ /* Keyboard shortcuts panel */
+  │ .shortcuts-overlay {
+  │ position: fixed;…
+  └ 54 lines...
+
+Now commit and test:
+
+● Commit iteration 297 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #297: Add keyboard shortcuts panel with Ctrl+Enter, Escape, M, ? keys
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 888 tests pass, TypeScript passes. Now check for QA tester requirement - proposal type is `ux` and frontend pages changed:
+
+● Record T3 and check frontend changes (shell)
+  │ date +%s && echo "---" && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 5 lines...
+
+Proposal type is `ux` and frontend files changed — must call tester. Start server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 297
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L650:655 (6 lines read)
+  └ Read useKeyboardShortcuts.ts
+      │ frontend/src/hooks/useKeyboardShortcuts.ts
+      └ L18:39 (22 lines read)
+
+The tester can't verify the feature because the dist bundle is stale. Let me rebuild the frontend and re-test:
+
+● Rebuild frontend dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 5 lines...
+
+TypeScript build found an error — `speech.listening` should be `speech.isListening`. Let me fix:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Rebuild frontend after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+
+Build passes now. Let me amend the commit and restart the server:
+

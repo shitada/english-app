@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
 import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory } from '../components/conversation';
+import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -72,12 +74,38 @@ export default function Conversation() {
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [quizError, setQuizError] = useState('');
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const speech = useSpeechRecognition({ continuous: true });
   const tts = useSpeechSynthesis();
+
+  useKeyboardShortcuts([
+    {
+      key: 'Escape',
+      handler: () => { if (phase === 'chat' && !loading) endConversation(); },
+      enabled: phase === 'chat',
+    },
+    {
+      key: '?',
+      handler: () => setShowShortcuts((v) => !v),
+      enabled: phase === 'chat',
+    },
+    {
+      key: 'm',
+      handler: () => { speech.isListening ? speech.stop() : speech.start(); },
+      enabled: phase === 'chat',
+    },
+    {
+      key: 'Enter',
+      ctrlKey: true,
+      handler: () => sendMessage(),
+      enabled: phase === 'chat',
+      allowInInput: true,
+    },
+  ]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -621,6 +649,7 @@ export default function Conversation() {
 
   return (
     <div className="chat-container">
+      <KeyboardShortcutsPanel open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <div className="chat-header">
         <span style={{ fontWeight: 600 }}>
           Role Play Scenario
@@ -711,6 +740,9 @@ export default function Conversation() {
           ) : (
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>∞ No limit</span>
           )}
+          <button className="btn btn-sm" onClick={() => setShowShortcuts(true)} aria-label="Keyboard shortcuts" title="Keyboard shortcuts" style={{ padding: '4px 6px' }}>
+            <Keyboard size={14} />
+          </button>
           <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
             <Square size={14} /> End
           </button>
