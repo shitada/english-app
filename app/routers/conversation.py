@@ -590,6 +590,19 @@ async def get_conversation_vocabulary(
     return result
 
 
+def _safe_quiz_index(value: Any) -> int | None:
+    """Coerce an LLM-returned correct_index to int in range 0-3, or None."""
+    if value is None:
+        return None
+    try:
+        idx = int(value)
+    except (ValueError, TypeError):
+        return None
+    if 0 <= idx <= 3:
+        return idx
+    return None
+
+
 class QuizQuestion(BaseModel):
     question: str
     options: list[str]
@@ -640,20 +653,27 @@ async def generate_conversation_quiz(
     questions = result.get("questions", [])
     validated: list[dict[str, Any]] = []
     for q in questions[:count]:
-        if (
-            isinstance(q, dict)
-            and "question" in q
-            and isinstance(q.get("options"), list)
-            and len(q["options"]) == 4
-            and isinstance(q.get("correct_index"), int)
-            and 0 <= q["correct_index"] <= 3
-        ):
-            validated.append({
-                "question": str(q["question"]),
-                "options": [str(o) for o in q["options"]],
-                "correct_index": int(q["correct_index"]),
-                "explanation": str(q.get("explanation", "")),
-            })
+        if not isinstance(q, dict) or "question" not in q:
+            continue
+        opts = q.get("options")
+        if not isinstance(opts, list) or len(opts) != 4:
+            continue
+        raw_idx = q.get("correct_index")
+        if raw_idx is None:
+            raw_idx = q.get("correct_answer")
+        if raw_idx is None:
+            raw_idx = q.get("answer_index")
+        if raw_idx is None:
+            raw_idx = q.get("answer")
+        idx = _safe_quiz_index(raw_idx)
+        if idx is None:
+            continue
+        validated.append({
+            "question": str(q["question"]),
+            "options": [str(o) for o in opts],
+            "correct_index": idx,
+            "explanation": str(q.get("explanation", "")),
+        })
 
     if not validated:
         raise HTTPException(status_code=502, detail="Failed to generate valid quiz questions")

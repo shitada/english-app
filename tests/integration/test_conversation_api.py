@@ -765,3 +765,60 @@ async def test_generate_quiz_nonexistent_conversation_returns_404(client):
     """Quiz generation on non-existent conversation returns 404."""
     res = await client.post("/api/conversation/99999/quiz")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_generate_quiz_accepts_string_correct_index(client, mock_copilot):
+    """Quiz validation should accept correct_index as a string from LLM."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Great!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "Hello"})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Done.", "key_vocabulary": ["hello"], "communication_level": "beginner", "tip": "ok"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"question": "Q1?", "options": ["A", "B", "C", "D"], "correct_index": "2", "explanation": "Because C"},
+            {"question": "Q2?", "options": ["A", "B", "C", "D"], "correct_index": 1.0, "explanation": "Because B"},
+        ]
+    })
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["questions"]) == 2
+    assert data["questions"][0]["correct_index"] == 2
+    assert data["questions"][1]["correct_index"] == 1
+
+
+@pytest.mark.integration
+async def test_generate_quiz_accepts_alternative_key_names(client, mock_copilot):
+    """Quiz validation should accept alternative key names like correct_answer."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Great!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "Hello"})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Done.", "key_vocabulary": [], "communication_level": "beginner", "tip": "ok"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"question": "Q?", "options": ["A", "B", "C", "D"], "correct_answer": 0, "explanation": "A is correct"},
+        ]
+    })
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 200
+    assert len(res.json()["questions"]) == 1
+    assert res.json()["questions"][0]["correct_index"] == 0
