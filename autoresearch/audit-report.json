@@ -1,3 +1,7 @@
 [
-  {"check":"agent_skip","severity":"error","iterations":" 256 258 259 260 262 263 268 269 ","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"missing_iterations","severity":"error","iterations":" 277","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
+,
+  {"check":"agent_skip","severity":"error","iterations":" 272 273 274 275 276 277 278 279  277 278 279","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+,
+  {"check":"playwright_shallow","severity":"warning","iterations":" 271(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
 ]

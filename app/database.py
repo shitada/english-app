@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     topic TEXT NOT NULL,
     difficulty TEXT NOT NULL DEFAULT 'intermediate',
+    role_swap INTEGER NOT NULL DEFAULT 0,
     summary_json TEXT,
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
@@ -147,6 +148,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on conversations started_at for dashboard queries",
         "CREATE INDEX IF NOT EXISTS idx_conversations_started_at ON conversations(started_at)",
+    ),
+    (
+        "add role_swap column to conversations",
+        "ALTER TABLE conversations ADD COLUMN role_swap INTEGER NOT NULL DEFAULT 0",
     ),
 ]
 

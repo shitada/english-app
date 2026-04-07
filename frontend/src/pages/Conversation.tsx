@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight, Headphones } from 'lucide-react';
-import { api, ApiError, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn, type ConversationQuizQuestion } from '../api';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones } from 'lucide-react';
+import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
+import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory } from '../components/conversation';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -37,48 +38,6 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
   { value: 'advanced', label: '🚀 Advanced', description: 'Idioms, complex grammar, nuanced' },
 ];
 
-function HighlightedMessage({ content, keyPhrases, onSpeak }: {
-  content: string;
-  keyPhrases?: string[];
-  onSpeak: (text: string) => void;
-}) {
-  if (!keyPhrases || keyPhrases.length === 0) return <>{content}</>;
-
-  // Build regex matching any key phrase (case-insensitive, longest first)
-  const sorted = [...keyPhrases].sort((a, b) => b.length - a.length);
-  const escaped = sorted.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  const regex = new RegExp(`(${escaped.join('|')})`, 'gi');
-
-  const parts = content.split(regex);
-  return (
-    <>
-      {parts.map((part, i) => {
-        const isMatch = keyPhrases.some((kp) => kp.toLowerCase() === part.toLowerCase());
-        if (!isMatch) return <span key={i}>{part}</span>;
-        return (
-          <span
-            key={i}
-            onClick={() => onSpeak(part)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') onSpeak(part); }}
-            title="Click to hear pronunciation"
-            style={{
-              background: '#dbeafe',
-              borderRadius: 3,
-              padding: '1px 2px',
-              cursor: 'pointer',
-              borderBottom: '2px solid #3b82f6',
-            }}
-          >
-            {part} <span style={{ fontSize: 10 }}>🔊</span>
-          </span>
-        );
-      })}
-    </>
-  );
-}
-
 export default function Conversation() {
   const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history' | 'replay'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -89,13 +48,14 @@ export default function Conversation() {
   const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [summary, setSummary] = useState<any>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
+  const [roleSwap, setRoleSwap] = useState(false);
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
-  const [historyMessages, setHistoryMessages] = useState<ChatMessage[]>([]);
-  const [historySummary, setHistorySummary] = useState<ConversationSummary | null>(null);
+  const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
+  const [historySummary, setHistorySummary] = useState<import('../api').ConversationSummary | null>(null);
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
-  const [replayTurns, setReplayTurns] = useState<ReplayTurn[]>([]);
+  const [replayTurns, setReplayTurns] = useState<import('../api').ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
   const [replayLoading, setReplayLoading] = useState(false);
   const [listenMode, setListenMode] = useState(false);
@@ -292,7 +252,7 @@ export default function Conversation() {
   const startConversation = async (topicId: string) => {
     setLoading(true);
     try {
-      const res = await api.startConversation(topicId, difficulty);
+      const res = await api.startConversation(topicId, difficulty, roleSwap);
       setConversationId(res.conversation_id);
       setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] }]);
       setPhase('chat');
@@ -423,6 +383,31 @@ export default function Conversation() {
                 ))}
               </div>
             </div>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Role Swap</h3>
+              <button
+                onClick={() => setRoleSwap(!roleSwap)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  border: roleSwap ? '2px solid var(--primary)' : '2px solid var(--border)',
+                  background: roleSwap ? 'var(--primary)' : 'transparent',
+                  color: roleSwap ? 'white' : 'var(--text)',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                }}
+              >
+                🔄 You play the staff role
+              </button>
+              {roleSwap && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: 4 }}>
+                  Practice responding as the hotel clerk, waiter, or doctor.
+                </p>
+              )}
+            </div>
             {topicsLoading ? (
               <div className="topic-grid">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -514,386 +499,62 @@ export default function Conversation() {
   // History view (read-only past conversation)
   if (phase === 'history') {
     return (
-      <div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          <button
-            onClick={() => setPhase('select')}
-            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
-          >
-            ← Back to scenarios
-          </button>
-          {conversationId && (
-            <button
-              onClick={() => startReplay(conversationId)}
-              disabled={replayLoading}
-              style={{ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: replayLoading ? 'not-allowed' : 'pointer', background: 'var(--primary, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              <PlayCircle size={16} />
-              {replayLoading ? 'Loading…' : 'Replay'}
-            </button>
-          )}
-        </div>
-        <h2 style={{ marginBottom: 16 }}>Conversation History</h2>
-
-        {historySummary && (
-          <div className="card summary-card" style={{ marginBottom: 24 }}>
-            <p style={{ marginBottom: 12 }}>{historySummary.summary}</p>
-            {historySummary.key_vocabulary?.length > 0 && (
-              <div style={{ marginBottom: 12 }}>
-                <strong style={{ fontSize: 13 }}>Key Vocabulary:</strong>
-                <div className="vocab-tags" style={{ marginTop: 4 }}>
-                  {historySummary.key_vocabulary.map((w: string) => (
-                    <span key={w}>{w}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <p style={{ fontSize: 13, marginBottom: 4 }}>
-              <strong>Level:</strong> {historySummary.communication_level}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--primary-dark)' }}>
-              <strong>Tip:</strong> {historySummary.tip}
-            </p>
-            {historySummary.performance && historySummary.performance.total_user_messages > 0 && (
-              <div style={{ marginTop: 12, padding: 12, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
-                <strong style={{ fontSize: 13 }}>Performance:</strong>
-                <div style={{ display: 'flex', gap: 16, marginTop: 4, fontSize: 13 }}>
-                  <span>{historySummary.performance.total_user_messages} messages</span>
-                  {historySummary.performance.grammar_checked > 0 && (
-                    <span>{historySummary.performance.grammar_accuracy_rate}% grammar accuracy ({historySummary.performance.grammar_correct}/{historySummary.performance.grammar_checked})</span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="chat-container" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          {historyMessages.map((msg, i) => (
-            <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
-              <div className={`message-bubble ${msg.role}`}>
-                <p>{msg.content}</p>
-                {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
-              </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                {formatDateTime(msg.created_at)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ConversationHistory
+        historyMessages={historyMessages}
+        historySummary={historySummary}
+        conversationId={conversationId}
+        replayLoading={replayLoading}
+        onBack={() => setPhase('select')}
+        onReplay={startReplay}
+        tts={tts}
+      />
     );
   }
 
   // Replay view (turn-by-turn stepper)
   if (phase === 'replay') {
-    const turn = replayTurns[replayIndex];
     return (
-      <div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          <button
-            onClick={() => setPhase('history')}
-            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer', background: 'transparent', color: 'var(--text)' }}
-          >
-            ← Back to history
-          </button>
-        </div>
-        <h2 style={{ marginBottom: 8 }}>Conversation Replay</h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 16 }}>
-          Turn {replayIndex + 1} of {replayTurns.length}
-        </p>
-
-        {turn && (
-          <div className="card" style={{ padding: '1.5rem', marginBottom: 16 }}>
-            {turn.assistant_message && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🤖 Assistant</strong>
-                  <button
-                    onClick={() => tts.speak(turn.assistant_message!)}
-                    disabled={tts.isSpeaking}
-                    style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 1 }}
-                    aria-label="Listen to assistant message"
-                  >
-                    <Volume2 size={16} color="var(--primary, #6366f1)" />
-                  </button>
-                </div>
-                <div className="message-bubble assistant" style={{ marginBottom: 0 }}>
-                  <p>{turn.assistant_message}</p>
-                </div>
-              </div>
-            )}
-
-            {turn.user_message && (
-              <div style={{ marginBottom: turn.corrections.length > 0 ? 16 : 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>🗣️ You said</strong>
-                  <button
-                    onClick={() => tts.speak(turn.user_message!)}
-                    disabled={tts.isSpeaking}
-                    style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 1 }}
-                    aria-label="Listen to your message"
-                  >
-                    <Volume2 size={16} color="var(--primary, #6366f1)" />
-                  </button>
-                </div>
-                <div className="message-bubble user" style={{ marginBottom: 0 }}>
-                  <p>{turn.user_message}</p>
-                </div>
-              </div>
-            )}
-
-            {turn.corrections.length > 0 && (
-              <div style={{ padding: '0.75rem', background: 'rgba(255,200,0,0.1)', borderRadius: 8 }}>
-                <strong style={{ fontSize: '0.85rem' }}>📝 Corrections</strong>
-                {turn.corrections.map((c, i) => (
-                  <div key={i} style={{ fontSize: '0.85rem', marginTop: 6 }}>
-                    <span style={{ color: 'var(--danger, #ef4444)', textDecoration: 'line-through' }}>{c.original}</span>
-                    {' → '}
-                    <span style={{ color: 'var(--success, #10b981)', fontWeight: 600 }}>{c.correction}</span>
-                    {c.explanation && <p style={{ margin: '2px 0 0', color: 'var(--text-secondary)' }}>{c.explanation}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, alignItems: 'center' }}>
-          <button
-            onClick={() => setReplayIndex(i => Math.max(0, i - 1))}
-            disabled={replayIndex === 0}
-            style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid var(--border)', cursor: replayIndex === 0 ? 'not-allowed' : 'pointer', background: 'transparent', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, opacity: replayIndex === 0 ? 0.4 : 1 }}
-          >
-            <ChevronLeft size={18} /> Previous
-          </button>
-          <button
-            onClick={() => setReplayIndex(i => Math.min(replayTurns.length - 1, i + 1))}
-            disabled={replayIndex >= replayTurns.length - 1}
-            style={{ padding: '10px 20px', borderRadius: 8, border: 'none', cursor: replayIndex >= replayTurns.length - 1 ? 'not-allowed' : 'pointer', background: 'var(--primary, #6366f1)', color: '#fff', display: 'flex', alignItems: 'center', gap: 4, opacity: replayIndex >= replayTurns.length - 1 ? 0.4 : 1 }}
-          >
-            Next <ChevronRight size={18} />
-          </button>
-        </div>
-      </div>
+      <ConversationReplay
+        turns={replayTurns}
+        replayIndex={replayIndex}
+        setReplayIndex={setReplayIndex}
+        onBack={() => setPhase('history')}
+        tts={tts}
+      />
     );
   }
 
   // Summary
   if (phase === 'summary' && summary) {
+    const handleNewConversation = () => {
+      setPhase('select');
+      setMessages([]);
+      setSummary(null);
+      setConversationId(null);
+      setQuizQuestions([]);
+      setQuizIndex(0);
+      setQuizAnswers([]);
+      setQuizRevealed(false);
+      setQuizFinished(false);
+      setQuizError('');
+    };
     return (
-      <div className="card summary-card">
-        <h2 style={{ marginBottom: 16 }}>Conversation Complete!</h2>
-        <p style={{ marginBottom: 16 }}>{summary.summary}</p>
-
-        {summary.key_vocabulary?.length > 0 && (
-          <>
-            <h4>Key Vocabulary</h4>
-            <div className="vocab-tags">
-              {summary.key_vocabulary.map((w: string) => (
-                <span key={w}>{w}</span>
-              ))}
-            </div>
-          </>
-        )}
-
-        <p style={{ marginBottom: 8 }}>
-          <strong>Level:</strong> {summary.communication_level}
-        </p>
-        <p style={{ marginBottom: 24, color: 'var(--primary-dark)' }}>
-          <strong>Tip:</strong> {summary.tip}
-        </p>
-
-        {summary.performance && summary.performance.total_user_messages > 0 && (
-          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
-            <h4 style={{ marginBottom: 8 }}>Performance</h4>
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary)' }}>
-                  {summary.performance.total_user_messages}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Messages</div>
-              </div>
-              {summary.performance.grammar_checked > 0 && (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: summary.performance.grammar_accuracy_rate >= 80 ? 'var(--success, #22c55e)' : summary.performance.grammar_accuracy_rate >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
-                    {summary.performance.grammar_accuracy_rate}%
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Grammar Accuracy</div>
-                </div>
-              )}
-              {summary.performance.grammar_checked > 0 && (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 24, fontWeight: 700 }}>
-                    {summary.performance.grammar_correct}/{summary.performance.grammar_checked}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Correct</div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Corrections Review */}
-        {(() => {
-          const allErrors = messages
-            .filter((m) => m.feedback && !m.feedback.is_correct)
-            .flatMap((m) => m.feedback!.errors || []);
-          const allSuggestions = messages
-            .filter((m) => m.feedback?.suggestions?.length)
-            .flatMap((m) => m.feedback!.suggestions || []);
-
-          if (allErrors.length === 0 && allSuggestions.length === 0) {
-            return (
-              <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8, textAlign: 'center' }}>
-                <span style={{ fontSize: 24 }}>✅</span>
-                <p style={{ margin: '8px 0 0', fontWeight: 600, color: 'var(--success, #22c55e)' }}>Perfect grammar!</p>
-              </div>
-            );
-          }
-
-          return (
-            <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
-              {allErrors.length > 0 && (
-                <>
-                  <h4 style={{ marginBottom: 8 }}>Your Corrections</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: allSuggestions.length > 0 ? 16 : 0 }}>
-                    {allErrors.map((err, i) => (
-                      <div key={`err-${i}`} style={{ padding: 10, background: 'var(--card-bg, #fff)', borderRadius: 6, borderLeft: '3px solid var(--danger, #ef4444)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ textDecoration: 'line-through', color: 'var(--danger, #ef4444)', fontSize: 14 }}>{err.original}</span>
-                          <span style={{ color: 'var(--text-secondary)' }}>→</span>
-                          <span style={{ color: 'var(--success, #22c55e)', fontWeight: 600, fontSize: 14 }}>{err.correction}</span>
-                          <button
-                            onClick={() => tts.speak(err.correction)}
-                            disabled={tts.isSpeaking}
-                            aria-label={`Listen to correction: ${err.correction}`}
-                            style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 0.7 }}
-                          >
-                            <Volume2 size={14} color="var(--primary, #6366f1)" />
-                          </button>
-                        </div>
-                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{err.explanation}</p>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-              {allSuggestions.length > 0 && (
-                <>
-                  <h4 style={{ marginBottom: 8 }}>Style Suggestions</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {allSuggestions.map((sug, i) => (
-                      <div key={`sug-${i}`} style={{ padding: 10, background: 'var(--card-bg, #fff)', borderRadius: 6, borderLeft: '3px solid var(--primary, #6366f1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{sug.original}</span>
-                          <span style={{ color: 'var(--text-secondary)' }}>→</span>
-                          <span style={{ color: 'var(--primary, #6366f1)', fontWeight: 600, fontSize: 14 }}>{sug.better}</span>
-                          <button
-                            onClick={() => tts.speak(sug.better)}
-                            disabled={tts.isSpeaking}
-                            aria-label={`Listen to suggestion: ${sug.better}`}
-                            style={{ background: 'none', border: 'none', cursor: tts.isSpeaking ? 'default' : 'pointer', padding: 2, opacity: tts.isSpeaking ? 0.4 : 0.7 }}
-                          >
-                            <Volume2 size={14} color="var(--primary, #6366f1)" />
-                          </button>
-                        </div>
-                        <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{sug.explanation}</p>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Quiz Section */}
-        {quizQuestions.length > 0 && !quizFinished && (
-          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
-            <h4 style={{ marginBottom: 12 }}>📝 Quick Quiz ({quizIndex + 1}/{quizQuestions.length})</h4>
-            <p style={{ marginBottom: 12, fontWeight: 500 }}>{quizQuestions[quizIndex].question}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {quizQuestions[quizIndex].options.map((opt, i) => {
-                const isSelected = quizAnswers[quizIndex] === i;
-                const isCorrect = i === quizQuestions[quizIndex].correct_index;
-                let bg = 'var(--card-bg, #fff)';
-                let border = '1px solid var(--border, #e5e7eb)';
-                if (quizRevealed) {
-                  if (isCorrect) { bg = '#dcfce7'; border = '2px solid var(--success, #22c55e)'; }
-                  else if (isSelected && !isCorrect) { bg = '#fee2e2'; border = '2px solid var(--danger, #ef4444)'; }
-                }
-                return (
-                  <button
-                    key={i}
-                    onClick={() => answerQuiz(i)}
-                    disabled={quizRevealed}
-                    style={{ padding: '10px 14px', background: bg, border, borderRadius: 6, cursor: quizRevealed ? 'default' : 'pointer', textAlign: 'left', fontSize: 14 }}
-                  >
-                    {String.fromCharCode(65 + i)}. {opt}
-                  </button>
-                );
-              })}
-            </div>
-            {quizRevealed && (
-              <div style={{ marginTop: 12 }}>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                  {quizAnswers[quizIndex] === quizQuestions[quizIndex].correct_index ? '✅ Correct!' : '❌ Incorrect.'}{' '}
-                  {quizQuestions[quizIndex].explanation}
-                </p>
-                <button className="btn btn-primary" onClick={nextQuizQuestion} style={{ fontSize: 14, padding: '6px 16px' }}>
-                  {quizIndex < quizQuestions.length - 1 ? 'Next Question →' : 'See Results'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {quizFinished && quizQuestions.length > 0 && (
-          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ marginBottom: 8 }}>Quiz Complete!</h4>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--primary)' }}>
-              {quizAnswers.filter((a, i) => a === quizQuestions[i].correct_index).length}/{quizQuestions.length}
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>correct answers</p>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {quizQuestions.length === 0 && !quizLoading && !quizError && (
-            <button className="btn" onClick={startQuiz} style={{ background: 'var(--primary-light, #e0e7ff)', color: 'var(--primary-dark, #4338ca)' }}>
-              📝 Take Quick Quiz
-            </button>
-          )}
-          {quizError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ color: 'var(--danger, #ef4444)', fontSize: 14 }}>{quizError}</span>
-              <button className="btn" onClick={startQuiz} style={{ background: 'var(--primary-light, #e0e7ff)', color: 'var(--primary-dark, #4338ca)', fontSize: 13 }}>
-                Retry
-              </button>
-            </div>
-          )}
-          {quizLoading && (
-            <button className="btn" disabled style={{ opacity: 0.6 }}>
-              Generating quiz…
-            </button>
-          )}
-          <button className="btn btn-primary" onClick={() => {
-            setPhase('select');
-            setMessages([]);
-            setSummary(null);
-            setConversationId(null);
-            setQuizQuestions([]);
-            setQuizIndex(0);
-            setQuizAnswers([]);
-            setQuizRevealed(false);
-            setQuizFinished(false);
-            setQuizError('');
-          }}>
-            Start New Conversation
-          </button>
-        </div>
-      </div>
+      <ConversationSummaryView
+        summary={summary}
+        messages={messages}
+        quizQuestions={quizQuestions}
+        quizIndex={quizIndex}
+        quizAnswers={quizAnswers}
+        quizRevealed={quizRevealed}
+        quizFinished={quizFinished}
+        quizLoading={quizLoading}
+        quizError={quizError}
+        onAnswerQuiz={answerQuiz}
+        onNextQuiz={nextQuizQuestion}
+        onStartQuiz={startQuiz}
+        onNewConversation={handleNewConversation}
+        tts={tts}
+      />
     );
   }
 
@@ -903,7 +564,10 @@ export default function Conversation() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <span style={{ fontWeight: 600 }}>Role Play Scenario</span>
+        <span style={{ fontWeight: 600 }}>
+          Role Play Scenario
+          {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 Staff Role</span>}
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <Volume2 size={14} color="var(--text-secondary)" />
@@ -1142,77 +806,6 @@ export default function Conversation() {
           <Send size={22} />
         </button>
       </div>
-    </div>
-  );
-}
-
-function FeedbackPanel({ feedback, onSpeak }: { feedback: GrammarFeedback; onSpeak?: (text: string) => void }) {
-  const [expanded, setExpanded] = useState(true);
-
-  if (feedback.is_correct && (feedback.suggestions ?? []).length === 0) {
-    return (
-      <div className="feedback-panel correct">
-        ✅ Great! Your English is correct.
-      </div>
-    );
-  }
-
-  return (
-    <div className="feedback-panel" onClick={() => setExpanded(!expanded)}>
-      <div style={{ cursor: 'pointer', fontWeight: 600, marginBottom: expanded ? 8 : 0 }}>
-        {feedback.is_correct ? '💡 Suggestions' : '📝 Corrections & Suggestions'}
-        <span style={{ float: 'right', fontSize: 12 }}>{expanded ? '▼' : '▶'}</span>
-      </div>
-      {expanded && (
-        <>
-          {(feedback.errors ?? []).map((err, i) => (
-            <div key={i} className="feedback-error">
-              <strong>{err.original}</strong> → <em>{err.correction}</em>
-              {onSpeak && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onSpeak(err.correction); }}
-                  aria-label={`Listen: ${err.correction}`}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
-                >
-                  <Volume2 size={13} color="var(--primary, #6366f1)" />
-                </button>
-              )}
-              <br />
-              <span style={{ fontSize: 12 }}>{err.explanation}</span>
-            </div>
-          ))}
-          {(feedback.suggestions ?? []).map((sug, i) => (
-            <div key={i} className="feedback-suggestion">
-              💡 "{sug.original}" → <em>"{sug.better}"</em>
-              {onSpeak && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onSpeak(sug.better); }}
-                  aria-label={`Listen: ${sug.better}`}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
-                >
-                  <Volume2 size={13} color="var(--primary, #6366f1)" />
-                </button>
-              )}
-              <br />
-              <span style={{ fontSize: 12 }}>{sug.explanation}</span>
-            </div>
-          ))}
-          {feedback.corrected_text && !feedback.is_correct && (
-            <div style={{ marginTop: 8, padding: '6px 10px', background: '#fefce8', borderRadius: 6, fontSize: 12 }}>
-              ✏️ <strong>Corrected:</strong> {feedback.corrected_text}
-              {onSpeak && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onSpeak(feedback.corrected_text!); }}
-                  aria-label="Listen to corrected text"
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
-                >
-                  <Volume2 size={13} color="var(--primary, #6366f1)" />
-                </button>
-              )}
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 }

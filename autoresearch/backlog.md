@@ -126,3 +126,39 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] ✅ Add conversation replay/review mode (completed iteration #100)
 - [x] ✅ Add post-conversation comprehension quiz on summary screen (completed iteration #270)
 - [x] ✅ Add minimal pairs listening exercise to Pronunciation page (completed iteration #271)
+
+## [HIGH] Refactoring & Code Quality
+
+- [ ] Split Pronunciation.tsx into sub-components (PronunciationHistory, MinimalPairs, ScoreVisual) — mirror Conversation.tsx split pattern
+- [ ] Split Dashboard.tsx into sub-components (StatsOverview, ActivityChart, GoalPanel, MistakeJournal)
+- [ ] Add integration tests for conversation quiz endpoints (generate + answer validation)
+- [ ] Add integration tests for minimal pairs pronunciation endpoint
+
+## [HIGH] Speaking & Listening Features
+
+- [ ] Add shadowing mode — play model audio, user repeats, compare waveforms/scores
+- [ ] Add conversation role swap — let user play the service staff role (hotel clerk, doctor) for perspective practice
+- [ ] Add vocabulary sentence construction — given 3 words, user builds a sentence, AI evaluates grammar and naturalness
+- [ ] Add pronunciation tongue twister drill — curated tongue twisters with speed progression
+
+## [MEDIUM] Feature Improvements
+
+- [ ] Add conversation topic favoriting — let users bookmark preferred scenarios for quick access
+- [ ] Add vocabulary word grouping by difficulty — auto-categorize words into tiers based on SRS success rate
+- [ ] Add dashboard weekly email summary — generate a weekly progress report
+- [ ] Add pronunciation recording history playback — browse and replay past recordings chronologically
+- [ ] Add dark mode toggle — persist preference and apply CSS variables
+
+## [MEDIUM] Performance & Reliability
+
+- [ ] Add connection health indicator — show backend connectivity status in UI header
+- [ ] Add request retry with exponential backoff in frontend api.ts for transient failures
+- [ ] Cache conversation topics in localStorage to reduce API calls on page load
+- [ ] Add database WAL checkpoint scheduling for long-running instances
+
+## [LOW] UX & Frontend
+
+- [ ] Add onboarding flow for first-time users — guided tour of features with tooltips
+- [ ] Add animated transitions between conversation phases (select → chat → summary)
+- [ ] Add keyboard shortcuts panel (Ctrl+Enter to send, Escape to end conversation)
+- [ ] Improve conversation chat mobile layout — larger touch targets, collapsible header

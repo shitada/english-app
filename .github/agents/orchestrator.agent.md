@@ -24,9 +24,15 @@ You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do 
 **For EVERY iteration, you MUST call these 3 subagents via `runSubagent`:**
 1. **proposer** → returns a JSON proposal. You MUST NOT decide what to implement yourself.
 2. **evaluator** → returns a JSON score. You MUST NOT assign scores yourself.
-3. **tester** → returns a QA JSON (only when frontend files changed or proposal type is feature/ux).
+3. **tester** → returns a QA JSON. **MANDATORY** when the proposal type is `feature` or `ux` AND any file in `frontend/src/pages/` or `frontend/src/components/` was changed. Optional for pure backend bugfixes/perf changes.
 
-**If you find yourself implementing without a proposer call, assigning a score without an evaluator call, or saying "QA passed" without a tester call — STOP. You are violating your instructions. Call the correct subagent NOW.**
+**If you find yourself implementing without a proposer call, assigning a score without an evaluator call, or skipping the tester for a UI feature — STOP. You are violating your instructions. Call the correct subagent NOW.**
+
+**TESTER SKIP RULE (read carefully):**
+- Proposal type is `feature` or `ux` AND frontend page/component files changed → **MUST call tester. No exceptions.**
+- Proposal type is `bugfix` or `perf` with only backend changes → tester is optional (skip is OK).
+- Proposal type is `feature` but only backend/test files changed (no frontend UI) → tester is optional.
+- When in doubt → call the tester. False skips are worse than unnecessary calls.
 
 **Additional mandatory rules:**
 - NEVER stop between iterations — the user may be away
@@ -42,7 +48,7 @@ You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do 
 - ✅ Did I call `proposer` subagent? → Must have received JSON proposal
 - ✅ Did I call `evaluator` subagent? → Must have received JSON with total_score
 - ✅ Does the score in results.tsv match evaluator's total_score exactly?
-- ✅ If frontend changed: Did I call `tester` subagent?
+- ✅ **TESTER CHECK**: Is proposal type `feature`/`ux` AND did `frontend/src/pages/` or `frontend/src/components/` change? → If YES, I **MUST** have called `tester` subagent. If I didn't, STOP and call it NOW before recording.
 
 ## The Experiment Loop
 
@@ -146,16 +152,21 @@ If smoke test fails → treat as test failure (discard the change).
 
 ### Step 5c — QA Test (Playwright MCP)
 
-**Run condition**: Only run the Playwright QA test when EITHER:
-1. The proposer's `type` is `"feature"` or `"ux"`, OR
+**Run condition**: The tester MUST run when BOTH conditions are true:
+1. The proposer's `type` is `"feature"` or `"ux"`, AND
 2. `changed_files` includes any file matching `frontend/src/pages/*.tsx` or `frontend/src/components/*.tsx`
 
 Check the condition:
 ```bash
-git diff HEAD~1 --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+FRONTEND_UI_CHANGED=$(git diff HEAD~1 --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$")
 ```
 
-If neither condition is met, **skip Step 5c entirely** and set `qa_passed=true, ux_score=7.0` (neutral defaults) for the evaluator. Log: "QA skipped — no frontend feature changes."
+Decision matrix:
+- Proposal is `feature`/`ux` AND `$FRONTEND_UI_CHANGED` is non-empty → **MUST run tester**
+- Proposal is `feature`/`ux` but NO frontend UI files changed → skip OK, log reason
+- Proposal is `bugfix`/`perf`/`test` → skip OK regardless of files changed
+
+If skipping, set `qa_passed=true, ux_score=7.0` (neutral defaults) for the evaluator. Log: "QA skipped — [reason]." where reason is one of: "backend-only feature", "bugfix", "perf", "test-only".
 
 **When running the QA test:**
 
@@ -271,6 +282,8 @@ Edit `autoresearch/backlog.md`:
 - If frontend changed: you called `tester` via `runSubagent`
 
 If you skipped any subagent, DO NOT continue. Go back and call it now.
+
+**Final tester verification**: If the proposal type was `feature`/`ux` and frontend page/component files were in the diff, confirm you called the tester. If not, call it NOW before moving on.
 
 Then move to the next iteration. Do NOT ask the user if you should continue. Do NOT pause.
 

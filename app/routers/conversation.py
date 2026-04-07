@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import time
 from typing import Any, Literal
 
@@ -27,6 +28,7 @@ router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 class StartRequest(BaseModel):
     topic: str = Field(min_length=1, max_length=100)
     difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
+    role_swap: bool = False
 
 
 class MessageRequest(BaseModel):
@@ -117,13 +119,28 @@ async def _extract_reply_helpers(
         return [], []
 
 
+def _swap_scenario_roles(scenario: str) -> str:
+    """Swap AI/user roles in a scenario string for role-swap mode.
+
+    E.g. 'You are a hotel front desk clerk. The user is a guest checking in.'
+    becomes 'You are a guest checking in. The user is a hotel front desk clerk.'
+    """
+    ai_match = re.search(r"You are (.+?)\.", scenario)
+    user_match = re.search(r"The user is (.+?)\.?$", scenario)
+    if ai_match and user_match:
+        ai_role = ai_match.group(1).strip()
+        user_role = user_match.group(1).strip()
+        return f"You are {user_role}. The user is {ai_role}."
+    return scenario
+
+
 @router.post("/start", response_model=StartResponse)
 async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     topics = get_conversation_topics()
     topic_data = validate_topic(topics, req.topic)
     topic_label = topic_data["label"]
 
-    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty)
+    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap)
 
     copilot = get_copilot_service()
 
@@ -133,9 +150,13 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         "advanced": "\nUse natural, fluent English including idioms, phrasal verbs, and complex sentence structures. Challenge the user with nuanced vocabulary. Only correct subtle errors. Discuss topics in depth.",
     }
 
+    scenario = topic_data.get("scenario", topic_label)
+    if req.role_swap:
+        scenario = _swap_scenario_roles(scenario)
+
     system = get_prompt("conversation_partner").format(
-        scenario=topic_data.get("scenario", topic_label),
-        role=extract_role(topic_data.get("scenario", "a conversation partner")),
+        scenario=scenario,
+        role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty]
     try:
@@ -271,9 +292,12 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Prepare prompts
     grammar_prompt = get_prompt("grammar_checker").format(user_message=req.content)
+    scenario = topic_data.get("scenario", topic_label) if topic_data else topic_label
+    if conv.get("role_swap"):
+        scenario = _swap_scenario_roles(scenario)
     system = get_prompt("conversation_partner").format(
-        scenario=topic_data.get("scenario", topic_label) if topic_data else topic_label,
-        role=extract_role(topic_data.get("scenario", "a conversation partner")) if topic_data else "a conversation partner",
+        scenario=scenario,
+        role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
     )
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."

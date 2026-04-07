@@ -25,10 +25,10 @@ export const api = {
   getConversationTopics: () => request<{ id: string; label: string; description: string }[]>('/api/conversation/topics'),
 
   // Conversation
-  startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate') =>
+  startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>
     request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[] }>('/api/conversation/start', {
       method: 'POST',
-      body: JSON.stringify({ topic, difficulty }),
+      body: JSON.stringify({ topic, difficulty, role_swap: roleSwap }),
     }),
 
   sendMessage: (conversation_id: number, content: string) =>
