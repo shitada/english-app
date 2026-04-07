@@ -1046,3 +1046,162 @@ The existing tests should still pass since the default `days=180` is large enoug
   │ date +%s
   └ 2 lines...
 
+● Commit 273 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #273: Fix unbounded full-table scans in grammar accuracy and conversation vocabulary"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+854 passed. Smoke test needed (DAL changed):
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend changes — QA skipped. Calling evaluator:
+
+● Evaluator Evaluate iteration 273
+  │ List directory app/dal
+  │   └ 7 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.25, KEEP. T0=1775523132, T1=1775523356, T2=1775523407, T3=1775523462, T4=1775523537
+- propose=224, implement=51, test=55, evaluate=75, total=405
+
+● Record iteration 273 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "273" "e66d98e" "2026-04-07" "224" "51" "55" "75" "405" \
+  │ "854" "854" "pass" "7.25" "KEPT" "Fix unbounded full-table scans in grammar accuracy and
+  │ conversation vocabulary" \…
+  └ 3 lines...
+
+---
+
+● T0 for 274 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 274
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L896:980 (85 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L1096:1170 (45 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good UX improvement. Let me implement it. First, let me read the FeedbackPanel and chat header:
+
+● Find FeedbackPanel and header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "FeedbackPanel\|chat-header\|timerClass" frontend/src/pages/Conversation.tsx | head -15
+  └ 7 lines...
+
+● Read chat header area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '897,915p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 19 lines...
+
+● Read rest of header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '915,955p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 42 lines...
+
+● Read after extend button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '955,975p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 21 lines...
+
+Now let me read the FeedbackPanel:
+
+● Read FeedbackPanel (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1098,1145p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 44 lines...
+
+Now I have full context. Let me implement both improvements:
+
+1. Live grammar accuracy HUD below header
+2. TTS buttons in FeedbackPanel
+
+● Edit Conversation.tsx +28 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now update FeedbackPanel usage in the chat to pass onSpeak:
+
+● Find FeedbackPanel usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "msg.feedback && <FeedbackPanel"
+  │ frontend/src/pages/Conversation.tsx
+  └ 3 lines...
+
+The one at line 1005 is in the live chat phase — that's the one that needs onSpeak. Line 574 is in the history phase where tts might not be in scope. Let me check:
+
+● Check context of first FeedbackPanel (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '570,580p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 12 lines...
+
+This is in the history phase — tts is available since it's declared at component level. Let me add onSpeak to both usages:
+
+✗ Edit Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ No match found
+
+● Exact text (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '573,576p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 5 lines...
+
+● Read second FeedbackPanel (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1003,1007p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+Both need to be updated. Since they have different surrounding context, let me use sed:
+
+● Update both FeedbackPanel usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' 's/{msg.feedback &&
+  │ <FeedbackPanel feedback={msg.feedback} \/>}/{msg.feedback \&\& <FeedbackPanel
+  │ feedback={msg.feedback} onSpeak={tts.speak} \/>}/g' frontend/src/pages/Conversation.tsx
+  └ 1 line...
+
+● Verify FeedbackPanel updates (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "FeedbackPanel"
+  │ frontend/src/pages/Conversation.tsx
+  └ 4 lines...
+
+Now add the live grammar accuracy HUD. Let me add it right after the chat-header:
+
+● Find after End button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '971,980p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 11 lines...
+
+● Edit Conversation.tsx +14
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

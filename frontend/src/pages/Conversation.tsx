@@ -571,7 +571,7 @@ export default function Conversation() {
             <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
               <div className={`message-bubble ${msg.role}`}>
                 <p>{msg.content}</p>
-                {msg.feedback && <FeedbackPanel feedback={msg.feedback} />}
+                {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                 {formatDateTime(msg.created_at)}
@@ -973,6 +973,20 @@ export default function Conversation() {
         </div>
       </div>
 
+      {(() => {
+        const checked = messages.filter((m) => m.role === 'user' && m.feedback);
+        const correct = checked.filter((m) => m.feedback!.is_correct);
+        if (checked.length === 0) return null;
+        const rate = Math.round((correct.length / checked.length) * 100);
+        const color = rate >= 80 ? 'var(--success, #22c55e)' : rate >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)';
+        return (
+          <div style={{ padding: '4px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', background: 'var(--bg-secondary, #f9fafb)', borderBottom: '1px solid var(--border, #e5e7eb)' }}>
+            <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>)</span>
+            <span>{messages.filter((m) => m.role === 'user').length} messages sent</span>
+          </div>
+        );
+      })()}
+
       <div className="chat-messages" role="log" aria-live="polite">
         {messages.map((msg, i) => (
           <div key={i}>
@@ -1002,7 +1016,7 @@ export default function Conversation() {
                 <Volume2 size={14} color="var(--primary, #6366f1)" />
               </button>
             </div>
-            {msg.feedback && <FeedbackPanel feedback={msg.feedback} />}
+            {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
           </div>
         ))}
         {loading && (
@@ -1095,7 +1109,7 @@ export default function Conversation() {
   );
 }
 
-function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
+function FeedbackPanel({ feedback, onSpeak }: { feedback: GrammarFeedback; onSpeak?: (text: string) => void }) {
   const [expanded, setExpanded] = useState(true);
 
   if (feedback.is_correct && (feedback.suggestions ?? []).length === 0) {
@@ -1117,6 +1131,15 @@ function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
           {(feedback.errors ?? []).map((err, i) => (
             <div key={i} className="feedback-error">
               <strong>{err.original}</strong> → <em>{err.correction}</em>
+              {onSpeak && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSpeak(err.correction); }}
+                  aria-label={`Listen: ${err.correction}`}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
+                >
+                  <Volume2 size={13} color="var(--primary, #6366f1)" />
+                </button>
+              )}
               <br />
               <span style={{ fontSize: 12 }}>{err.explanation}</span>
             </div>
@@ -1124,6 +1147,15 @@ function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
           {(feedback.suggestions ?? []).map((sug, i) => (
             <div key={i} className="feedback-suggestion">
               💡 "{sug.original}" → <em>"{sug.better}"</em>
+              {onSpeak && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSpeak(sug.better); }}
+                  aria-label={`Listen: ${sug.better}`}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
+                >
+                  <Volume2 size={13} color="var(--primary, #6366f1)" />
+                </button>
+              )}
               <br />
               <span style={{ fontSize: 12 }}>{sug.explanation}</span>
             </div>
@@ -1131,6 +1163,15 @@ function FeedbackPanel({ feedback }: { feedback: GrammarFeedback }) {
           {feedback.corrected_text && !feedback.is_correct && (
             <div style={{ marginTop: 8, padding: '6px 10px', background: '#fefce8', borderRadius: 6, fontSize: 12 }}>
               ✏️ <strong>Corrected:</strong> {feedback.corrected_text}
+              {onSpeak && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSpeak(feedback.corrected_text!); }}
+                  aria-label="Listen to corrected text"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', verticalAlign: 'middle' }}
+                >
+                  <Volume2 size={13} color="var(--primary, #6366f1)" />
+                </button>
+              )}
             </div>
           )}
         </>
