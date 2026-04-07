@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, Check, X, ArrowRight, Zap, Puzzle } from 'lucide-react';
-import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, getSentenceBuildExercises, checkSentenceBuild } from '../api';
+import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -13,14 +13,14 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build'>('word-to-meaning');
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build' | 'sentence-craft'>('word-to-meaning');
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
@@ -41,6 +41,11 @@ export default function Vocabulary() {
   const [sbResults, setSbResults] = useState<{ correct: boolean; correctSentence: string }[]>([]);
   const [sbRevealed, setSbRevealed] = useState(false);
   const [sbCorrect, setSbCorrect] = useState<boolean | null>(null);
+
+  const [craftWords, setCraftWords] = useState<SentenceCraftWord[]>([]);
+  const [craftSentence, setCraftSentence] = useState('');
+  const [craftResult, setCraftResult] = useState<SentenceCraftResult | null>(null);
+  const [craftLoading, setCraftLoading] = useState(false);
 
   const tts = useSpeechSynthesis();
 
@@ -70,6 +75,18 @@ export default function Vocabulary() {
         setSbRevealed(false);
         setSbCorrect(null);
         setPhase('sentence-build');
+        return;
+      }
+      if (quizMode === 'sentence-craft') {
+        const res = await getSentenceCraftWords(topicId, 3);
+        if (!res.words || res.words.length === 0) {
+          alert('No vocabulary words available for this topic. Try another topic.');
+          return;
+        }
+        setCraftWords(res.words);
+        setCraftSentence('');
+        setCraftResult(null);
+        setPhase('sentence-craft');
         return;
       }
       const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
@@ -336,6 +353,18 @@ export default function Vocabulary() {
               }}
             >
               🧩 Sentence Build
+            </button>
+            <button
+              onClick={() => setQuizMode('sentence-craft')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'sentence-craft' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'sentence-craft' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'sentence-craft' ? 'white' : 'var(--text)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              ✍️ Sentence Craft
             </button>
           </div>
         </div>
@@ -653,6 +682,98 @@ export default function Vocabulary() {
         <button className="btn btn-primary" onClick={() => setPhase('select')}>
           Try Another Topic
         </button>
+      </div>
+    );
+  }
+
+  if (phase === 'sentence-craft' && craftWords.length > 0) {
+    return (
+      <div className="card">
+        <h3 style={{ marginBottom: 8, textAlign: 'center' }}>✍️ Sentence Craft</h3>
+        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: 16 }}>
+          Write a sentence using all of these words:
+        </p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+          {craftWords.map((w) => (
+            <div key={w.id} style={{ padding: '8px 16px', background: 'var(--primary)', color: 'white', borderRadius: 8, textAlign: 'center' }}>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>{w.word}</div>
+              <div style={{ fontSize: 12, opacity: 0.8 }}>{w.meaning}</div>
+            </div>
+          ))}
+        </div>
+        <textarea
+          value={craftSentence}
+          onChange={(e) => setCraftSentence(e.target.value)}
+          placeholder="Write a sentence using all the words above…"
+          rows={3}
+          style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid var(--border)', fontSize: 16, marginBottom: 16, resize: 'vertical' }}
+        />
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <button
+            className="btn btn-primary"
+            disabled={craftLoading || craftSentence.trim().length === 0}
+            onClick={async () => {
+              setCraftLoading(true);
+              try {
+                const res = await evaluateSentenceCraft(craftWords.map(w => w.id), craftSentence);
+                setCraftResult(res);
+                setPhase('sentence-craft-result');
+              } catch (err) { console.error('Evaluation failed:', err); alert('Evaluation failed. Please try again.'); }
+              finally { setCraftLoading(false); }
+            }}
+          >
+            {craftLoading ? 'Evaluating…' : '✓ Submit'}
+          </button>
+          <button className="btn btn-secondary" onClick={() => setPhase('select')}>← Back</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'sentence-craft-result' && craftResult) {
+    const avg = Math.round((craftResult.grammar_score + craftResult.naturalness_score) / 2 * 10);
+    return (
+      <div className="card">
+        <h3 style={{ marginBottom: 16, textAlign: 'center' }}>✍️ Sentence Craft Results</h3>
+        <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 24 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: craftResult.grammar_score >= 7 ? 'var(--success, #4caf50)' : 'var(--warning, #ff9800)' }}>{craftResult.grammar_score}/10</div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Grammar</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: craftResult.naturalness_score >= 7 ? 'var(--success, #4caf50)' : 'var(--warning, #ff9800)' }}>{craftResult.naturalness_score}/10</div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Naturalness</div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <h4 style={{ marginBottom: 8 }}>Word Usage</h4>
+          {craftResult.word_usage.map((wu, i) => (
+            <div key={i} style={{ padding: 8, marginBottom: 4, borderRadius: 6, background: wu.used_correctly ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }}>
+              <span style={{ fontWeight: 600 }}>{wu.used_correctly ? '✅' : '❌'} {wu.word}</span>
+              <span style={{ color: 'var(--text-secondary)', marginLeft: 8, fontSize: 14 }}>{wu.feedback}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ padding: 12, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8, marginBottom: 16 }}>
+          <p style={{ fontWeight: 600, marginBottom: 4 }}>Your sentence:</p>
+          <p style={{ fontStyle: 'italic' }}>{craftSentence}</p>
+        </div>
+
+        {craftResult.model_sentence && (
+          <div style={{ padding: 12, background: 'rgba(76,175,80,0.1)', borderRadius: 8, marginBottom: 16 }}>
+            <p style={{ fontWeight: 600, marginBottom: 4 }}>Model sentence:</p>
+            <p style={{ fontStyle: 'italic' }}>{craftResult.model_sentence}</p>
+          </div>
+        )}
+
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>{craftResult.overall_feedback}</p>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <button className="btn btn-primary" onClick={() => { setCraftSentence(''); setCraftResult(null); setPhase('sentence-craft'); }}>Try Again</button>
+          <button className="btn btn-secondary" onClick={() => setPhase('select')}>← Back to Topics</button>
+        </div>
       </div>
     );
   }

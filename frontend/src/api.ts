@@ -709,6 +709,40 @@ export async function checkSentenceBuild(
   });
 }
 
+// Sentence Craft
+export interface SentenceCraftWord {
+  id: number;
+  word: string;
+  meaning: string;
+}
+
+export interface SentenceCraftResult {
+  grammar_score: number;
+  naturalness_score: number;
+  word_usage: { word: string; used_correctly: boolean; feedback: string }[];
+  overall_feedback: string;
+  model_sentence: string;
+}
+
+export async function getSentenceCraftWords(
+  topic: string,
+  count = 3,
+): Promise<{ words: SentenceCraftWord[]; count: number }> {
+  return request<{ words: SentenceCraftWord[]; count: number }>(
+    `/api/vocabulary/sentence-craft?topic=${encodeURIComponent(topic)}&count=${count}`,
+  );
+}
+
+export async function evaluateSentenceCraft(
+  word_ids: number[],
+  user_sentence: string,
+): Promise<SentenceCraftResult> {
+  return request<SentenceCraftResult>('/api/vocabulary/sentence-craft/evaluate', {
+    method: 'POST',
+    body: JSON.stringify({ word_ids, user_sentence }),
+  });
+}
+
 // Achievement badges (from iteration 253)
 export interface AchievementProgress {
   current: number;

@@ -999,3 +999,14 @@ def check_sentence_build(correct_sentence: str, user_sentence: str) -> bool:
         return _re.sub(r"[^\w\s]", "", s.lower()).strip()
 
     return _normalize(correct_sentence) == _normalize(user_sentence)
+
+
+async def get_random_words_for_craft(
+    db: aiosqlite.Connection, topic: str, count: int = 3
+) -> list[dict[str, Any]]:
+    """Return random vocabulary words for sentence craft exercises."""
+    rows = await db.execute_fetchall(
+        "SELECT id, word, meaning FROM vocabulary_words WHERE topic = ? ORDER BY RANDOM() LIMIT ?",
+        (topic, count),
+    )
+    return [dict(r) for r in rows]

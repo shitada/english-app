@@ -714,3 +714,101 @@ async def check_sentence_build(
     await vocab_dal.update_progress(db, req.word_id, is_correct)
 
     return {"is_correct": is_correct, "correct_sentence": correct, "word_id": req.word_id}
+
+
+class SentenceCraftWord(BaseModel):
+    id: int
+    word: str
+    meaning: str
+
+
+class SentenceCraftWordsResponse(BaseModel):
+    words: list[SentenceCraftWord]
+    count: int
+
+
+class SentenceCraftEvalRequest(BaseModel):
+    word_ids: list[int] = Field(min_length=1, max_length=10)
+    user_sentence: str = Field(min_length=1, max_length=2000)
+
+
+class WordUsage(BaseModel):
+    word: str
+    used_correctly: bool
+    feedback: str
+
+
+class SentenceCraftEvalResponse(BaseModel):
+    grammar_score: int
+    naturalness_score: int
+    word_usage: list[WordUsage]
+    overall_feedback: str
+    model_sentence: str
+
+
+@router.get("/sentence-craft", response_model=SentenceCraftWordsResponse)
+async def get_sentence_craft_words(
+    topic: str = Query(..., min_length=1),
+    count: int = Query(default=3, ge=1, le=5),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get random vocabulary words for sentence craft exercise."""
+    vocab_topics = get_vocabulary_topics()
+    validate_topic(vocab_topics, topic)
+    words = await vocab_dal.get_random_words_for_craft(db, topic, count)
+    return {"words": words, "count": len(words)}
+
+
+@router.post("/sentence-craft/evaluate", response_model=SentenceCraftEvalResponse)
+async def evaluate_sentence_craft(
+    req: SentenceCraftEvalRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user-written sentence using the given vocabulary words."""
+    words = []
+    for wid in req.word_ids:
+        rows = await db.execute_fetchall(
+            "SELECT word, meaning FROM vocabulary_words WHERE id = ?", (wid,),
+        )
+        if not rows:
+            raise HTTPException(status_code=404, detail=f"Word ID {wid} not found")
+        words.append({"id": wid, "word": rows[0]["word"], "meaning": rows[0]["meaning"]})
+
+    word_list_str = ", ".join(f'"{w["word"]}" ({w["meaning"]})' for w in words)
+    prompt = (
+        f"The user was given these vocabulary words: {word_list_str}\n"
+        f"They wrote this sentence: \"{req.user_sentence}\"\n\n"
+        "Evaluate the sentence. Return JSON with:\n"
+        '- "grammar_score": 1-10 integer\n'
+        '- "naturalness_score": 1-10 integer\n'
+        '- "word_usage": array of objects with "word", "used_correctly" (bool), "feedback" (string)\n'
+        '- "overall_feedback": brief helpful feedback string\n'
+        '- "model_sentence": a natural example sentence using all the given words\n'
+        "Return ONLY valid JSON."
+    )
+
+    copilot = get_copilot_service()
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(
+            "You are an English language evaluator. Assess grammar, naturalness, and vocabulary usage. Return ONLY valid JSON.",
+            prompt,
+        ),
+        context="sentence_craft_evaluate",
+    )
+
+    # Normalize result
+    return {
+        "grammar_score": max(1, min(10, int(result.get("grammar_score", 5)))),
+        "naturalness_score": max(1, min(10, int(result.get("naturalness_score", 5)))),
+        "word_usage": [
+            {
+                "word": wu.get("word", ""),
+                "used_correctly": bool(wu.get("used_correctly", False)),
+                "feedback": str(wu.get("feedback", "")),
+            }
+            for wu in result.get("word_usage", [])
+        ],
+        "overall_feedback": str(result.get("overall_feedback", "No feedback available.")),
+        "model_sentence": str(result.get("model_sentence", "")),
+    }

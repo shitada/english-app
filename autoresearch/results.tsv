@@ -281,3 +281,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 278	none	2026-04-07	208	96	47	131	482	862	862	pass	5.2	DISCARDED	Add correction speaking drill to conversation summary screen
 279	47727c1	2026-04-07	201	59	45	49	354	869	869	pass	8.35	KEPT	Add unit tests for dashboard get_mistake_journal function
 281	none	2026-04-07	200	209	55	943	1407	869	869	pass	5.65	DISCARDED	Add pronunciation tongue twister drill with speed progression
+282	0ba122e	2026-04-07	128	100	81	303	612	869	869	pass	6.35	KEPT	Add pronunciation tongue twister drill with speed progression
