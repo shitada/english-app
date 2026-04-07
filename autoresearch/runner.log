@@ -1588,3 +1588,47 @@ Rebuild and amend:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
   └ 6 lines...
 
+● Amend with dependency fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 18 lines...
+
+Now stop the server, record T3, and call the evaluator:
+
+● Stop server and record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3 = 1775584217. Now call the evaluator:
+
+● Evaluator Evaluate iteration 292
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ L50:150 (101 lines read)
+  └ Read Pronunciation.tsx
+      │ frontend/src/pages/Pronunciation.tsx
+      └ L150:250 (101 lines read)
+
+Server killed as expected. Evaluator score: **6.9**, verdict: **KEEP**. Let me record results and finish up.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Timings: T0=1775583515, T1=1775583624 (propose=109), T3=1775584217, T4=1775584292
+- propose=109, implement≈200, test≈T3-T1-200=293, evaluate=75, total=T4-T0=777
+
+● Record results for iteration 292 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "292" "b68aba6" "2026-04-08" "109" "200" "393" "75" "777" \
+  │ "888" "888" "pass" "6.9" "KEPT" "Add pronunciation recording history playback with
+  │ IndexedDB" \…
+  └ 3 lines...
+
+Good — row properly formatted. Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Now commit the backlog and results updates:
+
