@@ -6006,3 +6006,153 @@ Need to rebuild the frontend bundle. Let me fix this:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
   └ 10 lines...
 
+● Amend commit with built frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #308: Add topic practice stats badges to conversation topic selection cards
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now restart the server with fresh build and re-run tester:
+
+● Restart server with rebuilt frontend (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester Re-test iteration 308
+  │ playwright-browser_navigate http://localhost:8000/conversation · url: "http://localhost:8000/co…
+  │   └ ### Ran Playwright code
+  └ playwright-browser_evaluate function: "() => { const cards = document.querySelectorAll('.topic-…
+      └ ### Result
+
+Tester passed with ux_score=9. Now stop server and call evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -120
+  └ 121 lines...
+
+● Get source diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/pages/Conversation.tsx 2>&1
+  └ 77 lines...
+
+● Get full source diff (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/pages/Conversation.tsx 2>&1 | cat
+  └ 116 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 308
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L150:300 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L300:400 (101 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+All criteria met — KEEP. Recording results:
+
+● Record results for iteration 308 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "308" "$HASH" "2026-04-08" "370" "66" "629" "60" "1125" \
+  │ "906" "906" "pass" "7.4" "KEPT" "Add topic practice stats badges to conversation topic
+  │ selection cards" \…
+  └ 3 lines...
+
+Good, properly tab-separated. Update backlog:
+
+● Check backlog end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/backlog.md
+  └ 6 lines...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 308 complete (KEPT, score 7.4). Now starting iteration 309.
+
+---
+
+**Iteration 309:**
+
+● Record T0 for iteration 309 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results rows (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 309
+  │ Read index.ts
+  │   │ frontend/src/components/conversation/index.ts
+  │   └ 10 lines read
+  └ Read HighlightedMessage.tsx
+      │ frontend/src/components/conversation/HighlightedMessage.tsx
+      └ 41 lines read
+
+● Record T1 for iteration 309 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775598625, propose_sec = 223. Now implement. Let me look at existing exercise patterns:
+
+● List conversation components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && ls -la
+  └ 15 lines...
+
+● Check exercise sizes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && wc -l
+  │ CorrectionDrill.tsx DictationExercise.tsx
+  └ 4 lines...
+
+● Read CorrectionDrill.tsx
+  │ frontend/src/components/conversation/CorrectionDrill.tsx
+  └ 276 lines read
+
+● Read index.ts
+  │ frontend/src/components/conversation/index.ts
+  └ 10 lines read
+
+Now let me check ConversationSummary to see how exercises are integrated:
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 255 lines read
+
+Now I have the full pattern. Let me create the ClozeExercise component:
+
+● Create ClozeExercise.tsx +278
+  └ frontend/src/components/conversation/ClozeExercise.tsx
+
+Now update index.ts and ConversationSummary.tsx:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+● Edit ConversationSummary.tsx +1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add ClozeExercise between DictationExercise and ConversationQuiz:
+
+● Edit ConversationSummary.tsx +3
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now commit, test, and build:
+

@@ -167,3 +167,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add per-conversation grammar accuracy trend chart to dashboard (#305)
 - [x] Add fluency metrics (words/msg, vocab diversity) to conversation summary (#306)
 - [x] Add dictation exercise to conversation summary for listening practice (#307)
+- [x] Add topic practice stats badges to conversation topic selection cards (#308)

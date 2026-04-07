@@ -307,3 +307,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 305	3042bc2	2026-04-08	319	140	831	64	1354	901	901	pass	7.55	KEPT	Add per-conversation grammar accuracy trend chart to dashboard
 306	906568f	2026-04-08	170	120	312	79	681	906	906	pass	7.75	KEPT	Add fluency metrics to conversation summary
 307	f99bb91	2026-04-08	96	199	289	63	647	906	906	pass	7.35	KEPT	Add dictation exercise to conversation summary for listening practice
+308	383251b	2026-04-08	370	66	629	60	1125	906	906	pass	7.4	KEPT	Add topic practice stats badges to conversation topic selection cards

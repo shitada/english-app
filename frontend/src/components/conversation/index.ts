@@ -7,4 +7,5 @@ export { ConversationHistory } from './ConversationHistory';
 export { CorrectionDrill } from './CorrectionDrill';
 export { DictationExercise } from './DictationExercise';
 export { ShadowingExercise } from './ShadowingExercise';
+export { ClozeExercise } from './ClozeExercise';
 export { PhaseTransition } from './PhaseTransition';

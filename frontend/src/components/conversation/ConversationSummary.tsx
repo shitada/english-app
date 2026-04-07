@@ -4,6 +4,7 @@ import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
+import { ClozeExercise } from './ClozeExercise';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -231,6 +232,9 @@ export function ConversationSummary({
           tts={tts}
         />
       )}
+
+      {/* Cloze Exercise — fill in the blank for key phrases */}
+      <ClozeExercise messages={messages} />
 
       <ConversationQuiz
         questions={quizQuestions}
