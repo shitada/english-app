@@ -4259,3 +4259,132 @@ Add ARIA attributes for accessibility:
 
 Amend the commit with fixes:
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #302: Add onboarding flow for first-time users with guided tooltips
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 18 lines...
+
+Re-run TypeScript check after fixes:
+
+● Recheck TypeScript (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Good. Now kill the server and call the evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -200
+  └ 201 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 302
+  │ List directory frontend/src/components
+  │   └ 8 files found
+  └ List directory tests
+      └ 8 files found
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4 = 1775592385. Score: 7.0, KEEP.
+
+Timing: propose=101, implement=73, test=49, evaluate=789, total=1012.
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "302" "5a2e728" "2026-04-08" "101" "73" "49" "789" "1012" \
+  │ "890" "890" "pass" "7.0" "KEPT" "Add onboarding flow for first-time users with guided
+  │ tooltips" \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Good, tabs correct. Now update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+**Iteration 302 checklist:**
+- ✅ Called proposer subagent
+- ✅ Called tester subagent (frontend .tsx changed + type=feature)
+- ✅ Called evaluator subagent
+- ✅ Score 7.0 matches evaluator's total_score
+- ✅ Result: KEPT
+
+---
+
+## Iteration 303
+
+● Record T0 for iteration 303 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore iter 303 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 27 lines...
+
+T0 = 1775592406. Now calling the proposer:
+
+● Proposer Propose iteration 303
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L450:600 (151 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L600:750 (151 lines read)
+
+● Record T1 for iteration 303 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775592549, propose_sec = 143. Good proposal — correction drill exercise. Let me understand the current conversation summary:
+
+● Read ConversationSummary.tsx (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation/Conversa
+  │ tionSummary.tsx
+  └ 193 lines...
+
+● Read conversation index.ts (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation/index.ts
+  └ 8 lines...
+
+● Check GrammarFeedback type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -A 20 "GrammarFeedback"
+  │ api.ts | head -30
+  └ 31 lines...
+
+Good, I understand the error structure. Now let me create the CorrectionDrill component:
+
+● Create CorrectionDrill.tsx +277
+  └ frontend/src/components/conversation/CorrectionDrill.tsx
+
+Now integrate it into ConversationSummary.tsx:
+
+● Edit ConversationSummary.tsx +1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the CorrectionDrill after the corrections review section (before the quiz). I need to insert it between the corrections review IIFE and the ConversationQuiz:
+
+● Edit ConversationSummary.tsx +10
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Update the index.ts:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Commit and test:
+

@@ -4,4 +4,5 @@ export { ConversationQuiz } from './ConversationQuiz';
 export { ConversationReplay } from './ConversationReplay';
 export { ConversationSummary } from './ConversationSummary';
 export { ConversationHistory } from './ConversationHistory';
+export { CorrectionDrill } from './CorrectionDrill';
 export { PhaseTransition } from './PhaseTransition';

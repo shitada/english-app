@@ -1,6 +1,7 @@
 import { Volume2 } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
+import { CorrectionDrill } from './CorrectionDrill';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -167,6 +168,16 @@ export function ConversationSummary({
             )}
           </div>
         );
+      })()}
+
+      {/* Correction Drill — active recall practice */}
+      {(() => {
+        const drillErrors = messages
+          .filter((m) => m.feedback && !m.feedback.is_correct)
+          .flatMap((m) => m.feedback!.errors || []);
+        return drillErrors.length > 0 ? (
+          <CorrectionDrill errors={drillErrors} tts={tts} />
+        ) : null;
       })()}
 
       <ConversationQuiz

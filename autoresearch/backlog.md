@@ -158,7 +158,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 ## [LOW] UX & Frontend
 
-- [ ] Add onboarding flow for first-time users — guided tour of features with tooltips
+- [x] Add onboarding flow for first-time users — guided tour of features with tooltips (#302)
 - [x] Add animated transitions between conversation phases (select → chat → summary) (#300)
 - [x] Add keyboard shortcuts panel (Ctrl+Enter to send, Escape to end conversation) (#297)
 - [x] Improve conversation chat mobile layout — larger touch targets, collapsible header (#298)
