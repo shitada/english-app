@@ -817,6 +817,27 @@ export async function getAchievements(): Promise<AchievementsResponse> {
   return request<AchievementsResponse>('/api/dashboard/achievements');
 }
 
+// ── Weekly Report ────────────────────────────────────
+
+export interface WeeklyReport {
+  week_start: string;
+  week_end: string;
+  conversations: number;
+  messages_sent: number;
+  vocabulary_reviewed: number;
+  quiz_accuracy: number;
+  pronunciation_attempts: number;
+  avg_pronunciation_score: number;
+  grammar_accuracy: number;
+  streak: number;
+  highlights: string[];
+  text_summary: string;
+}
+
+export async function getWeeklyReport(): Promise<WeeklyReport> {
+  return request<WeeklyReport>('/api/dashboard/weekly-report');
+}
+
 // ── Vocabulary Tiers ─────────────────────────────────
 
 export interface TierWordItem {

@@ -3072,3 +3072,397 @@ Good. Update backlog and commit docs:
 ● Edit backlog.md +1 -1
   └ autoresearch/backlog.md
 
+● Commit docs update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: update
+  │ results.tsv and backlog for iterations 296-298
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+## Summary — Iterations 296–298
+
+All 3 iterations completed successfully, all **KEPT**:
+
+| Iter | Hash | Score | Description |
+|------|------|-------|-------------|
+| 296 | 7258a2e | 6.45 | Cache conversation topics in localStorage (stale-while-revalidate) |
+| 297 | 80c6221 | 7.95 | Keyboard shortcuts panel (Ctrl+Enter, Escape, M, ?) |
+| 298 | 3aa3377 | 7.45 | Mobile layout — collapsible header, 44px touch targets, iOS zoom fix |
+
+**Average score: 7.28** | **Success rate: 3/3 (100%)**
+
+
+Total usage est:        3 Premium requests
+API time spent:         35m 49s
+Total session time:     42m 27s
+Total code changes:     +264 -60
+Breakdown by AI model:
+ claude-opus-4.6          11.2m in, 88.9k out, 10.2m cached (Est. 3 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-296-to-309.md
+[2026-04-08 04:13:25] Copilot invocation completed (duration: 2550s)
+[2026-04-08 04:13:25] Verifying agent invocations for iter 296-298...
+[2026-04-08 04:13:26]   Iteration 296: proposer=✅ evaluator=✅
+[2026-04-08 04:13:26]   Iteration 297: proposer=✅ evaluator=✅
+[2026-04-08 04:13:26]   Iteration 298: proposer=✅ evaluator=✅
+[2026-04-08 04:13:26] All iterations passed agent verification.
+[2026-04-08 04:13:26] Running post-invocation audit (iter 296-298)...
+============================================
+ Autoresearch Audit
+ Iterations: 296 — 298
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-08 04:13:26
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 296(2) 297(2) 298(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-08 04:13:27] Audit passed — no issues
+[2026-04-08 04:13:30] Current iteration count: 298 / 309
+[2026-04-08 04:13:30] ------------------------------------------
+[2026-04-08 04:13:30] Invocation 5 / 10
+[2026-04-08 04:13:30] Resuming from iteration 299
+[2026-04-08 04:13:30] ------------------------------------------
+[2026-04-08 04:13:30] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-299-to-309.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read last 20 rows of results.tsv (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 165 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-005.md
+  └ 67 lines...
+
+Good. Last iteration was #298. I'll run iterations 299–301 (3 iterations). Let me start.
+
+---
+
+## Iteration 299
+
+● Record T0 for iteration 299 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 299
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L550:700 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L700:850 (141 lines read)
+
+Got the proposal. Now let me record the timestamp and start implementing.
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775589369, propose_sec=129. Let me examine the existing dashboard files to understand patterns.
+
+● Read dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -80 app/dal/dashboard.py
+  └ 80 lines...
+
+● Read dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -80 app/routers/dashboard.py
+  └ 80 lines...
+
+● Count lines in key files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/dashboard.py
+  │ app/routers/dashboard.py frontend/src/pages/Dashboard.tsx frontend/src/api.ts
+  └ 6 lines...
+
+● Read dashboard components index (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 3 lines...
+
+● Read Dashboard page (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat frontend/src/pages/Dashboard.tsx
+  └ 129 lines...
+
+● List dashboard router endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def \|@router\."
+  │ app/routers/dashboard.py
+  └ 29 lines...
+
+● List dashboard DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def _get_weekly_comparison\|def
+  │ _calculate_streak\|async def get_" app/dal/dashboard.py
+  └ 17 lines...
+
+● Read tail of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/dal/dashboard.py
+  └ 21 lines...
+
+● Read _get_weekly_comparison function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '575,650p' app/dal/dashboard.py
+  └ 77 lines...
+
+● Read tail of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/routers/dashboard.py
+  └ 11 lines...
+
+● Check if weekly report types exist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "WeeklyReport\|weeklyReport\|weekly_report\|weekly-report" frontend/src/api.ts
+  └ 1 line...
+
+Good, no weekly report exists yet. Let me implement it now. I'll add the DAL function, router endpoint, API types, and the frontend component.
+
+● Read _calculate_streak function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '82,146p' app/dal/dashboard.py
+  └ 65 lines...
+
+● Find streak function location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_calculate_streak"
+  │ app/dal/dashboard.py | head -3
+  └ 4 lines...
+
+Now I have all the context. Let me implement the changes:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L825:829 (5 lines read)
+
+● Edit dashboard.py +109
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● Edit dashboard.py +21
+  └ app/routers/dashboard.py
+
+Now add the frontend API types and function:
+
+● Find Achievement interface location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "interface Achievement\b\|export
+  │ interface\|export type\|export async function getAchievements\|export function getAchievements"
+  │ frontend/src/api.ts | tail -20
+  └ 21 lines...
+
+● Read around getAchievements function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '816,825p' frontend/src/api.ts
+  └ 11 lines...
+
+● Edit api.ts +21
+  └ frontend/src/api.ts
+
+Now create the WeeklyReport component:
+
+● Create WeeklyReport.tsx +94
+  └ frontend/src/components/dashboard/WeeklyReport.tsx
+
+Update the dashboard components index:
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now integrate into Dashboard.tsx:
+
+● Edit Dashboard.tsx +2 -2
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now add the WeeklyReport component between the stats grid and achievements:
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+
+● Commit iteration 299 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #299: Add dashboard weekly progress report with copy-to-clipboard"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775589488, implement_sec=119. Now run tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 888 tests pass, TypeScript checks pass. Now check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed. Also check if QA tester is needed:
+
+● Check if QA tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passed. Frontend UI files changed AND proposal type is "feature", so I MUST run the QA tester. Let me start the server and run the tester:
+
+● Kill old server on port 8000 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now calling the QA tester:
+
+● Tester QA test iteration 299
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L850:960 (89 lines read)
+  └ playwright-browser_console_messages level: "error", all: true
+      └ ### Result
+
+The tester found the frontend dist wasn't rebuilt. Let me fix that:
+
+● Rebuild frontend dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+Now restart the server with the new build and re-test:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server with rebuilt frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Let me amend the commit to include the rebuilt dist, then re-run the tester:
+
+● Amend commit with rebuilt dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #299: Add dashboard weekly progress report with copy-to-clipboard" --no-edit 2>&1
+  │ | tail -3
+  └ 3 lines...
+
+● Tester QA retest iteration 299
+  │ playwright-browser_evaluate function: "async () => { const res = await fetch('/api/dashboard/we…
+  │   └ ### Result
+  └ playwright-browser_console_messages level: "error", all: true
+      └ ### Result
+
+QA passed (ux_score=8, passed=true). Minor dark mode contrast issues found. Let me fix those quickly and then stop the server:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Check CSS variables for dark mode (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "bg-secondary\|--bg-secondary"
+  │ frontend/src/index.css | head -10
+  └ 1 line...
+
+● Check CSS variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "dark\|--bg\|--text\|--border\|--card" frontend/src/index.css | head -30
+  └ 31 lines...
+
+I see — the app uses `--bg` for background and `--bg-card` for cards. There's no `--bg-secondary`. Let me fix the WeeklyReport component to use proper CSS variables:
+
+● Edit WeeklyReport.tsx +1 -1
+  └ frontend/src/components/dashboard/WeeklyReport.tsx
+
+● Edit WeeklyReport.tsx +2 -2
+  └ frontend/src/components/dashboard/WeeklyReport.tsx
+
+● Edit WeeklyReport.tsx +1 -1
+  └ frontend/src/components/dashboard/WeeklyReport.tsx
+
+Rebuild and amend:
+
+✗ Rebuild and amend commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3 && cd
+  │ .. && git add -A && git commit --amend -m "autoresearch #299: Add dashboard weekly progress
+  │ report with copy-to-clipboard" --no-edit 2>&1 | tail -3
+  └ Permission denied and could not request permission from user
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3
+  └ 4 lines...
+

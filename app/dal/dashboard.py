@@ -827,3 +827,112 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
         "unlocked_count": unlocked_count,
         "total_count": len(_ACHIEVEMENT_DEFS),
     }
+
+
+async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Generate a weekly progress report aggregating the past 7 days."""
+    today = datetime.now(timezone.utc).date()
+    week_start = today.isoformat()
+    week_end = today.isoformat()
+
+    # Conversations started this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now', '-6 days')"
+    )
+    conversations = rows[0]["cnt"] if rows else 0
+
+    # Messages sent by user this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM messages WHERE role = 'user' AND created_at >= date('now', '-6 days')"
+    )
+    messages_sent = rows[0]["cnt"] if rows else 0
+
+    # Vocabulary words reviewed this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now', '-6 days')"
+    )
+    vocabulary_reviewed = rows[0]["cnt"] if rows else 0
+
+    # Quiz accuracy this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as total, SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) as correct "
+        "FROM quiz_attempts WHERE answered_at >= date('now', '-6 days')"
+    )
+    quiz_total = rows[0]["total"] or 0
+    quiz_correct = rows[0]["correct"] or 0
+    quiz_accuracy = round((quiz_correct / quiz_total * 100) if quiz_total > 0 else 0, 1)
+
+    # Pronunciation attempts and average score this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt, AVG(score) as avg_score FROM pronunciation_attempts "
+        "WHERE created_at >= date('now', '-6 days') AND score IS NOT NULL"
+    )
+    pronunciation_attempts = rows[0]["cnt"] if rows else 0
+    avg_pronunciation_score = round(rows[0]["avg_score"] or 0, 1)
+
+    # Grammar accuracy from feedback this week
+    grammar_stats = await get_grammar_stats(db)
+    grammar_accuracy = grammar_stats["grammar_accuracy"]
+
+    # Streak
+    streak = await _calculate_streak(db)
+
+    # Week-over-week comparison for highlights
+    comparison = await _get_weekly_comparison(db)
+
+    highlights: list[str] = []
+    for module, data in comparison.items():
+        this_w = data["this_week"]
+        last_w = data["last_week"]
+        if this_w > last_w and last_w > 0:
+            pct = round((this_w - last_w) / last_w * 100)
+            highlights.append(f"{module.capitalize()} up {pct}% vs last week!")
+        elif this_w > 0 and last_w == 0:
+            highlights.append(f"Started {module} practice this week!")
+
+    if streak >= 7:
+        highlights.append(f"{streak}-day streak — incredible dedication!")
+    elif streak >= 3:
+        highlights.append(f"{streak}-day streak — keep going!")
+
+    if quiz_accuracy >= 90 and quiz_total >= 5:
+        highlights.append(f"Quiz accuracy at {quiz_accuracy}% — excellent!")
+
+    # Build week date range string
+    from datetime import timedelta
+    week_start_date = today - timedelta(days=6)
+    week_start = week_start_date.isoformat()
+    week_end = today.isoformat()
+
+    # Build text summary
+    lines = [
+        f"📊 Weekly Progress Report ({week_start} to {week_end})",
+        "",
+        f"🔥 Current Streak: {streak} days",
+        f"💬 Conversations: {conversations} ({messages_sent} messages)",
+        f"📚 Vocabulary Reviewed: {vocabulary_reviewed} words ({quiz_accuracy}% accuracy)",
+        f"🎙️ Pronunciation: {pronunciation_attempts} attempts (avg {avg_pronunciation_score}/10)",
+        f"📝 Grammar Accuracy: {grammar_accuracy}%",
+    ]
+    if highlights:
+        lines.append("")
+        lines.append("✨ Highlights:")
+        for h in highlights:
+            lines.append(f"  • {h}")
+
+    text_summary = "\n".join(lines)
+
+    return {
+        "week_start": week_start,
+        "week_end": week_end,
+        "conversations": conversations,
+        "messages_sent": messages_sent,
+        "vocabulary_reviewed": vocabulary_reviewed,
+        "quiz_accuracy": quiz_accuracy,
+        "pronunciation_attempts": pronunciation_attempts,
+        "avg_pronunciation_score": avg_pronunciation_score,
+        "grammar_accuracy": grammar_accuracy,
+        "streak": streak,
+        "highlights": highlights,
+        "text_summary": text_summary,
+    }

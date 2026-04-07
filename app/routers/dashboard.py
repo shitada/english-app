@@ -329,7 +329,28 @@ class AchievementsResponse(BaseModel):
     total_count: int
 
 
+class WeeklyReportResponse(BaseModel):
+    week_start: str
+    week_end: str
+    conversations: int
+    messages_sent: int
+    vocabulary_reviewed: int
+    quiz_accuracy: float
+    pronunciation_attempts: int
+    avg_pronunciation_score: float
+    grammar_accuracy: float
+    streak: int
+    highlights: list[str]
+    text_summary: str
+
+
 @router.get("/achievements", response_model=AchievementsResponse)
 async def get_achievements(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get computed achievement badges based on learning progress."""
     return await dash_dal.get_achievements(db)
+
+
+@router.get("/weekly-report", response_model=WeeklyReportResponse)
+async def get_weekly_report(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get weekly progress report with aggregated stats and highlights."""
+    return await dash_dal.get_weekly_report(db)
