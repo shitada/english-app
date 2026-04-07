@@ -23,6 +23,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export const api = {
   // Topics
   getConversationTopics: () => request<{ id: string; label: string; description: string }[]>('/api/conversation/topics'),
+  getFavoriteTopics: () => request<{ favorites: string[] }>('/api/conversation/topics/favorites'),
+  toggleTopicFavorite: (topicId: string) => request<{ topic_id: string; is_favorite: boolean; favorites: string[] }>(`/api/conversation/topics/${topicId}/favorite`, { method: 'PUT' }),
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>

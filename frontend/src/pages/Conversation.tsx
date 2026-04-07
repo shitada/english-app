@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -54,6 +54,7 @@ export default function Conversation() {
   const [historySummary, setHistorySummary] = useState<import('../api').ConversationSummary | null>(null);
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
+  const [favoriteTopics, setFavoriteTopics] = useState<Set<string>>(new Set());
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
   const [replayTurns, setReplayTurns] = useState<import('../api').ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
@@ -178,10 +179,16 @@ export default function Conversation() {
     }
   }, [speech.transcript]);
 
-  // Fetch topics from API
+  // Fetch topics and favorites from API
   useEffect(() => {
-    api.getConversationTopics()
-      .then((data) => setTopics(data))
+    Promise.all([
+      api.getConversationTopics(),
+      api.getFavoriteTopics().catch(() => ({ favorites: [] })),
+    ])
+      .then(([topicsData, favData]) => {
+        setTopics(topicsData);
+        setFavoriteTopics(new Set(favData.favorites));
+      })
       .catch(() => {})
       .finally(() => setTopicsLoading(false));
   }, []);
@@ -191,6 +198,25 @@ export default function Conversation() {
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
+
+  const handleToggleFavorite = async (e: React.MouseEvent, topicId: string) => {
+    e.stopPropagation();
+    const next = new Set(favoriteTopics);
+    if (next.has(topicId)) next.delete(topicId); else next.add(topicId);
+    setFavoriteTopics(next);
+    try {
+      const res = await api.toggleTopicFavorite(topicId);
+      setFavoriteTopics(new Set(res.favorites));
+    } catch {
+      setFavoriteTopics(favoriteTopics);
+    }
+  };
+
+  const sortedTopics = [...topics].sort((a, b) => {
+    const aFav = favoriteTopics.has(a.id) ? 0 : 1;
+    const bFav = favoriteTopics.has(b.id) ? 0 : 1;
+    return aFav - bFav;
+  });
 
   // Load past conversations for history browsing
   useEffect(() => {
@@ -416,12 +442,21 @@ export default function Conversation() {
               </div>
             ) : (
               <div className="topic-grid">
-                {topics.map((s) => (
+                {sortedTopics.map((s) => (
                   <button
                     key={s.id}
                     className="topic-card"
                     onClick={() => startConversation(s.id)}
+                    style={{ position: 'relative' }}
                   >
+                    <span
+                      role="button"
+                      aria-label={favoriteTopics.has(s.id) ? 'Unfavorite' : 'Favorite'}
+                      onClick={(e) => handleToggleFavorite(e, s.id)}
+                      style={{ position: 'absolute', top: 8, right: 8, cursor: 'pointer', lineHeight: 1 }}
+                    >
+                      <Star size={16} fill={favoriteTopics.has(s.id) ? '#f59e0b' : 'none'} stroke={favoriteTopics.has(s.id) ? '#f59e0b' : '#9ca3af'} />
+                    </span>
                     <h3>{TOPIC_EMOJIS[s.id] || '💬'} {s.label}</h3>
                     <p>{s.description}</p>
                   </button>

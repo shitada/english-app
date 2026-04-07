@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
+from app.dal import preferences as pref_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
 from app.utils import coerce_bool, extract_role, get_topic_label, safe_llm_call, validate_topic
@@ -80,6 +81,39 @@ class ConversationListResponse(BaseModel):
 @router.get("/topics")
 async def list_topics():
     return get_conversation_topics()
+
+
+@router.get("/topics/favorites")
+async def get_favorite_topics(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Return list of favorited topic IDs."""
+    raw = await pref_dal.get_preference(db, "favorite_topics")
+    favorites: list[str] = json.loads(raw) if raw else []
+    return {"favorites": favorites}
+
+
+@router.put("/topics/{topic_id}/favorite")
+async def toggle_topic_favorite(
+    topic_id: str = Path(min_length=1, max_length=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Toggle a topic's favorite status."""
+    topics = get_conversation_topics()
+    valid_ids = {t["id"] for t in topics}
+    if topic_id not in valid_ids:
+        raise HTTPException(status_code=404, detail=f"Topic '{topic_id}' not found")
+
+    raw = await pref_dal.get_preference(db, "favorite_topics")
+    favorites: list[str] = json.loads(raw) if raw else []
+
+    if topic_id in favorites:
+        favorites.remove(topic_id)
+        is_favorite = False
+    else:
+        favorites.append(topic_id)
+        is_favorite = True
+
+    await pref_dal.set_preference(db, "favorite_topics", json.dumps(favorites))
+    return {"topic_id": topic_id, "is_favorite": is_favorite, "favorites": favorites}
 
 
 async def _extract_reply_helpers(
