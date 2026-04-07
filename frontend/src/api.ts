@@ -7,16 +7,61 @@ export class ApiError extends Error {
   }
 }
 
+const RETRYABLE_STATUS = new Set([502, 503, 504]);
+const MAX_RETRIES = 3;
+const BASE_DELAY = 500;
+
+function jitteredDelay(attempt: number): number {
+  const base = BASE_DELAY * Math.pow(2, attempt);
+  const jitter = base * 0.25 * (Math.random() * 2 - 1);
+  return Math.max(0, base + jitter);
+}
+
+const retryEvent = new EventTarget();
+export const onRetryStateChange = (cb: (retrying: boolean) => void) => {
+  const onStart = () => cb(true);
+  const onEnd = () => cb(false);
+  retryEvent.addEventListener('retry-start', onStart);
+  retryEvent.addEventListener('retry-end', onEnd);
+  return () => {
+    retryEvent.removeEventListener('retry-start', onStart);
+    retryEvent.removeEventListener('retry-end', onEnd);
+  };
+};
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new ApiError(res.status, `API error ${res.status}: ${text}`);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      if (!res.ok) {
+        if (RETRYABLE_STATUS.has(res.status) && attempt < MAX_RETRIES) {
+          if (attempt === 0) retryEvent.dispatchEvent(new Event('retry-start'));
+          await new Promise((r) => setTimeout(r, jitteredDelay(attempt)));
+          continue;
+        }
+        const text = await res.text();
+        throw new ApiError(res.status, `API error ${res.status}: ${text}`);
+      }
+      if (attempt > 0) retryEvent.dispatchEvent(new Event('retry-end'));
+      return res.json();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (attempt > 0) retryEvent.dispatchEvent(new Event('retry-end'));
+        throw err;
+      }
+      lastError = err as Error;
+      if (attempt < MAX_RETRIES) {
+        if (attempt === 0) retryEvent.dispatchEvent(new Event('retry-start'));
+        await new Promise((r) => setTimeout(r, jitteredDelay(attempt)));
+      }
+    }
   }
-  return res.json();
+  retryEvent.dispatchEvent(new Event('retry-end'));
+  throw lastError ?? new Error('Request failed after retries');
 }
 
 // Conversation

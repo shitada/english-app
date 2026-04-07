@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
+import RetryBanner from './components/RetryBanner';
 import { useTheme } from './hooks/useTheme';
 import { useHealthCheck } from './hooks/useHealthCheck';
 import type { HealthStatus } from './hooks/useHealthCheck';
@@ -67,6 +68,7 @@ export default function App() {
     <BrowserRouter>
       <div className="app-layout">
         <Header />
+        <RetryBanner />
         <main className="app-main">
           <ErrorBoundary>
             <Routes>

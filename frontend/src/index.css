@@ -151,6 +151,21 @@ body {
   50% { opacity: 0.3; }
 }
 
+/* Retry banner */
+.retry-banner {
+  background: var(--warning, #f59e0b);
+  color: #1a1a1a;
+  text-align: center;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: retry-slide 0.3s ease-out;
+}
+@keyframes retry-slide {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* Stats grid */
 .stats-grid {
   display: grid;

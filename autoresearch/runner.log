@@ -2132,3 +2132,142 @@ Now build, commit, and test:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
   └ 10 lines...
 
+● Commit iteration 294 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #294: Add connection health indicator in UI header
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+Stray screenshot in the commit. Let me clean it:
+
+● Remove stray screenshot (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git rm conversation-restaurant-roleswap.png
+  │ 2>/dev/null && git commit --amend --no-edit
+  └ 18 lines...
+
+● Record T2 for iteration 294 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775585945, implement_sec=77. Now test:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 888 tests pass, TypeScript check passes. No routers/dal/database changed, so no smoke test needed. Check if tester is needed:
+
+● Check if frontend UI files changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$" && echo "UI_CHANGED" || echo "NO_UI_CHANGE"
+  └ 2 lines...
+
+Proposal type is `feature` but NO frontend page/component files changed (only App.tsx, hooks, CSS, api.ts) → tester skip is OK. Set qa_passed=true, ux_score=7.0. Log: "QA skipped — App.tsx is not in pages/components directory."
+
+● Record T3 for iteration 294 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775586001, test_sec=56. Now call the evaluator:
+
+● Evaluator Evaluate iteration 294
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1:30 (30 lines read)
+  └ List directory app
+      └ 11 files found
+
+● Record T4 for iteration 294 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.2 ≥ 6.0 → KEEP. Recording results:
+
+● Record results for iteration 294 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "294" "$HASH" "$DATE" "91" "77" "56" "78" "302" \
+  │ "888" "888" "pass" "6.2" "KEPT" "Add connection health indicator in UI header" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ **Iteration 294 complete**: KEPT (6.2). Proposer ✅, Evaluator ✅, Tester skipped (no pages/components changed).
+
+---
+
+Now starting **Iteration 295**.
+
+● Context restore for iteration 295 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && echo "---" && tail -20
+  │ autoresearch/results.tsv && echo "---" && git --no-pager log --oneline -5
+  └ 29 lines...
+
+T0=1775586096. Now call the proposer:
+
+● Proposer Propose iteration 295
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L60:130 (71 lines read)
+  └ List directory frontend/src/components
+      └ 5 files found
+
+● Record T1 for iteration 295 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775586183, propose_sec=87. Now implement. Let me read the current api.ts request function:
+
+● Read api.ts request function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,25p' frontend/src/api.ts
+  └ 26 lines...
+
+● Check existing components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/ | head -20
+  └ 6 lines...
+
+Now implement the changes. I'll keep it focused and clean:
+
+● Edit api.ts +53 -8
+  └ frontend/src/api.ts
+
+Now create the RetryBanner component:
+
+● Create RetryBanner.tsx +17
+  └ frontend/src/components/RetryBanner.tsx
+
+Now add the RetryBanner to App.tsx and add CSS:
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+Now add the RetryBanner below the Header:
+
+● Find Header usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Header />" frontend/src/App.tsx
+  └ 2 lines...
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+Now add CSS for the retry banner:
+
+● Edit index.css +15
+  └ frontend/src/index.css
+
+Build and test:
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+
