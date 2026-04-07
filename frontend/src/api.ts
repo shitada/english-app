@@ -70,6 +70,9 @@ export const api = {
   getConversationReplay: (conversation_id: number) =>
     request<ConversationReplay>(`/api/conversation/${conversation_id}/replay`),
 
+  generateConversationQuiz: (conversation_id: number, count = 4) =>
+    request<ConversationQuizResponse>(`/api/conversation/${conversation_id}/quiz?count=${count}`, { method: 'POST' }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';
@@ -226,6 +229,18 @@ export interface ConversationReplay {
   };
   turns: ReplayTurn[];
   total_turns: number;
+}
+
+export interface ConversationQuizQuestion {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface ConversationQuizResponse {
+  conversation_id: number;
+  questions: ConversationQuizQuestion[];
 }
 
 export interface PronunciationFeedback {

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { api, ApiError, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn } from '../api';
+import { api, ApiError, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { formatDateTime } from '../utils/formatDate';
@@ -98,6 +98,13 @@ export default function Conversation() {
   const [replayTurns, setReplayTurns] = useState<ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
   const [replayLoading, setReplayLoading] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState<ConversationQuizQuestion[]>([]);
+  const [quizIndex, setQuizIndex] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
+  const [quizRevealed, setQuizRevealed] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizFinished, setQuizFinished] = useState(false);
+  const [quizError, setQuizError] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -138,6 +145,46 @@ export default function Conversation() {
       clearInterval(timerRef.current);
     }
   }, [conversationId]);
+
+  const startQuiz = useCallback(async () => {
+    if (!conversationId) return;
+    setQuizLoading(true);
+    setQuizQuestions([]);
+    setQuizIndex(0);
+    setQuizAnswers([]);
+    setQuizRevealed(false);
+    setQuizFinished(false);
+    setQuizError('');
+    try {
+      const res = await api.generateConversationQuiz(conversationId);
+      setQuizQuestions(res.questions);
+      setQuizAnswers(new Array(res.questions.length).fill(null));
+    } catch (err) {
+      console.error('Quiz generation failed:', err);
+      setQuizError('Quiz generation failed. Please try again.');
+    } finally {
+      setQuizLoading(false);
+    }
+  }, [conversationId]);
+
+  const answerQuiz = useCallback((optionIndex: number) => {
+    if (quizRevealed) return;
+    setQuizAnswers((prev) => {
+      const next = [...prev];
+      next[quizIndex] = optionIndex;
+      return next;
+    });
+    setQuizRevealed(true);
+  }, [quizIndex, quizRevealed]);
+
+  const nextQuizQuestion = useCallback(() => {
+    if (quizIndex < quizQuestions.length - 1) {
+      setQuizIndex((i) => i + 1);
+      setQuizRevealed(false);
+    } else {
+      setQuizFinished(true);
+    }
+  }, [quizIndex, quizQuestions.length]);
 
   // Timer (skip when no limit)
   useEffect(() => {
@@ -759,14 +806,91 @@ export default function Conversation() {
           );
         })()}
 
-        <button className="btn btn-primary" onClick={() => {
-          setPhase('select');
-          setMessages([]);
-          setSummary(null);
-          setConversationId(null);
-        }}>
-          Start New Conversation
-        </button>
+        {/* Quiz Section */}
+        {quizQuestions.length > 0 && !quizFinished && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+            <h4 style={{ marginBottom: 12 }}>📝 Quick Quiz ({quizIndex + 1}/{quizQuestions.length})</h4>
+            <p style={{ marginBottom: 12, fontWeight: 500 }}>{quizQuestions[quizIndex].question}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {quizQuestions[quizIndex].options.map((opt, i) => {
+                const isSelected = quizAnswers[quizIndex] === i;
+                const isCorrect = i === quizQuestions[quizIndex].correct_index;
+                let bg = 'var(--card-bg, #fff)';
+                let border = '1px solid var(--border, #e5e7eb)';
+                if (quizRevealed) {
+                  if (isCorrect) { bg = '#dcfce7'; border = '2px solid var(--success, #22c55e)'; }
+                  else if (isSelected && !isCorrect) { bg = '#fee2e2'; border = '2px solid var(--danger, #ef4444)'; }
+                }
+                return (
+                  <button
+                    key={i}
+                    onClick={() => answerQuiz(i)}
+                    disabled={quizRevealed}
+                    style={{ padding: '10px 14px', background: bg, border, borderRadius: 6, cursor: quizRevealed ? 'default' : 'pointer', textAlign: 'left', fontSize: 14 }}
+                  >
+                    {String.fromCharCode(65 + i)}. {opt}
+                  </button>
+                );
+              })}
+            </div>
+            {quizRevealed && (
+              <div style={{ marginTop: 12 }}>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                  {quizAnswers[quizIndex] === quizQuestions[quizIndex].correct_index ? '✅ Correct!' : '❌ Incorrect.'}{' '}
+                  {quizQuestions[quizIndex].explanation}
+                </p>
+                <button className="btn btn-primary" onClick={nextQuizQuestion} style={{ fontSize: 14, padding: '6px 16px' }}>
+                  {quizIndex < quizQuestions.length - 1 ? 'Next Question →' : 'See Results'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {quizFinished && quizQuestions.length > 0 && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8, textAlign: 'center' }}>
+            <h4 style={{ marginBottom: 8 }}>Quiz Complete!</h4>
+            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--primary)' }}>
+              {quizAnswers.filter((a, i) => a === quizQuestions[i].correct_index).length}/{quizQuestions.length}
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>correct answers</p>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {quizQuestions.length === 0 && !quizLoading && !quizError && (
+            <button className="btn" onClick={startQuiz} style={{ background: 'var(--primary-light, #e0e7ff)', color: 'var(--primary-dark, #4338ca)' }}>
+              📝 Take Quick Quiz
+            </button>
+          )}
+          {quizError && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: 'var(--danger, #ef4444)', fontSize: 14 }}>{quizError}</span>
+              <button className="btn" onClick={startQuiz} style={{ background: 'var(--primary-light, #e0e7ff)', color: 'var(--primary-dark, #4338ca)', fontSize: 13 }}>
+                Retry
+              </button>
+            </div>
+          )}
+          {quizLoading && (
+            <button className="btn" disabled style={{ opacity: 0.6 }}>
+              Generating quiz…
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={() => {
+            setPhase('select');
+            setMessages([]);
+            setSummary(null);
+            setConversationId(null);
+            setQuizQuestions([]);
+            setQuizIndex(0);
+            setQuizAnswers([]);
+            setQuizRevealed(false);
+            setQuizFinished(false);
+            setQuizError('');
+          }}>
+            Start New Conversation
+          </button>
+        </div>
       </div>
     );
   }

@@ -714,3 +714,54 @@ async def test_send_message_to_nonexistent_conversation_returns_404(client, mock
     res = await client.post("/api/conversation/message", json={"conversation_id": 99999, "content": "Hello"})
     assert res.status_code == 404
     assert "not found" in res.json()["detail"].lower()
+
+
+@pytest.mark.integration
+async def test_generate_quiz_on_ended_conversation(client, mock_copilot):
+    """Generate quiz questions from an ended conversation."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome! How can I help?")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Great choice!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "I need a room"})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Checked in.", "key_vocabulary": ["room", "reservation"],
+        "communication_level": "beginner", "tip": "Practice more"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"question": "What does 'reservation' mean?", "options": ["Booking", "Bill", "Room", "Key"], "correct_index": 0, "explanation": "A reservation is a booking."},
+            {"question": "What did the user request?", "options": ["A room", "A car", "Food", "Directions"], "correct_index": 0, "explanation": "The user asked for a room."},
+        ]
+    })
+    res = await client.post(f"/api/conversation/{conv_id}/quiz?count=4")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversation_id"] == conv_id
+    assert len(data["questions"]) == 2
+    assert data["questions"][0]["options"] == ["Booking", "Bill", "Room", "Key"]
+    assert data["questions"][0]["correct_index"] == 0
+
+
+@pytest.mark.integration
+async def test_generate_quiz_on_active_conversation_returns_400(client, mock_copilot):
+    """Quiz generation requires an ended conversation."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 400
+    assert "ended" in res.json()["detail"].lower()
+
+
+@pytest.mark.integration
+async def test_generate_quiz_nonexistent_conversation_returns_404(client):
+    """Quiz generation on non-existent conversation returns 404."""
+    res = await client.post("/api/conversation/99999/quiz")
+    assert res.status_code == 404

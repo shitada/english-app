@@ -588,3 +588,74 @@ async def get_conversation_vocabulary(
     vocab_topics = get_vocabulary_topics()
     result["words"] = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in result.get("words", [])]
     return result
+
+
+class QuizQuestion(BaseModel):
+    question: str
+    options: list[str]
+    correct_index: int = Field(ge=0, le=3)
+    explanation: str
+
+
+class QuizResponse(BaseModel):
+    conversation_id: int
+    questions: list[QuizQuestion]
+
+
+@router.post("/{conversation_id}/quiz", response_model=QuizResponse)
+async def generate_conversation_quiz(
+    conversation_id: int = Path(ge=1),
+    count: int = Query(default=4, ge=2, le=8),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate comprehension quiz questions from a completed conversation."""
+    status = await conv_dal.get_conversation_status(db, conversation_id)
+    if status is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if status != "ended":
+        raise HTTPException(status_code=400, detail="Conversation must be ended before generating a quiz")
+
+    history = await conv_dal.format_history_text(db, conversation_id)
+    summary = await conv_dal.get_conversation_summary(db, conversation_id)
+    key_vocab = ", ".join(summary.get("key_vocabulary", [])) if summary else "N/A"
+
+    quiz_prompt = get_prompt("conversation_quiz").format(
+        conversation=history, vocabulary=key_vocab, count=count,
+    )
+
+    copilot = get_copilot_service()
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English quiz generator. Return ONLY valid JSON.",
+                quiz_prompt,
+            ),
+            context="conversation_quiz",
+        )
+    except HTTPException:
+        logger.warning("Quiz generation failed for conversation %s", conversation_id)
+        raise HTTPException(status_code=502, detail="Quiz generation failed")
+
+    questions = result.get("questions", [])
+    validated: list[dict[str, Any]] = []
+    for q in questions[:count]:
+        if (
+            isinstance(q, dict)
+            and "question" in q
+            and isinstance(q.get("options"), list)
+            and len(q["options"]) == 4
+            and isinstance(q.get("correct_index"), int)
+            and 0 <= q["correct_index"] <= 3
+        ):
+            validated.append({
+                "question": str(q["question"]),
+                "options": [str(o) for o in q["options"]],
+                "correct_index": int(q["correct_index"]),
+                "explanation": str(q.get("explanation", "")),
+            })
+
+    if not validated:
+        raise HTTPException(status_code=502, detail="Failed to generate valid quiz questions")
+
+    return {"conversation_id": conversation_id, "questions": validated}

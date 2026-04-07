@@ -209,3 +209,27 @@ prompts:
       "communication_level": "beginner/intermediate/advanced",
       "tip": "One specific tip for improvement"
     }}
+
+  conversation_quiz: |
+    Based on this English conversation, generate {count} comprehension quiz questions.
+    Focus on vocabulary meaning, contextual usage, and comprehension of the discussion.
+
+    Conversation:
+    {conversation}
+
+    Key vocabulary from the conversation: {vocabulary}
+
+    Generate multiple-choice questions (4 options each). Each question should test
+    understanding of vocabulary or phrases actually used in the conversation.
+
+    Return a JSON object:
+    {{
+      "questions": [
+        {{
+          "question": "What does the phrase '...' mean in this conversation?",
+          "options": ["option A", "option B", "option C", "option D"],
+          "correct_index": 0,
+          "explanation": "Brief explanation of why this is correct"
+        }}
+      ]
+    }}

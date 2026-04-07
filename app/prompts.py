@@ -22,3 +22,7 @@ def VOCABULARY_QUIZ_GENERATOR() -> str:
 def CONVERSATION_SUMMARY() -> str:
     return get_prompt("conversation_summary")
 
+
+def CONVERSATION_QUIZ() -> str:
+    return get_prompt("conversation_quiz")
+

@@ -250,6 +250,7 @@ main() {
         copilot -p "$prompt" \
             --agent=orchestrator \
             --allow-all-tools \
+            --model claude-opus-4.6 \
             --share="$session_file" \
             2>&1 | tee -a "$LOG_FILE"
         local exit_code=$?
