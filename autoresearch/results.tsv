@@ -274,3 +274,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 271	a79369c	2026-04-07	106	250	136	400	892	852	852	pass	7.4	KEPT	Add minimal pairs listening exercise to Pronunciation page
 272	ef80ebb	2026-04-07	354	43	111	72	580	854	854	pass	7.8	KEPT	Fix quiz validation rejecting valid LLM output for correct_index
 273	e66d98e	2026-04-07	224	51	55	75	405	854	854	pass	7.25	KEPT	Fix unbounded full-table scans in grammar accuracy and conversation vocabulary
+274	c93fbfd	2026-04-07	250	109	47	113	519	854	854	pass	6.55	KEPT	Add live grammar accuracy HUD and correction TTS to conversation chat

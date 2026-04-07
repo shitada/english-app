@@ -80,57 +80,41 @@ async def list_topics():
     return get_conversation_topics()
 
 
-async def _generate_phrase_suggestions(
+async def _extract_reply_helpers(
     copilot: Any, ai_message: str, topic_label: str, difficulty: str
-) -> list[str]:
-    """Generate 2-3 reply starter phrases for the user (non-fatal)."""
+) -> tuple[list[str], list[str]]:
+    """Generate reply suggestions and extract key phrases in a single LLM call (non-fatal)."""
     try:
         prompt = (
             f"Given this AI message in a {topic_label} conversation at {difficulty} level:\n"
             f'"{ai_message}"\n\n'
-            "Suggest 2-3 short English phrases the user could reply with. "
-            "Keep them natural, varied, and appropriate for the difficulty level. "
-            'Return JSON: {"suggestions": ["phrase1", "phrase2", "phrase3"]}'
+            "Do two things:\n"
+            "1. Suggest 2-3 short English phrases the user could reply with. "
+            "Keep them natural, varied, and appropriate for the difficulty level.\n"
+            "2. Identify 2-4 useful English phrases, idioms, or expressions from the message "
+            "that a language learner should pay attention to. Pick phrases that appear "
+            "verbatim in the message.\n\n"
+            'Return JSON: {"suggestions": ["reply1", "reply2"], "key_phrases": ["phrase1", "phrase2"]}'
         )
         result = await copilot.ask_json(
             "You are an English conversation helper. Return ONLY valid JSON.",
             prompt,
         )
         suggestions = result.get("suggestions", [])
-        if isinstance(suggestions, list):
-            return [str(s) for s in suggestions[:3] if s]
-        return []
-    except Exception as e:
-        logger.warning("Phrase suggestion generation failed (non-fatal): %s", e)
-        return []
+        if not isinstance(suggestions, list):
+            suggestions = []
+        suggestions = [str(s) for s in suggestions[:3] if s]
 
-
-async def _extract_key_phrases(
-    copilot: Any, ai_message: str
-) -> list[str]:
-    """Extract 2-4 key phrases/idioms from AI message for highlighting (non-fatal)."""
-    try:
-        prompt = (
-            f"From this English conversation message:\n"
-            f'"{ai_message}"\n\n'
-            "Identify 2-4 useful English phrases, idioms, collocations, or expressions "
-            "that a language learner should pay attention to. Pick phrases that appear "
-            "verbatim in the message. "
-            'Return JSON: {"key_phrases": ["phrase1", "phrase2"]}'
-        )
-        result = await copilot.ask_json(
-            "You are an English language teaching assistant. Return ONLY valid JSON.",
-            prompt,
-        )
         phrases = result.get("key_phrases", [])
-        if isinstance(phrases, list):
-            # Only keep phrases that actually appear in the message (case-insensitive)
-            lower_msg = ai_message.lower()
-            return [str(p) for p in phrases[:4] if p and str(p).lower() in lower_msg]
-        return []
+        if not isinstance(phrases, list):
+            phrases = []
+        lower_msg = ai_message.lower()
+        phrases = [str(p) for p in phrases[:4] if p and str(p).lower() in lower_msg]
+
+        return suggestions, phrases
     except Exception as e:
-        logger.warning("Key phrase extraction failed (non-fatal): %s", e)
-        return []
+        logger.warning("Reply helpers generation failed (non-fatal): %s", e)
+        return [], []
 
 
 @router.post("/start", response_model=StartResponse)
@@ -165,10 +149,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
-    suggestions, key_phrases = await asyncio.gather(
-        _generate_phrase_suggestions(copilot, opening, topic_label, req.difficulty),
-        _extract_key_phrases(copilot, opening),
-    )
+    suggestions, key_phrases = await _extract_reply_helpers(copilot, opening, topic_label, req.difficulty)
 
     return {
         "conversation_id": conversation_id,
@@ -333,11 +314,8 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         await conv_dal.update_message_feedback(db, user_msg_id, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
-    # Generate phrase suggestions and extract key phrases (non-fatal, parallel)
-    suggestions, key_phrases = await asyncio.gather(
-        _generate_phrase_suggestions(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate")),
-        _extract_key_phrases(copilot, ai_response),
-    )
+    # Generate phrase suggestions and extract key phrases (single combined LLM call)
+    suggestions, key_phrases = await _extract_reply_helpers(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
 
     return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions, "key_phrases": key_phrases}
 

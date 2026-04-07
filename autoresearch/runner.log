@@ -1205,3 +1205,128 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit 274 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #274: Add live grammar accuracy HUD and correction TTS to conversation chat"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+854 passed, TS check pass. Frontend .tsx changed, this is a UX proposal — need QA tester. But Playwright is locked. Per instructions: record with ux_score=5.0 and note.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 274
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L70:130 (61 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L130:250 (121 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.55, KEEP. T0=1775523551, T1=1775523801, T2=1775523910, T3=1775523957, T4=1775524070
+- propose=250, implement=109, test=47, evaluate=113, total=519
+
+● Record iteration 274 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "274" "c93fbfd" "2026-04-07" "250" "109" "47" "113" "519" \
+  │ "854" "854" "pass" "6.55" "KEPT" "Add live grammar accuracy HUD and correction TTS to
+  │ conversation chat" \…
+  └ 3 lines...
+
+---
+
+● T0 for 275 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 275
+  │ Read test_ui.py
+  │   │ tests/e2e/test_ui.py
+  │   └ L1:50 (49 lines read)
+  └ Read conftest.py
+      │ tests/conftest.py
+      └ 105 lines read
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good refactor proposal. Let me read the relevant functions:
+
+● Read phrase suggestion and key phrase functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '83,135p'
+  │ app/routers/conversation.py
+  └ 52 lines...
+
+● Find call sites (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "_generate_phrase_suggestions\|_extract_key_phrases\|asyncio.gather" app/routers/conversation.py
+  │ | head -10
+  └ 10 lines...
+
+Now implement the merged function:
+
+● Edit conversation.py +21 -37
+  └ app/routers/conversation.py
+
+Now update the call sites:
+
+● Find gather calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "asyncio.gather"
+  │ app/routers/conversation.py
+  └ 4 lines...
+
+● Read first call site (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '150,157p'
+  │ app/routers/conversation.py
+  └ 9 lines...
+
+● Edit conversation.py +1 -4
+  └ app/routers/conversation.py
+
+● Find remaining gather calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "asyncio.gather"
+  │ app/routers/conversation.py
+  └ 3 lines...
+
+● Read second call site (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '316,323p'
+  │ app/routers/conversation.py
+  └ 8 lines...
+
+● Edit conversation.py +2 -5
+  └ app/routers/conversation.py
+
+Check if asyncio import is still needed:
+
+● Check asyncio usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "asyncio\."
+  │ app/routers/conversation.py
+  └ 2 lines...
+
+● Find remaining asyncio usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "asyncio\."
+  │ app/routers/conversation.py
+  └ 2 lines...
+
+Still used once for the feedback/response gather. Good, keep the import. Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
