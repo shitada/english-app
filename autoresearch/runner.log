@@ -4388,3 +4388,357 @@ Update the index.ts:
 
 Commit and test:
 
+● Commit iteration 303 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #303: Add correction drill exercise to conversation summary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 iter 303 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+890 passed, TS passes. Check QA requirements:
+
+● Record T3 iter 303 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+T3 = 1775592672, test_sec = 47. Frontend UI changed + type=feature → MUST run tester. Starting server:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9
+  │ 2>/dev/null; sleep 1
+  │ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 2>&1 &
+  │ UVIPID=$!
+  │ echo "PID: $UVIPID"…
+  └ 14 lines...
+
+● Tester QA test iteration 303
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L1:30 (30 lines read)
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L1:30 (30 lines read)
+
+Playwright infrastructure issue — server was running but tester couldn't connect. Let me retry:
+
+✗ Clean Playwright and verify server (shell)
+  │ pkill -f "chrome.*mcp" 2>/dev/null; rm -f
+  │ /Users/shingotada/Library/Caches/ms-playwright/mcp-chrome-*/SingletonLock 2>/dev/null; echo
+  │ "cleaned"
+  │ curl -s http://localhost:8000/api/health
+  └ Command not executed. The 'pkill' command is not allowed. Use 'kill <PID>' with a specific
+    process ID instead.
+
+● Verify server (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Restart server for QA retry (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1
+  │ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 2>&1 &
+  │ sleep 5
+  │ curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA retest iteration 303
+  │ Read CorrectionDrill.tsx
+  │   │ frontend/src/components/conversation/CorrectionDrill.tsx
+  │   └ L53:95 (42 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L96:182 (86 lines read)
+
+QA tester passed with ux_score=7 (code review based due to Playwright infrastructure). Let me kill the server and call evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 303
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ 203 lines read
+  └ Read index.ts
+      │ frontend/src/components/conversation/index.ts
+      └ 8 lines read
+
+● Record T4 iter 303 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4 = 1775593195. Score: 6.95, KEEP.
+
+Timing: propose=143, implement=76, test=47, evaluate=523, total=789.
+
+● Record results iter 303 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "303" "4180158" "2026-04-08" "143" "76" "47" "523" "789" \
+  │ "890" "890" "pass" "6.95" "KEPT" "Add correction drill exercise to conversation summary" \
+  │ >> autoresearch/results.tsv
+  └ 1 line...
+
+● Verify results row (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Update backlog:
+
+● Edit backlog.md
+  └ autoresearch/backlog.md
+
+● Find section in backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Ideas for Future"
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L100:115 (16 lines read)
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L155:175 (10 lines read)
+
+I'll add the new feature to the backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+**Iteration 303 checklist:**
+- ✅ Called proposer subagent
+- ✅ Called tester subagent (frontend .tsx changed + type=feature) — twice (retry)
+- ✅ Called evaluator subagent
+- ✅ Score 6.95 matches evaluator's total_score
+- ✅ Result: KEPT
+
+---
+
+## Iteration 304
+
+● Context restore and T0 for iter 304 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 14 lines...
+
+T0 = 1775593232. Calling proposer:
+
+● Proposer Propose iteration 304
+  │ Read index.ts
+  │   │ frontend/src/components/conversation/index.ts
+  │   └ 8 lines read
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L67:125 (59 lines read)
+
+● Record T1 iter 304 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775593470, propose_sec = 238. Now implementing the shadowing exercise. Let me check existing code:
+
+● Check conversation router tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -40 app/routers/conversation.py
+  └ 41 lines...
+
+● Check conversation DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def \|async def "
+  │ app/dal/conversation.py | tail -10
+  └ 11 lines...
+
+● Check if conversationId available in summary (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversation_id"
+  │ frontend/src/components/conversation/ConversationSummary.tsx | head -5
+  └ 1 line...
+
+● Check conversationId in Conversation page (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversationId\|conversation_id"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 11 lines...
+
+● Check how summary is rendered (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ConversationSummary\|ConversationSummaryView" frontend/src/pages/Conversation.tsx | head -10
+  └ 7 lines...
+
+● Check summary rendering code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '636,680p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 46 lines...
+
+● Check DAL and router imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 app/dal/conversation.py && echo
+  │ "---" && head -30 app/routers/conversation.py
+  └ 62 lines...
+
+Now implement. Let me add the DAL function and route:
+
+● See end of conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/dal/conversation.py
+  └ 21 lines...
+
+● Edit conversation.py +35
+  └ app/dal/conversation.py
+
+Now add the route. Let me find a good place in the router:
+
+● Find route positions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^@router\.\|^class "
+  │ app/routers/conversation.py | tail -20
+  └ 21 lines...
+
+● Check insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '649,660p'
+  │ app/routers/conversation.py
+  └ 13 lines...
+
+I'll add the shadowing-phrases endpoint right after vocabulary:
+
+● Check around line 660 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '660,680p'
+  │ app/routers/conversation.py
+  └ 22 lines...
+
+● Edit conversation.py +13
+  └ app/routers/conversation.py
+
+Now add the API function in frontend:
+
+● Find API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "getConversationSummary\|generateConversationQuiz\|vocabulary" api.ts | grep -i "conv" | head
+  │ -10
+  └ 5 lines...
+
+● Check around quiz API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && sed -n '118,130p' api.ts
+  └ 14 lines...
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now create the ShadowingExercise component:
+
+● Create ShadowingExercise.tsx +251
+  └ frontend/src/components/conversation/ShadowingExercise.tsx
+
+Now integrate into ConversationSummary. I need to pass `conversationId` and `speechRecognition` as new props:
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L1:50 (49 lines read)
+
+● Edit ConversationSummary.tsx +8
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+● Edit ConversationSummary.tsx +2
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the ShadowingExercise between CorrectionDrill and ConversationQuiz:
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L175:200 (26 lines read)
+
+● Edit ConversationSummary.tsx +9
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now pass `conversationId` and `speechRecognition` from Conversation.tsx:
+
+● Check current summary render (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '636,655p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 20 lines...
+
+● Check speech recognition usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useSpeechRecognition\|speechRecognition\|speech" frontend/src/pages/Conversation.tsx | head -10
+  └ 11 lines...
+
+● Check speech recognition hook API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "start\|stop\|isListening\|transcript\|reset" frontend/src/hooks/useSpeechRecognition.ts | head
+  │ -15
+  └ 16 lines...
+
+Now update the Conversation.tsx to pass conversationId and speechRecognition to ConversationSummary:
+
+● Edit Conversation.tsx +7
+  └ frontend/src/pages/Conversation.tsx
+
+Update the index.ts export:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Now add tests. Let me check existing test patterns:
+
+● Check existing DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_conversation\|async def test"
+  │ tests/unit/test_conversation_dal.py | head -10
+  └ 11 lines...
+
+● Check end of DAL test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/unit/test_conversation_dal.py
+  └ 31 lines...
+
+● Check test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 tests/unit/test_conversation_dal.py
+  └ 6 lines...
+
+● See imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '5,15p'
+  │ tests/unit/test_conversation_dal.py
+  └ 12 lines...
+
+● Full imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '15,35p'
+  │ tests/unit/test_conversation_dal.py
+  └ 20 lines...
+
+Now add the import and tests:
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+Now add the test class at the end of the file:
+
+✗ Edit test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ Multiple matches found
+
+● Find exact line (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "grammar_accuracy_rate.*100"
+  │ tests/unit/test_conversation_dal.py
+  └ 3 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L1035:1041 (6 lines read)
+
+● Edit test_conversation_dal.py +44
+  └ tests/unit/test_conversation_dal.py
+
+Now commit and test:
+

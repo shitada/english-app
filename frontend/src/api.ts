@@ -120,6 +120,9 @@ export const api = {
   generateConversationQuiz: (conversation_id: number, count = 4) =>
     request<ConversationQuizResponse>(`/api/conversation/${conversation_id}/quiz?count=${count}`, { method: 'POST' }),
 
+  getShadowingPhrases: (conversation_id: number, limit = 6) =>
+    request<{ conversation_id: number; phrases: { text: string; word_count: number }[] }>(`/api/conversation/${conversation_id}/shadowing-phrases?limit=${limit}`),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';

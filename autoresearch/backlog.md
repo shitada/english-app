@@ -162,3 +162,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add animated transitions between conversation phases (select → chat → summary) (#300)
 - [x] Add keyboard shortcuts panel (Ctrl+Enter to send, Escape to end conversation) (#297)
 - [x] Improve conversation chat mobile layout — larger touch targets, collapsible header (#298)
+- [x] Add correction drill exercise to conversation summary — active recall for grammar corrections (#303)

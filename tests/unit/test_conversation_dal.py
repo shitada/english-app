@@ -26,6 +26,7 @@ from app.dal.conversation import (
     get_conversation_summary,
     get_conversation_vocabulary,
     get_grammar_accuracy,
+    get_shadowing_phrases,
     get_topic_recommendations,
     list_conversations,
     toggle_message_bookmark,
@@ -1037,3 +1038,47 @@ class TestGetConversationMetrics:
         await add_message(test_db, cid, "user", "Nice weather", {"is_correct": True})
         metrics = await get_conversation_metrics(test_db, cid)
         assert metrics["grammar_accuracy_rate"] == 100.0
+
+
+@pytest.mark.unit
+class TestGetShadowingPhrases:
+    async def test_nonexistent_conversation_returns_none(self, test_db):
+        result = await get_shadowing_phrases(test_db, 99999)
+        assert result is None
+
+    async def test_no_assistant_messages_returns_empty(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hi there.")
+        result = await get_shadowing_phrases(test_db, cid)
+        assert result == []
+
+    async def test_extracts_sentences_from_assistant(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome to the hotel. How can I help you today?")
+        result = await get_shadowing_phrases(test_db, cid)
+        assert result is not None
+        assert len(result) >= 1
+        for phrase in result:
+            assert "text" in phrase
+            assert "word_count" in phrase
+            assert 4 <= phrase["word_count"] <= 15
+
+    async def test_excludes_short_sentences(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Hi. Yes. No way.")
+        result = await get_shadowing_phrases(test_db, cid)
+        assert result == []
+
+    async def test_respects_limit(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        long_text = ". ".join([f"This is sentence number {i} for testing" for i in range(10)])
+        await add_message(test_db, cid, "assistant", long_text)
+        result = await get_shadowing_phrases(test_db, cid, limit=3)
+        assert len(result) <= 3
+
+    async def test_deduplicates_phrases(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "How can I help you today?")
+        await add_message(test_db, cid, "assistant", "How can I help you today?")
+        result = await get_shadowing_phrases(test_db, cid)
+        assert len(result) == 1

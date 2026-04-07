@@ -302,3 +302,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 300	ac1a043	2026-04-07	94	100	331	56	581	888	888	pass	7.40	KEPT	Add animated transitions between conversation phases
 301	4d2de5c	2026-04-07	86	60	64	63	273	890	890	pass	6.5	KEPT	Add database WAL checkpoint scheduling for long-running instances
 302	5a2e728	2026-04-08	101	73	49	789	1012	890	890	pass	7.0	KEPT	Add onboarding flow for first-time users with guided tooltips
+303	4180158	2026-04-08	143	76	47	523	789	890	890	pass	6.95	KEPT	Add correction drill exercise to conversation summary

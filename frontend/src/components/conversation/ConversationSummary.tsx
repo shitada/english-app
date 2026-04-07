@@ -2,6 +2,7 @@ import { Volume2 } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
+import { ShadowingExercise } from './ShadowingExercise';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -25,6 +26,13 @@ interface ConversationSummaryProps {
   onStartQuiz: () => void;
   onNewConversation: () => void;
   tts: { speak: (text: string) => void; isSpeaking: boolean };
+  conversationId?: number;
+  speechRecognition?: {
+    isListening: boolean;
+    transcript: string;
+    startListening: () => void;
+    stopListening: () => void;
+  };
 }
 
 export function ConversationSummary({
@@ -42,6 +50,8 @@ export function ConversationSummary({
   onStartQuiz,
   onNewConversation,
   tts,
+  conversationId,
+  speechRecognition,
 }: ConversationSummaryProps) {
   return (
     <div className="card summary-card">
@@ -179,6 +189,15 @@ export function ConversationSummary({
           <CorrectionDrill errors={drillErrors} tts={tts} />
         ) : null;
       })()}
+
+      {/* Shadowing Exercise — listen and repeat practice */}
+      {conversationId && speechRecognition && (
+        <ShadowingExercise
+          conversationId={conversationId}
+          tts={tts}
+          speechRecognition={speechRecognition}
+        />
+      )}
 
       <ConversationQuiz
         questions={quizQuestions}

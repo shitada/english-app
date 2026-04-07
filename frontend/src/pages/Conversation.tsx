@@ -648,6 +648,13 @@ export default function Conversation() {
         onStartQuiz={startQuiz}
         onNewConversation={handleNewConversation}
         tts={tts}
+        conversationId={conversationId ?? undefined}
+        speechRecognition={{
+          isListening: speech.isListening,
+          transcript: speech.transcript,
+          startListening: speech.start,
+          stopListening: speech.stop,
+        }}
       />
       </PhaseTransition>
     );

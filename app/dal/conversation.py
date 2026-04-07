@@ -606,3 +606,38 @@ async def get_conversation_vocabulary(
             })
 
     return {"conversation_id": conversation_id, "words": matched, "total": len(matched)}
+
+
+async def get_shadowing_phrases(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    limit: int = 6,
+) -> list[dict[str, Any]] | None:
+    """Extract suitable shadowing phrases from assistant messages in a conversation."""
+    row = await db.execute_fetchall(
+        "SELECT id FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    if not row:
+        return None
+
+    rows = await db.execute_fetchall(
+        "SELECT content FROM messages WHERE conversation_id = ? AND role = 'assistant' ORDER BY id",
+        (conversation_id,),
+    )
+
+    phrases: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for r in rows:
+        content = r[0] if isinstance(r, (tuple, list)) else r["content"]
+        sentences = re.split(r'(?<=[.!?])\s+', content.strip())
+        for s in sentences:
+            s = s.strip()
+            word_count = len(s.split())
+            normalized = s.lower()
+            if 4 <= word_count <= 15 and normalized not in seen:
+                seen.add(normalized)
+                phrases.append({"text": s, "word_count": word_count})
+                if len(phrases) >= limit:
+                    return phrases
+
+    return phrases

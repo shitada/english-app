@@ -663,6 +663,19 @@ async def get_conversation_vocabulary(
     return result
 
 
+@router.get("/{conversation_id}/shadowing-phrases")
+async def get_shadowing_phrases(
+    conversation_id: int = Path(ge=1),
+    limit: int = Query(6, ge=1, le=20),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Extract phrases suitable for shadowing practice from a conversation."""
+    phrases = await conv_dal.get_shadowing_phrases(db, conversation_id, limit=limit)
+    if phrases is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"conversation_id": conversation_id, "phrases": phrases}
+
+
 def _safe_quiz_index(value: Any) -> int | None:
     """Coerce an LLM-returned correct_index to int in range 0-3, or None."""
     if value is None:
