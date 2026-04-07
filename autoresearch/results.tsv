@@ -285,3 +285,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 283	cd34ec1	2026-04-07	202	174	54	405	835	869	869	pass	7.6	KEPT	Add vocabulary sentence craft — write sentences using given words, AI evaluates
 284	85f08bc	2026-04-07	119	89	69	495	772	869	869	pass	7.05	KEPT	Add shadowing mode waveform visualization for audio comparison
 285	322c48b	2026-04-08	180	90	60	400	730	869	869	pass	7.1	KEPT	Add conversation topic favoriting with star toggle
+286	1cda7b3	2026-04-08	200	100	70	450	820	869	869	pass	7.7	KEPT	Split Pronunciation.tsx into sub-components
