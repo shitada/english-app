@@ -1971,3 +1971,164 @@ The tester found the frontend dist wasn't rebuilt. Let me fix that:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
   └ 10 lines...
 
+● Amend commit with rebuilt dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #293: Add role swap briefing panel with role context and professional phrases
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now restart the server and re-run tester:
+
+● Restart server with new dist (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA retest iteration 293
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ playwright-browser_network_requests filter: "/api/conversation", requestBody: true, requestHead…
+      └ ### Result
+
+QA passed with ux_score=9. Now kill the server and call the evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 2>&1 | head -200
+  └ 201 lines...
+
+● Evaluator Evaluate iteration 293
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:40 (40 lines read)
+  └ Read utils.py
+      │ app/utils.py
+      └ L1:30 (30 lines read)
+
+Evaluator score: 7.6 — KEEP. Let me record the results:
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 293 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "293" "$HASH" "$DATE" "149" "116" "1056" "60" "1381" \
+  │ "888" "888" "pass" "7.6" "KEPT" "Add role swap briefing panel with role context and
+  │ professional phrases" \…
+  └ 3 lines...
+
+Row properly formatted. Now update the backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ **Iteration 293 complete**: KEPT (7.6). Proposer ✅, Evaluator ✅, Tester ✅.
+
+---
+
+Now starting **Iteration 294**.
+
+● Record T0 for iteration 294 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for iteration 294 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 27 lines...
+
+● Read current backlog for proposer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 165 lines...
+
+● Proposer Propose iteration 294
+  │ Read useTheme.ts
+  │   │ frontend/src/hooks/useTheme.ts
+  │   └ 24 lines read
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L80:160 (81 lines read)
+
+● Record T1 for iteration 294 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775585777, T1=1775585868, propose_sec=91. Now implement:
+
+● Check if health API already exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "checkHealth\|health"
+  │ frontend/src/api.ts | head -5
+  └ 1 line...
+
+● Find header area in App.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "Header\|header\|theme.*toggle\|ThemeToggle\|DarkMode" frontend/src/App.tsx | head -20
+  └ 7 lines...
+
+● Check existing hooks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/hooks/
+  └ 2 lines...
+
+● Find where to add health check API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getConversationTopics\|getHealth\|checkHealth" frontend/src/api.ts | head -5
+  └ 2 lines...
+
+● Read full App.tsx header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,60p' frontend/src/App.tsx
+  └ 61 lines...
+
+● Read api.ts around line 20 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '20,30p' frontend/src/api.ts
+  └ 12 lines...
+
+Now let me implement all the changes. First, create the health check hook:
+
+● Create useHealthCheck.ts +55
+  └ frontend/src/hooks/useHealthCheck.ts
+
+Now update App.tsx to use the health indicator:
+
+● Edit App.tsx +8
+  └ frontend/src/App.tsx
+
+Now add the health dot next to the title:
+
+● Edit App.tsx +6 -1
+  └ frontend/src/App.tsx
+
+Now add CSS styles. Let me find where to add them:
+
+● Find header CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "app-header\|theme-toggle"
+  │ frontend/src/index.css | head -10
+  └ 11 lines...
+
+● Read after theme-toggle hover (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '127,135p' frontend/src/index.css
+  └ 10 lines...
+
+● Edit index.css +22
+  └ frontend/src/index.css
+
+Now build, commit, and test:
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 5 lines...
+
+● Edit App.tsx +2 -1
+  └ frontend/src/App.tsx
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+

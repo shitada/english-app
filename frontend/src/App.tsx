@@ -3,24 +3,38 @@ import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router
 import { Moon, Sun } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useTheme } from './hooks/useTheme';
+import { useHealthCheck } from './hooks/useHealthCheck';
+import type { HealthStatus } from './hooks/useHealthCheck';
 import Home from './pages/Home';
 import Conversation from './pages/Conversation';
 import Pronunciation from './pages/Pronunciation';
 import Vocabulary from './pages/Vocabulary';
 import Dashboard from './pages/Dashboard';
 
+const statusLabel: Record<HealthStatus, string> = {
+  connected: 'Connected',
+  degraded: 'Degraded',
+  disconnected: 'Disconnected',
+};
+
 function Header() {
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const health = useHealthCheck();
 
   // Close nav on route change
   const handleNavClick = () => setNavOpen(false);
 
   return (
     <header className="app-header">
-      <h1 onClick={() => { navigate('/'); setNavOpen(false); }} style={{ cursor: 'pointer' }}>
+      <h1 onClick={() => { navigate('/'); setNavOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
         English Practice
+        <span
+          className={`health-dot health-${health.status}`}
+          aria-label={`Server status: ${statusLabel[health.status]}`}
+          title={`${statusLabel[health.status]}${health.uptime != null ? ` · Uptime: ${Math.floor(health.uptime / 60)}m` : ''}`}
+        />
       </h1>
       <nav className={navOpen ? 'nav-open' : ''}>
         <NavLink to="/conversation" onClick={handleNavClick}>Conversation</NavLink>

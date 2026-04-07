@@ -137,7 +137,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [HIGH] Speaking & Listening Features
 
 - [x] ✅ Add shadowing mode — play model audio, user repeats, compare waveforms/scores (completed iteration #284 — waveform visualization added)
-- [ ] Add conversation role swap — let user play the service staff role (hotel clerk, doctor) for perspective practice
+- [x] ✅ Add conversation role swap — let user play the service staff role (hotel clerk, doctor) for perspective practice (completed iterations #280 wiring, #293 briefing panel)
 - [x] ✅ Add vocabulary sentence construction — given 3 words, user builds a sentence, AI evaluates grammar and naturalness (completed iteration #283)
 - [x] ✅ Add pronunciation tongue twister drill — curated tongue twisters with speed progression (completed iteration #282)
 

@@ -129,6 +129,28 @@ body {
   border-color: var(--primary);
 }
 
+/* Health indicator */
+.health-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.health-connected { background: var(--success, #22c55e); }
+.health-degraded {
+  background: var(--warning, #f59e0b);
+  animation: health-pulse 2s ease-in-out infinite;
+}
+.health-disconnected {
+  background: var(--danger, #ef4444);
+  animation: health-pulse 1.5s ease-in-out infinite;
+}
+@keyframes health-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* Stats grid */
 .stats-grid {
   display: grid;
