@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -75,6 +75,7 @@ export default function Conversation() {
   const [quizFinished, setQuizFinished] = useState(false);
   const [quizError, setQuizError] = useState('');
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [headerExpanded, setHeaderExpanded] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -651,11 +652,42 @@ export default function Conversation() {
     <div className="chat-container">
       <KeyboardShortcutsPanel open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <div className="chat-header">
-        <span style={{ fontWeight: 600 }}>
-          Role Play Scenario
-          {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 {userRoleName || 'Staff Role'}</span>}
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="chat-header-primary">
+          <span style={{ fontWeight: 600 }}>
+            Role Play Scenario
+            {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 {userRoleName || 'Staff Role'}</span>}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {duration > 0 ? (
+              <>
+                <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
+                {timeLeft > 0 && timeLeft <= 60 && (
+                  <button
+                    className="btn-touch"
+                    onClick={() => setTimeLeft((prev) => prev + 120)}
+                    aria-label="Extend by 2 minutes"
+                  >
+                    +2m
+                  </button>
+                )}
+              </>
+            ) : (
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>∞ No limit</span>
+            )}
+            <button
+              className="btn-touch chat-header-toggle"
+              onClick={() => setHeaderExpanded((v) => !v)}
+              aria-label={headerExpanded ? 'Collapse controls' : 'Expand controls'}
+              aria-expanded={headerExpanded}
+            >
+              <ChevronDown size={16} style={{ transform: headerExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
+              <Square size={14} /> End
+            </button>
+          </div>
+        </div>
+        <div className={`chat-header-controls ${headerExpanded ? 'chat-header-controls-open' : ''}`}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <Volume2 size={14} color="var(--text-secondary)" />
             <input
@@ -677,18 +709,13 @@ export default function Conversation() {
             ] as const).map((opt) => (
               <button
                 key={opt.value}
+                className="btn-touch speed-btn"
                 onClick={() => tts.setRate(opt.value)}
                 aria-label={`Speed ${opt.label}`}
                 aria-pressed={tts.rate === opt.value}
                 style={{
-                  padding: '2px 6px',
-                  fontSize: 12,
-                  border: '1px solid var(--border)',
-                  borderRadius: 4,
                   background: tts.rate === opt.value ? 'var(--primary)' : 'transparent',
                   color: tts.rate === opt.value ? '#fff' : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  lineHeight: 1.2,
                 }}
               >
                 {opt.label}
@@ -696,55 +723,20 @@ export default function Conversation() {
             ))}
           </div>
           <button
+            className="btn-touch listen-btn"
             onClick={() => setListenMode((v) => !v)}
             aria-label={listenMode ? 'Disable listen mode' : 'Enable listen mode'}
             aria-pressed={listenMode}
             title={listenMode ? 'Listen Mode ON — tap to show text' : 'Listen Mode — hide AI text for listening practice'}
             style={{
-              padding: '2px 8px',
-              fontSize: 13,
-              border: '1px solid var(--border)',
-              borderRadius: 4,
               background: listenMode ? 'var(--primary)' : 'transparent',
               color: listenMode ? '#fff' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
             }}
           >
             <Headphones size={14} /> {listenMode ? 'ON' : ''}
           </button>
-          {duration > 0 ? (
-            <>
-              <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
-              {timeLeft > 0 && timeLeft <= 60 && (
-                <button
-                  onClick={() => setTimeLeft((prev) => prev + 120)}
-                  aria-label="Extend by 2 minutes"
-                  style={{
-                    padding: '2px 8px',
-                    fontSize: 12,
-                    borderRadius: 4,
-                    border: '1px solid var(--border)',
-                    background: 'transparent',
-                    color: 'var(--primary)',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                  }}
-                >
-                  +2m
-                </button>
-              )}
-            </>
-          ) : (
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>∞ No limit</span>
-          )}
-          <button className="btn btn-sm" onClick={() => setShowShortcuts(true)} aria-label="Keyboard shortcuts" title="Keyboard shortcuts" style={{ padding: '4px 6px' }}>
+          <button className="btn btn-sm chat-shortcuts-btn" onClick={() => setShowShortcuts(true)} aria-label="Keyboard shortcuts" title="Keyboard shortcuts" style={{ padding: '4px 6px' }}>
             <Keyboard size={14} />
-          </button>
-          <button className="btn btn-danger btn-sm" onClick={endConversation} disabled={loading} aria-label="End conversation">
-            <Square size={14} /> End
           </button>
         </div>
       </div>
@@ -883,7 +875,6 @@ export default function Conversation() {
             style={{
               width: '100%',
               padding: '10px 14px',
-              fontSize: 14,
               border: '1px solid var(--border, #e2e8f0)',
               borderRadius: 8,
               outline: 'none',

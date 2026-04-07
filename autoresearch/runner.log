@@ -2806,3 +2806,226 @@ TypeScript build found an error — `speech.listening` should be `speech.isListe
 
 Build passes now. Let me amend the commit and restart the server:
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #297: Add keyboard shortcuts panel with Ctrl+Enter, Escape, M, ? keys
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 18 lines...
+
+Restart the server with the new dist:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server with new dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA retest iteration 297
+  │ playwright-browser_snapshot depth: 3
+  │   └ ### Page
+  └ playwright-browser_console_messages level: "error", all: true
+      └ ### Result
+
+Excellent! QA passed with ux_score 9. Now stop the server and call the evaluator:
+
+● Stop server, record time (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server stopped" && date +%s
+  └ 3 lines...
+
+● Evaluator Evaluate iteration 297
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L650:730 (81 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L730:810 (81 lines read)
+
+● Record T4 for iteration 297 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.95 ≥ 6.0, all tests pass, QA passed with ux_score 9. **KEEP**.
+
+● Record results for iteration 297 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "297" "80c6221" "2026-04-08" "139" "139" "600" "103" "981" \
+  │ "888" "888" "pass" "7.95" "KEPT" "Add keyboard shortcuts panel with Ctrl+Enter, Escape, M, ?
+  │ keys" \…
+  └ 3 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+## Iteration 298
+
+● Record T0 for iteration 298 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read latest results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 298
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ 854 lines read
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L648:750 (103 lines read)
+
+● Record T1 for iteration 298 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me implement the mobile layout improvements. First, let me see the full chat header and input area:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L648:760 (113 lines read)
+
+Now let me look at the chat input bar area:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L862:900 (38 lines read)
+
+Now I'll implement the mobile layout improvements. I'll split the header into primary/secondary rows and add a collapsible toggle:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L1:3 (3 lines read)
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the `headerExpanded` state:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now restructure the chat header into primary/secondary rows:
+
+● Edit Conversation.tsx +39 -48
+  └ frontend/src/pages/Conversation.tsx
+
+Now add CSS. Let me check for existing chat-header styles:
+
+● Find existing chat styles (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "chat-header\|chat-input\|@media.*max-width" frontend/src/index.css | head -20
+  └ 7 lines...
+
+● Read index.css
+  │ frontend/src/index.css
+  └ L300:340 (40 lines read)
+
+● Read index.css
+  │ frontend/src/index.css
+  └ L711:740 (30 lines read)
+
+Now I'll update the CSS. First update the chat-header to support the new layout, then add mobile-specific styles:
+
+● Edit index.css +40 -2
+  └ frontend/src/index.css
+
+Now add mobile-specific overrides in the existing media query:
+
+● Edit index.css +15
+  └ frontend/src/index.css
+
+Now commit and test:
+
+● Commit iteration 298 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #298: Improve conversation chat mobile layout with collapsible header and larger touch targets
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 888 tests pass, TypeScript passes. Now check tester requirement:
+
+● Record T3, check frontend changes (shell)
+  │ date +%s && echo "---" && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Proposal type is `ux` and `Conversation.tsx` changed — must call tester. Let me rebuild dist and start server:
+
+● Rebuild frontend dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server with new dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 298
+  │ playwright-browser_evaluate function: "() => {   // Find all CSS rules matching the chevron but…
+  │   └ ### Result
+  └ playwright-browser_snapshot
+      └ ### Page
+
+QA passed (ux_score 8) but found 2 CSS specificity bugs. Let me fix them:
+
+● Edit index.css
+  └ frontend/src/index.css
+
+● Find toggle CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "chat-header-toggle"
+  │ frontend/src/index.css
+  └ 3 lines...
+
+● Read index.css
+  │ frontend/src/index.css
+  └ L320:360 (41 lines read)
+
+The issue is `.btn-touch` with `display: inline-flex` overrides `.chat-header-toggle` with `display: none`. Fix by making toggle more specific and remove inline font-size from input:
+
+● Edit index.css +1 -1
+  └ frontend/src/index.css
+
+Now fix the input font-size inline style issue — remove inline fontSize from the component:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L878:900 (23 lines read)
+
+● Edit Conversation.tsx -1
+  └ frontend/src/pages/Conversation.tsx
+
+The base font-size (14px) is already set in `.chat-input-bar input` CSS rule at line 370. Now amend the commit and rebuild:
+

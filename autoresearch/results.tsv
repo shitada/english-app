@@ -296,3 +296,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 294	8e2bd46	2026-04-08	91	77	56	78	302	888	888	pass	6.2	KEPT	Add connection health indicator in UI header
 295	344a024	2026-04-08	87	61	302	70	520	888	888	pass	7.35	KEPT	Add request retry with exponential backoff and retry banner
 296	7258a2e	2026-04-08	106	78	400	77	661	888	888	pass	6.45	KEPT	Cache conversation topics in localStorage with stale-while-revalidate
+297	80c6221	2026-04-08	139	139	600	103	981	888	888	pass	7.95	KEPT	Add keyboard shortcuts panel with Ctrl+Enter, Escape, M, ? keys
