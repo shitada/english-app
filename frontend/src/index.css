@@ -931,3 +931,127 @@ button.chat-header-toggle {
     animation: none;
   }
 }
+
+/* Onboarding overlay */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.onboarding-tooltip {
+  max-width: 320px;
+  width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  cursor: default;
+  animation: tooltipFadeIn 200ms ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.onboarding-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.onboarding-step-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.onboarding-skip-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.onboarding-skip-btn:hover { color: var(--text); }
+
+.onboarding-tooltip-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.onboarding-tooltip-desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.onboarding-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 200ms;
+}
+.onboarding-dot.active {
+  background: var(--primary, #6366f1);
+}
+
+.onboarding-tooltip-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.onboarding-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 150ms;
+}
+.onboarding-btn:hover { opacity: 0.85; }
+.onboarding-btn.primary {
+  background: var(--primary, #6366f1);
+  color: #fff;
+}
+.onboarding-btn.secondary {
+  background: var(--bg-secondary, #f3f4f6);
+  color: var(--text);
+}
+
+.tour-restart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 150ms, border-color 150ms;
+}
+.tour-restart-btn:hover {
+  color: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+}

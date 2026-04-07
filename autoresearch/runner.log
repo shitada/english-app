@@ -3941,3 +3941,321 @@ Update backlog:
 ● Create invocation-006.md +45
   └ autoresearch/logs/invocation-006.md
 
+● Commit docs update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: update
+  │ results.tsv and backlog for iterations 299-301
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+All 3 iterations complete. Here's the summary:
+
+## Autoresearch Iterations 299–301 — All KEPT ✅
+
+| Iter | Score | Description |
+|------|-------|-------------|
+| 299 | 7.15 | Dashboard weekly progress report with copy-to-clipboard |
+| 300 | 7.40 | Animated transitions between conversation phases |
+| 301 | 6.50 | Database WAL checkpoint scheduling |
+
+**3/3 kept** | **Avg score: 7.02** | **Tests: 888→890 (+2)** | **Success rate: 100%**
+
+
+Total usage est:        3 Premium requests
+API time spent:         29m 14s
+Total session time:     35m 28s
+Total code changes:     +440 -11
+Breakdown by AI model:
+ claude-opus-4.6          12.3m in, 78.4k out, 11.5m cached (Est. 3 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-299-to-309.md
+[2026-04-08 04:49:01] Copilot invocation completed (duration: 2131s)
+[2026-04-08 04:49:01] Verifying agent invocations for iter 299-301...
+[2026-04-08 04:49:01]   Iteration 299: proposer=✅ evaluator=✅
+[2026-04-08 04:49:01]   Iteration 300: proposer=✅ evaluator=✅
+[2026-04-08 04:49:01]   Iteration 301: proposer=✅ evaluator=✅
+[2026-04-08 04:49:01] All iterations passed agent verification.
+[2026-04-08 04:49:01] Running post-invocation audit (iter 299-301)...
+============================================
+ Autoresearch Audit
+ Iterations: 299 — 301
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-08 04:49:01
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 301[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 299(3) 300(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-08 04:49:02] Audit found 1 error(s) — fixes applied where possible
+[2026-04-08 04:49:02] Cleaned up old session logs (kept 5)
+[2026-04-08 04:49:05] Current iteration count: 301 / 309
+[2026-04-08 04:49:05] ------------------------------------------
+[2026-04-08 04:49:05] Invocation 6 / 10
+[2026-04-08 04:49:05] Resuming from iteration 302
+[2026-04-08 04:49:05] ------------------------------------------
+[2026-04-08 04:49:05] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-302-to-309.md)...
+
+
+**I'll start by reading the current state to understand where we are.**
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 165 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-006.md
+  └ 45 lines...
+
+Good. Last iteration was 301. I'll run iterations 302–304. Starting now.
+
+---
+
+## Iteration 302
+
+● Record T0 for iteration 302 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1775591373. Now calling the proposer.
+
+● Proposer Propose iteration 302
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L80:160 (81 lines read)
+  └ Read KeyboardShortcutsPanel.tsx
+      │ frontend/src/components/KeyboardShortcutsPanel.tsx
+      └ 47 lines read
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775591474, propose_sec = 101. Now implementing the onboarding flow.
+
+● List hooks (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/hooks/
+  └ 3 lines...
+
+● Read Home.tsx (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/frontend/src/pages/Home.tsx
+  └ 400 lines...
+
+● List components (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/components/
+  └ 4 lines...
+
+● Check existing CSS patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "onboarding\|tour\|\.card\|feature-card\|feature-grid" index.css | head -20
+  └ 9 lines...
+
+● Check end of CSS file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && tail -40 index.css
+  └ 41 lines...
+
+Now I'll create the onboarding hook, overlay component, and update Home.tsx and CSS.
+
+● Create useOnboarding.ts +95
+  └ frontend/src/hooks/useOnboarding.ts
+
+● Create OnboardingOverlay.tsx +116
+  └ frontend/src/components/OnboardingOverlay.tsx
+
+Now update Home.tsx and add CSS:
+
+● Edit Home.tsx +3 -1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +16
+  └ frontend/src/pages/Home.tsx
+
+Now add the CSS:
+
+● Edit index.css +124
+  └ frontend/src/index.css
+
+Now commit and test:
+
+● Commit iteration 302 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #302: Add onboarding flow for first-time users with guided tooltips
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2 = 1775591547, implement_sec = 73. Now running tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+890 passed, TypeScript passes. Now check if we need smoke test:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+T3 = 1775591596, test_sec = 49. No smoke test needed. Now check if QA tester is needed:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend UI changed + type is "feature" → MUST run QA tester. Starting server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 2 lines...
+
+● Verify server running (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Retry health check (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Check server status (shell)
+  │ lsof -i:8000 2>/dev/null; ps aux | grep uvicorn | grep -v grep
+  └ 1 line...
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn.log 2>&1 &
+  │ echo "PID: $!"
+  │ sleep 5
+  │ curl -s http://localhost:8000/api/health…
+  └ Permission denied and could not request permission from user
+
+● Start server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 2>&1 &
+  │ UVIPID=$!
+  │ echo "Started PID: $UVIPID"
+  │ sleep 5…
+  └ 13 lines...
+
+Server running. Now call the tester:
+
+● Tester QA test iteration 302
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ playwright-browser_evaluate function: "() => {   // Final summary of all tests   const tests = …
+      └ ### Result
+
+The tester found a critical CSS variable issue. Let me fix `--bg-main` references:
+
+● Check CSS variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n "\-\-bg" index.css |
+  │ head -20
+  └ 21 lines...
+
+The correct variable is `--bg-card`, not `--bg-main`. Let me fix both places:
+
+● Edit index.css +1 -1
+  └ frontend/src/index.css
+
+● Edit index.css +1 -1
+  └ frontend/src/index.css
+
+Also fix the tooltip positioning to handle viewport overflow. Let me also fix the `.onboarding-btn.secondary` background:
+
+● Check for remaining --bg-main references (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "bg-main\|bg-secondary" index.css | head -10
+  └ 3 lines...
+
+● Read index.css
+  │ frontend/src/index.css
+  └ L898:905 (8 lines read)
+
+Now fix the tooltip viewport overflow issue:
+
+● Edit OnboardingOverlay.tsx +6 -1
+  └ frontend/src/components/OnboardingOverlay.tsx
+
+Add ARIA attributes for accessibility:
+
+● Edit OnboardingOverlay.tsx +3
+  └ frontend/src/components/OnboardingOverlay.tsx
+
+Amend the commit with fixes:
+

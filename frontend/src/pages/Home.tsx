@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle } from 'lucide-react';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle } from 'lucide-react';
 import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, type LearningInsights, type LearningGoal, type TodayActivity } from '../api';
+import { useOnboarding } from '../hooks/useOnboarding';
+import OnboardingOverlay from '../components/OnboardingOverlay';
 
 const MODULE_ROUTES: Record<string, string> = {
   conversation: '/conversation',
@@ -340,11 +342,27 @@ function DailyPracticeCard() {
 }
 
 export default function Home() {
+  const { isActive, currentStep, totalSteps, step, next, prev, skip, restartTour } = useOnboarding();
+
   return (
     <div>
+      {isActive && (
+        <OnboardingOverlay
+          step={step}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onNext={next}
+          onPrev={prev}
+          onSkip={skip}
+        />
+      )}
       <div className="home-hero">
         <h2>Improve Your English</h2>
         <p>Practice conversations, pronunciation, and vocabulary with AI</p>
+        <button className="tour-restart-btn" onClick={restartTour} title="Take a guided tour">
+          <HelpCircle size={16} />
+          Take a Tour
+        </button>
       </div>
 
       <DailyPracticeCard />
