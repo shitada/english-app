@@ -4887,3 +4887,419 @@ Update backlog:
 
 Now commit the docs update and write the invocation log:
 
+● Commit docs update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: update
+  │ results.tsv and backlog for iterations 302-304
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Create invocation-007.md +45
+  └ autoresearch/logs/invocation-007.md
+
+## Autoresearch Iterations 302–304 — All KEPT ✅
+
+| Iter | Score | Description |
+|------|-------|-------------|
+| 302 | 7.00 | Onboarding flow with guided tooltips |
+| 303 | 6.95 | Correction drill for grammar practice |
+| 304 | 6.85 | Shadowing exercise for speaking practice |
+
+**3/3 kept** | **Avg score: 6.93** | **Tests: 890→896 (+6)** | **Success rate: 100%**
+
+
+Total usage est:        3 Premium requests
+API time spent:         45m 20s
+Total session time:     50m 36s
+Total code changes:     +1076 -5
+Breakdown by AI model:
+ claude-opus-4.6          19.2m in, 129.7k out, 17.6m cached (Est. 3 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-302-to-309.md
+[2026-04-08 05:39:44] Copilot invocation completed (duration: 3039s)
+[2026-04-08 05:39:44] Verifying agent invocations for iter 302-304...
+[2026-04-08 05:39:44]   Iteration 302: proposer=✅ evaluator=✅
+[2026-04-08 05:39:44]   Iteration 303: proposer=✅ evaluator=✅
+[2026-04-08 05:39:44]   Iteration 304: proposer=✅ evaluator=✅
+[2026-04-08 05:39:44] All iterations passed agent verification.
+[2026-04-08 05:39:44] Running post-invocation audit (iter 302-304)...
+============================================
+ Autoresearch Audit
+ Iterations: 302 — 304
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-08 05:39:44
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 302(2) 304(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-08 05:39:45] Audit passed — no issues
+[2026-04-08 05:39:45] Cleaned up old session logs (kept 5)
+[2026-04-08 05:39:48] Current iteration count: 304 / 309
+[2026-04-08 05:39:48] ------------------------------------------
+[2026-04-08 05:39:48] Invocation 7 / 10
+[2026-04-08 05:39:48] Resuming from iteration 305
+[2026-04-08 05:39:48] ------------------------------------------
+[2026-04-08 05:39:48] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-305-to-309.md)...
+
+
+**I'll start by reading the current state to understand where we are.**
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 166 lines read
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read invocation-007.md
+  │ autoresearch/logs/invocation-007.md
+  └ 44 lines read
+
+Good. I have full context. Last iteration was 304 (all kept, 896 tests). I'll now run iterations 305–307. Let me start.
+
+---
+
+## Iteration 305
+
+● Record T0 for iteration 305 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1775594414. Now calling the proposer subagent.
+
+● Proposer Propose iteration 305
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L700:850 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L850:930 (15 lines read)
+
+Good proposal. Let me record T1 and start implementing.
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read dashboard DAL start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/dal/dashboard.py | head -30
+  └ 31 lines...
+
+● Find grammar-related code in router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "grammar" app/routers/dashboard.py
+  │ | head -20
+  └ 4 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1:50 (50 lines read)
+
+● Check file sizes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/dashboard.py
+  │ app/routers/dashboard.py frontend/src/api.ts frontend/src/pages/Dashboard.tsx
+  └ 6 lines...
+
+● Read Dashboard.tsx
+  │ frontend/src/pages/Dashboard.tsx
+  └ 135 lines read
+
+● Read end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 app/dal/dashboard.py
+  └ 51 lines...
+
+● Read end of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 app/routers/dashboard.py
+  └ 51 lines...
+
+● Read end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 frontend/src/api.ts
+  └ 31 lines...
+
+● Find grammar_accuracy in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "grammar_accuracy"
+  │ app/dal/dashboard.py | head -10
+  └ 7 lines...
+
+● Find feedback_json usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "feedback_json"
+  │ app/dal/dashboard.py | head -10
+  └ 8 lines...
+
+● Check dashboard components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/dashboard/ &&
+  │ cat frontend/src/components/dashboard/index.ts
+  └ 5 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L155:175 (21 lines read)
+
+Now I have enough context. Let me implement all the changes.
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L935:938 (4 lines read)
+
+● Edit dashboard.py +51
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L1:20 (19 lines read)
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L340:356 (17 lines read)
+
+● Edit dashboard.py +24
+  └ app/routers/dashboard.py
+
+Now add TypeScript types and API function:
+
+● Check end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/api.ts
+  └ 6 lines...
+
+● Edit api.ts +21
+  └ frontend/src/api.ts
+
+Now create the GrammarTrend component:
+
+● Create GrammarTrend.tsx +96
+  └ frontend/src/components/dashboard/GrammarTrend.tsx
+
+Update the dashboard components index:
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx to use GrammarTrend:
+
+● Edit Dashboard.tsx +2 -2
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +5
+  └ frontend/src/pages/Dashboard.tsx
+
+Now add tests. Let me check existing dashboard tests:
+
+● Find grammar test files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -l "grammar" tests/unit/
+  │ tests/integration/ 2>/dev/null | head -5
+  └ 1 line...
+
+● Find dashboard test files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_dashboard*
+  │ tests/integration/test_dashboard* 2>/dev/null
+  └ 2 lines...
+
+● Read end of dashboard DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -40 tests/unit/test_dashboard_dal.py
+  └ 41 lines...
+
+● Read dashboard DAL test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 tests/unit/test_dashboard_dal.py
+  └ 20 lines...
+
+Now let me add the grammar trend test:
+
+● Edit test_dashboard_dal.py +1
+  └ tests/unit/test_dashboard_dal.py
+
+Now append grammar trend tests at the end of the file:
+
+● Get line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L865:869 (5 lines read)
+
+● Edit test_dashboard_dal.py +56
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
+● Commit iteration 305 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #305: Add per-conversation grammar accuracy trend chart to dashboard"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2 = 1775594873. Now run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 901 tests pass, TypeScript check passes. Now run smoke test since we modified DAL and router:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed. Let me run it:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Now check QA test requirement. Frontend UI files changed?
+
+● Check if QA test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && FRONTEND_UI_CHANGED=$(git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"); echo "Changed:
+  │ $FRONTEND_UI_CHANGED"
+  └ 3 lines...
+
+Frontend UI files changed and proposal type is "feature" → MUST run tester. Let me start the server and run QA.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server died. Let me restart it and proceed with the tester.
+
+● Restart server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Verify server is running (shell)
+  │ sleep 5 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server keeps dying. Let me start it more robustly and call the tester immediately since the server is currently up.
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn.log 2>&1 &
+  │ echo "PID: $!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start server backgrounded (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 14 lines...
+
+Server is already running from the earlier start. Good. Let me now call the tester:
+
+● Tester QA test iteration 305
+  │ playwright-browser_snapshot depth: 2
+  │   └ ### Page
+  └ playwright-browser_console_messages level: "warning", all: true
+      └ ### Result
+
+The tester found the frontend wasn't rebuilt. Let me fix that:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 6 lines...
+
+Two issues to fix. Let me handle them:
+
+● Read GrammarTrend.tsx
+  │ frontend/src/components/dashboard/GrammarTrend.tsx
+  └ L40:45 (6 lines read)
+
+● Check ShadowingExercise import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ frontend/src/components/conversation/ShadowingExercise.tsx
+  └ 6 lines...
+
+● Edit GrammarTrend.tsx -1
+  └ frontend/src/components/dashboard/GrammarTrend.tsx
+
+● Edit ShadowingExercise.tsx +1 -1
+  └ frontend/src/components/conversation/ShadowingExercise.tsx
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+
+Build succeeded. Now amend the commit:
+

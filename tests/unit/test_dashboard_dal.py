@@ -7,6 +7,7 @@ import pytest
 from app.dal.conversation import add_message, create_conversation, update_message_feedback
 from app.dal.dashboard import (
     delete_learning_goal,
+    get_grammar_trend,
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
@@ -866,3 +867,59 @@ class TestGetMistakeJournal:
         })
         result = await get_mistake_journal(test_db, module="grammar")
         assert result["total_count"] == 0
+
+
+@pytest.mark.unit
+class TestGrammarTrend:
+    """Tests for get_grammar_trend."""
+
+    async def test_empty_database(self, test_db):
+        result = await get_grammar_trend(test_db)
+        assert result["conversations"] == []
+        assert result["trend"] == "insufficient_data"
+
+    async def test_single_conversation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute("UPDATE conversations SET status = 'ended' WHERE id = ?", (cid,))
+        mid = await add_message(test_db, cid, "user", "Hello")
+        await update_message_feedback(test_db, mid, {"is_correct": True, "errors": [], "suggestions": []})
+        await test_db.commit()
+        result = await get_grammar_trend(test_db)
+        assert len(result["conversations"]) == 1
+        assert result["conversations"][0]["accuracy_rate"] == 100.0
+        assert result["trend"] == "insufficient_data"
+
+    async def test_multiple_conversations_trend(self, test_db):
+        # Create 4 conversations with varying accuracy
+        for i in range(4):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            await test_db.execute("UPDATE conversations SET status = 'ended' WHERE id = ?", (cid,))
+            for j in range(3):
+                mid = await add_message(test_db, cid, "user", f"Message {j}")
+                is_correct = (i >= 2)  # first 2 wrong, last 2 correct
+                await update_message_feedback(test_db, mid, {
+                    "is_correct": is_correct, "errors": [], "suggestions": [],
+                })
+            await test_db.commit()
+        result = await get_grammar_trend(test_db)
+        assert len(result["conversations"]) == 4
+        assert result["trend"] == "improving"
+
+    async def test_limit_parameter(self, test_db):
+        for _ in range(5):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            await test_db.execute("UPDATE conversations SET status = 'ended' WHERE id = ?", (cid,))
+            mid = await add_message(test_db, cid, "user", "Test")
+            await update_message_feedback(test_db, mid, {"is_correct": True, "errors": [], "suggestions": []})
+            await test_db.commit()
+        result = await get_grammar_trend(test_db, limit=3)
+        assert len(result["conversations"]) == 3
+
+    async def test_excludes_active_conversations(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # Don't end the conversation
+        mid = await add_message(test_db, cid, "user", "Active msg")
+        await update_message_feedback(test_db, mid, {"is_correct": True, "errors": [], "suggestions": []})
+        await test_db.commit()
+        result = await get_grammar_trend(test_db)
+        assert len(result["conversations"]) == 0

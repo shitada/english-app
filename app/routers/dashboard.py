@@ -354,3 +354,27 @@ async def get_achievements(db: aiosqlite.Connection = Depends(get_db_session)):
 async def get_weekly_report(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get weekly progress report with aggregated stats and highlights."""
     return await dash_dal.get_weekly_report(db)
+
+
+class GrammarTrendItem(BaseModel):
+    conversation_id: int
+    topic: str
+    difficulty: str
+    started_at: str
+    checked_count: int
+    correct_count: int
+    accuracy_rate: float
+
+
+class GrammarTrendResponse(BaseModel):
+    conversations: list[GrammarTrendItem]
+    trend: str
+
+
+@router.get("/grammar-trend", response_model=GrammarTrendResponse)
+async def get_grammar_trend(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get per-conversation grammar accuracy trend for progress visualization."""
+    return await dash_dal.get_grammar_trend(db, limit=limit)

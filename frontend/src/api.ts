@@ -862,3 +862,24 @@ export interface TiersResponse {
 export async function getVocabularyTiers(): Promise<TiersResponse> {
   return request<TiersResponse>('/api/vocabulary/tiers');
 }
+
+// ── Grammar Trend ─────────────────────────────────
+
+export interface GrammarTrendItem {
+  conversation_id: number;
+  topic: string;
+  difficulty: string;
+  started_at: string;
+  checked_count: number;
+  correct_count: number;
+  accuracy_rate: number;
+}
+
+export interface GrammarTrendResponse {
+  conversations: GrammarTrendItem[];
+  trend: string;
+}
+
+export async function getGrammarTrend(limit = 20): Promise<GrammarTrendResponse> {
+  return request<GrammarTrendResponse>(`/api/dashboard/grammar-trend?limit=${limit}`);
+}

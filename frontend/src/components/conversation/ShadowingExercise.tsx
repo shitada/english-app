@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Volume2, Mic, RotateCcw, CheckCircle, XCircle } from 'lucide-react';
-import api from '../../api';
+import { api } from '../../api';
 
 interface Phrase {
   text: string;

@@ -936,3 +936,54 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
         "highlights": highlights,
         "text_summary": text_summary,
     }
+
+
+async def get_grammar_trend(db: aiosqlite.Connection, limit: int = 20) -> dict[str, Any]:
+    """Get per-conversation grammar accuracy trend for completed conversations."""
+    rows = await db.execute_fetchall(
+        """SELECT c.id, c.topic, c.difficulty, c.started_at,
+                  COUNT(*) as checked_count,
+                  SUM(CASE WHEN json_extract(m.feedback_json, '$.is_correct') = 1
+                            OR LOWER(json_extract(m.feedback_json, '$.is_correct')) IN ('true', 'yes', '1')
+                       THEN 1 ELSE 0 END) as correct_count
+           FROM messages m
+           JOIN conversations c ON c.id = m.conversation_id
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL AND c.status = 'ended'
+           GROUP BY c.id
+           HAVING checked_count >= 1
+           ORDER BY c.started_at DESC
+           LIMIT ?""",
+        (limit,),
+    )
+    conversations = []
+    for r in rows:
+        accuracy = round(r["correct_count"] / r["checked_count"] * 100, 1) if r["checked_count"] > 0 else 0
+        conversations.append({
+            "conversation_id": r["id"],
+            "topic": r["topic"],
+            "difficulty": r["difficulty"],
+            "started_at": r["started_at"],
+            "checked_count": r["checked_count"],
+            "correct_count": r["correct_count"],
+            "accuracy_rate": accuracy,
+        })
+
+    # Reverse to chronological order for trend display
+    conversations.reverse()
+
+    # Compute trend direction
+    if len(conversations) < 3:
+        trend = "insufficient_data"
+    else:
+        mid = len(conversations) // 2
+        first_half_avg = sum(c["accuracy_rate"] for c in conversations[:mid]) / mid
+        second_half_avg = sum(c["accuracy_rate"] for c in conversations[mid:]) / (len(conversations) - mid)
+        diff = second_half_avg - first_half_avg
+        if diff > 3:
+            trend = "improving"
+        elif diff < -3:
+            trend = "declining"
+        else:
+            trend = "stable"
+
+    return {"conversations": conversations, "trend": trend}

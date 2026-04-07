@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
-import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, getMistakeJournal, getAchievements, getWeeklyReport } from '../api';
+import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, MistakeJournal, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, GrammarTrend, MistakeJournal, WeeklyReport } from '../components/dashboard';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [achievementsUnlocked, setAchievementsUnlocked] = useState(0);
   const [achievementsTotal, setAchievementsTotal] = useState(0);
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReportData | null>(null);
+  const [grammarTrend, setGrammarTrend] = useState<GrammarTrendResponse | null>(null);
 
   useEffect(() => {
     api.getDashboardStats()
@@ -30,6 +31,9 @@ export default function Dashboard() {
       .catch(() => {});
     getWeeklyReport()
       .then(setWeeklyReport)
+      .catch(() => {});
+    getGrammarTrend()
+      .then(setGrammarTrend)
       .catch(() => {});
   }, []);
 
@@ -89,6 +93,11 @@ export default function Dashboard() {
 
       {/* Weekly Report */}
       <WeeklyReport report={weeklyReport} />
+
+      {/* Grammar Trend */}
+      {grammarTrend && (
+        <GrammarTrend conversations={grammarTrend.conversations} trend={grammarTrend.trend} />
+      )}
 
       {/* Achievements */}
       <AchievementsPanel achievements={achievements} unlocked={achievementsUnlocked} total={achievementsTotal} />
