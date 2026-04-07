@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.config import load_config, get_logging_config
-from app.database import init_db, get_db, get_db_session
+from app.database import init_db, get_db, get_db_session, start_wal_checkpoint_task, stop_wal_checkpoint_task
 from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
 from app.routers import preferences
@@ -67,8 +67,10 @@ async def lifespan(app: FastAPI):
     _startup_time = time.monotonic()
     logger.info("Initializing database...")
     await init_db()
+    start_wal_checkpoint_task()
     logger.info("Database ready.")
     yield
+    stop_wal_checkpoint_task()
     from app.copilot_client import get_copilot_service
     await get_copilot_service().close()
 

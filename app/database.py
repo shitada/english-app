@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -238,3 +239,55 @@ async def init_db() -> None:
         await _apply_migrations(db)
     finally:
         await db.close()
+
+
+_checkpoint_task: asyncio.Task | None = None
+
+
+async def wal_checkpoint(db_path: Path | None = None) -> dict[str, int]:
+    """Run a passive WAL checkpoint and return page counts."""
+    path = db_path or DB_PATH
+    db = await aiosqlite.connect(str(path))
+    try:
+        db.row_factory = aiosqlite.Row
+        rows = await db.execute_fetchall("PRAGMA wal_checkpoint(PASSIVE)")
+        row = rows[0] if rows else None
+        result = {
+            "busy": row["busy"] if row else 0,
+            "log": row["log"] if row else 0,
+            "checkpointed": row["checkpointed"] if row else 0,
+        }
+        logger.debug("WAL checkpoint: busy=%d, log=%d, checkpointed=%d",
+                      result["busy"], result["log"], result["checkpointed"])
+        return result
+    finally:
+        await db.close()
+
+
+async def _checkpoint_loop(interval: int) -> None:
+    """Background loop that periodically checkpoints the WAL."""
+    while True:
+        await asyncio.sleep(interval)
+        try:
+            await wal_checkpoint()
+        except Exception:
+            logger.exception("WAL checkpoint failed")
+
+
+def start_wal_checkpoint_task(interval_seconds: int = 300) -> asyncio.Task:
+    """Start the periodic WAL checkpoint background task."""
+    global _checkpoint_task
+    if _checkpoint_task is not None and not _checkpoint_task.done():
+        return _checkpoint_task
+    _checkpoint_task = asyncio.create_task(_checkpoint_loop(interval_seconds))
+    logger.info("WAL checkpoint task started (interval=%ds)", interval_seconds)
+    return _checkpoint_task
+
+
+def stop_wal_checkpoint_task() -> None:
+    """Cancel the background WAL checkpoint task if running."""
+    global _checkpoint_task
+    if _checkpoint_task is not None and not _checkpoint_task.done():
+        _checkpoint_task.cancel()
+        logger.info("WAL checkpoint task cancelled")
+    _checkpoint_task = None

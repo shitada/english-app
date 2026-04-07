@@ -3687,3 +3687,189 @@ Now let me verify the TypeScript compiles and test:
 
 TypeScript passes. Now commit and run backend tests:
 
+● Commit iteration 300 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #300: Add animated transitions between conversation phases"
+  └ 16 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+888/888 pass. Check if smoke test needed:
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE NEEDED" || echo "NO SMOKE"
+  └ 2 lines...
+
+No smoke test needed. Check QA tester need — this is a "ux" type proposal with frontend page/component changes:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend UI changed + type is "ux" → MUST run tester. Let me rebuild frontend and start server:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3
+  └ 4 lines...
+
+● Amend commit with dist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add frontend/dist && git commit --amend
+  │ --no-edit 2>&1 | tail -3
+  └ 5 lines...
+
+Dist is gitignored — that's fine, the server reads it at runtime. Let me start the server and run the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Calling the QA tester:
+
+● Tester QA test iteration 300
+  │ playwright-browser_click element: "Switch to light mode", ref: "e300"
+  │   └ ### Ran Playwright code
+  └ playwright-browser_console_messages level: "error"
+      └ ### Result
+
+Excellent! QA passed with ux_score=9. Now record T3 and call evaluator:
+
+● Stop server and record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed" && date +%s
+  └ 3 lines...
+
+T3=1775590931, test_sec=431. Now call evaluator:
+
+● Evaluator Evaluate iteration 300
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L620:680 (61 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L580:600 (21 lines read)
+
+● Record T4 for iteration 300 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score: 7.40, verdict: keep. Recording results:
+
+● Record iteration 300 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "300" "$HASH" "2026-04-07" "94" "100" "331" "56" "581" \
+  │ "888" "888" "pass" "7.40" "KEPT" "Add animated transitions between conversation phases" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, properly formatted. Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ Iteration 300 complete — KEPT (score 7.40). Moving to iteration 301.
+
+---
+
+## Iteration 301
+
+● Context restore for iteration 301 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 14 lines...
+
+T0=1775591017. Calling the proposer:
+
+● Proposer Propose iteration 301
+  │ Read config.yaml
+  │   └ 235 lines read
+  └ Read test_database.py
+      │ tests/unit/test_database.py
+      └ 175 lines read
+
+● Record T1 for iteration 301 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775591103, propose_sec=86. Now implement. Let me examine the existing database and main files:
+
+● Check existing unit tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/
+  └ 6 lines...
+
+● Find DB init patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def
+  │ get_db\|WAL\|journal_mode\|init_db\|DB_PATH\|_DB_PATH" app/database.py | head -15
+  └ 8 lines...
+
+● Find lifespan patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "lifespan\|init_db\|startup\|shutdown\|copilot" app/main.py | head -20
+  └ 11 lines...
+
+● Read lifespan function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,75p' app/main.py
+  └ 14 lines...
+
+● Read get_db and init_db (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '205,245p' app/database.py
+  └ 37 lines...
+
+● Read end of database.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/database.py
+  └ 31 lines...
+
+● Read main.py imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 app/main.py
+  └ 21 lines...
+
+Now implement. Add WAL checkpoint to database.py:
+
+● Check database.py imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -15 app/database.py
+  └ 15 lines...
+
+● Edit database.py +1
+  └ app/database.py
+
+Now add the checkpoint functions at the end of database.py:
+
+● Edit database.py +52
+  └ app/database.py
+
+Now update main.py lifespan:
+
+● Edit main.py +1 -1
+  └ app/main.py
+
+● Edit main.py +2
+  └ app/main.py
+
+Now add unit tests:
+
+● Check existing database tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 tests/unit/test_database.py
+  └ 20 lines...
+
+● Read end of database tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_database.py
+  └ 20 lines...
+
+● Edit test_database.py +37
+  └ tests/unit/test_database.py
+
+Now commit and test:
+

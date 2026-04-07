@@ -173,3 +173,40 @@ async def test_get_db_closes_on_pragma_failure():
             await get_db()
 
     mock_db.close.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_wal_checkpoint_runs_pragma(tmp_path):
+    """wal_checkpoint should execute PRAGMA wal_checkpoint(PASSIVE) successfully."""
+    import aiosqlite
+    from app.database import wal_checkpoint
+
+    db_path = tmp_path / "test_wal.db"
+    db = await aiosqlite.connect(str(db_path))
+    await db.execute("PRAGMA journal_mode=WAL")
+    await db.execute("CREATE TABLE t (id INTEGER PRIMARY KEY)")
+    await db.commit()
+    await db.close()
+
+    result = await wal_checkpoint(db_path)
+    assert "busy" in result
+    assert "log" in result
+    assert "checkpointed" in result
+    assert result["busy"] == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_start_wal_checkpoint_task_creates_task():
+    """start_wal_checkpoint_task should create an asyncio task that can be cancelled."""
+    import asyncio
+    from app.database import start_wal_checkpoint_task, stop_wal_checkpoint_task
+
+    task = start_wal_checkpoint_task(interval_seconds=3600)
+    assert isinstance(task, asyncio.Task)
+    assert not task.done()
+
+    stop_wal_checkpoint_task()
+    await asyncio.sleep(0.1)
+    assert task.cancelled()
