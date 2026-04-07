@@ -581,6 +581,7 @@ export default function Pronunciation() {
     }
 
     // Shadowing result (existing)
+    if (!feedback) return null;
     const scoreClass = feedback.overall_score != null
       ? (feedback.overall_score >= 8 ? 'score-high' : feedback.overall_score >= 5 ? 'score-mid' : 'score-low')
       : 'score-mid';

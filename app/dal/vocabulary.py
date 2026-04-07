@@ -1010,3 +1010,50 @@ async def get_random_words_for_craft(
         (topic, count),
     )
     return [dict(r) for r in rows]
+
+
+async def get_words_by_tier(db: aiosqlite.Connection) -> dict[str, list[dict[str, Any]]]:
+    """Categorize all vocabulary words into mastery tiers based on SRS level and error rate."""
+    rows = await db.execute_fetchall(
+        """
+        SELECT w.id, w.word, w.meaning, w.topic, w.difficulty,
+               COALESCE(p.level, -1) AS level,
+               COALESCE(p.correct_count, 0) AS correct_count,
+               COALESCE(p.incorrect_count, 0) AS incorrect_count
+        FROM vocabulary_words w
+        LEFT JOIN vocabulary_progress p ON w.id = p.word_id
+        ORDER BY w.word
+        """
+    )
+    tiers: dict[str, list[dict[str, Any]]] = {
+        "struggling": [],
+        "learning": [],
+        "familiar": [],
+        "mastered": [],
+        "new": [],
+    }
+    for r in rows:
+        total = r["correct_count"] + r["incorrect_count"]
+        error_rate = r["incorrect_count"] / total if total > 0 else 0.0
+        item = {
+            "id": r["id"],
+            "word": r["word"],
+            "meaning": r["meaning"],
+            "topic": r["topic"],
+            "level": max(r["level"], 0),
+            "correct_count": r["correct_count"],
+            "incorrect_count": r["incorrect_count"],
+            "error_rate": round(error_rate, 2),
+        }
+        level = r["level"]
+        if level < 0:
+            tiers["new"].append(item)
+        elif level <= 0 and total >= 2 and error_rate >= 0.5:
+            tiers["struggling"].append(item)
+        elif level <= 2:
+            tiers["learning"].append(item)
+        elif level <= 4:
+            tiers["familiar"].append(item)
+        else:
+            tiers["mastered"].append(item)
+    return tiers

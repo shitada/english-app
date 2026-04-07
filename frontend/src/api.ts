@@ -771,3 +771,25 @@ export interface AchievementsResponse {
 export async function getAchievements(): Promise<AchievementsResponse> {
   return request<AchievementsResponse>('/api/dashboard/achievements');
 }
+
+// ── Vocabulary Tiers ─────────────────────────────────
+
+export interface TierWordItem {
+  id: number;
+  word: string;
+  meaning: string;
+  topic: string;
+  level: number;
+  correct_count: number;
+  incorrect_count: number;
+  error_rate: number;
+}
+
+export interface TiersResponse {
+  tiers: Record<string, TierWordItem[]>;
+  counts: Record<string, number>;
+}
+
+export async function getVocabularyTiers(): Promise<TiersResponse> {
+  return request<TiersResponse>('/api/vocabulary/tiers');
+}

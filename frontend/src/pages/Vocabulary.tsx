@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, Check, X, ArrowRight, Zap, Puzzle } from 'lucide-react';
-import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft } from '../api';
+import { Volume2, Check, X, ArrowRight, Zap } from 'lucide-react';
+import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -13,7 +13,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -46,6 +46,11 @@ export default function Vocabulary() {
   const [craftSentence, setCraftSentence] = useState('');
   const [craftResult, setCraftResult] = useState<SentenceCraftResult | null>(null);
   const [craftLoading, setCraftLoading] = useState(false);
+
+  // Tiers state
+  const [tiersData, setTiersData] = useState<TiersResponse | null>(null);
+  const [tiersLoading, setTiersLoading] = useState(false);
+  const [expandedTiers, setExpandedTiers] = useState<Set<string>>(new Set(['struggling', 'learning']));
 
   const tts = useSpeechSynthesis();
 
@@ -218,6 +223,29 @@ export default function Vocabulary() {
     }
   };
 
+  const openTiers = async () => {
+    setTiersLoading(true);
+    try {
+      const data = await getVocabularyTiers();
+      setTiersData(data);
+      setPhase('tiers');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load word tiers.');
+    } finally {
+      setTiersLoading(false);
+    }
+  };
+
+  const toggleTier = (tier: string) => {
+    setExpandedTiers(prev => {
+      const next = new Set(prev);
+      if (next.has(tier)) next.delete(tier);
+      else next.add(tier);
+      return next;
+    });
+  };
+
   const drillAnswer = useCallback((known: boolean) => {
     const word = drillWords[drillIndex];
     if (!word) return;
@@ -304,6 +332,20 @@ export default function Vocabulary() {
           aria-label="Start quick drill"
         >
           <Zap size={20} /> ⚡ Quick Drill — 10 words in 60 seconds
+        </button>
+
+        <button
+          onClick={openTiers}
+          disabled={loading || topicsLoading || tiersLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #8b5cf6', background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+            color: '#5b21b6', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="View word tiers"
+        >
+          📊 Word Tiers — see your mastery levels
         </button>
 
         <div style={{ marginBottom: 16 }}>
@@ -731,7 +773,6 @@ export default function Vocabulary() {
   }
 
   if (phase === 'sentence-craft-result' && craftResult) {
-    const avg = Math.round((craftResult.grammar_score + craftResult.naturalness_score) / 2 * 10);
     return (
       <div className="card">
         <h3 style={{ marginBottom: 16, textAlign: 'center' }}>✍️ Sentence Craft Results</h3>
@@ -774,6 +815,84 @@ export default function Vocabulary() {
           <button className="btn btn-primary" onClick={() => { setCraftSentence(''); setCraftResult(null); setPhase('sentence-craft'); }}>Try Again</button>
           <button className="btn btn-secondary" onClick={() => setPhase('select')}>← Back to Topics</button>
         </div>
+      </div>
+    );
+  }
+
+  // Tiers view
+  if (phase === 'tiers' && tiersData) {
+    const tierConfig: Record<string, { label: string; color: string; bg: string; emoji: string }> = {
+      struggling: { label: 'Struggling', color: '#dc2626', bg: '#fef2f2', emoji: '🔴' },
+      learning:   { label: 'Learning',   color: '#f59e0b', bg: '#fffbeb', emoji: '🟠' },
+      familiar:   { label: 'Familiar',   color: '#3b82f6', bg: '#eff6ff', emoji: '🔵' },
+      mastered:   { label: 'Mastered',   color: '#16a34a', bg: '#f0fdf4', emoji: '🟢' },
+      new:        { label: 'New',        color: '#6b7280', bg: '#f9fafb', emoji: '⚪' },
+    };
+    const totalWords = Object.values(tiersData.counts).reduce((a, b) => a + b, 0);
+    return (
+      <div>
+        <h2 style={{ marginBottom: 8 }}>📊 Word Tiers</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
+          {totalWords} words across {Object.values(tiersData.counts).filter(c => c > 0).length} tiers
+        </p>
+        <button className="btn" onClick={() => setPhase('select')} style={{ marginBottom: 20 }}>
+          ← Back to Topics
+        </button>
+        {Object.entries(tierConfig).map(([key, cfg]) => {
+          const words = tiersData.tiers[key] || [];
+          const count = tiersData.counts[key] || 0;
+          const isOpen = expandedTiers.has(key);
+          return (
+            <div key={key} style={{ marginBottom: 12, borderRadius: 12, border: `2px solid ${cfg.color}22`, overflow: 'hidden' }}>
+              <button
+                onClick={() => toggleTier(key)}
+                style={{
+                  width: '100%', padding: '12px 16px', cursor: 'pointer', display: 'flex',
+                  alignItems: 'center', justifyContent: 'space-between',
+                  background: cfg.bg, border: 'none', fontSize: '1rem', fontWeight: 600, color: cfg.color,
+                }}
+                aria-expanded={isOpen}
+                aria-label={`${cfg.label} tier, ${count} words`}
+              >
+                <span>{cfg.emoji} {cfg.label}</span>
+                <span style={{
+                  background: cfg.color, color: 'white', borderRadius: 20,
+                  padding: '2px 10px', fontSize: '0.85rem',
+                }}>{count}</span>
+              </button>
+              {isOpen && words.length > 0 && (
+                <div style={{ padding: '8px 16px' }}>
+                  {words.map(w => (
+                    <div key={w.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0',
+                      borderBottom: '1px solid var(--border)',
+                    }}>
+                      <button
+                        onClick={() => tts.speak(w.word)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                        aria-label={`Hear ${w.word}`}
+                      >
+                        <Volume2 size={16} />
+                      </button>
+                      <span style={{ fontWeight: 600, minWidth: 100 }}>{w.word}</span>
+                      <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{w.meaning}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{w.topic}</span>
+                      <span style={{
+                        fontSize: '0.75rem', background: cfg.bg, color: cfg.color,
+                        borderRadius: 6, padding: '2px 6px',
+                      }}>Lv{w.level}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {isOpen && words.length === 0 && (
+                <p style={{ padding: '12px 16px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  No words in this tier yet.
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }

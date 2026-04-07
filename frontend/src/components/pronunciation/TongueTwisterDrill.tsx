@@ -26,7 +26,7 @@ const TT_LABELS = ['🐢 Slow', '1× Normal', '🐇 Fast'];
 interface TongueTwisterDrillProps {
   speech: {
     transcript: string;
-    listening: boolean;
+    isListening: boolean;
     start: () => void;
     reset: () => void;
   };
@@ -142,8 +142,8 @@ export function TongueTwisterDrill({ speech, tts, onBack }: TongueTwisterDrillPr
         <button className="btn btn-secondary" onClick={() => { tts.setRate(TT_SPEEDS[ttSpeedTier]); tts.speak(currentTwister.text); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <Volume2 size={16} /> Listen ({TT_LABELS[ttSpeedTier]})
         </button>
-        <button className="btn btn-primary" onClick={() => { speech.reset(); speech.start(); }} disabled={speech.listening} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <Mic size={16} /> {speech.listening ? 'Listening…' : 'Record & Speak'}
+        <button className="btn btn-primary" onClick={() => { speech.reset(); speech.start(); }} disabled={speech.isListening} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Mic size={16} /> {speech.isListening ? 'Listening…' : 'Record & Speak'}
         </button>
       </div>
 

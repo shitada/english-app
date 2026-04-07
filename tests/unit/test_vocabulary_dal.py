@@ -29,6 +29,7 @@ from app.dal.vocabulary import (
     search_words,
     update_notes,
     update_progress,
+    get_words_by_tier,
 )
 
 
@@ -1349,3 +1350,59 @@ class TestGetSentenceBuildExercises:
         result = await get_sentence_build_exercises(test_db, "greetings", count=5)
         # "OK." has only 1 word — should be filtered out; "Hi there." has 2 words — also filtered (< 3)
         assert len(result) == 0
+
+
+class TestGetWordsByTier:
+    """Tests for get_words_by_tier function."""
+
+    @pytest.mark.unit
+    async def test_empty_db(self, test_db):
+        result = await get_words_by_tier(test_db)
+        assert set(result.keys()) == {"struggling", "learning", "familiar", "mastered", "new"}
+        for words in result.values():
+            assert words == []
+
+    @pytest.mark.unit
+    async def test_new_words_no_progress(self, test_db):
+        qs = _make_questions(3)
+        await save_words(test_db, "hotel_checkin", qs)
+        result = await get_words_by_tier(test_db)
+        assert len(result["new"]) == 3
+        assert len(result["learning"]) == 0
+
+    @pytest.mark.unit
+    async def test_learning_tier(self, test_db):
+        qs = _make_questions(2)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words")
+        word_id = rows[0]["id"]
+        await update_progress(test_db, word_id, True)
+        result = await get_words_by_tier(test_db)
+        learning_ids = [w["id"] for w in result["learning"]]
+        assert word_id in learning_ids
+
+    @pytest.mark.unit
+    async def test_struggling_tier(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words")
+        word_id = rows[0]["id"]
+        # 2 incorrect answers → level stays 0, error_rate=1.0
+        await update_progress(test_db, word_id, False)
+        await update_progress(test_db, word_id, False)
+        result = await get_words_by_tier(test_db)
+        struggling_ids = [w["id"] for w in result["struggling"]]
+        assert word_id in struggling_ids
+
+    @pytest.mark.unit
+    async def test_tier_item_fields(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        result = await get_words_by_tier(test_db)
+        word = result["new"][0]
+        assert "id" in word
+        assert "word" in word
+        assert "meaning" in word
+        assert "topic" in word
+        assert "level" in word
+        assert "error_rate" in word

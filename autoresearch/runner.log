@@ -436,3 +436,545 @@ Let me clean up the playwright artifacts and stray files:
   │ .gitignore 2>/dev/null; git add -A && git commit --amend --no-edit
   └ 77 lines...
 
+[2026-04-08 02:04:24] Reverted to iteration 289. Next invocation will retry from 290.
+[2026-04-08 02:04:27] Current iteration count: 289 / 309
+[2026-04-08 02:04:27] ------------------------------------------
+[2026-04-08 02:04:27] Invocation 2 / 10
+[2026-04-08 02:04:27] Resuming from iteration 290
+[2026-04-08 02:04:27] ------------------------------------------
+[2026-04-08 02:04:27] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-290-to-309.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 165 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-005.md
+  └ 67 lines...
+
+Good. I have full context. Last iteration was 289 (score 8.1, KEPT). 883 tests passing. I'll run iterations 290-292, requiring features per the task mandate.
+
+Let me start iteration 290.
+
+**Iteration 290 — Step 1: Context & Timestamp**
+
+● Record T0 for iteration 290 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1775581504
+
+**Iteration 290 — Step 2: Propose**
+
+● Proposer Propose iteration 290
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L60:150 (91 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L550:750 (201 lines read)
+
+Good proposal: **Add vocabulary word grouping by mastery tier**. Let me record the timestamp and implement.
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check vocabulary DAL structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_words_by_tier\|def
+  │ get_word_detail\|async def get_" app/dal/vocabulary.py | tail -20
+  └ 20 lines...
+
+● Check vocabulary router structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def \|@router\."
+  │ app/routers/vocabulary.py | tail -30
+  └ 31 lines...
+
+● Check API types structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getVocabulary\|export "
+  │ frontend/src/api.ts | tail -20
+  └ 21 lines...
+
+● See end of vocabulary DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/dal/vocabulary.py
+  └ 31 lines...
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/vocabulary.py
+  └ 2 lines...
+
+● Check how topic labels work (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "from app.config
+  │ import\|get_topic_label\|TopicLabel" app/routers/vocabulary.py | head -10
+  └ 11 lines...
+
+● Check Vocabulary phases (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "phase\|setPhase\|'select'\|'quiz'\|'drill'" frontend/src/pages/Vocabulary.tsx | head -20
+  └ 21 lines...
+
+● See DAL imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,20p' app/dal/vocabulary.py
+  └ 21 lines...
+
+● See select phase UI (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '287,395p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 109 lines...
+
+Now I'll implement all the changes. Let me check the router's Pydantic models pattern first:
+
+● See router imports and models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,60p' app/routers/vocabulary.py
+  └ 61 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/api.ts
+  └ 21 lines...
+
+Now I have all the context needed. Let me implement all changes:
+
+● Add get_words_by_tier to DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/dal/vocabulary.py << 'PYEOF'
+  │
+  │
+  │ async def get_words_by_tier(db: aiosqlite.Connection) -> dict[str, list[dict[str, Any]]]:
+  │ """Categorize all vocabulary words into mastery tiers based on SRS level and error …
+  └ 48 lines...
+
+● Find insert point for tiers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ SentenceCraftEvalResponse\|@router.get.*sentence-craft\b" app/routers/vocabulary.py
+  └ 3 lines...
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/vocabulary.py
+  └ 2 lines...
+
+● See end of router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/vocabulary.py
+  └ 6 lines...
+
+● Add tiers endpoint to router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/routers/vocabulary.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ # ── Tier models ──────────────────────────────────────────…
+  └ 34 lines...
+
+Now add frontend API types and function:
+
+● Add tiers types to api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/api.ts << 'TSEOF'
+  │
+  │ // ── Vocabulary Tiers ─────────────────────────────────
+  │
+  │ export interface TierWordItem {…
+  └ 22 lines...
+
+Now update the Vocabulary.tsx frontend page. Let me check imports:
+
+● See Vocabulary imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,15p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 16 lines...
+
+● Find end of sentence-craft-result phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "sentence-craft-result"
+  │ frontend/src/pages/Vocabulary.tsx | tail -5
+  └ 4 lines...
+
+● Check total lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '975,986p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 12 lines...
+
+Now I'll update Vocabulary.tsx to add the 'tiers' phase. I need to:
+1. Add `getVocabularyTiers` and `TiersResponse` to imports
+2. Add 'tiers' to the phase type
+3. Add state for tiers data
+4. Add a button on select page
+5. Add the tiers view
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now I need to add state and the tiers view. Let me find where state variables are declared:
+
+● See state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '15,50p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 37 lines...
+
+● Edit Vocabulary.tsx +5
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the button on the select screen (after the Quick Drill button) and the tiers view. Let me add the startTiers function and the UI:
+
+● Find startDrill function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "const startDrill\|async function
+  │ startDrill" frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● See startDrill area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '204,235p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 33 lines...
+
+● Edit Vocabulary.tsx +23
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the Word Tiers button on the select screen (after the Quick Drill button):
+
+● Edit Vocabulary.tsx +14
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the tiers view. Let me find a good insertion point before the final quiz render:
+
+● Find quiz phase location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "// Quiz phase\|if (phase ===
+  │ 'quiz')\|// Default quiz" frontend/src/pages/Vocabulary.tsx | tail -5
+  └ 1 line...
+
+● Find end of component (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "sentence-craft-result\|// Sentence
+  │ Craft\|return null\|^}" frontend/src/pages/Vocabulary.tsx | tail -15
+  └ 7 lines...
+
+● See transition to quiz view (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '820,830p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 12 lines...
+
+I'll add the tiers view before the quiz question section:
+
+● Edit Vocabulary.tsx +78
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now let me add a test for the new DAL function and commit:
+
+● Check existing tests for pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ "get_words_by_tier\|get_drill_words\|def test_get_drill" tests/ | head -5
+  └ 6 lines...
+
+● See test imports pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 tests/unit/test_vocabulary_dal.py
+  └ 31 lines...
+
+● See all imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal\|^    get_\|^
+  │ save_\|^    update_\|^    toggle_" tests/unit/test_vocabulary_dal.py | tail -15
+  └ 16 lines...
+
+● See imports end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,40p'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 12 lines...
+
+● Edit test_vocabulary_dal.py +1
+  └ tests/unit/test_vocabulary_dal.py
+
+Now add a test at the end of the file:
+
+● See end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 tests/unit/test_vocabulary_dal.py
+  └ 10 lines...
+
+● Add unit tests for tiers (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_vocabulary_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ class TestGetWordsByTier:…
+  └ 57 lines...
+
+**Step 4: Commit**
+
+● Commit iteration 290 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #290: Add vocabulary word grouping by mastery tier
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+**Step 5: Test**
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+888 passed! Now TypeScript check:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS check passes. Now check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All tests pass. Now record T3 and check QA tester requirement:
+
+● Record T3, check frontend changes (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+T3 = 1775581922. Proposal type is `feature` and frontend page changed → **MUST call tester**. Let me start the server and invoke the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server process exited. Let me restart it and proceed with the tester:
+
+● Restart server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ echo "PID=$!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 4 lines...
+
+Server is up (15.9s uptime). Now invoke the tester:
+
+● Tester QA test iteration 290
+  │ playwright-browser_click element: "View word tiers button", ref: "e21"
+  │   └ ### Ran Playwright code
+  └ playwright-browser_take_screenshot filename: "word-tiers-crash.png", type: "png"
+      └ ### Result
+
+The tester found a critical issue: the frontend bundle is stale. I need to rebuild it. Let me fix this:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 11 lines...
+
+● Check build command (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && grep '"build"' package.json
+  └ 2 lines...
+
+● Check tsconfig strictness (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && cat tsconfig.json | grep -A5
+  │ "noUnused\|strict"
+  └ 1 line...
+
+● Check tsconfig files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && cat tsconfig.json && echo "---" &&
+  │ cat tsconfig.app.json 2>/dev/null || true
+  └ 37 lines...
+
+The build uses `tsc -b` which has stricter settings than `tsc --noEmit`. Let me fix the unused imports and pre-existing errors:
+
+● Check Vocabulary imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '2,3p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 3 lines...
+
+● Check if Puzzle is used (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Puzzle"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● Check avg variable (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '774,780p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 7 lines...
+
+● Find avg usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "\bavg\b"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+Both are pre-existing issues (Puzzle was likely used before and `avg` was defined but never used). Let me fix them:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now check the Pronunciation.tsx errors:
+
+● Check feedback null issue (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '615,625p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 12 lines...
+
+● See wider feedback context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '595,620p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 27 lines...
+
+● Find how feedback is used (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "feedback &&\|feedback
+  │ ?\|if.*feedback\|phase.*feedback\|feedback:" frontend/src/pages/Pronunciation.tsx | head -20
+  └ 3 lines...
+
+● See result phase condition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '527,535p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 10 lines...
+
+The issue is that `feedback` could be null even though the conditional checks `feedback || dictationResult`, TypeScript doesn't narrow it. This is pre-existing. Let me add a null guard:
+
+● Find where feedback section starts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '575,600p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 27 lines...
+
+● Edit Pronunciation.tsx +1
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now rebuild:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -15
+  └ 8 lines...
+
+More pre-existing build issues. Let me fix them all:
+
+● Check listening property issue (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '215,225p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 12 lines...
+
+● Check hook return type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -10
+  └ 1 line...
+
+● Check Volume2 usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Volume2"
+  │ frontend/src/components/conversation/ConversationHistory.tsx
+  └ 2 lines...
+
+● Check ConversationHistory imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ frontend/src/components/conversation/ConversationHistory.tsx
+  └ 5 lines...
+
+● Check hook structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/hooks/useSpeechRecognition.ts | grep -n
+  │ "return\|export\|interface\|type.*Return\|listening" | head -20
+  └ 8 lines...
+
+● See return interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '9,33p'
+  │ frontend/src/hooks/useSpeechRecognition.ts
+  └ 26 lines...
+
+The hook returns `isListening`, not `listening`. Let me see how it's destructured in Pronunciation.tsx:
+
+● See speech usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useSpeechRecognition\|listening.*speech\|speech\.\|{ transcript.*listening"
+  │ frontend/src/pages/Pronunciation.tsx | head -15
+  └ 16 lines...
+
+● See line 219 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '216,222p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 8 lines...
+
+● Check TongueTwisterDrill props (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speech:"
+  │ frontend/src/components/pronunciation/TongueTwisterDrill.tsx | head -5
+  └ 2 lines...
+
+● See TongueTwisterDrill speech prop type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '25,40p'
+  │ frontend/src/components/pronunciation/TongueTwisterDrill.tsx
+  └ 15 lines...
+
+The prop type says `listening` but the hook returns `isListening`. Let me fix the component prop types to match:
+
+● Check listening usage in TongueTwisterDrill (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening"
+  │ frontend/src/components/pronunciation/TongueTwisterDrill.tsx
+  └ 4 lines...
+
+● Check MinimalPairs speech prop (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening"
+  │ frontend/src/components/pronunciation/MinimalPairsExercise.tsx 2>/dev/null
+  └ 1 line...
+
+● See line 274 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '270,280p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 10 lines...
+
+The fix is to change the TongueTwisterDrill prop type from `listening` to `isListening` and update its usage:
+
+● Edit TongueTwisterDrill.tsx +1 -1
+  └ frontend/src/components/pronunciation/TongueTwisterDrill.tsx
+
+● Edit TongueTwisterDrill.tsx +2 -2
+  └ frontend/src/components/pronunciation/TongueTwisterDrill.tsx
+
+Now fix ConversationHistory and Vocabulary _avg:
+
+● Edit ConversationHistory.tsx +1 -1
+  └ frontend/src/components/conversation/ConversationHistory.tsx
+
+For `_avg`, the `noUnusedLocals` setting might still flag prefixed-underscore vars. Let me just remove the unused variable:
+
+● Edit Vocabulary.tsx -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now rebuild:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -15
+  └ 13 lines...
+
+Build successful. Now amend the commit, restart the server, and re-run the tester:
+
+● Amend commit with build fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #290: Add vocabulary word grouping by mastery tier
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 18 lines...
+

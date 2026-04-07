@@ -1,4 +1,4 @@
-import { PlayCircle, Volume2 } from 'lucide-react';
+import { PlayCircle } from 'lucide-react';
 import type { ChatMessage, ConversationSummary as ConversationSummaryType } from '../../api';
 import { FeedbackPanel } from './FeedbackPanel';
 import { formatDateTime } from '../../utils/formatDate';

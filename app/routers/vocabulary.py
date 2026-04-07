@@ -812,3 +812,36 @@ async def evaluate_sentence_craft(
         "overall_feedback": str(result.get("overall_feedback", "No feedback available.")),
         "model_sentence": str(result.get("model_sentence", "")),
     }
+
+
+# ── Tier models ──────────────────────────────────────────
+
+class TierWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    topic: str
+    level: int
+    correct_count: int
+    incorrect_count: int
+    error_rate: float
+
+
+class TiersResponse(BaseModel):
+    tiers: dict[str, list[TierWordItem]]
+    counts: dict[str, int]
+
+
+@router.get("/tiers", response_model=TiersResponse)
+async def get_tiers(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Return vocabulary words grouped by mastery tier."""
+    vocab_topics = get_vocabulary_topics()
+    raw = await vocab_dal.get_words_by_tier(db)
+    tiers: dict[str, list[dict[str, Any]]] = {}
+    counts: dict[str, int] = {}
+    for tier_name, words in raw.items():
+        tiers[tier_name] = [
+            {**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words
+        ]
+        counts[tier_name] = len(words)
+    return {"tiers": tiers, "counts": counts}
