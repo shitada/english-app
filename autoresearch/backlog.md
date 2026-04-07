@@ -143,7 +143,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 ## [MEDIUM] Feature Improvements
 
-- [ ] Add conversation topic favoriting — let users bookmark preferred scenarios for quick access
+- [x] Add conversation topic favoriting — let users bookmark preferred scenarios for quick access (#285)
 - [ ] Add vocabulary word grouping by difficulty — auto-categorize words into tiers based on SRS success rate
 - [ ] Add dashboard weekly email summary — generate a weekly progress report
 - [ ] Add pronunciation recording history playback — browse and replay past recordings chronologically
