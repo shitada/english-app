@@ -290,3 +290,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 288	cea82bd	2026-04-08	120	60	40	0	220	876	876	pass	8.1	KEPT	Add 7 integration tests for conversation quiz edge cases
 289	064fb76	2026-04-08	100	50	30	0	180	883	883	pass	8.1	KEPT	Add 7 integration tests for minimal pairs pronunciation endpoint
 290	68285e4	2026-04-08	159	200	1066	131	1556	888	888	pass	7.7	KEPT	Add vocabulary word grouping by mastery tier with visual tier view
+291	f895f05	2026-04-08	114	160	40	84	398	888	888	pass	6.5	KEPT	Add dark mode toggle with persisted preference

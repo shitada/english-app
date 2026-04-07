@@ -5,7 +5,8 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
-import { MinimalPairsExercise, TongueTwisterDrill, PronunciationHistory } from '../components/pronunciation';
+import { MinimalPairsExercise, TongueTwisterDrill, PronunciationHistory, RecordingHistory } from '../components/pronunciation';
+import { useRecordingStorage } from '../hooks/useRecordingStorage';
 
 const SAMPLE_SENTENCES = [
   { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel', difficulty: 'intermediate' },
@@ -17,7 +18,7 @@ const SAMPLE_SENTENCES = [
 ];
 
 export default function Pronunciation() {
-  const [phase, setPhase] = useState<'select' | 'practice' | 'result' | 'history'>('select');
+  const [phase, setPhase] = useState<'select' | 'practice' | 'result' | 'history' | 'recordings'>('select');
   const [sentences, setSentences] = useState(SAMPLE_SENTENCES);
   const [selectedSentence, setSelectedSentence] = useState<string>('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(undefined);
@@ -36,6 +37,7 @@ export default function Pronunciation() {
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
   const recorder = useAudioRecorder();
+  const recordingStorage = useRecordingStorage();
   const userAudioRef = useRef<HTMLAudioElement | null>(null);
   const [comparePlaying, setComparePlaying] = useState(false);
 
@@ -92,6 +94,12 @@ export default function Pronunciation() {
     try {
       const res = await api.checkPronunciation(selectedSentence, speech.transcript, selectedDifficulty);
       setFeedback(res);
+      // Save recording to IndexedDB if blob is available
+      if (recorder.audioBlob) {
+        recordingStorage.saveRecording(
+          recorder.audioBlob, selectedSentence, res.overall_score ?? null, selectedDifficulty ?? 'intermediate',
+        ).catch(err => console.error('Failed to save recording:', err));
+      }
       setPhase('result');
     } catch (err) {
       console.error(err);
@@ -156,6 +164,10 @@ export default function Pronunciation() {
     );
   }
 
+  if (phase === 'recordings') {
+    return <RecordingHistory onBack={() => setPhase('select')} />;
+  }
+
   // Sentence selection
   if (phase === 'select') {
     return (
@@ -196,7 +208,14 @@ export default function Pronunciation() {
           </button>
         </div>
 
-        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+        <div style={{ marginBottom: 16, textAlign: 'right', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setPhase('recordings')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Mic size={16} /> My Recordings
+          </button>
           <button
             className="btn btn-secondary"
             onClick={loadHistory}

@@ -147,7 +147,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add vocabulary word grouping by difficulty — auto-categorize words into tiers based on SRS success rate (#290)
 - [ ] Add dashboard weekly email summary — generate a weekly progress report
 - [ ] Add pronunciation recording history playback — browse and replay past recordings chronologically
-- [ ] Add dark mode toggle — persist preference and apply CSS variables
+- [x] Add dark mode toggle — persist preference and apply CSS variables (#291)
 
 ## [MEDIUM] Performance & Reliability
 
