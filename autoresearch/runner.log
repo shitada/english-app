@@ -6156,3 +6156,111 @@ Now add ClozeExercise between DictationExercise and ConversationQuiz:
 
 Now commit, test, and build:
 
+● Commit iteration 309 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #309: Add cloze fill-in-the-blank exercise for key phrases in conversation summary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 for iteration 309 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TS type check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 906 tests pass, TypeScript passes. Check if smoke test needed:
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE NEEDED" || echo "NO SMOKE"
+  └ 2 lines...
+
+● Check if QA tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Proposal type is `feature` AND frontend component files changed → **MUST run tester**. Build frontend first, then start server and run QA:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+● Amend commit with built frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add frontend/dist && git commit --amend
+  │ --no-edit
+  └ 5 lines...
+
+● Check how frontend is served (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "dist\|static\|mount\|StaticFiles\|spa" app/main.py | head -10
+  └ 9 lines...
+
+Good - the server serves from `frontend/dist` directly (not from git). Since I already ran `npm run build`, the dist folder is updated. Now start the server for QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 & disown; sleep 3 && curl -s
+  │ http://localhost:8000/api/health
+  └ 3 lines...
+
+● Tester QA test iteration 309
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ Read ClozeExercise.tsx
+      │ frontend/src/components/conversation/ClozeExercise.tsx
+      └ L27:56 (30 lines read)
+
+Tester passed with ux_score=9. Stop server, record T3, and call evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 309
+  │ Read CorrectionDrill.tsx
+  │   │ frontend/src/components/conversation/CorrectionDrill.tsx
+  │   └ 276 lines read
+  └ Read ShadowingExercise.tsx
+      │ frontend/src/components/conversation/ShadowingExercise.tsx
+      └ L1:30 (29 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+All criteria met — KEEP. Recording results:
+
+● Record results for iteration 309 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "309" "$HASH" "2026-04-08" "223" "85" "568" "136" "1012" \
+  │ "906" "906" "pass" "7.35" "KEPT" "Add cloze fill-in-the-blank exercise for key phrases in
+  │ conversation summary" \…
+  └ 3 lines...
+
+Good, properly formatted. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Write the session log:
+
+● Create invocation-009.md +34
+  └ autoresearch/logs/invocation-009.md
+
+Now commit the docs update:
+
