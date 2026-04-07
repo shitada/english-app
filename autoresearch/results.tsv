@@ -305,3 +305,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 303	4180158	2026-04-08	143	76	47	523	789	890	890	pass	6.95	KEPT	Add correction drill exercise to conversation summary
 304	b769ece	2026-04-08	238	205	61	598	1102	896	896	pass	6.85	KEPT	Add shadowing exercise to conversation summary for speaking practice
 305	3042bc2	2026-04-08	319	140	831	64	1354	901	901	pass	7.55	KEPT	Add per-conversation grammar accuracy trend chart to dashboard
+306	906568f	2026-04-08	170	120	312	79	681	906	906	pass	7.75	KEPT	Add fluency metrics to conversation summary

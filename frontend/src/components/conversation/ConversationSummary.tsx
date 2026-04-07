@@ -2,6 +2,7 @@ import { Volume2 } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
+import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
 
 interface Message {
@@ -220,6 +221,14 @@ export function ConversationSummary({
           conversationId={conversationId}
           tts={tts}
           speechRecognition={speechRecognition}
+        />
+      )}
+
+      {/* Dictation Exercise — listen and type practice */}
+      {conversationId && (
+        <DictationExercise
+          conversationId={conversationId}
+          tts={tts}
         />
       )}
 

@@ -5,5 +5,6 @@ export { ConversationReplay } from './ConversationReplay';
 export { ConversationSummary } from './ConversationSummary';
 export { ConversationHistory } from './ConversationHistory';
 export { CorrectionDrill } from './CorrectionDrill';
+export { DictationExercise } from './DictationExercise';
 export { ShadowingExercise } from './ShadowingExercise';
 export { PhaseTransition } from './PhaseTransition';

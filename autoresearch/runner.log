@@ -5492,3 +5492,157 @@ All passing. Now run full test suite:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
   └ 6 lines...
 
+● Commit iteration 306 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #306: Add fluency metrics to conversation summary"
+  └ 15 lines...
+
+Now check if smoke test needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Now check if QA tester is needed:
+
+● Check if QA test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && FRONTEND_UI_CHANGED=$(git diff HEAD~1
+  │ --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"); echo "Changed:
+  │ $FRONTEND_UI_CHANGED"
+  └ 2 lines...
+
+Frontend component changed and proposal type is "feature" → MUST call tester. Let me restart the server with the new build:
+
+● Restart server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 2; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA test iteration 306
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ playwright-browser_navigate http://localhost:8000/conversation · url: "http://localhost:8000/co…
+      └ ### Ran Playwright code
+
+QA passed with ux_score 9. Now record timestamp and call evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 306
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1100:1200 (36 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L500:620 (121 lines read)
+
+Evaluator says KEEP with score 7.75. Record results:
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 306 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "306" "906568f" "2026-04-08" "170" "120" "312" "79" "681" \
+  │ "906" "906" "pass" "7.75" "KEPT" "Add fluency metrics to conversation summary" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 306 complete. Checklist: proposer ✅, evaluator ✅, tester ✅ (frontend changed). Score 7.75, KEPT.
+
+---
+
+## Iteration 307
+
+● Record T0 for iteration 307 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Quick context refresh (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 12 lines...
+
+T0 = 1775596505. Now call proposer:
+
+● Proposer Propose iteration 307
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L600:700 (59 lines read)
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L1:60 (60 lines read)
+
+● Record T1 for iteration 307 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775596601. Now implement the dictation exercise. Let me check the existing patterns:
+
+● Check CorrectionDrill pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -50
+  │ frontend/src/components/conversation/CorrectionDrill.tsx
+  └ 51 lines...
+
+● Check exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 10 lines...
+
+Good. Now let me check how ShadowingExercise fetches phrases to follow the same pattern:
+
+● Check ShadowingExercise pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -80
+  │ frontend/src/components/conversation/ShadowingExercise.tsx
+  └ 81 lines...
+
+Now I have the pattern. Let me create the DictationExercise component:
+
+● Create DictationExercise.tsx +277
+  └ frontend/src/components/conversation/DictationExercise.tsx
+
+Now update the exports and ConversationSummary:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Now add DictationExercise to ConversationSummary:
+
+● Edit ConversationSummary.tsx +1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+● Edit ConversationSummary.tsx +8
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now build and test:
+
+● TypeScript check and build (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && npm run
+  │ build 2>&1 | tail -5
+  └ 6 lines...
+
+● Run full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+906 passed, TS check pass, build success. Commit and run QA:
+
