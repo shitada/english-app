@@ -416,3 +416,340 @@ Now add the error display in the UI:
 
 Now amend the commit and re-test:
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #270: Add post-conversation comprehension quiz on summary screen" --no-edit
+  └ 16 lines...
+
+● Re-run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Re-run tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 844 passed, TS check passed. Now call the evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat 2>&1 | tail -5
+  └ 6 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ app/routers/conversation.py app/prompts.py config.yaml frontend/src/api.ts
+  │ frontend/src/pages/Conversation.tsx tests/integration/test_conversation_api.py 2>&1 | head -300
+  └ 301 lines...
+
+● Evaluator Evaluate iteration 270
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L400:600 (201 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L600:end (168 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.5, verdict KEEP. Let me record the results:
+
+T0=1775520515, T1=1775520632, T2=1775520858, T3=1775521457, T4=1775521569
+- propose_sec = 632-515 = 117
+- implement_sec = 858-632 = 226
+- test_sec = 1457-858 = 599
+- evaluate_sec = 1569-1457 = 112
+- total_sec = 1569-515 = 1054
+
+● Record iteration 270 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "270" "dc30240" "2026-04-07" "117" "226" "599" "112" "1054" \
+  │ "844" "844" "pass" "7.5" "KEPT" "Add post-conversation comprehension quiz on summary screen"
+  │ \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Row is well-formed. Now update the backlog and stop the server:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server stopped"
+  └ 2 lines...
+
+● Check if quiz is in backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "Mini-quiz\|mini-quiz\|comprehension quiz\|post-conversation" autoresearch/backlog.md | head -5
+  └ 1 line...
+
+Not in backlog (it was a new feature). Let me add it as completed:
+
+● Check end of backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/backlog.md
+  └ 6 lines...
+
+● Update backlog with completed item (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │ - [x] ✅ Add post-conversation comprehension quiz on summary screen (completed iteration #270)
+  │ EOF
+  └ 1 line...
+
+Iteration 270 complete (KEPT, 7.5). Now starting iteration 271.
+
+---
+
+● Record T0 for iteration 271 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+T0_271 = 1775521624. Now calling proposer for iteration 271:
+
+● Proposer Propose iteration 271
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L200:350 (151 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L60:150 (91 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1_271 = 1775521730. Now implementing minimal pairs. Let me explore the pronunciation files:
+
+● Explore Explore pronunciation codebase
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ 837 lines read
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ 716 lines read
+
+Now I have full context. Let me implement the minimal pairs feature:
+
+● Check end of pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/pronunciation.py
+  └ 6 lines...
+
+● Check line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/pronunciation.py
+  └ 2 lines...
+
+● Read last endpoint in pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '493,500p'
+  │ app/routers/pronunciation.py
+  └ 9 lines...
+
+● Read pronunciation router imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '13,23p'
+  │ app/routers/pronunciation.py
+  └ 11 lines...
+
+Now let me add the minimal pairs data in the DAL and the endpoint:
+
+● Add minimal pairs data and function to DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/dal/pronunciation.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ # ── Minimal pairs: static curated data ──────────────────────────────…
+  └ 100 lines...
+
+Now add the endpoint to the router:
+
+● Add minimal pairs endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/routers/pronunciation.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ class MinimalPairItem(BaseModel):…
+  └ 25 lines...
+
+Now add frontend API types and method:
+
+● Find pronunciation API methods (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getPronunciationWeeklyProgress"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Read after deletePronunciationAttempt (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '96,100p' frontend/src/api.ts
+  └ 5 lines...
+
+● Edit api.ts +6
+  └ frontend/src/api.ts
+
+Now add the TypeScript types. Let me find the right spot:
+
+● Find WeeklyProgressResponse type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "export interface
+  │ WeeklyProgressResponse" frontend/src/api.ts
+  └ 2 lines...
+
+● Read WeeklyProgressResponse area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '468,477p' frontend/src/api.ts
+  └ 11 lines...
+
+● Edit api.ts +15
+  └ frontend/src/api.ts
+
+Now update the Pronunciation.tsx to add the minimal pairs mode. Let me read the relevant sections:
+
+● Read Pronunciation state variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '18,45p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 29 lines...
+
+● Read imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,17p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 17 lines...
+
+Now let me look at the practice mode selection in the select phase:
+
+● Read select phase rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '290,360p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 72 lines...
+
+Now I have good context. Let me implement the frontend changes. I need to:
+
+1. Add `MinimalPairItem` import
+2. Add practice mode `'minimal-pairs'`
+3. Add minimal pairs state variables
+4. Add a button for minimal pairs mode
+5. Add the minimal pairs practice/result UI
+
+● Edit Pronunciation.tsx +1 -1
+  └ frontend/src/pages/Pronunciation.tsx
+
+● Edit Pronunciation.tsx +9 -1
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add the minimal pairs mode button and handlers. Let me find the spot for the button:
+
+● Edit Pronunciation.tsx +7
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now I need to add the minimal pairs select and practice UI. Let me find the right spot — after the mode buttons and before the difficulty filter, when minimal-pairs is selected, show a start button instead of sentences:
+
+● Find View History button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "View History"
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 2 lines...
+
+● Read after View History (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '343,380p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 39 lines...
+
+I need to replace the difficulty filter and sentence list with a conditional — show sentence list for shadowing/dictation, and a start button for minimal-pairs:
+
+● Edit Pronunciation.tsx +69 -22
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add the minimal pairs practice phase. Let me find the practice phase start:
+
+● Find practice phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "// Practice phase"
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 2 lines...
+
+● Read practice phase start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '420,425p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 7 lines...
+
+● Edit Pronunciation.tsx +128
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add tests. Let me add a unit test for the DAL function and update integration tests:
+
+● Check end of pronunciation unit tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/unit/test_pronunciation_dal.py
+  └ 6 lines...
+
+● Add unit tests for minimal pairs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_pronunciation_dal.py << 'PYEOF'
+  │
+  │
+  │ class TestGetMinimalPairs:…
+  └ 37 lines...
+
+Now add integration test for the endpoint:
+
+● Check end of pronunciation API tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_pronunciation_api.py
+  └ 6 lines...
+
+● Add integration tests for minimal pairs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_pronunciation_api.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 32 lines...
+
+Now let me commit and test:
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 271 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #271: Add minimal pairs listening exercise to Pronunciation page"
+  └ 15 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 20 lines...
+
+Need to fix the test — it's missing the import. Let me check how the other tests import:
+
+● Read imports of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10
+  │ tests/unit/test_pronunciation_dal.py
+  └ 11 lines...
+
+● Read full imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '10,30p'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 22 lines...
+
+I see — the test uses direct imports, not `pron_dal`. Let me fix the test:
+
+● Edit test_pronunciation_dal.py +1
+  └ tests/unit/test_pronunciation_dal.py
+
+Now fix the test to use direct function call:
+
+● Edit test_pronunciation_dal.py +5 -5
+  └ tests/unit/test_pronunciation_dal.py
+

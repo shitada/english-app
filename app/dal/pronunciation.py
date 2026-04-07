@@ -682,3 +682,70 @@ async def get_common_mistake_patterns(
         }
         for p in ranked
     ]
+
+
+# ── Minimal pairs: static curated data ──────────────────────────────
+
+_MINIMAL_PAIRS: list[dict[str, str]] = [
+    # Vowels: ɪ vs iː
+    {"word_a": "ship", "word_b": "sheep", "phoneme_contrast": "ɪ / iː", "example_a": "The ship sailed across the sea.", "example_b": "The sheep grazed on the hill.", "difficulty": "beginner"},
+    {"word_a": "sit", "word_b": "seat", "phoneme_contrast": "ɪ / iː", "example_a": "Please sit down.", "example_b": "Is this seat taken?", "difficulty": "beginner"},
+    {"word_a": "hit", "word_b": "heat", "phoneme_contrast": "ɪ / iː", "example_a": "He hit the ball.", "example_b": "I can't stand the heat.", "difficulty": "beginner"},
+    {"word_a": "fit", "word_b": "feet", "phoneme_contrast": "ɪ / iː", "example_a": "These shoes fit well.", "example_b": "My feet are tired.", "difficulty": "beginner"},
+    {"word_a": "lip", "word_b": "leap", "phoneme_contrast": "ɪ / iː", "example_a": "She bit her lip.", "example_b": "The cat made a big leap.", "difficulty": "intermediate"},
+    # Vowels: æ vs ɛ
+    {"word_a": "bat", "word_b": "bet", "phoneme_contrast": "æ / ɛ", "example_a": "He swung the bat.", "example_b": "I bet you can do it.", "difficulty": "beginner"},
+    {"word_a": "pan", "word_b": "pen", "phoneme_contrast": "æ / ɛ", "example_a": "Heat the pan first.", "example_b": "Can I borrow your pen?", "difficulty": "beginner"},
+    {"word_a": "bad", "word_b": "bed", "phoneme_contrast": "æ / ɛ", "example_a": "That was a bad idea.", "example_b": "Time to go to bed.", "difficulty": "beginner"},
+    {"word_a": "man", "word_b": "men", "phoneme_contrast": "æ / ɛ", "example_a": "The man waved hello.", "example_b": "The men worked together.", "difficulty": "beginner"},
+    # Consonants: θ vs s
+    {"word_a": "think", "word_b": "sink", "phoneme_contrast": "θ / s", "example_a": "Let me think about it.", "example_b": "Wash the dishes in the sink.", "difficulty": "intermediate"},
+    {"word_a": "thick", "word_b": "sick", "phoneme_contrast": "θ / s", "example_a": "This book is very thick.", "example_b": "She felt sick this morning.", "difficulty": "intermediate"},
+    {"word_a": "mouth", "word_b": "mouse", "phoneme_contrast": "θ / s", "example_a": "Open your mouth wide.", "example_b": "I saw a mouse in the kitchen.", "difficulty": "intermediate"},
+    {"word_a": "path", "word_b": "pass", "phoneme_contrast": "θ / s", "example_a": "Follow the path through the park.", "example_b": "Can you pass me the salt?", "difficulty": "intermediate"},
+    # Consonants: r vs l
+    {"word_a": "right", "word_b": "light", "phoneme_contrast": "r / l", "example_a": "Turn right at the corner.", "example_b": "Turn on the light.", "difficulty": "beginner"},
+    {"word_a": "rock", "word_b": "lock", "phoneme_contrast": "r / l", "example_a": "He sat on a rock.", "example_b": "Don't forget to lock the door.", "difficulty": "beginner"},
+    {"word_a": "rice", "word_b": "lice", "phoneme_contrast": "r / l", "example_a": "I'd like some rice.", "example_b": "The school had a lice outbreak.", "difficulty": "intermediate"},
+    {"word_a": "rate", "word_b": "late", "phoneme_contrast": "r / l", "example_a": "What's the exchange rate?", "example_b": "Sorry I'm late.", "difficulty": "beginner"},
+    {"word_a": "red", "word_b": "led", "phoneme_contrast": "r / l", "example_a": "She wore a red dress.", "example_b": "He led the team to victory.", "difficulty": "intermediate"},
+    # Consonants: b vs v
+    {"word_a": "berry", "word_b": "very", "phoneme_contrast": "b / v", "example_a": "I picked a berry from the bush.", "example_b": "That's very kind of you.", "difficulty": "beginner"},
+    {"word_a": "ban", "word_b": "van", "phoneme_contrast": "b / v", "example_a": "They will ban smoking here.", "example_b": "We rented a van for moving.", "difficulty": "intermediate"},
+    {"word_a": "best", "word_b": "vest", "phoneme_contrast": "b / v", "example_a": "She is the best player.", "example_b": "He wore a vest under his jacket.", "difficulty": "intermediate"},
+    # Consonants: n vs ŋ
+    {"word_a": "thin", "word_b": "thing", "phoneme_contrast": "n / ŋ", "example_a": "The ice is too thin.", "example_b": "What's that thing over there?", "difficulty": "advanced"},
+    {"word_a": "sin", "word_b": "sing", "phoneme_contrast": "n / ŋ", "example_a": "Greed is a sin.", "example_b": "She loves to sing.", "difficulty": "intermediate"},
+    {"word_a": "win", "word_b": "wing", "phoneme_contrast": "n / ŋ", "example_a": "I hope we win the game.", "example_b": "The bird hurt its wing.", "difficulty": "intermediate"},
+    # Vowels: ʌ vs ɑː
+    {"word_a": "cut", "word_b": "cart", "phoneme_contrast": "ʌ / ɑː", "example_a": "Be careful not to cut yourself.", "example_b": "Put the items in the cart.", "difficulty": "advanced"},
+    {"word_a": "hut", "word_b": "heart", "phoneme_contrast": "ʌ / ɑː", "example_a": "They stayed in a small hut.", "example_b": "Follow your heart.", "difficulty": "advanced"},
+    # Mixed: f vs v
+    {"word_a": "fan", "word_b": "van", "phoneme_contrast": "f / v", "example_a": "Turn on the fan.", "example_b": "The delivery van arrived.", "difficulty": "beginner"},
+    {"word_a": "fine", "word_b": "vine", "phoneme_contrast": "f / v", "example_a": "The weather is fine today.", "example_b": "Grapes grow on a vine.", "difficulty": "intermediate"},
+    # Consonants: p vs b
+    {"word_a": "pack", "word_b": "back", "phoneme_contrast": "p / b", "example_a": "Pack your bags.", "example_b": "I'll be right back.", "difficulty": "beginner"},
+    {"word_a": "pat", "word_b": "bat", "phoneme_contrast": "p / b", "example_a": "She gave the dog a pat.", "example_b": "He swung the bat hard.", "difficulty": "beginner"},
+]
+
+
+def get_minimal_pairs(
+    difficulty: str | None = None,
+    count: int = 10,
+) -> list[dict[str, str]]:
+    """Return randomized minimal pairs, optionally filtered by difficulty."""
+    import random
+
+    pool = _MINIMAL_PAIRS
+    if difficulty:
+        pool = [p for p in pool if p["difficulty"] == difficulty]
+    selected = random.sample(pool, min(count, len(pool)))
+
+    result = []
+    for pair in selected:
+        play_word = random.choice(["a", "b"])
+        result.append({
+            **pair,
+            "play_word": play_word,
+        })
+    return result

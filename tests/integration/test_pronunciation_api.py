@@ -680,3 +680,36 @@ async def test_dictation_check_validation(client):
         },
     )
     assert resp.status_code == 422
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_default(client):
+    """GET /api/pronunciation/minimal-pairs returns pairs."""
+    res = await client.get("/api/pronunciation/minimal-pairs")
+    assert res.status_code == 200
+    data = res.json()
+    assert "pairs" in data
+    assert "total" in data
+    assert len(data["pairs"]) <= 10
+    for pair in data["pairs"]:
+        assert "word_a" in pair
+        assert "word_b" in pair
+        assert "phoneme_contrast" in pair
+        assert pair["play_word"] in ("a", "b")
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_filtered(client):
+    """GET /api/pronunciation/minimal-pairs filters by difficulty."""
+    res = await client.get("/api/pronunciation/minimal-pairs?difficulty=beginner&count=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert all(p["difficulty"] == "beginner" for p in data["pairs"])
+    assert len(data["pairs"]) <= 5
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_invalid_difficulty(client):
+    """Invalid difficulty returns 422."""
+    res = await client.get("/api/pronunciation/minimal-pairs?difficulty=invalid")
+    assert res.status_code == 422

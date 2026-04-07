@@ -498,3 +498,28 @@ async def get_common_mistakes(
     """Get commonly confused sound patterns aggregated from pronunciation feedback."""
     patterns = await pron_dal.get_common_mistake_patterns(db, limit=limit)
     return {"patterns": patterns, "total": len(patterns)}
+
+
+class MinimalPairItem(BaseModel):
+    word_a: str
+    word_b: str
+    phoneme_contrast: str
+    example_a: str
+    example_b: str
+    difficulty: str
+    play_word: str
+
+
+class MinimalPairsResponse(BaseModel):
+    pairs: list[MinimalPairItem]
+    total: int
+
+
+@router.get("/minimal-pairs", response_model=MinimalPairsResponse)
+async def get_minimal_pairs(
+    difficulty: str | None = Query(default=None, pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=10, ge=1, le=30),
+):
+    """Get minimal pairs exercises for listening discrimination practice."""
+    pairs = pron_dal.get_minimal_pairs(difficulty=difficulty, count=count)
+    return {"pairs": pairs, "total": len(pairs)}

@@ -13,6 +13,7 @@ from app.dal.pronunciation import (
     delete_attempt,
     get_common_mistake_patterns,
     get_history,
+    get_minimal_pairs,
     get_progress,
     get_progress_by_difficulty,
     get_pronunciation_weaknesses,
@@ -946,3 +947,41 @@ class TestGetCommonMistakePatterns:
         assert top["produced_sound"] == "s"
         assert top["occurrence_count"] == 2
         assert "three" in top["example_words"]
+
+
+class TestGetMinimalPairs:
+    """Tests for get_minimal_pairs static data function."""
+
+    def test_returns_pairs(self):
+        """get_minimal_pairs returns a list of pairs."""
+        result = get_minimal_pairs(count=5)
+        assert isinstance(result, list)
+        assert len(result) == 5
+        for pair in result:
+            assert "word_a" in pair
+            assert "word_b" in pair
+            assert "phoneme_contrast" in pair
+            assert "play_word" in pair
+            assert pair["play_word"] in ("a", "b")
+
+    def test_filter_by_difficulty(self):
+        """get_minimal_pairs filters by difficulty."""
+        result = get_minimal_pairs(difficulty="beginner", count=30)
+        assert all(p["difficulty"] == "beginner" for p in result)
+
+    def test_filter_advanced(self):
+        """get_minimal_pairs returns advanced pairs."""
+        result = get_minimal_pairs(difficulty="advanced", count=30)
+        assert all(p["difficulty"] == "advanced" for p in result)
+        assert len(result) > 0
+
+    def test_count_limit(self):
+        """get_minimal_pairs respects count limit."""
+        result = get_minimal_pairs(count=3)
+        assert len(result) == 3
+
+    def test_count_exceeds_pool(self):
+        """get_minimal_pairs handles count > pool size gracefully."""
+        result = get_minimal_pairs(difficulty="advanced", count=100)
+        assert len(result) > 0
+        assert len(result) <= 100

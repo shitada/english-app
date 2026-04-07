@@ -124,3 +124,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] ✅ Add vocabulary spaced repetition analytics (completed iteration #98)
 - [x] ✅ Add user preference settings persistence (completed iteration #99)
 - [x] ✅ Add conversation replay/review mode (completed iteration #100)
+- [x] ✅ Add post-conversation comprehension quiz on summary screen (completed iteration #270)

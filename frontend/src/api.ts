@@ -97,6 +97,12 @@ export const api = {
   deletePronunciationAttempt: (attemptId: number) =>
     request<{ deleted: boolean }>(`/api/pronunciation/${attemptId}`, { method: 'DELETE' }),
 
+  getMinimalPairs: (difficulty?: string, count = 10) => {
+    const params = new URLSearchParams({ count: String(count) });
+    if (difficulty) params.set('difficulty', difficulty);
+    return request<MinimalPairsResponse>(`/api/pronunciation/minimal-pairs?${params}`);
+  },
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -463,6 +469,21 @@ export interface WeeklyProgressResponse {
   weeks: { week: string; attempt_count: number; avg_score: number; best_score: number }[];
   total_weeks: number;
   improvement: number;
+}
+
+export interface MinimalPairItem {
+  word_a: string;
+  word_b: string;
+  phoneme_contrast: string;
+  example_a: string;
+  example_b: string;
+  difficulty: string;
+  play_word: string;
+}
+
+export interface MinimalPairsResponse {
+  pairs: MinimalPairItem[];
+  total: number;
 }
 
 export async function getPronunciationWeeklyProgress(weeks?: number): Promise<WeeklyProgressResponse> {

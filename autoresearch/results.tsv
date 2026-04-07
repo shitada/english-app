@@ -270,3 +270,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 267	cbf8a9c	2026-04-07	187	87	369	67	710	838	838	pass	6.95	KEPT	Add corrections review with TTS to conversation summary screen
 268	e6c7761	2026-04-07	336	166	30	75	607	839	839	pass	7.0	KEPT	Add date bounds to weekly comparison and today activity queries
 269	f529e79	2026-04-07	348	258	270	72	948	841	841	pass	7.8	KEPT	Fix unbounded full-table scans in pronunciation analytics functions
+270	dc30240	2026-04-07	117	226	599	112	1054	844	844	pass	7.5	KEPT	Add post-conversation comprehension quiz on summary screen
