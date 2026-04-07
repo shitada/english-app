@@ -138,7 +138,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [ ] Add shadowing mode — play model audio, user repeats, compare waveforms/scores
 - [ ] Add conversation role swap — let user play the service staff role (hotel clerk, doctor) for perspective practice
-- [ ] Add vocabulary sentence construction — given 3 words, user builds a sentence, AI evaluates grammar and naturalness
+- [x] ✅ Add vocabulary sentence construction — given 3 words, user builds a sentence, AI evaluates grammar and naturalness (completed iteration #283)
 - [x] ✅ Add pronunciation tongue twister drill — curated tongue twisters with speed progression (completed iteration #282)
 
 ## [MEDIUM] Feature Improvements

@@ -5,6 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { formatDateTime } from '../utils/formatDate';
+import AudioWaveform from '../components/AudioWaveform';
 
 const SAMPLE_SENTENCES = [
   { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel', difficulty: 'intermediate' },
@@ -841,6 +842,12 @@ export default function Pronunciation() {
             >
               <MicOff size={18} /> Stop Recording
             </button>
+          )}
+
+          {shadowingState === 'recording' && (
+            <div style={{ marginTop: 12 }}>
+              <AudioWaveform analyser={recorder.analyserNode} isActive={recorder.isRecording} />
+            </div>
           )}
 
           {shadowingState !== 'idle' && shadowingState !== 'recording' && (

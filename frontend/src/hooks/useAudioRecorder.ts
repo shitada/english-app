@@ -3,6 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 interface UseAudioRecorderResult {
   isRecording: boolean;
   audioUrl: string | null;
+  analyserNode: AnalyserNode | null;
   startRecording: () => Promise<void>;
   stopRecording: () => void;
   reset: () => void;
@@ -11,9 +12,11 @@ interface UseAudioRecorderResult {
 export function useAudioRecorder(): UseAudioRecorderResult {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [analyserNode, setAnalyserNode] = useState<AnalyserNode | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
@@ -26,6 +29,15 @@ export function useAudioRecorder(): UseAudioRecorderResult {
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+
+      // Set up Web Audio API analyser for waveform visualization
+      const audioCtx = new AudioContext();
+      audioContextRef.current = audioCtx;
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      setAnalyserNode(analyser);
 
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
@@ -45,6 +57,12 @@ export function useAudioRecorder(): UseAudioRecorderResult {
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         setIsRecording(false);
+        setAnalyserNode(null);
+        // Close audio context
+        if (audioContextRef.current) {
+          audioContextRef.current.close().catch(() => {});
+          audioContextRef.current = null;
+        }
         // Stop all tracks
         stream.getTracks().forEach(t => t.stop());
         streamRef.current = null;
@@ -68,9 +86,14 @@ export function useAudioRecorder(): UseAudioRecorderResult {
       URL.revokeObjectURL(audioUrl);
     }
     setAudioUrl(null);
+    setAnalyserNode(null);
     chunksRef.current = [];
     if (recorderRef.current && recorderRef.current.state === 'recording') {
       recorderRef.current.stop();
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
@@ -85,6 +108,10 @@ export function useAudioRecorder(): UseAudioRecorderResult {
       if (recorderRef.current && recorderRef.current.state === 'recording') {
         recorderRef.current.stop();
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
         streamRef.current = null;
@@ -92,5 +119,5 @@ export function useAudioRecorder(): UseAudioRecorderResult {
     };
   }, []);
 
-  return { isRecording, audioUrl, startRecording, stopRecording, reset };
+  return { isRecording, audioUrl, analyserNode, startRecording, stopRecording, reset };
 }
