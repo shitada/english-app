@@ -5724,3 +5724,285 @@ Now write the session log:
 ● Create invocation-008.md +45
   └ autoresearch/logs/invocation-008.md
 
+● Commit docs update (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: update
+  │ results.tsv and backlog for iterations 305-307"
+  └ 15 lines...
+
+✅ **Iterations 305–307 complete.** All 3 kept, 0 discarded.
+
+| Iter | Score | Description |
+|------|-------|-------------|
+| 305 | 7.55 | Grammar accuracy trend chart on Dashboard |
+| 306 | 7.75 | Fluency metrics (words/msg, vocab diversity) in conversation summary |
+| 307 | 7.35 | Dictation exercise for listening comprehension |
+
+Tests: 896 → 906 (+10). Average score: 7.55. Success rate: 100%.
+
+
+Total usage est:        3 Premium requests
+API time spent:         37m 1s
+Total session time:     46m 52s
+Total code changes:     +688 -5
+Breakdown by AI model:
+ claude-opus-4.6          17.4m in, 92.6k out, 16.2m cached (Est. 3 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-305-to-309.md
+[2026-04-08 06:26:43] Copilot invocation completed (duration: 2815s)
+[2026-04-08 06:26:43] Verifying agent invocations for iter 305-307...
+[2026-04-08 06:26:43]   Iteration 305: proposer=✅ evaluator=✅
+[2026-04-08 06:26:43]   Iteration 306: proposer=✅ evaluator=✅
+[2026-04-08 06:26:43]   Iteration 307: proposer=✅ evaluator=✅
+[2026-04-08 06:26:43] All iterations passed agent verification.
+[2026-04-08 06:26:43] Running post-invocation audit (iter 305-307)...
+============================================
+ Autoresearch Audit
+ Iterations: 305 — 307
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-08 06:26:43
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 305(4) 306(2) 307(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-08 06:26:44] Audit passed — no issues
+[2026-04-08 06:26:44] Cleaned up old session logs (kept 5)
+[2026-04-08 06:26:47] Current iteration count: 307 / 309
+[2026-04-08 06:26:47] ------------------------------------------
+[2026-04-08 06:26:48] Invocation 8 / 10
+[2026-04-08 06:26:48] Resuming from iteration 308
+[2026-04-08 06:26:48] ------------------------------------------
+[2026-04-08 06:26:48] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-308-to-309.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 170 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read last 20 rows of results.tsv (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-008.md
+  └ 45 lines...
+
+Good. Starting iteration 308. Let me record the start timestamp and invoke the proposer.
+
+● Record T0 for iteration 308 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 308
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L80:120 (41 lines read)
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ L200:260 (61 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check Conversation.tsx size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && wc -l Conversation.tsx
+  └ 2 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L1:40 (40 lines read)
+
+● Find pastConversations references (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n "pastConversatio
+  │ ns\|topic_id\|ConversationListItem\|listConversations\|formatRelativeTime\|formatDate"
+  │ Conversation.tsx | head -30
+  └ 10 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L480:580 (101 lines read)
+
+● Check ConversationListItem type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "topic_id\|started_at\|ConversationListItem" api.ts | head -20
+  └ 9 lines...
+
+● Check formatDate exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "formatRelativeTime\|formatDateTime\|formatDate" utils/formatDate.ts | head -20
+  └ 3 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L362:380 (19 lines read)
+
+● Read formatDate.ts
+  │ frontend/src/utils/formatDate.ts
+  └ L13:35 (23 lines read)
+
+● Find sortedTopics and useMemo (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ "sortedTopics\|useMemo" Conversation.tsx | head -20
+  └ 3 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L1:2 (2 lines read)
+
+Now I'll implement the changes:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the `useMemo` for topic stats. Let me find a good spot:
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L255:270 (15 lines read)
+
+● Edit Conversation.tsx +16
+  └ frontend/src/pages/Conversation.tsx
+
+Now update the topic cards to show stats badges:
+
+● Edit Conversation.tsx +49 -18
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit:
+
+● Commit iteration 308 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #308: Add topic practice stats badges to conversation topic selection cards
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+Now run tests:
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TS type check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 906 tests pass, TypeScript check passes. Now check if smoke test is needed:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No smoke test needed. Check QA tester requirement:
+
+● Check if QA tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Proposal is `ux` AND frontend page changed → **MUST run tester**. Starting server and QA test:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Get changed files for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 4 lines...
+
+Server exited. Let me restart it:
+
+● Restart server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+Good, server is up. Now call the tester:
+
+● Tester QA test iteration 308
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L513:565 (53 lines read)
+  └ Read formatDate.ts
+      │ frontend/src/utils/formatDate.ts
+      └ 41 lines read
+
+Need to rebuild the frontend bundle. Let me fix this:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+

@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { formatDateTime } from '../utils/formatDate';
+import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
 import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
@@ -268,6 +268,22 @@ export default function Conversation() {
     }).catch(() => {});
   }, [phase]);
 
+  // Compute per-topic practice stats from past conversations
+  const topicStats = useMemo(() => {
+    const stats: Record<string, { count: number; lastPracticed: string; totalMessages: number }> = {};
+    for (const c of pastConversations) {
+      const prev = stats[c.topic_id];
+      if (!prev) {
+        stats[c.topic_id] = { count: 1, lastPracticed: c.started_at, totalMessages: c.message_count };
+      } else {
+        prev.count++;
+        prev.totalMessages += c.message_count;
+        if (c.started_at > prev.lastPracticed) prev.lastPracticed = c.started_at;
+      }
+    }
+    return stats;
+  }, [pastConversations]);
+
   const viewConversationHistory = async (id: number) => {
     try {
       const [histRes, sumRes] = await Promise.allSettled([
@@ -495,25 +511,56 @@ export default function Conversation() {
               </div>
             ) : (
               <div className="topic-grid">
-                {sortedTopics.map((s) => (
-                  <button
-                    key={s.id}
-                    className="topic-card"
-                    onClick={() => startConversation(s.id)}
-                    style={{ position: 'relative' }}
-                  >
-                    <span
-                      role="button"
-                      aria-label={favoriteTopics.has(s.id) ? 'Unfavorite' : 'Favorite'}
-                      onClick={(e) => handleToggleFavorite(e, s.id)}
-                      style={{ position: 'absolute', top: 8, right: 8, cursor: 'pointer', lineHeight: 1 }}
+                {sortedTopics.map((s) => {
+                  const stats = topicStats[s.id];
+                  const daysSincePractice = stats
+                    ? Math.floor((Date.now() - new Date(stats.lastPracticed).getTime()) / 86400000)
+                    : -1;
+                  const freshnessColor = daysSincePractice < 0 ? 'transparent' : daysSincePractice <= 3 ? '#22c55e' : daysSincePractice <= 7 ? '#f59e0b' : '#94a3b8';
+                  return (
+                    <button
+                      key={s.id}
+                      className="topic-card"
+                      onClick={() => startConversation(s.id)}
+                      style={{ position: 'relative' }}
                     >
-                      <Star size={16} fill={favoriteTopics.has(s.id) ? '#f59e0b' : 'none'} stroke={favoriteTopics.has(s.id) ? '#f59e0b' : '#9ca3af'} />
-                    </span>
-                    <h3>{TOPIC_EMOJIS[s.id] || '💬'} {s.label}</h3>
-                    <p>{s.description}</p>
-                  </button>
-                ))}
+                      <span
+                        role="button"
+                        aria-label={favoriteTopics.has(s.id) ? 'Unfavorite' : 'Favorite'}
+                        onClick={(e) => handleToggleFavorite(e, s.id)}
+                        style={{ position: 'absolute', top: 8, right: 8, cursor: 'pointer', lineHeight: 1 }}
+                      >
+                        <Star size={16} fill={favoriteTopics.has(s.id) ? '#f59e0b' : 'none'} stroke={favoriteTopics.has(s.id) ? '#f59e0b' : '#9ca3af'} />
+                      </span>
+                      <h3>{TOPIC_EMOJIS[s.id] || '💬'} {s.label}</h3>
+                      <p>{s.description}</p>
+                      <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                        {stats ? (
+                          <>
+                            <span style={{
+                              fontSize: '0.7rem', padding: '2px 6px', borderRadius: 9999,
+                              background: `${freshnessColor}20`, color: freshnessColor, fontWeight: 600,
+                              border: `1px solid ${freshnessColor}40`,
+                            }}>
+                              {stats.count} {stats.count === 1 ? 'session' : 'sessions'}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                              {formatRelativeTime(stats.lastPracticed)}
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{
+                            fontSize: '0.7rem', padding: '2px 6px', borderRadius: 9999,
+                            background: '#8b5cf620', color: '#8b5cf6', fontWeight: 600,
+                            border: '1px solid #8b5cf640',
+                          }}>
+                            ✨ New
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </>
