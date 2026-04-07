@@ -28,7 +28,7 @@ export const api = {
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>
-    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[] }>('/api/conversation/start', {
+    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; user_role: string; role_briefing: string[] }>('/api/conversation/start', {
       method: 'POST',
       body: JSON.stringify({ topic, difficulty, role_swap: roleSwap }),
     }),

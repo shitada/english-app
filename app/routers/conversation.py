@@ -47,6 +47,8 @@ class StartResponse(BaseModel):
     topic: str
     phrase_suggestions: list[str] = []
     key_phrases: list[str] = []
+    user_role: str = ""
+    role_briefing: list[str] = []
 
 
 class MessageResponse(BaseModel):
@@ -185,7 +187,12 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     }
 
     scenario = topic_data.get("scenario", topic_label)
+    user_role_name = ""
     if req.role_swap:
+        # Extract the user's role before swapping (the original AI role becomes user's role)
+        ai_match = re.search(r"You are (.+?)\.", scenario)
+        if ai_match:
+            user_role_name = ai_match.group(1).strip()
         scenario = _swap_scenario_roles(scenario)
 
     system = get_prompt("conversation_partner").format(
@@ -204,7 +211,35 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
-    suggestions, key_phrases = await _extract_reply_helpers(copilot, opening, topic_label, req.difficulty)
+    helpers_coro = _extract_reply_helpers(copilot, opening, topic_label, req.difficulty)
+
+    role_briefing: list[str] = []
+    if req.role_swap and user_role_name:
+        async def _get_briefing() -> list[str]:
+            prompt = (
+                f"The user is practicing English by role-playing as '{user_role_name}' in a {topic_label} scenario. "
+                f"List exactly 4 short professional English phrases that a {user_role_name} would commonly say. "
+                "Return ONLY a JSON array of strings, no explanation."
+            )
+            try:
+                raw = await safe_llm_call(
+                    lambda: copilot.ask("You are a helpful English teacher.", prompt),
+                    context="role_briefing",
+                )
+                parsed = json.loads(raw.strip().removeprefix("```json").removesuffix("```").strip())
+                if isinstance(parsed, list):
+                    return [str(p) for p in parsed[:4]]
+            except Exception:
+                logger.warning("Failed to generate role briefing phrases")
+            return []
+
+        suggestions_result, briefing_result = await asyncio.gather(
+            helpers_coro, _get_briefing()
+        )
+        suggestions, key_phrases = suggestions_result
+        role_briefing = briefing_result
+    else:
+        suggestions, key_phrases = await helpers_coro
 
     return {
         "conversation_id": conversation_id,
@@ -212,6 +247,8 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         "topic": req.topic,
         "phrase_suggestions": suggestions,
         "key_phrases": key_phrases,
+        "user_role": user_role_name,
+        "role_briefing": role_briefing,
     }
 
 

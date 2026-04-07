@@ -56,6 +56,9 @@ export default function Conversation() {
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [favoriteTopics, setFavoriteTopics] = useState<Set<string>>(new Set());
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
+  const [userRoleName, setUserRoleName] = useState('');
+  const [roleBriefing, setRoleBriefing] = useState<string[]>([]);
+  const [showBriefing, setShowBriefing] = useState(false);
   const [replayTurns, setReplayTurns] = useState<import('../api').ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
   const [replayLoading, setReplayLoading] = useState(false);
@@ -284,6 +287,15 @@ export default function Conversation() {
       setPhase('chat');
       setTimeLeft(duration);
       setPhraseSuggestions(res.phrase_suggestions || []);
+      if (roleSwap && res.user_role) {
+        setUserRoleName(res.user_role);
+        setRoleBriefing(res.role_briefing || []);
+        setShowBriefing(true);
+      } else {
+        setUserRoleName('');
+        setRoleBriefing([]);
+        setShowBriefing(false);
+      }
       tts.speak(res.message);
     } catch (err) {
       alert('Failed to start conversation. Make sure the backend is running.');
@@ -601,7 +613,7 @@ export default function Conversation() {
       <div className="chat-header">
         <span style={{ fontWeight: 600 }}>
           Role Play Scenario
-          {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 Staff Role</span>}
+          {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 {userRoleName || 'Staff Role'}</span>}
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -715,6 +727,18 @@ export default function Conversation() {
       })()}
 
       <div className="chat-messages" role="log" aria-live="polite">
+        {showBriefing && userRoleName && (
+          <div style={{ margin: '0 0 12px', padding: 12, background: 'var(--primary-light, #e8f0fe)', border: '1px solid var(--primary)', borderRadius: 10, position: 'relative' }}>
+            <button onClick={() => setShowBriefing(false)} aria-label="Dismiss briefing" style={{ position: 'absolute', top: 6, right: 8, background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--text-secondary)' }}>✕</button>
+            <div style={{ fontWeight: 600, marginBottom: 6, fontSize: '0.95rem' }}>🏷️ You are {userRoleName}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 8 }}>Try using these professional phrases:</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {roleBriefing.map((phrase, i) => (
+                <button key={i} onClick={() => setInput(phrase)} style={{ padding: '4px 10px', borderRadius: 16, border: '1px solid var(--primary)', background: 'white', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.8rem' }}>{phrase}</button>
+              ))}
+            </div>
+          </div>
+        )}
         {messages.map((msg, i) => (
           <div key={i}>
             <div className={`message message-${msg.role}`}>
