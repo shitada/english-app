@@ -978,3 +978,267 @@ Build successful. Now amend the commit, restart the server, and re-run the teste
   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
   └ 18 lines...
 
+● Clean up tester artifacts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && rm -f vocabulary-page-initial.png
+  │ word-tiers-crash.png && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+Now restart the server and re-run the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server and tiers endpoint (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health && echo "" && curl -s
+  │ http://localhost:8000/api/vocabulary/tiers | python3 -c "import sys,json;
+  │ d=json.load(sys.stdin); print({k:len(v) for k,v in d['tiers'].items()})"
+  └ 3 lines...
+
+Server exited again. Let me restart and run the tester immediately:
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 300 > /tmp/server-290.log 2>&1 &
+  │ echo "Server PID: $!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start server for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 300
+  └ 1 line...
+
+● Verify server running (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Start server and verify (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 300 2>&1 &
+  │ SERVER_PID=$!
+  │ echo "PID=$SERVER_PID"
+  │ sleep 3…
+  └ 15 lines...
+
+Good - the server is actually still running from before (port already in use), and it responds to health check (29.5s uptime). Let me invoke the tester now:
+
+● Tester QA test tiers feature
+  │ playwright-browser_console_messages level: "error"
+  │   └ ### Result
+  └ playwright-browser_take_screenshot filename: "tiers-new-expanded.png", type: "png"
+      └ ### Result
+
+Tester passed with ux_score=9. Now let me stop the server, record T3 properly, and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1775582929. Now call the evaluator:
+
+● Get diff summary for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 11 lines...
+
+● Evaluator Evaluate iteration 290
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L1350:1500 (59 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L790:900 (111 lines read)
+
+Evaluator score: **7.7**, verdict: **KEEP**. Let me record the results:
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now record results:
+
+● Record results for iteration 290 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "290" "68285e4" "2026-04-08" "159" "200" "1066" "131" "1556" \
+  │ "888" "888" "pass" "7.7" "KEPT" "Add vocabulary word grouping by mastery tier with visual
+  │ tier view" \…
+  └ 3 lines...
+
+Row is properly tab-separated. Now update the backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ **Iteration 290 complete**: KEPT (7.7) — Vocabulary word tiers. Checklist verified: ✅ proposer, ✅ evaluator, ✅ tester (frontend changed + feature type).
+
+---
+
+**Iteration 291 — Step 1: Context Restore**
+
+● Context restore for iteration 291 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 29 lines...
+
+T0 = 1775583093. Now call the proposer:
+
+● Proposer Propose iteration 291
+  │ Read MinimalPairsExercise.tsx
+  │   │ frontend/src/components/pronunciation/MinimalPairsExercise.tsx
+  │   └ L1:5 (5 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ 399 lines read
+
+Good proposal: **Add dark mode toggle with persisted preference**. Let me record T1 and implement.
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775583207. Now implement. Let me check the existing files:
+
+● See App.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat frontend/src/App.tsx
+  └ 60 lines...
+
+● Check existing preference API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "preferences\|getPreference\|setPreference" frontend/src/api.ts | head -10
+  └ 1 line...
+
+● See CSS variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60 frontend/src/index.css
+  └ 61 lines...
+
+● See nav and media query patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "nav-toggle\|nav-open\|@media"
+  │ frontend/src/index.css | head -15
+  └ 5 lines...
+
+● Check existing hooks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/hooks/
+  └ 2 lines...
+
+● Check CSS file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/index.css
+  └ 2 lines...
+
+Now implement all changes. First, create the useTheme hook:
+
+● Create useTheme.ts +25
+  └ frontend/src/hooks/useTheme.ts
+
+Now add dark mode CSS variables. I'll add them right after the `:root` block:
+
+● Edit index.css +16
+  └ frontend/src/index.css
+
+Now update App.tsx to add the theme toggle:
+
+● Edit App.tsx +11
+  └ frontend/src/App.tsx
+
+Now add the `.theme-toggle` CSS class. Let me add it near the `.nav-toggle` styles:
+
+● See nav-toggle CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '99,115p' frontend/src/index.css
+  └ 18 lines...
+
+● Edit index.css +21
+  └ frontend/src/index.css
+
+Now update the mobile media query so nav-toggle takes margin-left instead of theme-toggle on mobile:
+
+● Check mobile breakpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "@media.*640\|nav-toggle.*display\|margin-left.*auto" frontend/src/index.css | tail -10
+  └ 6 lines...
+
+● See mobile breakpoint styles (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '675,697p' frontend/src/index.css
+  └ 23 lines...
+
+Good, the mobile breakpoint already handles nav-toggle showing. The theme-toggle has `margin-left: auto` and nav-toggle also does. On mobile where nav-toggle is displayed, the nav-toggle will push to the end. Let me adjust so on mobile, `theme-toggle` doesn't use `margin-left: auto`:
+
+● Edit index.css +2 -1
+  └ frontend/src/index.css
+
+Wait, that's redundant since theme-toggle already has margin-left: auto. The issue is that on desktop, nav is visible and takes up space, so we need theme-toggle to not push. Let me fix the desktop layout. On desktop, the nav already takes the remaining space, and the theme-toggle should sit after it. Let me check the order in the DOM: h1 → theme-toggle → nav-toggle → nav. I need the theme-toggle to be right-aligned after nav on desktop. Let me update the header flex layout:
+
+Actually, the current order in my App.tsx is: h1, theme-toggle (margin-left: auto), nav-toggle, nav. On desktop, nav-toggle is hidden, so it's: h1, theme-toggle (pushes right), nav. That means nav comes after, which isn't ideal. Let me reorder so nav comes before theme-toggle on desktop:
+
+● Check header nav styles (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,100p' frontend/src/index.css
+  └ 41 lines...
+
+I see - `.app-header nav` has `margin-left: auto` which pushes it right. Since I want the theme toggle between nav and nav-toggle, but after nav on desktop, I'll remove `margin-left: auto` from theme-toggle and put it after nav in the DOM:
+
+● Edit App.tsx +6 -6
+  └ frontend/src/App.tsx
+
+Now update theme-toggle CSS to not have margin-left:auto (the nav already pushes it):
+
+● Edit index.css -1
+  └ frontend/src/index.css
+
+Also fix the mobile media query:
+
+● Edit index.css +1 -2
+  └ frontend/src/index.css
+
+Now let me also add some dark mode overrides for common hardcoded backgrounds. Let me check what inline styles might need dark mode awareness:
+
+● Check existing component styles (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "word-correct\|word-incorrect\|word-partial\|feedback-panel\|score-circle"
+  │ frontend/src/index.css | head -15
+  └ 7 lines...
+
+● See component styles with colors (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '334,350p' frontend/src/index.css &&
+  │ echo "---" && sed -n '416,440p' frontend/src/index.css && echo "---" && sed -n '461,480p'
+  │ frontend/src/index.css
+  └ 65 lines...
+
+These hardcoded colors will look bad in dark mode. Let me add dark overrides at the end of the CSS:
+
+● See CSS end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/index.css
+  └ 5 lines...
+
+● Add dark mode CSS overrides (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/frontend/src/index.css << 'CSSEOF'
+  │
+  │ /* Dark mode overrides for hardcoded colors */
+  │ [data-theme="dark"] .feedback-panel {
+  │ background: #422006;…
+  └ 49 lines...
+
+Now build and test:
+
+● Build frontend with dark mode (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -10
+  └ 10 lines...
+
+Build successful. Now commit and run tests:
+
+● Commit iteration 291 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #291: Add dark mode toggle with persisted preference
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 20 lines...
+
+Clean up tester artifacts:
+

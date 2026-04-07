@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useTheme } from './hooks/useTheme';
 import Home from './pages/Home';
 import Conversation from './pages/Conversation';
 import Pronunciation from './pages/Pronunciation';
@@ -10,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 function Header() {
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   // Close nav on route change
   const handleNavClick = () => setNavOpen(false);
@@ -19,6 +22,20 @@ function Header() {
       <h1 onClick={() => { navigate('/'); setNavOpen(false); }} style={{ cursor: 'pointer' }}>
         English Practice
       </h1>
+      <nav className={navOpen ? 'nav-open' : ''}>
+        <NavLink to="/conversation" onClick={handleNavClick}>Conversation</NavLink>
+        <NavLink to="/pronunciation" onClick={handleNavClick}>Pronunciation</NavLink>
+        <NavLink to="/vocabulary" onClick={handleNavClick}>Vocabulary</NavLink>
+        <NavLink to="/dashboard" onClick={handleNavClick}>Dashboard</NavLink>
+      </nav>
+      <button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+        title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+      >
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
       <button
         className="nav-toggle"
         onClick={() => setNavOpen(!navOpen)}
@@ -27,12 +44,6 @@ function Header() {
       >
         {navOpen ? '✕' : '☰'}
       </button>
-      <nav className={navOpen ? 'nav-open' : ''}>
-        <NavLink to="/conversation" onClick={handleNavClick}>Conversation</NavLink>
-        <NavLink to="/pronunciation" onClick={handleNavClick}>Pronunciation</NavLink>
-        <NavLink to="/vocabulary" onClick={handleNavClick}>Vocabulary</NavLink>
-        <NavLink to="/dashboard" onClick={handleNavClick}>Dashboard</NavLink>
-      </nav>
     </header>
   );
 }

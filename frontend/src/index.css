@@ -15,6 +15,22 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
+[data-theme="dark"] {
+  --primary: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: #4f46e5;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -91,6 +107,26 @@ body {
   margin-left: auto;
   padding: 4px 8px;
   color: var(--text);
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* Stats grid */
@@ -676,4 +712,52 @@ body {
 .skeleton-text-sm {
   height: 12px;
   width: 60%;
+}
+
+/* Dark mode overrides for hardcoded colors */
+[data-theme="dark"] .feedback-panel {
+  background: #422006;
+  border-color: #92400e;
+}
+
+[data-theme="dark"] .feedback-panel.correct {
+  background: #052e16;
+  border-color: #166534;
+}
+
+[data-theme="dark"] .word-correct {
+  background: #052e16;
+  color: #4ade80;
+  border-color: #166534;
+}
+
+[data-theme="dark"] .word-incorrect {
+  background: #450a0a;
+  color: #fca5a5;
+  border-color: #991b1b;
+}
+
+[data-theme="dark"] .word-partial {
+  background: #422006;
+  color: #fbbf24;
+  border-color: #92400e;
+}
+
+[data-theme="dark"] .score-high { background: #052e16; color: #4ade80; border-color: #22c55e; }
+[data-theme="dark"] .score-mid { background: #422006; color: #fbbf24; border-color: #f59e0b; }
+[data-theme="dark"] .score-low { background: #450a0a; color: #fca5a5; border-color: #ef4444; }
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #334155 25%, #1e293b 50%, #334155 75%);
+  background-size: 200% 100%;
+}
+
+[data-theme="dark"] .quiz-option {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .quiz-option:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: #1e1b4b;
 }
