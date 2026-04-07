@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, PlayCircle, ChevronLeft, ChevronRight, Headphones } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ChatMessage, type ConversationListItem, type ConversationSummary, type ReplayTurn, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -98,6 +98,8 @@ export default function Conversation() {
   const [replayTurns, setReplayTurns] = useState<ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
   const [replayLoading, setReplayLoading] = useState(false);
+  const [listenMode, setListenMode] = useState(false);
+  const [revealedMessages, setRevealedMessages] = useState<Set<number>>(new Set());
   const [quizQuestions, setQuizQuestions] = useState<ConversationQuizQuestion[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
@@ -942,6 +944,26 @@ export default function Conversation() {
               </button>
             ))}
           </div>
+          <button
+            onClick={() => setListenMode((v) => !v)}
+            aria-label={listenMode ? 'Disable listen mode' : 'Enable listen mode'}
+            aria-pressed={listenMode}
+            title={listenMode ? 'Listen Mode ON — tap to show text' : 'Listen Mode — hide AI text for listening practice'}
+            style={{
+              padding: '2px 8px',
+              fontSize: 13,
+              border: '1px solid var(--border)',
+              borderRadius: 4,
+              background: listenMode ? 'var(--primary)' : 'transparent',
+              color: listenMode ? '#fff' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <Headphones size={14} /> {listenMode ? 'ON' : ''}
+          </button>
           {duration > 0 ? (
             <>
               <span className={`timer ${timerClass}`}>{formatTime(timeLeft)}</span>
@@ -982,7 +1004,13 @@ export default function Conversation() {
         return (
           <div style={{ padding: '4px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', background: 'var(--bg-secondary, #f9fafb)', borderBottom: '1px solid var(--border, #e5e7eb)' }}>
             <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>)</span>
-            <span>{messages.filter((m) => m.role === 'user').length} messages sent</span>
+            <span>
+              {messages.filter((m) => m.role === 'user').length} messages sent
+              {listenMode && (() => {
+                const assistantCount = messages.filter((m) => m.role === 'assistant').length;
+                return assistantCount > 0 ? ` · 👁 ${revealedMessages.size}/${assistantCount} revealed` : '';
+              })()}
+            </span>
           </div>
         );
       })()}
@@ -992,7 +1020,16 @@ export default function Conversation() {
           <div key={i}>
             <div className={`message message-${msg.role}`}>
               {msg.role === 'assistant' ? (
-                <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} onSpeak={tts.speak} />
+                listenMode && !revealedMessages.has(i) ? (
+                  <div
+                    onClick={() => setRevealedMessages((prev) => new Set(prev).add(i))}
+                    style={{ padding: '12px 16px', background: 'var(--bg-secondary, #f0f0f0)', borderRadius: 8, cursor: 'pointer', textAlign: 'center', color: 'var(--text-secondary)', userSelect: 'none' }}
+                  >
+                    🎧 Tap to reveal text
+                  </div>
+                ) : (
+                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} onSpeak={tts.speak} />
+                )
               ) : (
                 msg.content
               )}

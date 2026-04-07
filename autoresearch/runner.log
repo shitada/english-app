@@ -1330,3 +1330,137 @@ Still used once for the feedback/response gather. Good, keep the import. Now com
   │ date +%s
   └ 2 lines...
 
+● Commit 275 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #275: Merge phrase suggestion and key phrase extraction into single LLM call"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+854 passed. Smoke test needed (router changed):
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend .tsx changes — QA skipped. Call evaluator:
+
+● Evaluator Evaluate iteration 275
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ 1 line read
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L1:60 (58 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.25, KEEP. T0=1775524085, T1=1775524493, T2=1775524569, T3=1775524621, T4=1775524709
+- propose=408, implement=76, test=52, evaluate=88, total=624
+
+● Record iteration 275 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "275" "cdee639" "2026-04-07" "408" "76" "52" "88" "624" \
+  │ "854" "854" "pass" "7.25" "KEPT" "Merge phrase suggestion and key phrase extraction into
+  │ single LLM call" \…
+  └ 3 lines...
+
+---
+
+● T0 for 276 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 276
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ 89 lines read
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L1100:1180 (81 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Great feature idea. Let me implement it:
+
+● Read state area for new state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '98,102p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the toggle button in the chat header. Let me find a good spot — next to volume/speed controls:
+
+● Check if Headphones icon imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Headphones\|headphones"
+  │ frontend/src/pages/Conversation.tsx
+  └ 1 line...
+
+Not imported yet. Let me add it to imports and add the toggle:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the listen mode toggle button in the header — between speed controls and timer:
+
+● Find timer conditional in header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "duration > 0 ?"
+  │ frontend/src/pages/Conversation.tsx | head -3
+  └ 3 lines...
+
+● Read before timer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '944,949p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 7 lines...
+
+● Edit Conversation.tsx +20
+  └ frontend/src/pages/Conversation.tsx
+
+Now wrap assistant message rendering. Let me find the assistant message display in the chat:
+
+● Find assistant message rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "HighlightedMessage\|msg.role ===
+  │ 'assistant'" frontend/src/pages/Conversation.tsx | head -10
+  └ 4 lines...
+
+● Read assistant message rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1013,1035p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 24 lines...
+
+Now I need to wrap the assistant message with listen mode logic:
+
+● Edit Conversation.tsx +10 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the revealed counter in the grammar HUD area:
+
+● Find message count display (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "messages sent"
+  │ frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● Edit Conversation.tsx +7 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
