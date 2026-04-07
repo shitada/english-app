@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory } from '../components/conversation';
+import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -404,6 +404,7 @@ export default function Conversation() {
   // Topic selection
   if (phase === 'select') {
     return (
+      <PhaseTransition phase={phase}>
       <div>
         <h2 style={{ marginBottom: 8 }}>Choose a Scenario</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
@@ -580,12 +581,14 @@ export default function Conversation() {
           </div>
         )}
       </div>
+      </PhaseTransition>
     );
   }
 
   // History view (read-only past conversation)
   if (phase === 'history') {
     return (
+      <PhaseTransition phase={phase}>
       <ConversationHistory
         historyMessages={historyMessages}
         historySummary={historySummary}
@@ -595,12 +598,14 @@ export default function Conversation() {
         onReplay={startReplay}
         tts={tts}
       />
+      </PhaseTransition>
     );
   }
 
   // Replay view (turn-by-turn stepper)
   if (phase === 'replay') {
     return (
+      <PhaseTransition phase={phase}>
       <ConversationReplay
         turns={replayTurns}
         replayIndex={replayIndex}
@@ -608,6 +613,7 @@ export default function Conversation() {
         onBack={() => setPhase('history')}
         tts={tts}
       />
+      </PhaseTransition>
     );
   }
 
@@ -626,6 +632,7 @@ export default function Conversation() {
       setQuizError('');
     };
     return (
+      <PhaseTransition phase={phase}>
       <ConversationSummaryView
         summary={summary}
         messages={messages}
@@ -642,6 +649,7 @@ export default function Conversation() {
         onNewConversation={handleNewConversation}
         tts={tts}
       />
+      </PhaseTransition>
     );
   }
 
@@ -649,6 +657,7 @@ export default function Conversation() {
   const timerClass = duration > 0 ? (timeLeft <= 30 ? 'danger' : timeLeft <= 60 ? 'warning' : '') : '';
 
   return (
+    <PhaseTransition phase={phase}>
     <div className="chat-container">
       <KeyboardShortcutsPanel open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <div className="chat-header">
@@ -900,5 +909,6 @@ export default function Conversation() {
         </button>
       </div>
     </div>
+    </PhaseTransition>
   );
 }

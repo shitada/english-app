@@ -3466,3 +3466,224 @@ Rebuild and amend:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3
   └ 4 lines...
 
+● Amend commit with dark mode fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #299: Add dashboard weekly progress report with copy-to-clipboard" --no-edit 2>&1
+  │ | tail -3
+  └ 3 lines...
+
+Now record T3 and call the evaluator:
+
+● Record T3 after testing (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Get git diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -200
+  └ 201 lines...
+
+T3=1775590298, test_sec=810. Now call the evaluator:
+
+● Evaluator Evaluate iteration 299
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L100:200 (101 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L500:610 (111 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 7.15, verdict: keep. All conditions met. Recording results:
+
+● Record iteration 299 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "299" "$HASH" "2026-04-07" "129" "119" "810" "88" "1146" \
+  │ "888" "888" "pass" "7.15" "KEPT" "Add dashboard weekly progress report with
+  │ copy-to-clipboard" \…
+  └ 3 lines...
+
+Results recorded correctly with tabs. Now update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ Iteration 299 complete — KEPT (score 7.15). Moving to iteration 300.
+
+---
+
+## Iteration 300
+
+● Context restore for iteration 300 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 29 lines...
+
+T0=1775590406. Now call the proposer:
+
+● Proposer Propose iteration 300
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L900:920 (5 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:80 (79 lines read)
+
+● Record T1 for iteration 300 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775590500, propose_sec=94. Now implement. Let me check the Conversation.tsx structure:
+
+● Understand Conversation phase structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Conversation.tsx
+  │ && grep -n "phase ==\|setPhase\|return (" frontend/src/pages/Conversation.tsx | head -30
+  └ 32 lines...
+
+● Read tail of index.css (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 frontend/src/index.css
+  └ 31 lines...
+
+● Check if conversation components dir exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/conversation/
+  │ 2>/dev/null
+  └ 3 lines...
+
+● Read history/replay/summary/chat sections (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '585,660p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 76 lines...
+
+● Read phase select section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '400,420p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+● Read conversation components index (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 7 lines...
+
+Now implement the animated transitions. Let me create the PhaseTransition component and CSS:
+
+● Create PhaseTransition.tsx +28
+  └ frontend/src/components/conversation/PhaseTransition.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Add CSS animations to index.css:
+
+● Check last line of index.css (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -1 frontend/src/index.css
+  └ 2 lines...
+
+● Add phase transition CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/index.css << 'CSSEOF'
+  │
+  │ /* Phase transition animations */
+  │ .phase-transition {
+  │ width: 100%;…
+  └ 24 lines...
+
+Now wrap the phase returns in Conversation.tsx. Let me check what's imported:
+
+● Check Conversation imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20
+  │ frontend/src/pages/Conversation.tsx
+  └ 21 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now I need to wrap each phase return. Let me look at the exact return points:
+
+● Check select phase return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '405,408p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 5 lines...
+
+● Find phase block starts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^  if (phase ==\|^  // Chat"
+  │ frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+I need to wrap each phase return with PhaseTransition. Let me do this for each block:
+
+● Check select return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '405,407p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 4 lines...
+
+● Check end of select phase and start of history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '583,590p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+Now let me wrap each phase. The approach: wrap each return block's content with `<PhaseTransition phase={phase}>`. I'll do them one by one:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now I need to find the closing of the select phase:
+
+● Find select phase closing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '580,590p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 12 lines...
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+● Check history closing and replay start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '596,612p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 18 lines...
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+● Check replay closing and summary start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '614,630p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 18 lines...
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+● Check summary return and chat section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '633,656p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 24 lines...
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now wrap the chat phase return. Let me find it:
+
+● Check chat return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '655,660p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+● Check chat phase closing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now let me verify the TypeScript compiles and test:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TypeScript passes. Now commit and run backend tests:
+

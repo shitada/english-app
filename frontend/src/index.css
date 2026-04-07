@@ -905,3 +905,29 @@ button.chat-header-toggle {
   min-width: 24px;
   text-align: center;
 }
+
+/* Phase transition animations */
+.phase-transition {
+  width: 100%;
+}
+
+.phase-enter {
+  animation: phaseSlideIn 250ms ease-out;
+}
+
+@keyframes phaseSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-enter {
+    animation: none;
+  }
+}

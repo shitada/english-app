@@ -145,7 +145,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add conversation topic favoriting — let users bookmark preferred scenarios for quick access (#285)
 - [x] Add vocabulary word grouping by difficulty — auto-categorize words into tiers based on SRS success rate (#290)
-- [ ] Add dashboard weekly email summary — generate a weekly progress report
+- [x] Add dashboard weekly email summary — generate a weekly progress report (#299)
 - [x] Add pronunciation recording history playback — browse and replay past recordings chronologically (#292)
 - [x] Add dark mode toggle — persist preference and apply CSS variables (#291)
 
