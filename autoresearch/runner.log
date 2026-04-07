@@ -3873,3 +3873,71 @@ Now add unit tests:
 
 Now commit and test:
 
+● Commit iteration 301 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #301: Add database WAL checkpoint scheduling for long-running instances"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+890 passed (2 new tests). Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Now check if smoke test is needed:
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All tests pass. This is type "feature" but no frontend UI files changed — QA tester optional, skip is OK. Record T3:
+
+● Record T3 for iteration 301 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775591227, test_sec=124. QA skipped — backend-only feature. Now call evaluator:
+
+● Evaluator Evaluate iteration 301
+  │ Read main.py
+  │   │ app/main.py
+  │   └ 219 lines read
+  └ Read test_database.py
+      │ tests/unit/test_database.py
+      └ 212 lines read
+
+● Record T4 for iteration 301 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score: 6.5, verdict: keep. Recording results:
+
+● Record iteration 301 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "301" "$HASH" "2026-04-07" "86" "60" "64" "63" "273" \
+  │ "890" "890" "pass" "6.5" "KEPT" "Add database WAL checkpoint scheduling for long-running
+  │ instances" \…
+  └ 3 lines...
+
+Update backlog:
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ Iteration 301 complete — KEPT (score 6.5). Now write the session log and commit docs:
+
+● Create invocation-006.md +45
+  └ autoresearch/logs/invocation-006.md
+

@@ -300,3 +300,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 298	3aa3377	2026-04-08	92	126	486	68	772	888	888	pass	7.45	KEPT	Improve conversation chat mobile layout with collapsible header and larger touch targets
 299	2cd6c75	2026-04-07	129	119	810	88	1146	888	888	pass	7.15	KEPT	Add dashboard weekly progress report with copy-to-clipboard
 300	ac1a043	2026-04-07	94	100	331	56	581	888	888	pass	7.40	KEPT	Add animated transitions between conversation phases
+301	4d2de5c	2026-04-07	86	60	64	63	273	890	890	pass	6.5	KEPT	Add database WAL checkpoint scheduling for long-running instances
