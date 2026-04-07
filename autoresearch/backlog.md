@@ -164,3 +164,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Improve conversation chat mobile layout — larger touch targets, collapsible header (#298)
 - [x] Add correction drill exercise to conversation summary — active recall for grammar corrections (#303)
 - [x] Add shadowing exercise to conversation summary — listen and repeat speaking practice (#304)
+- [x] Add per-conversation grammar accuracy trend chart to dashboard (#305)

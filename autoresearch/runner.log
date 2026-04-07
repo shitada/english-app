@@ -5303,3 +5303,192 @@ Two issues to fix. Let me handle them:
 
 Build succeeded. Now amend the commit:
 
+● Amend commit with build (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #305: Add per-conversation grammar accuracy trend chart to dashboard"
+  └ 17 lines...
+
+Now restart the server and re-run the tester:
+
+● Restart server with new build (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 2; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 12 lines...
+
+● Tester Re-QA test iteration 305
+  │ playwright-browser_snapshot depth: 4
+  │   └ ### Page
+  └ playwright-browser_evaluate function: "() => {   const h3s = document.querySelectorAll('h3');  …
+      └ ### Result
+
+QA passed with ux_score 8. Now let me record timestamp and run the evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 12 lines...
+
+● Evaluator Evaluate iteration 305
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L300:end (586 lines read)
+  └ Read ShadowingExercise.tsx
+      │ frontend/src/components/conversation/ShadowingExercise.tsx
+      └ L1:15 (15 lines read)
+
+Evaluator says KEEP with score 7.55. Let me record timestamps and results:
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 305 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "305" "3042bc2" "2026-04-08" "319" "140" "831" "64" "1354" \
+  │ "901" "901" "pass" "7.55" "KEPT" "Add per-conversation grammar accuracy trend chart to
+  │ dashboard" \…
+  └ 3 lines...
+
+Iteration 305 recorded. Now update the backlog:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L159:167 (8 lines read)
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 305 complete. Checklist: proposer ✅, evaluator ✅, tester ✅ (frontend changed). Score 7.55, KEPT.
+
+---
+
+## Iteration 306
+
+● Record T0 for iteration 306 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+T0 = 1775595796. Now call the proposer:
+
+● Proposer Propose iteration 306
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L500:620 (121 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L79:108 (29 lines read)
+
+● Record T1 for iteration 306 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775595966. Now implement. Let me check the existing conversation DAL and summary component:
+
+● Find metrics function in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_metrics\|def
+  │ get_summary\|def get_conversation_summary" app/dal/conversation.py | head -10
+  └ 3 lines...
+
+● Check file sizes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/conversation.py
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 4 lines...
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L529:575 (47 lines read)
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 222 lines read
+
+Good. Now I need to:
+1. Enhance `get_conversation_metrics()` to compute fluency metrics from message content
+2. Update the ConversationSummary component to show the new metrics
+3. Add tests
+
+● Read conversation.py
+  │ app/dal/conversation.py
+  └ L529:562 (32 lines read)
+
+● Edit conversation.py +16 -1
+  └ app/dal/conversation.py
+
+Now update ConversationSummary.tsx to show the new metrics:
+
+● Edit ConversationSummary.tsx +24
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add unit tests:
+
+● Check existing metrics tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_metrics"
+  │ tests/unit/test_conversation_dal.py | head -5
+  └ 6 lines...
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L988:1040 (53 lines read)
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 tests/unit/test_conversation_dal.py
+  └ 6 lines...
+
+● Get line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+Now I need to add fluency metric assertions to existing tests and add new tests. Let me update the existing test to also check the new fields, then add new focused tests:
+
+● Edit test_conversation_dal.py +3
+  └ tests/unit/test_conversation_dal.py
+
+Now add new fluency-specific tests at the end of the file:
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L1081:1087 (7 lines read)
+
+● Edit test_conversation_dal.py +48
+  └ tests/unit/test_conversation_dal.py
+
+Now build frontend and run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run relevant tests first (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_conversation_dal.py::TestGetConversationMetrics
+  │ tests/unit/test_conversation_dal.py::TestFluencyMetrics -v 2>&1 | tail -25
+  └ 22 lines...
+
+All passing. Now run full test suite:
+
+● Run full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+906 passed. Now commit, build frontend, and check for smoke test:
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+

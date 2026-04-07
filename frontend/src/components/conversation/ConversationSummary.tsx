@@ -102,6 +102,30 @@ export function ConversationSummary({
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Correct</div>
               </div>
             )}
+            {summary.performance.avg_words_per_message > 0 && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: summary.performance.avg_words_per_message >= 12 ? 'var(--success, #22c55e)' : summary.performance.avg_words_per_message >= 6 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
+                  {summary.performance.avg_words_per_message}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Avg Words/Msg</div>
+              </div>
+            )}
+            {summary.performance.vocabulary_diversity > 0 && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: summary.performance.vocabulary_diversity >= 60 ? 'var(--success, #22c55e)' : summary.performance.vocabulary_diversity >= 40 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
+                  {summary.performance.vocabulary_diversity}%
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Vocab Diversity</div>
+              </div>
+            )}
+            {summary.performance.total_words > 0 && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>
+                  {summary.performance.total_words}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Total Words</div>
+              </div>
+            )}
           </div>
         </div>
       )}

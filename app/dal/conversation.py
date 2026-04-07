@@ -531,13 +531,21 @@ async def get_conversation_metrics(
 ) -> dict[str, Any]:
     """Compute quantitative performance metrics for a conversation."""
     rows = await db.execute_fetchall(
-        "SELECT feedback_json FROM messages WHERE conversation_id = ? AND role = 'user'",
+        "SELECT content, feedback_json FROM messages WHERE conversation_id = ? AND role = 'user'",
         (conversation_id,),
     )
     total_user_messages = len(rows)
     grammar_checked = 0
     grammar_correct = 0
+    total_words = 0
+    all_words: list[str] = []
     for row in rows:
+        # Fluency metrics from content
+        words = row["content"].split() if row["content"] else []
+        total_words += len(words)
+        all_words.extend(w.lower().strip(".,!?;:'\"") for w in words if w.strip(".,!?;:'\""))
+
+        # Grammar metrics from feedback
         if not row["feedback_json"]:
             continue
         try:
@@ -552,11 +560,18 @@ async def get_conversation_metrics(
         if coerce_bool(feedback["is_correct"]):
             grammar_correct += 1
     accuracy_rate = round(grammar_correct / grammar_checked * 100, 1) if grammar_checked > 0 else 0.0
+    unique_words = len(set(all_words))
+    avg_words = round(total_words / total_user_messages, 1) if total_user_messages > 0 else 0.0
+    diversity = round(unique_words / len(all_words) * 100, 1) if all_words else 0.0
     return {
         "total_user_messages": total_user_messages,
         "grammar_checked": grammar_checked,
         "grammar_correct": grammar_correct,
         "grammar_accuracy_rate": accuracy_rate,
+        "total_words": total_words,
+        "unique_words": unique_words,
+        "avg_words_per_message": avg_words,
+        "vocabulary_diversity": diversity,
     }
 
 

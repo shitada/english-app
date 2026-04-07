@@ -998,6 +998,9 @@ class TestGetConversationMetrics:
         assert metrics["grammar_checked"] == 0
         assert metrics["grammar_correct"] == 0
         assert metrics["grammar_accuracy_rate"] == 0.0
+        assert metrics["total_words"] == 0
+        assert metrics["avg_words_per_message"] == 0.0
+        assert metrics["vocabulary_diversity"] == 0.0
 
     async def test_messages_with_feedback(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
@@ -1082,3 +1085,51 @@ class TestGetShadowingPhrases:
         await add_message(test_db, cid, "assistant", "How can I help you today?")
         result = await get_shadowing_phrases(test_db, cid)
         assert len(result) == 1
+
+
+@pytest.mark.unit
+class TestFluencyMetrics:
+    """Tests for fluency metrics in get_conversation_metrics."""
+
+    async def test_avg_words_per_message(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I would like to check in please")
+        await add_message(test_db, cid, "user", "Yes that is correct")
+        metrics = await get_conversation_metrics(test_db, cid)
+        # 7 words + 4 words = 11, avg = 5.5
+        assert metrics["total_words"] == 11
+        assert metrics["avg_words_per_message"] == 5.5
+
+    async def test_vocabulary_diversity_all_unique(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello world today beautiful")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["unique_words"] == 4
+        assert metrics["vocabulary_diversity"] == 100.0
+
+    async def test_vocabulary_diversity_with_repeats(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "the cat and the dog and the bird")
+        metrics = await get_conversation_metrics(test_db, cid)
+        # 8 words total, unique: the, cat, and, dog, bird = 5
+        assert metrics["total_words"] == 8
+        assert metrics["unique_words"] == 5
+        assert metrics["vocabulary_diversity"] == 62.5
+
+    async def test_single_word_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "yes")
+        await add_message(test_db, cid, "user", "no")
+        await add_message(test_db, cid, "user", "yes")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["total_words"] == 3
+        assert metrics["avg_words_per_message"] == 1.0
+        assert metrics["unique_words"] == 2
+
+    async def test_punctuation_stripped(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello! How are you?")
+        metrics = await get_conversation_metrics(test_db, cid)
+        # "hello", "how", "are", "you" = 4 unique out of 4
+        assert metrics["unique_words"] == 4
+        assert metrics["vocabulary_diversity"] == 100.0
