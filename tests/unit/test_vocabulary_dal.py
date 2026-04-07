@@ -9,10 +9,12 @@ from app.dal.vocabulary import (
     build_fill_blank_quiz,
     build_quiz,
     delete_word,
+    get_drill_words,
     get_due_word_ids,
     get_due_words,
     get_progress,
     get_review_forecast,
+    get_sentence_build_exercises,
     get_similar_words,
     get_srs_analytics,
     get_vocabulary_stats,
@@ -1276,3 +1278,74 @@ class TestCheckSentenceBuild:
     def test_missing_word(self):
         from app.dal.vocabulary import check_sentence_build
         assert check_sentence_build("I like cats", "I like") is False
+
+
+@pytest.mark.unit
+class TestGetDrillWords:
+    async def test_empty_database(self, test_db):
+        result = await get_drill_words(test_db, count=5)
+        assert result == []
+
+    async def test_returns_words_from_vocabulary(self, test_db):
+        qs = _make_questions(5)
+        await save_words(test_db, "greetings", qs)
+        result = await get_drill_words(test_db, count=3)
+        assert len(result) == 3
+        assert all("word" in r and "meaning" in r for r in result)
+
+    async def test_count_respected(self, test_db):
+        qs = _make_questions(10)
+        await save_words(test_db, "greetings", qs)
+        result = await get_drill_words(test_db, count=5)
+        assert len(result) == 5
+
+    async def test_no_duplicate_word_ids(self, test_db):
+        qs = _make_questions(8)
+        await save_words(test_db, "greetings", qs)
+        # Create some progress to trigger due/weak phases
+        words = await get_words_by_topic(test_db, "greetings")
+        for w in words[:3]:
+            await update_progress(test_db, w["id"], True)
+        result = await get_drill_words(test_db, count=8)
+        ids = [r["id"] for r in result]
+        assert len(ids) == len(set(ids))
+
+    async def test_returns_fewer_than_count_when_not_enough_words(self, test_db):
+        qs = _make_questions(2)
+        await save_words(test_db, "greetings", qs)
+        result = await get_drill_words(test_db, count=10)
+        assert len(result) == 2
+
+
+@pytest.mark.unit
+class TestGetSentenceBuildExercises:
+    async def test_empty_topic(self, test_db):
+        result = await get_sentence_build_exercises(test_db, "greetings", count=5)
+        assert result == []
+
+    async def test_returns_exercises_with_sentences(self, test_db):
+        qs = [
+            {"word": "hello", "correct_meaning": "greeting", "example_sentence": "Hello there my friend.", "difficulty": 1},
+            {"word": "goodbye", "correct_meaning": "farewell", "example_sentence": "Goodbye and good luck.", "difficulty": 1},
+        ]
+        await save_words(test_db, "greetings", qs)
+        result = await get_sentence_build_exercises(test_db, "greetings", count=5)
+        assert len(result) == 2
+        for ex in result:
+            assert "scrambled_words" in ex
+            assert "correct_sentence" in ex
+            assert "hint_word" in ex
+            # Scrambled should contain same words as correct
+            correct_words = sorted(ex["correct_sentence"].split())
+            scrambled_words = sorted(ex["scrambled_words"])
+            assert correct_words == scrambled_words
+
+    async def test_filters_short_sentences(self, test_db):
+        qs = [
+            {"word": "hi", "correct_meaning": "greeting", "example_sentence": "Hi there.", "difficulty": 1},
+            {"word": "ok", "correct_meaning": "agreement", "example_sentence": "OK.", "difficulty": 1},
+        ]
+        await save_words(test_db, "greetings", qs)
+        result = await get_sentence_build_exercises(test_db, "greetings", count=5)
+        # "OK." has only 1 word — should be filtered out; "Hi there." has 2 words — also filtered (< 3)
+        assert len(result) == 0

@@ -1464,3 +1464,105 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit 276 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #276: Add listening comprehension mode to conversation chat"
+  └ 15 lines...
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3 && cd frontend && npx tsc --noEmit 2>&1
+  └ 5 lines...
+
+854 passed, TS pass. Frontend changed, type is "feature" — need QA tester (Playwright locked). Per instructions, proceed with code-review QA.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 276
+  │ List directory app
+  │   └ 11 files found
+  └ List directory tests
+      └ 8 files found
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.6, KEEP. T0=1775524724, T1=1775524870, T2=1775524955, T3=1775525001, T4=1775525108
+- propose=146, implement=85, test=46, evaluate=107, total=384
+
+● Record iteration 276 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "276" "3fa4a69" "2026-04-07" "146" "85" "46" "107" "384" \
+  │ "854" "854" "pass" "6.6" "KEPT" "Add listening comprehension mode to conversation chat" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+---
+
+● T0 for 277 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 277
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L1100:1250 (151 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1250:1400 (29 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good test coverage proposal. Let me look at the functions and existing tests:
+
+● Read get_drill_words (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '367,430p' app/dal/vocabulary.py
+  └ 65 lines...
+
+● Find sentence build function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_sentence_build_exercises"
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read sentence build function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '950,990p' app/dal/vocabulary.py
+  └ 41 lines...
+
+Now let me look at the existing test file and add tests:
+
+● Read test file imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 tests/unit/test_vocabulary_dal.py
+  └ 21 lines...
+
+● Read more imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '20,40p'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 22 lines...
+
+● Read end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 tests/unit/test_vocabulary_dal.py
+  └ 11 lines...
+
+Now add the tests:
+
+● Edit test_vocabulary_dal.py +2
+  └ tests/unit/test_vocabulary_dal.py
+
+● Add unit tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_vocabulary_dal.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 75 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
