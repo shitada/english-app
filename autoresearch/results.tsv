@@ -286,3 +286,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 284	85f08bc	2026-04-07	119	89	69	495	772	869	869	pass	7.05	KEPT	Add shadowing mode waveform visualization for audio comparison
 285	322c48b	2026-04-08	180	90	60	400	730	869	869	pass	7.1	KEPT	Add conversation topic favoriting with star toggle
 286	1cda7b3	2026-04-08	200	100	70	450	820	869	869	pass	7.7	KEPT	Split Pronunciation.tsx into sub-components
+287	188f113	2026-04-08	150	80	50	400	680	869	869	pass	7.15	KEPT	Split Dashboard.tsx into sub-components

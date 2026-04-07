@@ -822,3 +822,119 @@ async def test_generate_quiz_accepts_alternative_key_names(client, mock_copilot)
     assert res.status_code == 200
     assert len(res.json()["questions"]) == 1
     assert res.json()["questions"][0]["correct_index"] == 0
+
+
+async def _create_ended_conversation(client, mock_copilot):
+    """Helper: create and end a conversation, returning its ID."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Great!")
+    mock_copilot.ask_json = AsyncMock(return_value={"is_correct": True, "errors": [], "suggestions": []})
+    await client.post("/api/conversation/message", json={"conversation_id": conv_id, "content": "Hello"})
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Done.", "key_vocabulary": ["hello"], "communication_level": "beginner", "tip": "ok"
+    })
+    await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    return conv_id
+
+
+@pytest.mark.integration
+async def test_generate_quiz_llm_failure_returns_502(client, mock_copilot):
+    """Quiz generation returns 502 when LLM raises an exception."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM timeout"))
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 502
+
+
+@pytest.mark.integration
+async def test_generate_quiz_empty_questions_returns_502(client, mock_copilot):
+    """Quiz generation returns 502 when LLM returns empty questions list."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": []})
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 502
+
+
+@pytest.mark.integration
+async def test_generate_quiz_all_malformed_returns_502(client, mock_copilot):
+    """Quiz returns 502 when all questions are malformed (wrong option count, missing fields)."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": [
+        {"options": ["A", "B"], "correct_index": 0},  # missing question field
+        {"question": "Q?", "options": ["A", "B", "C"], "correct_index": 0, "explanation": "x"},  # only 3 options
+        {"question": "Q2?", "correct_index": 0, "explanation": "x"},  # missing options
+    ]})
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 502
+
+
+@pytest.mark.integration
+async def test_generate_quiz_filters_invalid_keeps_valid(client, mock_copilot):
+    """Valid questions are kept, malformed ones are filtered out."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": [
+        {"question": "Good Q?", "options": ["A", "B", "C", "D"], "correct_index": 1, "explanation": "Yes"},
+        {"options": ["A", "B", "C", "D"], "correct_index": 0},  # no question field
+        {"question": "Also good?", "options": ["W", "X", "Y", "Z"], "correct_index": 3, "explanation": "Z"},
+    ]})
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["questions"]) == 2
+    assert data["questions"][0]["question"] == "Good Q?"
+    assert data["questions"][1]["question"] == "Also good?"
+
+
+@pytest.mark.integration
+async def test_generate_quiz_filters_out_of_range_index(client, mock_copilot):
+    """Questions with out-of-range correct_index are filtered out."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": [
+        {"question": "Q1?", "options": ["A", "B", "C", "D"], "correct_index": 5, "explanation": "x"},
+        {"question": "Q2?", "options": ["A", "B", "C", "D"], "correct_index": -1, "explanation": "x"},
+        {"question": "Q3?", "options": ["A", "B", "C", "D"], "correct_index": 2, "explanation": "OK"},
+    ]})
+    res = await client.post(f"/api/conversation/{conv_id}/quiz")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["questions"]) == 1
+    assert data["questions"][0]["question"] == "Q3?"
+    assert data["questions"][0]["correct_index"] == 2
+
+
+@pytest.mark.integration
+async def test_generate_quiz_count_parameter_bounds(client, mock_copilot):
+    """Count parameter enforces bounds: ge=2, le=8."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    res = await client.post(f"/api/conversation/{conv_id}/quiz?count=1")
+    assert res.status_code == 422
+
+    res = await client.post(f"/api/conversation/{conv_id}/quiz?count=9")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_generate_quiz_truncates_to_count(client, mock_copilot):
+    """LLM returns more questions than requested count — only count are kept."""
+    conv_id = await _create_ended_conversation(client, mock_copilot)
+
+    mock_copilot.ask_json = AsyncMock(return_value={"questions": [
+        {"question": f"Q{i}?", "options": ["A", "B", "C", "D"], "correct_index": 0, "explanation": f"E{i}"}
+        for i in range(6)
+    ]})
+    res = await client.post(f"/api/conversation/{conv_id}/quiz?count=3")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["questions"]) == 3
+    assert data["questions"][0]["question"] == "Q0?"
+    assert data["questions"][2]["question"] == "Q2?"
