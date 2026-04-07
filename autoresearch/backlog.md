@@ -131,7 +131,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Split Pronunciation.tsx into sub-components (MinimalPairsExercise, TongueTwisterDrill, PronunciationHistory) (#286)
 - [x] Split Dashboard.tsx into sub-components (AchievementsPanel, MistakeJournal) (#287)
-- [ ] Add integration tests for conversation quiz endpoints (generate + answer validation)
+- [x] Add integration tests for conversation quiz endpoints (7 edge case tests) (#288)
 - [ ] Add integration tests for minimal pairs pronunciation endpoint
 
 ## [HIGH] Speaking & Listening Features

@@ -713,3 +713,74 @@ async def test_minimal_pairs_invalid_difficulty(client):
     """Invalid difficulty returns 422."""
     res = await client.get("/api/pronunciation/minimal-pairs?difficulty=invalid")
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_count_one(client):
+    """count=1 returns exactly 1 pair."""
+    res = await client.get("/api/pronunciation/minimal-pairs?count=1")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["pairs"]) == 1
+    assert data["total"] == 1
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_count_exceeds_pool(client):
+    """Requesting more pairs than available returns all without error."""
+    res = await client.get("/api/pronunciation/minimal-pairs?difficulty=advanced&count=30")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["pairs"]) <= 30
+    assert data["total"] == len(data["pairs"])
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_count_zero_returns_422(client):
+    """count=0 violates ge=1 constraint → 422."""
+    res = await client.get("/api/pronunciation/minimal-pairs?count=0")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_count_over_max_returns_422(client):
+    """count=31 violates le=30 constraint → 422."""
+    res = await client.get("/api/pronunciation/minimal-pairs?count=31")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_intermediate_filter(client):
+    """Intermediate filter returns only intermediate pairs."""
+    res = await client.get("/api/pronunciation/minimal-pairs?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["pairs"]) > 0
+    assert all(p["difficulty"] == "intermediate" for p in data["pairs"])
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_advanced_filter(client):
+    """Advanced filter returns only advanced pairs."""
+    res = await client.get("/api/pronunciation/minimal-pairs?difficulty=advanced")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["pairs"]) > 0
+    assert all(p["difficulty"] == "advanced" for p in data["pairs"])
+
+
+@pytest.mark.integration
+async def test_minimal_pairs_response_shape(client):
+    """Every pair has all required fields with correct types."""
+    res = await client.get("/api/pronunciation/minimal-pairs?count=20")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["pairs"]) > 0
+    for pair in data["pairs"]:
+        assert isinstance(pair["word_a"], str) and len(pair["word_a"]) > 0
+        assert isinstance(pair["word_b"], str) and len(pair["word_b"]) > 0
+        assert isinstance(pair["phoneme_contrast"], str) and len(pair["phoneme_contrast"]) > 0
+        assert isinstance(pair["example_a"], str) and len(pair["example_a"]) > 0
+        assert isinstance(pair["example_b"], str) and len(pair["example_b"]) > 0
+        assert pair["difficulty"] in ("beginner", "intermediate", "advanced")
+        assert pair["play_word"] in ("a", "b")

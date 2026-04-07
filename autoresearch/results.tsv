@@ -287,3 +287,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 285	322c48b	2026-04-08	180	90	60	400	730	869	869	pass	7.1	KEPT	Add conversation topic favoriting with star toggle
 286	1cda7b3	2026-04-08	200	100	70	450	820	869	869	pass	7.7	KEPT	Split Pronunciation.tsx into sub-components
 287	188f113	2026-04-08	150	80	50	400	680	869	869	pass	7.15	KEPT	Split Dashboard.tsx into sub-components
+288	cea82bd	2026-04-08	120	60	40	0	220	876	876	pass	8.1	KEPT	Add 7 integration tests for conversation quiz edge cases
