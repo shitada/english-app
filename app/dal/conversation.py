@@ -281,13 +281,18 @@ async def get_conversation_export(
     }
 
 
-async def get_grammar_accuracy(db: aiosqlite.Connection) -> dict[str, Any]:
-    """Get grammar accuracy stats across all conversations."""
+async def get_grammar_accuracy(
+    db: aiosqlite.Connection, *, days: int = 180
+) -> dict[str, Any]:
+    """Get grammar accuracy stats across conversations within a time window."""
     rows = await db.execute_fetchall(
         """SELECT c.topic, m.feedback_json
            FROM messages m
            JOIN conversations c ON c.id = m.conversation_id
-           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL"""
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+             AND m.created_at >= date('now', ? || ' days')
+           LIMIT 5000""",
+        (f"-{days}",),
     )
     topic_stats: dict[str, dict[str, int]] = {}
     total_correct = 0
@@ -574,12 +579,13 @@ async def get_conversation_vocabulary(
     # Combine all message content into one searchable text
     full_text = " ".join(r["content"].lower() for r in msg_rows)
 
-    # Get all vocabulary words
+    # Get all vocabulary words (capped for safety)
     word_rows = await db.execute_fetchall(
         """SELECT w.id, w.word, w.meaning, w.topic, w.difficulty,
                   p.level, p.correct_count, p.incorrect_count, p.next_review_at
            FROM vocabulary_words w
-           LEFT JOIN vocabulary_progress p ON w.id = p.word_id"""
+           LEFT JOIN vocabulary_progress p ON w.id = p.word_id
+           LIMIT 2000"""
     )
 
     matched = []

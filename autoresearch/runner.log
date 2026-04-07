@@ -937,3 +937,112 @@ The problem is `q.get("correct_index")` returns `0` which is falsy, so it falls 
 ● Edit conversation.py +7 -1
   └ app/routers/conversation.py
 
+● Amend and re-test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #272: Fix quiz validation rejecting valid LLM output for correct_index" --no-edit
+  │ && uv run pytest tests/unit tests/integration -v 2>&1 | tail -5
+  └ 21 lines...
+
+All 854 passed. Smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -3
+  └ 4 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend .tsx changes — QA skipped. Now call evaluator:
+
+● Evaluator Evaluate iteration 272
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L650:710 (32 lines read)
+  └ Read test_conversation_api.py
+      └ tests/integration/test_conversation_api.py
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, KEEP. T0=1775522538, T1=1775522892, T2=1775522935, T3=1775523046, T4=1775523118
+- propose=354, implement=43, test=111, evaluate=72, total=580
+
+● Record iteration 272 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "272" "ef80ebb" "2026-04-07" "354" "43" "111" "72" "580" \
+  │ "854" "854" "pass" "7.8" "KEPT" "Fix quiz validation rejecting valid LLM output for
+  │ correct_index" \…
+  └ 3 lines...
+
+---
+
+● T0 for iteration 273 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 273
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L505:600 (96 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L600:700 (100 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me look at the functions that need fixing:
+
+● Find functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def
+  │ get_grammar_accuracy\|async def get_conversation_vocabulary" app/dal/conversation.py
+  └ 3 lines...
+
+● Read get_conversation_vocabulary (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '557,610p' app/dal/conversation.py
+  └ 46 lines...
+
+● Read get_grammar_accuracy (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '284,340p' app/dal/conversation.py
+  └ 58 lines...
+
+Good, I can see both issues clearly. Let me implement the fixes:
+
+● Edit conversation.py +8 -3
+  └ app/dal/conversation.py
+
+Now fix get_conversation_vocabulary to add LIMIT:
+
+● Edit conversation.py +3 -2
+  └ app/dal/conversation.py
+
+Now check if the router calls get_grammar_accuracy to see if I need to update the call:
+
+● Find call sites (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_grammar_accuracy"
+  │ app/routers/conversation.py
+  └ 2 lines...
+
+The call doesn't pass `days`, so it'll use the default 180. That's fine. Now add/update tests:
+
+● Find existing grammar accuracy tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammar_accuracy\|get_grammar_accuracy" tests/unit/test_conversation_dal.py
+  └ 14 lines...
+
+● Read grammar accuracy test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '585,660p'
+  │ tests/unit/test_conversation_dal.py
+  └ 76 lines...
+
+The existing tests should still pass since the default `days=180` is large enough for test data. Let me commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
