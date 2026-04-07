@@ -294,3 +294,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 292	b68aba6	2026-04-08	109	200	393	75	777	888	888	pass	6.9	KEPT	Add pronunciation recording history playback with IndexedDB
 293	6fff4ce	2026-04-08	149	116	1056	60	1381	888	888	pass	7.6	KEPT	Add role swap briefing panel with role context and professional phrases
 294	8e2bd46	2026-04-08	91	77	56	78	302	888	888	pass	6.2	KEPT	Add connection health indicator in UI header
+295	344a024	2026-04-08	87	61	302	70	520	888	888	pass	7.35	KEPT	Add request retry with exponential backoff and retry banner
