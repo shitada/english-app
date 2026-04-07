@@ -4742,3 +4742,148 @@ Now add the test class at the end of the file:
 
 Now commit and test:
 
+● Commit iteration 304 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #304: Add shadowing exercise to conversation summary for speaking practice
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 iter 304 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2 = 1775593675, implement_sec = 205. Running tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+896 passed (+6 new tests), TS passes. Check smoke test and QA:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed! Also check frontend UI changes:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. Frontend UI changed + type=feature → MUST run tester.
+
+● Record T3 iter 304 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1775593736, test_sec = 61. Starting server for QA:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1
+  │ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 2>&1 &
+  │ sleep 5
+  │ curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA test iteration 304
+  │ playwright-browser_run_code code: "async (page) => {   // Check if we can read the certs direct…
+  │   └ ### Result
+  └ playwright-browser_navigate file:///Users/shingotada/Documents/vscode/english-app/frontend/dist…
+      └ MCP server 'playwright': ### Error
+        Error: Access to "file:" protocol is blocked. Attempted URL:
+        "file:///Users/shingotada/Documents/vscode/english-app/frontend/dist/index.html"
+
+Playwright infrastructure issue again. Retrying once:
+
+● Verify server still running (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+Server died. Let me restart and retry:
+
+● Restart server for retry (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1
+  │ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 2>&1 &
+  │ sleep 5
+  │ curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA retest iteration 304
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L870:960 (71 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L940:1020 (1 line read)
+
+Playwright infrastructure failure on retry. Per instructions, using ux_score=5.0 and noting infrastructure failure. Let me kill the server and call the evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 304
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L550:650 (101 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L650:670 (21 lines read)
+
+● Record T4 iter 304 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4 = 1775594334. Score: 6.85, verdict: keep.
+
+Now check keep/discard criteria:
+- All tests pass (896/896) ✅
+- TypeScript check passes ✅
+- Smoke test passes ✅
+- QA tester: Playwright infrastructure failure — ux_score=5.0 (≥5.0) ✅
+- Evaluator total_score: 6.85 (≥6.0) ✅
+
+**KEEP**. Timing: propose=238, implement=205, test=61, evaluate=598, total=1102.
+
+● Record results iter 304 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "304" "b769ece" "2026-04-08" "238" "205" "61" "598" "1102" \
+  │ "896" "896" "pass" "6.85" "KEPT" "Add shadowing exercise to conversation summary for
+  │ speaking practice" \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+**Iteration 304 checklist:**
+- ✅ Called proposer subagent
+- ✅ Called tester subagent (twice — infrastructure failure)
+- ✅ Called evaluator subagent
+- ✅ Score 6.85 matches evaluator's total_score
+- ✅ Result: KEPT
+
+Now commit the docs update and write the invocation log:
+

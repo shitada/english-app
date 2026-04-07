@@ -303,3 +303,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 301	4d2de5c	2026-04-07	86	60	64	63	273	890	890	pass	6.5	KEPT	Add database WAL checkpoint scheduling for long-running instances
 302	5a2e728	2026-04-08	101	73	49	789	1012	890	890	pass	7.0	KEPT	Add onboarding flow for first-time users with guided tooltips
 303	4180158	2026-04-08	143	76	47	523	789	890	890	pass	6.95	KEPT	Add correction drill exercise to conversation summary
+304	b769ece	2026-04-08	238	205	61	598	1102	896	896	pass	6.85	KEPT	Add shadowing exercise to conversation summary for speaking practice
