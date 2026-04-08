@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import pytest
 
-from app.dal.conversation import add_message, create_conversation, update_message_feedback
+from app.dal.conversation import add_message, create_conversation, end_conversation, update_message_feedback
 from app.dal.dashboard import (
     delete_learning_goal,
+    get_confidence_trend,
+    get_daily_challenge,
     get_grammar_trend,
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
     get_mistake_journal,
+    get_mistake_review_items,
     get_stats,
     get_today_activity,
+    get_word_of_the_day,
     set_learning_goal,
 )
 from app.dal.pronunciation import save_attempt
@@ -923,3 +927,236 @@ class TestGrammarTrend:
         await test_db.commit()
         result = await get_grammar_trend(test_db)
         assert len(result["conversations"]) == 0
+
+
+@pytest.mark.unit
+class TestGetMistakeReviewItems:
+    async def test_empty_database(self, test_db):
+        items = await get_mistake_review_items(test_db)
+        assert items == []
+
+    async def test_extracts_errors_from_feedback(self, test_db):
+        import json
+
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I go to hotel yesterday")
+        feedback = {
+            "is_correct": False,
+            "errors": [
+                {
+                    "original": "I go to hotel yesterday",
+                    "correction": "I went to the hotel yesterday",
+                    "explanation": "Use past tense for past events",
+                }
+            ],
+        }
+        await update_message_feedback(test_db, mid, feedback)
+        await test_db.commit()
+
+        items = await get_mistake_review_items(test_db)
+        assert len(items) >= 1
+        item = items[0]
+        assert item["original"] == "I go to hotel yesterday"
+        assert item["correction"] == "I went to the hotel yesterday"
+        assert item["explanation"] == "Use past tense for past events"
+        assert item["topic"] == "hotel_checkin"
+
+    async def test_skips_messages_with_no_errors(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I went to the hotel yesterday")
+        feedback = {"is_correct": True, "errors": []}
+        await update_message_feedback(test_db, mid, feedback)
+        await test_db.commit()
+
+        items = await get_mistake_review_items(test_db)
+        assert items == []
+
+    async def test_skips_malformed_feedback(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Test message")
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?",
+            ("not valid json{{{", mid),
+        )
+        await test_db.commit()
+
+        items = await get_mistake_review_items(test_db)
+        assert items == []
+
+    async def test_respects_count_parameter(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(5):
+            mid = await add_message(test_db, cid, "user", f"Mistake {i}")
+            feedback = {
+                "errors": [
+                    {"original": f"mistake {i}", "correction": f"correct {i}", "explanation": ""}
+                ]
+            }
+            await update_message_feedback(test_db, mid, feedback)
+        await test_db.commit()
+
+        items = await get_mistake_review_items(test_db, count=2)
+        assert len(items) == 2
+
+    async def test_skips_errors_missing_original_or_correction(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Test")
+        feedback = {
+            "errors": [
+                {"original": "test", "correction": "", "explanation": "no correction"},
+                {"original": "", "correction": "fixed", "explanation": "no original"},
+                {"correction": "only correction"},
+            ]
+        }
+        await update_message_feedback(test_db, mid, feedback)
+        await test_db.commit()
+
+        items = await get_mistake_review_items(test_db)
+        assert items == []
+
+
+@pytest.mark.unit
+class TestGetConfidenceTrend:
+    async def test_empty_database(self, test_db):
+        result = await get_confidence_trend(test_db)
+        assert result["sessions"] == []
+        assert result["trend"] == "insufficient_data"
+
+    async def test_single_ended_conversation_with_performance(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {
+            "performance": {
+                "grammar_accuracy_rate": 80,
+                "vocabulary_diversity": 60,
+                "avg_words_per_message": 12,
+                "total_user_messages": 5,
+            }
+        }
+        await end_conversation(test_db, cid, summary=summary)
+
+        result = await get_confidence_trend(test_db)
+        assert len(result["sessions"]) == 1
+        session = result["sessions"][0]
+        assert session["topic"] == "hotel_checkin"
+        assert session["score"] > 0
+        assert session["grammar_score"] == 80.0
+        assert session["diversity_score"] == 60.0
+        assert result["trend"] == "insufficient_data"
+
+    async def test_improving_trend(self, test_db):
+        import json
+
+        for i in range(6):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            summary = {
+                "performance": {
+                    "grammar_accuracy_rate": 50 + i * 10,
+                    "vocabulary_diversity": 50 + i * 5,
+                    "avg_words_per_message": 8 + i,
+                    "total_user_messages": 5 + i,
+                }
+            }
+            # Set distinct started_at so ordering is deterministic
+            await test_db.execute(
+                "UPDATE conversations SET started_at = ?, status = 'ended', summary_json = ? WHERE id = ?",
+                (f"2026-01-0{i + 1} 10:00:00", json.dumps(summary), cid),
+            )
+        await test_db.commit()
+
+        result = await get_confidence_trend(test_db)
+        assert len(result["sessions"]) == 6
+        assert result["trend"] == "improving"
+
+    async def test_skips_conversations_without_performance(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {"some_other_key": "value"}
+        await end_conversation(test_db, cid, summary=summary)
+
+        result = await get_confidence_trend(test_db)
+        assert result["sessions"] == []
+
+    async def test_sub_score_normalization_caps_at_100(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {
+            "performance": {
+                "grammar_accuracy_rate": 150,
+                "vocabulary_diversity": 200,
+                "avg_words_per_message": 100,
+                "total_user_messages": 50,
+            }
+        }
+        await end_conversation(test_db, cid, summary=summary)
+
+        result = await get_confidence_trend(test_db)
+        session = result["sessions"][0]
+        assert session["grammar_score"] == 100.0
+        assert session["diversity_score"] == 100.0
+        assert session["complexity_score"] == 100.0
+        assert session["participation_score"] == 100.0
+        assert session["score"] == 100.0
+
+
+@pytest.mark.unit
+class TestGetDailyChallenge:
+    async def test_returns_valid_challenge_structure(self, test_db):
+        challenge = await get_daily_challenge(test_db)
+        assert "challenge_type" in challenge
+        assert "title" in challenge
+        assert "description" in challenge
+        assert "target_count" in challenge
+        assert "current_count" in challenge
+        assert "completed" in challenge
+        assert "route" in challenge
+        assert "topic" in challenge
+
+    async def test_challenge_type_is_valid(self, test_db):
+        challenge = await get_daily_challenge(test_db)
+        assert challenge["challenge_type"] in ("conversation", "vocabulary", "pronunciation")
+
+    async def test_completed_when_current_meets_target(self, test_db):
+        challenge = await get_daily_challenge(test_db)
+        if challenge["current_count"] >= challenge["target_count"]:
+            assert challenge["completed"] is True
+        else:
+            assert challenge["completed"] is False
+
+    async def test_route_matches_challenge_type(self, test_db):
+        challenge = await get_daily_challenge(test_db)
+        routes = {
+            "conversation": "/conversation",
+            "vocabulary": "/vocabulary",
+            "pronunciation": "/pronunciation",
+        }
+        assert challenge["route"] == routes[challenge["challenge_type"]]
+
+
+@pytest.mark.unit
+class TestGetWordOfTheDay:
+    async def test_returns_none_when_no_words(self, test_db):
+        result = await get_word_of_the_day(test_db)
+        assert result is None
+
+    async def test_returns_valid_word_dict(self, test_db):
+        await save_words(test_db, "travel", [
+            {"word": "luggage", "meaning": "bags and suitcases", "example_sentence": "Check your luggage.", "difficulty": 1},
+        ])
+
+        result = await get_word_of_the_day(test_db)
+        assert result is not None
+        assert "word_id" in result
+        assert result["word"] == "luggage"
+        assert result["meaning"] == "bags and suitcases"
+        assert result["topic"] == "travel"
+        assert result["difficulty"] == 1
+        assert "example_sentence" in result
+
+    async def test_deterministic_for_same_day(self, test_db):
+        await save_words(test_db, "travel", [
+            {"word": "luggage", "meaning": "bags", "example_sentence": "", "difficulty": 1},
+            {"word": "passport", "meaning": "travel document", "example_sentence": "", "difficulty": 2},
+            {"word": "ticket", "meaning": "boarding pass", "example_sentence": "", "difficulty": 1},
+        ])
+
+        result1 = await get_word_of_the_day(test_db)
+        result2 = await get_word_of_the_day(test_db)
+        assert result1["word"] == result2["word"]

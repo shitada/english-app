@@ -1356,3 +1356,426 @@ Good, `json` is already imported. Let me also check `Any` is imported:
 
 Good. Now commit, run tests, and then call the subagents:
 
+● Commit iteration 315 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "feat:
+  │ conversation difficulty auto-adjustment recommendation
+  │
+  │ Analyze recent conversation performance to recommend appropriate difficulty level.
+  │ Backend DAL analyzes grammar accuracy and words per message from last 5 sessions.…
+  └ 18 lines...
+
+● Task Run backend tests
+  └ Agent started in background with agent_id: backend-tests-315. You can use rea...
+
+● Task Run frontend TS check
+  └ Agent started in background with agent_id: ts-check-315. You can use read_age...
+
+While tests run, let me check the current state:
+
+● Check results.tsv state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv | tr '\t'
+  │ '|'
+  └ 21 lines...
+
+● Get commit hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -1
+  └ 2 lines...
+
+Now let me also read the backlog to see what features we should propose next:
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 177 lines...
+
+● Check for existing session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-010.md
+  │ 2>/dev/null | tail -30 || echo "No invocation-010 log yet"
+  └ 1 line...
+
+● List log files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls autoresearch/logs/
+  └ 7 lines...
+
+● Check invocation log format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-009.md |
+  │ head -10
+  └ 11 lines...
+
+Now let me read the TS check results:
+
+● Quick TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+TS check passes. Let me wait for backend tests to complete too.
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v --tb=short 2>&1 | tail -15
+  └ 16 lines...
+
+
+
+All 906 tests pass, TS check passes. Now let me run smoke test, build frontend, and run QA + evaluator in parallel.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python tests/smoke_test.py 2>&1 |
+  │ tail -15
+  └ 16 lines...
+
+Smoke test passes. Now build frontend and start QA:
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 2>/dev/null | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main &
+  └ 1 line...
+
+● Check server health (shell)
+  │ sleep 3 && curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health
+  └ 2 lines...
+
+● Restart server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 2>/dev/null; uv run python -m
+  │ app.main &
+  │ sleep 4 && curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health
+  └ 8 lines...
+
+Port 8000 is in use. Let me kill the existing processes:
+
+● Kill old server and restart (shell)
+  │ kill -9 80901 80904 2>/dev/null; sleep 2 && cd /Users/shingotada/Documents/vscode/english-app &&
+  │ uv run python -m app.main &
+  │ sleep 4 && curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health
+  └ 13 lines...
+
+HTTPS server - need to use https:
+
+● Check health via HTTPS (shell)
+  │ curl -sk -o /dev/null -w "%{http_code}" https://localhost:8000/api/health
+  └ 2 lines...
+
+● Wait and retry health check (shell)
+  │ sleep 3 && curl -sk -o /dev/null -w "%{http_code}" https://localhost:8000/api/health
+  └ 2 lines...
+
+● Check what's on port 8000 (shell)
+  │ lsof -i:8000 2>/dev/null | head -10
+  └ 1 line...
+
+Nothing is listening. The server likely crashed after the reload. Let me restart it properly:
+
+● Start server fresh (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run python -m app.main 2>&1 &
+  │ sleep 5 && lsof -i:8000 | head -5
+  └ 15 lines...
+
+● Test health endpoint (shell)
+  │ curl -sk https://localhost:8000/api/health 2>&1
+  └ 1 line...
+
+● Debug connection (shell)
+  │ curl -vsk https://localhost:8000/api/health 2>&1 | head -20
+  └ 10 lines...
+
+The server crashed due to watchfiles reload. Let me check if it's still running:
+
+● Check server processes (shell)
+  │ ps aux | grep "app.main" | grep -v grep
+  └ 1 line...
+
+Server died. The watchfiles reload probably killed it. Let me start without reload:
+
+● Check uvicorn config (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A5 "uvicorn.run" app/main.py | head
+  │ -10
+  └ 7 lines...
+
+● Start server without reload (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --ssl-keyfile certs/localhost-key.pem --ssl-certfile certs/localhost.pem
+  │ --no-access-log 2>&1 &
+  │ sleep 4 && curl -sk https://localhost:8000/api/health
+  └ 43 lines...
+
+● Check cert files (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/certs/
+  └ 2 lines...
+
+● Start server with correct cert paths (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --ssl-keyfile certs/key.pem --ssl-certfile certs/cert.pem --no-access-log 2>&1 &
+  │ sleep 4 && curl -sk https://localhost:8000/api/health
+  └ 10 lines...
+
+Server is running. Now call QA tester and evaluator:
+
+● Tester QA test iteration 315
+  └ Agent started in background with agent_id: qa-315. You can use read_agent too...
+
+● Evaluator Evaluate iteration 315
+  └ Agent started in background with agent_id: eval-315. You can use read_agent t...
+
+Now while waiting for those, let me call the proposer for iteration 316:
+
+● Proposer Propose iteration 316
+  └ Agent started in background with agent_id: proposer-316. You can use read_age...
+
+Let me wait for the evaluator and QA results for iteration 315.
+
+● Check current time (shell)
+  │ date "+%Y-%m-%d %H:%M:%S"
+  └ 2 lines...
+
+I'll wait for the agents to complete. Let me check what iteration we need to add to the backlog:
+
+● Get short hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -1 | cut -c1-7
+  └ 2 lines...
+
+● Acknowledge eval completion (shell)
+  │ echo "eval-315 done, reading results"
+  └ 2 lines...
+
+Let me read the evaluator results while waiting for QA:
+
+● Task Read eval-315 results
+  └ Echo reminder about using read_agent (shell)
+      │ echo "Use read_agent with agent_id eval-315"
+      └ 2 lines...
+
+I need to wait for the QA tester to finish too before recording results. Let me check the proposer for 316 while waiting:
+
+● Status check (shell)
+  │ echo "Waiting for qa-315 and proposer-316..."
+  └ 2 lines...
+
+
+
+Good, proposer-316 is done. Still waiting for qa-315. Let me note the timestamps for iteration 315 and prepare. The evaluator gave a score - let me record what I know so far while waiting.
+
+Let me check the evaluator result from the checkpoint context. I know the pattern - evaluator returns a total_score. I'll need to wait for QA before finalizing.
+
+Let me check if qa-315 is still running by doing some prep work for 316:
+
+● Wait for QA (shell)
+  │ echo "Waiting for QA tester to finish for iteration 315..."
+  │ sleep 30 && echo "Still waiting..."
+  └ 3 lines...
+
+
+Total usage est:        3 Premium requests
+API time spent:         1h 14m 53s
+Total session time:     1h 21m 4s
+Total code changes:     +1284 -24
+Breakdown by AI model:
+ claude-opus-4.6          36.9m in, 184.6k out, 34.8m cached (Est. 3 Premium requests)
+ claude-haiku-4.5         140.1k in, 881 out, 93.0k cached (Est. 0 Premium requests)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-310-to-329.md
+[2026-04-09 00:34:27] Copilot invocation completed (duration: 4867s)
+[2026-04-09 00:34:27] Verifying Playwright test depth...
+[2026-04-09 00:34:27]   PW_SHALLOW iter=310 — only 2 tool calls (min 10 expected)
+[2026-04-09 00:34:27]   PW_SHALLOW iter=311 — only 1 tool calls (min 10 expected)
+[2026-04-09 00:34:27]   PW_SHALLOW iter=312 — only 4 tool calls (min 10 expected)
+[2026-04-09 00:34:27]   PW_SHALLOW iter=313 — only 2 tool calls (min 10 expected)
+[2026-04-09 00:34:27]   PW_SHALLOW iter=314 — only 2 tool calls (min 10 expected)
+[2026-04-09 00:34:27] Running post-invocation audit (iter 310-314)...
+============================================
+ Autoresearch Audit
+ Iterations: 310 — 314
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-09 00:34:27
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: Shallow (<5 tools): 310(2) 311(1) 312(4) 313(2) 314(2)[0m
+  [1mROOT CAUSE: Tester consistently returning early[0m
+  [1mCONFIDENCE: MEDIUM[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;33m  [playwright_shallow] MEDIUM confidence → queued for prescriber[0m
+
+[0;36m  Calling prescriber agent for MEDIUM/LOW findings...[0m
+[0;33m  Prescriber unavailable — logging findings for manual review[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-09 00:34:28] Audit passed — no issues
+[2026-04-09 00:34:31] Current iteration count: 314 / 329
+[2026-04-09 00:34:31] ------------------------------------------
+[2026-04-09 00:34:31] Invocation 2 / 10
+[2026-04-09 00:34:31] Resuming from iteration 315
+[2026-04-09 00:34:31] ------------------------------------------
+[2026-04-09 00:34:31] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-315-to-329.md)...
+
+
+I'll start by reading the current state of the project to understand where we are.
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 177 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-009.md
+  └ 34 lines...
+
+Good. I have the full context. Last recorded iteration was #314. There's an extra commit `30fb2be` on top. I'll now start the autoresearch loop from iteration 315, targeting up to 329.
+
+Let me begin iteration 315.
+
+● Record T0 for iteration 315 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775662505. Now calling the proposer subagent.
+
+● Proposer Propose iteration 315
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L200:400 (191 lines read)
+  └ Read test_dashboard_api.py
+      └ tests/integration/test_dashboard_api.py
+
+Good proposal — adding unit tests for untested dashboard DAL functions. Let me record T1 and start implementing.
+
+● Record T1 for iteration 315 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find functions to test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_confidence_trend\|get_daily_challenge\|get_word_of_the_day\|get_mistake_review_items"
+  │ app/dal/dashboard.py | head -20
+  └ 5 lines...
+
+● Check existing test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_dashboard_dal.py &&
+  │ tail -5 tests/unit/test_dashboard_dal.py
+  └ 7 lines...
+
+● Read the 4 functions to test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '992,1260p' app/dal/dashboard.py
+  └ 232 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 tests/unit/test_dashboard_dal.py
+  └ 31 lines...
+
+Now I'll implement the unit tests. Let me check the helper functions available and add the tests.
+
+● Find helper function signatures (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_today_activity\|get_learning_insights" app/dal/dashboard.py | head -5
+  └ 5 lines...
+
+● Check conversation DAL API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "create_conversation\|summary_json\|performance" app/dal/conversation.py | head -20
+  └ 18 lines...
+
+● Find end_conversation signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def end_conversation"
+  │ app/dal/conversation.py | head -3
+  └ 2 lines...
+
+● Read end_conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '95,115p' app/dal/conversation.py
+  └ 22 lines...
+
+Good, now I have all the context. Let me write the tests:
+
+● Check vocabulary_words schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "vocabulary_words" app/database.py
+  │ | head -5
+  └ 6 lines...
+
+● Read vocabulary_words schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '50,65p' app/database.py
+  └ 17 lines...
+
+Now I'll add the tests to the existing file:
+
+● Edit test_dashboard_dal.py +4
+  └ tests/unit/test_dashboard_dal.py
+
+Now add the imports for `end_conversation` and append the test classes:
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
+Now append the test classes at the end of the file:
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3 tests/unit/test_dashboard_dal.py
+  └ 4 lines...
+
+● Edit test_dashboard_dal.py +226
+  └ tests/unit/test_dashboard_dal.py
+
+Now let me commit and run tests:
+
+● Commit iteration 315 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #315: Add unit tests for untested dashboard DAL functions from iterations 310-313
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests for iteration 315 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+The test has a timing issue — all conversations get the same `started_at` so ordering is non-deterministic. Let me fix it:
+
+● Edit test_dashboard_dal.py +8 -1
+  └ tests/unit/test_dashboard_dal.py
+
