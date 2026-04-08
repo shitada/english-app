@@ -401,3 +401,29 @@ async def get_mistake_review(
     """Get grammar mistakes formatted as correction drill items for active review."""
     items = await dash_dal.get_mistake_review_items(db, count=count)
     return {"items": items, "total": len(items)}
+
+
+class ConfidenceSession(BaseModel):
+    conversation_id: int
+    topic: str
+    difficulty: str
+    started_at: str
+    score: float
+    grammar_score: float
+    diversity_score: float
+    complexity_score: float
+    participation_score: float
+
+
+class ConfidenceTrendResponse(BaseModel):
+    sessions: list[ConfidenceSession]
+    trend: str
+
+
+@router.get("/confidence-trend", response_model=ConfidenceTrendResponse)
+async def get_confidence_trend(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get speaking confidence scores and trend across recent conversations."""
+    return await dash_dal.get_confidence_trend(db, limit=limit)

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
-import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview } from '../api';
+import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, GrammarTrend, MistakeJournal, MistakeReviewDrill, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, GrammarTrend, MistakeJournal, MistakeReviewDrill, SpeakingConfidence, WeeklyReport } from '../components/dashboard';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [grammarTrend, setGrammarTrend] = useState<GrammarTrendResponse | null>(null);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewItems, setReviewItems] = useState<MistakeReviewItem[]>([]);
+  const [confidenceTrend, setConfidenceTrend] = useState<ConfidenceTrendResponse | null>(null);
 
   useEffect(() => {
     api.getDashboardStats()
@@ -36,6 +37,9 @@ export default function Dashboard() {
       .catch(() => {});
     getGrammarTrend()
       .then(setGrammarTrend)
+      .catch(() => {});
+    getConfidenceTrend()
+      .then(setConfidenceTrend)
       .catch(() => {});
   }, []);
 
@@ -103,6 +107,11 @@ export default function Dashboard() {
 
       {/* Weekly Report */}
       <WeeklyReport report={weeklyReport} />
+
+      {/* Speaking Confidence */}
+      {confidenceTrend && (
+        <SpeakingConfidence sessions={confidenceTrend.sessions} trend={confidenceTrend.trend} />
+      )}
 
       {/* Grammar Trend */}
       {grammarTrend && (

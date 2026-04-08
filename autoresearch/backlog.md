@@ -169,3 +169,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add dictation exercise to conversation summary for listening practice (#307)
 - [x] Add topic practice stats badges to conversation topic selection cards (#308)
 - [x] Add cloze fill-in-the-blank exercise for key phrases in conversation summary (#309)
+- [x] Add mistake review drill to practice past errors from Mistake Journal (#310)

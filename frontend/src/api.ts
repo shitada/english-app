@@ -743,6 +743,28 @@ export async function getMistakeReview(count = 10): Promise<MistakeReviewRespons
   return request<MistakeReviewResponse>(`/api/dashboard/mistakes/review?count=${count}`);
 }
 
+// Speaking Confidence Trend (from iteration 311)
+export interface ConfidenceSession {
+  conversation_id: number;
+  topic: string;
+  difficulty: string;
+  started_at: string;
+  score: number;
+  grammar_score: number;
+  diversity_score: number;
+  complexity_score: number;
+  participation_score: number;
+}
+
+export interface ConfidenceTrendResponse {
+  sessions: ConfidenceSession[];
+  trend: string;
+}
+
+export async function getConfidenceTrend(limit = 20): Promise<ConfidenceTrendResponse> {
+  return request<ConfidenceTrendResponse>(`/api/dashboard/confidence-trend?limit=${limit}`);
+}
+
 // Sentence Build exercises (from iteration 252)
 export interface SentenceBuildExercise {
   word_id: number;

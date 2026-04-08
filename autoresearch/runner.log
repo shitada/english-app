@@ -317,3 +317,195 @@ The tester found a valid issue with punctuation normalization. Let me fix it bef
 ● Edit MistakeReviewDrill.tsx +1 -1
   └ frontend/src/components/dashboard/MistakeReviewDrill.tsx
 
+● Amend commit with fix and recheck TS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #310: Add mistake review drill to practice past errors from Mistake Journal
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && cd frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 18 lines...
+
+Good. Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 16 lines...
+
+● Get relevant diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 -- app/ frontend/src/ 2>&1
+  │ | head -200
+  └ 201 lines...
+
+Now call the evaluator:
+
+● Record time before evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 310
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:50 (50 lines read)
+  └ List directory tests
+      └ 8 files found
+
+● Record T4 for iteration 310 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.65 ≥ 6.0, all tests pass, QA passed, ux_score 7 ≥ 5.0 → KEEP.
+
+Record results:
+
+● Record results for iteration 310 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "310" "6f18a8f" "2026-04-08" "154" "253" "407" "406" "813" \
+  │ "906" "906" "pass" "6.65" "KEPT" "Add mistake review drill to practice past errors from
+  │ Mistake Journal" \…
+  └ 3 lines...
+
+Good, properly tab-separated. Now let me kill the server and update the backlog:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Now update backlog and start iteration 311:
+
+● Check end of backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/backlog.md
+  └ 6 lines...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Iteration 310 complete. ✅ Proposer called ✅ Tester called ✅ Evaluator called. Starting iteration 311.
+
+● Record T0 for iteration 311 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 311
+  │ Read index.ts
+  │   │ frontend/src/components/dashboard/index.ts
+  │   └ 5 lines read
+  └ Read GrammarTrend.tsx
+      │ frontend/src/components/dashboard/GrammarTrend.tsx
+      └ 94 lines read
+
+● Record T1 for iteration 311 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775658613. Let me check the summary_json structure to understand the performance data:
+
+● Check summary_json usage in DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "summary_json\|performance"
+  │ app/dal/dashboard.py | head -15
+  └ 1 line...
+
+● Find summary_json usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "summary_json" app/dal/*.py
+  │ app/routers/*.py | head -20
+  └ 11 lines...
+
+● Check conversation summary structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammar_accuracy\|vocabulary_diversity\|words_per_message\|performance\|fluency"
+  │ app/routers/conversation.py | head -20
+  └ 6 lines...
+
+● Check performance metrics structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '420,470p'
+  │ app/routers/conversation.py
+  └ 50 lines...
+
+● Find metrics function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_metrics"
+  │ app/dal/conversation.py
+  └ 2 lines...
+
+● Read metrics function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '529,610p' app/dal/conversation.py
+  └ 83 lines...
+
+Now I have everything I need. Let me implement the confidence trend feature:
+
+● Read GrammarTrend for pattern reference (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/GrammarTrend.tsx
+  └ 95 lines...
+
+Now let me implement all the changes for iteration 311:
+
+● Edit dashboard.py +84
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +26
+  └ app/routers/dashboard.py
+
+Add API types and function:
+
+● Edit api.ts +22
+  └ frontend/src/api.ts
+
+Create the SpeakingConfidence component:
+
+● Create SpeakingConfidence.tsx +124
+  └ frontend/src/components/dashboard/SpeakingConfidence.tsx
+
+Update exports:
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx:
+
+● Edit Dashboard.tsx +2 -2
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +1
+  └ frontend/src/pages/Dashboard.tsx
+
+Now add the confidence trend fetch. Let me find the useEffect that fetches dashboard data:
+
+● Find data fetching effects (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useEffect\|getGrammarTrend\|getAchievements\|getWeeklyReport" frontend/src/pages/Dashboard.tsx
+  │ | head -20
+  └ 8 lines...
+
+● Read data fetching effects (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '23,48p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 27 lines...
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now render the SpeakingConfidence component. Let me find where to place it (between streak/stats and weekly report):
+
+● Find component placements (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "WeeklyReport\|GrammarTrend\|SpeakingConf" frontend/src/pages/Dashboard.tsx
+  └ 11 lines...
+
+● Read around WeeklyReport render (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '106,120p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 16 lines...
+
+● Edit Dashboard.tsx +5
+  └ frontend/src/pages/Dashboard.tsx
+
+Now let me commit and test:
+

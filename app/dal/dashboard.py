@@ -1039,3 +1039,87 @@ async def get_mistake_review_items(
         items = random.sample(items, count)
 
     return items
+
+
+async def get_confidence_trend(
+    db: aiosqlite.Connection,
+    *,
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Compute speaking confidence scores from ended conversations with performance data."""
+    import json as _json
+
+    rows = await db.execute_fetchall(
+        """
+        SELECT id, topic, difficulty, started_at, summary_json
+        FROM conversations
+        WHERE status = 'ended' AND summary_json IS NOT NULL
+        ORDER BY started_at DESC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+
+    sessions: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            summary = _json.loads(row["summary_json"]) if isinstance(row["summary_json"], str) else row["summary_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if not isinstance(summary, dict):
+            continue
+        perf = summary.get("performance")
+        if not isinstance(perf, dict):
+            continue
+
+        accuracy = float(perf.get("grammar_accuracy_rate", 0))
+        diversity = float(perf.get("vocabulary_diversity", 0))
+        avg_words = float(perf.get("avg_words_per_message", 0))
+        total_msgs = int(perf.get("total_user_messages", 0))
+
+        # Normalize sub-scores to 0-100
+        grammar_score = min(accuracy, 100.0)
+        diversity_score = min(diversity, 100.0)
+        complexity_score = min(avg_words / 15.0 * 100, 100.0)
+        participation_score = min(total_msgs / 10.0 * 100, 100.0)
+
+        # Weighted composite
+        composite = round(
+            grammar_score * 0.4
+            + diversity_score * 0.3
+            + complexity_score * 0.2
+            + participation_score * 0.1,
+            1,
+        )
+
+        sessions.append({
+            "conversation_id": row["id"],
+            "topic": row["topic"],
+            "difficulty": row["difficulty"],
+            "started_at": row["started_at"],
+            "score": composite,
+            "grammar_score": round(grammar_score, 1),
+            "diversity_score": round(diversity_score, 1),
+            "complexity_score": round(complexity_score, 1),
+            "participation_score": round(participation_score, 1),
+        })
+
+    # Reverse to chronological order
+    sessions.reverse()
+
+    # Compute trend
+    if len(sessions) < 3:
+        trend = "insufficient_data"
+    else:
+        mid = len(sessions) // 2
+        first_avg = sum(s["score"] for s in sessions[:mid]) / mid
+        second_avg = sum(s["score"] for s in sessions[mid:]) / (len(sessions) - mid)
+        diff = second_avg - first_avg
+        if diff > 3:
+            trend = "improving"
+        elif diff < -3:
+            trend = "declining"
+        else:
+            trend = "stable"
+
+    return {"sessions": sessions, "trend": trend}
