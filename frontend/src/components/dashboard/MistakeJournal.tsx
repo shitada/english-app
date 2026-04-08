@@ -8,9 +8,11 @@ interface MistakeJournalProps {
   setFilter: (f: 'all' | 'grammar' | 'pronunciation' | 'vocabulary') => void;
   total: number;
   onLoadMore: () => void;
+  onStartReview?: () => void;
+  hasGrammarMistakes?: boolean;
 }
 
-export function MistakeJournal({ mistakes, filter, setFilter, total, onLoadMore }: MistakeJournalProps) {
+export function MistakeJournal({ mistakes, filter, setFilter, total, onLoadMore, onStartReview, hasGrammarMistakes }: MistakeJournalProps) {
   return (
     <div className="card" style={{ marginTop: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -20,6 +22,15 @@ export function MistakeJournal({ mistakes, filter, setFilter, total, onLoadMore 
           <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginLeft: 'auto' }}>
             {total} total
           </span>
+        )}
+        {onStartReview && hasGrammarMistakes && (
+          <button
+            onClick={onStartReview}
+            className="btn btn-primary"
+            style={{ fontSize: 12, padding: '3px 10px', marginLeft: total > 0 ? 8 : 'auto' }}
+          >
+            ✏️ Practice Mistakes
+          </button>
         )}
       </div>
 

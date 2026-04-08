@@ -186,6 +186,16 @@ if [[ -f "$LOG_FILE" ]]; then
             echo "PW|${i}|${pw_count} tools|${pw_tools}"
         fi
     done
+
+    # Playwright verification summary from runner.log
+    echo ""
+    echo "=== PLAYWRIGHT VERIFICATION ==="
+    for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
+        pw_verdict=$(grep -oE "PW_(OK|SHALLOW|SKIP|NO_SNAPSHOT|NO_INTERACT|NA) iter=$i[^ ]*.*" "$LOG_FILE" 2>/dev/null | head -1)
+        if [[ -n "$pw_verdict" ]]; then
+            echo "PW_VERIFY|${i}|${pw_verdict}"
+        fi
+    done
 fi
 echo ""
 

@@ -725,6 +725,24 @@ export async function getMistakeJournal(
   return request<MistakeJournalResponse>(`/api/dashboard/mistakes?${params}`);
 }
 
+// Mistake Review Drill (from iteration 310)
+export interface MistakeReviewItem {
+  original: string;
+  correction: string;
+  explanation: string;
+  topic: string;
+  created_at: string;
+}
+
+export interface MistakeReviewResponse {
+  items: MistakeReviewItem[];
+  total: number;
+}
+
+export async function getMistakeReview(count = 10): Promise<MistakeReviewResponse> {
+  return request<MistakeReviewResponse>(`/api/dashboard/mistakes/review?count=${count}`);
+}
+
 // Sentence Build exercises (from iteration 252)
 export interface SentenceBuildExercise {
   word_id: number;

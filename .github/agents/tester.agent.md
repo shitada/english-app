@@ -14,6 +14,7 @@ You will receive:
 - `server_url`: The base URL of the running app (e.g., `http://localhost:8000`)
 - `change_description`: What was changed in this iteration
 - `changed_files`: List of modified files
+- `changed_pages`: Which pages were affected (e.g., `["Conversation", "Pronunciation"]`). These are the pages you MUST focus your testing on.
 
 ## Core Approach: Snapshot-Driven Exploratory Testing
 
@@ -31,19 +32,35 @@ This approach automatically adapts to new pages, new buttons, and new features w
 
 ## Test Procedure
 
-### Phase 1: Page Discovery
-Navigate to each page in the app. For each page:
+### Phase 0: Identify Test Scope
 
-```
-navigate → snapshot → list all interactive elements → test each one
-```
+Before testing, determine your **primary test targets** from the input:
 
-Pages to visit (discover via Home page links):
-- Home (`/`)
-- Conversation (`/conversation`)
-- Pronunciation (`/pronunciation`)
-- Vocabulary (`/vocabulary`)
-- Dashboard (`/dashboard`)
+1. Read `changed_pages` — these are the pages whose UI or UI logic changed.
+2. Read `change_description` — understand what specifically was added or modified.
+3. Your job is to **test the changed functionality on the changed pages**.
+
+You do NOT need to test all 5 pages every time. Focus on:
+- **Changed pages**: Navigate, snapshot, and thoroughly test the new/modified UI elements.
+- **Regression check**: Quick smoke-check of 1-2 other pages (navigate + snapshot only) to ensure no breakage.
+
+### Phase 1: Changed Page Testing (PRIMARY — spend 80% of effort here)
+
+For each page in `changed_pages`:
+
+1. **Navigate** to the page
+2. **Snapshot** to get the full accessibility tree
+3. **Identify the NEW or MODIFIED elements** based on `change_description`
+4. **Test each changed element thoroughly**:
+   - Click buttons, verify state changes
+   - Fill inputs, verify they accept text
+   - Toggle controls, verify they respond
+   - Check that new components render correctly
+   - Verify visual states (loading, error, success)
+5. **Snapshot after each interaction** to verify results
+6. **Check console errors** that may relate to the changed code
+
+You MUST perform **at least 3 interactions** with the changed elements on EACH changed page.
 
 ### Phase 2: Element-by-Element Testing
 
@@ -97,14 +114,30 @@ These are behavioral expectations for this specific app. Use them to validate, b
 
 ## MINIMUM REQUIREMENTS
 
-You MUST perform at least:
-- Navigate to **all 5 pages** (home, conversation, pronunciation, vocabulary, dashboard)
-- Take a snapshot on **each page** and read it carefully
-- **Click at least 3 different interactive elements** across different pages
-- Check console errors on at least 2 pages
-- Total: at least **15 Playwright tool calls**
+Your test MUST meet these minimums based on the changed scope:
 
-If you use fewer than 15 calls, your test is INVALID.
+**For each changed page, you MUST:**
+- Navigate to the page (1 call)
+- Take a snapshot (1 call)
+- Interact with at least 3 changed/new elements (3+ calls)
+- Verify results with follow-up snapshots or checks (2+ calls)
+- Check console errors (1 call)
+- **Subtotal per changed page: at least 8 Playwright tool calls**
+
+**Regression smoke check:**
+- Navigate + snapshot on 1-2 other pages (2-4 calls)
+- Console error check (1 call)
+- **Subtotal: at least 3 calls**
+
+**Absolute minimum total: 10 Playwright tool calls.**
+**If 2+ pages changed: at least 15 calls.**
+
+If you use fewer calls than the minimum, your test is INVALID and will be rejected by the evaluator.
+
+**FORBIDDEN shortcuts:**
+- Do NOT just check `console_messages` and return — that tests nothing about the UI.
+- Do NOT skip `snapshot` — you cannot test what you cannot see.
+- Do NOT skip interactions — clicking/typing is the core of QA testing.
 
 ## Output Format
 
@@ -114,8 +147,14 @@ Return EXACTLY this JSON (no markdown fences, no extra text):
 {
   "passed": true,
   "ux_score": 7,
-  "pages_tested": ["home", "conversation", "pronunciation", "vocabulary", "dashboard"],
+  "pages_tested": ["conversation", "pronunciation"],
+  "changed_pages_tested": ["conversation"],
   "elements_tested": 12,
+  "playwright_tool_calls": 18,
+  "changed_elements_tested": [
+    {"page": "conversation", "element": "Correction Drill button", "action": "click", "result": "Drill panel appeared with first correction"},
+    {"page": "conversation", "element": "Answer input", "action": "type", "result": "Accepted text input"}
+  ],
   "issues": [
     {
       "severity": "critical|major|minor|cosmetic",
@@ -138,6 +177,8 @@ Return EXACTLY this JSON (no markdown fences, no extra text):
   "overall_impression": "One sentence summary"
 }
 ```
+
+**IMPORTANT**: The `changed_elements_tested` array MUST contain at least 3 entries for each changed page. If it's empty or has fewer entries, you haven't tested the actual changes and your test is INVALID.
 
 ### Severity Levels
 

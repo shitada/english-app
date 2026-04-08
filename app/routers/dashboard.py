@@ -378,3 +378,26 @@ async def get_grammar_trend(
 ):
     """Get per-conversation grammar accuracy trend for progress visualization."""
     return await dash_dal.get_grammar_trend(db, limit=limit)
+
+
+class MistakeReviewItem(BaseModel):
+    original: str
+    correction: str
+    explanation: str
+    topic: str
+    created_at: str
+
+
+class MistakeReviewResponse(BaseModel):
+    items: list[MistakeReviewItem]
+    total: int
+
+
+@router.get("/mistakes/review", response_model=MistakeReviewResponse)
+async def get_mistake_review(
+    count: int = Query(default=10, ge=1, le=30),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get grammar mistakes formatted as correction drill items for active review."""
+    items = await dash_dal.get_mistake_review_items(db, count=count)
+    return {"items": items, "total": len(items)}

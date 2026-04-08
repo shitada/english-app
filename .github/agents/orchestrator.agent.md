@@ -196,10 +196,24 @@ sleep 4 && curl -s http://localhost:8000/api/health
 
 **CRITICAL**: Command 2 MUST be run with `isBackground=true`. If you run uvicorn in a foreground terminal, it will never return and your entire session will hang.
 
+Determine which pages were affected by the changes:
+```bash
+CHANGED_PAGES=$(git diff HEAD~1 --name-only | grep -oE "frontend/src/(pages|components)/[^/]+" | sed 's|frontend/src/pages/||;s|frontend/src/components/||' | sort -u | tr '\n' ',' | sed 's/,$//')
+```
+
+Map component directories to page names:
+- `conversation` or files in `components/conversation/` → "Conversation"
+- `pronunciation` or files in `components/pronunciation/` → "Pronunciation"
+- `dashboard` or files in `components/dashboard/` → "Dashboard"
+- `Vocabulary.tsx` → "Vocabulary"
+- `Home.tsx` → "Home"
+- `App.tsx`, `index.css`, or shared components → "Home" (affects global layout)
+
 Invoke the **tester** subagent. Pass it:
 - `server_url`: `http://localhost:8000`
 - `change_description`: The proposal title + description from Step 2
 - `changed_files`: List of files modified in this iteration (from `git diff HEAD~1 --name-only`)
+- `changed_pages`: The list of affected page names (e.g., `["Conversation", "Dashboard"]`)
 
 The tester uses Playwright MCP tools to open a real browser, navigate the app as a strict end-user, and returns:
 `{passed, ux_score, pages_tested, issues, performance_notes, overall_impression}`

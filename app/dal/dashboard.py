@@ -987,3 +987,55 @@ async def get_grammar_trend(db: aiosqlite.Connection, limit: int = 20) -> dict[s
             trend = "stable"
 
     return {"conversations": conversations, "trend": trend}
+
+
+async def get_mistake_review_items(
+    db: aiosqlite.Connection,
+    *,
+    count: int = 10,
+) -> list[dict[str, Any]]:
+    """Return grammar mistakes formatted as correction drill items for review practice."""
+    import json as _json
+    import random
+
+    grammar_rows = await db.execute_fetchall(
+        """
+        SELECT m.content, m.feedback_json, m.created_at, c.topic
+        FROM messages m
+        JOIN conversations c ON c.id = m.conversation_id
+        WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+        ORDER BY m.created_at DESC
+        LIMIT 500
+        """
+    )
+
+    items: list[dict[str, Any]] = []
+    for row in grammar_rows:
+        try:
+            fb = _json.loads(row["feedback_json"]) if isinstance(row["feedback_json"], str) else row["feedback_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if not isinstance(fb, dict):
+            continue
+        errors = fb.get("errors", [])
+        if not isinstance(errors, list):
+            continue
+        for err in errors:
+            if not isinstance(err, dict):
+                continue
+            original = err.get("original", "").strip()
+            correction = err.get("correction", "").strip()
+            if not original or not correction:
+                continue
+            items.append({
+                "original": original,
+                "correction": correction,
+                "explanation": err.get("explanation", ""),
+                "topic": row["topic"],
+                "created_at": row["created_at"],
+            })
+
+    if len(items) > count:
+        items = random.sample(items, count)
+
+    return items

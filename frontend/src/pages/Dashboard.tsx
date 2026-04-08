@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
-import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend } from '../api';
+import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, GrammarTrend, MistakeJournal, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, GrammarTrend, MistakeJournal, MistakeReviewDrill, WeeklyReport } from '../components/dashboard';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -16,6 +16,8 @@ export default function Dashboard() {
   const [achievementsTotal, setAchievementsTotal] = useState(0);
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReportData | null>(null);
   const [grammarTrend, setGrammarTrend] = useState<GrammarTrendResponse | null>(null);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewItems, setReviewItems] = useState<MistakeReviewItem[]>([]);
 
   useEffect(() => {
     api.getDashboardStats()
@@ -50,6 +52,14 @@ export default function Dashboard() {
       .then(res => { setMistakes(prev => [...prev, ...res.items]); setMistakeOffset(newOffset); })
       .catch(() => {});
   };
+
+  const startMistakeReview = () => {
+    getMistakeReview(10)
+      .then(res => { setReviewItems(res.items); setReviewMode(true); })
+      .catch(() => {});
+  };
+
+  const hasGrammarMistakes = mistakes.some(m => m.module === 'grammar');
 
   if (loading) {
     return (
@@ -121,13 +131,19 @@ export default function Dashboard() {
       )}
 
       {/* Mistake Journal */}
-      <MistakeJournal
-        mistakes={mistakes}
-        filter={mistakeFilter}
-        setFilter={setMistakeFilter}
-        total={mistakeTotal}
-        onLoadMore={loadMoreMistakes}
-      />
+      {reviewMode ? (
+        <MistakeReviewDrill items={reviewItems} onClose={() => setReviewMode(false)} />
+      ) : (
+        <MistakeJournal
+          mistakes={mistakes}
+          filter={mistakeFilter}
+          setFilter={setMistakeFilter}
+          total={mistakeTotal}
+          onLoadMore={loadMoreMistakes}
+          onStartReview={startMistakeReview}
+          hasGrammarMistakes={hasGrammarMistakes}
+        />
+      )}
     </div>
   );
 }

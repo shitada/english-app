@@ -271,6 +271,49 @@ main() {
         local new_iter
         new_iter=$(get_current_iteration)
         if [[ "$new_iter" -gt "$current" ]]; then
+            # Playwright test depth verification for UI-changing iterations
+            log "Verifying Playwright test depth..."
+            for iter_num in $(seq $((current + 1)) "$new_iter"); do
+                local iter_commit
+                iter_commit=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n {print $2}' "$RESULTS_FILE")
+                if [[ -z "$iter_commit" || "$iter_commit" == "none" ]]; then
+                    continue
+                fi
+
+                local has_ui_change
+                has_ui_change=$(git diff --name-only "${iter_commit}~1..${iter_commit}" 2>/dev/null \
+                    | grep -cE "frontend/src/(pages|components)/.*\.tsx$" || true)
+
+                if [[ "$has_ui_change" -gt 0 ]]; then
+                    local next_iter=$((iter_num + 1))
+                    local pw_count
+                    pw_count=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
+                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser" || true)
+
+                    local pw_has_snapshot
+                    pw_has_snapshot=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
+                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser_snapshot\|playwright-browser_take_screenshot" || true)
+
+                    local pw_has_interaction
+                    pw_has_interaction=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
+                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser_click\|playwright-browser_type\|playwright-browser_evaluate" || true)
+
+                    if [[ "$pw_count" -eq 0 ]]; then
+                        log "  PW_SKIP iter=$iter_num — UI changed but NO Playwright test was run"
+                    elif [[ "$pw_count" -lt 5 ]]; then
+                        log "  PW_SHALLOW iter=$iter_num — only $pw_count tool calls (min 10 expected)"
+                    elif [[ "$pw_has_snapshot" -eq 0 ]]; then
+                        log "  PW_NO_SNAPSHOT iter=$iter_num — no snapshot taken, test quality suspect"
+                    elif [[ "$pw_has_interaction" -eq 0 ]]; then
+                        log "  PW_NO_INTERACT iter=$iter_num — no click/type/evaluate, test quality suspect"
+                    else
+                        log "  PW_OK iter=$iter_num — $pw_count tools, snapshot=$pw_has_snapshot, interact=$pw_has_interaction"
+                    fi
+                else
+                    log "  PW_NA iter=$iter_num — no UI file changes, Playwright test not required"
+                fi
+            done
+
             log "Running post-invocation audit (iter $((current + 1))-$new_iter)..."
             set +e
             bash "$SCRIPT_DIR/audit.sh" --fix \
