@@ -1,0 +1,372 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - 'heading "English Practice Server status: Connected" [level=1] [ref=e5] [cursor=pointer]':
+      - text: English Practice
+      - 'generic "Server status: Connected" [ref=e6]'
+    - navigation [ref=e7]:
+      - link "Conversation" [ref=e8] [cursor=pointer]:
+        - /url: /conversation
+      - link "Pronunciation" [ref=e9] [cursor=pointer]:
+        - /url: /pronunciation
+      - link "Vocabulary" [ref=e10] [cursor=pointer]:
+        - /url: /vocabulary
+      - link "Dashboard" [active] [ref=e11] [cursor=pointer]:
+        - /url: /dashboard
+    - button "Switch to dark mode" [ref=e12] [cursor=pointer]:
+      - img [ref=e13]
+  - main [ref=e15]:
+    - generic [ref=e149]:
+      - heading "Dashboard" [level=2] [ref=e150]
+      - generic [ref=e151]:
+        - img [ref=e152]
+        - generic [ref=e154]: "1"
+        - paragraph [ref=e155]: Day streak! Keep it up!
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - img [ref=e159]
+          - generic [ref=e161]: "72"
+          - paragraph [ref=e162]: Conversations
+          - paragraph [ref=e163]: 32 messages sent
+        - generic [ref=e164]:
+          - img [ref=e166]
+          - generic [ref=e169]: "6"
+          - paragraph [ref=e170]: Shadowing
+          - paragraph [ref=e171]: "Avg score: 7/10"
+        - generic [ref=e172]:
+          - img [ref=e174]
+          - generic [ref=e176]: "16"
+          - paragraph [ref=e177]: Words Reviewed
+          - paragraph [ref=e178]: 4 mastered
+        - generic [ref=e179]:
+          - img [ref=e181]
+          - generic [ref=e184]: "11"
+          - paragraph [ref=e185]: Due for Review
+          - paragraph [ref=e186]: Words need review!
+      - generic [ref=e187]:
+        - generic [ref=e188]:
+          - heading "Weekly Report" [level=3] [ref=e189]:
+            - img [ref=e190]
+            - text: Weekly Report
+          - button "Copy weekly report to clipboard" [ref=e193] [cursor=pointer]:
+            - img [ref=e194]
+            - text: Copy Report
+        - paragraph [ref=e197]: 2026-04-02 — 2026-04-08
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - generic [ref=e200]: "31"
+            - generic [ref=e201]: Conversations
+          - generic [ref=e202]:
+            - generic [ref=e203]: "10"
+            - generic [ref=e204]: Messages Sent
+          - generic [ref=e205]:
+            - generic [ref=e206]: "34"
+            - generic [ref=e207]: Words Reviewed
+          - generic [ref=e208]:
+            - generic [ref=e209]: 88.2%
+            - generic [ref=e210]: Quiz Accuracy
+          - generic [ref=e211]:
+            - generic [ref=e212]: "0"
+            - generic [ref=e213]: Pronunciation
+          - generic [ref=e214]:
+            - generic [ref=e215]: 0/10
+            - generic [ref=e216]: Avg Score
+        - generic [ref=e217]:
+          - paragraph [ref=e218]: ✨ Highlights
+          - paragraph [ref=e219]: • Vocabulary up 325% vs last week!
+      - generic [ref=e220]:
+        - generic [ref=e221]:
+          - heading "Speaking Confidence" [level=3] [ref=e222]
+          - generic [ref=e223]: 📈 Improving
+        - generic [ref=e224]:
+          - text: 81.5🔥
+          - paragraph [ref=e225]: Current confidence score (out of 100)
+        - generic [ref=e226]:
+          - generic [ref=e228] [cursor=pointer]:
+            - generic [ref=e229]: 2026-04-07
+            - generic [ref=e231]: "0"
+            - generic [ref=e232]: hotel_checkin
+          - generic [ref=e234] [cursor=pointer]:
+            - generic [ref=e235]: 2026-04-07
+            - generic [ref=e237]: "0"
+            - generic [ref=e238]: restaurant_order
+          - generic [ref=e240] [cursor=pointer]:
+            - generic [ref=e241]: 2026-04-07
+            - generic [ref=e243]: "0"
+            - generic [ref=e244]: shopping
+          - generic [ref=e246] [cursor=pointer]:
+            - generic [ref=e247]: 2026-04-07
+            - generic [ref=e250]: "41"
+            - generic [ref=e251]: hotel_checkin
+          - generic [ref=e253] [cursor=pointer]:
+            - generic [ref=e254]: 2026-04-07
+            - generic [ref=e256]: "0"
+            - generic [ref=e257]: doctor_visit
+          - generic [ref=e259] [cursor=pointer]:
+            - generic [ref=e260]: 2026-04-07
+            - generic [ref=e262]: "0"
+            - generic [ref=e263]: restaurant_order
+          - generic [ref=e265] [cursor=pointer]:
+            - generic [ref=e266]: 2026-04-07
+            - generic [ref=e269]: "86.7"
+            - generic [ref=e270]: hotel_checkin
+          - generic [ref=e272] [cursor=pointer]:
+            - generic [ref=e273]: 2026-04-07
+            - generic [ref=e276]: "83"
+            - generic [ref=e277]: hotel_checkin
+          - generic [ref=e279] [cursor=pointer]:
+            - generic [ref=e280]: 2026-04-07
+            - generic [ref=e283]: "81.5"
+            - generic [ref=e284]: hotel_checkin
+      - generic [ref=e285]:
+        - generic [ref=e286]:
+          - heading "Grammar Trend" [level=3] [ref=e287]
+          - generic [ref=e288]: 📈 Improving
+        - paragraph [ref=e289]: 0% → 100% over last 10 conversations
+        - generic [ref=e290]:
+          - generic [ref=e291]:
+            - generic [ref=e292]: 2026-03-28
+            - generic [ref=e294]: 0%
+            - generic [ref=e295]: 1msg
+          - generic [ref=e296]:
+            - generic [ref=e297]: 2026-03-28
+            - generic [ref=e299]: 0%
+            - generic [ref=e300]: 3msg
+          - generic [ref=e301]:
+            - generic [ref=e302]: 2026-03-30
+            - generic [ref=e304]: 0%
+            - generic [ref=e305]: 4msg
+          - generic [ref=e306]:
+            - generic [ref=e307]: 2026-03-31
+            - generic [ref=e309]: 0%
+            - generic [ref=e310]: 5msg
+          - generic [ref=e311]:
+            - generic [ref=e312]: 2026-04-01
+            - generic [ref=e314]: 0%
+            - generic [ref=e315]: 1msg
+          - generic [ref=e316]:
+            - generic [ref=e317]: 2026-04-03
+            - generic [ref=e319]: 0%
+            - generic [ref=e320]: 1msg
+          - generic [ref=e321]:
+            - generic [ref=e322]: 2026-04-07
+            - generic [ref=e325]: 100%
+            - generic [ref=e326]: 1msg
+          - generic [ref=e327]:
+            - generic [ref=e328]: 2026-04-07
+            - generic [ref=e331]: 100%
+            - generic [ref=e332]: 1msg
+          - generic [ref=e333]:
+            - generic [ref=e334]: 2026-04-07
+            - generic [ref=e337]: 100%
+            - generic [ref=e338]: 1msg
+          - generic [ref=e339]:
+            - generic [ref=e340]: 2026-04-07
+            - generic [ref=e343]: 100%
+            - generic [ref=e344]: 2msg
+      - generic [ref=e345]:
+        - generic [ref=e346]:
+          - img [ref=e347]
+          - heading "Achievements" [level=3] [ref=e350]
+          - generic [ref=e351]: 8/15 earned
+        - generic [ref=e352]:
+          - generic [ref=e353]:
+            - generic [ref=e354]: 🌱
+            - paragraph [ref=e355]: Getting Started
+            - paragraph [ref=e356]: Study for 1 day
+          - generic [ref=e357]:
+            - generic [ref=e358]: 🔥
+            - paragraph [ref=e359]: Week Warrior
+            - paragraph [ref=e360]: 7-day study streak
+            - paragraph [ref=e363]: 1/7
+          - generic [ref=e364]:
+            - generic [ref=e365]: 👑
+            - paragraph [ref=e366]: Monthly Master
+            - paragraph [ref=e367]: 30-day study streak
+            - paragraph [ref=e370]: 1/30
+          - generic [ref=e371]:
+            - generic [ref=e372]: 💬
+            - paragraph [ref=e373]: First Chat
+            - paragraph [ref=e374]: Complete 1 conversation
+          - generic [ref=e375]:
+            - generic [ref=e376]: 🗣️
+            - paragraph [ref=e377]: Chatterbox
+            - paragraph [ref=e378]: Complete 10 conversations
+          - generic [ref=e379]:
+            - generic [ref=e380]: 🌍
+            - paragraph [ref=e381]: Polyglot
+            - paragraph [ref=e382]: Complete 25 conversations
+          - generic [ref=e383]:
+            - generic [ref=e384]: 📖
+            - paragraph [ref=e385]: Word Learner
+            - paragraph [ref=e386]: Master 1 word
+          - generic [ref=e387]:
+            - generic [ref=e388]: 📚
+            - paragraph [ref=e389]: Vocab Builder
+            - paragraph [ref=e390]: Master 10 words
+            - paragraph [ref=e393]: 4/10
+          - generic [ref=e394]:
+            - generic [ref=e395]: 🏆
+            - paragraph [ref=e396]: Lexicon
+            - paragraph [ref=e397]: Master 50 words
+            - paragraph [ref=e400]: 4/50
+          - generic [ref=e401]:
+            - generic [ref=e402]: 🎙️
+            - paragraph [ref=e403]: First Try
+            - paragraph [ref=e404]: Complete 1 pronunciation attempt
+          - generic [ref=e405]:
+            - generic [ref=e406]: 🎓
+            - paragraph [ref=e407]: Sound Scholar
+            - paragraph [ref=e408]: Complete 25 pronunciation attempts
+            - paragraph [ref=e411]: 6/25
+          - generic [ref=e412]:
+            - generic [ref=e413]: ⭐
+            - paragraph [ref=e414]: Perfect Score
+            - paragraph [ref=e415]: Score 9.0+ on pronunciation
+          - generic [ref=e416]:
+            - generic [ref=e417]: 🎯
+            - paragraph [ref=e418]: All-Rounder
+            - paragraph [ref=e419]: Use all 3 learning modules
+          - generic [ref=e420]:
+            - generic [ref=e421]: 📅
+            - paragraph [ref=e422]: Dedicated
+            - paragraph [ref=e423]: Study for 10 different days
+            - paragraph [ref=e426]: 8/10
+          - generic [ref=e427]:
+            - generic [ref=e428]: 💯
+            - paragraph [ref=e429]: Century
+            - paragraph [ref=e430]: Complete 100 total activities
+            - paragraph [ref=e433]: 74/100
+      - generic [ref=e434]:
+        - heading "Recent Activity" [level=3] [ref=e435]
+        - generic [ref=e436]:
+          - generic [ref=e437]: 💬
+          - generic [ref=e438]:
+            - paragraph [ref=e439]: Hotel Check-in
+            - paragraph [ref=e440]: Yesterday
+        - generic [ref=e441]:
+          - generic [ref=e442]: 💬
+          - generic [ref=e443]:
+            - paragraph [ref=e444]: At the Airport
+            - paragraph [ref=e445]: Yesterday
+        - generic [ref=e446]:
+          - generic [ref=e447]: 💬
+          - generic [ref=e448]:
+            - paragraph [ref=e449]: Shopping
+            - paragraph [ref=e450]: Yesterday
+        - generic [ref=e451]:
+          - generic [ref=e452]: 💬
+          - generic [ref=e453]:
+            - paragraph [ref=e454]: Hotel Check-in
+            - paragraph [ref=e455]: Yesterday
+        - generic [ref=e456]:
+          - generic [ref=e457]: 📚
+          - generic [ref=e458]:
+            - paragraph [ref=e459]: check in
+            - paragraph [ref=e460]: Yesterday
+        - generic [ref=e461]:
+          - generic [ref=e462]: 💬
+          - generic [ref=e463]:
+            - paragraph [ref=e464]: Hotel Check-in
+            - paragraph [ref=e465]: Yesterday
+        - generic [ref=e466]:
+          - generic [ref=e467]: 💬
+          - generic [ref=e468]:
+            - paragraph [ref=e469]: Hotel Check-in
+            - paragraph [ref=e470]: Yesterday
+      - generic [ref=e471]:
+        - generic [ref=e472]:
+          - img [ref=e473]
+          - heading "Mistake Journal" [level=3] [ref=e475]
+          - generic [ref=e476]: 47 total
+          - button "✏️ Practice Mistakes" [ref=e477] [cursor=pointer]
+        - generic [ref=e478]:
+          - button "All" [ref=e479] [cursor=pointer]
+          - button "📝 Grammar" [ref=e480] [cursor=pointer]
+          - button "🎙️ Pronunciation" [ref=e481] [cursor=pointer]
+          - button "📚 Vocabulary" [ref=e482] [cursor=pointer]
+        - generic [ref=e483]:
+          - generic [ref=e484]:
+            - generic [ref=e485]:
+              - generic [ref=e486]: 📝
+              - generic [ref=e487]: grammar
+              - generic [ref=e488]: 5d ago
+            - generic [ref=e489]:
+              - paragraph [ref=e490]: I like to check in → I would like to check in
+              - paragraph [ref=e491]: "'I like to' expresses a general habit or preference, while 'I would like to' expresses a current desire or request. Since you're talking about something you want to do right now, 'would like to' is correct."
+          - generic [ref=e492]:
+            - generic [ref=e493]:
+              - generic [ref=e494]: 📚
+              - generic [ref=e495]: vocabulary
+              - generic [ref=e496]: 5d ago
+            - paragraph [ref=e497]:
+              - strong [ref=e498]: window shopping
+              - text: — Looking at items displayed in store windows or walking through stores without intending to buy anything
+          - generic [ref=e499]:
+            - generic [ref=e500]:
+              - generic [ref=e501]: 📚
+              - generic [ref=e502]: vocabulary
+              - generic [ref=e503]: 5d ago
+            - paragraph [ref=e504]:
+              - strong [ref=e505]: splurge
+              - text: — To spend more money than usual on something, often as a treat or indulgence
+          - generic [ref=e506]:
+            - generic [ref=e507]:
+              - generic [ref=e508]: 📚
+              - generic [ref=e509]: vocabulary
+              - generic [ref=e510]: 5d ago
+            - paragraph [ref=e511]:
+              - strong [ref=e512]: ring up
+              - text: — To scan or enter the price of items at the register to calculate the total cost
+          - generic [ref=e513]:
+            - generic [ref=e514]:
+              - generic [ref=e515]: 📝
+              - generic [ref=e516]: grammar
+              - generic [ref=e517]: 6d ago
+            - generic [ref=e518]:
+              - paragraph [ref=e519]: Could I see the menu please? → Could I see the menu, please?
+              - paragraph [ref=e520]: A comma should be placed before 'please' when it appears at the end of a request, as it is a parenthetical politeness marker.
+          - generic [ref=e521]:
+            - generic [ref=e522]:
+              - generic [ref=e523]: 📚
+              - generic [ref=e524]: vocabulary
+              - generic [ref=e525]: 6d ago
+            - paragraph [ref=e526]:
+              - strong [ref=e527]: vacancy
+              - text: — An available or unoccupied hotel room
+          - generic [ref=e528]:
+            - generic [ref=e529]:
+              - generic [ref=e530]: 📝
+              - generic [ref=e531]: grammar
+              - generic [ref=e532]: Apr 1
+            - generic [ref=e533]:
+              - paragraph [ref=e534]: London please → London, please
+              - paragraph [ref=e535]: A comma should be placed before 'please' when it appears at the end of a sentence, as it is a polite interjection set off from the rest of the clause.
+          - generic [ref=e536]:
+            - generic [ref=e537]:
+              - generic [ref=e538]: 📝
+              - generic [ref=e539]: grammar
+              - generic [ref=e540]: Apr 1
+            - generic [ref=e541]:
+              - paragraph [ref=e542]: the menu please → the menu, please.
+              - paragraph [ref=e543]: A comma should be placed before 'please' when it appears at the end of a sentence, and the sentence should end with a period.
+          - generic [ref=e544]:
+            - generic [ref=e545]:
+              - generic [ref=e546]: 🎙️
+              - generic [ref=e547]: pronunciation
+              - generic [ref=e548]: Mar 31
+            - generic [ref=e549]:
+              - paragraph [ref=e550]:
+                - text: "Expected:"
+                - strong [ref=e551]: I've been having a headache for the past two days.
+              - paragraph [ref=e552]:
+                - text: "You said: \"I have been a headache for the past two days\""
+                - generic [ref=e553]: (5/10)
+          - generic [ref=e554]:
+            - generic [ref=e555]:
+              - generic [ref=e556]: 📝
+              - generic [ref=e557]: grammar
+              - generic [ref=e558]: Mar 31
+            - generic [ref=e559]:
+              - paragraph [ref=e560]: Great greatYes the size is a very niceEat suit for me I'll buy itHow much does it → Great, great! Yes, the size is very nice. It's a suit for me. I'll buy it. How much does it cost?
+              - paragraph [ref=e561]: The entire message is missing punctuation (periods, commas, exclamation marks) and proper spacing between sentences, making it very hard to read.
+          - button "Load More" [ref=e562] [cursor=pointer]

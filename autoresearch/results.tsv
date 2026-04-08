@@ -310,3 +310,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 308	383251b	2026-04-08	370	66	629	60	1125	906	906	pass	7.4	KEPT	Add topic practice stats badges to conversation topic selection cards
 309	7d28339	2026-04-08	223	85	568	136	1012	906	906	pass	7.35	KEPT	Add cloze fill-in-the-blank exercise for key phrases in conversation summary
 310	6f18a8f	2026-04-08	154	253	407	406	813	906	906	pass	6.65	KEPT	Add mistake review drill to practice past errors from Mistake Journal
+311	2274655	2026-04-08	145	290	490	99	734	906	906	pass	7.15	KEPT	Add speaking confidence score with trend tracking on dashboard

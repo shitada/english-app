@@ -427,3 +427,22 @@ async def get_confidence_trend(
 ):
     """Get speaking confidence scores and trend across recent conversations."""
     return await dash_dal.get_confidence_trend(db, limit=limit)
+
+
+class DailyChallengeResponse(BaseModel):
+    challenge_type: str
+    title: str
+    description: str
+    target_count: int
+    current_count: int
+    completed: bool
+    route: str
+    topic: str
+
+
+@router.get("/daily-challenge", response_model=DailyChallengeResponse)
+async def get_daily_challenge(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get today's personalized daily challenge based on weakest module."""
+    return await dash_dal.get_daily_challenge(db)

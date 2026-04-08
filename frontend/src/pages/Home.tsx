@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, type LearningInsights, type LearningGoal, type TodayActivity } from '../api';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 
@@ -341,6 +341,81 @@ function DailyPracticeCard() {
   );
 }
 
+function DailyChallengeCard() {
+  const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
+
+  useEffect(() => {
+    getDailyChallenge().then(setChallenge).catch(() => {});
+  }, []);
+
+  if (!challenge) return null;
+
+  const progress = challenge.target_count > 0
+    ? Math.min(100, Math.round((challenge.current_count / challenge.target_count) * 100))
+    : 0;
+  const emoji = challenge.challenge_type === 'conversation' ? '💬' : challenge.challenge_type === 'vocabulary' ? '📚' : '🎙️';
+
+  return (
+    <div style={{
+      padding: '1rem 1.25rem',
+      marginBottom: '1.5rem',
+      borderRadius: 12,
+      border: '2px solid transparent',
+      background: challenge.completed
+        ? 'linear-gradient(var(--card-bg, #fff), var(--card-bg, #fff)) padding-box, linear-gradient(135deg, #10b981, #6366f1) border-box'
+        : 'linear-gradient(var(--card-bg, #fff), var(--card-bg, #fff)) padding-box, linear-gradient(135deg, #6366f1, #f59e0b) border-box',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <Zap size={18} color={challenge.completed ? '#10b981' : '#6366f1'} />
+        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Daily Challenge</span>
+        {challenge.completed && <span style={{ marginLeft: 'auto', fontSize: 18 }}>🎉</span>}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <span style={{ fontSize: 20 }}>{emoji}</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>{challenge.title}</p>
+          <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{challenge.description}</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ flex: 1, background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+          <div style={{
+            width: `${progress}%`,
+            height: '100%',
+            background: challenge.completed ? '#10b981' : '#6366f1',
+            borderRadius: 4,
+            transition: 'width 0.3s ease',
+          }} />
+        </div>
+        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: challenge.completed ? '#10b981' : 'var(--text-secondary)', minWidth: 40, textAlign: 'right' }}>
+          {challenge.current_count}/{challenge.target_count}
+        </span>
+      </div>
+
+      {!challenge.completed && (
+        <Link
+          to={challenge.route}
+          style={{
+            display: 'inline-block',
+            marginTop: 10,
+            padding: '0.4rem 1rem',
+            borderRadius: 6,
+            background: 'var(--primary, #6366f1)',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: '0.85rem',
+            textDecoration: 'none',
+          }}
+        >
+          Start Challenge →
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const { isActive, currentStep, totalSteps, step, next, prev, skip, restartTour } = useOnboarding();
 
@@ -366,6 +441,8 @@ export default function Home() {
       </div>
 
       <DailyPracticeCard />
+
+      <DailyChallengeCard />
 
       <div className="feature-grid">
         <Link to="/conversation" className="feature-card">

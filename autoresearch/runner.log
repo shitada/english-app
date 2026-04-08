@@ -509,3 +509,258 @@ Now render the SpeakingConfidence component. Let me find where to place it (betw
 
 Now let me commit and test:
 
+● Commit iteration 311 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #311: Add speaking confidence score with trend tracking on dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All pass. Check smoke test and QA tester conditions:
+
+● Check smoke + QA conditions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "---SMOKE---" && git diff HEAD~1 --name-only | grep
+  │ -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 6 lines...
+
+Both needed. Run smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Good. Now start server and run QA tester:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Build frontend for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -5
+  └ 6 lines...
+
+● Tester QA test iteration 311
+  │ Read Dashboard.tsx
+  │   │ frontend/src/pages/Dashboard.tsx
+  │   └ L30:60 (31 lines read)
+  └ playwright-browser_evaluate function: "() => {   // Verify the Speaking Confidence section rend…
+      └ ### Result
+
+● Kill server and record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+Excellent! QA passed with ux_score 9. Now call the evaluator:
+
+● Evaluator Evaluate iteration 311
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L950:1100 (151 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1100:1150 (26 lines read)
+
+● Record T4 for iteration 311 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.15 ≥ 6.0 → KEEP.
+
+● Record results for iteration 311 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "311" "2274655" "2026-04-08" "145" "290" "490" "99" "734" \
+  │ "906" "906" "pass" "7.15" "KEPT" "Add speaking confidence score with trend tracking on
+  │ dashboard" \…
+  └ 3 lines...
+
+Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Iteration 311 complete. ✅ Proposer ✅ Tester ✅ Evaluator. Starting iteration 312.
+
+● Record T0 for iteration 312 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 312
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L700:900 (201 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L600:750 (151 lines read)
+
+● Record T1 for iteration 312 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me check the Home page and relevant DAL functions:
+
+● Read Home page (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Home.tsx && head
+  │ -60 frontend/src/pages/Home.tsx
+  └ 62 lines...
+
+● Find Home page structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "return\|feature-grid\|<Link\|card"
+  │ frontend/src/pages/Home.tsx | head -30
+  └ 29 lines...
+
+● Read Home page main render (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '345,420p'
+  │ frontend/src/pages/Home.tsx
+  └ 74 lines...
+
+I see there's already a `DailyPracticeCard` component. Let me check how to add the daily challenge alongside or integrate it. Let me also look at the get_today_activity function:
+
+● Check existing daily/insight functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_today_activity\|daily_challenge\|get_learning_insights" app/dal/dashboard.py | head -10
+  └ 3 lines...
+
+● Read get_today_activity function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '610,650p' app/dal/dashboard.py
+  └ 42 lines...
+
+● Check config topics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "topics" config.yaml | head -10
+  └ 5 lines...
+
+● Read conversation and vocabulary topics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '18,55p' config.yaml
+  └ 39 lines...
+
+Now I have all the context. Let me implement the daily challenge:
+
+● Edit dashboard.py +72
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● Check end of router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/dashboard.py
+  └ 6 lines...
+
+● Edit dashboard.py +19
+  └ app/routers/dashboard.py
+
+Now add API types:
+
+● Edit api.ts +16
+  └ frontend/src/api.ts
+
+Now add the DailyChallengeCard to Home.tsx. Let me find the right insertion point:
+
+● Find DailyPracticeCard component (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '240,265p'
+  │ frontend/src/pages/Home.tsx
+  └ 27 lines...
+
+● Find component boundaries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "function
+  │ DailyPracticeCard\|function.*export default\|export default" frontend/src/pages/Home.tsx | head
+  │ -10
+  └ 3 lines...
+
+I'll add the DailyChallengeCard as a small inline component in Home.tsx rendered above the feature-grid but after DailyPracticeCard:
+
+● Edit Home.tsx +2 -2
+  └ frontend/src/pages/Home.tsx
+
+Now add the DailyChallengeCard component before the Home export:
+
+● Edit Home.tsx +75
+  └ frontend/src/pages/Home.tsx
+
+Now render the DailyChallengeCard in the Home component:
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test:
+
+● Commit iteration 312 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #312: Add daily challenge card on Home page with personalized task
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All pass. Check conditions:
+
+● Check smoke + QA conditions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "---" && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 5 lines...
+
+Both needed. Run smoke test and QA:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Good. Start server for QA:
+
+✗ Build frontend and start server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; cd frontend && npm run build 2>&1 | tail -3 && cd .. && uv run uvicorn app.main:app
+  │ --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Build frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3
+  └ 4 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 11 lines...
+
+● Tester QA test iteration 312
+  │ playwright-browser_snapshot depth: 2
+  │   └ ### Page
+  └ playwright-browser_console_messages level: "error"
+      └ ### Result
+
+Critical bug found. Let me fix the import:
+
+● Check config.py functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def load_config\|def
+  │ get_config\|^config\|_config" app/config.py | head -10
+  └ 11 lines...
+
+● Edit dashboard.py +2 -2
+  └ app/dal/dashboard.py
+

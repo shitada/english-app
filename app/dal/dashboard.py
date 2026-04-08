@@ -1123,3 +1123,75 @@ async def get_confidence_trend(
             trend = "stable"
 
     return {"sessions": sessions, "trend": trend}
+
+
+async def get_daily_challenge(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Generate a deterministic daily challenge based on today's date and user's weakest area."""
+    from hashlib import md5
+
+    today = date.today().isoformat()
+    activity = await get_today_activity(db)
+
+    # Determine weakest module from recent activity
+    insights = await get_learning_insights(db)
+    strengths = insights.get("module_strengths", {})
+    conv_str = strengths.get("conversation", 50)
+    vocab_str = strengths.get("vocabulary", 50)
+    pron_str = strengths.get("pronunciation", 50)
+
+    # Bias toward weakest module using date hash
+    day_hash = int(md5(today.encode()).hexdigest(), 16)
+    modules = [
+        ("conversation", conv_str),
+        ("vocabulary", vocab_str),
+        ("pronunciation", pron_str),
+    ]
+    modules.sort(key=lambda x: x[1])
+    # 60% chance weakest, 30% middle, 10% strongest
+    r = day_hash % 10
+    if r < 6:
+        chosen = modules[0][0]
+    elif r < 9:
+        chosen = modules[1][0]
+    else:
+        chosen = modules[2][0]
+
+    # Pick a topic deterministically
+    from app.config import load_config
+    config = load_config()
+    conv_topics = config.get("conversation_topics", [])
+    topic_ids = [t["id"] for t in conv_topics]
+    topic_labels = {t["id"]: t["label"] for t in conv_topics}
+    selected_topic_idx = day_hash % len(topic_ids) if topic_ids else 0
+    selected_topic = topic_ids[selected_topic_idx] if topic_ids else "hotel_checkin"
+    topic_label = topic_labels.get(selected_topic, selected_topic)
+
+    if chosen == "conversation":
+        title = f"Have a conversation: {topic_label}"
+        description = f"Start a conversation practice session about {topic_label} today."
+        target = 1
+        current = activity.get("conversations", 0)
+        route = "/conversation"
+    elif chosen == "vocabulary":
+        title = "Review vocabulary words"
+        description = "Complete at least 10 vocabulary quiz answers to reinforce your learning."
+        target = 10
+        current = activity.get("vocabulary_reviews", 0)
+        route = "/vocabulary"
+    else:
+        title = "Practice pronunciation"
+        description = "Complete 3 pronunciation attempts to improve your speaking."
+        target = 3
+        current = activity.get("pronunciation_attempts", 0)
+        route = "/pronunciation"
+
+    return {
+        "challenge_type": chosen,
+        "title": title,
+        "description": description,
+        "target_count": target,
+        "current_count": min(current, target),
+        "completed": current >= target,
+        "route": route,
+        "topic": selected_topic,
+    }

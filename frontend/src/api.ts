@@ -765,6 +765,22 @@ export async function getConfidenceTrend(limit = 20): Promise<ConfidenceTrendRes
   return request<ConfidenceTrendResponse>(`/api/dashboard/confidence-trend?limit=${limit}`);
 }
 
+// Daily Challenge (from iteration 312)
+export interface DailyChallenge {
+  challenge_type: string;
+  title: string;
+  description: string;
+  target_count: number;
+  current_count: number;
+  completed: boolean;
+  route: string;
+  topic: string;
+}
+
+export async function getDailyChallenge(): Promise<DailyChallenge> {
+  return request<DailyChallenge>('/api/dashboard/daily-challenge');
+}
+
 // Sentence Build exercises (from iteration 252)
 export interface SentenceBuildExercise {
   word_id: number;
