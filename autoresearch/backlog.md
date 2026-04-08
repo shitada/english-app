@@ -172,3 +172,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add mistake review drill to practice past errors from Mistake Journal (#310)
 - [x] Add speaking confidence score with trend tracking on dashboard (#311)
 - [x] Add daily challenge card on Home page with personalized task (#312)
+- [x] Add word-of-the-day card on Home page with TTS and practice link (#313)

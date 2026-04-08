@@ -1,3 +1,4 @@
+export { BookmarksReview } from './BookmarksReview';
 export { FeedbackPanel } from './FeedbackPanel';
 export { HighlightedMessage } from './HighlightedMessage';
 export { ConversationQuiz } from './ConversationQuiz';

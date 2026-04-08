@@ -958,3 +958,189 @@ Also update the frontend type:
 ● Edit api.ts +1 -1
   └ frontend/src/api.ts
 
+● Fix, amend, restart, verify (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9
+  │ 2>/dev/null; sleep 1; git add -A && git commit --amend -m "autoresearch #313: Add
+  │ word-of-the-day card on Home page with TTS and practice link
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run uvicorn …
+  └ 31 lines...
+
+Now rebuild frontend and run QA:
+
+● Rebuild frontend (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm run build 2>&1 | tail -3
+  └ 4 lines...
+
+● Tester QA test iteration 313
+  │ playwright-browser_evaluate function: "() => {   return window._ttsCallLog || 'No TTS calls log…
+  │   └ ### Result
+  └ playwright-browser_console_messages level: "warning", all: true
+      └ ### Result
+
+QA passed with ux_score 9, no issues. Now kill server and call evaluator:
+
+● Kill server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 313
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L400:500 (101 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L500:end (68 lines read)
+
+● Record T4 for iteration 313 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.40 ≥ 6.0 → KEEP. 4th feature kept — target met!
+
+● Record results for iteration 313 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "313" "$HASH" "2026-04-09" "107" "214" "564" "68" "632" \
+  │ "906" "906" "pass" "7.40" "KEPT" "Add word-of-the-day card on Home page with TTS and
+  │ practice link" \…
+  └ 3 lines...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Iteration 313 complete. ✅ Proposer ✅ Tester ✅ Evaluator. 4 features KEPT. Target met! Now continuing with remaining iterations. Starting 314.
+
+● Record T0 for iteration 314 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 314
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L400:550 (151 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L550:700 (151 lines read)
+
+● Record T1 for iteration 314 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me check the existing bookmarks API and conversation page structure:
+
+● Check bookmark API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "bookmark\|Bookmark"
+  │ frontend/src/api.ts | head -15
+  └ 12 lines...
+
+● Read bookmark types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '649,682p' frontend/src/api.ts
+  └ 34 lines...
+
+● Check Conversation page phases (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "phase\|setPhase\|'select'\|'chat'\|'summary'\|pastConversations"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 21 lines...
+
+● Find Past Conversations button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Past
+  │ Conversations\|history\|'replay'\|setPhase" frontend/src/pages/Conversation.tsx | grep -i
+  │ "past\|history button\|btn.*hist" | head -5
+  └ 4 lines...
+
+● Read Past Conversations button area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '565,580p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+● Check conversation component exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 12 lines...
+
+Now create the BookmarksReview component:
+
+● Create BookmarksReview.tsx +138
+  └ frontend/src/components/conversation/BookmarksReview.tsx
+
+Update exports:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Now integrate into Conversation.tsx:
+
+● Check Conversation imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 frontend/src/pages/Conversation.tsx
+  └ 6 lines...
+
+● Find conversation component import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "from.*conversation.*index\|from.*components/conversation" frontend/src/pages/Conversation.tsx |
+  │ head -5
+  └ 2 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Add 'bookmarks' to the phase type:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the bookmarks button and render the BookmarksReview. Let me find where to add the button:
+
+● Read around Past Conversations section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '564,585p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 23 lines...
+
+● Check existing bookmark imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Bookmark"
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 2 lines...
+
+I need to add the Bookmark icon import and a bookmarks button. Let me add the button above Past Conversations:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the bookmarks button before Past Conversations section and render BookmarksReview when in bookmarks phase. Let me find where the select phase rendering starts and ends:
+
+● Find phase conditionals (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'select'\|phase ===
+  │ 'history'\|phase === 'replay'\|phase === 'chat'\|phase === 'summary'"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 12 lines...
+
+● Read before Past Conversations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '569,572p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 5 lines...
+
+Add a Bookmarks button before Past Conversations:
+
+● Edit Conversation.tsx +11
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the bookmarks phase rendering. Let me find where replay phase ends:
+
+● Read replay and summary phase renders (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '653,690p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 39 lines...
+
+I need to add the bookmarks phase before history. Let me find between the phase conditionals:
+
+● Read between phases (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '643,650p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+● Edit Conversation.tsx +9
+  └ frontend/src/pages/Conversation.tsx
+
+Commit and test:
+

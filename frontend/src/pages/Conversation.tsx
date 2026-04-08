@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -42,7 +42,7 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
 ];
 
 export default function Conversation() {
-  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history' | 'replay'>('select');
+  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history' | 'replay' | 'bookmarks'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -566,6 +566,17 @@ export default function Conversation() {
           </>
         )}
 
+        {/* Bookmarks Button */}
+        <div style={{ marginTop: 24, textAlign: 'center' }}>
+          <button
+            onClick={() => setPhase('bookmarks')}
+            className="btn btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Bookmark size={16} /> Saved Bookmarks
+          </button>
+        </div>
+
         {/* Past Conversations */}
         {pastConversations.length > 0 && (
           <div style={{ marginTop: 32 }}>
@@ -628,6 +639,15 @@ export default function Conversation() {
           </div>
         )}
       </div>
+      </PhaseTransition>
+    );
+  }
+
+  // Bookmarks review
+  if (phase === 'bookmarks') {
+    return (
+      <PhaseTransition phase={phase}>
+        <BookmarksReview onBack={() => setPhase('select')} />
       </PhaseTransition>
     );
   }
