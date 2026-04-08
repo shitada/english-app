@@ -1195,3 +1195,28 @@ async def get_daily_challenge(db: aiosqlite.Connection) -> dict[str, Any]:
         "route": route,
         "topic": selected_topic,
     }
+
+
+async def get_word_of_the_day(db: aiosqlite.Connection) -> dict[str, Any] | None:
+    """Select a deterministic word-of-the-day based on today's date."""
+    from hashlib import md5
+
+    rows = await db.execute_fetchall(
+        "SELECT id, word, meaning, example_sentence, topic, difficulty FROM vocabulary_words ORDER BY id"
+    )
+    if not rows:
+        return None
+
+    today = date.today().isoformat()
+    day_hash = int(md5(today.encode()).hexdigest(), 16)
+    idx = day_hash % len(rows)
+    row = rows[idx]
+
+    return {
+        "word_id": row["id"],
+        "word": row["word"],
+        "meaning": row["meaning"],
+        "example_sentence": row["example_sentence"] or "",
+        "topic": row["topic"],
+        "difficulty": row["difficulty"],
+    }

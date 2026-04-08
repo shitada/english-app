@@ -781,6 +781,23 @@ export async function getDailyChallenge(): Promise<DailyChallenge> {
   return request<DailyChallenge>('/api/dashboard/daily-challenge');
 }
 
+// Word of the Day (from iteration 313)
+export interface WordOfTheDay {
+  word_id: number;
+  word: string;
+  meaning: string;
+  example_sentence: string;
+  topic: string;
+  difficulty: string | number | null;
+}
+
+export async function getWordOfTheDay(): Promise<WordOfTheDay | null> {
+  const res = await fetch('/api/dashboard/word-of-the-day');
+  if (res.status === 204) return null;
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 // Sentence Build exercises (from iteration 252)
 export interface SentenceBuildExercise {
   word_id: number;

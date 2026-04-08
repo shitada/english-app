@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge } from '../api';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 
@@ -341,6 +341,77 @@ function DailyPracticeCard() {
   );
 }
 
+function WordOfTheDayCard() {
+  const [word, setWord] = useState<WordOfTheDay | null>(null);
+
+  useEffect(() => {
+    getWordOfTheDay().then(setWord).catch(() => {});
+  }, []);
+
+  const speak = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.9;
+      window.speechSynthesis.speak(u);
+    }
+  }, []);
+
+  if (!word) return null;
+
+  return (
+    <div style={{
+      padding: '1rem 1.25rem',
+      marginBottom: '1.5rem',
+      borderRadius: 12,
+      border: '2px solid transparent',
+      background: 'linear-gradient(var(--card-bg, #fff), var(--card-bg, #fff)) padding-box, linear-gradient(135deg, #8b5cf6, #ec4899) border-box',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 18 }}>📖</span>
+        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Word of the Day</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 'auto', textTransform: 'capitalize' }}>
+          {word.topic?.replace(/_/g, ' ')}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+        <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>{word.word}</span>
+        <button
+          onClick={() => speak(word.word)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-secondary)' }}
+          title="Listen"
+        >
+          🔊
+        </button>
+      </div>
+
+      <p style={{ margin: '0 0 6px', fontSize: '0.9rem', color: 'var(--text)' }}>
+        {word.meaning}
+      </p>
+
+      {word.example_sentence && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginTop: 8, padding: '6px 10px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 6 }}>
+          <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontStyle: 'italic', flex: 1 }}>
+            "{word.example_sentence}"
+          </span>
+          <button
+            onClick={() => speak(word.example_sentence)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: 'var(--text-secondary)', flexShrink: 0 }}
+            title="Listen to example"
+          >
+            🔊
+          </button>
+        </div>
+      )}
+
+      <Link to="/vocabulary" style={{ display: 'inline-block', marginTop: 10, fontSize: '0.85rem', color: 'var(--primary, #6366f1)', fontWeight: 600, textDecoration: 'none' }}>
+        Practice Vocabulary →
+      </Link>
+    </div>
+  );
+}
+
 function DailyChallengeCard() {
   const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
 
@@ -443,6 +514,8 @@ export default function Home() {
       <DailyPracticeCard />
 
       <DailyChallengeCard />
+
+      <WordOfTheDayCard />
 
       <div className="feature-grid">
         <Link to="/conversation" className="feature-card">

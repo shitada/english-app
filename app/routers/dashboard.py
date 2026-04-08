@@ -446,3 +446,24 @@ async def get_daily_challenge(
 ):
     """Get today's personalized daily challenge based on weakest module."""
     return await dash_dal.get_daily_challenge(db)
+
+
+class WordOfTheDayResponse(BaseModel):
+    word_id: int
+    word: str
+    meaning: str
+    example_sentence: str
+    topic: str
+    difficulty: int | str | None = None
+
+
+@router.get("/word-of-the-day")
+async def get_word_of_the_day(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get today's word-of-the-day from vocabulary words."""
+    from fastapi.responses import JSONResponse
+    result = await dash_dal.get_word_of_the_day(db)
+    if result is None:
+        return JSONResponse(status_code=204, content=None)
+    return WordOfTheDayResponse(**result)
