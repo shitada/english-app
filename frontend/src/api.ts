@@ -680,6 +680,18 @@ export async function getBookmarkedMessages(params?: {
   return request<BookmarkedMessagesResponse>(`/api/conversation/bookmarks${qs ? `?${qs}` : ''}`);
 }
 
+// Difficulty recommendation (from iteration 315)
+export interface DifficultyRecommendation {
+  current_difficulty: string;
+  recommended_difficulty: string;
+  reason: string;
+  stats: { accuracy: number; avg_words: number; sessions_analyzed: number };
+}
+
+export async function getDifficultyRecommendation(): Promise<DifficultyRecommendation> {
+  return request<DifficultyRecommendation>('/api/conversation/difficulty-recommendation');
+}
+
 // Dictation mode (from iteration 250)
 export interface DictationWordResult {
   expected: string;

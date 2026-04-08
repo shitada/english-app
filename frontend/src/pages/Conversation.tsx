@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark } from 'lucide-react';
-import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion } from '../api';
+import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -51,6 +51,7 @@ export default function Conversation() {
   const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [summary, setSummary] = useState<any>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
+  const [diffRec, setDiffRec] = useState<DifficultyRecommendation | null>(null);
   const [roleSwap, setRoleSwap] = useState(false);
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
@@ -266,6 +267,12 @@ export default function Conversation() {
     api.listConversations().then((res) => {
       setPastConversations(res.conversations.filter((c) => c.status === 'ended'));
     }).catch(() => {});
+    getDifficultyRecommendation().then((rec) => {
+      setDiffRec(rec);
+      if (rec.recommended_difficulty && rec.recommended_difficulty !== rec.current_difficulty) {
+        setDifficulty(rec.recommended_difficulty as Difficulty);
+      }
+    }).catch(() => {});
   }, [phase]);
 
   // Compute per-topic practice stats from past conversations
@@ -432,6 +439,27 @@ export default function Conversation() {
           </div>
         ) : (
           <>
+            {diffRec && diffRec.recommended_difficulty !== diffRec.current_difficulty && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 16px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.10), rgba(168,85,247,0.10))',
+                border: '1px solid rgba(99,102,241,0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                fontSize: '0.9rem',
+              }}>
+                <span style={{ fontSize: '1.3rem' }}>💡</span>
+                <div>
+                  <strong>Recommendation:</strong> {diffRec.reason}
+                  <div style={{ marginTop: 4, opacity: 0.7, fontSize: '0.8rem' }}>
+                    Based on {diffRec.stats.sessions_analyzed} recent session{diffRec.stats.sessions_analyzed !== 1 ? 's' : ''} — {diffRec.stats.accuracy}% accuracy, {diffRec.stats.avg_words} avg words/msg
+                  </div>
+                </div>
+              </div>
+            )}
             <div style={{ marginBottom: 24 }}>
               <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Difficulty Level</h3>
               <div style={{ display: 'flex', gap: 8 }}>

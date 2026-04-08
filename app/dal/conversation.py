@@ -656,3 +656,76 @@ async def get_shadowing_phrases(
                     return phrases
 
     return phrases
+
+
+async def get_difficulty_recommendation(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Analyze recent conversations to recommend a difficulty level."""
+    rows = await db.execute_fetchall(
+        """
+        SELECT c.id, c.difficulty, c.summary_json
+        FROM conversations c
+        WHERE c.status = 'ended' AND c.summary_json IS NOT NULL
+        ORDER BY c.ended_at DESC
+        LIMIT 5
+        """
+    )
+
+    if len(rows) < 2:
+        return {
+            "current_difficulty": "intermediate",
+            "recommended_difficulty": "intermediate",
+            "reason": "Not enough data yet — keep practicing!",
+            "stats": {"accuracy": 0, "avg_words": 0, "sessions_analyzed": len(rows)},
+        }
+
+    difficulties = [r["difficulty"] or "intermediate" for r in rows]
+    current_difficulty = max(set(difficulties), key=difficulties.count)
+
+    total_accuracy = 0.0
+    total_avg_words = 0.0
+    valid_count = 0
+
+    for row in rows:
+        try:
+            summary = json.loads(row["summary_json"]) if isinstance(row["summary_json"], str) else row["summary_json"]
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(summary, dict):
+            continue
+        perf = summary.get("performance")
+        if not isinstance(perf, dict):
+            continue
+        total_accuracy += float(perf.get("grammar_accuracy_rate", 0))
+        total_avg_words += float(perf.get("avg_words_per_message", 0))
+        valid_count += 1
+
+    if valid_count == 0:
+        return {
+            "current_difficulty": current_difficulty,
+            "recommended_difficulty": current_difficulty,
+            "reason": "Not enough performance data yet.",
+            "stats": {"accuracy": 0, "avg_words": 0, "sessions_analyzed": 0},
+        }
+
+    avg_accuracy = round(total_accuracy / valid_count, 1)
+    avg_words = round(total_avg_words / valid_count, 1)
+
+    levels = ["beginner", "intermediate", "advanced"]
+    current_idx = levels.index(current_difficulty) if current_difficulty in levels else 1
+
+    if avg_accuracy > 85 and avg_words > 10 and current_idx < 2:
+        recommended = levels[current_idx + 1]
+        reason = f"Your grammar accuracy is {avg_accuracy}% with {avg_words} avg words/msg — ready for a challenge!"
+    elif (avg_accuracy < 50 or avg_words < 4) and current_idx > 0:
+        recommended = levels[current_idx - 1]
+        reason = f"Accuracy is {avg_accuracy}% — try an easier level to build confidence."
+    else:
+        recommended = current_difficulty
+        reason = f"Accuracy {avg_accuracy}%, {avg_words} avg words/msg — you're at the right level!"
+
+    return {
+        "current_difficulty": current_difficulty,
+        "recommended_difficulty": recommended,
+        "reason": reason,
+        "stats": {"accuracy": avg_accuracy, "avg_words": avg_words, "sessions_analyzed": valid_count},
+    }

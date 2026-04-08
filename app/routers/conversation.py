@@ -765,3 +765,24 @@ async def generate_conversation_quiz(
         raise HTTPException(status_code=502, detail="Failed to generate valid quiz questions")
 
     return {"conversation_id": conversation_id, "questions": validated}
+
+
+class DifficultyRecommendationStats(BaseModel):
+    accuracy: float
+    avg_words: float
+    sessions_analyzed: int
+
+
+class DifficultyRecommendationResponse(BaseModel):
+    current_difficulty: str
+    recommended_difficulty: str
+    reason: str
+    stats: DifficultyRecommendationStats
+
+
+@router.get("/difficulty-recommendation", response_model=DifficultyRecommendationResponse)
+async def difficulty_recommendation(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get a difficulty level recommendation based on recent performance."""
+    return await conv_dal.get_difficulty_recommendation(db)

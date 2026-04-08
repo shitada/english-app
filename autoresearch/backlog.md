@@ -173,3 +173,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add speaking confidence score with trend tracking on dashboard (#311)
 - [x] Add daily challenge card on Home page with personalized task (#312)
 - [x] Add word-of-the-day card on Home page with TTS and practice link (#313)
+- [x] Add bookmarks review panel to Conversation page (#314)
