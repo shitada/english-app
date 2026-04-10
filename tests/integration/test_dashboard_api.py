@@ -428,3 +428,113 @@ async def test_recent_activity_after_conversation(client, mock_copilot):
     assert item["type"] == "conversation"
     assert item["route"] == "/conversation"
     assert "timestamp" in item
+
+
+# ── Tests for untested dashboard endpoints ──────────────────────────
+
+
+@pytest.mark.integration
+async def test_weekly_report_empty(client):
+    """Weekly report on empty DB returns valid structure."""
+    res = await client.get("/api/dashboard/weekly-report")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["week_start"], str)
+    assert isinstance(data["week_end"], str)
+    assert data["conversations"] == 0
+    assert data["streak"] == 0
+    assert isinstance(data["highlights"], list)
+    assert isinstance(data["text_summary"], str)
+
+
+@pytest.mark.integration
+async def test_grammar_trend_empty(client):
+    """Grammar trend returns empty conversations list."""
+    res = await client.get("/api/dashboard/grammar-trend")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversations"] == []
+    assert isinstance(data["trend"], str)
+
+
+@pytest.mark.integration
+async def test_grammar_trend_limit_param(client):
+    """Grammar trend respects limit parameter."""
+    res = await client.get("/api/dashboard/grammar-trend?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["conversations"]) <= 5
+
+
+@pytest.mark.integration
+async def test_confidence_trend_empty(client):
+    """Confidence trend returns empty sessions."""
+    res = await client.get("/api/dashboard/confidence-trend")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["sessions"] == []
+    assert isinstance(data["trend"], str)
+
+
+@pytest.mark.integration
+async def test_daily_challenge_structure(client):
+    """Daily challenge returns valid structure."""
+    res = await client.get("/api/dashboard/daily-challenge")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["challenge_type"], str)
+    assert isinstance(data["title"], str)
+    assert isinstance(data["description"], str)
+    assert isinstance(data["target_count"], int)
+    assert isinstance(data["current_count"], int)
+    assert isinstance(data["completed"], bool)
+    assert isinstance(data["route"], str)
+    assert isinstance(data["topic"], str)
+
+
+@pytest.mark.integration
+async def test_word_of_the_day_empty(client):
+    """Word of the day on empty DB returns 204."""
+    res = await client.get("/api/dashboard/word-of-the-day")
+    assert res.status_code == 204
+
+
+@pytest.mark.integration
+async def test_mistakes_review_empty(client):
+    """Mistake review returns empty items list."""
+    res = await client.get("/api/dashboard/mistakes/review")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["items"] == []
+    assert data["total"] == 0
+
+
+@pytest.mark.integration
+async def test_session_analytics_empty(client):
+    """Session analytics returns modules and daily arrays."""
+    res = await client.get("/api/dashboard/session-analytics")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["modules"], list)
+    assert isinstance(data["daily"], list)
+
+
+@pytest.mark.integration
+async def test_session_analytics_days_param(client):
+    """Session analytics accepts days parameter."""
+    res = await client.get("/api/dashboard/session-analytics?days=30")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["modules"], list)
+
+
+@pytest.mark.integration
+async def test_migration_status_structure(client):
+    """Migration status returns valid structure."""
+    res = await client.get("/api/dashboard/migration-status")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["total_defined"], int)
+    assert isinstance(data["total_applied"], int)
+    assert isinstance(data["current_version"], int)
+    assert isinstance(data["migrations"], list)

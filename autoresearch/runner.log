@@ -1944,3 +1944,112 @@ Now I'll add the flashcard and flashcard-result phases right after drill-result:
 
 All pass. Commit and evaluate:
 
+● Commit iteration 337 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #337: Add self-paced Flashcard review mode to Vocabulary page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 337
+  │ Read session-iter-337-to-436.md
+  │   │ autoresearch/logs/session-iter-337-to-436.md
+  │   └ L13800:14400 (541 lines read)
+  └ Read session-iter-337-to-436.md
+      │ autoresearch/logs/session-iter-337-to-436.md
+      └ L14341:14863 (523 lines read)
+
+Score: 6.65, KEEP.
+
+● Record iteration 337 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "337\t36bd1f1\t2026-04-11\t25\t80\t45\t15\t165\t994\t994\tpass\t6.65\tkept\tAdd self-paced
+  │ Flashcard review mode to Vocabulary page\n" >> autoresearch/results.tsv && date +%s
+  └ 2 lines...
+
+Iteration 338:
+
+● Proposer Propose iteration 338
+  │ Read dashboard.py
+  │   │ app/routers/dashboard.py
+  │   └ L200:end (340 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L340:431 (91 lines read)
+
+● See dashboard router endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def " app/routers/dashboard.py |
+  │ head -20
+  └ 21 lines...
+
+● Find route paths (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "router\.\(get\|post\)"
+  │ app/routers/dashboard.py | grep -E "weekly|grammar-trend|confidence|daily-challenge|word-of-the-
+  │ day|mistakes/review|session-analytics|migration" | head -10
+  └ 9 lines...
+
+● See existing dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_"
+  │ tests/integration/test_dashboard_api.py | head -20
+  └ 21 lines...
+
+● Count existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "test_"
+  │ tests/integration/test_dashboard_api.py
+  └ 2 lines...
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_dashboard_api.py
+  └ 6 lines...
+
+Let me check the response model shapes:
+
+● See response model shapes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A10 "class
+  │ WeeklyReportResponse\|class GrammarTrendResponse\|class ConfidenceTrendResponse\|class
+  │ DailyChallengeResponse\|class MistakeReviewResponse\|class SessionAnalyticsResponse"
+  │ app/routers/dashboard.py
+  └ 72 lines...
+
+● Full weekly report response (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A8 "class WeeklyReportResponse"
+  │ app/routers/dashboard.py
+  └ 10 lines...
+
+● See full weekly report model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '340,370p' app/routers/dashboard.py
+  └ 32 lines...
+
+Now let me write the integration tests:
+
+● See file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_dashboard_api.py
+  └ 2 lines...
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '425,430p'
+  │ tests/integration/test_dashboard_api.py
+  └ 7 lines...
+
+● Edit test_dashboard_api.py +110
+  └ tests/integration/test_dashboard_api.py
+
+● Run new tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py -v -k "weekly_report or grammar_trend or confidence or
+  │ daily_challenge or word_of_the_day or mistakes_review or session_analytics or migration_status"
+  │ 2>&1 | tail -20
+  └ 21 lines...
+
+All 10 new tests pass. Run full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+1004/1004! Over 1000 tests now. Commit and evaluate:
+
