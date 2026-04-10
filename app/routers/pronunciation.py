@@ -1022,3 +1022,64 @@ async def evaluate_sentence_expand(
         "feedback": str(result.get("feedback", "")),
         "model_expansion": str(result.get("model_expansion", "")),
     }
+
+
+# ── Listen-and-Summarize evaluation ──────────────────────────────
+
+class ListeningSummaryEvalRequest(BaseModel):
+    passage: str = Field(..., min_length=10, max_length=5000)
+    user_summary: str = Field(..., min_length=3, max_length=2000)
+
+
+class ListeningSummaryEvalResponse(BaseModel):
+    content_coverage_score: float
+    accuracy_score: float
+    grammar_score: float
+    conciseness_score: float
+    overall_score: float
+    feedback: str
+    model_summary: str
+
+
+@router.post("/listening-summary/evaluate", response_model=ListeningSummaryEvalResponse)
+async def evaluate_listening_summary(req: ListeningSummaryEvalRequest, _rl=Depends(require_rate_limit)):
+    """Evaluate a user's spoken summary of a listening passage."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Original passage:\n\"{req.passage}\"\n\n"
+        f"User's summary:\n\"{req.user_summary}\"\n\n"
+        "Evaluate the user's summary of the passage. Return JSON with:\n"
+        "- content_coverage_score (number 1-10): how well the summary covers the key points\n"
+        "- accuracy_score (number 1-10): factual accuracy relative to the passage\n"
+        "- grammar_score (number 1-10): grammar and sentence structure quality\n"
+        "- conciseness_score (number 1-10): how concise and well-organized the summary is\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback on how to improve\n"
+        "- model_summary (string): a concise model summary of the passage for comparison"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach evaluating listening comprehension summaries. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listening_summary_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "content_coverage_score": clamp(result.get("content_coverage_score", 5)),
+        "accuracy_score": clamp(result.get("accuracy_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "conciseness_score": clamp(result.get("conciseness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_summary": str(result.get("model_summary", "")),
+    }

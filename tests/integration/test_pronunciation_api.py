@@ -1074,3 +1074,42 @@ async def test_pronunciation_check_empty_transcription_rejected(client):
         "user_transcription": "",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_summary_evaluate(client, mock_copilot):
+    """Listen-and-summarize endpoint returns evaluation scores."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "content_coverage_score": 8,
+        "accuracy_score": 7,
+        "grammar_score": 9,
+        "conciseness_score": 7,
+        "overall_score": 8,
+        "feedback": "Good summary covering main points.",
+        "model_summary": "The passage discusses hotel check-in procedures.",
+    })
+    res = await client.post("/api/pronunciation/listening-summary/evaluate", json={
+        "passage": "Welcome to our hotel. Please present your ID and credit card for check-in.",
+        "user_summary": "The passage is about hotel check-in where you need to show ID and credit card.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert 1 <= data["content_coverage_score"] <= 10
+    assert 1 <= data["accuracy_score"] <= 10
+    assert 1 <= data["grammar_score"] <= 10
+    assert 1 <= data["conciseness_score"] <= 10
+    assert 1 <= data["overall_score"] <= 10
+    assert len(data["feedback"]) > 0
+    assert len(data["model_summary"]) > 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_summary_evaluate_short_input(client):
+    """Listen-and-summarize rejects too-short inputs."""
+    res = await client.post("/api/pronunciation/listening-summary/evaluate", json={
+        "passage": "Short.",
+        "user_summary": "OK",
+    })
+    assert res.status_code == 422

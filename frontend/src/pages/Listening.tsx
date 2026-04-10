@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from 'lucide-react';
 import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
+import { ListenAndSummarize } from '../components/ListenAndSummarize';
 import { api, saveListeningQuizResult, getListeningQuizHistory } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult } from '../api';
 
@@ -363,6 +364,7 @@ export default function Listening() {
           </div>
           {passage && <EchoPractice passage={passage} />}
           {passage && <ClozeListening passage={passage} />}
+          {passage && <ListenAndSummarize passage={passage} />}
         </div>
       )}
     </div>

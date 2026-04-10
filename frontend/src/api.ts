@@ -1219,3 +1219,26 @@ export async function evaluateSentenceExpand(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Listen-and-Summarize ──
+
+export interface ListeningSummaryEvaluation {
+  content_coverage_score: number;
+  accuracy_score: number;
+  grammar_score: number;
+  conciseness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_summary: string;
+}
+
+export async function evaluateListeningSummary(data: {
+  passage: string;
+  user_summary: string;
+}): Promise<ListeningSummaryEvaluation> {
+  return request<ListeningSummaryEvaluation>('/api/pronunciation/listening-summary/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

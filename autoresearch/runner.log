@@ -667,3 +667,259 @@ Now integrate it into Listening.tsx:
 
 Commit and test:
 
+● Commit iteration 330 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #330: Add cloze listening drill to Listening quiz results page"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+978/978 pass, TS pass. Check QA need:
+
+● Check frontend changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Feature type + frontend pages changed → tester MANDATORY. Start server and QA:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 330
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L90:105 (15 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:32 (32 lines read)
+
+Tester passed (ux_score: 6.0). CSS variable naming concern noted but fallback values are provided. Now call evaluator:
+
+● Evaluator Evaluate iteration 330
+  │ List directory frontend/src/components
+  │   └ 13 files found
+  └ Read EchoPractice.tsx
+      │ frontend/src/components/EchoPractice.tsx
+      └ 229 lines read
+
+Score 6.5, verdict KEEP. All criteria met. Record results:
+
+● Record T4, stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo $T4 && lsof -ti:8000
+  │ | xargs kill -9 2>/dev/null
+  └ 2 lines...
+
+T0=1775840015, T1=1775840205, T2=1775840258, T3=1775840315, T4=1775840638
+propose=190, implement=53, test=57, evaluate=323, total=623
+
+● Record results for iteration 330 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "330" "d0500b2" "2026-04-11" "190" "53" "57" "323" "623" \
+  │ "978" "978" "pass" "6.5" "KEPT" "Add cloze listening drill to Listening quiz results page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Now iteration 331:
+
+● Record T0 for iteration 331 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 331
+  │ List directory tests/unit
+  │   └ 15 files found
+  └ List directory tests/integration
+      └ 13 files found
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me implement the backend endpoint first, then frontend:
+
+● Check pronunciation router structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "class.*Request\|class.*Response\|@router" app/routers/pronunciation.py | tail -20
+  └ 21 lines...
+
+● See end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/routers/pronunciation.py
+  └ 31 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "safe_llm_call\|from app"
+  │ app/routers/pronunciation.py | head -10
+  └ 11 lines...
+
+Now let me add the endpoint:
+
+● Get file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/pronunciation.py
+  └ 2 lines...
+
+● Check last lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1020,1024p'
+  │ app/routers/pronunciation.py
+  └ 6 lines...
+
+● Edit pronunciation.py +61
+  └ app/routers/pronunciation.py
+
+Now add frontend API types and function:
+
+● Find where to add API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "evaluateListening\|sentenceExpand\|SentenceExpand" frontend/src/api.ts | tail -10
+  └ 8 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 frontend/src/api.ts
+  └ 11 lines...
+
+● Edit api.ts +23
+  └ frontend/src/api.ts
+
+Now create the ListenAndSummarize component:
+
+● Create ListenAndSummarize.tsx +211
+  └ frontend/src/components/ListenAndSummarize.tsx
+
+Now integrate into Listening.tsx:
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Now add integration test:
+
+● Check end of pronunciation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ tests/integration/test_pronunciation_api.py
+  └ 9 lines...
+
+✗ Edit test_pronunciation_api.py
+  │ tests/integration/test_pronunciation_api.py
+  └ Multiple matches found
+
+● Get exact end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_pronunciation_api.py && tail -15
+  │ tests/integration/test_pronunciation_api.py
+  └ 17 lines...
+
+● Edit test_pronunciation_api.py +39
+  └ tests/integration/test_pronunciation_api.py
+
+Now I need to check if AsyncMock is imported in the test file:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ tests/integration/test_pronunciation_api.py
+  └ 5 lines...
+
+Good, AsyncMock is imported. Commit and test:
+
+● Commit iteration 331 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #331: Add listen-and-summarize speaking drill to Listening quiz results"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+980/980 pass (2 new tests), TS pass. Check smoke test and QA needs:
+
+● Check smoke test and QA needs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/" && echo "---" && git diff HEAD~1 --name-only | grep
+  │ -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 6 lines...
+
+Backend router changed → smoke test needed. Frontend pages changed + feature → QA needed.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -15
+  └ 16 lines...
+
+Smoke test passed. Now QA:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 331
+  │ List directory frontend/src/hooks
+  │   └ 9 files found
+  └ Read useSpeechRecognition.ts
+      │ frontend/src/hooks/useSpeechRecognition.ts
+      └ L166:167 (2 lines read)
+
+Critical bug found — property name mismatch with useSpeechRecognition hook. Let me fix it:
+
+● Check hook API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "export\|return\|startListening\|stopListening\|start\|stop"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -20
+  └ 18 lines...
+
+Confirmed — the hook returns `start` and `stop`. Let me fix the component:
+
+● Edit ListenAndSummarize.tsx +1 -1
+  └ frontend/src/components/ListenAndSummarize.tsx
+
+● Edit ListenAndSummarize.tsx +1 -1
+  └ frontend/src/components/ListenAndSummarize.tsx
+
+Also fix the handleReset to clear transcript:
+
+● Edit ListenAndSummarize.tsx +1
+  └ frontend/src/components/ListenAndSummarize.tsx
+
+Also add rate limiting to the endpoint:
+
+● Find endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening-summary"
+  │ app/routers/pronunciation.py
+  └ 2 lines...
+
+● Check endpoint signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1044,1048p'
+  │ app/routers/pronunciation.py
+  └ 6 lines...
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Amend the commit with fixes:
+
