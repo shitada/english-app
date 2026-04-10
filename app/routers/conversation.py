@@ -41,12 +41,19 @@ class EndRequest(BaseModel):
     conversation_id: int = Field(ge=1)
 
 
+class GrammarNote(BaseModel):
+    phrase: str
+    grammar_point: str
+    explanation: str
+
+
 class StartResponse(BaseModel):
     conversation_id: int
     message: str
     topic: str
     phrase_suggestions: list[str] = []
     key_phrases: list[str] = []
+    grammar_notes: list[GrammarNote] = []
     user_role: str = ""
     role_briefing: list[str] = []
 
@@ -56,6 +63,7 @@ class MessageResponse(BaseModel):
     feedback: dict[str, Any] | None
     phrase_suggestions: list[str] = []
     key_phrases: list[str] = []
+    grammar_notes: list[GrammarNote] = []
 
 
 class EndResponse(BaseModel):
@@ -120,19 +128,24 @@ async def toggle_topic_favorite(
 
 async def _extract_reply_helpers(
     copilot: Any, ai_message: str, topic_label: str, difficulty: str
-) -> tuple[list[str], list[str]]:
-    """Generate reply suggestions and extract key phrases in a single LLM call (non-fatal)."""
+) -> tuple[list[str], list[str], list[dict]]:
+    """Generate reply suggestions, extract key phrases, and identify grammar notes in a single LLM call."""
     try:
         prompt = (
             f"Given this AI message in a {topic_label} conversation at {difficulty} level:\n"
             f'"{ai_message}"\n\n'
-            "Do two things:\n"
+            "Do three things:\n"
             "1. Suggest 2-3 short English phrases the user could reply with. "
             "Keep them natural, varied, and appropriate for the difficulty level.\n"
             "2. Identify 2-4 useful English phrases, idioms, or expressions from the message "
             "that a language learner should pay attention to. Pick phrases that appear "
-            "verbatim in the message.\n\n"
-            'Return JSON: {"suggestions": ["reply1", "reply2"], "key_phrases": ["phrase1", "phrase2"]}'
+            "verbatim in the message.\n"
+            "3. Identify 1-3 interesting grammar patterns in the message (e.g. conditionals, "
+            "phrasal verbs, tense usage, passive voice). For each, give the exact phrase from "
+            "the message, the grammar point name, and a brief explanation.\n\n"
+            'Return JSON: {"suggestions": ["reply1", "reply2"], "key_phrases": ["phrase1", "phrase2"], '
+            '"grammar_notes": [{"phrase": "exact phrase from message", "grammar_point": "Present Perfect", '
+            '"explanation": "Used for actions with current relevance"}]}'
         )
         result = await copilot.ask_json(
             "You are an English conversation helper. Return ONLY valid JSON.",
@@ -149,10 +162,20 @@ async def _extract_reply_helpers(
         lower_msg = ai_message.lower()
         phrases = [str(p) for p in phrases[:4] if p and str(p).lower() in lower_msg]
 
-        return suggestions, phrases
+        grammar_notes = result.get("grammar_notes", [])
+        if not isinstance(grammar_notes, list):
+            grammar_notes = []
+        grammar_notes = [
+            {"phrase": str(n["phrase"]), "grammar_point": str(n["grammar_point"]), "explanation": str(n["explanation"])}
+            for n in grammar_notes[:3]
+            if isinstance(n, dict) and n.get("phrase") and n.get("grammar_point") and n.get("explanation")
+            and str(n["phrase"]).lower() in lower_msg
+        ]
+
+        return suggestions, phrases, grammar_notes
     except Exception as e:
         logger.warning("Reply helpers generation failed (non-fatal): %s", e)
-        return [], []
+        return [], [], []
 
 
 def _swap_scenario_roles(scenario: str) -> str:
@@ -236,10 +259,10 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         suggestions_result, briefing_result = await asyncio.gather(
             helpers_coro, _get_briefing()
         )
-        suggestions, key_phrases = suggestions_result
+        suggestions, key_phrases, grammar_notes = suggestions_result
         role_briefing = briefing_result
     else:
-        suggestions, key_phrases = await helpers_coro
+        suggestions, key_phrases, grammar_notes = await helpers_coro
 
     return {
         "conversation_id": conversation_id,
@@ -247,6 +270,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         "topic": req.topic,
         "phrase_suggestions": suggestions,
         "key_phrases": key_phrases,
+        "grammar_notes": grammar_notes,
         "user_role": user_role_name,
         "role_briefing": role_briefing,
     }
@@ -410,9 +434,9 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
     # Generate phrase suggestions and extract key phrases (single combined LLM call)
-    suggestions, key_phrases = await _extract_reply_helpers(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
+    suggestions, key_phrases, grammar_notes = await _extract_reply_helpers(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
 
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions, "key_phrases": key_phrases}
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions, "key_phrases": key_phrases, "grammar_notes": grammar_notes}
 
 
 @router.post("/end", response_model=EndResponse)

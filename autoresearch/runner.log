@@ -3731,3 +3731,183 @@ Now run tests:
 
 Score: **7.0 — KEEP**. Record and continue:
 
+● Record 322 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '322\t7f01255\t2025-04-10\t30\t360\t60\t30\t480\t952\t952\tpass\t7.0\tKEPT\tAdd speaking pace
+  │ analysis with WPM tracking in conversation\n' >> autoresearch/results.tsv && sed -i '' 's/- \[
+  │ \] Add speaking pace analysis/- [x] Add speaking pace analysis/' autoresearch/backlog.md &&
+  │ git add autoresearch/ && git commit -m "bookkeeping: record iteration 322 results…
+  └ 5 lines...
+
+Iteration 323:
+
+● Proposer Propose iteration 323 feature
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L905:944 (40 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L121:156 (35 lines read)
+
+Good proposal. Let me implement grammar explanation tooltips. First, check existing code:
+
+● Find helper extraction function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ '_extract_reply_helpers\|extract_reply_helpers' app/routers/conversation.py | head -5
+  └ 4 lines...
+
+● View _extract_reply_helpers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '121,175p'
+  │ app/routers/conversation.py
+  └ 56 lines...
+
+Now let me update the function to also extract grammar_notes:
+
+● Edit conversation.py +22 -7
+  └ app/routers/conversation.py
+
+Now update call sites. Let me check the start_conversation and send_message:
+
+● Find call sites (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'helpers_coro\|suggestions,
+  │ key_phrases' app/routers/conversation.py | head -10
+  └ 6 lines...
+
+● View start conversation helpers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '248,270p'
+  │ app/routers/conversation.py
+  └ 24 lines...
+
+● Edit conversation.py +3 -2
+  └ app/routers/conversation.py
+
+Now update the send_message call site:
+
+● View send_message helpers call (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '425,445p'
+  │ app/routers/conversation.py
+  └ 22 lines...
+
+● Edit conversation.py +2 -2
+  └ app/routers/conversation.py
+
+Now update the Pydantic models to include grammar_notes:
+
+● Find response models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class StartResponse\|class
+  │ MessageResponse' app/routers/conversation.py | head -5
+  └ 3 lines...
+
+● View response models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '44,70p' app/routers/conversation.py
+  └ 28 lines...
+
+● Edit conversation.py +8
+  └ app/routers/conversation.py
+
+Now update the frontend. First, api.ts types:
+
+● Check frontend types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'key_phrases\|grammar_notes\|GrammarNote\|StartConversation\|MessageResponse'
+  │ frontend/src/api.ts | head -15
+  └ 3 lines...
+
+● View conversation API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '70,90p' frontend/src/api.ts
+  └ 22 lines...
+
+I need to add the GrammarNote type and update the return types:
+
+● Find GrammarFeedback (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'GrammarFeedback\|interface
+  │ Grammar' frontend/src/api.ts | head -5
+  └ 6 lines...
+
+● View GrammarFeedback interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '254,260p' frontend/src/api.ts
+  └ 7 lines...
+
+● Edit api.ts +6
+  └ frontend/src/api.ts
+
+Now update the API return types:
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+Now update Conversation.tsx Message interface and pass grammar_notes to HighlightedMessage:
+
+● Find Message type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'interface Message\|type Message'
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 2 lines...
+
+● View Message interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '12,20p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 10 lines...
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now update the startConversation to store grammar_notes:
+
+● Find message set lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "setMessages.*assistant.*content.*res.message.*key_phrases" frontend/src/pages/Conversation.tsx
+  │ | head -5
+  └ 2 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now the sendMessage:
+
+● Find send message push (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "updated.push.*assistant.*content.*res.message.*key_phrases" frontend/src/pages/Conversation.tsx
+  │ | head -5
+  └ 2 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now find where HighlightedMessage is rendered and pass grammar_notes:
+
+● Find HighlightedMessage usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'HighlightedMessage'
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 3 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now update HighlightedMessage component:
+
+● View HighlightedMessage component (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/HighlightedMessage.tsx
+  └ 42 lines...
+
+Now I need to update this to also handle grammar notes. I'll add grammar tooltips as dashed green underlines:
+
+● Edit HighlightedMessage.tsx +94 -21
+  └ frontend/src/components/conversation/HighlightedMessage.tsx
+
+Now run tests and TS check:
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+952 tests pass, TS clean. Commit and evaluate:
+

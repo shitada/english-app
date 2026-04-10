@@ -73,13 +73,13 @@ export const api = {
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>
-    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; user_role: string; role_briefing: string[] }>('/api/conversation/start', {
+    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; user_role: string; role_briefing: string[] }>('/api/conversation/start', {
       method: 'POST',
       body: JSON.stringify({ topic, difficulty, role_swap: roleSwap }),
     }),
 
   sendMessage: (conversation_id: number, content: string) =>
-    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[] }>('/api/conversation/message', {
+    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[] }>('/api/conversation/message', {
       method: 'POST',
       body: JSON.stringify({ conversation_id, content }),
     }),
@@ -256,6 +256,12 @@ export interface GrammarFeedback {
   is_correct: boolean;
   errors: { original: string; correction: string; explanation: string }[];
   suggestions: { original: string; better: string; explanation: string }[];
+}
+
+export interface GrammarNote {
+  phrase: string;
+  grammar_point: string;
+  explanation: string;
 }
 
 export interface ChatMessage {

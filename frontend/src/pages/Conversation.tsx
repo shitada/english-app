@@ -14,6 +14,7 @@ interface Message {
   content: string;
   feedback?: GrammarFeedback;
   key_phrases?: string[];
+  grammar_notes?: import('../api').GrammarNote[];
 }
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -348,7 +349,7 @@ export default function Conversation() {
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setConversationId(res.conversation_id);
-      setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] }]);
+      setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] }]);
       setLastAssistantAt(Date.now());
       setWpmValues([]);
       setPhase('chat');
@@ -401,7 +402,7 @@ export default function Conversation() {
           updated[lastUser] = { ...updated[lastUser], feedback: res.feedback };
         }
         // Add AI response
-        updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] });
+        updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] });
         return updated;
       });
       setLastAssistantAt(Date.now());
@@ -914,7 +915,7 @@ export default function Conversation() {
                     🎧 Tap to reveal text
                   </div>
                 ) : (
-                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} onSpeak={tts.speak} />
+                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} />
                 )
               ) : (
                 msg.content
