@@ -507,3 +507,33 @@ async def get_recent_activity(
     """Get recent learning activity feed for the Home page."""
     items = await dash_dal.get_recent_activity(db, limit=limit)
     return {"items": items}
+
+
+# --- Session Analytics ---
+
+class ModuleAnalytics(BaseModel):
+    module: str
+    total_seconds: int
+    session_count: int
+
+
+class DailyAnalytics(BaseModel):
+    date: str
+    conversation_seconds: int
+    pronunciation_seconds: int
+    vocabulary_seconds: int
+
+
+class SessionAnalyticsResponse(BaseModel):
+    modules: list[ModuleAnalytics]
+    daily: list[DailyAnalytics]
+
+
+@router.get("/session-analytics", response_model=SessionAnalyticsResponse)
+async def get_session_analytics(
+    days: int = Query(default=7, ge=1, le=90),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get time spent per exercise module over the specified number of days."""
+    data = await dash_dal.get_session_analytics(db, days=days)
+    return data

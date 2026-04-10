@@ -1310,3 +1310,99 @@ async def get_recent_activity(db: aiosqlite.Connection, limit: int = 5) -> list[
         }
         for r in rows
     ]
+
+
+async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict[str, Any]:
+    """Compute time spent per exercise module over the given number of days."""
+    from_date = (date.today() - __import__("datetime").timedelta(days=days)).isoformat()
+
+    # Conversation time from started_at/ended_at
+    conv_rows = await db.execute_fetchall(
+        """
+        SELECT DATE(started_at) as day,
+               SUM(CAST((julianday(ended_at) - julianday(started_at)) * 86400 AS INTEGER)) as secs,
+               COUNT(*) as cnt
+        FROM conversations
+        WHERE status = 'ended' AND ended_at IS NOT NULL
+          AND DATE(started_at) >= ?
+        GROUP BY DATE(started_at)
+        ORDER BY day
+        """,
+        (from_date,),
+    )
+
+    # Pronunciation: count attempts per day, estimate 2 min each
+    pron_rows = await db.execute_fetchall(
+        """
+        SELECT DATE(created_at) as day,
+               COUNT(*) as cnt
+        FROM pronunciation_attempts
+        WHERE DATE(created_at) >= ?
+        GROUP BY DATE(created_at)
+        ORDER BY day
+        """,
+        (from_date,),
+    )
+
+    # Vocabulary: count quiz attempts per day, estimate 30 sec each
+    vocab_rows = await db.execute_fetchall(
+        """
+        SELECT DATE(answered_at) as day,
+               COUNT(*) as cnt
+        FROM quiz_attempts
+        WHERE DATE(answered_at) >= ?
+        GROUP BY DATE(answered_at)
+        ORDER BY day
+        """,
+        (from_date,),
+    )
+
+    # Build per-day breakdown
+    daily: dict[str, dict[str, int]] = {}
+    conv_total_secs = 0
+    conv_total_cnt = 0
+    for r in conv_rows:
+        d = r["day"]
+        s = max(r["secs"] or 0, 0)
+        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily[d]["conversation"] = s
+        conv_total_secs += s
+        conv_total_cnt += r["cnt"]
+
+    pron_total_secs = 0
+    pron_total_cnt = 0
+    for r in pron_rows:
+        d = r["day"]
+        s = r["cnt"] * 120  # 2 min per attempt
+        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily[d]["pronunciation"] = s
+        pron_total_secs += s
+        pron_total_cnt += r["cnt"]
+
+    vocab_total_secs = 0
+    vocab_total_cnt = 0
+    for r in vocab_rows:
+        d = r["day"]
+        s = r["cnt"] * 30  # 30 sec per attempt
+        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily[d]["vocabulary"] = s
+        vocab_total_secs += s
+        vocab_total_cnt += r["cnt"]
+
+    modules = [
+        {"module": "conversation", "total_seconds": conv_total_secs, "session_count": conv_total_cnt},
+        {"module": "pronunciation", "total_seconds": pron_total_secs, "session_count": pron_total_cnt},
+        {"module": "vocabulary", "total_seconds": vocab_total_secs, "session_count": vocab_total_cnt},
+    ]
+
+    daily_list = [
+        {
+            "date": d,
+            "conversation_seconds": v["conversation"],
+            "pronunciation_seconds": v["pronunciation"],
+            "vocabulary_seconds": v["vocabulary"],
+        }
+        for d, v in sorted(daily.items())
+    ]
+
+    return {"modules": modules, "daily": daily_list}

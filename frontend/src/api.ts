@@ -1067,3 +1067,26 @@ export interface RecentActivityResponse {
 export async function getRecentActivity(limit = 5): Promise<RecentActivityResponse> {
   return request<RecentActivityResponse>(`/api/dashboard/recent-activity?limit=${limit}`);
 }
+
+// Session analytics
+export interface ModuleAnalytics {
+  module: string;
+  total_seconds: number;
+  session_count: number;
+}
+
+export interface DailyAnalytics {
+  date: string;
+  conversation_seconds: number;
+  pronunciation_seconds: number;
+  vocabulary_seconds: number;
+}
+
+export interface SessionAnalyticsResponse {
+  modules: ModuleAnalytics[];
+  daily: DailyAnalytics[];
+}
+
+export async function getSessionAnalytics(days = 7): Promise<SessionAnalyticsResponse> {
+  return request<SessionAnalyticsResponse>(`/api/dashboard/session-analytics?days=${days}`);
+}
