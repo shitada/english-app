@@ -1055,3 +1055,20 @@ button.chat-header-toggle {
   color: var(--primary, #6366f1);
   border-color: var(--primary, #6366f1);
 }
+
+/* Streak milestone animations */
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes milestone-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); }
+}
+
+@keyframes milestone-unlock {
+  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}

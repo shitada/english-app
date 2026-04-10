@@ -2718,3 +2718,97 @@ Evaluator: **6.4 — KEEP**. Let me add a quick integration test to address the 
   │ "$((T1-T0))" "$((T3-T1))" "$((T4-T3))" "90" "$((T4-T0))" \…
   └ 6 lines...
 
+● Update backlog and commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ sed -i '' 's/- \[ \] Add skill radar chart on Dashboard showing strength across
+  │ speaking\/listening\/vocabulary\/grammar\/pronunciation/- [x] Add skill radar chart on
+  │ Dashboard showing 5-axis strength (#317)/' autoresearch/backlog.md && \
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null && \…
+  └ 18 lines...
+
+**Iteration 317 ✅ — KEPT (6.4)**. Starting iteration 318.
+
+---
+
+## Iteration 318
+
+● T0 for iteration 318 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 318
+  │ List directory tests/integration
+  │   └ 13 files found
+  └ List directory tests/unit
+      └ 15 files found
+
+Proposal: **Add streak milestones celebration card on Home page**. Implementing:
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check streak API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "StreakMilestones\|getStreakMilestones\|streak-milestones" frontend/src/api.ts | head -10
+  └ 4 lines...
+
+● Check Home.tsx structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "DailyPractice\|DailyChallenge\|StreakMilestones\|streak" frontend/src/pages/Home.tsx | head -20
+  └ 13 lines...
+
+● Read StreakMilestonesResponse type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '458,475p' frontend/src/api.ts
+  └ 19 lines...
+
+● Read Home layout where cards are placed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '510,520p'
+  │ frontend/src/pages/Home.tsx
+  └ 12 lines...
+
+Now I have the full picture. Let me add the StreakMilestonesCard to Home.tsx and CSS animations:
+
+● Check Home imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 frontend/src/pages/Home.tsx
+  └ 6 lines...
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add the StreakMilestonesCard function. Let me find the right place (before `DailyChallengeCard`):
+
+● Find DailyChallengeCard location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^function DailyChallengeCard"
+  │ frontend/src/pages/Home.tsx
+  └ 2 lines...
+
+● Read context before DailyChallengeCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '414,418p'
+  │ frontend/src/pages/Home.tsx
+  └ 6 lines...
+
+● Edit Home.tsx +83
+  └ frontend/src/pages/Home.tsx
+
+Good, tester-317 done (already recorded). Continuing 318 implementation — add card to layout and CSS animations:
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add CSS animations:
+
+● Check end of CSS file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/index.css
+  └ 21 lines...
+
+● Add CSS animations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/index.css << 'CSS'
+  │
+  │ /* Streak milestone animations */
+  │ @keyframes streak-pulse {
+  │ 0%, 100% { transform: scale(1); }…
+  └ 15 lines...
+
+Now commit and test:
+

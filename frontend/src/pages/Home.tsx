@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
 import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay } from '../api';
+import { api } from '../api';
+import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 
@@ -412,6 +414,89 @@ function WordOfTheDayCard() {
   );
 }
 
+function StreakMilestonesCard() {
+  const [data, setData] = useState<StreakMilestonesResponse | null>(null);
+
+  useEffect(() => {
+    api.getStreakMilestones().then(setData).catch(() => {});
+  }, []);
+
+  if (!data) return null;
+
+  const { current_streak, longest_streak, milestones, next_milestone } = data;
+  const isHot = current_streak >= 7;
+
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <span
+          style={{
+            fontSize: 32,
+            animation: isHot ? 'streak-pulse 1.5s ease-in-out infinite' : undefined,
+          }}
+        >
+          🔥
+        </span>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>
+            {current_streak} day{current_streak !== 1 ? 's' : ''}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Current streak</div>
+        </div>
+        {longest_streak > 0 && (
+          <div style={{
+            marginLeft: 'auto', padding: '4px 10px', borderRadius: 12,
+            background: 'var(--warning-bg, #fffbeb)', border: '1px solid var(--warning, #f59e0b)',
+            fontSize: 12, fontWeight: 600, color: 'var(--warning, #f59e0b)',
+          }}>
+            🏆 Best: {longest_streak}d
+          </div>
+        )}
+      </div>
+
+      {/* Milestone timeline */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, justifyContent: 'center' }}>
+        {milestones.map(m => {
+          const justUnlocked = m.achieved && current_streak === m.days;
+          return (
+            <div
+              key={m.days}
+              style={{
+                padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                background: m.achieved ? 'var(--warning, #f59e0b)' : 'var(--bg-secondary, #f5f5f5)',
+                color: m.achieved ? '#fff' : 'var(--text-secondary)',
+                border: m.achieved ? 'none' : '1px solid var(--border)',
+                animation: justUnlocked ? 'milestone-unlock 0.6s ease-out' : m.achieved ? 'milestone-glow 2s ease-in-out infinite' : undefined,
+                transition: 'all 0.3s',
+              }}
+            >
+              {m.achieved ? '⭐' : '○'} {m.label}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Progress to next milestone */}
+      {next_milestone && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Next: {next_milestone.label}</span>
+            <span style={{ fontWeight: 600 }}>{next_milestone.days_remaining} day{next_milestone.days_remaining !== 1 ? 's' : ''} to go</span>
+          </div>
+          <div style={{ height: 6, borderRadius: 3, background: 'var(--border, #e5e7eb)' }}>
+            <div style={{
+              height: '100%', borderRadius: 3,
+              background: 'linear-gradient(90deg, var(--primary, #6366f1), var(--warning, #f59e0b))',
+              width: `${Math.min(100, ((next_milestone.days - next_milestone.days_remaining) / next_milestone.days) * 100)}%`,
+              transition: 'width 0.5s',
+            }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DailyChallengeCard() {
   const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
 
@@ -512,6 +597,8 @@ export default function Home() {
       </div>
 
       <DailyPracticeCard />
+
+      <StreakMilestonesCard />
 
       <DailyChallengeCard />
 
