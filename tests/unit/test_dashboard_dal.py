@@ -15,6 +15,7 @@ from app.dal.dashboard import (
     get_learning_summary,
     get_mistake_journal,
     get_mistake_review_items,
+    get_recent_activity,
     get_stats,
     get_today_activity,
     get_word_of_the_day,
@@ -1160,3 +1161,36 @@ class TestGetWordOfTheDay:
         result1 = await get_word_of_the_day(test_db)
         result2 = await get_word_of_the_day(test_db)
         assert result1["word"] == result2["word"]
+
+
+@pytest.mark.unit
+class TestGetRecentActivity:
+    async def test_empty_db_returns_empty(self, test_db):
+        result = await get_recent_activity(test_db)
+        assert result == []
+
+    async def test_returns_items_sorted_by_time(self, test_db):
+        await create_conversation(test_db, "hotel_checkin", "beginner")
+        await save_attempt(test_db, "Hello world", "Hello world", 95, {})
+        result = await get_recent_activity(test_db)
+        assert len(result) >= 2
+        # sorted descending
+        for i in range(len(result) - 1):
+            assert result[i]["timestamp"] >= result[i + 1]["timestamp"]
+
+    async def test_respects_limit(self, test_db):
+        for i in range(5):
+            await create_conversation(test_db, f"topic_{i}", "beginner")
+        result = await get_recent_activity(test_db, limit=3)
+        assert len(result) == 3
+
+    async def test_items_have_required_fields(self, test_db):
+        await create_conversation(test_db, "hotel_checkin", "beginner")
+        result = await get_recent_activity(test_db, limit=1)
+        assert len(result) == 1
+        item = result[0]
+        assert "type" in item
+        assert "detail" in item
+        assert "timestamp" in item
+        assert "route" in item
+        assert item["route"] == "/conversation"

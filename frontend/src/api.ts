@@ -1024,3 +1024,19 @@ export interface VocabularyStatsResponse {
 export async function getVocabularyStats(): Promise<VocabularyStatsResponse> {
   return request<VocabularyStatsResponse>('/api/vocabulary/stats');
 }
+
+// Recent activity
+export interface RecentActivityItem {
+  type: string;
+  detail: string;
+  timestamp: string;
+  route: string;
+}
+
+export interface RecentActivityResponse {
+  items: RecentActivityItem[];
+}
+
+export async function getRecentActivity(limit = 5): Promise<RecentActivityResponse> {
+  return request<RecentActivityResponse>(`/api/dashboard/recent-activity?limit=${limit}`);
+}

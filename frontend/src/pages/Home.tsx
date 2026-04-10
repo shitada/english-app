@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse } from '../api';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, getRecentActivity, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse, type RecentActivityItem } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -414,6 +414,87 @@ function WordOfTheDayCard() {
   );
 }
 
+function RecentlyPracticedCard() {
+  const [items, setItems] = useState<RecentActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getRecentActivity(5)
+      .then((res) => setItems(res.items))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (!loading && items.length === 0) return null;
+
+  const iconMap: Record<string, { icon: typeof MessageSquare; color: string; bg: string }> = {
+    conversation: { icon: MessageSquare, color: '#6366f1', bg: '#eef2ff' },
+    pronunciation: { icon: Mic, color: '#f59e0b', bg: '#fef3c7' },
+    vocabulary: { icon: BookOpen, color: '#10b981', bg: '#d1fae5' },
+  };
+
+  const relativeTime = (ts: string) => {
+    const diff = Date.now() - new Date(ts).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'yesterday';
+    return `${days}d ago`;
+  };
+
+  return (
+    <div style={{
+      background: 'var(--card-bg, #ffffff)', borderRadius: 16, padding: '20px 24px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: 16, border: '1px solid var(--border-color, #e5e7eb)',
+    }}>
+      <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
+        Recently Practiced
+      </h3>
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} style={{ height: 40, borderRadius: 8, background: 'var(--border-color, #e5e7eb)', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {items.map((item, i) => {
+            const cfg = iconMap[item.type] || iconMap.conversation;
+            const Icon = cfg.icon;
+            return (
+              <Link key={i} to={item.route} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8,
+                textDecoration: 'none', color: 'inherit', transition: 'background 0.15s',
+              }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hover-bg, #f3f4f6)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={16} color={cfg.color} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary, #1f2937)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.detail}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)', textTransform: 'capitalize' }}>
+                    {item.type}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)', whiteSpace: 'nowrap' }}>
+                  {relativeTime(item.timestamp)}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StreakMilestonesCard() {
   const [data, setData] = useState<StreakMilestonesResponse | null>(null);
 
@@ -699,6 +780,8 @@ export default function Home() {
       </div>
 
       <DailyPracticeCard />
+
+      <RecentlyPracticedCard />
 
       <StreakMilestonesCard />
 

@@ -486,3 +486,24 @@ async def get_skill_radar(
     """Get 5-axis skill radar scores for the dashboard chart."""
     skills = await dash_dal.get_skill_radar(db)
     return {"skills": skills}
+
+
+class RecentActivityItem(BaseModel):
+    type: str
+    detail: str
+    timestamp: str
+    route: str
+
+
+class RecentActivityResponse(BaseModel):
+    items: list[RecentActivityItem]
+
+
+@router.get("/recent-activity", response_model=RecentActivityResponse)
+async def get_recent_activity(
+    limit: int = Query(default=5, ge=1, le=20),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get recent learning activity feed for the Home page."""
+    items = await dash_dal.get_recent_activity(db, limit=limit)
+    return {"items": items}

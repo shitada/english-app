@@ -403,3 +403,28 @@ async def test_skill_radar_returns_five_axes(client):
     for s in data["skills"]:
         assert 0 <= s["score"] <= 100
         assert isinstance(s["label"], str)
+
+
+@pytest.mark.integration
+async def test_recent_activity_empty(client):
+    """Recent activity returns empty list on fresh DB."""
+    res = await client.get("/api/dashboard/recent-activity")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["items"] == []
+
+
+@pytest.mark.integration
+async def test_recent_activity_after_conversation(client, mock_copilot):
+    """Recent activity returns items after creating a conversation."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={"reply": "Hello", "feedback": None})
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin", "difficulty": "beginner"})
+    res = await client.get("/api/dashboard/recent-activity?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["items"]) >= 1
+    item = data["items"][0]
+    assert item["type"] == "conversation"
+    assert item["route"] == "/conversation"
+    assert "timestamp" in item

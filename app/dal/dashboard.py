@@ -1273,3 +1273,40 @@ async def get_skill_radar(db: aiosqlite.Connection) -> list[dict[str, Any]]:
         {"name": "grammar", "score": grammar, "label": "Grammar"},
         {"name": "pronunciation", "score": pronunciation, "label": "Pronunciation"},
     ]
+
+
+ROUTE_MAP = {
+    "conversation": "/conversation",
+    "pronunciation": "/pronunciation",
+    "vocabulary": "/vocabulary",
+}
+
+
+async def get_recent_activity(db: aiosqlite.Connection, limit: int = 5) -> list[dict[str, Any]]:
+    """Get recent learning activity with navigation routes."""
+    rows = await db.execute_fetchall("""
+        SELECT type, detail, ts FROM (
+            SELECT 'conversation' as type, topic as detail, started_at as ts FROM conversations ORDER BY started_at DESC LIMIT ?
+        )
+        UNION ALL
+        SELECT type, detail, ts FROM (
+            SELECT 'pronunciation' as type, reference_text as detail, created_at as ts FROM pronunciation_attempts ORDER BY created_at DESC LIMIT ?
+        )
+        UNION ALL
+        SELECT type, detail, ts FROM (
+            SELECT 'vocabulary' as type, vw.word as detail, qa.answered_at as ts
+            FROM quiz_attempts qa
+            JOIN vocabulary_words vw ON qa.word_id = vw.id
+            ORDER BY qa.answered_at DESC LIMIT ?
+        )
+        ORDER BY ts DESC LIMIT ?
+    """, (limit, limit, limit, limit))
+    return [
+        {
+            "type": r["type"],
+            "detail": r["detail"][:60] if r["detail"] else r["type"],
+            "timestamp": r["ts"],
+            "route": ROUTE_MAP.get(r["type"], "/"),
+        }
+        for r in rows
+    ]

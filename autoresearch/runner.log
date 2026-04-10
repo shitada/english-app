@@ -3284,3 +3284,190 @@ Now call evaluator:
 
 Score: **7.0 — KEEP**. Now let me record results and continue:
 
+● Record 320 and commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '320\tf7b894d\t2025-04-10\t30\t240\t60\t30\t360\t943\t943\tpass\t7.0\tKEPT\tAdd vocabulary
+  │ progress card with per-topic mastery on Home page\n' >> autoresearch/results.tsv && sed -i ''
+  │ 's/- \[ \] Add vocabulary progress card/- [x] Add vocabulary progress card/'
+  │ autoresearch/backlog.md && git add autoresearch/ && git commit -m "bookkeeping: record …
+  └ 6 lines...
+
+Now iteration 321. Let me call the proposer:
+
+● Proposer Propose iteration 321 feature
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L122:146 (24 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L677:758 (82 lines read)
+
+Good proposal. Let me implement it. First, check the existing `_get_recent_activity`:
+
+● Find existing recent activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ '_get_recent_activity\|get_recent_activity' app/dal/dashboard.py | head -10
+  └ 3 lines...
+
+● View _get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '123,175p' app/dal/dashboard.py
+  └ 54 lines...
+
+Now let me add a public version with route info and the endpoint:
+
+● Check end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/dashboard.py
+  └ 6 lines...
+
+● Add public get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/dal/dashboard.py << 'EOF'
+  │
+  │
+  │ ROUTE_MAP = {
+  │ "conversation": "/conversation",…
+  └ 38 lines...
+
+Now add the endpoint in dashboard router:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from app.dal'
+  │ app/routers/dashboard.py | head -5
+  └ 2 lines...
+
+● Check end of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/routers/dashboard.py
+  └ 21 lines...
+
+● Add recent-activity endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/routers/dashboard.py << 'EOF'
+  │
+  │
+  │ class RecentActivityItem(BaseModel):
+  │ type: str…
+  └ 19 lines...
+
+Check if Query is imported:
+
+● Check Query import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -15 app/routers/dashboard.py | grep -n
+  │ 'Query\|from fastapi'
+  └ 2 lines...
+
+Good, Query is imported. Now add the frontend API function:
+
+✗ Add recent activity API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/api.ts << 'EOF'
+  │
+  │ // Recent activity
+  │ export interface RecentActivityItem {
+  │ type: string;…
+  └ Command blocked: contains dangerous shell expansion patterns (e.g., parameter transformation,
+    indirect expansion, or nested command substitution) that could enable arbitrary code execution.
+    Please rewrite the command without these expansion patterns.
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L1025:1030 (2 lines read)
+
+● Edit api.ts +16
+  └ frontend/src/api.ts
+
+Now add the RecentlyPracticedCard to Home.tsx:
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+Now find where to add the component (before DailyPracticeCard or between DailyPractice and Streak):
+
+● Find component locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'function
+  │ DailyPracticeCard\|function StreakMilestones' frontend/src/pages/Home.tsx | head -5
+  └ 3 lines...
+
+I'll insert RecentlyPracticedCard before StreakMilestonesCard:
+
+● Check area before StreakMilestonesCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '413,419p'
+  │ frontend/src/pages/Home.tsx
+  └ 7 lines...
+
+● Edit Home.tsx +81
+  └ frontend/src/pages/Home.tsx
+
+Now add the rendering between DailyPracticeCard and StreakMilestonesCard:
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add tests. First check what exists for dashboard DAL tests:
+
+● Check dashboard DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_dashboard* 2>/dev/null
+  │ && tail -5 tests/unit/test_dashboard_dal.py 2>/dev/null
+  └ 7 lines...
+
+● Check imports in dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from app.dal'
+  │ tests/unit/test_dashboard_dal.py | head -5
+  └ 6 lines...
+
+● Check import block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '7,22p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 17 lines...
+
+● Edit test_dashboard_dal.py +1
+  └ tests/unit/test_dashboard_dal.py
+
+Now add the tests at the end of the file:
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1158,1163p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 7 lines...
+
+● Edit test_dashboard_dal.py +33
+  └ tests/unit/test_dashboard_dal.py
+
+Now add an integration test for the endpoint:
+
+● Check end of dashboard API tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3
+  │ tests/integration/test_dashboard_api.py
+  └ 4 lines...
+
+● Edit test_dashboard_api.py +24
+  └ tests/integration/test_dashboard_api.py
+
+Now run tests and TS check:
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 5 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from unittest\|AsyncMock'
+  │ tests/integration/test_dashboard_api.py | head -5
+  └ 6 lines...
+
+Need to import AsyncMock locally:
+
+● Edit test_dashboard_api.py +1
+  └ tests/integration/test_dashboard_api.py
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -3
+  └ 1 line...
+
+949 tests pass, TS clean. Commit and evaluate:
+
