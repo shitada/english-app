@@ -15,7 +15,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'flashcard-result'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -37,6 +37,12 @@ export default function Vocabulary() {
   const [drillAnswers, setDrillAnswers] = useState<boolean[]>([]);
   const [drillTimeLeft, setDrillTimeLeft] = useState(60);
   const drillTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Flashcard review state
+  const [fcFlipped, setFcFlipped] = useState(false);
+  const [fcIndex, setFcIndex] = useState(0);
+  const [fcAnswers, setFcAnswers] = useState<boolean[]>([]);
+  const [fcWords, setFcWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
 
   // Sentence build state
   const [sbExercises, setSbExercises] = useState<SentenceBuildExercise[]>([]);
@@ -362,6 +368,38 @@ export default function Vocabulary() {
         </button>
 
         <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getDrillWords(10);
+              if (!data.words || data.words.length === 0) {
+                alert('No vocabulary words available for flashcard review. Add words via a topic quiz first.');
+                return;
+              }
+              setFcWords(data.words.slice(0, 10));
+              setFcIndex(0);
+              setFcAnswers([]);
+              setFcFlipped(false);
+              setPhase('flashcard');
+            } catch {
+              alert('Failed to load words for flashcard review.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #06b6d4', background: 'linear-gradient(135deg, #ecfeff, #cffafe)',
+            color: '#155e75', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start flashcard review"
+        >
+          🃏 Flashcard Review — self-paced active recall
+        </button>
+
+        <button
           onClick={openTiers}
           disabled={loading || topicsLoading || tiersLoading}
           style={{
@@ -595,6 +633,160 @@ export default function Vocabulary() {
         <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
           <button className="btn btn-primary" onClick={startDrill} style={{ flex: 1 }}>
             ⚡ Drill Again
+          </button>
+          <button className="btn" onClick={() => { setPhase('select'); setIsOfflineMode(false); }} style={{ flex: 1 }}>
+            Back to Topics
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Flashcard review
+  if (phase === 'flashcard' && fcWords.length > 0) {
+    const currentWord = fcWords[fcIndex];
+    const progress = fcWords.length > 0 ? (fcIndex / fcWords.length) * 100 : 0;
+
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+        <h2 style={{ marginBottom: 8, textAlign: 'center' }}>🃏 Flashcard Review</h2>
+        <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, marginBottom: 16, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${progress}%`, background: '#06b6d4', borderRadius: 3, transition: 'width 0.3s' }} />
+        </div>
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
+          {fcIndex + 1} / {fcWords.length}
+        </p>
+
+        <div
+          style={{
+            padding: 32, borderRadius: 16, border: '2px solid var(--border)',
+            background: 'var(--surface)', textAlign: 'center', minHeight: 200,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <span
+            style={{ fontSize: 32, fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }}
+            onClick={() => tts.speak(currentWord.word)}
+          >
+            {currentWord.word} 🔊
+          </span>
+
+          {fcFlipped ? (
+            <div style={{ marginTop: 20 }}>
+              <p style={{ fontSize: 18, color: 'var(--text)', marginBottom: 8 }}>{currentWord.meaning}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                Topic: {currentWord.topic.replace(/_/g, ' ')}
+              </p>
+            </div>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={() => setFcFlipped(true)}
+              style={{ marginTop: 24 }}
+            >
+              Show Answer
+            </button>
+          )}
+        </div>
+
+        {fcFlipped && (
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button
+              className="btn"
+              onClick={async () => {
+                try { await api.submitAnswer(currentWord.id, false); } catch { /* ignore */ }
+                setFcAnswers(prev => [...prev, false]);
+                if (fcIndex + 1 >= fcWords.length) {
+                  setPhase('flashcard-result');
+                } else {
+                  setFcIndex(prev => prev + 1);
+                  setFcFlipped(false);
+                  tts.speak(fcWords[fcIndex + 1].word);
+                }
+              }}
+              style={{
+                flex: 1, background: '#fef2f2', border: '2px solid #fca5a5',
+                color: '#991b1b', fontWeight: 600, fontSize: '1rem',
+              }}
+            >
+              Again
+            </button>
+            <button
+              className="btn"
+              onClick={async () => {
+                try { await api.submitAnswer(currentWord.id, true); } catch { /* ignore */ }
+                setFcAnswers(prev => [...prev, true]);
+                if (fcIndex + 1 >= fcWords.length) {
+                  setPhase('flashcard-result');
+                } else {
+                  setFcIndex(prev => prev + 1);
+                  setFcFlipped(false);
+                  tts.speak(fcWords[fcIndex + 1].word);
+                }
+              }}
+              style={{
+                flex: 1, background: '#f0fdf4', border: '2px solid #86efac',
+                color: '#166534', fontWeight: 600, fontSize: '1rem',
+              }}
+            >
+              Got It ✓
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Flashcard result
+  if (phase === 'flashcard-result') {
+    const known = fcAnswers.filter(Boolean).length;
+    const total = fcAnswers.length;
+
+    return (
+      <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+        <h2 style={{ marginBottom: 8 }}>🃏 Flashcard Review Complete!</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+          You reviewed {total} words at your own pace.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#16a34a' }}>{known}</div>
+            <div style={{ fontSize: 14, color: '#166534' }}>Got It</div>
+          </div>
+          <div style={{ padding: 16, background: '#fef2f2', borderRadius: 12, border: '1px solid #fecaca' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#dc2626' }}>{total - known}</div>
+            <div style={{ fontSize: 14, color: '#991b1b' }}>Again</div>
+          </div>
+        </div>
+
+        {total > 0 && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Recall Rate</div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>{Math.round((known / total) * 100)}%</div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+          <button
+            className="btn btn-primary"
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const data = await api.getDrillWords(10);
+                if (data.words?.length) {
+                  setFcWords(data.words.slice(0, 10));
+                  setFcIndex(0);
+                  setFcAnswers([]);
+                  setFcFlipped(false);
+                  setPhase('flashcard');
+                }
+              } catch { /* ignore */ }
+              finally { setLoading(false); }
+            }}
+            style={{ flex: 1 }}
+          >
+            🃏 Review Again
           </button>
           <button className="btn" onClick={() => { setPhase('select'); setIsOfflineMode(false); }} style={{ flex: 1 }}>
             Back to Topics

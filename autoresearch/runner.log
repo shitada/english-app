@@ -1800,3 +1800,147 @@ Good — `audio-quiz` already maps to `'multiple_choice'` since it's not `'fill-
 
 All pass. Commit and evaluate:
 
+● Commit iteration 336 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #336: Add Audio Quiz mode to Vocabulary — hear word, select meaning
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 336
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L100:115 (16 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L1255:1300 (46 lines read)
+
+Score: 6.95, KEEP.
+
+● Record iteration 336 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "336\t30e8297\t2026-04-11\t25\t60\t45\t15\t145\t994\t994\tpass\t6.95\tkept\tAdd Audio Quiz mode
+  │ to Vocabulary — hear word, select meaning\n" >> autoresearch/results.tsv && date +%s
+  └ 2 lines...
+
+Iteration 337:
+
+● Proposer Propose iteration 337
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L160:220 (61 lines read)
+  └ Read ListenAndSummarize.tsx
+      │ frontend/src/components/ListenAndSummarize.tsx
+      └ L1:60 (60 lines read)
+
+Let me check if there's already a flashcard page:
+
+● Check for existing flashcard page (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/pages/Flashcard*
+  │ 2>/dev/null && grep -r "flashcard" frontend/src/App.tsx
+  └ 1 line...
+
+● Check for flashcard pages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/pages/ | grep -i flash
+  └ 1 line...
+
+No flashcard page exists. The drill mode in Vocabulary shows word+meaning together. This adds a proper active recall mode. Let me implement it:
+
+● See phase type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '18,18p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now I need to add state for flashcard mode and find where the drill button is to add a flashcard button:
+
+● Find drill button and logic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getDrillWords\|Timed
+  │ Drill\|setPhase.*drill\|drill-result" frontend/src/pages/Vocabulary.tsx | head -15
+  └ 8 lines...
+
+● See drill button area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '374,400p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 28 lines...
+
+● See startDrill function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '222,240p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 20 lines...
+
+I see that drillWords already holds the data. I'll reuse that. Let me add flashcard-specific state and add a Flashcard Review button. I need to find where the drill rendering ends and add flashcard rendering:
+
+● Check state variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "drillWords\|drillIndex\|drillAnswers\|flipped" frontend/src/pages/Vocabulary.tsx | head -15
+  └ 15 lines...
+
+I'll add flashcard state (flipped, flashcardAnswers) and reuse drillWords. Let me add state:
+
+● See state area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '35,42p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 9 lines...
+
+● Edit Vocabulary.tsx +6
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add a Flashcard Review button in the select phase. Find a good place:
+
+● Find buttons in select phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Word Tiers\|Pronunciation\|🎯
+  │ Timed Drill" frontend/src/pages/Vocabulary.tsx | head -5
+  └ 4 lines...
+
+● Find start drill button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "startDrill\|Start Drill\|Timed
+  │ Drill" frontend/src/pages/Vocabulary.tsx | head -5
+  └ 4 lines...
+
+● See drill + tiers buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '354,380p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 28 lines...
+
+I'll add a Flashcard Review button right after the Quick Drill button:
+
+● Edit Vocabulary.tsx +32
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add the flashcard and flashcard-result phase rendering. Find where the drill-result rendering ends:
+
+● Find drill-result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'drill-result'"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● See drill-result section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '601,640p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 41 lines...
+
+● See end of drill-result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '640,650p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 11 lines...
+
+Now I'll add the flashcard and flashcard-result phases right after drill-result:
+
+● Edit Vocabulary.tsx +154
+  └ frontend/src/pages/Vocabulary.tsx
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. Commit and evaluate:
+
