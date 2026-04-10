@@ -1004,3 +1004,23 @@ export interface GrammarTrendResponse {
 export async function getGrammarTrend(limit = 20): Promise<GrammarTrendResponse> {
   return request<GrammarTrendResponse>(`/api/dashboard/grammar-trend?limit=${limit}`);
 }
+
+// Vocabulary stats
+export interface TopicBreakdownItem {
+  topic: string;
+  word_count: number;
+  mastered_count: number;
+  avg_level: number;
+}
+
+export interface VocabularyStatsResponse {
+  total_words: number;
+  total_mastered: number;
+  total_reviews: number;
+  accuracy_rate: number;
+  topic_breakdown: TopicBreakdownItem[];
+}
+
+export async function getVocabularyStats(): Promise<VocabularyStatsResponse> {
+  return request<VocabularyStatsResponse>('/api/vocabulary/stats');
+}

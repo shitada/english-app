@@ -3081,3 +3081,182 @@ One test failed. Let me check:
 
 Now update backlog and commit bookkeeping:
 
+● Commit bookkeeping for 319 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' 's/- \[ \] Add quick-speak
+  │ warm-up/- [x] Add quick-speak warm-up/' autoresearch/backlog.md && git add autoresearch/ && git
+  │ commit -m "bookkeeping: record iteration 319 results
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3
+  └ 4 lines...
+
+Good. Now let's start iteration 320. Let me read current state:
+
+● Read current state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv | tr '\t'
+  │ '|' && echo "---" && grep -n '\[ \]' autoresearch/backlog.md
+  └ 37 lines...
+
+● Proposer Propose iteration 320 feature
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L550:700 (151 lines read)
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L1:60 (60 lines read)
+
+Good, tester-319 completed. Let me grab those results and continue implementing iteration 320.
+
+✗ Start iteration 320 timer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "T0=$T0" >
+  │ /tmp/iter320_times
+  └ Permission denied and could not request permission from user
+
+● Check existing vocab stats code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'getVocabularyStats\|vocabulary/stats\|VocabularyStats\|topic_breakdown' frontend/src/api.ts
+  │ app/routers/vocabulary.py 2>/dev/null | head -20
+  └ 6 lines...
+
+✗ Start timer (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo "$T0" >
+  │ /tmp/iter320_t0
+  └ Permission denied and could not request permission from user
+
+● View vocab stats endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '260,290p' app/routers/vocabulary.py
+  └ 32 lines...
+
+● View vocab stats models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '80,110p' app/routers/vocabulary.py
+  └ 32 lines...
+
+● Check frontend for existing vocab progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'VocabProgress\|vocabularyStats\|getVocab' frontend/src/api.ts frontend/src/pages/Home.tsx
+  │ 2>/dev/null | head -20
+  └ 6 lines...
+
+● Check if getVocabularyStats exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'getVocabularyStats\|vocabulary.*stats' frontend/src/api.ts | head -10
+  └ 1 line...
+
+No `getVocabularyStats` function exists in `api.ts` yet. Let me check what exists for vocabulary in api.ts and see the Home page structure:
+
+● Check vocab API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'vocabulary' frontend/src/api.ts |
+  │ head -20
+  └ 21 lines...
+
+● Check Home page card structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'StreakMilestones\|DailyChallenge\|WordOfDay\|DailyPractice\|VocabProgress'
+  │ frontend/src/pages/Home.tsx | head -20
+  └ 13 lines...
+
+● View Home page render section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '590,620p'
+  │ frontend/src/pages/Home.tsx
+  └ 32 lines...
+
+Now let me implement the VocabProgressCard. I'll add the API function and the component:
+
+● Find where to add API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'getSkillRadar\|export async
+  │ function' frontend/src/api.ts | tail -10
+  └ 11 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/api.ts
+  └ 6 lines...
+
+● Add vocabulary stats API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/api.ts << 'EOF'
+  │
+  │ // Vocabulary stats
+  │ export interface TopicBreakdownItem {
+  │ topic: string;…
+  └ 18 lines...
+
+Now add the VocabProgressCard to Home.tsx:
+
+● Check imports at top (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,7p' frontend/src/pages/Home.tsx
+  └ 8 lines...
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+Now I need to add the VocabProgressCard component and render it. Let me find the right spot to insert it:
+
+● Find DailyChallengeCard location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'function DailyChallengeCard'
+  │ frontend/src/pages/Home.tsx
+  └ 2 lines...
+
+● Check area before DailyChallengeCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '496,502p'
+  │ frontend/src/pages/Home.tsx
+  └ 7 lines...
+
+I'll insert the VocabProgressCard component before DailyChallengeCard:
+
+● Edit Home.tsx +102
+  └ frontend/src/pages/Home.tsx
+
+Now add the VocabProgressCard in the render section, between StreakMilestonesCard and DailyChallengeCard:
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add an integration test:
+
+● Check existing vocab stats tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'test_vocabulary_stats\|def
+  │ test_.*stats' tests/integration/test_vocabulary_api.py | head -10
+  └ 3 lines...
+
+● View existing vocab stats tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '170,220p'
+  │ tests/integration/test_vocabulary_api.py
+  └ 52 lines...
+
+Good — tests already exist for the stats endpoint. Let me add one specifically for topic_breakdown structure:
+
+● Add topic breakdown test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_vocabulary_api.py << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 22 lines...
+
+Now run tests and TS check:
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+● Debug test failure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_vocabulary_api.py::test_vocabulary_stats_topic_breakdown_structure -v
+  │ 2>&1 | tail -20
+  └ 21 lines...
+
+Need to submit an answer to populate the stats. Let me fix the test:
+
+● Edit test_vocabulary_api.py +3 -1
+  └ tests/integration/test_vocabulary_api.py
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+All 943 tests pass, TS clean. Let me commit and run evaluator:
+

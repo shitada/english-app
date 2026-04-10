@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay } from '../api';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -497,6 +497,108 @@ function StreakMilestonesCard() {
   );
 }
 
+function VocabProgressCard() {
+  const [stats, setStats] = useState<VocabularyStatsResponse | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    getVocabularyStats().then(setStats).catch(() => {});
+  }, []);
+
+  if (!stats || stats.total_words === 0) return null;
+
+  const overallPct = stats.total_words > 0
+    ? Math.round((stats.total_mastered / stats.total_words) * 100)
+    : 0;
+
+  const sorted = [...stats.topic_breakdown].sort(
+    (a, b) => (b.mastered_count / (b.word_count || 1)) - (a.mastered_count / (a.word_count || 1))
+  );
+
+  const displayed = expanded ? sorted : sorted.slice(0, 4);
+
+  const barColor = (pct: number) =>
+    pct >= 60 ? 'var(--color-success, #22c55e)' : pct >= 30 ? 'var(--color-warning, #f59e0b)' : 'var(--color-error, #ef4444)';
+
+  return (
+    <div style={{
+      background: 'var(--card-bg, #ffffff)', borderRadius: 16, padding: '20px 24px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: 16, border: '1px solid var(--border-color, #e5e7eb)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <BookOpen size={20} color="var(--color-primary, #6366f1)" />
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
+          Vocabulary Progress
+        </h3>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: `conic-gradient(${barColor(overallPct)} ${overallPct * 3.6}deg, var(--border-color, #e5e7eb) 0deg)`,
+          position: 'relative',
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%', background: 'var(--card-bg, #ffffff)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 13, fontWeight: 700, color: 'var(--text-primary, #1f2937)',
+          }}>
+            {overallPct}%
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
+            {stats.total_mastered} / {stats.total_words} mastered
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary, #6b7280)' }}>
+            {stats.accuracy_rate > 0 ? `${Math.round(stats.accuracy_rate)}% accuracy` : 'Start practicing to track accuracy'}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {displayed.map((t) => {
+          const pct = t.word_count > 0 ? Math.round((t.mastered_count / t.word_count) * 100) : 0;
+          return (
+            <div key={t.topic}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 3, color: 'var(--text-primary, #1f2937)' }}>
+                <span>{t.topic}</span>
+                <span style={{ color: 'var(--text-secondary, #6b7280)' }}>{t.mastered_count}/{t.word_count}</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: 'var(--border-color, #e5e7eb)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 3, background: barColor(pct), transition: 'width 0.4s ease' }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {sorted.length > 4 && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            marginTop: 10, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13,
+            color: 'var(--color-primary, #6366f1)', fontWeight: 500, padding: 0,
+          }}
+        >
+          {expanded ? 'Show less' : `Show all ${sorted.length} topics`}
+        </button>
+      )}
+
+      <Link
+        to="/vocabulary"
+        style={{
+          display: 'block', marginTop: 12, textAlign: 'center', padding: '8px 16px', borderRadius: 8,
+          background: 'var(--color-primary, #6366f1)', color: '#fff', fontSize: 13, fontWeight: 500,
+          textDecoration: 'none',
+        }}
+      >
+        Practice Vocabulary
+      </Link>
+    </div>
+  );
+}
+
 function DailyChallengeCard() {
   const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
 
@@ -599,6 +701,8 @@ export default function Home() {
       <DailyPracticeCard />
 
       <StreakMilestonesCard />
+
+      <VocabProgressCard />
 
       <DailyChallengeCard />
 

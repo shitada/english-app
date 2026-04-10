@@ -891,3 +891,27 @@ async def test_sentence_build_check(client, mock_copilot):
         })
         assert res.status_code == 200
         assert res.json()["is_correct"] is True
+
+
+@pytest.mark.integration
+async def test_vocabulary_stats_topic_breakdown_structure(client, mock_copilot):
+    """Topic breakdown entries have expected fields with correct types."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "reservation", "correct_meaning": "booking", "example_sentence": "Make a reservation.", "difficulty": 1},
+        ]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    questions = quiz_res.json()["questions"]
+    await client.post("/api/vocabulary/answer", json={"word_id": questions[0]["id"], "is_correct": True})
+    res = await client.get("/api/vocabulary/stats")
+    assert res.status_code == 200
+    data = res.json()
+    breakdown = data["topic_breakdown"]
+    assert len(breakdown) >= 1
+    entry = breakdown[0]
+    assert "topic" in entry and isinstance(entry["topic"], str)
+    assert "word_count" in entry and isinstance(entry["word_count"], int)
+    assert "mastered_count" in entry and isinstance(entry["mastered_count"], int)
+    assert "avg_level" in entry and isinstance(entry["avg_level"], (int, float))
+    assert entry["word_count"] >= entry["mastered_count"]
