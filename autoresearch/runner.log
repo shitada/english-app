@@ -3064,3 +3064,20 @@ One test failed. Let me check:
 
 942 passed. Now record iteration 319 and proceed:
 
+● Amend commit with test fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #319: Add quick-speak warm-up exercise with 30-second timer
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-edit 2>&1 | head -3
+  │ && HASH=$(git rev-parse --short HEAD) && echo "Hash: $HASH"
+  └ 5 lines...
+
+● Record iteration 319 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '319\te7e7b0a\t2025-04-10\t30\t300\t60\t30\t420\t942\t942\tpass\t6.4\tKEPT\tAdd quick-speak
+  │ warm-up exercise with 30-second timer\n' >> autoresearch/results.tsv && tail -1
+  │ autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Now update backlog and commit bookkeeping:
+
