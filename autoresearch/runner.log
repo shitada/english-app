@@ -3471,3 +3471,21 @@ Need to import AsyncMock locally:
 
 949 tests pass, TS clean. Commit and evaluate:
 
+● Commit iteration 321 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #321: Add recently practiced section on Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3 && git
+  │ rev-parse --short HEAD
+  └ 5 lines...
+
+● Evaluator Evaluate iteration 321
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L1:5 (5 lines read)
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ L320:end (3 lines read)
+
+Score: **7.55 — KEEP**. Record and continue:
+
