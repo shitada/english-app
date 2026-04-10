@@ -22,7 +22,7 @@ export default function Vocabulary() {
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build' | 'sentence-craft'>('word-to-meaning');
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build' | 'sentence-craft' | 'audio-quiz'>('word-to-meaning');
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
@@ -159,7 +159,7 @@ export default function Vocabulary() {
 
     const mcQ = currentQ as QuizQuestion;
     const correctMeaning = mcQ?.correct_meaning || mcQ?.meaning || '';
-    const isCorrect = quizMode === 'word-to-meaning'
+    const isCorrect = quizMode === 'word-to-meaning' || quizMode === 'audio-quiz'
       ? answer === correctMeaning
       : answer === mcQ?.word;
 
@@ -298,10 +298,17 @@ export default function Vocabulary() {
     return () => clearInterval(drillTimerRef.current);
   }, [phase]);
 
+  // Auto-play TTS for audio quiz mode
+  useEffect(() => {
+    if (quizMode === 'audio-quiz' && phase === 'quiz' && currentQ) {
+      tts.speak((currentQ as QuizQuestion).word);
+    }
+  }, [currentIndex, quizMode, phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const getOptions = () => {
     if (!currentQ || quizMode === 'fill-blank') return [];
     const mcQ = currentQ as QuizQuestion;
-    if (quizMode === 'word-to-meaning') {
+    if (quizMode === 'word-to-meaning' || quizMode === 'audio-quiz') {
       const correct = mcQ.correct_meaning || mcQ.meaning;
       const wrong = mcQ.wrong_options || [];
       const all = [correct, ...wrong];
@@ -327,7 +334,7 @@ export default function Vocabulary() {
 
   const correctAnswer = quizMode === 'fill-blank'
     ? (currentQ as FillBlankQuestion)?.answer || ''
-    : quizMode === 'word-to-meaning'
+    : quizMode === 'word-to-meaning' || quizMode === 'audio-quiz'
     ? ((currentQ as QuizQuestion)?.correct_meaning || (currentQ as QuizQuestion)?.meaning || '')
     : ((currentQ as QuizQuestion)?.word || '');
 
@@ -460,6 +467,18 @@ export default function Vocabulary() {
               }}
             >
               ✍️ Sentence Craft
+            </button>
+            <button
+              onClick={() => setQuizMode('audio-quiz')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'audio-quiz' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'audio-quiz' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'audio-quiz' ? 'white' : 'var(--text)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              🎧 Audio Quiz
             </button>
           </div>
         </div>
@@ -1235,10 +1254,31 @@ export default function Vocabulary() {
       </p>
 
       <h3 style={{ textAlign: 'center', marginBottom: 8 }}>
-        {quizMode === 'word-to-meaning' ? 'What does this mean?' : 'Which word matches this meaning?'}
+        {quizMode === 'audio-quiz' ? 'Listen and select the meaning' : quizMode === 'word-to-meaning' ? 'What does this mean?' : 'Which word matches this meaning?'}
       </h3>
 
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        {quizMode === 'audio-quiz' ? (
+          <>
+            <button
+              onClick={() => tts.speak((currentQ as QuizQuestion).word)}
+              style={{
+                background: 'var(--primary)', border: 'none', borderRadius: '50%',
+                width: 72, height: 72, cursor: 'pointer', display: 'inline-flex',
+                alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 32,
+              }}
+              aria-label="Play word audio"
+              title="Click to hear the word"
+            >
+              🔊
+            </button>
+            {revealed && (
+              <p style={{ marginTop: 12, fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>
+                {(currentQ as QuizQuestion).word}
+              </p>
+            )}
+          </>
+        ) : (
         <span
           style={{
             fontSize: 28,
@@ -1255,6 +1295,7 @@ export default function Vocabulary() {
             style={{ marginLeft: 8, verticalAlign: 'middle', opacity: 0.6 }}
           />
         </span>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 12 }}>
           <Volume2 size={14} color="var(--text-secondary)" />
           <input

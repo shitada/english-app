@@ -334,3 +334,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 332	eaeb2d5	2026-04-11	165	80	431	90	766	980	980	pass	6.2	KEPT	Add speak-the-correction drill to conversation summary
 333	b8cc9a1	2026-04-11	25	120	60	15	220	993	993	pass	8.05	kept	Unit tests for get_skill_radar, get_weekly_report, get_session_analytics
 334	278fddd	2026-04-11	20	15	45	15	95	994	994	pass	7.25	kept	Fix dead-code wrong-property bug in Listening quiz score calculation
+335	583930a	2026-04-11	30	90	50	15	185	994	994	pass	6.2	kept	Add i18n framework with Japanese locale for app shell
