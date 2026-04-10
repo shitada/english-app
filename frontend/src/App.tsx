@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Conversation from './pages/Conversation';
 import Pronunciation from './pages/Pronunciation';
 import Vocabulary from './pages/Vocabulary';
+import Listening from './pages/Listening';
 import Dashboard from './pages/Dashboard';
 
 const statusLabel: Record<HealthStatus, string> = {
@@ -40,6 +41,7 @@ function Header() {
       <nav className={navOpen ? 'nav-open' : ''}>
         <NavLink to="/conversation" onClick={handleNavClick}>Conversation</NavLink>
         <NavLink to="/pronunciation" onClick={handleNavClick}>Pronunciation</NavLink>
+        <NavLink to="/listening" onClick={handleNavClick}>Listening</NavLink>
         <NavLink to="/vocabulary" onClick={handleNavClick}>Vocabulary</NavLink>
         <NavLink to="/dashboard" onClick={handleNavClick}>Dashboard</NavLink>
       </nav>
@@ -75,6 +77,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/conversation" element={<Conversation />} />
               <Route path="/pronunciation" element={<Pronunciation />} />
+              <Route path="/listening" element={<Listening />} />
               <Route path="/vocabulary" element={<Vocabulary />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Routes>

@@ -162,6 +162,9 @@ export const api = {
     return request<MinimalPairsResponse>(`/api/pronunciation/minimal-pairs?${params}`);
   },
 
+  generateListeningQuiz: (difficulty: string = 'intermediate', questionCount = 5) =>
+    request<ListeningQuizResponse>(`/api/pronunciation/listening-quiz?difficulty=${difficulty}&question_count=${questionCount}`, { method: 'POST' }),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -306,6 +309,19 @@ export interface ConversationQuizQuestion {
 export interface ConversationQuizResponse {
   conversation_id: number;
   questions: ConversationQuizQuestion[];
+}
+
+export interface ListeningQuizQuestion {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface ListeningQuizResponse {
+  title: string;
+  passage: string;
+  questions: ListeningQuizQuestion[];
 }
 
 export interface PronunciationFeedback {

@@ -2256,3 +2256,231 @@ Results recorded correctly with tab separators. Now update backlog and stop the 
   │ - [x] Add rephrase challenge exercise to conversation summary (#315)…
   └ 22 lines...
 
+● Commit bookkeeping (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch:
+  │ update backlog and results for iteration 315
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+**Iteration 315 complete ✅ — KEPT (7.8)**. Now starting iteration 316.
+
+---
+
+## Iteration 316
+
+● Context restore for iteration 316 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && tail -20
+  │ autoresearch/results.tsv && git --no-pager log --oneline -5
+  └ 27 lines...
+
+T0 = 1775791645. Calling proposer for iteration 316:
+
+● Proposer Propose iteration 316
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L450:550 (76 lines read)
+  └ Read pronunciation.py
+      └ app/routers/pronunciation.py
+
+Got the proposal for 316: **Add listening comprehension quiz as standalone page**. Let me implement it.
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check pronunciation router imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import"
+  │ app/routers/pronunciation.py | head -15
+  └ 15 lines...
+
+● Check end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/routers/pronunciation.py
+  └ 21 lines...
+
+● Check App.tsx routing patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Route\|NavLink\|path="
+  │ frontend/src/App.tsx | head -20
+  └ 15 lines...
+
+● Read App.tsx header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 frontend/src/App.tsx
+  └ 31 lines...
+
+● Read App.tsx routes section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '58,85p' frontend/src/App.tsx
+  └ 29 lines...
+
+● Check if listening already exists in API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ListeningQuiz\|Listening"
+  │ frontend/src/api.ts | head -5
+  └ 1 line...
+
+Now I have all the context. Let me implement all four files:
+
+● Edit pronunciation.py +74
+  └ app/routers/pronunciation.py
+
+Now create the Listening page:
+
+● Create Listening.tsx +301
+  └ frontend/src/pages/Listening.tsx
+
+Now update App.tsx to add the route and nav link:
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+Now add API types and function:
+
+● Find type export patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ConversationQuizQuestion\|export
+  │ interface\|export type" frontend/src/api.ts | head -20
+  └ 21 lines...
+
+● Check ConversationQuizResponse area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '306,312p' frontend/src/api.ts
+  └ 8 lines...
+
+● Edit api.ts
+  └ frontend/src/api.ts
+
+Let me add the interface after ConversationQuizResponse and add the API method:
+
+● Edit api.ts +13
+  └ frontend/src/api.ts
+
+Now add the API function. Let me find the right place (near pronunciation endpoints):
+
+● Find minimal pairs API location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "minimal-pairs\|getMinimalPairs"
+  │ frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● Read minimal pairs API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '159,166p' frontend/src/api.ts
+  └ 9 lines...
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now I need to make sure the `ListeningQuizResponse` type is used in the import in the Listening page. Let me check:
+
+● Check Listening imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 frontend/src/pages/Listening.tsx
+  └ 5 lines...
+
+Good. Now commit and test:
+
+● Commit iteration 316 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #316: Add listening comprehension quiz as standalone page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests for iteration 316 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Check if smoke test needed and run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && lsof -ti:8099 | xargs kill -9 2>/dev/null; uv run python
+  │ tests/smoke_test.py 2>&1
+  └ 24 lines...
+
+All tests pass. Now check for frontend UI changes for the tester:
+
+● T3 and check UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend page changed. Must call tester. Start server and call tester:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 5 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Calling tester and evaluator in parallel since QA results will use conservative defaults if needed:
+
+● Tester QA test iteration 316
+  └ Agent started in background with agent_id: tester-316. You can use read_agent...
+
+Now call the evaluator while the tester runs:
+
+● Evaluator Evaluate iteration 316
+  └ Agent started in background with agent_id: evaluator-316. You can use read_ag...
+
+● Timestamp while waiting (shell)
+  │ date +%s
+  └ 2 lines...
+
+Waiting for tester and evaluator to complete...
+
+● Wait for agents (shell)
+  │ sleep 30 && echo "waited"
+  └ 2 lines...
+
+● Wait for agents to complete (shell)
+  │ sleep 30 && echo "waited more"
+  └ 2 lines...
+
+Let me call the evaluator in sync mode since background agents may still be running:
+
+● Evaluator Evaluate iteration 316 sync
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L50:end (577 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L627:787 (160 lines read)
+
+Evaluator score: **6.1 — KEEP** but found a real bug (`correct_index=0` dropped as falsy). Let me fix it before recording.
+
+● Find the bug location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "raw_idx = q.get"
+  │ app/routers/pronunciation.py
+  └ 2 lines...
+
+● Edit pronunciation.py +5 -1
+  └ app/routers/pronunciation.py
+
+Now add integration tests:
+
+● Check end of pronunciation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_pronunciation_api.py
+  └ 21 lines...
+
+● Check pronunciation test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ tests/integration/test_pronunciation_api.py
+  └ 5 lines...
+
+● Add listening quiz integration tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/integration/test_pronunciation_api.py << 'TESTS'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 57 lines...
+

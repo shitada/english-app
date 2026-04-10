@@ -523,3 +523,81 @@ async def get_minimal_pairs(
     """Get minimal pairs exercises for listening discrimination practice."""
     pairs = pron_dal.get_minimal_pairs(difficulty=difficulty, count=count)
     return {"pairs": pairs, "total": len(pairs)}
+
+
+class ListeningQuizQuestion(BaseModel):
+    question: str
+    options: list[str]
+    correct_index: int = Field(ge=0, le=3)
+    explanation: str
+
+
+class ListeningQuizResponse(BaseModel):
+    title: str
+    passage: str
+    questions: list[ListeningQuizQuestion]
+
+
+@router.post("/listening-quiz", response_model=ListeningQuizResponse)
+async def generate_listening_quiz(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    question_count: int = Query(default=5, ge=2, le=8),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a listening comprehension quiz with a passage and questions."""
+    copilot = get_copilot_service()
+    prompt = (
+        f"Generate a short English listening comprehension exercise at {difficulty} level.\n"
+        f"Create a passage of 3-6 sentences about an everyday topic.\n"
+        f"Then create {question_count} multiple-choice comprehension questions about the passage.\n\n"
+        "Return JSON with:\n"
+        "- title (string): a short title for the passage\n"
+        "- passage (string): the passage text (3-6 sentences)\n"
+        "- questions (array): each with question, options (4 strings), correct_index (0-3), explanation\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English listening comprehension quiz generator. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="listening_quiz",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Listening quiz generation failed")
+
+    title = str(result.get("title", "Listening Exercise"))
+    passage = str(result.get("passage", ""))
+    if not passage:
+        raise HTTPException(status_code=502, detail="Failed to generate passage")
+
+    questions_raw = result.get("questions", [])
+    validated: list[dict[str, Any]] = []
+    for q in questions_raw[:question_count]:
+        if not isinstance(q, dict) or "question" not in q:
+            continue
+        opts = q.get("options")
+        if not isinstance(opts, list) or len(opts) != 4:
+            continue
+        raw_idx = q.get("correct_index")
+        if raw_idx is None:
+            raw_idx = q.get("correct_answer")
+        if raw_idx is None:
+            raw_idx = q.get("answer_index")
+        try:
+            idx = int(raw_idx)
+        except (ValueError, TypeError):
+            continue
+        if not (0 <= idx <= 3):
+            continue
+        validated.append({
+            "question": str(q["question"]),
+            "options": [str(o) for o in opts],
+            "correct_index": idx,
+            "explanation": str(q.get("explanation", "")),
+        })
+
+    if not validated:
+        raise HTTPException(status_code=502, detail="Failed to generate valid questions")
+
+    return {"title": title, "passage": passage, "questions": validated}

@@ -784,3 +784,56 @@ async def test_minimal_pairs_response_shape(client):
         assert isinstance(pair["example_b"], str) and len(pair["example_b"]) > 0
         assert pair["difficulty"] in ("beginner", "intermediate", "advanced")
         assert pair["play_word"] in ("a", "b")
+
+
+@pytest.mark.integration
+async def test_listening_quiz_success(client, mock_copilot):
+    """Listening quiz returns passage and validated questions."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "title": "At the Coffee Shop",
+        "passage": "Sarah walked into the coffee shop. She ordered a latte.",
+        "questions": [
+            {"question": "Where did Sarah go?", "options": ["Park", "Coffee shop", "Library", "Office"], "correct_index": 1, "explanation": "The passage says she walked into the coffee shop."},
+            {"question": "What did she order?", "options": ["A latte", "Tea", "Water", "Juice"], "correct_index": 0, "explanation": "She ordered a latte."},
+        ],
+    })
+    res = await client.post("/api/pronunciation/listening-quiz?difficulty=beginner&question_count=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["title"] == "At the Coffee Shop"
+    assert "Sarah" in data["passage"]
+    assert len(data["questions"]) == 2
+    assert data["questions"][0]["correct_index"] == 1
+    assert data["questions"][1]["correct_index"] == 0
+
+
+@pytest.mark.integration
+async def test_listening_quiz_correct_index_zero(client, mock_copilot):
+    """correct_index=0 is NOT treated as falsy — question is included."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "title": "Test",
+        "passage": "A simple passage for testing.",
+        "questions": [
+            {"question": "Q1?", "options": ["A", "B", "C", "D"], "correct_index": 0, "explanation": "E1"},
+        ],
+    })
+    res = await client.post("/api/pronunciation/listening-quiz?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["questions"]) == 1
+    assert data["questions"][0]["correct_index"] == 0
+
+
+@pytest.mark.integration
+async def test_listening_quiz_invalid_difficulty(client):
+    """Invalid difficulty value is rejected."""
+    res = await client.post("/api/pronunciation/listening-quiz?difficulty=expert")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_listening_quiz_llm_failure(client, mock_copilot):
+    """LLM failure returns 502."""
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM timeout"))
+    res = await client.post("/api/pronunciation/listening-quiz?difficulty=beginner")
+    assert res.status_code == 502
