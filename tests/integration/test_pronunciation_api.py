@@ -1020,3 +1020,57 @@ async def test_sentence_expand_evaluate_validation(client):
         "seed": "I like coffee", "expanded": "",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_pronunciation_check_with_passage_sentence(client, mock_copilot):
+    """Echo practice: pronunciation check works with a sentence extracted from a listening passage."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 7.8,
+        "overall_feedback": "Good pronunciation with minor issues.",
+        "fluency_score": 7.2,
+        "fluency_feedback": "Mostly fluent.",
+        "word_feedback": [
+            {"expected": "the", "heard": "the", "is_correct": True, "tip": ""},
+            {"expected": "hotel", "heard": "hotel", "is_correct": True, "tip": ""},
+            {"expected": "reservation", "heard": "reservation", "is_correct": True, "tip": ""},
+        ],
+        "focus_areas": [],
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "The hotel reservation was confirmed for two nights.",
+        "user_transcription": "The hotel reservation was confirmed for two nights.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 7.8
+    assert "word_feedback" in data
+
+
+@pytest.mark.integration
+async def test_pronunciation_check_with_short_sentence(client, mock_copilot):
+    """Echo practice: pronunciation check handles shorter sentences from passages."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "overall_score": 8.5,
+        "overall_feedback": "Well done!",
+        "word_feedback": [
+            {"expected": "please", "heard": "please", "is_correct": True, "tip": ""},
+        ],
+        "focus_areas": [],
+    })
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "Please take a seat.",
+        "user_transcription": "Please take a seat.",
+    })
+    assert res.status_code == 200
+    assert res.json()["overall_score"] == 8.5
+
+
+@pytest.mark.integration
+async def test_pronunciation_check_empty_transcription_rejected(client):
+    """Echo practice: empty transcription is rejected."""
+    res = await client.post("/api/pronunciation/check", json={
+        "reference_text": "The weather is nice today.",
+        "user_transcription": "",
+    })
+    assert res.status_code == 422

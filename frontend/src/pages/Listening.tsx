@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from 'lucide-react';
+import { EchoPractice } from '../components/EchoPractice';
 import { api, saveListeningQuizResult, getListeningQuizHistory } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult } from '../api';
 
@@ -359,6 +360,7 @@ export default function Listening() {
               <RotateCcw size={14} /> Try Again
             </button>
           </div>
+          {passage && <EchoPractice passage={passage} />}
         </div>
       )}
     </div>
