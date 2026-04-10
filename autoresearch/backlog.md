@@ -181,7 +181,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add listening comprehension quiz as standalone page (#316)
 - [x] Add skill radar chart on Dashboard showing 5-axis strength (#317)
 - [x] Add streak milestones celebration card with animations on Home page (#318)
-- [ ] Add vocabulary progress card showing mastery percentage per topic on Home page
+- [x] Add vocabulary progress card showing mastery percentage per topic on Home page
 - [x] Add quick-speak warm-up exercise (30-second speaking prompt)
 - [ ] Add recently practiced section on Home page showing last 3-5 activities
 - [ ] Add speaking pace analysis (words per minute tracking in conversation)

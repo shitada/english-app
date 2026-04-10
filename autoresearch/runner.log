@@ -3260,3 +3260,27 @@ Need to submit an answer to populate the stats. Let me fix the test:
 
 All 943 tests pass, TS clean. Let me commit and run evaluator:
 
+● Commit iteration 320 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #320: Add vocabulary progress card with per-topic mastery on Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 | head -3 && git
+  │ rev-parse --short HEAD
+  └ 5 lines...
+
+● Check diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 6 lines...
+
+Now call evaluator:
+
+● Evaluator Evaluate iteration 320
+  │ Read vocabulary.py
+  │   │ app/routers/vocabulary.py
+  │   └ L200:280 (81 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L500:600 (101 lines read)
+
+Score: **7.0 — KEEP**. Now let me record results and continue:
+
