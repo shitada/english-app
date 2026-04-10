@@ -1160,3 +1160,96 @@ async def test_listening_summary_evaluate_short_input(client):
         "user_summary": "OK",
     })
     assert res.status_code == 422
+
+
+# ── Pronunciation endpoint data-populated tests (iter 344) ──────────
+
+
+async def _submit_checks(client, mock_copilot, sentences_scores: list[tuple[str, int]]):
+    """Helper: submit multiple pronunciation checks with given scores."""
+    for text, score in sentences_scores:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score,
+            "overall_feedback": "Feedback",
+            "word_feedback": [],
+            "focus_areas": [],
+        })
+        res = await client.post("/api/pronunciation/check", json={
+            "reference_text": text,
+            "user_transcription": text,
+        })
+        assert res.status_code == 200
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_retry_suggestions_populated(client, mock_copilot):
+    """GET /retry-suggestions returns low-scored sentences."""
+    await _submit_checks(client, mock_copilot, [
+        ("She sells seashells.", 4),
+        ("The weather is nice.", 9),
+    ])
+    res = await client.get("/api/pronunciation/retry-suggestions")
+    assert res.status_code == 200
+    data = res.json()
+    texts = [s["text"] for s in data["suggestions"]]
+    assert "She sells seashells." in texts
+    assert "The weather is nice." not in texts
+    low = next(s for s in data["suggestions"] if s["text"] == "She sells seashells.")
+    assert low["latest_score"] == 4
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_personal_records_populated(client, mock_copilot):
+    """GET /records returns best/worst with correct ordering after submitting checks."""
+    await _submit_checks(client, mock_copilot, [
+        ("Good sentence.", 9),
+        ("Bad sentence.", 3),
+        ("Medium sentence.", 6),
+    ])
+    res = await client.get("/api/pronunciation/records")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] >= 3
+    assert data["best_score"] >= 9
+    assert data["worst_score"] <= 3
+    assert len(data["best_attempts"]) >= 1
+    assert len(data["worst_attempts"]) >= 1
+    assert data["best_attempts"][0]["score"] >= data["best_attempts"][-1]["score"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_score_distribution_populated(client, mock_copilot):
+    """GET /distribution has non-zero counts after submitting varied scores."""
+    await _submit_checks(client, mock_copilot, [
+        ("Sentence A.", 2),
+        ("Sentence B.", 5),
+        ("Sentence C.", 9),
+    ])
+    res = await client.get("/api/pronunciation/distribution")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_attempts"] >= 3
+    non_zero = [b for b in data["distribution"] if b["count"] > 0]
+    assert len(non_zero) >= 2
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_score_trend_with_data(client, mock_copilot):
+    """GET /trend returns improving/stable/declining when enough data exists."""
+    # Need window*2 = 10 attempts. First 5 low, last 5 high → improving.
+    sentences = [(f"Trend sentence {i}.", score) for i, score in enumerate([
+        3, 3, 4, 3, 3,   # older 5 (avg ~3.2)
+        8, 9, 8, 9, 8,   # recent 5 (avg ~8.4)
+    ])]
+    await _submit_checks(client, mock_copilot, sentences)
+    res = await client.get("/api/pronunciation/trend")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["trend"] in ("improving", "stable", "declining")
+    assert data["trend"] != "insufficient_data"
+    assert data["recent_avg"] > data["previous_avg"]
+    assert data["change"] > 0
