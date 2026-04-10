@@ -129,6 +129,37 @@ export function ConversationSummary({
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Total Words</div>
               </div>
             )}
+            {summary.performance.speaking_pace_wpm > 0 && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: summary.performance.speaking_pace_wpm >= 100 ? 'var(--success, #22c55e)' : summary.performance.speaking_pace_wpm >= 60 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
+                  {summary.performance.speaking_pace_wpm}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>WPM Pace</div>
+              </div>
+            )}
+            {summary.performance.pace_trend && summary.performance.pace_trend.length >= 3 && (
+              <div style={{ textAlign: 'center' }}>
+                <svg width="60" height="30" viewBox={`0 0 60 30`} style={{ display: 'block', margin: '0 auto 2px' }}>
+                  <polyline
+                    fill="none"
+                    stroke="var(--primary, #6366f1)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={(() => {
+                      const vals = summary.performance.pace_trend as number[];
+                      const maxV = Math.max(...vals);
+                      const minV = Math.min(...vals);
+                      const range = maxV - minV || 1;
+                      return vals.map((v: number, i: number) =>
+                        `${(i / (vals.length - 1)) * 56 + 2},${28 - ((v - minV) / range) * 24}`
+                      ).join(' ');
+                    })()}
+                  />
+                </svg>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Pace Trend</div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1183,3 +1183,28 @@ class TestFluencyMetrics:
         # "hello", "how", "are", "you" = 4 unique out of 4
         assert metrics["unique_words"] == 4
         assert metrics["vocabulary_diversity"] == 100.0
+
+
+@pytest.mark.unit
+class TestSpeakingPaceMetrics:
+    """Tests for speaking pace WPM in get_conversation_metrics."""
+
+    async def test_no_messages_returns_zero_wpm(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["speaking_pace_wpm"] == 0
+        assert metrics["pace_trend"] == []
+
+    async def test_pace_fields_present(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert "speaking_pace_wpm" in metrics
+        assert "fastest_wpm" in metrics
+        assert "slowest_wpm" in metrics
+        assert "pace_trend" in metrics
+
+    async def test_single_user_message_no_preceding_assistant(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello there")
+        metrics = await get_conversation_metrics(test_db, cid)
+        assert metrics["speaking_pace_wpm"] == 0

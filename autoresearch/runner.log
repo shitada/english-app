@@ -3489,3 +3489,227 @@ Need to import AsyncMock locally:
 
 Score: **7.55 — KEEP**. Record and continue:
 
+● Record 321 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '321\t83ba399\t2025-04-10\t30\t300\t60\t30\t420\t949\t949\tpass\t7.55\tKEPT\tAdd recently
+  │ practiced section on Home page\n' >> autoresearch/results.tsv && sed -i '' 's/- \[ \] Add
+  │ recently practiced section/- [x] Add recently practiced section/' autoresearch/backlog.md &&
+  │ git add autoresearch/ && git commit -m "bookkeeping: record iteration 321 results…
+  └ 5 lines...
+
+Now iteration 322:
+
+● Proposer Propose iteration 322 feature
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L800:1000 (201 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L1000:1100 (101 lines read)
+
+Good proposal. Let me implement it. First, check the relevant files:
+
+● Find conversation metrics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_conversation_metrics\|def
+  │ get_summary\|def end_conversation' app/dal/conversation.py | head -10
+  └ 3 lines...
+
+● View get_conversation_metrics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '529,600p' app/dal/conversation.py
+  └ 73 lines...
+
+Now let me add speaking pace to the existing metrics function. I need to query timestamps too:
+
+● Edit conversation.py +5
+  └ app/dal/conversation.py
+
+Now add the `_compute_speaking_pace` helper:
+
+● Find insert point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def
+  │ get_conversation_vocabulary' app/dal/conversation.py
+  └ 2 lines...
+
+● Check area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '580,584p' app/dal/conversation.py
+  └ 6 lines...
+
+● Edit conversation.py +45
+  └ app/dal/conversation.py
+
+Now add frontend display. Let me check ConversationSummary for the performance section:
+
+● Find performance section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'total_words\|Total
+  │ Words\|performance\|speaking_pace' frontend/src/components/conversation/ConversationSummary.tsx
+  │ | head -10
+  └ 11 lines...
+
+● View after avg words section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '105,130p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 27 lines...
+
+● View after Total Words (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '128,140p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 14 lines...
+
+I'll add the WPM stat tile after Total Words:
+
+● Edit ConversationSummary.tsx +31
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add a WPM badge to the Conversation page chat stats. Let me find the relevant area:
+
+● Find chat stats section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'grammar.*accuracy\|grammar_accuracy\|chat.*stats\|Messages\|msg.*count'
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 11 lines...
+
+● Find messages display (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'messages.*length\|Messages:\|message count' frontend/src/pages/Conversation.tsx | head -10
+  └ 5 lines...
+
+● View chat stats area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '860,890p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 32 lines...
+
+I'll add a real-time WPM badge to the chat stats bar. Let me check if there's already a state for tracking message timestamps:
+
+● Check if WPM state exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'useState.*wpm\|useState.*pace\|useState.*timestamp' frontend/src/pages/Conversation.tsx | head
+  │ -5
+  └ 1 line...
+
+Let me add the real-time WPM tracking. First find the state declarations:
+
+● View state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '40,75p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 37 lines...
+
+● Continue viewing state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '75,85p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 12 lines...
+
+I'll add WPM tracking state after the existing state declarations:
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now find where AI messages arrive (startConversation and sendMessage) to track timestamps:
+
+● Find where assistant messages are set (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'setMessages.*assistant\|role.*assistant.*content' frontend/src/pages/Conversation.tsx | head
+  │ -10
+  └ 7 lines...
+
+I need to set `lastAssistantAt` at lines 351 and 395 (success paths), and track WPM when the user sends. Let me see the sendMessage function:
+
+● View startConversation success (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '348,355p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now add tracking when assistant message arrives in sendMessage:
+
+● View sendMessage success (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '390,400p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 12 lines...
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now track WPM when user sends a message. Find where user message is sent:
+
+● Find user message send (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'setMessages.*role.*user\|sendMessage\|async.*send' frontend/src/pages/Conversation.tsx | head
+  │ -10
+  └ 7 lines...
+
+● View sendMessage function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '375,392p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 19 lines...
+
+Add WPM tracking right after user message is set:
+
+● Edit Conversation.tsx +7
+  └ frontend/src/pages/Conversation.tsx
+
+Now add WPM display in the stats bar:
+
+● Find stats bar (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'messages sent'
+  │ frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● View stats bar (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '873,886p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 14 lines...
+
+● Edit Conversation.tsx +5
+  └ frontend/src/pages/Conversation.tsx
+
+Now add unit tests for the speaking pace DAL function:
+
+● Find existing metric tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class TestConversationMetrics\|def
+  │ test.*metrics\|get_conversation_metrics' tests/unit/test_conversation_dal.py | head -10
+  └ 11 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10
+  │ tests/unit/test_conversation_dal.py
+  └ 11 lines...
+
+✗ Edit test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ Multiple matches found
+
+● Check line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+● View last lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1180,1185p'
+  │ tests/unit/test_conversation_dal.py
+  └ 7 lines...
+
+✗ Edit test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ Multiple matches found
+
+● Read test_conversation_dal.py
+  │ tests/unit/test_conversation_dal.py
+  └ L1175:1185 (11 lines read)
+
+● Edit test_conversation_dal.py +25
+  └ tests/unit/test_conversation_dal.py
+
+Now run tests:
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -5
+  └ 1 line...
+
+952 tests pass, TS clean. Commit and evaluate:
+

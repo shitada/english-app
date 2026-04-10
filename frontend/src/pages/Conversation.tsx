@@ -77,6 +77,8 @@ export default function Conversation() {
   const [quizError, setQuizError] = useState('');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [lastAssistantAt, setLastAssistantAt] = useState<number>(0);
+  const [wpmValues, setWpmValues] = useState<number[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -347,6 +349,8 @@ export default function Conversation() {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setConversationId(res.conversation_id);
       setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] }]);
+      setLastAssistantAt(Date.now());
+      setWpmValues([]);
       setPhase('chat');
       setTimeLeft(duration);
       setPhraseSuggestions(res.phrase_suggestions || []);
@@ -378,6 +382,13 @@ export default function Conversation() {
     speech.reset();
     setPhraseSuggestions([]);
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    if (lastAssistantAt > 0) {
+      const elapsed = (Date.now() - lastAssistantAt) / 1000;
+      const wordCount = userMsg.split(/\s+/).length;
+      if (elapsed >= 2 && wordCount > 0) {
+        setWpmValues((prev) => [...prev, Math.round((wordCount / elapsed) * 60)]);
+      }
+    }
     setLoading(true);
 
     try {
@@ -393,6 +404,7 @@ export default function Conversation() {
         updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [] });
         return updated;
       });
+      setLastAssistantAt(Date.now());
       setPhraseSuggestions(res.phrase_suggestions || []);
       tts.speak(res.message);
     } catch (err) {
@@ -863,6 +875,11 @@ export default function Conversation() {
             <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>)</span>
             <span>
               {messages.filter((m) => m.role === 'user').length} messages sent
+              {wpmValues.length > 0 && (() => {
+                const avgWpm = Math.round(wpmValues.reduce((a, b) => a + b, 0) / wpmValues.length);
+                const wpmColor = avgWpm >= 100 ? 'var(--success, #22c55e)' : avgWpm >= 60 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)';
+                return <> · <span title="Average typing pace">🗣️ <strong style={{ color: wpmColor }}>{avgWpm}</strong> WPM</span></>;
+              })()}
               {listenMode && (() => {
                 const assistantCount = messages.filter((m) => m.role === 'assistant').length;
                 return assistantCount > 0 ? ` · 👁 ${revealedMessages.size}/${assistantCount} revealed` : '';

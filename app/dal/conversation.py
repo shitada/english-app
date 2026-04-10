@@ -563,6 +563,10 @@ async def get_conversation_metrics(
     unique_words = len(set(all_words))
     avg_words = round(total_words / total_user_messages, 1) if total_user_messages > 0 else 0.0
     diversity = round(unique_words / len(all_words) * 100, 1) if all_words else 0.0
+
+    # Speaking pace (WPM) from message timestamps
+    pace_data = await _compute_speaking_pace(db, conversation_id)
+
     return {
         "total_user_messages": total_user_messages,
         "grammar_checked": grammar_checked,
@@ -572,6 +576,52 @@ async def get_conversation_metrics(
         "unique_words": unique_words,
         "avg_words_per_message": avg_words,
         "vocabulary_diversity": diversity,
+        **pace_data,
+    }
+
+
+async def _compute_speaking_pace(
+    db: aiosqlite.Connection, conversation_id: int
+) -> dict[str, Any]:
+    """Compute per-message WPM from timestamps of alternating messages."""
+    from datetime import datetime
+
+    all_msgs = await db.execute_fetchall(
+        "SELECT role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
+        (conversation_id,),
+    )
+    if not all_msgs:
+        return {"speaking_pace_wpm": 0, "fastest_wpm": 0, "slowest_wpm": 0, "pace_trend": []}
+
+    pace_values: list[float] = []
+    last_assistant_ts: datetime | None = None
+
+    for msg in all_msgs:
+        ts_str = msg["created_at"]
+        try:
+            ts = datetime.fromisoformat(ts_str)
+        except (ValueError, TypeError):
+            continue
+
+        if msg["role"] == "assistant":
+            last_assistant_ts = ts
+        elif msg["role"] == "user" and last_assistant_ts is not None:
+            elapsed = (ts - last_assistant_ts).total_seconds()
+            if elapsed < 2:
+                continue  # skip too-fast (likely copy-paste)
+            word_count = len(msg["content"].split()) if msg["content"] else 0
+            if word_count > 0:
+                wpm = round((word_count / elapsed) * 60, 1)
+                pace_values.append(wpm)
+
+    if not pace_values:
+        return {"speaking_pace_wpm": 0, "fastest_wpm": 0, "slowest_wpm": 0, "pace_trend": []}
+
+    return {
+        "speaking_pace_wpm": round(sum(pace_values) / len(pace_values), 1),
+        "fastest_wpm": round(max(pace_values), 1),
+        "slowest_wpm": round(min(pace_values), 1),
+        "pace_trend": [round(v, 1) for v in pace_values],
     }
 
 
