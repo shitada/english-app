@@ -191,7 +191,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add vocabulary word pronunciation practice (listen and repeat for word bank) (#318)
 - [ ] Add achievement badges/gamification system
 - [x] Add spaced repetition visual progress for vocabulary flashcards (#319)
-- [ ] Add AI-powered conversation topic suggestions based on weak areas
+- [x] Add AI-powered conversation topic suggestions based on weak areas (iteration 320)
 - [ ] Add pronunciation minimal pairs scoring improvement
 - [ ] Add vocabulary etymology/word origin information
 - [ ] Add session analytics (time spent per exercise type)
