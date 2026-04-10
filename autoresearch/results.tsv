@@ -316,3 +316,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 314	847cb76	2026-04-09	155	181	630	89	874	906	906	pass	7.2	KEPT	Add bookmarks review panel to Conversation page
 315	ec2dbea	2026-04-10	108	454	16	210	788	934	934	pass	7.8	KEPT	Add rephrase challenge exercise to conversation summary
 316	f940363	2026-04-10	146	188	333	120	667	938	938	pass	6.1	KEPT	Add listening comprehension quiz as standalone page
+317	2289c16	2026-04-10	125	172	176	90	473	939	939	pass	6.4	KEPT	Add skill radar chart on Dashboard showing 5-axis strength

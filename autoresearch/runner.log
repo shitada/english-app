@@ -2696,3 +2696,25 @@ Evaluator: **6.4 — KEEP**. Let me add a quick integration test to address the 
   │ @pytest.mark.integration…
   └ 14 lines...
 
+● Amend with test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #317: Add skill radar chart on Dashboard showing 5-axis strength
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+939 passed. Record results:
+
+● Record iteration 317 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T4=$(date +%s) && T0=1775792340 && T1=1775792465 && T3=1775792637 && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "317" "$(git rev-parse --short HEAD)" "$(date +%Y-%m-%d)" \
+  │ "$((T1-T0))" "$((T3-T1))" "$((T4-T3))" "90" "$((T4-T0))" \…
+  └ 6 lines...
+
