@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS vocabulary_words (
     example_sentence TEXT,
     difficulty INTEGER NOT NULL DEFAULT 1,
     is_favorite INTEGER NOT NULL DEFAULT 0,
-    notes TEXT
+    notes TEXT,
+    etymology TEXT
 );
 
 CREATE TABLE IF NOT EXISTS vocabulary_progress (

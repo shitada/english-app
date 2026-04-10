@@ -1090,3 +1090,21 @@ export interface SessionAnalyticsResponse {
 export async function getSessionAnalytics(days = 7): Promise<SessionAnalyticsResponse> {
   return request<SessionAnalyticsResponse>(`/api/dashboard/session-analytics?days=${days}`);
 }
+
+// Etymology
+export interface EtymologyInfo {
+  origin_language: string;
+  root_words: string;
+  evolution: string;
+  fun_fact: string;
+}
+
+export interface EtymologyResponse {
+  word_id: number;
+  word: string;
+  etymology: EtymologyInfo;
+}
+
+export async function getWordEtymology(wordId: number): Promise<EtymologyResponse> {
+  return request<EtymologyResponse>(`/api/vocabulary/${wordId}/etymology`);
+}

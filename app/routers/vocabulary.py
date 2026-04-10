@@ -845,3 +845,65 @@ async def get_tiers(db: aiosqlite.Connection = Depends(get_db_session)):
         ]
         counts[tier_name] = len(words)
     return {"tiers": tiers, "counts": counts}
+
+
+# --- Etymology ---
+
+class EtymologyInfo(BaseModel):
+    origin_language: str
+    root_words: str
+    evolution: str
+    fun_fact: str
+
+
+class EtymologyResponse(BaseModel):
+    word_id: int
+    word: str
+    etymology: EtymologyInfo
+
+
+@router.get("/{word_id}/etymology", response_model=EtymologyResponse)
+async def get_word_etymology(
+    word_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Get etymology/word origin, generating via LLM if not cached."""
+    import json as _json
+
+    word_text, cached = await vocab_dal.get_etymology(db, word_id)
+    if word_text is None:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    if cached:
+        try:
+            data = _json.loads(cached)
+            return {"word_id": word_id, "word": word_text, "etymology": data}
+        except Exception:
+            pass
+
+    copilot = get_copilot_service()
+    user_prompt = (
+        f'Give the etymology of the English word "{word_text}". '
+        'Return JSON: {"origin_language": "...", "root_words": "...", '
+        '"evolution": "1-2 sentences on meaning change", "fun_fact": "one interesting fact"}'
+    )
+
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English etymologist. Return ONLY valid JSON, no markdown.",
+                user_prompt,
+            ),
+            context="etymology",
+        )
+    except Exception:
+        result = {
+            "origin_language": "unknown",
+            "root_words": word_text,
+            "evolution": "Origin information unavailable.",
+            "fun_fact": "",
+        }
+
+    await vocab_dal.save_etymology(db, word_id, _json.dumps(result))
+    return {"word_id": word_id, "word": word_text, "etymology": result}

@@ -915,3 +915,53 @@ async def test_vocabulary_stats_topic_breakdown_structure(client, mock_copilot):
     assert "mastered_count" in entry and isinstance(entry["mastered_count"], int)
     assert "avg_level" in entry and isinstance(entry["avg_level"], (int, float))
     assert entry["word_count"] >= entry["mastered_count"]
+
+
+# --- Etymology Tests ---
+
+
+@pytest.mark.integration
+async def test_get_etymology_not_found(client):
+    """Etymology for nonexistent word returns 404."""
+    res = await client.get("/api/vocabulary/99999/etymology")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_get_etymology_cached(client, mock_copilot, test_db):
+    """Etymology returns cached data without calling LLM."""
+    import json
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{"word": "apple", "correct_meaning": "a fruit", "example_sentence": "I ate an apple.", "difficulty": 1}]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    ety = {"origin_language": "Old English", "root_words": "æppel", "evolution": "From Proto-Germanic.", "fun_fact": "Apples float!"}
+    await test_db.execute("UPDATE vocabulary_words SET etymology = ? WHERE id = ?", (json.dumps(ety), word_id))
+    await test_db.commit()
+
+    res = await client.get(f"/api/vocabulary/{word_id}/etymology")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["word_id"] == word_id
+    assert data["etymology"]["origin_language"] == "Old English"
+    mock_copilot.ask_json.assert_called_once()  # only quiz call, not etymology
+
+
+@pytest.mark.integration
+async def test_get_etymology_llm_lookup(client, mock_copilot):
+    """Etymology calls LLM when not cached and saves result."""
+    mock_copilot.ask_json = AsyncMock(side_effect=[
+        {"questions": [{"word": "banana", "correct_meaning": "a yellow fruit", "example_sentence": "Eat a banana.", "difficulty": 1}]},
+        {"origin_language": "Wolof", "root_words": "banaana", "evolution": "Via Portuguese/Spanish.", "fun_fact": "Bananas are berries."},
+    ])
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    res = await client.get(f"/api/vocabulary/{word_id}/etymology")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["etymology"]["origin_language"] == "Wolof"
+    assert data["etymology"]["fun_fact"] == "Bananas are berries."
+    assert mock_copilot.ask_json.call_count == 2  # quiz + etymology

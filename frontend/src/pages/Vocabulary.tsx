@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, Check, X, ArrowRight, Zap, Mic, SkipForward, RotateCcw } from 'lucide-react';
-import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers } from '../api';
+import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, type EtymologyInfo, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers, getWordEtymology } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import VocabSRSProgress, { type SRSChange } from '../components/VocabSRSProgress';
@@ -28,6 +28,8 @@ export default function Vocabulary() {
   const [fillBlankInput, setFillBlankInput] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [srsChanges, setSrsChanges] = useState<SRSChange[]>([]);
+  const [etymologyMap, setEtymologyMap] = useState<Record<number, EtymologyInfo | 'loading'>>({});
+  const [expandedEtymology, setExpandedEtymology] = useState<number | null>(null);
 
   // Drill mode state
   const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -609,6 +611,7 @@ export default function Vocabulary() {
           <div className="vocab-tags">
             {questions.map((q, i) => {
               const displayWord = 'word' in q ? q.word : (q as FillBlankQuestion).answer;
+              const wordId = q.id;
               return (
               <span
                 key={i}
@@ -617,14 +620,44 @@ export default function Vocabulary() {
                   background: answers[i] ? '#f0fdf4' : '#fef2f2',
                   color: answers[i] ? '#15803d' : '#b91c1c',
                 }}
-                onClick={() => tts.speak(displayWord)}
-                title="Click to hear pronunciation"
+                onClick={() => {
+                  if (expandedEtymology === wordId) {
+                    setExpandedEtymology(null);
+                    return;
+                  }
+                  setExpandedEtymology(wordId);
+                  if (!etymologyMap[wordId]) {
+                    setEtymologyMap(prev => ({ ...prev, [wordId]: 'loading' }));
+                    getWordEtymology(wordId)
+                      .then(r => setEtymologyMap(prev => ({ ...prev, [wordId]: r.etymology })))
+                      .catch(() => setEtymologyMap(prev => ({ ...prev, [wordId]: { origin_language: '?', root_words: displayWord, evolution: 'Could not load.', fun_fact: '' } })));
+                  }
+                }}
+                title="Click for word origin"
               >
-                {answers[i] ? '✓' : '✗'} {displayWord}
+                {answers[i] ? '✓' : '✗'} {displayWord} 📜
               </span>
               );
             })}
           </div>
+          {expandedEtymology !== null && etymologyMap[expandedEtymology] && (
+            <div className="card" style={{ marginTop: 8, padding: '10px 14px', fontSize: '0.85rem' }}>
+              {etymologyMap[expandedEtymology] === 'loading' ? (
+                <span>⏳ Loading etymology...</span>
+              ) : (
+                (() => {
+                  const ety = etymologyMap[expandedEtymology] as EtymologyInfo;
+                  return (
+                    <>
+                      <strong>Origin:</strong> {ety.origin_language} &middot; <strong>Root:</strong> {ety.root_words}
+                      <div style={{ marginTop: 4 }}>{ety.evolution}</div>
+                      {ety.fun_fact && <div style={{ marginTop: 4, color: 'var(--text-secondary, #666)' }}>💡 {ety.fun_fact}</div>}
+                    </>
+                  );
+                })()
+              )}
+            </div>
+          )}
         </div>
 
         <VocabSRSProgress changes={srsChanges} />

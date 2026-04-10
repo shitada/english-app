@@ -1057,3 +1057,21 @@ async def get_words_by_tier(db: aiosqlite.Connection) -> dict[str, list[dict[str
         else:
             tiers["mastered"].append(item)
     return tiers
+
+
+async def get_etymology(db: aiosqlite.Connection, word_id: int) -> tuple[str | None, str | None]:
+    """Get word text and cached etymology. Returns (word, etymology_json) or (None, None)."""
+    rows = await db.execute_fetchall(
+        "SELECT word, etymology FROM vocabulary_words WHERE id = ?", (word_id,)
+    )
+    if not rows:
+        return None, None
+    return rows[0]["word"], rows[0]["etymology"]
+
+
+async def save_etymology(db: aiosqlite.Connection, word_id: int, etymology_json: str) -> None:
+    """Cache etymology JSON for a word."""
+    await db.execute(
+        "UPDATE vocabulary_words SET etymology = ? WHERE id = ?", (etymology_json, word_id)
+    )
+    await db.commit()
