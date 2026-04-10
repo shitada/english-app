@@ -174,3 +174,26 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add daily challenge card on Home page with personalized task (#312)
 - [x] Add word-of-the-day card on Home page with TTS and practice link (#313)
 - [x] Add bookmarks review panel to Conversation page (#314)
+
+## [NEW] Features from Iteration 315+
+
+- [x] Add rephrase challenge exercise to conversation summary (#315)
+- [ ] Add listening comprehension quiz as standalone page
+- [ ] Add skill radar chart on Dashboard showing strength across speaking/listening/vocabulary/grammar/pronunciation
+- [ ] Add streak milestones celebration with animations on Home page
+- [ ] Add vocabulary progress card showing mastery percentage per topic on Home page
+- [ ] Add quick-speak warm-up exercise (30-second speaking prompt)
+- [ ] Add recently practiced section on Home page showing last 3-5 activities
+- [ ] Add speaking pace analysis (words per minute tracking in conversation)
+- [ ] Add grammar explanation tooltips in conversation AI messages
+- [ ] Add study session timer (Pomodoro-style focused study)
+- [ ] Add conversation summary export/sharing
+- [ ] Add vocabulary word pronunciation practice (listen and repeat for word bank)
+- [ ] Add achievement badges/gamification system
+- [ ] Add spaced repetition visual progress for vocabulary flashcards
+- [ ] Add AI-powered conversation topic suggestions based on weak areas
+- [ ] Add pronunciation minimal pairs scoring improvement
+- [ ] Add vocabulary etymology/word origin information
+- [ ] Add session analytics (time spent per exercise type)
+- [ ] Add multi-language UI support framework
+- [ ] Add conversation transcript download
