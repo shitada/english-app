@@ -2053,3 +2053,123 @@ All 10 new tests pass. Run full suite:
 
 1004/1004! Over 1000 tests now. Commit and evaluate:
 
+● Commit iteration 338 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #338: Add integration tests for 10 untested dashboard router endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 338
+  │ List directory app/routers
+  │   └ 7 files found
+  └ Read dashboard.py
+      │ app/routers/dashboard.py
+      └ L1:50 (50 lines read)
+
+Score: 8.1, KEEP! Highest score yet.
+
+● Record iteration 338 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "338\t6126b9d\t2026-04-11\t20\t60\t45\t15\t140\t1004\t1004\tpass\t8.1\tkept\tAdd integration
+  │ tests for 10 untested dashboard router endpoints\n" >> autoresearch/results.tsv && date +%s
+  └ 2 lines...
+
+Iteration 339:
+
+● Proposer Propose iteration 339
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ 89 lines read
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L355:372 (17 lines read)
+
+● See Listening speech usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,10p'
+  │ frontend/src/pages/Listening.tsx && echo "---" && grep -n
+  │ "SpeechSynthesisUtterance\|useSpeechSynthesis\|\.rate\|speak(" frontend/src/pages/Listening.tsx
+  │ | head -15
+  └ 15 lines...
+
+● See playAudio function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '55,80p'
+  │ frontend/src/pages/Listening.tsx
+  └ 27 lines...
+
+I'll add a playback speed state and a speed selector. Let me check state declarations:
+
+● See state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '11,35p'
+  │ frontend/src/pages/Listening.tsx
+  └ 25 lines...
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Set default rate based on difficulty:
+
+● Find difficulty changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "setDifficulty\|difficulty.*useState" frontend/src/pages/Listening.tsx | head -5
+  └ 3 lines...
+
+● See difficulty buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '132,145p'
+  │ frontend/src/pages/Listening.tsx
+  └ 15 lines...
+
+I'll update the difficulty click to also set a default rate:
+
+● Edit Listening.tsx +4 -1
+  └ frontend/src/pages/Listening.tsx
+
+Now update playAudio to use playbackRate instead of hardcoded difficulty-based rate:
+
+● Edit Listening.tsx +2 -2
+  └ frontend/src/pages/Listening.tsx
+
+Now add the speed selector UI. Find the Play Audio button in the listen phase:
+
+● Find play buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Play Audio\|playAudio\|Listen
+  │ Again" frontend/src/pages/Listening.tsx | head -10
+  └ 5 lines...
+
+● See listen phase play button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '210,235p'
+  │ frontend/src/pages/Listening.tsx
+  └ 27 lines...
+
+I'll add the speed control strip after the play/show text buttons row:
+
+● See after buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '235,250p'
+  │ frontend/src/pages/Listening.tsx
+  └ 17 lines...
+
+● Edit Listening.tsx +17
+  └ frontend/src/pages/Listening.tsx
+
+Also add speed control in the quiz phase. Find where the quiz phase audio button is:
+
+● See quiz phase play button area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '275,295p'
+  │ frontend/src/pages/Listening.tsx
+  └ 22 lines...
+
+I'll add a compact speed strip in the quiz phase header too:
+
+● Edit Listening.tsx +17
+  └ frontend/src/pages/Listening.tsx
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+

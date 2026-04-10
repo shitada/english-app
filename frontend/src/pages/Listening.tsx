@@ -33,6 +33,7 @@ export default function Listening() {
   const [results, setResults] = useState<QuizResult[]>([]);
   const [history, setHistory] = useState<ListeningQuizResult[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -63,12 +64,12 @@ export default function Listening() {
     }
     const utterance = new SpeechSynthesisUtterance(passage);
     utterance.lang = 'en-US';
-    utterance.rate = difficulty === 'beginner' ? 0.8 : difficulty === 'advanced' ? 1.1 : 1.0;
+    utterance.rate = playbackRate;
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
     window.speechSynthesis.speak(utterance);
-  }, [passage, difficulty, isSpeaking]);
+  }, [passage, playbackRate, isSpeaking]);
 
   const handleAnswer = useCallback(() => {
     if (selectedOption === null) return;
@@ -133,7 +134,10 @@ export default function Listening() {
             {(['beginner', 'intermediate', 'advanced'] as Difficulty[]).map(d => (
               <button
                 key={d}
-                onClick={() => setDifficulty(d)}
+                onClick={() => {
+                  setDifficulty(d);
+                  setPlaybackRate(d === 'beginner' ? 0.75 : d === 'advanced' ? 1.1 : 1.0);
+                }}
                 style={{
                   flex: 1, minWidth: 100, padding: '0.6rem 1rem', borderRadius: 8,
                   border: `2px solid ${difficulty === d ? 'var(--primary, #6366f1)' : 'var(--border)'}`,
@@ -230,6 +234,23 @@ export default function Listening() {
               {showText ? 'Hide Text' : 'Show Text'}
             </button>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Speed:</span>
+            {[0.5, 0.75, 1.0, 1.25, 1.5].map(r => (
+              <button
+                key={r}
+                onClick={() => setPlaybackRate(r)}
+                style={{
+                  padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  border: playbackRate === r ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: playbackRate === r ? 'var(--primary)' : 'transparent',
+                  color: playbackRate === r ? 'white' : 'var(--text)',
+                }}
+              >
+                {r}x
+              </button>
+            ))}
+          </div>
           {showText && (
             <div style={{
               padding: 16, borderRadius: 8, marginBottom: 16,
@@ -266,6 +287,23 @@ export default function Listening() {
             >
               <Volume2 size={14} /> Replay
             </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Speed:</span>
+            {[0.5, 0.75, 1.0, 1.25, 1.5].map(r => (
+              <button
+                key={r}
+                onClick={() => setPlaybackRate(r)}
+                style={{
+                  padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  border: playbackRate === r ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: playbackRate === r ? 'var(--primary)' : 'transparent',
+                  color: playbackRate === r ? 'white' : 'var(--text)',
+                }}
+              >
+                {r}x
+              </button>
+            ))}
           </div>
           <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 16 }}>
             {questions[quizIndex].question}

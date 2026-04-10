@@ -337,3 +337,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 335	583930a	2026-04-11	30	90	50	15	185	994	994	pass	6.2	kept	Add i18n framework with Japanese locale for app shell
 336	30e8297	2026-04-11	25	60	45	15	145	994	994	pass	6.95	kept	Add Audio Quiz mode to Vocabulary — hear word, select meaning
 337	36bd1f1	2026-04-11	25	80	45	15	165	994	994	pass	6.65	kept	Add self-paced Flashcard review mode to Vocabulary page
+338	6126b9d	2026-04-11	20	60	45	15	140	1004	1004	pass	8.1	kept	Add integration tests for 10 untested dashboard router endpoints
