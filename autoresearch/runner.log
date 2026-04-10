@@ -2944,3 +2944,37 @@ All 82 pass. Now run the full suite:
 
 1025/1025 pass (+4 new tests). Now commit and call the evaluator:
 
+● Commit iteration 344 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "test: add 4
+  │ data-populated integration tests for pronunciation endpoints
+  │
+  │ Add tests for retry-suggestions, personal-records, score-distribution,
+  │ and score-trend endpoints with seeded pronunciation check data.…
+  └ 8 lines...
+
+● Evaluator Evaluate iteration 344
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L1050:1200 (150 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L1200:1310 (56 lines read)
+
+Score 7.8, KEEP. Now record results and write the session log:
+
+● Record iteration 344 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "344\t353fd5a\t2026-04-11\t15\t30\t45\t15\t105\t1025\t1025\tpass\t7.8\tkept\tAdd 4
+  │ data-populated integration tests for pronunciation endpoints\n" >> autoresearch/results.tsv &&
+  │ tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Now write the session log:
+
+● Check latest log file (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/ | sort | tail -3
+  └ 4 lines...
+
+● Create session-iter-328-to-344.md +52
+  └ autoresearch/logs/session-iter-328-to-344.md
+
