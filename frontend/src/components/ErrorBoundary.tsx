@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { useI18n } from '../i18n/I18nContext';
 
 interface Props {
   children: ReactNode;
@@ -8,6 +9,30 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+}
+
+function ErrorFallbackUI({ error, onReset }: { error: Error | null; onReset: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div style={{ textAlign: 'center', padding: 40 }}>
+      <h2 style={{ marginBottom: 12, color: '#b91c1c' }}>{t('errorHeading')}</h2>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
+        {error?.message || t('errorFallback')}
+      </p>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+        <button className="btn btn-primary" onClick={onReset}>
+          {t('tryAgain')}
+        </button>
+        <a
+          href="/"
+          className="btn btn-secondary"
+          style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+        >
+          {t('goHome')}
+        </a>
+      </div>
+    </div>
+  );
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
@@ -28,27 +53,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
-
-      return (
-        <div style={{ textAlign: 'center', padding: 40 }}>
-          <h2 style={{ marginBottom: 12, color: '#b91c1c' }}>Something went wrong</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
-            {this.state.error?.message || 'An unexpected error occurred.'}
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button className="btn btn-primary" onClick={this.handleReset}>
-              Try Again
-            </button>
-            <a
-              href="/"
-              className="btn btn-secondary"
-              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
-            >
-              Go Home
-            </a>
-          </div>
-        </div>
-      );
+      return <ErrorFallbackUI error={this.state.error} onReset={this.handleReset} />;
     }
 
     return this.props.children;
