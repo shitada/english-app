@@ -806,6 +806,7 @@ export default function Conversation() {
           transcript: speech.transcript,
           startListening: speech.start,
           stopListening: speech.stop,
+          reset: speech.reset,
         }}
       />
       </PhaseTransition>

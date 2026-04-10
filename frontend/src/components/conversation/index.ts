@@ -7,6 +7,7 @@ export { ConversationReplay } from './ConversationReplay';
 export { ConversationSummary } from './ConversationSummary';
 export { ConversationHistory } from './ConversationHistory';
 export { CorrectionDrill } from './CorrectionDrill';
+export { SpeakCorrectionDrill } from './SpeakCorrectionDrill';
 export { DictationExercise } from './DictationExercise';
 export { ShadowingExercise } from './ShadowingExercise';
 export { ClozeExercise } from './ClozeExercise';

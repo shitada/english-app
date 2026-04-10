@@ -923,3 +923,217 @@ Also add rate limiting to the endpoint:
 
 Amend the commit with fixes:
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #331: Add listen-and-summarize speaking drill to Listening quiz results"
+  └ 17 lines...
+
+Re-run tests to confirm fixes don't break anything:
+
+● TypeScript check after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Re-run tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+980/980 pass, TS pass. Now call the evaluator:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 331
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L340:420 (33 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1200:1300 (45 lines read)
+
+Score 7.05, verdict KEEP. Record results:
+
+● Record T4, stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo $T4 && lsof -ti:8000
+  │ | xargs kill -9 2>/dev/null
+  └ 2 lines...
+
+T0=1775840649, T1=1775840912, T2=1775841029, T3=1775841360, T4=1775841444
+propose=263, implement=117, test=331, evaluate=84, total=795
+
+● Record results for iteration 331 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "331" "467f4c1" "2026-04-11" "263" "117" "331" "84" "795" \
+  │ "980" "980" "pass" "7.05" "KEPT" "Add listen-and-summarize speaking drill to Listening quiz
+  │ results" \…
+  └ 3 lines...
+
+Now iteration 332:
+
+● Record T0 for iteration 332 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 332
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ L200:350 (151 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L350:500 (110 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me check the existing CorrectionDrill to understand the errors format and how speechRecognition is passed:
+
+● Check CorrectionDrill integration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "CorrectionDrill\|drillErrors\|speechRecognition"
+  │ frontend/src/components/conversation/ConversationSummary.tsx | head -20
+  └ 9 lines...
+
+● See drill area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '370,390p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 22 lines...
+
+● Check CorrectionDrill props (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30
+  │ frontend/src/components/conversation/CorrectionDrill.tsx
+  └ 31 lines...
+
+Now I have the structure. Let me create the SpeakCorrectionDrill component:
+
+● Create SpeakCorrectionDrill.tsx +237
+  └ frontend/src/components/conversation/SpeakCorrectionDrill.tsx
+
+Now I need to check the speechRecognition prop shape — the tester in iteration 331 caught that the hook uses `start`/`stop`, not `startListening`/`stopListening`. Let me check what the ConversationSummary receives:
+
+● Check how speechRecognition is passed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speechRecognition"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 2 lines...
+
+● See speechRecognition prop shape (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '800,815p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+The parent maps `speech.start` → `startListening` and `speech.stop` → `stopListening`. So the SpeakCorrectionDrill should use `startListening`/`stopListening` — which matches the ConversationSummaryProps interface. Good, my component is correct.
+
+Now integrate it in ConversationSummary:
+
+● Find import location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "import.*CorrectionDrill\|import.*ShadowingExercise"
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 3 lines...
+
+● Edit ConversationSummary.tsx +1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the component after CorrectionDrill:
+
+● See correction drill area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '373,385p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 14 lines...
+
+● Edit ConversationSummary.tsx +6 -1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now update index.ts:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Commit and test:
+
+● Commit iteration 332 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #332: Add speak-the-correction drill to conversation summary"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+980/980 pass, TS pass. Check QA needs:
+
+● Check frontend changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Feature + frontend components → tester mandatory. Start server:
+
+● Start server for QA (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 332
+  │ List directory tests
+  │   └ 8 files found
+  └ List directory tests/e2e
+      └ 4 files found
+
+Critical bugs found. Let me fix the transcript accumulation and stale read issues:
+
+● Check speechRecognition interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '37,43p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 8 lines...
+
+I need to add `reset` to the interface and pass it from the parent:
+
+● Edit ConversationSummary.tsx +1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now update Conversation.tsx to pass reset:
+
+● Check speechRecognition prop (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '804,811p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now update SpeakCorrectionDrill to add reset to the interface and fix the logic:
+
+● Edit SpeakCorrectionDrill.tsx +1
+  └ frontend/src/components/conversation/SpeakCorrectionDrill.tsx
+
+Now fix handleStartRecording to reset transcript first, and fix handleStopRecording to use an effect for the final transcript:
+
+● Edit SpeakCorrectionDrill.tsx +1 -1
+  └ frontend/src/components/conversation/SpeakCorrectionDrill.tsx
+
+Now fix the recording logic to handle stale transcript:
+
+● Edit SpeakCorrectionDrill.tsx +12
+  └ frontend/src/components/conversation/SpeakCorrectionDrill.tsx
+
+Now fix handleStartRecording to reset transcript:
+
+● Edit SpeakCorrectionDrill.tsx +2 -6
+  └ frontend/src/components/conversation/SpeakCorrectionDrill.tsx
+
+Amend the commit:
+

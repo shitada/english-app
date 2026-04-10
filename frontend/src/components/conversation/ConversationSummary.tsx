@@ -5,6 +5,7 @@ import { api, getSessionAverages } from '../../api';
 import { generateStudyCardsCSV, hasStudyCards } from '../../utils/csvExport';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
+import { SpeakCorrectionDrill } from './SpeakCorrectionDrill';
 import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
 import { ClozeExercise } from './ClozeExercise';
@@ -39,6 +40,7 @@ interface ConversationSummaryProps {
     transcript: string;
     startListening: () => void;
     stopListening: () => void;
+    reset?: () => void;
   };
 }
 
@@ -373,7 +375,12 @@ export function ConversationSummary({
           .filter((m) => m.feedback && !m.feedback.is_correct)
           .flatMap((m) => m.feedback!.errors || []);
         return drillErrors.length > 0 ? (
-          <CorrectionDrill errors={drillErrors} tts={tts} />
+          <>
+            <CorrectionDrill errors={drillErrors} tts={tts} />
+            {speechRecognition && (
+              <SpeakCorrectionDrill errors={drillErrors} tts={tts} speechRecognition={speechRecognition} />
+            )}
+          </>
         ) : null;
       })()}
 
