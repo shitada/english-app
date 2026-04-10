@@ -187,7 +187,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add speaking pace analysis (words per minute tracking in conversation)
 - [x] Add grammar explanation tooltips in conversation AI messages (completed iteration #322)
 - [x] Add study session timer (Pomodoro-style focused study) (#315)
-- [ ] Add conversation summary export/sharing
+- [x] Add conversation summary export/sharing (completed iteration #328 — ShareCard visual summary)
 - [x] Add vocabulary word pronunciation practice (listen and repeat for word bank) (#318)
 - [x] Add achievement badges/gamification system (completed iteration #321)
 - [x] Add spaced repetition visual progress for vocabulary flashcards (#319)

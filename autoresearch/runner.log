@@ -377,3 +377,172 @@ Good - tests already exist for export. Now let me add a more thorough test for t
 
 Now commit, test, and evaluate:
 
+● Commit iteration 328 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #328: Add shareable visual summary card to conversation summary"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 978 tests pass, TypeScript passes. Let me record the test timestamp and check for smoke test need:
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+No backend files changed — smoke test not needed. Now check QA tester need:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Frontend components changed and proposal type is `feature` — tester is MANDATORY. Let me start the server and run QA:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Check if server still running (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is running. Now let me call the tester subagent:
+
+● Tester QA test iteration 328
+  │ Read config.yaml
+  │   └ L100:170 (70 lines read)
+  └ Read config.yaml
+      └ L170:250 (66 lines read)
+
+Tester passed (ux_score: 7). Minor issue noted about topic prop not being passed. Let me now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 10 lines...
+
+● Evaluator Evaluate iteration 328
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:30 (30 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L366:410 (43 lines read)
+
+● Record T4 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo $T4
+  └ 2 lines...
+
+Evaluator: total_score=6.45, verdict=keep. All tests pass (978/978), TS pass, QA passed (ux_score=7). Score ≥ 6.0 → KEEP.
+
+Timings: T0=1775838698, T1=1775838861, T2=1775838981, T3=1775839039, T4=1775839418
+- propose=163, implement=120, test=58, evaluate=379, total=720
+
+● Record results for iteration 328 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "328" "5fbcb6f" "2026-04-11" "163" "120" "58" "379" "720" \
+  │ "978" "978" "pass" "6.45" "KEPT" "Add shareable visual summary card to conversation summary"
+  │ \…
+  └ 3 lines...
+
+Good — tabs verified. Now update backlog and move to iteration 329:
+
+● Stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ echo "server stopped"
+  └ 2 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L187:200 (13 lines read)
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Now iteration 329. Let me start the cycle:
+
+● Record T0 for iteration 329 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 329
+  │ List directory tests
+  │   └ 8 files found
+  └ List directory tests/unit
+      └ 15 files found
+
+● Record T1 for iteration 329 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me implement the CSV study card export:
+
+● Check if utils dir exists (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/utils/ 2>/dev/null
+  └ 2 lines...
+
+● Check GrammarFeedback types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "feedback\|GrammarFeedback\|errors\|suggestions" frontend/src/api.ts | head -20
+  └ 20 lines...
+
+Now I have the types. Let me create the CSV utility and update ConversationSummary:
+
+● Create csvExport.ts +79
+  └ frontend/src/utils/csvExport.ts
+
+Now update ConversationSummary to add the Study Cards button:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && sed -n
+  │ '1,4p' ConversationSummary.tsx
+  └ 5 lines...
+
+● Edit ConversationSummary.tsx +2 -1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the download handler and button. Let me find the right spot for the handler:
+
+● Find handleShare location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && grep
+  │ -n "async function handleShare" ConversationSummary.tsx
+  └ 2 lines...
+
+● See handleShare and return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && sed -n
+  │ '117,130p' ConversationSummary.tsx
+  └ 15 lines...
+
+● Edit ConversationSummary.tsx +13
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the button in the action buttons area:
+
+● Find download button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && grep
+  │ -n "Download" ConversationSummary.tsx | tail -5
+  └ 6 lines...
+
+● Edit ConversationSummary.tsx +6
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now commit and test:
+

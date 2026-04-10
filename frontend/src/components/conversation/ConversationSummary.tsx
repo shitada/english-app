@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff } from 'lucide-react';
+import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff, FileSpreadsheet } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
 import { api, getSessionAverages } from '../../api';
+import { generateStudyCardsCSV, hasStudyCards } from '../../utils/csvExport';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
@@ -120,6 +121,19 @@ export function ConversationSummary({
       } catch { /* share cancelled */ }
     }
   }
+
+  function handleDownloadStudyCards() {
+    const csv = generateStudyCardsCSV(messages, summary);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-cards-${conversationId ?? 'session'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const showStudyCardsBtn = hasStudyCards(messages, summary);
 
   return (
     <div className="card summary-card">
@@ -427,6 +441,12 @@ export function ConversationSummary({
           <Download size={16} />
           Download
         </button>
+        {showStudyCardsBtn && (
+          <button className="btn btn-secondary" onClick={handleDownloadStudyCards} aria-label="Download study cards" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <FileSpreadsheet size={16} />
+            Study Cards
+          </button>
+        )}
         {typeof navigator !== 'undefined' && 'share' in navigator && (
           <button className="btn btn-secondary" onClick={handleShare} aria-label="Share summary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Share2 size={16} />
