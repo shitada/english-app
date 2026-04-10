@@ -2261,3 +2261,310 @@ All 9 new tests pass. Run full suite:
 
 1013/1013! Commit and evaluate:
 
+● Commit iteration 340 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #340: Add integration tests for 9 untested conversation router endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 340
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L900:1100 (201 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L1100:end (34 lines read)
+
+Score: 8.1, KEEP!
+
+● Record iteration 340 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "340\tf3ead5c\t2026-04-11\t20\t60\t45\t15\t140\t1013\t1013\tpass\t8.1\tkept\tAdd integration
+  │ tests for 9 untested conversation router endpoints\n" >> autoresearch/results.tsv && date +%s
+  └ 2 lines...
+
+Iteration 341:
+
+● Proposer Propose iteration 341
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L1000:1200 (201 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L1200:1370 (171 lines read)
+
+Good refactoring proposal. Let me check the current state of the file:
+
+● Check Vocabulary size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+Let me extract the drill mode first. I need to understand the boundary:
+
+● Find drill phase boundaries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'drill'"
+  │ frontend/src/pages/Vocabulary.tsx | head -5
+  └ 2 lines...
+
+● See drill phase start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '549,560p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 13 lines...
+
+● See drill-result phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '595,650p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 57 lines...
+
+● See full flashcard phases (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '645,790p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 147 lines...
+
+● See end of flashcard result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '790,800p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 12 lines...
+
+Now I understand the boundaries. Let me also check what `drillAnswer` callback does and the `VocabSRSProgress`:
+
+● Find drill answer handler (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "drillAnswer\|handleDrillAnswer\|const.*drillWords.*drillIndex"
+  │ frontend/src/pages/Vocabulary.tsx | head -10
+  └ 10 lines...
+
+● See drillAnswer callback (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '273,295p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 24 lines...
+
+● Find SRS progress import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "VocabSRSProgress"
+  │ frontend/src/pages/Vocabulary.tsx | head -5
+  └ 4 lines...
+
+This refactor is quite involved. Let me create the extracted components. First the drill mode:
+
+● Create VocabDrillMode.tsx +155
+  └ frontend/src/components/VocabDrillMode.tsx
+
+Now create VocabFlashcardMode:
+
+● Create VocabFlashcardMode.tsx +168
+  └ frontend/src/components/VocabFlashcardMode.tsx
+
+Now update Vocabulary.tsx to use the extracted components. First, add imports:
+
+● See imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,12p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 13 lines...
+
+● Edit Vocabulary.tsx +2
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now replace the drill phase block (lines ~549-597) with the component call:
+
+● Find drill phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "if (phase === 'drill')"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+● See full drill phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '551,599p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 50 lines...
+
+Now I need to replace both drill and drill-result phases with the component. Let me find the exact boundaries:
+
+● See drill-result and flashcard transition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '598,650p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 54 lines...
+
+Replace both drill phases with component:
+
+● Edit Vocabulary.tsx +12 -241
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now check if there are unused state variables and imports I can clean up:
+
+● TS check after refactor (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -20
+  └ 1 line...
+
+Good — no TS errors. Now let me also remove the unused state variables and the drillAnswer/drillTimer logic that's been extracted:
+
+● Find remaining references (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "drillAnswer\b\|fcFlipped\|fcIndex\
+  │ |fcAnswers\b\|drillTimerRef\|drillTimeLeft\|drillIndex\b\|drillAnswers\b"
+  │ frontend/src/pages/Vocabulary.tsx | head -20
+  └ 16 lines...
+
+These are now unused since the drill and flashcard logic is in extracted components. Let me clean them up:
+
+● Edit Vocabulary.tsx -7
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now remove the drillAnswer callback and drillTimer useEffect:
+
+● See drill callback area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '268,300p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 34 lines...
+
+● Edit Vocabulary.tsx -33
+  └ frontend/src/pages/Vocabulary.tsx
+
+Also update startDrill to not set removed state:
+
+● Find startDrill (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "startDrill"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 3 lines...
+
+● See startDrill (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '222,245p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 25 lines...
+
+● Edit Vocabulary.tsx -3
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now check if unused imports remain:
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -15
+  └ 1 line...
+
+Good! Let me check the file length reduction:
+
+● Check new file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+Reduced from 1556 to 1286 lines (-270 lines). Now check if `useRef` is still needed:
+
+● Check useRef usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "useRef"
+  │ frontend/src/pages/Vocabulary.tsx | head -5
+  └ 2 lines...
+
+● Count useRef (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "useRef\b"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+Only the import. Let me check if there's another ref usage:
+
+● Check ref usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "Ref\b\|useRef("
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+`useRef` is no longer used. Remove it:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Also check if `Check` and `X` from lucide are still used (they were in the old drill):
+
+● Check Check/X usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "<Check\b\|<X\b"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 2 lines...
+
+Still used. Good. Let me run tests:
+
+● Run all tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3 && cd frontend && npx tsc --noEmit 2>&1 | tail -3
+  └ 4 lines...
+
+All pass. Commit and evaluate:
+
+● Commit iteration 341 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #341: Extract VocabDrillMode and VocabFlashcardMode from Vocabulary.tsx
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 18 lines...
+
+● Evaluator Evaluate iteration 341
+  │ Read VocabDrillMode.tsx
+  │   │ frontend/src/components/VocabDrillMode.tsx
+  │   └ L28:44 (17 lines read)
+  └ Read VocabFlashcardMode.tsx
+      │ frontend/src/components/VocabFlashcardMode.tsx
+      └ L26:52 (27 lines read)
+
+The evaluator found real bugs. Let me fix them:
+
+● Find broken state setters (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "setFcIndex\|setFcAnswers\|setFcFlipped" frontend/src/pages/Vocabulary.tsx
+  └ 4 lines...
+
+● See flashcard button handler (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '330,350p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 22 lines...
+
+The fix: remove the calls to deleted state setters (the child component handles its own state):
+
+● Edit Vocabulary.tsx -3
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now fix VocabDrillMode's "Drill Again" — use proper state reset instead of reload:
+
+● Edit VocabDrillMode.tsx +2 -1
+  └ frontend/src/components/VocabDrillMode.tsx
+
+● Edit VocabDrillMode.tsx +10 -2
+  └ frontend/src/components/VocabDrillMode.tsx
+
+Now update the button to show loading state:
+
+● Edit VocabDrillMode.tsx +1 -1
+  └ frontend/src/components/VocabDrillMode.tsx
+
+Now clean up dead phase values in the parent:
+
+● See phase type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '18,18p'
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 1 line...
+
+● Find dead phase references (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "drill-result\|flashcard-result"
+  │ frontend/src/pages/Vocabulary.tsx
+  └ 4 lines...
+
+Remove dead phase values from the union type:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Update the conditional rendering:
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● TS check after fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 | tail -10
+  └ 1 line...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+All fixed. Amend the commit:
+

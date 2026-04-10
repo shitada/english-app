@@ -339,3 +339,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 337	36bd1f1	2026-04-11	25	80	45	15	165	994	994	pass	6.65	kept	Add self-paced Flashcard review mode to Vocabulary page
 338	6126b9d	2026-04-11	20	60	45	15	140	1004	1004	pass	8.1	kept	Add integration tests for 10 untested dashboard router endpoints
 339	314980c	2026-04-11	25	45	45	15	130	1004	1004	pass	6.75	kept	Add adjustable playback speed control to Listening quiz page
+340	f3ead5c	2026-04-11	20	60	45	15	140	1013	1013	pass	8.1	kept	Add integration tests for 9 untested conversation router endpoints
