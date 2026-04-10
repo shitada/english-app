@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PlayCircle, Download } from 'lucide-react';
 import type { ChatMessage, ConversationSummary as ConversationSummaryType } from '../../api';
-import { api, getTranscript } from '../../api';
+import { api } from '../../api';
 import { FeedbackPanel } from './FeedbackPanel';
 import { formatDateTime } from '../../utils/formatDate';
 
@@ -30,12 +30,21 @@ export function ConversationHistory({
     if (!conversationId || downloading) return;
     setDownloading(true);
     try {
-      const resp = await getTranscript(conversationId);
-      const blob = new Blob([resp.markdown], { type: 'text/markdown' });
+      const data = await api.exportConversation(conversationId);
+      const lines: string[] = ['📝 English Practice Session', ''];
+      if (historySummary) {
+        if (historySummary.communication_level) lines.push(`Level: ${historySummary.communication_level}`);
+        lines.push('', '--- Summary ---', historySummary.summary || '', '');
+        if (historySummary.key_vocabulary?.length) lines.push('--- Key Vocabulary ---', historySummary.key_vocabulary.join(', '), '');
+        if (historySummary.tip) lines.push('--- Tip ---', historySummary.tip, '');
+      }
+      const msgLines = data.messages?.map((m: { role: string; content: string }) => `[${m.role}] ${m.content}`) ?? [];
+      if (msgLines.length) lines.push('--- Transcript ---', ...msgLines, '');
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = resp.filename;
+      a.download = `conversation-${conversationId}.txt`;
       a.click();
       URL.revokeObjectURL(url);
     } catch { /* download failed */ }
