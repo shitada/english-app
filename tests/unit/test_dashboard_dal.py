@@ -7,6 +7,7 @@ import pytest
 from app.dal.conversation import add_message, create_conversation, end_conversation, update_message_feedback
 from app.dal.dashboard import (
     delete_learning_goal,
+    get_achievements,
     get_confidence_trend,
     get_daily_challenge,
     get_grammar_trend,
@@ -1194,3 +1195,33 @@ class TestGetRecentActivity:
         assert "timestamp" in item
         assert "route" in item
         assert item["route"] == "/conversation"
+
+
+@pytest.mark.unit
+class TestGetAchievements:
+    async def test_empty_db_all_locked(self, test_db):
+        result = await get_achievements(test_db)
+        assert result["unlocked_count"] == 0
+        assert result["total_count"] > 0
+        for a in result["achievements"]:
+            assert a["unlocked"] is False
+            assert a["progress"]["current"] == 0
+
+    async def test_conv_achievement_unlocks(self, test_db):
+        for i in range(10):
+            cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+            await end_conversation(test_db, cid)
+        result = await get_achievements(test_db)
+        conv_10 = next(a for a in result["achievements"] if a["id"] == "conv_10")
+        assert conv_10["unlocked"] is True
+        assert conv_10["progress"]["current"] >= 10
+
+    async def test_century_sums_all_activities(self, test_db):
+        for _ in range(5):
+            cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+            await end_conversation(test_db, cid)
+        for _ in range(5):
+            await save_attempt(test_db, "test sentence", "test sentence", 80, {})
+        result = await get_achievements(test_db)
+        century = next(a for a in result["achievements"] if a["id"] == "century")
+        assert century["progress"]["current"] >= 10

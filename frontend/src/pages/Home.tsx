@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, getRecentActivity, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse, type RecentActivityItem } from '../api';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award } from 'lucide-react';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
+import { AchievementToastContainer } from '../components/AchievementToast';
 
 const MODULE_ROUTES: Record<string, string> = {
   conversation: '/conversation',
@@ -755,6 +756,54 @@ function DailyChallengeCard() {
   );
 }
 
+function RecentAchievementsRow() {
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [allAchievements, setAllAchievements] = useState<Achievement[]>([]);
+
+  useEffect(() => {
+    getAchievements().then(res => {
+      setAllAchievements(res.achievements);
+      setAchievements(res.achievements.filter(a => a.unlocked).slice(-3));
+    }).catch(() => {});
+  }, []);
+
+  return (
+    <>
+      <AchievementToastContainer achievements={allAchievements} />
+      {achievements.length > 0 && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Award size={18} color="#f59e0b" />
+            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Recent Achievements</h4>
+            <Link to="/dashboard" style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--primary, #6366f1)' }}>
+              View all →
+            </Link>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {achievements.map(a => (
+              <Link
+                key={a.id}
+                to="/dashboard"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '6px 12px', borderRadius: 20,
+                  background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                  border: '1px solid #f59e0b',
+                  textDecoration: 'none', color: '#92400e',
+                  fontSize: 13, fontWeight: 500,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{a.emoji}</span>
+                {a.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Home() {
   const { isActive, currentStep, totalSteps, step, next, prev, skip, restartTour } = useOnboarding();
 
@@ -784,6 +833,8 @@ export default function Home() {
       <RecentlyPracticedCard />
 
       <StreakMilestonesCard />
+
+      <RecentAchievementsRow />
 
       <VocabProgressCard />
 
