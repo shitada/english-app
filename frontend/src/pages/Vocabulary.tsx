@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, Check, X, ArrowRight, Zap } from 'lucide-react';
+import { Volume2, Check, X, ArrowRight, Zap, Mic, SkipForward, RotateCcw } from 'lucide-react';
 import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -13,7 +14,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'drill-result' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -52,7 +53,14 @@ export default function Vocabulary() {
   const [tiersLoading, setTiersLoading] = useState(false);
   const [expandedTiers, setExpandedTiers] = useState<Set<string>>(new Set(['struggling', 'learning']));
 
+  // Word pronunciation practice state
+  const [pronWords, setPronWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
+  const [pronIndex, setPronIndex] = useState(0);
+  const [pronResults, setPronResults] = useState<{ word: string; matched: boolean; skipped: boolean }[]>([]);
+  const [pronChecked, setPronChecked] = useState(false);
+
   const tts = useSpeechSynthesis();
+  const speech = useSpeechRecognition({ lang: 'en-US' });
 
   // Fetch topics from API
   useEffect(() => {
@@ -346,6 +354,39 @@ export default function Vocabulary() {
           aria-label="View word tiers"
         >
           📊 Word Tiers — see your mastery levels
+        </button>
+
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getDrillWords(10);
+              if (!data.words || data.words.length === 0) {
+                alert('No vocabulary words available for pronunciation practice. Add words via a topic quiz first.');
+                return;
+              }
+              setPronWords(data.words.slice(0, 10));
+              setPronIndex(0);
+              setPronResults([]);
+              setPronChecked(false);
+              speech.reset();
+              setPhase('word-pronunciation');
+            } catch {
+              alert('Failed to load words for pronunciation practice.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #06b6d4', background: 'linear-gradient(135deg, #cffafe, #a5f3fc)',
+            color: '#155e75', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start pronunciation practice"
+        >
+          <Mic size={20} /> 🎤 Listen &amp; Repeat — practice word pronunciation
         </button>
 
         <div style={{ marginBottom: 16 }}>
@@ -893,6 +934,136 @@ export default function Vocabulary() {
             </div>
           );
         })}
+      </div>
+    );
+  }
+
+  // Word pronunciation practice
+  if (phase === 'word-pronunciation' && pronWords.length > 0) {
+    const w = pronWords[pronIndex];
+    const matched = pronChecked && speech.transcript.trim().toLowerCase() === w.word.toLowerCase();
+
+    const handleRecord = () => {
+      if (speech.isListening) { speech.stop(); return; }
+      setPronChecked(false);
+      speech.reset();
+      speech.start();
+    };
+
+    const handleCheck = () => {
+      speech.stop();
+      setPronChecked(true);
+    };
+
+    const advanceWord = (skipped: boolean) => {
+      const result = { word: w.word, matched: !skipped && matched, skipped };
+      const newResults = [...pronResults, result];
+      setPronResults(newResults);
+      if (pronIndex + 1 >= pronWords.length) {
+        setPhase('word-pronunciation-result');
+      } else {
+        setPronIndex(pronIndex + 1);
+        setPronChecked(false);
+        speech.reset();
+      }
+    };
+
+    return (
+      <div className="card" style={{ maxWidth: 520, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h2>🎤 Listen &amp; Repeat</h2>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{pronIndex + 1} / {pronWords.length}</span>
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <p style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: 4 }}>{w.word}</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{w.meaning}</p>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => tts.speak(w.word)} disabled={tts.isSpeaking} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Volume2 size={18} /> Listen
+          </button>
+          <button
+            className={`btn ${speech.isListening ? 'btn-danger' : 'btn-primary'}`}
+            onClick={handleRecord}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <Mic size={18} /> {speech.isListening ? 'Stop' : 'Record'}
+          </button>
+          {speech.transcript && !pronChecked && (
+            <button className="btn btn-primary" onClick={handleCheck} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Check size={18} /> Check
+            </button>
+          )}
+        </div>
+
+        {speech.transcript && (
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>You said:</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 600 }}>&ldquo;{speech.transcript}&rdquo;</p>
+          </div>
+        )}
+
+        {pronChecked && (
+          <div style={{ textAlign: 'center', marginBottom: 16, padding: 16, background: matched ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)', borderRadius: 8 }}>
+            {matched ? (
+              <p style={{ color: 'var(--success, #22c55e)', fontWeight: 700, fontSize: '1.1rem' }}><Check size={20} style={{ verticalAlign: 'middle' }} /> Correct!</p>
+            ) : (
+              <p style={{ color: 'var(--danger, #ef4444)', fontWeight: 700, fontSize: '1.1rem' }}><X size={20} style={{ verticalAlign: 'middle' }} /> Expected &ldquo;{w.word}&rdquo;</p>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+          {pronChecked && !matched && (
+            <button className="btn btn-secondary" onClick={() => { setPronChecked(false); speech.reset(); }} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <RotateCcw size={16} /> Retry
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={() => advanceWord(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <SkipForward size={16} /> Skip
+          </button>
+          {pronChecked && (
+            <button className="btn btn-primary" onClick={() => advanceWord(false)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {pronIndex + 1 >= pronWords.length ? 'See Results' : 'Next'} <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+
+        <button className="btn btn-secondary" onClick={() => setPhase('select')} style={{ marginTop: 16, fontSize: '0.85rem' }}>
+          ← Back to Topics
+        </button>
+      </div>
+    );
+  }
+
+  // Word pronunciation results
+  if (phase === 'word-pronunciation-result') {
+    const correct = pronResults.filter(r => r.matched).length;
+    const skipped = pronResults.filter(r => r.skipped).length;
+    const total = pronResults.length;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    return (
+      <div className="card" style={{ maxWidth: 520, margin: '0 auto' }}>
+        <h2 style={{ marginBottom: 16 }}>🎤 Pronunciation Results</h2>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ fontSize: '2.5rem', fontWeight: 700, color: pct >= 70 ? 'var(--success, #22c55e)' : pct >= 40 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>{pct}%</div>
+          <p style={{ color: 'var(--text-secondary)' }}>{correct} correct, {skipped} skipped, {total - correct - skipped} missed</p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+          {pronResults.map((r, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+              <span style={{ fontWeight: 600 }}>{r.word}</span>
+              <span>
+                {r.skipped ? <span style={{ color: 'var(--text-secondary)' }}>Skipped</span> : r.matched ? <Check size={16} color="var(--success, #22c55e)" /> : <X size={16} color="var(--danger, #ef4444)" />}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button className="btn btn-primary" onClick={() => setPhase('select')}>Try Another Topic</button>
+        </div>
       </div>
     );
   }
