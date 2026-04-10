@@ -1,5 +1,7 @@
-import { PlayCircle } from 'lucide-react';
+import { useState } from 'react';
+import { PlayCircle, Download } from 'lucide-react';
 import type { ChatMessage, ConversationSummary as ConversationSummaryType } from '../../api';
+import { api } from '../../api';
 import { FeedbackPanel } from './FeedbackPanel';
 import { formatDateTime } from '../../utils/formatDate';
 
@@ -22,6 +24,33 @@ export function ConversationHistory({
   onReplay,
   tts,
 }: ConversationHistoryProps) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    if (!conversationId || downloading) return;
+    setDownloading(true);
+    try {
+      const data = await api.exportConversation(conversationId);
+      const lines: string[] = ['📝 English Practice Session', ''];
+      if (historySummary) {
+        if (historySummary.communication_level) lines.push(`Level: ${historySummary.communication_level}`);
+        lines.push('', '--- Summary ---', historySummary.summary || '', '');
+        if (historySummary.key_vocabulary?.length) lines.push('--- Key Vocabulary ---', historySummary.key_vocabulary.join(', '), '');
+        if (historySummary.tip) lines.push('--- Tip ---', historySummary.tip, '');
+      }
+      const msgLines = data.messages?.map((m: { role: string; content: string }) => `[${m.role}] ${m.content}`) ?? [];
+      if (msgLines.length) lines.push('--- Transcript ---', ...msgLines, '');
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `conversation-${conversationId}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { /* download failed */ }
+    setDownloading(false);
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -39,6 +68,17 @@ export function ConversationHistory({
           >
             <PlayCircle size={16} />
             {replayLoading ? 'Loading…' : 'Replay'}
+          </button>
+        )}
+        {conversationId && (
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', cursor: downloading ? 'not-allowed' : 'pointer', background: 'transparent', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}
+            aria-label="Download transcript"
+          >
+            <Download size={16} />
+            {downloading ? 'Downloading…' : 'Download'}
           </button>
         )}
       </div>

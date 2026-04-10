@@ -4096,3 +4096,203 @@ Good QA feedback. Let me fix the identified issues before evaluation:
 ● Edit useStudyTimer.ts +1
   └ frontend/src/hooks/useStudyTimer.ts
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 18 lines...
+
+Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 8 lines...
+
+● Evaluator Evaluate iteration 315
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L1:50 (50 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L540:end (647 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.15, verdict: keep. All checks pass. Recording results:
+
+● Record iteration 315 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "315" "46a8e6c" "2026-04-10" "160" "100" "60" "390" "710" \
+  │ "952" "952" "pass" "6.15" "KEPT" "Add study session timer (Pomodoro-style focused study)" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Good, properly formatted. Now update the backlog and move to iteration 316.
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Now kill the server and start iteration 316:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+---
+
+## Iteration 316
+
+● Record T0 for iteration 316 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 316 change
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L400:500 (101 lines read)
+  └ Read ConversationHistory.tsx
+      │ frontend/src/components/conversation/ConversationHistory.tsx
+      └ 95 lines read
+
+● Record T1 for iteration 316 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775808632, propose_sec=145. Now implementing. Let me check the existing files:
+
+● Check ConversationHistory structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && head
+  │ -5 ConversationHistory.tsx && echo "---" && wc -l ConversationHistory.tsx
+  └ 8 lines...
+
+● Find existing export API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n "exportConversation"
+  │ api.ts
+  └ 2 lines...
+
+● Check ConversationSummary structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && head
+  │ -5 ConversationSummary.tsx && echo "---" && wc -l ConversationSummary.tsx
+  └ 8 lines...
+
+● Check export API signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && sed -n '220,230p' api.ts
+  └ 12 lines...
+
+● Check ConversationSummary props and structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/components/conversation && grep
+  │ -n "interface\|Props\|function\|export\|conversationId\|onStartNew\|Start New"
+  │ ConversationSummary.tsx | head -25
+  └ 13 lines...
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L1:60 (60 lines read)
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L275:294 (20 lines read)
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L60:120 (61 lines read)
+
+Now let me look at the ConversationHistory:
+
+● Read ConversationHistory.tsx
+  │ frontend/src/components/conversation/ConversationHistory.tsx
+  └ 95 lines read
+
+Now I have all the context. Let me implement the export/sharing functionality:
+
+● Edit ConversationSummary.tsx +3 -1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the helper function and export buttons. Let me first see what's right before the return statement:
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L42:62 (21 lines read)
+
+● Edit ConversationSummary.tsx +56
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the export buttons next to the "Start New Conversation" button:
+
+● Read ConversationSummary.tsx
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ L338:355 (15 lines read)
+
+● Edit ConversationSummary.tsx +14
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add export to ConversationHistory too:
+
+● Edit ConversationHistory.tsx +3 -1
+  └ frontend/src/components/conversation/ConversationHistory.tsx
+
+● Edit ConversationHistory.tsx +27
+  └ frontend/src/components/conversation/ConversationHistory.tsx
+
+Now add the download button next to the replay button:
+
+● Edit ConversationHistory.tsx +11
+  └ frontend/src/components/conversation/ConversationHistory.tsx
+
+Now commit and test:
+
+● Commit iteration 316 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #316: Add conversation summary export/sharing with copy & download
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+952 passed, TS check passes. Check for QA requirements:
+
+● T3 and check frontend UI changes (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Frontend components changed, type=feature → tester required. Start server and run QA:
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test export/sharing
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ L1:5 (5 lines read)
+  └ Read ConversationHistory.tsx
+      │ frontend/src/components/conversation/ConversationHistory.tsx
+      └ L1:5 (5 lines read)
+
+Critical bug: wrong import style. Let me fix it:
+
+● Edit ConversationSummary.tsx +1 -1
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+● Edit ConversationHistory.tsx +1 -1
+  └ frontend/src/components/conversation/ConversationHistory.tsx
+
+● Verify TS after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+

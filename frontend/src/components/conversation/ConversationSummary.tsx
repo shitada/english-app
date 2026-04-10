@@ -1,5 +1,7 @@
-import { Volume2 } from 'lucide-react';
+import { useState } from 'react';
+import { Volume2, Copy, Download, Share2 } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
+import { api } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
@@ -56,6 +58,62 @@ export function ConversationSummary({
   conversationId,
   speechRecognition,
 }: ConversationSummaryProps) {
+  const [copied, setCopied] = useState(false);
+
+  function formatSummaryText(): string {
+    const lines: string[] = ['📝 English Practice Session', ''];
+    if (summary.communication_level) lines.push(`Level: ${summary.communication_level}`);
+    lines.push(`Date: ${new Date().toLocaleDateString()}`, '');
+    lines.push('--- Summary ---', summary.summary || '', '');
+    if (summary.performance && summary.performance.total_user_messages > 0) {
+      const p = summary.performance;
+      lines.push('--- Performance ---');
+      const parts = [`Messages: ${p.total_user_messages}`];
+      if (p.grammar_checked > 0) parts.push(`Grammar: ${p.grammar_accuracy_rate}%`);
+      if (p.avg_words_per_message > 0) parts.push(`Avg Words/Msg: ${p.avg_words_per_message}`);
+      lines.push(parts.join(' | '), '');
+    }
+    if (summary.key_vocabulary?.length > 0) {
+      lines.push('--- Key Vocabulary ---', summary.key_vocabulary.join(', '), '');
+    }
+    if (summary.tip) lines.push('--- Tip ---', summary.tip, '');
+    return lines.join('\n');
+  }
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(formatSummaryText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard not available */ }
+  }
+
+  async function handleDownload() {
+    try {
+      let text = formatSummaryText();
+      if (conversationId) {
+        const data = await api.exportConversation(conversationId);
+        const msgLines = data.messages?.map((m: { role: string; content: string }) => `[${m.role}] ${m.content}`) ?? [];
+        if (msgLines.length) text += '\n--- Transcript ---\n' + msgLines.join('\n') + '\n';
+      }
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `conversation-${conversationId ?? 'summary'}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { /* download failed */ }
+  }
+
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'English Practice Session', text: formatSummaryText() });
+      } catch { /* share cancelled */ }
+    }
+  }
+
   return (
     <div className="card summary-card">
       <h2 style={{ marginBottom: 16 }}>Conversation Complete!</h2>
@@ -288,6 +346,20 @@ export function ConversationSummary({
         <button className="btn btn-primary" onClick={onNewConversation}>
           Start New Conversation
         </button>
+        <button className="btn btn-secondary" onClick={handleCopy} aria-label="Copy summary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Copy size={16} />
+          {copied ? '✓ Copied!' : 'Copy Summary'}
+        </button>
+        <button className="btn btn-secondary" onClick={handleDownload} aria-label="Download transcript" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Download size={16} />
+          Download
+        </button>
+        {typeof navigator !== 'undefined' && 'share' in navigator && (
+          <button className="btn btn-secondary" onClick={handleShare} aria-label="Share summary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Share2 size={16} />
+            Share
+          </button>
+        )}
       </div>
     </div>
   );
