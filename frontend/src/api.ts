@@ -1186,3 +1186,36 @@ export async function evaluateResponseDrill(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Sentence Expand Drill ────────────────────────────────────
+
+export interface SentenceExpandSeed {
+  seed: string;
+  context: string;
+  difficulty: string;
+}
+
+export interface SentenceExpandEvaluation {
+  grammar_score: number;
+  creativity_score: number;
+  complexity_score: number;
+  overall_score: number;
+  word_count_added: number;
+  feedback: string;
+  model_expansion: string;
+}
+
+export async function getSentenceExpandSeeds(difficulty = 'intermediate', count = 5): Promise<{ seeds: SentenceExpandSeed[] }> {
+  return request<{ seeds: SentenceExpandSeed[] }>('/api/pronunciation/sentence-expand?difficulty=' + difficulty + '&count=' + count);
+}
+
+export async function evaluateSentenceExpand(data: {
+  seed: string;
+  expanded: string;
+}): Promise<SentenceExpandEvaluation> {
+  return request<SentenceExpandEvaluation>('/api/pronunciation/sentence-expand/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

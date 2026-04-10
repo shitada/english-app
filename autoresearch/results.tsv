@@ -324,3 +324,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 322	aaae7c5	2026-04-11	206	230	42	55	533	959	959	pass	7.1	KEPT	Add Grammar Notes Collection Panel in conversation chat phase
 323	3d42ca6	2026-04-11	268	250	42	55	615	964	964	pass	7.3	KEPT	Add session progress comparison in conversation summary
 324	60601f8	2026-04-11	206	280	42	55	583	968	968	pass	7.4	KEPT	Add listening quiz score history tracking with progress panel
+325	fda5077	2026-04-11	175	310	43	55	583	971	971	pass	7.5	KEPT	Add situational response speaking drill on Pronunciation page

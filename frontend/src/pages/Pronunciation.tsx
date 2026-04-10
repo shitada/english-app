@@ -5,7 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
-import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory } from '../components/pronunciation';
+import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory } from '../components/pronunciation';
 import { useRecordingStorage } from '../hooks/useRecordingStorage';
 
 const SAMPLE_SENTENCES = [
@@ -29,7 +29,7 @@ export default function Pronunciation() {
   const [progressData, setProgressData] = useState<PronunciationProgress | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
-  const [practiceMode, setPracticeMode] = useState<'shadowing' | 'dictation' | 'minimal-pairs' | 'tongue-twisters' | 'quick-speak' | 'response-drill'>('shadowing');
+  const [practiceMode, setPracticeMode] = useState<'shadowing' | 'dictation' | 'minimal-pairs' | 'tongue-twisters' | 'quick-speak' | 'response-drill' | 'sentence-expand'>('shadowing');
   const [dictationText, setDictationText] = useState('');
   const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [dictationPlayed, setDictationPlayed] = useState(false);
@@ -220,6 +220,13 @@ export default function Pronunciation() {
           >
             💬 Response Drill
           </button>
+          <button
+            className={`btn ${practiceMode === 'sentence-expand' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setPracticeMode('sentence-expand')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            📝 Expand
+          </button>
         </div>
 
         <div style={{ marginBottom: 16, textAlign: 'right', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -257,6 +264,8 @@ export default function Pronunciation() {
           <QuickSpeakExercise speechRecognition={speech} />
         ) : practiceMode === 'response-drill' ? (
           <ResponseDrill speechRecognition={speech} />
+        ) : practiceMode === 'sentence-expand' ? (
+          <SentenceExpandDrill speechRecognition={speech} />
         ) : (
           <>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -321,6 +330,10 @@ export default function Pronunciation() {
 
     if (practiceMode === 'response-drill') {
       return <ResponseDrill speechRecognition={speech} />;
+    }
+
+    if (practiceMode === 'sentence-expand') {
+      return <SentenceExpandDrill speechRecognition={speech} />;
     }
 
     if (practiceMode === 'dictation') {

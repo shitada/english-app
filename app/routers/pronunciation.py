@@ -906,3 +906,119 @@ async def evaluate_response_drill(
         "feedback": str(result.get("feedback", "")),
         "model_response": str(result.get("model_response", "")),
     }
+
+
+# ── Sentence Expand Drill ──────────────────────────────────────
+
+class SentenceExpandSeed(BaseModel):
+    seed: str
+    context: str
+    difficulty: str
+
+
+class SentenceExpandSeedsResponse(BaseModel):
+    seeds: list[SentenceExpandSeed]
+
+
+@router.get("/sentence-expand", response_model=SentenceExpandSeedsResponse)
+async def get_sentence_expand_seeds(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=5, ge=1, le=10),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate short seed sentences for expansion practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate {count} short English seed sentences (3-5 words each) at {difficulty} level.\n"
+        "The user will expand each seed into a longer, more detailed sentence.\n"
+        "Return JSON with a 'seeds' array. Each item has:\n"
+        "- seed (string): the short sentence (3-5 words)\n"
+        "- context (string): a hint about how to expand it (1 sentence)\n"
+        "- difficulty (string): the difficulty level\n"
+        "Use varied topics: daily life, travel, work, hobbies, food, weather."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_expand",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Seed generation failed")
+
+    seeds = result.get("seeds", [])[:count]
+    return {
+        "seeds": [
+            {
+                "seed": str(s.get("seed", "I like coffee.")),
+                "context": str(s.get("context", "Add details about when, where, how.")),
+                "difficulty": difficulty,
+            }
+            for s in seeds
+        ]
+    }
+
+
+class SentenceExpandEvalRequest(BaseModel):
+    seed: str = Field(min_length=1, max_length=200)
+    expanded: str = Field(min_length=1, max_length=2000)
+
+
+class SentenceExpandEvalResponse(BaseModel):
+    grammar_score: float
+    creativity_score: float
+    complexity_score: float
+    overall_score: float
+    word_count_added: int
+    feedback: str
+    model_expansion: str
+
+
+@router.post("/sentence-expand/evaluate", response_model=SentenceExpandEvalResponse)
+async def evaluate_sentence_expand(
+    req: SentenceExpandEvalRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's sentence expansion."""
+    copilot = get_copilot_service()
+    seed_words = len(req.seed.split())
+    expanded_words = len(req.expanded.split())
+    prompt_text = (
+        f"Seed sentence: \"{req.seed}\"\n"
+        f"User's expansion: \"{req.expanded}\"\n\n"
+        "Evaluate how well the user expanded the seed sentence. Return JSON with:\n"
+        "- grammar_score (number 1-10): grammatical correctness of the expansion\n"
+        "- creativity_score (number 1-10): how creative and detailed the expansion is\n"
+        "- complexity_score (number 1-10): sentence complexity and vocabulary richness\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback\n"
+        "- model_expansion (string): an example of a great expansion of the seed"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach evaluating sentence expansions. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_expand_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "creativity_score": clamp(result.get("creativity_score", 5)),
+        "complexity_score": clamp(result.get("complexity_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "word_count_added": max(0, expanded_words - seed_words),
+        "feedback": str(result.get("feedback", "")),
+        "model_expansion": str(result.get("model_expansion", "")),
+    }

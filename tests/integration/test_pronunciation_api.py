@@ -976,3 +976,47 @@ async def test_response_drill_evaluate_validation(client):
         "situation": "Hotel", "speaker_says": "Welcome!", "user_response": "",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_sentence_expand_seeds(client, mock_copilot):
+    """Sentence expand returns seed sentences."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "seeds": [
+            {"seed": "I like coffee", "context": "Add details about when and where", "difficulty": "intermediate"},
+            {"seed": "She went home", "context": "Describe the journey", "difficulty": "intermediate"},
+        ]
+    })
+    res = await client.get("/api/pronunciation/sentence-expand?difficulty=intermediate&count=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["seeds"]) == 2
+    assert data["seeds"][0]["seed"] == "I like coffee"
+
+
+@pytest.mark.integration
+async def test_sentence_expand_evaluate(client, mock_copilot):
+    """Sentence expand evaluation returns scores and word count."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "grammar_score": 8, "creativity_score": 7, "complexity_score": 6,
+        "overall_score": 7, "feedback": "Nice expansion!",
+        "model_expansion": "I really enjoy drinking freshly brewed coffee every morning at the local cafe.",
+    })
+    res = await client.post("/api/pronunciation/sentence-expand/evaluate", json={
+        "seed": "I like coffee",
+        "expanded": "I like to drink hot coffee every morning before going to work",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 7
+    assert data["word_count_added"] >= 7
+    assert "model_expansion" in data
+
+
+@pytest.mark.integration
+async def test_sentence_expand_evaluate_validation(client):
+    """Empty expanded sentence is rejected."""
+    res = await client.post("/api/pronunciation/sentence-expand/evaluate", json={
+        "seed": "I like coffee", "expanded": "",
+    })
+    assert res.status_code == 422
