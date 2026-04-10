@@ -91,8 +91,7 @@ export default function Listening() {
     } else {
       setPhase('results');
       // Auto-save quiz result
-      const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length
-        + (selectedOption === questions[quizIndex]?.correct_answer ? 1 : 0);
+      const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length;
       const totalQ = questions.length;
       const scoreVal = Math.round((correctCount / totalQ) * 100);
       saveListeningQuizResult({

@@ -1491,3 +1491,84 @@ The issue is `test_db.lastrowid` — need to use cursor:
 
 993/993 pass. Let me amend, then run TS check and evaluate:
 
+● Amend commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #333: Add unit tests for get_skill_radar, get_weekly_report, get_session_analytics
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-edit 2>&1 | tail -3
+  └ 4 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cd frontend && npx tsc --noEmit 2>&1 | tail
+  │ -5
+  └ 1 line...
+
+TS pass. Now call the evaluator for iteration 333:
+
+● Get hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short HEAD
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 333
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1100:1350 (251 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1350:1450 (59 lines read)
+
+Score: 8.05, KEEP. Now record to results.tsv:
+
+● Record iteration 333 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "333\tb8cc9a1\t2026-04-11\t25\t120\t60\t15\t220\t993\t993\tpass\t8.05\tkept\tUnit tests for
+  │ get_skill_radar, get_weekly_report, get_session_analytics\n" >> autoresearch/results.tsv && tail
+  │ -3 autoresearch/results.tsv
+  └ 4 lines...
+
+Now let's proceed with iteration 334. Let me set timing:
+
+● Start timing iteration 334 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 334
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L800:end (316 lines read)
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L73:105 (33 lines read)
+
+● See the bug (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '88,100p'
+  │ frontend/src/pages/Listening.tsx
+  └ 14 lines...
+
+Clear bug. The `correct_answer` property doesn't exist on `ListeningQuizQuestion`, this is dead code that always adds 0. Let me fix it:
+
+● Edit Listening.tsx +1 -2
+  └ frontend/src/pages/Listening.tsx
+
+Now add the edge-case test. Let me check the existing test file:
+
+● Find listening quiz tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz"
+  │ tests/integration/test_pronunciation_api.py | head -10
+  └ 9 lines...
+
+● See save quiz result tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '888,915p'
+  │ tests/integration/test_pronunciation_api.py
+  └ 29 lines...
+
+● Edit test_pronunciation_api.py +13
+  └ tests/integration/test_pronunciation_api.py
+
+● Run all tests + TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && cd frontend && npx tsc --noEmit 2>&1 | tail -3
+  └ 6 lines...
+
+994/994 pass, TS pass. This is a bugfix with frontend changes, so I need to call the tester:
+

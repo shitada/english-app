@@ -908,6 +908,19 @@ async def test_save_listening_quiz_result_validation(client):
 
 
 @pytest.mark.integration
+async def test_save_listening_quiz_result_all_wrong(client):
+    """Edge case: user gets all answers wrong (correct_count=0)."""
+    res = await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "Hard Listening", "difficulty": "advanced",
+        "total_questions": 5, "correct_count": 0, "score": 0,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] >= 1
+    assert data["message"] == "Result saved"
+
+
+@pytest.mark.integration
 async def test_listening_quiz_history_empty(client):
     """Empty history returns empty list."""
     res = await client.get("/api/pronunciation/listening-quiz/history")
