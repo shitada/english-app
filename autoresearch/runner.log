@@ -2568,3 +2568,84 @@ Update the conditional rendering:
 
 All fixed. Amend the commit:
 
+● Amend with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #341: Extract VocabDrillMode and VocabFlashcardMode from Vocabulary.tsx
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 19 lines...
+
+Now re-evaluate:
+
+● Evaluator Re-evaluate iteration 341
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L900:1100 (201 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L1100:1290 (184 lines read)
+
+Score: 7.55, KEEP!
+
+● Record iteration 341 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "341\taa431b7\t2026-04-11\t25\t120\t45\t30\t220\t1013\t1013\tpass\t7.55\tkept\tExtract
+  │ VocabDrillMode and VocabFlashcardMode from Vocabulary.tsx\n" >> autoresearch/results.tsv && date
+  │ +%s
+  └ 2 lines...
+
+Iteration 342:
+
+● Proposer Propose iteration 342
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L400:500 (101 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L600:700 (101 lines read)
+
+● Find untested endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "router\.\(get\|post\)"
+  │ app/routers/vocabulary.py | grep -iE "drill|tiers|sentence-craft" | head -10
+  └ 5 lines...
+
+● See endpoint implementations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '312,325p' app/routers/vocabulary.py
+  │ && echo "---" && sed -n '749,785p' app/routers/vocabulary.py && echo "---" && sed -n '835,860p'
+  │ app/routers/vocabulary.py
+  └ 80 lines...
+
+Now let me check the response models:
+
+● See response models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B2 -A6 "class DrillResponse\|class
+  │ SentenceCraftWordsResponse\|class SentenceCraftEvalResponse\|class TiersResponse\|class
+  │ SentenceCraftEvalRequest" app/routers/vocabulary.py
+  └ 43 lines...
+
+Good. Now add the tests:
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_vocabulary_api.py
+  └ 6 lines...
+
+● Edit test_vocabulary_api.py +80
+  └ tests/integration/test_vocabulary_api.py
+
+● Run new tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_vocabulary_api.py -v -k "drill or tiers or sentence_craft" 2>&1 | tail
+  │ -15
+  └ 16 lines...
+
+All 6 new tests pass. Full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+1019/1019! Commit and evaluate:
+

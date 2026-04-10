@@ -965,3 +965,83 @@ async def test_get_etymology_llm_lookup(client, mock_copilot):
     assert data["etymology"]["origin_language"] == "Wolof"
     assert data["etymology"]["fun_fact"] == "Bananas are berries."
     assert mock_copilot.ask_json.call_count == 2  # quiz + etymology
+
+
+# ── Tests for untested vocabulary endpoints ──────────────────────────
+
+
+@pytest.mark.integration
+async def test_drill_empty(client):
+    """Drill with no words returns empty list."""
+    res = await client.get("/api/vocabulary/drill")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["words"] == []
+    assert data["count"] == 0
+
+
+@pytest.mark.integration
+async def test_drill_with_words(client, mock_copilot):
+    """Drill returns prioritized words after populating via quiz."""
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "luggage", "correct_meaning": "bags", "wrong_options": ["a", "b", "c"], "example_sentence": "s", "difficulty": 1},
+            {"word": "passport", "correct_meaning": "ID doc", "wrong_options": ["a", "b", "c"], "example_sentence": "s", "difficulty": 1},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2&mode=multiple_choice")
+    res = await client.get("/api/vocabulary/drill?count=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["count"] >= 1
+    for w in data["words"]:
+        assert "id" in w
+        assert "word" in w
+        assert "meaning" in w
+
+
+@pytest.mark.integration
+async def test_tiers_empty(client):
+    """Tiers with no words returns empty structure."""
+    res = await client.get("/api/vocabulary/tiers")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["tiers"], dict)
+    assert isinstance(data["counts"], dict)
+
+
+@pytest.mark.integration
+async def test_tiers_with_words(client, mock_copilot):
+    """Tiers returns words grouped by mastery level."""
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "receipt", "correct_meaning": "proof of payment", "wrong_options": ["a", "b", "c"], "example_sentence": "s", "difficulty": 1},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1&mode=multiple_choice")
+    res = await client.get("/api/vocabulary/tiers")
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data["tiers"], dict)
+    total = sum(data["counts"].values())
+    assert total >= 1
+
+
+@pytest.mark.integration
+async def test_sentence_craft_empty_topic(client):
+    """Sentence craft with no words returns empty."""
+    res = await client.get("/api/vocabulary/sentence-craft?topic=hotel_checkin")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["words"] == []
+    assert data["count"] == 0
+
+
+@pytest.mark.integration
+async def test_sentence_craft_evaluate_not_found(client):
+    """Sentence craft evaluate with invalid word ID returns 404."""
+    res = await client.post("/api/vocabulary/sentence-craft/evaluate", json={
+        "word_ids": [99999],
+        "user_sentence": "I have a luggage.",
+    })
+    assert res.status_code == 404
