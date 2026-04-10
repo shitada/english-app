@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark, BookOpen } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -79,6 +79,7 @@ export default function Conversation() {
   const [quizError, setQuizError] = useState('');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [showGrammarPanel, setShowGrammarPanel] = useState(false);
   const [lastAssistantAt, setLastAssistantAt] = useState<number>(0);
   const [wpmValues, setWpmValues] = useState<number[]>([]);
 
@@ -297,6 +298,10 @@ export default function Conversation() {
     }
     return stats;
   }, [pastConversations]);
+
+  const allGrammarNotes = useMemo(() => {
+    return messages.flatMap(m => m.grammar_notes || []);
+  }, [messages]);
 
   const viewConversationHistory = async (id: number) => {
     try {
@@ -838,6 +843,23 @@ export default function Conversation() {
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>∞ No limit</span>
             )}
             <button
+              className="btn-touch"
+              onClick={() => setShowGrammarPanel(v => !v)}
+              aria-label={showGrammarPanel ? 'Hide grammar notes' : 'Show grammar notes'}
+              aria-pressed={showGrammarPanel}
+              style={{ position: 'relative' }}
+            >
+              <BookOpen size={16} />
+              {allGrammarNotes.length > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -4,
+                  background: 'var(--primary, #6366f1)', color: '#fff',
+                  fontSize: 10, fontWeight: 700, borderRadius: '50%',
+                  width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>{allGrammarNotes.length}</span>
+              )}
+            </button>
+            <button
               className="btn-touch chat-header-toggle"
               onClick={() => setHeaderExpanded((v) => !v)}
               aria-label={headerExpanded ? 'Collapse controls' : 'Expand controls'}
@@ -928,6 +950,10 @@ export default function Conversation() {
           </div>
         );
       })()}
+
+      {showGrammarPanel && (
+        <GrammarNotesPanel notes={allGrammarNotes} onSpeak={tts.speak} onClose={() => setShowGrammarPanel(false)} />
+      )}
 
       <div className="chat-messages" role="log" aria-live="polite">
         {showBriefing && userRoleName && (

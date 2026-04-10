@@ -1,5 +1,6 @@
 export { BookmarksReview } from './BookmarksReview';
 export { FeedbackPanel } from './FeedbackPanel';
+export { GrammarNotesPanel } from './GrammarNotesPanel';
 export { HighlightedMessage } from './HighlightedMessage';
 export { ConversationQuiz } from './ConversationQuiz';
 export { ConversationReplay } from './ConversationReplay';

@@ -991,3 +991,24 @@ async def test_rephrase_evaluate_validation(client):
         "user_rephrase": "Hello",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_message_returns_grammar_notes(client, mock_copilot):
+    """Grammar notes field is present and correctly structured in message response."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to our hotel!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    cid = start_res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="How can I help you today?")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Hello!",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+    res = await client.post("/api/conversation/message", json={"conversation_id": cid, "content": "Hello!"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "grammar_notes" in data
+    assert isinstance(data["grammar_notes"], list)
