@@ -314,4 +314,9 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 312	081c15a	2026-04-08	126	274	688	95	909	906	906	pass	6.9	KEPT	Add daily challenge card on Home page with personalized task
 313	11972c5	2026-04-09	107	214	564	68	632	906	906	pass	7.40	KEPT	Add word-of-the-day card on Home page with TTS and practice link
 314	847cb76	2026-04-09	155	181	630	89	874	906	906	pass	7.2	KEPT	Add bookmarks review panel to Conversation page
+315	a66ba57	2026-04-10	90	300	42	55	487	952	952	pass	6.45	KEPT	Add session analytics with time spent per exercise type on Dashboard
 316	none	2026-04-10	199	205	369	162	935	952	952	pass	4.8	DISCARDED	Add vocabulary etymology/word origin with LLM lookup
+317	b0da3e6	2026-04-10	100	280	44	58	482	955	955	pass	7.55	KEPT	Add vocabulary etymology with LLM lookup, caching, and tests
+318	none	2026-04-10	95	350	43	65	553	955	955	pass	5.7	DISCARDED	Add multi-language UI support framework
+319	none	2026-04-10	85	200	40	50	375	955	955	pass	5.1	DISCARDED	Add inline correction practice drill to FeedbackPanel
+320	none	2026-04-10T15:16:20+09:00	120	300	45	60	525	960	960	pass	5.5	DISCARDED	Rich Markdown transcript download with inline grammar feedback
