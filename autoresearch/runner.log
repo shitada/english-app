@@ -546,3 +546,124 @@ Now add the button in the action buttons area:
 
 Now commit and test:
 
+● Commit iteration 329 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #329: Add Anki-compatible CSV study card export from conversation summary"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+978/978 tests pass, TS pass. Check frontend changes for QA:
+
+● Check QA tester need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend component changed + feature type → tester required. Start server and run QA:
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; cd
+  │ /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 329
+  │ Read main.py
+  │   │ app/main.py
+  │   └ L1:50 (50 lines read)
+  └ Read csvExport.ts
+      │ frontend/src/utils/csvExport.ts
+      └ L60:78 (19 lines read)
+
+Tester passed (ux_score: 7). Now call the evaluator:
+
+● Evaluator Evaluate iteration 329
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ L300:400 (101 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L400:500 (60 lines read)
+
+Score 6.7, verdict KEEP. All criteria met. Let me record and move on:
+
+● Record T4, stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo $T4 && lsof -ti:8000
+  │ | xargs kill -9 2>/dev/null
+  └ 2 lines...
+
+T0=1775839450, T1=1775839612, T2=1775839665, T3=1775839717, T4=1775840000
+propose=162, implement=53, test=52, evaluate=283, total=550
+
+● Record results for iteration 329 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "329" "b9330bf" "2026-04-11" "162" "53" "52" "283" "550" \
+  │ "978" "978" "pass" "6.7" "KEPT" "Add Anki-compatible CSV study card export from conversation
+  │ summary" \…
+  └ 3 lines...
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+Now iteration 330:
+
+● Record T0 for iteration 330 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 330
+  │ Read ClozeExercise.tsx
+  │   │ frontend/src/components/conversation/ClozeExercise.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read DictationExercise.tsx
+      │ frontend/src/components/conversation/DictationExercise.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me implement this. First, check the existing Listening page structure:
+
+● Check Listening page structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "EchoPractice\|results\|phase\|passage" frontend/src/pages/Listening.tsx | head -30
+  └ 23 lines...
+
+● See exact EchoPractice integration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '360,380p'
+  │ frontend/src/pages/Listening.tsx
+  └ 10 lines...
+
+Good. Now create the ClozeListening component:
+
+● Create ClozeListening.tsx +178
+  └ frontend/src/components/ClozeListening.tsx
+
+Now integrate it into Listening.tsx:
+
+● Check Listening imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 frontend/src/pages/Listening.tsx
+  └ 6 lines...
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Commit and test:
+

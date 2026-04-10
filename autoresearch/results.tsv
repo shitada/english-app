@@ -328,3 +328,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 326	ec89bfd	2026-04-11	175	300	43	55	573	974	974	pass	7.3	KEPT	Add sentence expand drill to Pronunciation page
 327	ebb88ee	2026-04-11	180	280	43	55	558	977	977	pass	7.3	KEPT	Add echo practice to Listening quiz results page
 328	5fbcb6f	2026-04-11	163	120	58	379	720	978	978	pass	6.45	KEPT	Add shareable visual summary card to conversation summary
+329	b9330bf	2026-04-11	162	53	52	283	550	978	978	pass	6.7	KEPT	Add Anki-compatible CSV study card export from conversation summary
