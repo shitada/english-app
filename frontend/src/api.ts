@@ -1108,3 +1108,13 @@ export interface EtymologyResponse {
 export async function getWordEtymology(wordId: number): Promise<EtymologyResponse> {
   return request<EtymologyResponse>(`/api/vocabulary/${wordId}/etymology`);
 }
+
+// Transcript
+export interface TranscriptResponse {
+  markdown: string;
+  filename: string;
+}
+
+export async function getTranscript(conversationId: number): Promise<TranscriptResponse> {
+  return request<TranscriptResponse>(`/api/conversation/${conversationId}/transcript`);
+}

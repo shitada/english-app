@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Volume2, Copy, Download, Share2 } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
-import { api } from '../../api';
+import { api, getTranscript } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
@@ -90,17 +90,23 @@ export function ConversationSummary({
 
   async function handleDownload() {
     try {
-      let text = formatSummaryText();
       if (conversationId) {
-        const data = await api.exportConversation(conversationId);
-        const msgLines = data.messages?.map((m: { role: string; content: string }) => `[${m.role}] ${m.content}`) ?? [];
-        if (msgLines.length) text += '\n--- Transcript ---\n' + msgLines.join('\n') + '\n';
+        const resp = await getTranscript(conversationId);
+        const blob = new Blob([resp.markdown], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = resp.filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
       }
+      const text = formatSummaryText();
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `conversation-${conversationId ?? 'summary'}.txt`;
+      a.download = `conversation-summary.txt`;
       a.click();
       URL.revokeObjectURL(url);
     } catch { /* download failed */ }

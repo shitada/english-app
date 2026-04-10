@@ -1208,3 +1208,74 @@ class TestSpeakingPaceMetrics:
         await add_message(test_db, cid, "user", "Hello there")
         metrics = await get_conversation_metrics(test_db, cid)
         assert metrics["speaking_pace_wpm"] == 0
+
+
+# --- Transcript Formatting Tests ---
+
+from app.dal.conversation import format_transcript_markdown
+
+
+class TestFormatTranscriptMarkdown:
+    """Tests for format_transcript_markdown."""
+
+    def test_basic_transcript(self):
+        data = {
+            "topic": "hotel_checkin",
+            "difficulty": "intermediate",
+            "started_at": "2026-04-10T10:00:00",
+            "ended_at": "2026-04-10T10:05:00",
+            "summary": {"summary": "Good conversation", "tip": "Try using more idioms.", "key_vocabulary": ["check in", "reservation"]},
+            "messages": [
+                {"role": "assistant", "content": "Welcome! How can I help you?", "feedback": None},
+                {"role": "user", "content": "I has a reservation.", "feedback": {"is_correct": False, "errors": [{"original": "I has", "correction": "I have", "explanation": "Subject-verb agreement"}], "suggestions": [], "corrected_text": "I have a reservation."}},
+            ],
+        }
+        md = format_transcript_markdown(data)
+        assert "# Conversation: hotel_checkin" in md
+        assert "**Difficulty:** intermediate" in md
+        assert "**Duration:** 5m 0s" in md
+        assert "Good conversation" in md
+        assert "Try using more idioms" in md
+        assert "check in" in md
+        assert '❌ "I has" → "I have"' in md
+        assert "Subject-verb agreement" in md
+        assert "✏️ Corrected: I have a reservation." in md
+
+    def test_all_correct_grammar(self):
+        data = {
+            "topic": "restaurant",
+            "difficulty": "beginner",
+            "started_at": "2026-04-10T10:00:00",
+            "ended_at": None,
+            "summary": None,
+            "messages": [
+                {"role": "user", "content": "I would like a table.", "feedback": {"is_correct": True, "errors": [], "suggestions": []}},
+            ],
+        }
+        md = format_transcript_markdown(data)
+        assert "✅ Grammar correct" in md
+        assert "❌" not in md
+
+    def test_empty_conversation(self):
+        data = {"topic": "test", "difficulty": "easy", "started_at": None, "ended_at": None, "summary": None, "messages": []}
+        md = format_transcript_markdown(data)
+        assert "# Conversation: test" in md
+        assert "## Transcript" not in md
+
+    def test_no_feedback(self):
+        data = {
+            "topic": "doctor",
+            "difficulty": "advanced",
+            "started_at": "2026-04-10T10:00:00",
+            "ended_at": "2026-04-10T10:10:00",
+            "summary": None,
+            "messages": [
+                {"role": "user", "content": "I feel sick.", "feedback": None},
+                {"role": "assistant", "content": "What symptoms?", "feedback": None},
+            ],
+        }
+        md = format_transcript_markdown(data)
+        assert "🧑 You" in md
+        assert "🤖 AI" in md
+        assert "❌" not in md
+        assert "✅" not in md

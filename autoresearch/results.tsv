@@ -315,3 +315,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 313	11972c5	2026-04-09	107	214	564	68	632	906	906	pass	7.40	KEPT	Add word-of-the-day card on Home page with TTS and practice link
 314	847cb76	2026-04-09	155	181	630	89	874	906	906	pass	7.2	KEPT	Add bookmarks review panel to Conversation page
 316	none	2026-04-10	199	205	369	162	935	952	952	pass	4.8	DISCARDED	Add vocabulary etymology/word origin with LLM lookup
+319	none	2026-04-10	268	110	110	381	759	955	955	pass	5.1	DISCARDED	Add inline correction practice drill to FeedbackPanel

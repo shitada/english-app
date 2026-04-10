@@ -873,3 +873,27 @@ async def evaluate_rephrase(
         "overall_score": min(10, max(1, float(result.get("overall_score", 5)))),
         "feedback": str(result.get("feedback", "")),
     }
+
+
+# --- Transcript ---
+
+class TranscriptResponse(BaseModel):
+    markdown: str
+    filename: str
+
+
+@router.get("/{conversation_id}/transcript", response_model=TranscriptResponse)
+async def get_transcript(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get a rich Markdown transcript of a conversation for download."""
+    export_data = await conv_dal.get_conversation_export(db, conversation_id)
+    if export_data is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    markdown = conv_dal.format_transcript_markdown(export_data)
+    topic = export_data.get("topic", "conversation")
+    date_str = (export_data.get("started_at") or "")[:10].replace("-", "")
+    filename = f"{topic}_{date_str}.md"
+    return {"markdown": markdown, "filename": filename}
