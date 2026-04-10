@@ -1215,6 +1215,7 @@ class TestSpeakingPaceMetrics:
 from app.dal.conversation import format_transcript_markdown
 
 
+@pytest.mark.unit
 class TestFormatTranscriptMarkdown:
     """Tests for format_transcript_markdown."""
 
@@ -1279,3 +1280,25 @@ class TestFormatTranscriptMarkdown:
         assert "🤖 AI" in md
         assert "❌" not in md
         assert "✅" not in md
+
+    def test_performance_section(self):
+        data = {
+            "topic": "hotel_checkin",
+            "difficulty": "intermediate",
+            "started_at": "2026-04-10T10:00:00",
+            "ended_at": "2026-04-10T10:15:00",
+            "summary": {
+                "summary": "Good conversation",
+                "performance": {
+                    "grammar_accuracy_rate": 85,
+                    "total_user_messages": 6,
+                    "avg_words_per_message": 12.5,
+                },
+            },
+            "messages": [],
+        }
+        md = format_transcript_markdown(data)
+        assert "## Performance" in md
+        assert "Grammar accuracy: 85%" in md
+        assert "Messages sent: 6" in md
+        assert "Avg words/message: 12.5" in md

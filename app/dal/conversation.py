@@ -891,8 +891,9 @@ def format_transcript_markdown(export_data: dict[str, Any]) -> str:
         perf = summary.get("performance")
         if isinstance(perf, dict):
             lines.append("## Performance")
-            if perf.get("grammar_accuracy") is not None:
-                lines.append(f"- Grammar accuracy: {perf['grammar_accuracy']}%")
+            accuracy = perf.get("grammar_accuracy_rate") or perf.get("grammar_accuracy")
+            if accuracy is not None:
+                lines.append(f"- Grammar accuracy: {accuracy}%")
             if perf.get("total_user_messages") is not None:
                 lines.append(f"- Messages sent: {perf['total_user_messages']}")
             if perf.get("avg_words_per_message") is not None:

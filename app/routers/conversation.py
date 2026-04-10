@@ -893,7 +893,8 @@ async def get_transcript(
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     markdown = conv_dal.format_transcript_markdown(export_data)
-    topic = export_data.get("topic", "conversation")
+    topic_raw = export_data.get("topic", "conversation")
+    topic = get_topic_label(topic_raw) or topic_raw
     date_str = (export_data.get("started_at") or "")[:10].replace("-", "")
     filename = f"{topic}_{date_str}.md"
     return {"markdown": markdown, "filename": filename}
