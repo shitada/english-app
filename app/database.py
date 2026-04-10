@@ -154,6 +154,57 @@ _MIGRATIONS: list[tuple[str, str]] = [
         "add role_swap column to conversations",
         "ALTER TABLE conversations ADD COLUMN role_swap INTEGER NOT NULL DEFAULT 0",
     ),
+    (
+        "create minimal_pairs_results table",
+        """CREATE TABLE IF NOT EXISTS minimal_pairs_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            total_pairs INTEGER NOT NULL,
+            correct_count INTEGER NOT NULL,
+            difficulty TEXT,
+            phoneme_results_json TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "create session_logs table",
+        """CREATE TABLE IF NOT EXISTS session_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_type TEXT NOT NULL,
+            metadata_json TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add session_logs indexes",
+        "CREATE INDEX IF NOT EXISTS idx_session_logs_type ON session_logs(session_type)",
+    ),
+    (
+        "add etymology column to vocabulary_words",
+        "ALTER TABLE vocabulary_words ADD COLUMN etymology TEXT",
+    ),
+    (
+        "drop and recreate minimal_pairs_results with per-pair schema",
+        "DROP TABLE IF EXISTS minimal_pairs_results",
+    ),
+    (
+        "create minimal_pairs_results table v2",
+        """CREATE TABLE IF NOT EXISTS minimal_pairs_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            phoneme_contrast TEXT NOT NULL,
+            word_a TEXT NOT NULL,
+            word_b TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on minimal_pairs_results phoneme_contrast",
+        "CREATE INDEX IF NOT EXISTS idx_mp_results_contrast ON minimal_pairs_results(phoneme_contrast)",
+    ),
+    (
+        "add index on minimal_pairs_results created_at",
+        "CREATE INDEX IF NOT EXISTS idx_mp_results_created ON minimal_pairs_results(created_at DESC)",
+    ),
 ]
 
 

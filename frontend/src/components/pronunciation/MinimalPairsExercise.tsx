@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2 } from 'lucide-react';
-import { api, type MinimalPairItem } from '../../api';
+import { api, type MinimalPairItem, type PhonemeContrastStat } from '../../api';
 
 interface MinimalPairsExerciseProps {
   tts: {
@@ -21,6 +21,26 @@ export function MinimalPairsExercise({ tts, difficultyFilter, setDifficultyFilte
   const [mpResults, setMpResults] = useState<boolean[]>([]);
   const [mpFinished, setMpFinished] = useState(false);
   const [mpLoading, setMpLoading] = useState(false);
+  const [weakSounds, setWeakSounds] = useState<PhonemeContrastStat[]>([]);
+  const [resultsSaved, setResultsSaved] = useState(false);
+
+  // Save results and fetch weak sounds when exercise finishes
+  useEffect(() => {
+    if (!mpFinished) return;
+    if (!resultsSaved) {
+      const payload = mpPairs.map((p, i) => ({
+        phoneme_contrast: p.phoneme_contrast,
+        word_a: p.word_a,
+        word_b: p.word_b,
+        is_correct: mpResults[i],
+      }));
+      api.saveMinimalPairsResults(payload).catch(() => {});
+      setResultsSaved(true);
+    }
+    api.getMinimalPairsStats(10)
+      .then(stats => setWeakSounds(stats.filter(s => s.accuracy < 70)))
+      .catch(() => {});
+  }, [mpFinished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (phase === 'select') {
     return (
@@ -54,6 +74,8 @@ export function MinimalPairsExercise({ tts, difficultyFilter, setDifficultyFilte
               setMpRevealed(false);
               setMpResults([]);
               setMpFinished(false);
+              setResultsSaved(false);
+              setWeakSounds([]);
               setPhase('practice');
             } catch (err) {
               console.error('Failed to load minimal pairs:', err);
@@ -97,6 +119,31 @@ export function MinimalPairsExercise({ tts, difficultyFilter, setDifficultyFilte
                   <button onClick={() => tts.speak(pair.word_b)} disabled={tts.isSpeaking} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                     <Volume2 size={16} color="var(--primary)" />
                   </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {weakSounds.length > 0 && (
+          <div style={{ textAlign: 'left', marginBottom: 24 }}>
+            <h4 style={{ marginBottom: 8 }}>🎯 Your Weak Sounds</h4>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              Phoneme contrasts with &lt;70% accuracy across all sessions
+            </p>
+            {weakSounds.map((s) => (
+              <div key={s.phoneme_contrast} style={{ marginBottom: 8, padding: '8px 12px', borderRadius: 8, background: 'var(--bg-secondary, #f5f5f5)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{s.phoneme_contrast}</span>
+                  <span style={{ fontSize: 12, color: s.accuracy < 50 ? 'var(--danger, #ef4444)' : 'var(--warning, #f59e0b)' }}>
+                    {s.accuracy}% ({s.correct}/{s.attempts})
+                  </span>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: 'var(--border, #e5e7eb)', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', borderRadius: 3, width: `${s.accuracy}%`,
+                    background: s.accuracy < 50 ? 'var(--danger, #ef4444)' : 'var(--warning, #f59e0b)',
+                  }} />
                 </div>
               </div>
             ))}

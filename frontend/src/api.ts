@@ -162,6 +162,16 @@ export const api = {
     return request<MinimalPairsResponse>(`/api/pronunciation/minimal-pairs?${params}`);
   },
 
+  saveMinimalPairsResults: (results: { phoneme_contrast: string; word_a: string; word_b: string; is_correct: boolean }[]) =>
+    request<{ saved: number }>('/api/pronunciation/minimal-pairs/results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ results }),
+    }),
+
+  getMinimalPairsStats: (limit = 20) =>
+    request<PhonemeContrastStat[]>(`/api/pronunciation/minimal-pairs/stats?limit=${limit}`),
+
   generateListeningQuiz: (difficulty: string = 'intermediate', questionCount = 5) =>
     request<ListeningQuizResponse>(`/api/pronunciation/listening-quiz?difficulty=${difficulty}&question_count=${questionCount}`, { method: 'POST' }),
 
@@ -576,6 +586,13 @@ export interface MinimalPairItem {
 export interface MinimalPairsResponse {
   pairs: MinimalPairItem[];
   total: number;
+}
+
+export interface PhonemeContrastStat {
+  phoneme_contrast: string;
+  attempts: number;
+  correct: number;
+  accuracy: number;
 }
 
 export async function getPronunciationWeeklyProgress(weeks?: number): Promise<WeeklyProgressResponse> {

@@ -749,3 +749,44 @@ def get_minimal_pairs(
             "play_word": play_word,
         })
     return result
+
+
+async def save_minimal_pairs_results(
+    db: aiosqlite.Connection,
+    results: list[dict[str, Any]],
+) -> int:
+    """Batch-insert minimal pairs exercise results. Returns number of rows inserted."""
+    if not results:
+        return 0
+    await db.executemany(
+        "INSERT INTO minimal_pairs_results (phoneme_contrast, word_a, word_b, is_correct) VALUES (?, ?, ?, ?)",
+        [(r["phoneme_contrast"], r["word_a"], r["word_b"], int(r["is_correct"])) for r in results],
+    )
+    await db.commit()
+    return len(results)
+
+
+async def get_phoneme_contrast_stats(
+    db: aiosqlite.Connection,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    """Return per-phoneme-contrast accuracy aggregated across all sessions."""
+    rows = await db.execute_fetchall(
+        """SELECT phoneme_contrast,
+                  COUNT(*) AS attempts,
+                  SUM(is_correct) AS correct
+           FROM minimal_pairs_results
+           GROUP BY phoneme_contrast
+           ORDER BY CAST(SUM(is_correct) AS REAL) / COUNT(*) ASC
+           LIMIT ?""",
+        (limit,),
+    )
+    return [
+        {
+            "phoneme_contrast": r["phoneme_contrast"],
+            "attempts": r["attempts"],
+            "correct": r["correct"],
+            "accuracy": round(r["correct"] / r["attempts"] * 100, 1) if r["attempts"] else 0,
+        }
+        for r in rows
+    ]

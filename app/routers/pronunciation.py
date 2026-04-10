@@ -525,6 +525,45 @@ async def get_minimal_pairs(
     return {"pairs": pairs, "total": len(pairs)}
 
 
+class MinimalPairsResultItem(BaseModel):
+    phoneme_contrast: str
+    word_a: str
+    word_b: str
+    is_correct: bool
+
+
+class MinimalPairsResultsRequest(BaseModel):
+    results: list[MinimalPairsResultItem] = Field(..., min_length=1, max_length=30)
+
+
+@router.post("/minimal-pairs/results")
+async def save_minimal_pairs_results(
+    body: MinimalPairsResultsRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Save minimal pairs exercise results for tracking."""
+    count = await pron_dal.save_minimal_pairs_results(
+        db, [r.model_dump() for r in body.results]
+    )
+    return {"saved": count}
+
+
+class PhonemeContrastStat(BaseModel):
+    phoneme_contrast: str
+    attempts: int
+    correct: int
+    accuracy: float
+
+
+@router.get("/minimal-pairs/stats", response_model=list[PhonemeContrastStat])
+async def get_minimal_pairs_stats(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get per-phoneme-contrast accuracy stats across all sessions."""
+    return await pron_dal.get_phoneme_contrast_stats(db, limit=limit)
+
+
 class ListeningQuizQuestion(BaseModel):
     question: str
     options: list[str]
