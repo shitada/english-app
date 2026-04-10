@@ -2649,3 +2649,111 @@ All 6 new tests pass. Full suite:
 
 1019/1019! Commit and evaluate:
 
+● Commit iteration 342 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #342: Add integration tests for vocabulary drill, tiers, and sentence-craft endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 342
+  │ List directory app/routers
+  │   └ 7 files found
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L1:50 (48 lines read)
+
+Score: 7.95, KEEP.
+
+● Record iteration 342 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "342\t7757176\t2026-04-11\t20\t50\t45\t15\t130\t1019\t1019\tpass\t7.95\tkept\tAdd integration
+  │ tests for vocabulary drill, tiers, and sentence-craft endpoints\n" >> autoresearch/results.tsv
+  │ && date +%s
+  └ 2 lines...
+
+Iteration 343:
+
+● Proposer Propose iteration 343
+  │ Read DictationExercise.tsx
+  │   │ frontend/src/components/conversation/DictationExercise.tsx
+  │   └ L1:10 (10 lines read)
+  └ Read DictationExercise.tsx
+      │ frontend/src/components/conversation/DictationExercise.tsx
+      └ L63:78 (16 lines read)
+
+Interesting bug! Let me verify:
+
+● Check DictationExercise (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "handleSubmit\|checkDictation\|word_results"
+  │ frontend/src/components/conversation/DictationExercise.tsx | head -15
+  └ 4 lines...
+
+● See handleSubmit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '64,100p'
+  │ frontend/src/components/conversation/DictationExercise.tsx
+  └ 38 lines...
+
+Now let me check the backend endpoint:
+
+● Find API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "checkDictation\|dictation-check\|dictation_check" frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● See API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '760,790p' frontend/src/api.ts
+  └ 32 lines...
+
+Good — the API function exists. Let me wire it up. I need to make the handleSubmit async and call checkDictation:
+
+● See imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,15p'
+  │ frontend/src/components/conversation/DictationExercise.tsx
+  └ 16 lines...
+
+● See types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '16,30p'
+  │ frontend/src/components/conversation/DictationExercise.tsx
+  └ 16 lines...
+
+Now update the imports and handleSubmit:
+
+● Edit DictationExercise.tsx +1 -1
+  └ frontend/src/components/conversation/DictationExercise.tsx
+
+● Edit DictationExercise.tsx +19 -10
+  └ frontend/src/components/conversation/DictationExercise.tsx
+
+Now add the insertion/deletion edge case test:
+
+● Find dictation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "dictation"
+  │ tests/integration/test_pronunciation_api.py | head -10
+  └ 9 lines...
+
+● See last dictation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '673,690p'
+  │ tests/integration/test_pronunciation_api.py
+  └ 19 lines...
+
+● Edit test_pronunciation_api.py +34
+  └ tests/integration/test_pronunciation_api.py
+
+● Run dictation tests + TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_pronunciation_api.py -v -k "dictation" 2>&1 | tail -15 && cd frontend &&
+  │ npx tsc --noEmit 2>&1 | tail -3
+  └ 16 lines...
+
+All pass + TS pass. Full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+1021/1021! Commit and evaluate:
+

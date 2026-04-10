@@ -683,6 +683,40 @@ async def test_dictation_check_validation(client):
 
 
 @pytest.mark.integration
+async def test_dictation_check_insertion(client):
+    """Dictation check handles word insertion gracefully."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "I went to the store",
+            "user_typed_text": "I went the store",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_words"] == 5
+    # Missing "to" — should not score every remaining word wrong
+    assert data["correct_words"] >= 3
+    assert isinstance(data["word_results"], list)
+
+
+@pytest.mark.integration
+async def test_dictation_check_extra_words(client):
+    """Dictation check handles extra words in user input."""
+    resp = await client.post(
+        "/api/pronunciation/dictation-check",
+        json={
+            "reference_text": "The cat sat",
+            "user_typed_text": "The big cat sat down",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_words"] == 3
+    assert isinstance(data["word_results"], list)
+
+
+@pytest.mark.integration
 async def test_minimal_pairs_default(client):
     """GET /api/pronunciation/minimal-pairs returns pairs."""
     res = await client.get("/api/pronunciation/minimal-pairs")

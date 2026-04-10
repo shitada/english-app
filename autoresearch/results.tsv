@@ -341,3 +341,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 339	314980c	2026-04-11	25	45	45	15	130	1004	1004	pass	6.75	kept	Add adjustable playback speed control to Listening quiz page
 340	f3ead5c	2026-04-11	20	60	45	15	140	1013	1013	pass	8.1	kept	Add integration tests for 9 untested conversation router endpoints
 341	aa431b7	2026-04-11	25	120	45	30	220	1013	1013	pass	7.55	kept	Extract VocabDrillMode and VocabFlashcardMode from Vocabulary.tsx
+342	7757176	2026-04-11	20	50	45	15	130	1019	1019	pass	7.95	kept	Add integration tests for vocabulary drill, tiers, and sentence-craft endpoints

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Volume2, Headphones, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
-import { api } from '../../api';
+import { api, checkDictation } from '../../api';
 
 interface Phrase {
   text: string;
@@ -61,19 +61,28 @@ export function DictationExercise({ conversationId, tts }: Props) {
     }
   }, [phrases, currentIndex, tts]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const phrase = phrases[currentIndex];
-    const phraseWords = normalizeText(phrase.text).split(' ');
-    const userWords = normalizeText(userInput).split(' ');
-    let matches = 0;
-    const maxLen = Math.max(phraseWords.length, userWords.length);
-    for (let i = 0; i < maxLen; i++) {
-      if (phraseWords[i] && userWords[i] && phraseWords[i] === userWords[i]) {
-        matches++;
+    try {
+      const result = await checkDictation(phrase.text, userInput);
+      const accuracy = result.total_words > 0
+        ? Math.round((result.correct_words / result.total_words) * 100)
+        : 0;
+      setResults(prev => [...prev, { phrase: phrase.text, userInput, accuracy }]);
+    } catch {
+      // Fallback to client-side comparison if API fails
+      const phraseWords = normalizeText(phrase.text).split(' ');
+      const userWords = normalizeText(userInput).split(' ');
+      let matches = 0;
+      const maxLen = Math.max(phraseWords.length, userWords.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (phraseWords[i] && userWords[i] && phraseWords[i] === userWords[i]) {
+          matches++;
+        }
       }
+      const accuracy = Math.round((matches / phraseWords.length) * 100);
+      setResults(prev => [...prev, { phrase: phrase.text, userInput, accuracy }]);
     }
-    const accuracy = Math.round((matches / phraseWords.length) * 100);
-    setResults(prev => [...prev, { phrase: phrase.text, userInput, accuracy }]);
     setSubmitted(true);
   }, [phrases, currentIndex, userInput]);
 
