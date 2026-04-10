@@ -314,11 +314,3 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 312	081c15a	2026-04-08	126	274	688	95	909	906	906	pass	6.9	KEPT	Add daily challenge card on Home page with personalized task
 313	11972c5	2026-04-09	107	214	564	68	632	906	906	pass	7.40	KEPT	Add word-of-the-day card on Home page with TTS and practice link
 314	847cb76	2026-04-09	155	181	630	89	874	906	906	pass	7.2	KEPT	Add bookmarks review panel to Conversation page
-315	ec2dbea	2026-04-10	108	454	16	210	788	934	934	pass	7.8	KEPT	Add rephrase challenge exercise to conversation summary
-316	f940363	2026-04-10	146	188	333	120	667	938	938	pass	6.1	KEPT	Add listening comprehension quiz as standalone page
-317	2289c16	2026-04-10	125	172	176	90	473	939	939	pass	6.4	KEPT	Add skill radar chart on Dashboard showing 5-axis strength
-318	db80a13	2026-04-10	120	133	132	80	385	939	939	pass	6.45	KEPT	Add streak milestones celebration card with animations on Home page
-319	e7e7b0a	2025-04-10	30	300	60	30	420	942	942	pass	6.4	KEPT	Add quick-speak warm-up exercise with 30-second timer
-320	f7b894d	2025-04-10	30	240	60	30	360	943	943	pass	7.0	KEPT	Add vocabulary progress card with per-topic mastery on Home page
-321	83ba399	2025-04-10	30	300	60	30	420	949	949	pass	7.55	KEPT	Add recently practiced section on Home page
-322	7f01255	2025-04-10	30	360	60	30	480	952	952	pass	7.0	KEPT	Add speaking pace analysis with WPM tracking in conversation

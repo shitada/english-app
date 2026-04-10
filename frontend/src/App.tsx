@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router
 import { Moon, Sun } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 import RetryBanner from './components/RetryBanner';
+import StudyTimer from './components/StudyTimer';
 import { useTheme } from './hooks/useTheme';
 import { useHealthCheck } from './hooks/useHealthCheck';
 import type { HealthStatus } from './hooks/useHealthCheck';
@@ -83,6 +84,7 @@ export default function App() {
             </Routes>
           </ErrorBoundary>
         </main>
+        <StudyTimer />
       </div>
     </BrowserRouter>
   );

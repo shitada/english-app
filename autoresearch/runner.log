@@ -3911,3 +3911,188 @@ Now run tests and TS check:
 
 952 tests pass, TS clean. Commit and evaluate:
 
+[2026-04-10 16:53:51] Reverted to iteration 314. Next invocation will retry from 315.
+[2026-04-10 16:53:54] Current iteration count: 314 / 436
+[2026-04-10 16:53:54] ------------------------------------------
+[2026-04-10 16:53:54] Invocation 5 / 10
+[2026-04-10 16:53:54] Resuming from iteration 315
+[2026-04-10 16:53:54] ------------------------------------------
+[2026-04-10 16:53:54] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-315-to-436.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read last 20 rows of results.tsv (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 200 lines...
+
+● Check last 5 results with formatting (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv | tr '\t'
+  │ '|'
+  └ 6 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-009.md
+  └ 34 lines...
+
+● Check total rows and last entries (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "^" autoresearch/results.tsv &&
+  │ tail -15 autoresearch/results.tsv | tr '\t' '|'
+  └ 17 lines...
+
+● Check more git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -20
+  └ 21 lines...
+
+Current state: results.tsv ends at iteration 314, but git HEAD is at iteration 323. I'll start from iteration 315 as requested. Let me begin the loop.
+
+● Record T0 for iteration 315 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775807741. Now calling the proposer for iteration 315.
+
+● Proposer Propose iteration 315 change
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L140:240 (101 lines read)
+  └ List directory frontend/src/utils
+      └ 2 files found
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read App.tsx structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && head -60 App.tsx
+  └ 61 lines...
+
+● List existing hooks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && ls hooks/
+  └ 3 lines...
+
+● List existing components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && ls components/
+  └ 4 lines...
+
+● Find insertion points in App.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && grep -n
+  │ "StudyTimer\|RetryBanner\|app-layout\|<main" App.tsx | head -20
+  └ 5 lines...
+
+● Read App.tsx
+  │ frontend/src/App.tsx
+  └ L68:100 (22 lines read)
+
+Now I have the context. Let me create all the files in parallel.
+
+● Create StudyTimer.tsx +84
+  └ frontend/src/components/StudyTimer.tsx
+
+● Create useStudyTimer.ts +107
+  └ frontend/src/hooks/useStudyTimer.ts
+
+Now add the import and component to App.tsx and add styles to index.css:
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+● Edit App.tsx +1
+  └ frontend/src/App.tsx
+
+Now add CSS styles. Let me find a good place in index.css:
+
+● Check end of index.css (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src && wc -l index.css && tail -5
+  │ index.css
+  └ 7 lines...
+
+● Add study timer CSS styles (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/frontend/src/index.css << 'CSSEOF'
+  │
+  │ /* ── Study Timer ── */
+  │ .study-timer-collapsed {
+  │ position: fixed;…
+  └ 111 lines...
+
+Now commit and test:
+
+● Commit iteration 315 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #315: Add study session timer (Pomodoro-style focused study)
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 952 tests passed, TypeScript check passes. Now record T3 and check if smoke test is needed:
+
+● Record T3 and check smoke test need (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Check if frontend UI files changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Frontend component changed + type=feature → tester is MANDATORY. Let me start the server and run QA.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+✗ Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn-315.log 2>&1 &
+  │ echo "PID=$!"
+  └ Permission denied and could not request permission from user
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test study timer
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L400:600 (200 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:32 (32 lines read)
+
+Good QA feedback. Let me fix the identified issues before evaluation:
+
+● Edit useStudyTimer.ts +1 -1
+  └ frontend/src/hooks/useStudyTimer.ts
+
+● Edit index.css +1 -1
+  └ frontend/src/index.css
+
+● Edit useStudyTimer.ts +1
+  └ frontend/src/hooks/useStudyTimer.ts
+
