@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Volume2, Copy, Download, Share2 } from 'lucide-react';
-import type { GrammarFeedback, ConversationQuizQuestion } from '../../api';
-import { api } from '../../api';
+import { useState, useEffect } from 'react';
+import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown } from 'lucide-react';
+import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
+import { api, getSessionAverages } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
@@ -59,6 +59,11 @@ export function ConversationSummary({
   speechRecognition,
 }: ConversationSummaryProps) {
   const [copied, setCopied] = useState(false);
+  const [averages, setAverages] = useState<SessionAveragesResponse | null>(null);
+
+  useEffect(() => {
+    getSessionAverages().then(setAverages).catch(() => {});
+  }, []);
 
   function formatSummaryText(): string {
     const lines: string[] = ['📝 English Practice Session', ''];
@@ -218,6 +223,56 @@ export function ConversationSummary({
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Pace Trend</div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* vs. Your Average comparison */}
+      {summary.performance && averages && averages.session_count > 0 && (
+        <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+          <h4 style={{ marginBottom: 10, fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>
+            vs. Your Average ({averages.session_count} sessions)
+          </h4>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {summary.performance.grammar_accuracy_rate > 0 && (() => {
+              const diff = summary.performance.grammar_accuracy_rate - averages.avg_grammar_accuracy_rate;
+              const improving = diff > 1;
+              const declining = diff < -1;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                  {improving ? <TrendingUp size={14} color="var(--success, #22c55e)" /> : declining ? <TrendingDown size={14} color="var(--danger, #ef4444)" /> : null}
+                  <span style={{ color: improving ? 'var(--success, #22c55e)' : declining ? 'var(--danger, #ef4444)' : 'var(--text-secondary)' }}>
+                    Grammar: {diff > 0 ? '+' : ''}{diff.toFixed(0)}% vs avg
+                  </span>
+                </div>
+              );
+            })()}
+            {summary.performance.avg_words_per_message > 0 && (() => {
+              const diff = summary.performance.avg_words_per_message - averages.avg_avg_words_per_message;
+              const improving = diff > 0.5;
+              const declining = diff < -0.5;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                  {improving ? <TrendingUp size={14} color="var(--success, #22c55e)" /> : declining ? <TrendingDown size={14} color="var(--danger, #ef4444)" /> : null}
+                  <span style={{ color: improving ? 'var(--success, #22c55e)' : declining ? 'var(--danger, #ef4444)' : 'var(--text-secondary)' }}>
+                    Words/msg: {diff > 0 ? '+' : ''}{diff.toFixed(1)} vs avg
+                  </span>
+                </div>
+              );
+            })()}
+            {summary.performance.vocabulary_diversity > 0 && (() => {
+              const diff = summary.performance.vocabulary_diversity - averages.avg_vocabulary_diversity;
+              const improving = diff > 1;
+              const declining = diff < -1;
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                  {improving ? <TrendingUp size={14} color="var(--success, #22c55e)" /> : declining ? <TrendingDown size={14} color="var(--danger, #ef4444)" /> : null}
+                  <span style={{ color: improving ? 'var(--success, #22c55e)' : declining ? 'var(--danger, #ef4444)' : 'var(--text-secondary)' }}>
+                    Vocab diversity: {diff > 0 ? '+' : ''}{diff.toFixed(0)}% vs avg
+                  </span>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

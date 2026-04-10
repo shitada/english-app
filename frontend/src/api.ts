@@ -1108,3 +1108,17 @@ export interface EtymologyResponse {
 export async function getWordEtymology(wordId: number): Promise<EtymologyResponse> {
   return request<EtymologyResponse>(`/api/vocabulary/${wordId}/etymology`);
 }
+
+// ── Session Averages ────────────────────────────────────
+
+export interface SessionAveragesResponse {
+  session_count: number;
+  avg_grammar_accuracy_rate: number;
+  avg_avg_words_per_message: number;
+  avg_vocabulary_diversity: number;
+  avg_total_user_messages: number;
+}
+
+export async function getSessionAverages(): Promise<SessionAveragesResponse> {
+  return request<SessionAveragesResponse>('/api/conversation/session-averages');
+}

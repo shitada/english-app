@@ -28,6 +28,7 @@ from app.dal.conversation import (
     get_grammar_accuracy,
     get_rephrase_sentences,
     get_shadowing_phrases,
+    get_historical_session_averages,
     get_topic_recommendations,
     list_conversations,
     toggle_message_bookmark,
@@ -1208,3 +1209,44 @@ class TestSpeakingPaceMetrics:
         await add_message(test_db, cid, "user", "Hello there")
         metrics = await get_conversation_metrics(test_db, cid)
         assert metrics["speaking_pace_wpm"] == 0
+
+
+@pytest.mark.unit
+class TestHistoricalSessionAverages:
+    async def test_no_past_sessions_returns_zeros(self, test_db):
+        result = await get_historical_session_averages(test_db)
+        assert result["session_count"] == 0
+        assert result["avg_grammar_accuracy_rate"] == 0
+
+    async def test_single_session_returns_its_values(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        perf = {"grammar_accuracy_rate": 80, "avg_words_per_message": 10, "vocabulary_diversity": 50, "total_user_messages": 5}
+        await end_conversation(test_db, cid, summary={"summary": "Good", "performance": perf})
+        result = await get_historical_session_averages(test_db)
+        assert result["session_count"] == 1
+        assert result["avg_grammar_accuracy_rate"] == 80
+        assert result["avg_avg_words_per_message"] == 10
+
+    async def test_multiple_sessions_computes_averages(self, test_db):
+        for acc in [60, 80, 100]:
+            cid = await create_conversation(test_db, "hotel_checkin")
+            perf = {"grammar_accuracy_rate": acc, "avg_words_per_message": 10, "vocabulary_diversity": 50, "total_user_messages": 5}
+            await end_conversation(test_db, cid, summary={"summary": "OK", "performance": perf})
+        result = await get_historical_session_averages(test_db)
+        assert result["session_count"] == 3
+        assert result["avg_grammar_accuracy_rate"] == 80.0
+
+    async def test_exclude_id_parameter(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid1, summary={"summary": "A", "performance": {"grammar_accuracy_rate": 100, "avg_words_per_message": 10, "vocabulary_diversity": 50, "total_user_messages": 5}})
+        cid2 = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid2, summary={"summary": "B", "performance": {"grammar_accuracy_rate": 60, "avg_words_per_message": 10, "vocabulary_diversity": 50, "total_user_messages": 5}})
+        result = await get_historical_session_averages(test_db, exclude_id=cid2)
+        assert result["session_count"] == 1
+        assert result["avg_grammar_accuracy_rate"] == 100.0
+
+    async def test_handles_malformed_summary(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary="not a dict")
+        result = await get_historical_session_averages(test_db)
+        assert result["session_count"] == 0

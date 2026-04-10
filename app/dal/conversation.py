@@ -851,3 +851,47 @@ async def get_rephrase_sentences(
                     return sentences
 
     return sentences
+
+
+async def get_historical_session_averages(
+    db: aiosqlite.Connection, *, exclude_id: int | None = None
+) -> dict[str, Any]:
+    """Compute average performance metrics from past ended conversations."""
+    query = """
+        SELECT id, summary_json FROM conversations
+        WHERE status = 'ended' AND summary_json IS NOT NULL
+        ORDER BY ended_at DESC LIMIT 20
+    """
+    rows = await db.execute_fetchall(query)
+
+    totals: dict[str, float] = {
+        "grammar_accuracy_rate": 0,
+        "avg_words_per_message": 0,
+        "vocabulary_diversity": 0,
+        "total_user_messages": 0,
+    }
+    count = 0
+
+    for row in rows:
+        if exclude_id and row["id"] == exclude_id:
+            continue
+        try:
+            summary = json.loads(row["summary_json"]) if isinstance(row["summary_json"], str) else row["summary_json"]
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(summary, dict):
+            continue
+        perf = summary.get("performance")
+        if not isinstance(perf, dict):
+            continue
+        count += 1
+        for key in totals:
+            totals[key] += float(perf.get(key, 0))
+
+    if count == 0:
+        return {"session_count": 0, **{f"avg_{k}": 0 for k in totals}}
+
+    return {
+        "session_count": count,
+        **{f"avg_{k}": round(totals[k] / count, 1) for k in totals},
+    }

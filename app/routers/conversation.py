@@ -873,3 +873,19 @@ async def evaluate_rephrase(
         "overall_score": min(10, max(1, float(result.get("overall_score", 5)))),
         "feedback": str(result.get("feedback", "")),
     }
+
+
+class SessionAveragesResponse(BaseModel):
+    session_count: int
+    avg_grammar_accuracy_rate: float
+    avg_avg_words_per_message: float
+    avg_vocabulary_diversity: float
+    avg_total_user_messages: float
+
+
+@router.get("/session-averages", response_model=SessionAveragesResponse)
+async def get_session_averages(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get historical average performance metrics across past sessions."""
+    return await conv_dal.get_historical_session_averages(db)
