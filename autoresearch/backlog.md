@@ -178,7 +178,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [NEW] Features from Iteration 315+
 
 - [x] Add rephrase challenge exercise to conversation summary (#315)
-- [ ] Add listening comprehension quiz as standalone page
+- [x] Add listening comprehension quiz as standalone page (#316)
 - [ ] Add skill radar chart on Dashboard showing strength across speaking/listening/vocabulary/grammar/pronunciation
 - [ ] Add streak milestones celebration with animations on Home page
 - [ ] Add vocabulary progress card showing mastery percentage per topic on Home page

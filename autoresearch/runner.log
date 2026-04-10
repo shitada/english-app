@@ -2484,3 +2484,31 @@ Now add integration tests:
   │ @pytest.mark.integration…
   └ 57 lines...
 
+● Amend commit with bug fix and tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #316: Add listening comprehension quiz as standalone page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● Run tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+938 tests pass (up from 934). Now record the results:
+
+● T4 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Record iteration 316 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ N=316 && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ DATE=$(date +%Y-%m-%d) && \
+  │ T0=1775791645 && T1=1775791791 && T3=1775791979 && T4=1775792312 && \…
+  └ 12 lines...
+
+Good. Now update backlog and stop server:
+
