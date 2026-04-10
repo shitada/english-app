@@ -789,3 +789,120 @@ async def get_listening_quiz_history(
 ):
     """Get recent listening quiz results."""
     return await pron_dal.get_listening_quiz_history(db, limit=limit)
+
+
+# ── Response Drill ──────────────────────────────────────────
+
+class ResponseDrillPrompt(BaseModel):
+    situation: str
+    speaker_says: str
+    expected_response_type: str
+    difficulty: str
+
+
+class ResponseDrillPromptsResponse(BaseModel):
+    prompts: list[ResponseDrillPrompt]
+
+
+@router.get("/response-drill", response_model=ResponseDrillPromptsResponse)
+async def get_response_drill_prompts(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=6, ge=1, le=10),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate situational prompts for response speaking drill."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate {count} conversational situation prompts for a {difficulty}-level English learner.\n"
+        "Each prompt presents a real-life situation where someone says something and the learner must respond.\n"
+        "Return JSON with a 'prompts' array. Each item has:\n"
+        "- situation (string): brief setting (e.g., 'At a restaurant')\n"
+        "- speaker_says (string): what the other person says (1-2 sentences)\n"
+        "- expected_response_type (string): what kind of response is expected (e.g., 'ordering food', 'greeting')\n"
+        "- difficulty (string): the difficulty level\n"
+        "Use varied scenarios: hotel, restaurant, airport, doctor, shopping, workplace."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="response_drill",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    prompts = result.get("prompts", [])[:count]
+    return {
+        "prompts": [
+            {
+                "situation": str(p.get("situation", "General")),
+                "speaker_says": str(p.get("speaker_says", "Hello, how can I help you?")),
+                "expected_response_type": str(p.get("expected_response_type", "reply")),
+                "difficulty": difficulty,
+            }
+            for p in prompts
+        ]
+    }
+
+
+class ResponseDrillEvalRequest(BaseModel):
+    situation: str = Field(min_length=1, max_length=500)
+    speaker_says: str = Field(min_length=1, max_length=500)
+    user_response: str = Field(min_length=1, max_length=2000)
+
+
+class ResponseDrillEvalResponse(BaseModel):
+    appropriateness_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    model_response: str
+
+
+@router.post("/response-drill/evaluate", response_model=ResponseDrillEvalResponse)
+async def evaluate_response_drill(
+    req: ResponseDrillEvalRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's spoken response to a situational prompt."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Situation: {req.situation}\n"
+        f"Speaker says: \"{req.speaker_says}\"\n"
+        f"User responded: \"{req.user_response}\"\n\n"
+        "Evaluate the user's response. Return JSON with:\n"
+        "- appropriateness_score (number 1-10): how appropriate/relevant is the response\n"
+        "- grammar_score (number 1-10): grammar correctness\n"
+        "- naturalness_score (number 1-10): how natural the response sounds\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback\n"
+        "- model_response (string): an example of a natural response"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach evaluating conversational responses. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="response_drill_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "appropriateness_score": clamp(result.get("appropriateness_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_response": str(result.get("model_response", "")),
+    }

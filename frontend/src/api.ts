@@ -1152,3 +1152,37 @@ export async function saveListeningQuizResult(data: {
 export async function getListeningQuizHistory(limit = 20): Promise<ListeningQuizResult[]> {
   return request<ListeningQuizResult[]>('/api/pronunciation/listening-quiz/history?limit=' + limit);
 }
+
+// ── Response Drill ────────────────────────────────────
+
+export interface ResponseDrillPrompt {
+  situation: string;
+  speaker_says: string;
+  expected_response_type: string;
+  difficulty: string;
+}
+
+export interface ResponseDrillEvaluation {
+  appropriateness_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_response: string;
+}
+
+export async function getResponseDrillPrompts(difficulty = 'intermediate', count = 6): Promise<{ prompts: ResponseDrillPrompt[] }> {
+  return request<{ prompts: ResponseDrillPrompt[] }>('/api/pronunciation/response-drill?difficulty=' + difficulty + '&count=' + count);
+}
+
+export async function evaluateResponseDrill(data: {
+  situation: string;
+  speaker_says: string;
+  user_response: string;
+}): Promise<ResponseDrillEvaluation> {
+  return request<ResponseDrillEvaluation>('/api/pronunciation/response-drill/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

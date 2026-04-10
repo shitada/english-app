@@ -933,3 +933,46 @@ async def test_listening_quiz_history_populated(client):
     titles = {d["title"] for d in data}
     assert "Hotel" in titles
     assert "Airport" in titles
+
+
+@pytest.mark.integration
+async def test_response_drill_prompts(client, mock_copilot):
+    """Response drill returns situational prompts."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "prompts": [
+            {"situation": "At a hotel", "speaker_says": "Welcome!", "expected_response_type": "greeting", "difficulty": "beginner"},
+            {"situation": "Restaurant", "speaker_says": "Ready to order?", "expected_response_type": "ordering", "difficulty": "beginner"},
+        ]
+    })
+    res = await client.get("/api/pronunciation/response-drill?difficulty=beginner&count=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["prompts"]) == 2
+    assert data["prompts"][0]["situation"] == "At a hotel"
+
+
+@pytest.mark.integration
+async def test_response_drill_evaluate(client, mock_copilot):
+    """Response drill evaluation returns scores."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "appropriateness_score": 8, "grammar_score": 7, "naturalness_score": 7,
+        "overall_score": 7.5, "feedback": "Good response!", "model_response": "Hello, I have a reservation.",
+    })
+    res = await client.post("/api/pronunciation/response-drill/evaluate", json={
+        "situation": "At a hotel", "speaker_says": "Welcome! Do you have a reservation?",
+        "user_response": "Yes I have reservation.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 7.5
+    assert data["feedback"] == "Good response!"
+    assert "model_response" in data
+
+
+@pytest.mark.integration
+async def test_response_drill_evaluate_validation(client):
+    """Empty user_response is rejected."""
+    res = await client.post("/api/pronunciation/response-drill/evaluate", json={
+        "situation": "Hotel", "speaker_says": "Welcome!", "user_response": "",
+    })
+    assert res.status_code == 422
