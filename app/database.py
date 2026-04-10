@@ -107,6 +107,16 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     value TEXT NOT NULL,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS listening_quiz_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    difficulty TEXT NOT NULL,
+    total_questions INTEGER NOT NULL,
+    correct_count INTEGER NOT NULL,
+    score REAL NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------
@@ -205,6 +215,18 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on minimal_pairs_results created_at",
         "CREATE INDEX IF NOT EXISTS idx_mp_results_created ON minimal_pairs_results(created_at DESC)",
+    ),
+    (
+        "create listening_quiz_results table",
+        """CREATE TABLE IF NOT EXISTS listening_quiz_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            difficulty TEXT NOT NULL,
+            total_questions INTEGER NOT NULL,
+            correct_count INTEGER NOT NULL,
+            score REAL NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
     ),
 ]
 

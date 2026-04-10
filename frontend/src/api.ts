@@ -1122,3 +1122,33 @@ export interface SessionAveragesResponse {
 export async function getSessionAverages(): Promise<SessionAveragesResponse> {
   return request<SessionAveragesResponse>('/api/conversation/session-averages');
 }
+
+// ── Listening Quiz History ────────────────────────────────────
+
+export interface ListeningQuizResult {
+  id: number;
+  title: string;
+  difficulty: string;
+  total_questions: number;
+  correct_count: number;
+  score: number;
+  created_at: string;
+}
+
+export async function saveListeningQuizResult(data: {
+  title: string;
+  difficulty: string;
+  total_questions: number;
+  correct_count: number;
+  score: number;
+}): Promise<{ id: number; message: string }> {
+  return request<{ id: number; message: string }>('/api/pronunciation/listening-quiz/results', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getListeningQuizHistory(limit = 20): Promise<ListeningQuizResult[]> {
+  return request<ListeningQuizResult[]>('/api/pronunciation/listening-quiz/history?limit=' + limit);
+}

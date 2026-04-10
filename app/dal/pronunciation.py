@@ -790,3 +790,33 @@ async def get_phoneme_contrast_stats(
         }
         for r in rows
     ]
+
+
+async def save_listening_quiz_result(
+    db: aiosqlite.Connection,
+    title: str,
+    difficulty: str,
+    total_questions: int,
+    correct_count: int,
+    score: float,
+) -> int:
+    """Save a listening quiz result and return the ID."""
+    cursor = await db.execute(
+        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score)
+           VALUES (?, ?, ?, ?, ?)""",
+        (title, difficulty, total_questions, correct_count, score),
+    )
+    await db.commit()
+    return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def get_listening_quiz_history(
+    db: aiosqlite.Connection, *, limit: int = 20
+) -> list[dict[str, Any]]:
+    """Get recent listening quiz results ordered by most recent."""
+    rows = await db.execute_fetchall(
+        """SELECT id, title, difficulty, total_questions, correct_count, score, created_at
+           FROM listening_quiz_results ORDER BY created_at DESC LIMIT ?""",
+        (limit,),
+    )
+    return [dict(r) for r in rows]

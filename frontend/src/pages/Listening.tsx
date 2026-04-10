@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
-import { api } from '../api';
-import type { ListeningQuizQuestion } from '../api';
+import { useState, useCallback, useEffect } from 'react';
+import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from 'lucide-react';
+import { api, saveListeningQuizResult, getListeningQuizHistory } from '../api';
+import type { ListeningQuizQuestion, ListeningQuizResult } from '../api';
 
 type Phase = 'setup' | 'listen' | 'quiz' | 'results';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
@@ -28,6 +28,13 @@ export default function Listening() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [answered, setAnswered] = useState(false);
   const [results, setResults] = useState<QuizResult[]>([]);
+  const [history, setHistory] = useState<ListeningQuizResult[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    getListeningQuizHistory(10).then(setHistory).catch(() => {});
+  }, []);
 
   const generateQuiz = useCallback(async () => {
     setLoading(true);
@@ -80,8 +87,19 @@ export default function Listening() {
       setAnswered(false);
     } else {
       setPhase('results');
+      // Auto-save quiz result
+      const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length
+        + (selectedOption === questions[quizIndex]?.correct_answer ? 1 : 0);
+      const totalQ = questions.length;
+      const scoreVal = Math.round((correctCount / totalQ) * 100);
+      saveListeningQuizResult({
+        title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal,
+      }).then(() => {
+        setSaved(true);
+        getListeningQuizHistory(10).then(setHistory).catch(() => {});
+      }).catch(() => {});
     }
-  }, [quizIndex, questions.length]);
+  }, [quizIndex, questions, results, selectedOption, title, difficulty]);
 
   const handleRestart = useCallback(() => {
     setPhase('setup');
@@ -93,6 +111,7 @@ export default function Listening() {
     setSelectedOption(null);
     setAnswered(false);
     setResults([]);
+    setSaved(false);
     setError('');
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
@@ -134,6 +153,53 @@ export default function Listening() {
           >
             {loading ? 'Generating…' : 'Generate Quiz'}
           </button>
+          {history.length > 0 && (
+            <button
+              className="btn"
+              onClick={() => setShowHistory(v => !v)}
+              style={{ width: '100%', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            >
+              <History size={16} />
+              {showHistory ? 'Hide History' : 'View History'} ({history.length})
+            </button>
+          )}
+          {showHistory && history.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <h4 style={{ marginBottom: 8, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Recent Results</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {history.map(h => (
+                  <div key={h.id} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '8px 12px', borderRadius: 8,
+                    background: 'var(--bg-secondary, #f9fafb)', border: '1px solid var(--border, #e5e7eb)',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {h.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                        {h.difficulty} · {h.correct_count}/{h.total_questions} correct · {new Date(h.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div style={{
+                      fontSize: 18, fontWeight: 700, marginLeft: 12,
+                      color: h.score >= 80 ? 'var(--success, #22c55e)' : h.score >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)',
+                    }}>
+                      {h.score}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {history.length >= 3 && (() => {
+                const avg = Math.round(history.reduce((s, h) => s + h.score, 0) / history.length);
+                return (
+                  <div style={{ marginTop: 8, textAlign: 'center', fontSize: 13, color: 'var(--text-secondary)' }}>
+                    Average score: <strong style={{ color: avg >= 80 ? 'var(--success)' : avg >= 50 ? 'var(--warning)' : 'var(--danger)' }}>{avg}%</strong>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
 

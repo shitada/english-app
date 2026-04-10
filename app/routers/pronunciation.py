@@ -753,3 +753,39 @@ async def evaluate_quick_speak(
         "feedback": str(result.get("feedback", "")),
         "suggestions": [str(s) for s in result.get("suggestions", [])[:3]],
     }
+
+
+class ListeningQuizResultRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=500)
+    difficulty: str = Field(min_length=1, max_length=50)
+    total_questions: int = Field(ge=1, le=100)
+    correct_count: int = Field(ge=0)
+    score: float = Field(ge=0, le=100)
+
+
+class ListeningQuizResultResponse(BaseModel):
+    id: int
+    message: str
+
+
+@router.post("/listening-quiz/results", response_model=ListeningQuizResultResponse)
+async def save_listening_quiz_result(
+    req: ListeningQuizResultRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Save a listening quiz result."""
+    if req.correct_count > req.total_questions:
+        raise HTTPException(status_code=422, detail="correct_count cannot exceed total_questions")
+    result_id = await pron_dal.save_listening_quiz_result(
+        db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score
+    )
+    return {"id": result_id, "message": "Result saved"}
+
+
+@router.get("/listening-quiz/history")
+async def get_listening_quiz_history(
+    limit: int = Query(default=20, ge=1, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get recent listening quiz results."""
+    return await pron_dal.get_listening_quiz_history(db, limit=limit)

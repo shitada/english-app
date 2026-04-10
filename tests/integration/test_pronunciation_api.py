@@ -882,3 +882,54 @@ async def test_quick_speak_evaluate_validation(client):
         "prompt": "Test", "transcript": "", "duration_seconds": 10,
     })
     assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_save_listening_quiz_result(client):
+    """Saving a valid listening quiz result returns ID."""
+    res = await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "At the Airport", "difficulty": "beginner",
+        "total_questions": 5, "correct_count": 4, "score": 80,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["id"] >= 1
+    assert data["message"] == "Result saved"
+
+
+@pytest.mark.integration
+async def test_save_listening_quiz_result_validation(client):
+    """correct_count > total_questions is rejected."""
+    res = await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "Test", "difficulty": "beginner",
+        "total_questions": 3, "correct_count": 5, "score": 100,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_listening_quiz_history_empty(client):
+    """Empty history returns empty list."""
+    res = await client.get("/api/pronunciation/listening-quiz/history")
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+@pytest.mark.integration
+async def test_listening_quiz_history_populated(client):
+    """Saved results appear in history."""
+    await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "Hotel", "difficulty": "intermediate",
+        "total_questions": 5, "correct_count": 3, "score": 60,
+    })
+    await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "Airport", "difficulty": "advanced",
+        "total_questions": 5, "correct_count": 5, "score": 100,
+    })
+    res = await client.get("/api/pronunciation/listening-quiz/history?limit=10")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 2
+    titles = {d["title"] for d in data}
+    assert "Hotel" in titles
+    assert "Airport" in titles
