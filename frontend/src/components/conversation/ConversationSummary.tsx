@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
 import { api, getSessionAverages } from '../../api';
 import { ConversationQuiz } from './ConversationQuiz';
@@ -8,6 +8,7 @@ import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
 import { ClozeExercise } from './ClozeExercise';
 import { RephraseChallenge } from './RephraseChallenge';
+import { ShareCard } from './ShareCard';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -59,6 +60,7 @@ export function ConversationSummary({
   speechRecognition,
 }: ConversationSummaryProps) {
   const [copied, setCopied] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [averages, setAverages] = useState<SessionAveragesResponse | null>(null);
 
   useEffect(() => {
@@ -397,9 +399,25 @@ export function ConversationSummary({
         onStart={onStartQuiz}
       />
 
+      {/* Share Card Preview */}
+      {showShareCard && (
+        <div style={{ marginBottom: 16 }}>
+          <ShareCard summary={summary} />
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12 }}>
         <button className="btn btn-primary" onClick={onNewConversation}>
           Start New Conversation
+        </button>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowShareCard(v => !v)}
+          aria-label={showShareCard ? 'Hide share card' : 'Show share card'}
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          {showShareCard ? <EyeOff size={16} /> : <Eye size={16} />}
+          {showShareCard ? 'Hide Card' : 'Share Card'}
         </button>
         <button className="btn btn-secondary" onClick={handleCopy} aria-label="Copy summary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Copy size={16} />

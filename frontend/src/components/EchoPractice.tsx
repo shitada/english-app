@@ -17,7 +17,7 @@ interface SentenceResult {
 type Phase = 'idle' | 'playing' | 'recording' | 'evaluating' | 'result' | 'summary';
 
 /** Split passage into 4-6 meaningful sentences */
-function extractSentences(passage: string): string[] {
+export function extractSentences(passage: string): string[] {
   const raw = passage
     .replace(/([.!?])\s+/g, '$1|||')
     .split('|||')

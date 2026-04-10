@@ -1012,3 +1012,29 @@ async def test_message_returns_grammar_notes(client, mock_copilot):
     data = res.json()
     assert "grammar_notes" in data
     assert isinstance(data["grammar_notes"], list)
+
+
+@pytest.mark.asyncio
+async def test_export_includes_messages_structure(client, mock_copilot):
+    """Test export response includes messages with correct role/content structure."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to our hotel!")
+    start = await client.post("/api/conversation/start", json={
+        "topic": "hotel_checkin", "difficulty": "beginner"
+    })
+    cid = start.json()["conversation_id"]
+    mock_copilot.ask = AsyncMock(return_value="Your room is 101.")
+    await client.post("/api/conversation/message", json={
+        "conversation_id": cid, "content": "I have a reservation"
+    })
+    res = await client.get(f"/api/conversation/{cid}/export")
+    assert res.status_code == 200
+    data = res.json()
+    assert "messages" in data
+    for msg in data["messages"]:
+        assert "role" in msg
+        assert "content" in msg
+        assert msg["role"] in ("user", "assistant")
+        assert len(msg["content"]) > 0
+    roles = [m["role"] for m in data["messages"]]
+    assert "assistant" in roles
+    assert "user" in roles
