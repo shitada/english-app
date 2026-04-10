@@ -2812,3 +2812,56 @@ Now add CSS animations:
 
 Now commit and test:
 
+● Commit iteration 318 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #318: Add streak milestones celebration card with animations on Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests and TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5 && cd frontend && npx tsc --noEmit 2>&1 && echo "TS OK"
+  └ 7 lines...
+
+939 pass, TS OK. No backend changes so no smoke test needed. Frontend pages changed so must call tester:
+
+● T3 and check UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff HEAD~1 --name-only |
+  │ grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+● Start server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 5 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server up. Calling tester and evaluator:
+
+● Tester QA test iteration 318
+  └ Agent started in background with agent_id: tester-318. You can use read_agent...
+
+● Evaluator Evaluate iteration 318
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L350:550 (200 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L550:end (448 lines read)
+
+Evaluator: **6.45 — KEEP**. Recording results:
+
+● Record iteration 318 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T4=$(date +%s) && T0=1775792826 && T1=1775792946 && T3=1775793079 && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "318" "$(git rev-parse --short HEAD)" "$(date +%Y-%m-%d)" \
+  │ "$((T1-T0))" "$((T3-T1))" "$((T4-T3))" "80" "$((T4-T0))" \…
+  └ 6 lines...
+
