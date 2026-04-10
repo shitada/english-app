@@ -586,9 +586,13 @@ export async function getPronunciationWeeklyProgress(weeks?: number): Promise<We
 // Topic recommendations (from iteration 90)
 export interface TopicRecommendation {
   topic: string;
+  topic_id: string;
   session_count: number;
   last_practiced: string | null;
-  reason: "never_practiced" | "continue_practice";
+  accuracy: number | null;
+  reason: "never_practiced" | "continue_practice" | "low_accuracy";
+  reason_text: string;
+  priority: number;
 }
 
 export async function getTopicRecommendations(): Promise<TopicRecommendation[]> {

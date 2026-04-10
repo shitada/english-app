@@ -190,7 +190,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [ ] Add conversation summary export/sharing
 - [x] Add vocabulary word pronunciation practice (listen and repeat for word bank) (#318)
 - [ ] Add achievement badges/gamification system
-- [ ] Add spaced repetition visual progress for vocabulary flashcards
+- [x] Add spaced repetition visual progress for vocabulary flashcards (#319)
 - [ ] Add AI-powered conversation topic suggestions based on weak areas
 - [ ] Add pronunciation minimal pairs scoring improvement
 - [ ] Add vocabulary etymology/word origin information

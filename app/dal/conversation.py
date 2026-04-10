@@ -340,7 +340,7 @@ async def get_grammar_accuracy(
 async def get_topic_recommendations(
     db: aiosqlite.Connection, all_topics: list[str]
 ) -> list[dict[str, Any]]:
-    """Recommend conversation topics based on practice frequency."""
+    """Recommend conversation topics based on practice frequency and grammar accuracy."""
     rows = await db.execute_fetchall(
         """SELECT topic, COUNT(*) as session_count,
                   MAX(started_at) as last_practiced
@@ -348,30 +348,67 @@ async def get_topic_recommendations(
            GROUP BY topic"""
     )
     practiced = {row["topic"]: dict(row) for row in rows}
+
+    # Per-topic grammar accuracy
+    grammar_rows = await db.execute_fetchall(
+        """SELECT c.topic, m.feedback_json
+           FROM messages m
+           JOIN conversations c ON c.id = m.conversation_id
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+           LIMIT 5000"""
+    )
+    grammar_stats: dict[str, dict[str, int]] = {}
+    for row in grammar_rows:
+        topic = row["topic"]
+        try:
+            fb = json.loads(row["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(fb, dict):
+            continue
+        if topic not in grammar_stats:
+            grammar_stats[topic] = {"correct": 0, "total": 0}
+        grammar_stats[topic]["total"] += 1
+        if coerce_bool(fb.get("is_correct", False)):
+            grammar_stats[topic]["correct"] += 1
+
     recommendations = []
     for topic in all_topics:
-        if topic in practiced:
-            recommendations.append({
-                "topic": topic,
-                "session_count": practiced[topic]["session_count"],
-                "last_practiced": practiced[topic]["last_practiced"],
-                "reason": "continue_practice",
-            })
-        else:
+        gs = grammar_stats.get(topic, {"correct": 0, "total": 0})
+        accuracy = round(gs["correct"] / gs["total"] * 100) if gs["total"] > 0 else None
+
+        if topic not in practiced:
             recommendations.append({
                 "topic": topic,
                 "session_count": 0,
                 "last_practiced": None,
+                "accuracy": accuracy,
                 "reason": "never_practiced",
+                "reason_text": "You haven't tried this scenario yet",
+                "priority": 0,
             })
-    # Sort: never practiced first, then by fewest sessions, then oldest last_practiced
-    recommendations.sort(
-        key=lambda r: (
-            0 if r["reason"] == "never_practiced" else 1,
-            r["session_count"],
-            r["last_practiced"] or "",
-        )
-    )
+        elif accuracy is not None and accuracy < 70:
+            recommendations.append({
+                "topic": topic,
+                "session_count": practiced[topic]["session_count"],
+                "last_practiced": practiced[topic]["last_practiced"],
+                "accuracy": accuracy,
+                "reason": "low_accuracy",
+                "reason_text": f"Your grammar accuracy was {accuracy}% — try again to improve!",
+                "priority": 1,
+            })
+        else:
+            recommendations.append({
+                "topic": topic,
+                "session_count": practiced[topic]["session_count"],
+                "last_practiced": practiced[topic]["last_practiced"],
+                "accuracy": accuracy,
+                "reason": "continue_practice",
+                "reason_text": "Keep practicing to maintain your skills",
+                "priority": 2,
+            })
+
+    recommendations.sort(key=lambda r: (r["priority"], r.get("accuracy") or 999, r["session_count"]))
     return recommendations
 
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark } from 'lucide-react';
-import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation } from '../api';
+import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -60,6 +60,7 @@ export default function Conversation() {
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [favoriteTopics, setFavoriteTopics] = useState<Set<string>>(new Set());
+  const [topicSuggestions, setTopicSuggestions] = useState<TopicRecommendation[]>([]);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
   const [userRoleName, setUserRoleName] = useState('');
   const [roleBriefing, setRoleBriefing] = useState<string[]>([]);
@@ -238,6 +239,9 @@ export default function Conversation() {
       })
       .catch(() => {})
       .finally(() => setTopicsLoading(false));
+    getTopicRecommendations()
+      .then(recs => setTopicSuggestions(recs.filter(r => r.reason !== 'continue_practice').slice(0, 3)))
+      .catch(() => {});
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -551,6 +555,40 @@ export default function Conversation() {
                 ))}
               </div>
             ) : (
+              <>
+              {topicSuggestions.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{ fontSize: '1rem', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    💡 Suggested for You
+                  </h3>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {topicSuggestions.map(s => (
+                      <button
+                        key={s.topic_id}
+                        onClick={() => startConversation(s.topic_id)}
+                        style={{
+                          flex: '1 1 200px', maxWidth: 280, padding: '12px 16px', borderRadius: 12, cursor: 'pointer',
+                          border: '1px solid rgba(99,102,241,0.3)',
+                          background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.08))',
+                          color: 'var(--text)', textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 4 }}>
+                          {TOPIC_EMOJIS[s.topic_id] || '💬'} {s.topic}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          {s.reason === 'never_practiced' ? '✨' : '🎯'} {s.reason_text}
+                        </div>
+                        {s.accuracy != null && (
+                          <div style={{ fontSize: '0.75rem', color: s.accuracy < 50 ? 'var(--danger, #ef4444)' : 'var(--warning, #f59e0b)', marginTop: 4 }}>
+                            Grammar: {s.accuracy}%
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="topic-grid">
                 {sortedTopics.map((s) => {
                   const stats = topicStats[s.id];
@@ -603,6 +641,7 @@ export default function Conversation() {
                   );
                 })}
               </div>
+              </>
             )}
           </>
         )}
