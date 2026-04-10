@@ -2173,3 +2173,91 @@ I'll add a compact speed strip in the quiz phase header too:
   │ -q 2>&1 | tail -3
   └ 4 lines...
 
+● Commit iteration 339 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #339: Add adjustable playback speed control to Listening quiz page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && git rev-parse --short
+  │ HEAD
+  └ 16 lines...
+
+● Evaluator Evaluate iteration 339
+  │ Read session-iter-336-to-436.md
+  │   │ autoresearch/logs/session-iter-336-to-436.md
+  │   └ L1000:1500 (488 lines read)
+  └ Read session-iter-336-to-436.md
+      │ autoresearch/logs/session-iter-336-to-436.md
+      └ L1500:2000 (501 lines read)
+
+Score: 6.75, KEEP.
+
+● Record iteration 339 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ "339\t314980c\t2026-04-11\t25\t45\t45\t15\t130\t1004\t1004\tpass\t6.75\tkept\tAdd adjustable
+  │ playback speed control to Listening quiz page\n" >> autoresearch/results.tsv && date +%s
+  └ 2 lines...
+
+Iteration 340:
+
+● Proposer Propose iteration 340
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L400:500 (101 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L500:700 (201 lines read)
+
+● Find untested endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "router\.\(get\|post\|put\|delete\)" app/routers/conversation.py | grep -iE
+  │ "favorite|cleanup|shadowing|difficulty-rec|session-average" | head -10
+  └ 7 lines...
+
+● Check existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_"
+  │ tests/integration/test_conversation_api.py | wc -l && echo "---" && tail -5
+  │ tests/integration/test_conversation_api.py
+  └ 8 lines...
+
+Let me check the response models and endpoint implementations:
+
+● See endpoint implementations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '96,120p'
+  │ app/routers/conversation.py && echo "---" && sed -n '570,590p' app/routers/conversation.py &&
+  │ echo "---" && sed -n '690,720p' app/routers/conversation.py && echo "---" && sed -n '807,830p'
+  │ app/routers/conversation.py && echo "---" && sed -n '886,915p' app/routers/conversation.py
+  └ 112 lines...
+
+● See response models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B2 -A8 "class
+  │ DifficultyRecommendationResponse\|class SessionAveragesResponse\|class CleanupResponse"
+  │ app/routers/conversation.py
+  └ 34 lines...
+
+Now write the tests:
+
+● Edit test_conversation_api.py +93
+  └ tests/integration/test_conversation_api.py
+
+● Run new tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_conversation_api.py -v -k "favorites or cleanup or shadowing or
+  │ difficulty_rec or session_averages" 2>&1 | tail -20
+  └ 18 lines...
+
+Good — 6 pass. But I also have the toggle tests:
+
+● Run toggle tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_conversation_api.py -v -k "toggle" 2>&1 | tail -15
+  └ 15 lines...
+
+All 9 new tests pass. Run full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+1013/1013! Commit and evaluate:
+

@@ -1038,3 +1038,96 @@ async def test_export_includes_messages_structure(client, mock_copilot):
     roles = [m["role"] for m in data["messages"]]
     assert "assistant" in roles
     assert "user" in roles
+
+
+# ── Tests for untested conversation router endpoints ─────────────────
+
+
+@pytest.mark.integration
+async def test_favorites_empty(client):
+    """No favorites set returns empty list."""
+    res = await client.get("/api/conversation/topics/favorites")
+    assert res.status_code == 200
+    assert res.json()["favorites"] == []
+
+
+@pytest.mark.integration
+async def test_toggle_favorite_on(client):
+    """Toggle a valid topic to favorite."""
+    res = await client.put("/api/conversation/topics/hotel_checkin/favorite")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_favorite"] is True
+    # Verify it's in favorites list
+    res2 = await client.get("/api/conversation/topics/favorites")
+    assert "hotel_checkin" in res2.json()["favorites"]
+
+
+@pytest.mark.integration
+async def test_toggle_favorite_off(client):
+    """Toggle same topic twice unfavorites it."""
+    await client.put("/api/conversation/topics/hotel_checkin/favorite")
+    res = await client.put("/api/conversation/topics/hotel_checkin/favorite")
+    assert res.status_code == 200
+    assert res.json()["is_favorite"] is False
+
+
+@pytest.mark.integration
+async def test_toggle_favorite_invalid_topic(client):
+    """Invalid topic returns 404."""
+    res = await client.put("/api/conversation/topics/nonexistent_topic/favorite")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_cleanup_stale_no_stale(client):
+    """No stale conversations returns 0 abandoned."""
+    res = await client.post("/api/conversation/cleanup/stale")
+    assert res.status_code == 200
+    assert res.json()["abandoned_count"] == 0
+
+
+@pytest.mark.integration
+async def test_shadowing_phrases_not_found(client):
+    """Non-existent conversation returns 404."""
+    res = await client.get("/api/conversation/99999/shadowing-phrases")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_shadowing_phrases_returns_phrases(client, mock_copilot):
+    """Conversation with messages returns phrases."""
+    # Create conversation and add messages
+    create_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin", "difficulty": "beginner"})
+    cid = create_res.json()["conversation_id"]
+    await client.post(f"/api/conversation/{cid}/message", json={"content": "Hello, I would like to check in please."})
+    res = await client.get(f"/api/conversation/{cid}/shadowing-phrases")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversation_id"] == cid
+    assert isinstance(data["phrases"], list)
+
+
+@pytest.mark.integration
+async def test_difficulty_recommendation_empty(client):
+    """Difficulty recommendation on empty DB returns valid structure."""
+    res = await client.get("/api/conversation/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["current_difficulty"] in ("beginner", "intermediate", "advanced")
+    assert data["recommended_difficulty"] in ("beginner", "intermediate", "advanced")
+    assert isinstance(data["reason"], str)
+    assert isinstance(data["stats"], dict)
+
+
+@pytest.mark.integration
+async def test_session_averages_empty(client):
+    """Session averages on empty DB returns zeroed stats."""
+    res = await client.get("/api/conversation/session-averages")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["session_count"] == 0
+    assert data["avg_grammar_accuracy_rate"] == 0.0
+    assert data["avg_avg_words_per_message"] == 0.0
+    assert data["avg_vocabulary_diversity"] == 0.0
+    assert data["avg_total_user_messages"] == 0.0
