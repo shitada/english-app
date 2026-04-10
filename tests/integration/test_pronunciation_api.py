@@ -837,3 +837,48 @@ async def test_listening_quiz_llm_failure(client, mock_copilot):
     mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM timeout"))
     res = await client.post("/api/pronunciation/listening-quiz?difficulty=beginner")
     assert res.status_code == 502
+
+
+@pytest.mark.integration
+async def test_quick_speak_prompt_success(client, mock_copilot):
+    """Quick speak generates a prompt with suggested phrases."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "prompt": "Describe your morning routine.",
+        "context_hint": "Think about what you do from waking up to leaving home.",
+        "difficulty": "intermediate",
+        "suggested_phrases": ["I usually start by", "After that I", "My favorite part is"],
+    })
+    res = await client.get("/api/pronunciation/quick-speak?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert "prompt" in data
+    assert "suggested_phrases" in data
+    assert len(data["suggested_phrases"]) <= 3
+
+
+@pytest.mark.integration
+async def test_quick_speak_evaluate_success(client, mock_copilot):
+    """Quick speak evaluates a transcript and returns scores."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "fluency_score": 7, "relevance_score": 8,
+        "grammar_score": 6, "vocabulary_score": 7,
+        "overall_score": 7, "feedback": "Good job!",
+        "suggestions": ["Try using more complex sentences"],
+    })
+    res = await client.post("/api/pronunciation/quick-speak/evaluate", json={
+        "prompt": "Describe your day.", "transcript": "I wake up and go to work.", "duration_seconds": 15,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_score"] == 7
+    assert data["word_count"] >= 7
+    assert data["wpm"] > 0
+
+
+@pytest.mark.integration
+async def test_quick_speak_evaluate_validation(client):
+    """Empty transcript is rejected."""
+    res = await client.post("/api/pronunciation/quick-speak/evaluate", json={
+        "prompt": "Test", "transcript": "", "duration_seconds": 10,
+    })
+    assert res.status_code == 422

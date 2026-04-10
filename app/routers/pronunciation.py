@@ -601,3 +601,116 @@ async def generate_listening_quiz(
         raise HTTPException(status_code=502, detail="Failed to generate valid questions")
 
     return {"title": title, "passage": passage, "questions": validated}
+
+
+class QuickSpeakPromptResponse(BaseModel):
+    prompt: str
+    context_hint: str
+    difficulty: str
+    suggested_phrases: list[str]
+
+
+@router.get("/quick-speak", response_model=QuickSpeakPromptResponse)
+async def get_quick_speak_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a random situational speaking prompt for quick-speak warm-up."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a speaking prompt for a {difficulty}-level English learner.\n"
+        "Give them a topic to speak about for 30 seconds.\n"
+        "Return JSON with:\n"
+        "- prompt (string): the speaking topic/question (1-2 sentences)\n"
+        "- context_hint (string): brief context to help them get started (1 sentence)\n"
+        "- difficulty (string): the difficulty level\n"
+        "- suggested_phrases (array of 3 strings): useful phrases they could use"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="quick_speak_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "prompt": str(result.get("prompt", "Describe your typical day.")),
+        "context_hint": str(result.get("context_hint", "Think about what you do from morning to evening.")),
+        "difficulty": difficulty,
+        "suggested_phrases": [str(p) for p in result.get("suggested_phrases", [])[:3]],
+    }
+
+
+class QuickSpeakEvaluateRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=500)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class QuickSpeakEvaluateResponse(BaseModel):
+    fluency_score: float
+    relevance_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    word_count: int
+    wpm: float
+    feedback: str
+    suggestions: list[str]
+
+
+@router.post("/quick-speak/evaluate", response_model=QuickSpeakEvaluateResponse)
+async def evaluate_quick_speak(
+    body: QuickSpeakEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a quick-speak warm-up attempt."""
+    word_count = len(body.transcript.split())
+    wpm = round(word_count / (body.duration_seconds / 60), 1) if body.duration_seconds > 0 else 0
+
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Speaking prompt: \"{body.prompt}\"\n"
+        f"User's spoken transcript ({body.duration_seconds}s, {word_count} words, {wpm} WPM):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this speaking attempt. Return JSON with:\n"
+        "- fluency_score (1-10): flow and pace of speech\n"
+        "- relevance_score (1-10): how well they addressed the prompt\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- vocabulary_score (1-10): range and appropriateness of words\n"
+        "- overall_score (1-10): overall speaking quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- suggestions (array of 2 strings): specific improvement tips"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="quick_speak_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "fluency_score": clamp(result.get("fluency_score", 5)),
+        "relevance_score": clamp(result.get("relevance_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "word_count": word_count,
+        "wpm": wpm,
+        "feedback": str(result.get("feedback", "")),
+        "suggestions": [str(s) for s in result.get("suggestions", [])[:3]],
+    }

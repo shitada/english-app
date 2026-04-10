@@ -165,6 +165,15 @@ export const api = {
   generateListeningQuiz: (difficulty: string = 'intermediate', questionCount = 5) =>
     request<ListeningQuizResponse>(`/api/pronunciation/listening-quiz?difficulty=${difficulty}&question_count=${questionCount}`, { method: 'POST' }),
 
+  getQuickSpeakPrompt: (difficulty: string = 'intermediate') =>
+    request<{ prompt: string; context_hint: string; difficulty: string; suggested_phrases: string[] }>(`/api/pronunciation/quick-speak?difficulty=${difficulty}`),
+
+  evaluateQuickSpeak: (prompt: string, transcript: string, duration_seconds: number) =>
+    request<{ fluency_score: number; relevance_score: number; grammar_score: number; vocabulary_score: number; overall_score: number; word_count: number; wpm: number; feedback: string; suggestions: string[] }>('/api/pronunciation/quick-speak/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ prompt, transcript, duration_seconds }),
+    }),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
