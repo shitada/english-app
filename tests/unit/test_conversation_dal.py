@@ -26,6 +26,7 @@ from app.dal.conversation import (
     get_conversation_summary,
     get_conversation_vocabulary,
     get_grammar_accuracy,
+    get_rephrase_sentences,
     get_shadowing_phrases,
     get_topic_recommendations,
     list_conversations,
@@ -1084,6 +1085,55 @@ class TestGetShadowingPhrases:
         await add_message(test_db, cid, "assistant", "How can I help you today?")
         await add_message(test_db, cid, "assistant", "How can I help you today?")
         result = await get_shadowing_phrases(test_db, cid)
+        assert len(result) == 1
+
+
+@pytest.mark.unit
+class TestGetRephraseSentences:
+    async def test_nonexistent_conversation_returns_none(self, test_db):
+        result = await get_rephrase_sentences(test_db, 99999)
+        assert result is None
+
+    async def test_no_assistant_messages_returns_empty(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hi there.")
+        result = await get_rephrase_sentences(test_db, cid)
+        assert result == []
+
+    async def test_extracts_substantive_sentences(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(
+            test_db, cid, "assistant",
+            "Welcome to the Grand Hotel and thank you for choosing us. How can I help you with your reservation today?"
+        )
+        result = await get_rephrase_sentences(test_db, cid)
+        assert result is not None
+        assert len(result) >= 1
+        for s in result:
+            assert "text" in s
+            assert "word_count" in s
+            assert s["word_count"] >= 8
+
+    async def test_excludes_short_sentences(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Hi. Yes. Sure thing.")
+        result = await get_rephrase_sentences(test_db, cid)
+        assert result == []
+
+    async def test_respects_limit(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        long_text = ". ".join(
+            [f"This is a much longer sentence number {i} for rephrase testing purposes" for i in range(10)]
+        )
+        await add_message(test_db, cid, "assistant", long_text)
+        result = await get_rephrase_sentences(test_db, cid, limit=2)
+        assert len(result) <= 2
+
+    async def test_deduplicates_sentences(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome to the Grand Hotel and thank you for choosing us.")
+        await add_message(test_db, cid, "assistant", "Welcome to the Grand Hotel and thank you for choosing us.")
+        result = await get_rephrase_sentences(test_db, cid)
         assert len(result) == 1
 
 

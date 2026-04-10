@@ -5,6 +5,7 @@ import { CorrectionDrill } from './CorrectionDrill';
 import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
 import { ClozeExercise } from './ClozeExercise';
+import { RephraseChallenge } from './RephraseChallenge';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -235,6 +236,9 @@ export function ConversationSummary({
 
       {/* Cloze Exercise — fill in the blank for key phrases */}
       <ClozeExercise messages={messages} />
+
+      {/* Rephrase Challenge — say the same thing differently */}
+      {conversationId && <RephraseChallenge conversationId={conversationId} />}
 
       <ConversationQuiz
         questions={quizQuestions}

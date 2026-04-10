@@ -938,3 +938,56 @@ async def test_generate_quiz_truncates_to_count(client, mock_copilot):
     assert len(data["questions"]) == 3
     assert data["questions"][0]["question"] == "Q0?"
     assert data["questions"][2]["question"] == "Q2?"
+
+
+@pytest.mark.integration
+async def test_rephrase_sentences_not_found(client):
+    res = await client.get("/api/conversation/99999/rephrase-sentences")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_rephrase_sentences_returns_list(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(
+        return_value="Welcome to our hotel and thank you very much for choosing to stay with us today."
+    )
+    res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = res.json()["conversation_id"]
+
+    res = await client.get(f"/api/conversation/{conv_id}/rephrase-sentences")
+    assert res.status_code == 200
+    data = res.json()
+    assert "sentences" in data
+    assert data["conversation_id"] == conv_id
+    for s in data["sentences"]:
+        assert "text" in s
+        assert "word_count" in s
+
+
+@pytest.mark.integration
+async def test_rephrase_evaluate_success(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "meaning_preserved": True,
+        "naturalness_score": 8,
+        "variety_score": 7,
+        "overall_score": 7.5,
+        "feedback": "Good rephrase!",
+    })
+    res = await client.post("/api/conversation/rephrase-evaluate", json={
+        "original": "Welcome to the hotel.",
+        "user_rephrase": "Thanks for having me at the hotel.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["meaning_preserved"] is True
+    assert data["overall_score"] == 7.5
+    assert data["feedback"] == "Good rephrase!"
+
+
+@pytest.mark.integration
+async def test_rephrase_evaluate_validation(client):
+    res = await client.post("/api/conversation/rephrase-evaluate", json={
+        "original": "",
+        "user_rephrase": "Hello",
+    })
+    assert res.status_code == 422

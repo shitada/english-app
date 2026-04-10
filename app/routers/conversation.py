@@ -786,3 +786,66 @@ async def difficulty_recommendation(
 ):
     """Get a difficulty level recommendation based on recent performance."""
     return await conv_dal.get_difficulty_recommendation(db)
+
+
+@router.get("/{conversation_id}/rephrase-sentences")
+async def get_rephrase_sentences(
+    conversation_id: int = Path(ge=1),
+    limit: int = Query(5, ge=1, le=10),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Extract sentences suitable for rephrase practice from a conversation."""
+    sentences = await conv_dal.get_rephrase_sentences(db, conversation_id, limit=limit)
+    if sentences is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"conversation_id": conversation_id, "sentences": sentences}
+
+
+class RephraseEvaluateRequest(BaseModel):
+    original: str = Field(min_length=1, max_length=500)
+    user_rephrase: str = Field(min_length=1, max_length=500)
+
+
+class RephraseEvaluateResponse(BaseModel):
+    meaning_preserved: bool
+    naturalness_score: float
+    variety_score: float
+    overall_score: float
+    feedback: str
+
+
+@router.post("/rephrase-evaluate", response_model=RephraseEvaluateResponse)
+async def evaluate_rephrase(
+    body: RephraseEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's rephrase of a sentence using LLM."""
+    copilot = get_copilot_service()
+    prompt = (
+        f"Original sentence: \"{body.original}\"\n"
+        f"User's rephrase: \"{body.user_rephrase}\"\n\n"
+        "Evaluate the rephrase. Return JSON with:\n"
+        "- meaning_preserved (bool): does the rephrase keep the same meaning?\n"
+        "- naturalness_score (1-10): how natural does the rephrase sound?\n"
+        "- variety_score (1-10): how different is it from the original (word choice, structure)?\n"
+        "- overall_score (1-10): overall quality combining all factors\n"
+        "- feedback (string): brief encouraging feedback (1-2 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English teacher evaluating sentence rephrasing. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="rephrase_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Rephrase evaluation failed")
+
+    return {
+        "meaning_preserved": bool(result.get("meaning_preserved", False)),
+        "naturalness_score": min(10, max(1, float(result.get("naturalness_score", 5)))),
+        "variety_score": min(10, max(1, float(result.get("variety_score", 5)))),
+        "overall_score": min(10, max(1, float(result.get("overall_score", 5)))),
+        "feedback": str(result.get("feedback", "")),
+    }

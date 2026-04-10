@@ -9,4 +9,5 @@ export { CorrectionDrill } from './CorrectionDrill';
 export { DictationExercise } from './DictationExercise';
 export { ShadowingExercise } from './ShadowingExercise';
 export { ClozeExercise } from './ClozeExercise';
+export { RephraseChallenge } from './RephraseChallenge';
 export { PhaseTransition } from './PhaseTransition';

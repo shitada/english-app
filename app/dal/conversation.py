@@ -729,3 +729,38 @@ async def get_difficulty_recommendation(db: aiosqlite.Connection) -> dict[str, A
         "reason": reason,
         "stats": {"accuracy": avg_accuracy, "avg_words": avg_words, "sessions_analyzed": valid_count},
     }
+
+
+async def get_rephrase_sentences(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    limit: int = 5,
+) -> list[dict[str, Any]] | None:
+    """Extract substantive assistant sentences suitable for rephrasing practice."""
+    row = await db.execute_fetchall(
+        "SELECT id FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    if not row:
+        return None
+
+    rows = await db.execute_fetchall(
+        "SELECT content FROM messages WHERE conversation_id = ? AND role = 'assistant' ORDER BY id",
+        (conversation_id,),
+    )
+
+    sentences: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for r in rows:
+        content = r[0] if isinstance(r, (tuple, list)) else r["content"]
+        parts = re.split(r'(?<=[.!?])\s+', content.strip())
+        for s in parts:
+            s = s.strip()
+            word_count = len(s.split())
+            normalized = s.lower()
+            if 8 <= word_count <= 25 and normalized not in seen:
+                seen.add(normalized)
+                sentences.append({"text": s, "word_count": word_count})
+                if len(sentences) >= limit:
+                    return sentences
+
+    return sentences

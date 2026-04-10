@@ -123,6 +123,15 @@ export const api = {
   getShadowingPhrases: (conversation_id: number, limit = 6) =>
     request<{ conversation_id: number; phrases: { text: string; word_count: number }[] }>(`/api/conversation/${conversation_id}/shadowing-phrases?limit=${limit}`),
 
+  getRephraseSentences: (conversation_id: number, limit = 5) =>
+    request<{ conversation_id: number; sentences: { text: string; word_count: number }[] }>(`/api/conversation/${conversation_id}/rephrase-sentences?limit=${limit}`),
+
+  evaluateRephrase: (original: string, user_rephrase: string) =>
+    request<{ meaning_preserved: boolean; naturalness_score: number; variety_score: number; overall_score: number; feedback: string }>('/api/conversation/rephrase-evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ original, user_rephrase }),
+    }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';
