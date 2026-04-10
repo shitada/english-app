@@ -199,6 +199,8 @@ export const api = {
   // Dashboard
   getDashboardStats: () => request<DashboardStats>('/api/dashboard/stats'),
 
+  getSkillRadar: () => request<{ skills: { name: string; score: number; label: string }[] }>('/api/dashboard/skill-radar'),
+
   getActivityHistory: (days = 30) =>
     request<ActivityHistoryResponse>(`/api/dashboard/activity-history?days=${days}`),
 

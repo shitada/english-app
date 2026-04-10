@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, GrammarTrend, MistakeJournal, MistakeReviewDrill, SpeakingConfidence, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, GrammarTrend, MistakeJournal, MistakeReviewDrill, SkillsRadarChart, SpeakingConfidence, WeeklyReport } from '../components/dashboard';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -104,6 +104,9 @@ export default function Dashboard() {
         <StatCard icon={<BookOpen size={24} color="#10b981" />} label="Words Reviewed" value={stats.total_vocab_reviewed} sub={`${stats.vocab_mastered} mastered`} />
         <StatCard icon={<Clock size={24} color={stats.vocab_due_count > 0 ? '#ef4444' : '#6b7280'} />} label="Due for Review" value={stats.vocab_due_count} sub={stats.vocab_due_count > 0 ? 'Words need review!' : 'All caught up!'} />
       </div>
+
+      {/* Skills Radar Chart */}
+      <SkillsRadarChart />
 
       {/* Weekly Report */}
       <WeeklyReport report={weeklyReport} />

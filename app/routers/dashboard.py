@@ -467,3 +467,22 @@ async def get_word_of_the_day(
     if result is None:
         return JSONResponse(status_code=204, content=None)
     return WordOfTheDayResponse(**result)
+
+
+class SkillAxis(BaseModel):
+    name: str
+    score: int
+    label: str
+
+
+class SkillRadarResponse(BaseModel):
+    skills: list[SkillAxis]
+
+
+@router.get("/skill-radar", response_model=SkillRadarResponse)
+async def get_skill_radar(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get 5-axis skill radar scores for the dashboard chart."""
+    skills = await dash_dal.get_skill_radar(db)
+    return {"skills": skills}

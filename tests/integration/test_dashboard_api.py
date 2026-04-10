@@ -388,3 +388,18 @@ async def test_achievements_unlocked_after_activity(client, mock_copilot):
     unlocked_ids = [a["id"] for a in data["achievements"] if a["unlocked"]]
     assert "conv_1" in unlocked_ids
     assert "pron_1" in unlocked_ids
+
+
+@pytest.mark.integration
+async def test_skill_radar_returns_five_axes(client):
+    """Skill radar endpoint returns 5 skill axes with valid scores."""
+    res = await client.get("/api/dashboard/skill-radar")
+    assert res.status_code == 200
+    data = res.json()
+    assert "skills" in data
+    assert len(data["skills"]) == 5
+    names = {s["name"] for s in data["skills"]}
+    assert names == {"speaking", "listening", "vocabulary", "grammar", "pronunciation"}
+    for s in data["skills"]:
+        assert 0 <= s["score"] <= 100
+        assert isinstance(s["label"], str)
