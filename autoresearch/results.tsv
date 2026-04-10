@@ -331,3 +331,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 329	b9330bf	2026-04-11	162	53	52	283	550	978	978	pass	6.7	KEPT	Add Anki-compatible CSV study card export from conversation summary
 330	d0500b2	2026-04-11	190	53	57	323	623	978	978	pass	6.5	KEPT	Add cloze listening drill to Listening quiz results page
 331	467f4c1	2026-04-11	263	117	331	84	795	980	980	pass	7.05	KEPT	Add listen-and-summarize speaking drill to Listening quiz results
+332	eaeb2d5	2026-04-11	165	80	431	90	766	980	980	pass	6.2	KEPT	Add speak-the-correction drill to conversation summary

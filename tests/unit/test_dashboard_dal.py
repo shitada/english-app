@@ -17,8 +17,11 @@ from app.dal.dashboard import (
     get_mistake_journal,
     get_mistake_review_items,
     get_recent_activity,
+    get_session_analytics,
+    get_skill_radar,
     get_stats,
     get_today_activity,
+    get_weekly_report,
     get_word_of_the_day,
     set_learning_goal,
 )
@@ -1225,3 +1228,184 @@ class TestGetAchievements:
         result = await get_achievements(test_db)
         century = next(a for a in result["achievements"] if a["id"] == "century")
         assert century["progress"]["current"] >= 10
+
+
+@pytest.mark.unit
+class TestGetSkillRadar:
+    """Tests for get_skill_radar()."""
+
+    async def test_empty_db_returns_all_zeros(self, test_db):
+        result = await get_skill_radar(test_db)
+        assert len(result) == 5
+        names = {r["name"] for r in result}
+        assert names == {"speaking", "listening", "vocabulary", "grammar", "pronunciation"}
+        for r in result:
+            assert r["score"] == 0
+            assert "label" in r
+
+    async def test_speaking_score_from_conversations(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, cid, "assistant", "Hello!")
+        await add_message(test_db, cid, "user", "Hi there")
+        await add_message(test_db, cid, "user", "I need a room")
+        await end_conversation(test_db, cid)
+        result = await get_skill_radar(test_db)
+        speaking = next(r for r in result if r["name"] == "speaking")
+        # 1 conversation * 5 + 2 user messages = 7, / 2 = 3
+        assert speaking["score"] >= 3
+
+    async def test_vocabulary_score_from_mastery(self, test_db):
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "alpha", "correct_meaning": "m"},
+            {"word": "beta", "correct_meaning": "m"},
+            {"word": "gamma", "correct_meaning": "m"},
+            {"word": "delta", "correct_meaning": "m"},
+        ])
+        # Level up 3 words to level 3+ (mastered) — need 3 correct answers each
+        for w in words[:3]:
+            for _ in range(4):
+                await update_progress(test_db, w["id"], True)
+        result = await get_skill_radar(test_db)
+        vocab = next(r for r in result if r["name"] == "vocabulary")
+        # 3/4 mastered ≈ 75%
+        assert vocab["score"] >= 50
+
+    async def test_scores_capped_at_100(self, test_db):
+        # Create many conversations to push speaking score past 100
+        for _ in range(25):
+            cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+            for _ in range(10):
+                await add_message(test_db, cid, "user", "test message")
+            await end_conversation(test_db, cid)
+        result = await get_skill_radar(test_db)
+        speaking = next(r for r in result if r["name"] == "speaking")
+        assert speaking["score"] <= 100
+
+
+@pytest.mark.unit
+class TestGetWeeklyReport:
+    """Tests for get_weekly_report()."""
+
+    async def test_empty_db_returns_zeroed_stats(self, test_db):
+        result = await get_weekly_report(test_db)
+        assert result["conversations"] == 0
+        assert result["messages_sent"] == 0
+        assert result["vocabulary_reviewed"] == 0
+        assert result["quiz_accuracy"] == 0
+        assert result["pronunciation_attempts"] == 0
+        assert "text_summary" in result
+        assert len(result["text_summary"]) > 0
+        assert "week_start" in result
+        assert "week_end" in result
+
+    async def test_counts_conversations_this_week(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, cid, "user", "Hello")
+        await add_message(test_db, cid, "user", "Good morning")
+        result = await get_weekly_report(test_db)
+        assert result["conversations"] >= 1
+        assert result["messages_sent"] >= 2
+
+    async def test_quiz_accuracy_calculation(self, test_db):
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "correct1", "correct_meaning": "m"},
+            {"word": "correct2", "correct_meaning": "m"},
+            {"word": "wrong1", "correct_meaning": "m"},
+        ])
+        await update_progress(test_db, words[0]["id"], True)
+        await update_progress(test_db, words[1]["id"], True)
+        await update_progress(test_db, words[2]["id"], False)
+        result = await get_weekly_report(test_db)
+        assert result["vocabulary_reviewed"] >= 3
+        # 2/3 correct ≈ 66.7%
+        assert 60 <= result["quiz_accuracy"] <= 70
+
+    async def test_highlights_include_streak(self, test_db):
+        # Streak counts days with messages/pronunciation/quiz_attempts
+        import json
+        from datetime import datetime, timedelta, timezone
+        for i in range(7):
+            d = (datetime.now(timezone.utc) - timedelta(days=i)).isoformat()
+            cursor = await test_db.execute(
+                "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at) VALUES (?, ?, 'ended', ?, ?)",
+                ("hotel_checkin", "beginner", d, d),
+            )
+            cid = cursor.lastrowid
+            await test_db.execute(
+                "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, 'user', 'hello', ?)",
+                (cid, d),
+            )
+        await test_db.commit()
+        result = await get_weekly_report(test_db)
+        assert result["streak"] >= 7
+        streak_highlight = [h for h in result["highlights"] if "streak" in h.lower()]
+        assert len(streak_highlight) > 0
+
+
+@pytest.mark.unit
+class TestGetSessionAnalytics:
+    """Tests for get_session_analytics()."""
+
+    async def test_empty_db_returns_empty_daily(self, test_db):
+        result = await get_session_analytics(test_db)
+        assert result["daily"] == []
+        assert len(result["modules"]) == 3
+        for m in result["modules"]:
+            assert m["total_seconds"] == 0
+            assert m["session_count"] == 0
+
+    async def test_conversation_time_from_timestamps(self, test_db):
+        from datetime import datetime, timedelta, timezone
+        now = datetime.now(timezone.utc)
+        start = now.isoformat()
+        end = (now + timedelta(minutes=5)).isoformat()
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at) VALUES (?, ?, 'ended', ?, ?)",
+            ("hotel_checkin", "beginner", start, end),
+        )
+        await test_db.commit()
+        result = await get_session_analytics(test_db, days=7)
+        conv_mod = next(m for m in result["modules"] if m["module"] == "conversation")
+        assert conv_mod["session_count"] == 1
+        assert 250 <= conv_mod["total_seconds"] <= 350  # ~300 seconds (5 min)
+
+    async def test_pronunciation_time_estimation(self, test_db):
+        import json
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+        for _ in range(3):
+            await test_db.execute(
+                "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, feedback_json, created_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                ("Test sentence", "Test sentence", 8.0, json.dumps({"overall_score": 8.0}), now),
+            )
+        await test_db.commit()
+        result = await get_session_analytics(test_db, days=7)
+        pron_mod = next(m for m in result["modules"] if m["module"] == "pronunciation")
+        assert pron_mod["session_count"] == 3
+        assert pron_mod["total_seconds"] == 360  # 3 * 120
+
+    async def test_vocabulary_time_estimation(self, test_db):
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "word1", "correct_meaning": "m"},
+            {"word": "word2", "correct_meaning": "m"},
+            {"word": "word3", "correct_meaning": "m"},
+            {"word": "word4", "correct_meaning": "m"},
+        ])
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+        result = await get_session_analytics(test_db, days=30)
+        vocab_mod = next(m for m in result["modules"] if m["module"] == "vocabulary")
+        assert vocab_mod["session_count"] == 4
+        assert vocab_mod["total_seconds"] == 120  # 4 * 30
+
+    async def test_daily_breakdown_has_all_modules(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await end_conversation(test_db, cid)
+        result = await get_session_analytics(test_db, days=7)
+        if result["daily"]:
+            day = result["daily"][0]
+            assert "conversation_seconds" in day
+            assert "pronunciation_seconds" in day
+            assert "vocabulary_seconds" in day
+            assert "date" in day
