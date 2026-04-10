@@ -320,3 +320,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 318	none	2026-04-10	95	350	43	65	553	955	955	pass	5.7	DISCARDED	Add multi-language UI support framework
 319	none	2026-04-10	85	200	40	50	375	955	955	pass	5.1	DISCARDED	Add inline correction practice drill to FeedbackPanel
 320	none	2026-04-10T15:16:20+09:00	120	300	45	60	525	960	960	pass	5.5	DISCARDED	Rich Markdown transcript download with inline grammar feedback
+321	bf13193	2026-04-11	172	192	42	60	466	958	958	pass	7.2	KEPT	Add achievement unlock celebration toasts on Home page
