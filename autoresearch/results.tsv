@@ -319,3 +319,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 318	d576f72	2026-04-10	136	148	100	364	748	952	952	pass	6.15	KEPT	Add vocabulary word pronunciation practice (listen and repeat)
 319	41753a3	2026-04-10	275	180	100	277	878	952	952	pass	6.7	KEPT	Add spaced repetition visual progress for vocabulary flashcards
 320	0b56231	2026-04-10	200	250	120	180	750	952	952	pass	7.0	KEPT	Add AI-powered conversation topic suggestions based on weak areas
+321	1a08ff2	2026-04-10	180	300	120	200	800	952	952	pass	6.65	KEPT	Persist minimal pairs results and show phoneme weakness analysis
