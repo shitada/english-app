@@ -321,3 +321,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 319	e7e7b0a	2025-04-10	30	300	60	30	420	942	942	pass	6.4	KEPT	Add quick-speak warm-up exercise with 30-second timer
 320	f7b894d	2025-04-10	30	240	60	30	360	943	943	pass	7.0	KEPT	Add vocabulary progress card with per-topic mastery on Home page
 321	83ba399	2025-04-10	30	300	60	30	420	949	949	pass	7.55	KEPT	Add recently practiced section on Home page
+322	7f01255	2025-04-10	30	360	60	30	480	952	952	pass	7.0	KEPT	Add speaking pace analysis with WPM tracking in conversation

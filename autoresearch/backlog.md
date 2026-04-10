@@ -184,7 +184,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add vocabulary progress card showing mastery percentage per topic on Home page
 - [x] Add quick-speak warm-up exercise (30-second speaking prompt)
 - [x] Add recently practiced section on Home page showing last 3-5 activities
-- [ ] Add speaking pace analysis (words per minute tracking in conversation)
+- [x] Add speaking pace analysis (words per minute tracking in conversation)
 - [ ] Add grammar explanation tooltips in conversation AI messages
 - [ ] Add study session timer (Pomodoro-style focused study)
 - [ ] Add conversation summary export/sharing
