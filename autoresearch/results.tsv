@@ -316,3 +316,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 314	847cb76	2026-04-09	155	181	630	89	874	906	906	pass	7.2	KEPT	Add bookmarks review panel to Conversation page
 315	46a8e6c	2026-04-10	160	100	60	390	710	952	952	pass	6.15	KEPT	Add study session timer (Pomodoro-style focused study)
 317	none	2026-04-10	165	200	150	536	1051	952	952	pass	5.25	DISCARDED	Add vocabulary word pronunciation practice (listen and repeat) - QA failed
+318	d576f72	2026-04-10	136	148	100	364	748	952	952	pass	6.15	KEPT	Add vocabulary word pronunciation practice (listen and repeat)

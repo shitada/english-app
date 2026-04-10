@@ -3,6 +3,7 @@ import { Volume2, Check, X, ArrowRight, Zap, Mic, SkipForward, RotateCcw } from 
 import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import VocabSRSProgress, { type SRSChange } from '../components/VocabSRSProgress';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -26,6 +27,7 @@ export default function Vocabulary() {
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [srsChanges, setSrsChanges] = useState<SRSChange[]>([]);
 
   // Drill mode state
   const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -72,6 +74,7 @@ export default function Vocabulary() {
 
   const startQuiz = async (topicId: string) => {
     setLoading(true);
+    setSrsChanges([]);
     try {
       // Sentence build mode uses a different endpoint
       if (quizMode === 'sentence-build') {
@@ -171,7 +174,9 @@ export default function Vocabulary() {
 
     // Submit to backend if word has an ID
     if (mcQ?.id) {
-      api.submitAnswer(mcQ.id, isCorrect).catch(() => {});
+      api.submitAnswer(mcQ.id, isCorrect).then(res => {
+        setSrsChanges(prev => [...prev, { word: mcQ.word, newLevel: res.new_level, isCorrect, nextReview: res.next_review }]);
+      }).catch(() => {});
     }
   };
 
@@ -193,7 +198,9 @@ export default function Vocabulary() {
     }
 
     if (fbQ?.id) {
-      api.submitAnswer(fbQ.id, isCorrect).catch(() => {});
+      api.submitAnswer(fbQ.id, isCorrect).then(res => {
+        setSrsChanges(prev => [...prev, { word: fbQ.answer, newLevel: res.new_level, isCorrect, nextReview: res.next_review }]);
+      }).catch(() => {});
     }
   };
 
@@ -211,6 +218,7 @@ export default function Vocabulary() {
   // Drill mode functions
   const startDrill = async () => {
     setLoading(true);
+    setSrsChanges([]);
     try {
       const res = await api.getDrillWords(10);
       if (!res.words || res.words.length === 0) {
@@ -258,7 +266,9 @@ export default function Vocabulary() {
     const word = drillWords[drillIndex];
     if (!word) return;
     setDrillAnswers((prev) => [...prev, known]);
-    api.submitAnswer(word.id, known).catch(() => {});
+    api.submitAnswer(word.id, known).then(res => {
+      setSrsChanges(prev => [...prev, { word: word.word, newLevel: res.new_level, isCorrect: known, nextReview: res.next_review }]);
+    }).catch(() => {});
 
     const nextIdx = drillIndex + 1;
     if (nextIdx >= drillWords.length) {
@@ -559,7 +569,9 @@ export default function Vocabulary() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <VocabSRSProgress changes={srsChanges} />
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
           <button className="btn btn-primary" onClick={startDrill} style={{ flex: 1 }}>
             ⚡ Drill Again
           </button>
@@ -615,7 +627,9 @@ export default function Vocabulary() {
           </div>
         </div>
 
-        <button className="btn btn-primary" onClick={() => { setPhase('select'); setIsOfflineMode(false); }}>
+        <VocabSRSProgress changes={srsChanges} />
+
+        <button className="btn btn-primary" onClick={() => { setPhase('select'); setIsOfflineMode(false); }} style={{ marginTop: 16 }}>
           Try Another Topic
         </button>
       </div>
