@@ -287,3 +287,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ❌ Add Filler Word Tracker to conversation chat and summary (#391 — discarded, no unit tests for utility)
 - [x] Add unit tests for untested pronunciation DAL functions (#392)
+
+## [NEW] Iterations 393–394
+
+- [x] ❌ Add Vocabulary Used section to Conversation Summary (#393 — discarded, Playwright unavailable for UX validation)
+- [x] Add data-populated integration tests for difficulty-recommendation and session-averages (#394)
