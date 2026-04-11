@@ -469,6 +469,24 @@ async def get_word_of_the_day(
     return WordOfTheDayResponse(**result)
 
 
+class PhraseOfTheDayResponse(BaseModel):
+    phrase: str
+    topic: str
+    source: str
+
+
+@router.get("/phrase-of-the-day")
+async def get_phrase_of_the_day(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get today's phrase-of-the-day for listen-and-repeat practice."""
+    from fastapi.responses import JSONResponse
+    result = await dash_dal.get_phrase_of_the_day(db)
+    if result is None:
+        return JSONResponse(status_code=204, content=None)
+    return PhraseOfTheDayResponse(**result)
+
+
 class SkillAxis(BaseModel):
     name: str
     score: int

@@ -1926,3 +1926,50 @@ async def get_vocabulary_forecast(
         "avg_retention_score": avg_retention,
         "recommended_review_count": recommended,
     }
+
+
+async def get_phrase_of_the_day(db: aiosqlite.Connection) -> dict[str, Any] | None:
+    """Select a deterministic phrase-of-the-day from past AI conversation messages."""
+    from hashlib import md5
+
+    # Try assistant messages from completed conversations first
+    rows = await db.execute_fetchall(
+        """
+        SELECT m.content, c.topic
+        FROM messages m
+        JOIN conversations c ON c.id = m.conversation_id
+        WHERE m.role = 'assistant' AND c.status = 'ended'
+        ORDER BY m.id
+        """
+    )
+
+    phrases: list[tuple[str, str]] = []
+    for row in rows:
+        content = row["content"] or ""
+        topic = row["topic"] or "general"
+        for sentence in content.replace("!", ".").replace("?", ".").split("."):
+            s = sentence.strip()
+            if 20 <= len(s) <= 80 and not s.startswith("*"):
+                phrases.append((s, topic))
+
+    # Fallback to vocabulary example sentences
+    if not phrases:
+        vocab_rows = await db.execute_fetchall(
+            "SELECT example_sentence, topic FROM vocabulary_words WHERE example_sentence IS NOT NULL AND LENGTH(example_sentence) BETWEEN 20 AND 80 ORDER BY id"
+        )
+        for vr in vocab_rows:
+            phrases.append((vr["example_sentence"], vr["topic"] or "general"))
+
+    if not phrases:
+        return None
+
+    today = date.today().isoformat()
+    day_hash = int(md5(("phrase:" + today).encode()).hexdigest(), 16)
+    idx = day_hash % len(phrases)
+    phrase, topic = phrases[idx]
+
+    return {
+        "phrase": phrase,
+        "topic": topic,
+        "source": "conversation" if rows else "vocabulary",
+    }

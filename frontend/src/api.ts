@@ -911,6 +911,19 @@ export async function getWordOfTheDay(): Promise<WordOfTheDay | null> {
   return res.json();
 }
 
+export interface PhraseOfTheDay {
+  phrase: string;
+  topic: string;
+  source: string;
+}
+
+export async function getPhraseOfTheDay(): Promise<PhraseOfTheDay | null> {
+  const res = await fetch('/api/dashboard/phrase-of-the-day');
+  if (res.status === 204) return null;
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 // Sentence Build exercises (from iteration 252)
 export interface SentenceBuildExercise {
   word_id: number;

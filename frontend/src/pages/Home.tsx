@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement } from '../api';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getPhraseOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type PhraseOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -423,6 +423,104 @@ function WordOfTheDayCard() {
       <Link to="/vocabulary" style={{ display: 'inline-block', marginTop: 10, fontSize: '0.85rem', color: 'var(--primary, #6366f1)', fontWeight: 600, textDecoration: 'none' }}>
         {t('practiceVocabulary')}
       </Link>
+    </div>
+  );
+}
+
+function PhraseOfTheDayCard() {
+  const { t } = useI18n();
+  const [phrase, setPhrase] = useState<PhraseOfTheDay | null>(null);
+  const [score, setScore] = useState<number | null>(null);
+  const [listening, setListening] = useState(false);
+
+  useEffect(() => {
+    getPhraseOfTheDay().then(setPhrase).catch(() => {});
+  }, []);
+
+  const speak = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.9;
+      window.speechSynthesis.speak(u);
+    }
+  }, []);
+
+  const computeAccuracy = useCallback((reference: string, spoken: string): number => {
+    const normalize = (t: string) => t.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+    const refWords = normalize(reference).split(/\s+/);
+    const spokenWords = normalize(spoken).split(/\s+/);
+    if (refWords.length === 0) return 0;
+    let matched = 0;
+    for (const rw of refWords) {
+      if (spokenWords.includes(rw)) matched++;
+    }
+    return Math.round((matched / refWords.length) * 100);
+  }, []);
+
+  const startPractice = useCallback(() => {
+    if (!phrase) return;
+    const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    setListening(true);
+    setScore(null);
+    const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      const transcript = e.results[0][0].transcript;
+      setScore(computeAccuracy(phrase.phrase, transcript));
+      setListening(false);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognition.start();
+  }, [phrase, computeAccuracy]);
+
+  if (!phrase) return null;
+
+  const scoreColor = score !== null ? (score >= 80 ? 'var(--success, #10b981)' : score >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)') : undefined;
+
+  return (
+    <div style={{
+      padding: '1rem 1.25rem',
+      marginBottom: '1.5rem',
+      borderRadius: 12,
+      border: '2px solid transparent',
+      background: 'linear-gradient(var(--card-bg, #fff), var(--card-bg, #fff)) padding-box, linear-gradient(135deg, #06b6d4, #8b5cf6) border-box',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 18 }}>💬</span>
+        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('phraseOfTheDay') || 'Phrase of the Day'}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 'auto', textTransform: 'capitalize' }}>
+          {phrase.topic?.replace(/_/g, ' ')}
+        </span>
+      </div>
+
+      <p style={{ margin: '0 0 12px', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.4 }}>
+        "{phrase.phrase}"
+      </p>
+
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => speak(phrase.phrase)}
+          style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border, #e5e7eb)', background: 'var(--bg-secondary, #f9fafb)', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          🔊 {t('listen') || 'Listen'}
+        </button>
+        <button
+          onClick={startPractice}
+          disabled={listening}
+          style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: listening ? 'var(--warning, #f59e0b)' : 'var(--primary, #6366f1)', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          🎙️ {listening ? (t('listening') || 'Listening...') : (t('practice') || 'Practice')}
+        </button>
+        {score !== null && (
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: scoreColor, marginLeft: 8 }}>
+            {score}%
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -865,6 +963,8 @@ export default function Home() {
       <DailyChallengeCard />
 
       <WordOfTheDayCard />
+
+      <PhraseOfTheDayCard />
 
       <div className="feature-grid">
         <Link to="/conversation" className="feature-card">
