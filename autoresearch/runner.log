@@ -4051,3 +4051,202 @@ T2=1775893829, implement_sec=113.
 
 **Step 4 — Commit**
 
+● Commit iteration 360 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #360: Add Spoken Retelling drill to conversation summary
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+**Step 5 — Test**
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All 1074 tests pass, TypeScript check passes.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775893895, test_sec=66.
+
+**Step 5b — Smoke test check**
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+Router changed, need smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+**Step 5c — QA Test check**
+
+● Check if tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Proposal type is "feature" and frontend UI files changed → MUST run tester. Starting the server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 360
+  │ Read RephraseChallenge.tsx
+  │   │ frontend/src/components/conversation/RephraseChallenge.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read SpokenRetelling.tsx
+      │ frontend/src/components/conversation/SpokenRetelling.tsx
+      └ L105:115 (11 lines read)
+
+Tester passed (ux_score=8.0). Now stop the server and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 9 lines...
+
+**Step 6 — Evaluate**
+
+● Evaluator Evaluate iteration 360
+  │ Read RephraseChallenge.tsx
+  │   │ frontend/src/components/conversation/RephraseChallenge.tsx
+  │   └ L1:40 (40 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L400:500 (73 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775894529. Timing: propose=249, implement=113, test=66, evaluate=634, total=1062. Score=6.85 ≥ 6.0, all tests pass → **KEEP**.
+
+**Step 8 — Record Results**
+
+● Record results for iteration 360 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "360" "1924df4" "2026-04-11" "249" "113" "66" "634" "1062" \
+  │ "1074" "1074" "pass" "6.85" "kept" "Add Spoken Retelling drill to conversation summary" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified with proper tab separators.
+
+**Step 9 — Update Backlog**
+
+● Find where to add new section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Iterations 357"
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● Check end of backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/backlog.md
+  └ 5 lines...
+
+● Edit backlog.md +6
+  └ autoresearch/backlog.md
+
+✅ Iteration 360 complete. Checklist: ✅ proposer called, ✅ evaluator called, ✅ tester called (frontend .tsx changed + feature type).
+
+---
+
+**Iteration 361 — Step 1: Context Restore**
+
+● Context restore for iteration 361 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 14 lines...
+
+T0=1775894558. Now calling the proposer:● Request failed due to a transient API error. Retrying...
+
+T0=1775894558.
+
+**Step 2 — Propose**
+
+● Proposer Propose iteration 361
+  │ Read SpokenRetelling.tsx
+  │   │ frontend/src/components/conversation/SpokenRetelling.tsx
+  │   └ 276 lines read
+  └ Read index.ts
+      │ frontend/src/components/conversation/index.ts
+      └ 17 lines read
+
+● Record T1 for iteration 361 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775895327, propose_sec=769. Now implementing the refactor.
+
+**Step 3 — Implement**
+
+● Read ScoreBar from RephraseChallenge (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '28,42p'
+  │ frontend/src/components/conversation/RephraseChallenge.tsx
+  └ 16 lines...
+
+● Create ScoreBar.tsx +16
+  └ frontend/src/components/conversation/ScoreBar.tsx
+
+Now update RephraseChallenge.tsx to import ScoreBar instead of defining it locally:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,5p'
+  │ frontend/src/components/conversation/RephraseChallenge.tsx
+  └ 6 lines...
+
+● Edit RephraseChallenge.tsx +1
+  └ frontend/src/components/conversation/RephraseChallenge.tsx
+
+● Edit RephraseChallenge.tsx -15
+  └ frontend/src/components/conversation/RephraseChallenge.tsx
+
+Now update SpokenRetelling.tsx:
+
+● Edit SpokenRetelling.tsx +1
+  └ frontend/src/components/conversation/SpokenRetelling.tsx
+
+● Edit SpokenRetelling.tsx -15
+  └ frontend/src/components/conversation/SpokenRetelling.tsx
+
+Add export to index.ts:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775895363, implement_sec=36.
+
+**Step 4 — Commit**
+

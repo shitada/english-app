@@ -215,3 +215,9 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add unit tests for 4 untested vocabulary DAL functions (#358)
 - [x] Add unit tests for save_minimal_pairs_results and get_phoneme_contrast_stats (#359)
 - [x] Fix test_db conftest fixture to run migrations for migration-only tables (#359)
+
+## [NEW] Iterations 360+
+
+- [x] Add Spoken Retelling drill to conversation summary (#360)
+- [ ] Extract shared ScoreBar component from RephraseChallenge and SpokenRetelling
+- [ ] Add integration test for POST /api/conversation/retelling/evaluate endpoint

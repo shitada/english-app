@@ -12,6 +12,7 @@ export { DictationExercise } from './DictationExercise';
 export { ShadowingExercise } from './ShadowingExercise';
 export { ClozeExercise } from './ClozeExercise';
 export { RephraseChallenge } from './RephraseChallenge';
+export { ScoreBar } from './ScoreBar';
 export { SpokenRetelling } from './SpokenRetelling';
 export { ShareCard } from './ShareCard';
 export { PhaseTransition } from './PhaseTransition';
