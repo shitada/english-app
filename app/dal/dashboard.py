@@ -1814,3 +1814,115 @@ async def get_grammar_weak_spots(
         "category_count": len(all_categories),
         "most_common_category": most_common,
     }
+
+
+# ---------------------------------------------------------------------------
+# Vocabulary retention forecast
+# ---------------------------------------------------------------------------
+
+_SM2_INTERVALS = [0, 1, 3, 7, 14, 30, 60]
+
+
+async def get_vocabulary_forecast(
+    db: aiosqlite.Connection, *, limit: int = 20
+) -> dict[str, Any]:
+    """Predict vocabulary retention risk per word and return at-risk words."""
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+
+    rows = await db.execute_fetchall(
+        """
+        SELECT vp.word_id, vw.word, vw.meaning, vw.topic,
+               vp.level, vp.correct_count, vp.incorrect_count,
+               vp.last_reviewed, vp.next_review_at
+        FROM vocabulary_progress vp
+        JOIN vocabulary_words vw ON vw.id = vp.word_id
+        WHERE vp.last_reviewed IS NOT NULL
+        """
+    )
+
+    # Get quiz attempt accuracy per word
+    quiz_rows = await db.execute_fetchall(
+        """
+        SELECT word_id,
+               SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) AS correct,
+               COUNT(*) AS total
+        FROM quiz_attempts
+        GROUP BY word_id
+        """
+    )
+    quiz_map: dict[int, tuple[int, int]] = {
+        r["word_id"]: (r["correct"], r["total"]) for r in quiz_rows
+    }
+
+    at_risk: list[dict[str, Any]] = []
+    total_reviewed = len(rows)
+    overdue_count = 0
+
+    for row in rows:
+        word_id = row["word_id"]
+        level = max(0, min(row["level"], len(_SM2_INTERVALS) - 1))
+        expected_interval = max(_SM2_INTERVALS[level], 1)
+
+        # Overdue ratio
+        next_review = row["next_review_at"] or today
+        try:
+            next_dt = datetime.fromisoformat(next_review.replace("Z", "+00:00"))
+            if next_dt.tzinfo is None:
+                next_dt = next_dt.replace(tzinfo=timezone.utc)
+        except (ValueError, AttributeError):
+            next_dt = now
+        days_overdue = (now - next_dt).days
+        if days_overdue > 0:
+            overdue_count += 1
+        overdue_ratio = max(days_overdue, 0) / expected_interval
+
+        # Error rate from quiz attempts
+        quiz_data = quiz_map.get(word_id)
+        if quiz_data:
+            correct, total = quiz_data
+            error_rate = (total - correct) / total if total > 0 else 0
+        else:
+            error_rate = 0.5  # unknown = moderate risk
+
+        # Level fragility (lower level = higher fragility)
+        max_level = len(_SM2_INTERVALS) - 1
+        level_fragility = 1.0 - (level / max_level) if max_level > 0 else 1.0
+
+        # Composite risk score (0-100)
+        risk = min(100, round(
+            (overdue_ratio * 0.4 + error_rate * 0.35 + level_fragility * 0.25) * 100
+        ))
+
+        at_risk.append({
+            "word_id": word_id,
+            "word": row["word"],
+            "meaning": row["meaning"],
+            "topic": row["topic"],
+            "level": level,
+            "risk_score": risk,
+            "days_overdue": max(days_overdue, 0),
+            "error_rate": round(error_rate, 2),
+        })
+
+    at_risk.sort(key=lambda w: w["risk_score"], reverse=True)
+    at_risk = at_risk[:limit]
+
+    avg_retention = round(
+        100 - (sum(w["risk_score"] for w in at_risk) / len(at_risk))
+        if at_risk else 100,
+        1,
+    )
+    at_risk_count = sum(1 for w in at_risk if w["risk_score"] >= 50)
+    recommended = min(max(overdue_count, at_risk_count, 5), 20)
+
+    return {
+        "at_risk_words": at_risk,
+        "total_reviewed": total_reviewed,
+        "at_risk_count": at_risk_count,
+        "overdue_count": overdue_count,
+        "avg_retention_score": avg_retention,
+        "recommended_review_count": recommended,
+    }

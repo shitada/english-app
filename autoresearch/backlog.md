@@ -249,3 +249,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ❌ Add Collocation Match Drill for natural word pairing practice (#377 — discarded, QA failed due to undeclared variable)
 - [x] Add learning velocity tracking endpoint with weekly pace analytics (#378)
+
+## [NEW] Iteration 379
+
+- [x] Add grammar error category analysis endpoint with per-category trends (#379)

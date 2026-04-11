@@ -1850,3 +1850,228 @@ I see two issues: 1) `add_message` doesn't accept `created_at` as a positional a
 ● Edit test_dashboard_dal.py +10 -23
   └ tests/unit/test_dashboard_dal.py
 
+● Amend and retest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit/test_dashboard_dal.py::TestGrammarWeakSpots
+  │ tests/unit/test_dashboard_dal.py::TestCategorizeError
+  │ tests/integration/test_dashboard_api.py::test_grammar_weak_spots_empty
+  │ tests/integration/test_dashboard_api.py::test_grammar_weak_spots_limit -v 2>&1 | tail -20
+  └ 36 lines...
+
+All 12 new tests pass. Now run the full suite and TS check:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+● TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All 1206 tests pass, TS check passes. Now run smoke test since we changed `app/dal/dashboard.py` and `app/routers/dashboard.py`:
+
+● Smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+No frontend UI files changed, proposal type is `feature` but backend-only. QA tester skipped — backend-only feature. Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 8 lines...
+
+● Evaluator Evaluate iteration 379
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1590:end (127 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score: 7.55 — KEEP. Recording results:
+
+● Record results for iteration 379 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "379" "$HASH" "$DATE" "138" "123" "195" "68" "524" \
+  │ "1206" "1206" "pass" "7.55" "kept" "Add grammar error category analysis endpoint with
+  │ per-category trends" \…
+  └ 3 lines...
+
+Row verified. Now update backlog and start iteration 380.
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iteration 379
+  │
+  │ - [x] Add grammar error category analysis endpoint with per-category trends (#379)…
+  └ 2 lines...
+
+---
+
+**Iteration 380 — Step 1: Context Restore**
+
+● T0 and context for iteration 380 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git --no-pager log --oneline -5
+  └ 7 lines...
+
+T0=1775921231. Calling proposer for iteration 380:
+
+● Proposer Propose iteration 380
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L80:250 (171 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L250:450 (201 lines read)
+
+● T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 108s. Let me check if a similar endpoint already exists:
+
+● Check for existing forecast endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabulary.forecast\|vocabulary-forecast\|vocab.*forecast\|retention.*forecast\|forgetting"
+  │ app/dal/dashboard.py app/routers/dashboard.py app/dal/vocabulary.py app/routers/vocabulary.py
+  │ 2>/dev/null | head -10
+  └ 3 lines...
+
+There's already a `review_forecast` in vocabulary router. Let me check what it does vs what we're proposing:
+
+● Check existing forecast (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def get_review_forecast"
+  │ app/dal/vocabulary.py
+  └ 2 lines...
+
+● Read existing forecast function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '457,490p' app/dal/vocabulary.py
+  └ 35 lines...
+
+The existing one just counts scheduled reviews. The proposed one calculates per-word risk scores — different enough. Let me implement it.
+
+● Check SRS intervals (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "SRS_INTERVALS\|srs_intervals\|INTERVALS" app/dal/vocabulary.py | head -5
+  └ 6 lines...
+
+● Check schema for relevant tables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabulary_progress\|vocabulary_words" app/database.py | head -20
+  └ 19 lines...
+
+● Check vocabulary schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '50,100p' app/database.py
+  └ 52 lines...
+
+Good. Now I'll implement:
+
+● Verify end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3 app/dal/dashboard.py
+  └ 4 lines...
+
+● Edit dashboard.py +110
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● Check end of router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/dashboard.py
+  └ 6 lines...
+
+● Edit dashboard.py +32
+  └ app/routers/dashboard.py
+
+Now add tests. Let me check how vocabulary data is seeded in tests:
+
+● Check how vocab data is seeded in tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "save_words\|vocabulary_words\|vocabulary_progress\|quiz_attempts"
+  │ tests/unit/test_dashboard_dal.py | head -10
+  └ 11 lines...
+
+● See how vocabulary tests seed data (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '72,95p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 25 lines...
+
+Now add the tests at the end of the file:
+
+● Check import location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_grammar_weak_spots,"
+  │ tests/unit/test_dashboard_dal.py | head -3
+  └ 2 lines...
+
+● Edit test_dashboard_dal.py +1
+  └ tests/unit/test_dashboard_dal.py
+
+● Verify end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3 tests/unit/test_dashboard_dal.py
+  └ 4 lines...
+
+● Edit test_dashboard_dal.py +93
+  └ tests/unit/test_dashboard_dal.py
+
+Now add integration tests:
+
+● Edit test_dashboard_api.py +23
+  └ tests/integration/test_dashboard_api.py
+
+Now commit and test:
+
+● Commit iteration 380 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #380: Add vocabulary retention forecast endpoint with forgetting-risk scores
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Full test suite for iteration 380 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● Debug test failure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestVocabularyForecast::test_word_with_no_quiz_history -v 2>&1
+  │ | tail -20
+  └ 20 lines...
+
+The `next_review_at` stored in DB doesn't have timezone info. Fix:
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+● Fix and retest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit/test_dashboard_dal.py::TestVocabularyForecast -v 2>&1 | tail -15
+  └ 31 lines...
+
+● Debug first test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestVocabularyForecast::test_word_with_no_quiz_history -v 2>&1
+  │ | tail -15
+  └ 16 lines...
+
+So `update_progress` also creates quiz_attempts entries. Let me fix the tests to match the actual behavior:
+
+● Edit test_dashboard_dal.py +7 -1
+  └ tests/unit/test_dashboard_dal.py
+
+Now fix the `test_high_error_rate_increases_risk` — `update_progress` creates a quiz_attempt too, so there are 6 attempts per word (1 from update_progress + 5 manual). Fix assertions:
+
+● Edit test_dashboard_dal.py +3 -1
+  └ tests/unit/test_dashboard_dal.py
+

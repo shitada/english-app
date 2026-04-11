@@ -703,3 +703,26 @@ async def test_grammar_weak_spots_limit(client):
     assert resp.status_code == 200
     data = resp.json()
     assert isinstance(data["categories"], list)
+
+
+# --- Vocabulary Retention Forecast ---
+
+
+@pytest.mark.integration
+async def test_vocabulary_forecast_empty(client):
+    """GET /vocabulary-forecast returns empty results when no data."""
+    resp = await client.get("/api/dashboard/vocabulary-forecast")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["at_risk_words"] == []
+    assert data["total_reviewed"] == 0
+    assert data["avg_retention_score"] == 100
+
+
+@pytest.mark.integration
+async def test_vocabulary_forecast_limit(client):
+    """GET /vocabulary-forecast accepts limit query param."""
+    resp = await client.get("/api/dashboard/vocabulary-forecast?limit=5")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data["at_risk_words"], list)

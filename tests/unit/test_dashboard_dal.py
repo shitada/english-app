@@ -26,6 +26,7 @@ from app.dal.dashboard import (
     get_skill_radar,
     get_stats,
     get_today_activity,
+    get_vocabulary_forecast,
     get_weekly_report,
     get_word_of_the_day,
     set_learning_goal,
@@ -1714,3 +1715,104 @@ class TestGrammarWeakSpots:
         """Limit caps the number of categories returned."""
         result = await get_grammar_weak_spots(test_db, limit=1)
         assert len(result["categories"]) <= 1
+
+
+# ---------------------------------------------------------------------------
+# Vocabulary retention forecast
+# ---------------------------------------------------------------------------
+
+
+class TestVocabularyForecast:
+    """Unit tests for get_vocabulary_forecast."""
+
+    @pytest.mark.unit
+    async def test_empty_database(self, test_db):
+        """Returns empty results when no vocabulary progress exists."""
+        result = await get_vocabulary_forecast(test_db)
+        assert result["at_risk_words"] == []
+        assert result["total_reviewed"] == 0
+        assert result["at_risk_count"] == 0
+        assert result["overdue_count"] == 0
+        assert result["avg_retention_score"] == 100
+        assert result["recommended_review_count"] == 5
+
+    @pytest.mark.unit
+    async def test_word_with_no_quiz_history(self, test_db):
+        """Words without quiz attempts get moderate error_rate (0.5)."""
+        questions = [{"word": "hello", "correct_meaning": "greeting"}]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        # Directly insert progress without going through update_progress
+        # (which also creates quiz_attempts)
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at) VALUES (?, 1, 0, 1, datetime('now'), datetime('now', '+1 day'))",
+            (words[0]["id"],),
+        )
+        await test_db.commit()
+
+        result = await get_vocabulary_forecast(test_db)
+        assert result["total_reviewed"] == 1
+        assert len(result["at_risk_words"]) == 1
+        assert result["at_risk_words"][0]["error_rate"] == 0.5
+
+    @pytest.mark.unit
+    async def test_overdue_word_has_higher_risk(self, test_db):
+        """An overdue word has a higher risk score than an up-to-date word."""
+        from datetime import datetime, timedelta, timezone
+
+        questions = [
+            {"word": "overdue", "correct_meaning": "late"},
+            {"word": "current", "correct_meaning": "now"},
+        ]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+
+        # Make one word overdue
+        past = (datetime.now(timezone.utc) - timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = ? WHERE word_id = ?",
+            (past, words[0]["id"]),
+        )
+        await test_db.commit()
+
+        result = await get_vocabulary_forecast(test_db)
+        risk_map = {w["word"]: w["risk_score"] for w in result["at_risk_words"]}
+        assert risk_map["overdue"] > risk_map["current"]
+        assert result["overdue_count"] >= 1
+
+    @pytest.mark.unit
+    async def test_high_error_rate_increases_risk(self, test_db):
+        """Words with high quiz error rate have higher risk scores."""
+        questions = [
+            {"word": "difficult", "correct_meaning": "hard"},
+            {"word": "easy", "correct_meaning": "simple"},
+        ]
+        words = await save_words(test_db, "hotel_checkin", questions)
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+
+        # Add quiz attempts: difficult = mostly wrong, easy = all correct
+        for _ in range(5):
+            await test_db.execute(
+                "INSERT INTO quiz_attempts (word_id, is_correct) VALUES (?, ?)",
+                (words[0]["id"], 0),
+            )
+            await test_db.execute(
+                "INSERT INTO quiz_attempts (word_id, is_correct) VALUES (?, ?)",
+                (words[1]["id"], 1),
+            )
+        await test_db.commit()
+
+        result = await get_vocabulary_forecast(test_db)
+        risk_map = {w["word"]: w for w in result["at_risk_words"]}
+        assert risk_map["difficult"]["risk_score"] > risk_map["easy"]["risk_score"]
+        # update_progress adds 1 correct quiz_attempt, plus 5 incorrect = 5/6 error rate
+        assert risk_map["difficult"]["error_rate"] > 0.7
+        # update_progress adds 1 correct quiz_attempt, plus 5 correct = 0/6 error rate
+        assert risk_map["easy"]["error_rate"] == 0.0
+
+    @pytest.mark.unit
+    async def test_limit_parameter(self, test_db):
+        """Limit caps the number of at-risk words returned."""
+        result = await get_vocabulary_forecast(test_db, limit=1)
+        assert len(result["at_risk_words"]) <= 1

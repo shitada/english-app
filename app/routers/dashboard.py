@@ -645,3 +645,35 @@ async def get_grammar_weak_spots(
 ):
     """Analyse grammar errors by category with trend data."""
     return await dash_dal.get_grammar_weak_spots(db, limit=limit)
+
+
+# --- Vocabulary Retention Forecast ---
+
+
+class AtRiskWord(BaseModel):
+    word_id: int
+    word: str
+    meaning: str
+    topic: str
+    level: int
+    risk_score: int
+    days_overdue: int
+    error_rate: float
+
+
+class VocabularyForecastResponse(BaseModel):
+    at_risk_words: list[AtRiskWord]
+    total_reviewed: int
+    at_risk_count: int
+    overdue_count: int
+    avg_retention_score: float
+    recommended_review_count: int
+
+
+@router.get("/vocabulary-forecast", response_model=VocabularyForecastResponse)
+async def get_vocabulary_forecast(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Predict vocabulary retention risk and return at-risk words."""
+    return await dash_dal.get_vocabulary_forecast(db, limit=limit)
