@@ -229,3 +229,9 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Quick Dictation Card to Home page (#368)
 - [x] Add Quick Speak Card to Home page (#369)
 - [x] Add integration tests for sentence-craft evaluate and sentence-transform endpoints (#370)
+
+## [NEW] Iterations 371–373
+
+- [x] Add Quick Grammar Fix card to Home page (#371 — discarded, Playwright unavailable)
+- [x] Add integration tests for listening-qa evaluate and conversation bookmarks endpoints (#372)
+- [x] Add unit tests for _swap_scenario_roles, _safe_quiz_index, and _normalize_summary edge cases (#373)

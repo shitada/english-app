@@ -372,3 +372,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 370	cdb634b	2026-04-11	3543	173	52	52	3768	1093	1093	pass	7.8	kept	Add integration tests for sentence-craft evaluate and sentence-transform endpoints
 371	none	2026-04-11	283	64	68	229	644	1093	1093	pass	5.9	discarded	Add Quick Grammar Fix card to Home page
 372	7959e6d	2026-04-11	379	223	266	54	922	1100	1100	pass	7.85	kept	Add integration tests for listening-qa evaluate and conversation bookmarks endpoints
+373	b1dc363	2026-04-11	412	57	64	54	587	1122	1122	pass	8.1	kept	Add unit tests for _swap_scenario_roles, _safe_quiz_index, and _normalize_summary edge cases
