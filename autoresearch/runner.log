@@ -3364,3 +3364,175 @@ Tester passed (ux_score=7). Let me fix the minor issue about canceling speech in
 ● Edit Listening.tsx +2
   └ frontend/src/pages/Listening.tsx
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #357: Add passage replay and retry-wrong to Listening quiz results
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 5 lines...
+
+● Evaluator Evaluate iteration 357
+  │ List directory tests
+  │   └ 8 files found
+  └ List directory app
+      └ 11 files found
+
+Evaluator: total_score=7.25, verdict=keep. Now record results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results iteration 357 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "357" "$HASH" "$DATE" "492" "50" "65" "362" "969" \
+  │ "1053" "1053" "pass" "7.25" "kept" "Add passage replay and retry-wrong to Listening quiz
+  │ results" \…
+  └ 3 lines...
+
+Good, row is properly formatted. Now kill the server and start iteration 358.
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+---
+
+**Iteration 358** — Starting.
+
+● Record T0 for iteration 358 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 358
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L60:200 (141 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L610:760 (151 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=229. Now implementing. Let me check the existing test file and DAL functions:
+
+● Check existing vocabulary DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_vocabulary_dal.py &&
+  │ echo "---" && grep "^async def " tests/unit/test_vocabulary_dal.py | head -30
+  └ 3 lines...
+
+● List vocabulary DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^async def " app/dal/vocabulary.py |
+  │ head -30
+  └ 31 lines...
+
+● List existing test functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^async def test_"
+  │ tests/unit/test_vocabulary_dal.py | sed 's/async def //' | sed 's/(.*//g' | sort
+  └ 1 line...
+
+● Find test functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^def test_\|^async def test_\|^
+  │ async def test_\|^class Test" tests/unit/test_vocabulary_dal.py | head -40
+  └ 41 lines...
+
+● List all test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^class Test"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 34 lines...
+
+Many of these already have test classes. Let me check which ones have minimal coverage:
+
+● Check test coverage in relevant classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && for cls in TestBatchImport TestUpdateWord
+  │ TestFavorites TestExportWords TestTopicSummary; do echo "=== $cls ==="; grep -A 1 "class $cls"
+  │ tests/unit/test_vocabulary_dal.py | head -2; grep "async def test_"
+  │ tests/unit/test_vocabulary_dal.py | grep -A 0 "" | awk "/$cls/,/^class/" | head -20; done
+  └ 16 lines...
+
+● Count tests per class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ import re
+  │ content = open('tests/unit/test_vocabulary_dal.py').read()
+  │ classes = re.split(r'(?=^class Test)', content, flags=re.MULTILINE)
+  │ for cls in classes[1:]:…
+  └ 12 lines...
+
+The proposer's suggestions are already covered. Let me find actual gaps and implement tests for untested functions. Let me check what's truly untested:
+
+● Find truly untested DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ import re
+  │ # Get all DAL functions
+  │ dal = open('app/dal/vocabulary.py').read()
+  │ dal_funcs = re.findall(r'async def (\w+)', dal)…
+  └ 17 lines...
+
+Good, 4 truly untested functions. Let me look at them:
+
+● Find untested functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def
+  │ get_topic_accuracy\|async def get_random_words_for_craft\|async def get_etymology\|async def
+  │ save_etymology" app/dal/vocabulary.py
+  └ 5 lines...
+
+● Read untested function implementations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '582,620p' app/dal/vocabulary.py &&
+  │ echo "========" && sed -n '1004,1080p' app/dal/vocabulary.py
+  └ 115 lines...
+
+Now I have the functions. Let me check the end of the test file to know where to append:
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 tests/unit/test_vocabulary_dal.py
+  └ 21 lines...
+
+Let me also check what imports the test file uses and the helper function:
+
+● Check imports and helpers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30 tests/unit/test_vocabulary_dal.py
+  └ 31 lines...
+
+● Check more imports and helpers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,65p'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 37 lines...
+
+Now let me check which functions are already imported:
+
+● Confirm functions not imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c
+  │ "get_topic_accuracy\|get_random_words_for_craft\|get_etymology\|save_etymology"
+  │ tests/unit/test_vocabulary_dal.py
+  └ 2 lines...
+
+Good, none are imported yet. Let me add the imports and tests:
+
+● Edit test_vocabulary_dal.py +4
+  └ tests/unit/test_vocabulary_dal.py
+
+Now append tests at the end of the file:
+
+● Append new tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> tests/unit/test_vocabulary_dal.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 142 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+implement_sec = 93. Commit and test:
+

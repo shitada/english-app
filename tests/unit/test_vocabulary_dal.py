@@ -12,11 +12,14 @@ from app.dal.vocabulary import (
     get_drill_words,
     get_due_word_ids,
     get_due_words,
+    get_etymology,
     get_progress,
+    get_random_words_for_craft,
     get_review_forecast,
     get_sentence_build_exercises,
     get_similar_words,
     get_srs_analytics,
+    get_topic_accuracy,
     get_vocabulary_stats,
     get_weak_words,
     get_word,
@@ -25,6 +28,7 @@ from app.dal.vocabulary import (
     get_words_by_topic,
     log_attempt,
     reset_progress,
+    save_etymology,
     save_words,
     search_words,
     update_notes,
@@ -1406,3 +1410,141 @@ class TestGetWordsByTier:
         assert "topic" in word
         assert "level" in word
         assert "error_rate" in word
+
+
+@pytest.mark.unit
+class TestGetTopicAccuracy:
+    async def test_empty_database(self, test_db):
+        result = await get_topic_accuracy(test_db)
+        assert result == []
+
+    async def test_single_topic_accuracy(self, test_db):
+        qs = _make_questions(2)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall(
+            "SELECT id FROM vocabulary_words WHERE topic = ?", ("hotel_checkin",)
+        )
+        # 3 correct, 1 incorrect for first word
+        await update_progress(test_db, rows[0]["id"], True)
+        await update_progress(test_db, rows[0]["id"], True)
+        await update_progress(test_db, rows[0]["id"], True)
+        await update_progress(test_db, rows[0]["id"], False)
+        result = await get_topic_accuracy(test_db)
+        assert len(result) == 1
+        assert result[0]["topic"] == "hotel_checkin"
+        assert result[0]["correct_count"] == 3
+        assert result[0]["incorrect_count"] == 1
+        assert result[0]["total_attempts"] == 4
+        assert result[0]["accuracy_rate"] == 75.0
+
+    async def test_multiple_topics_sorted_by_accuracy(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        await save_words(test_db, "restaurant", [{"word": "menu", "correct_meaning": "a list of dishes", "example_sentence": "Check the menu.", "difficulty": 1, "wrong_options": ["a", "b", "c"]}])
+        rows_hotel = await test_db.execute_fetchall(
+            "SELECT id FROM vocabulary_words WHERE topic = ?", ("hotel_checkin",)
+        )
+        rows_rest = await test_db.execute_fetchall(
+            "SELECT id FROM vocabulary_words WHERE topic = ?", ("restaurant",)
+        )
+        # Hotel: 1 correct, 1 incorrect → 50%
+        await update_progress(test_db, rows_hotel[0]["id"], True)
+        await update_progress(test_db, rows_hotel[0]["id"], False)
+        # Restaurant: 3 correct, 0 incorrect → 100%
+        await update_progress(test_db, rows_rest[0]["id"], True)
+        await update_progress(test_db, rows_rest[0]["id"], True)
+        await update_progress(test_db, rows_rest[0]["id"], True)
+        result = await get_topic_accuracy(test_db)
+        assert len(result) == 2
+        # Sorted ASC by accuracy_rate
+        assert result[0]["topic"] == "hotel_checkin"
+        assert result[0]["accuracy_rate"] == 50.0
+        assert result[1]["topic"] == "restaurant"
+        assert result[1]["accuracy_rate"] == 100.0
+
+
+@pytest.mark.unit
+class TestGetRandomWordsForCraft:
+    async def test_empty_topic(self, test_db):
+        result = await get_random_words_for_craft(test_db, "nonexistent")
+        assert result == []
+
+    async def test_returns_words_for_topic(self, test_db):
+        qs = _make_questions(5)
+        await save_words(test_db, "hotel_checkin", qs)
+        result = await get_random_words_for_craft(test_db, "hotel_checkin", count=3)
+        assert len(result) == 3
+        for w in result:
+            assert "id" in w
+            assert "word" in w
+            assert "meaning" in w
+
+    async def test_respects_count_limit(self, test_db):
+        qs = _make_questions(10)
+        await save_words(test_db, "hotel_checkin", qs)
+        result = await get_random_words_for_craft(test_db, "hotel_checkin", count=2)
+        assert len(result) == 2
+
+    async def test_returns_fewer_when_not_enough(self, test_db):
+        qs = _make_questions(2)
+        await save_words(test_db, "hotel_checkin", qs)
+        result = await get_random_words_for_craft(test_db, "hotel_checkin", count=5)
+        assert len(result) == 2
+
+    async def test_does_not_return_other_topics(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(3))
+        await save_words(test_db, "restaurant", [{"word": "menu", "correct_meaning": "a list", "example_sentence": "Ex.", "difficulty": 1, "wrong_options": ["a", "b", "c"]}])
+        result = await get_random_words_for_craft(test_db, "restaurant", count=10)
+        assert len(result) == 1
+        assert result[0]["word"] == "menu"
+
+
+@pytest.mark.unit
+class TestGetEtymology:
+    async def test_not_found(self, test_db):
+        word, etym = await get_etymology(test_db, 99999)
+        assert word is None
+        assert etym is None
+
+    async def test_no_cached_etymology(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word, etym = await get_etymology(test_db, rows[0]["id"])
+        assert word == "word_0"
+        assert etym is None
+
+    async def test_with_cached_etymology(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await save_etymology(test_db, word_id, '{"origin": "Latin"}')
+        word, etym = await get_etymology(test_db, word_id)
+        assert word == "word_0"
+        assert etym == '{"origin": "Latin"}'
+
+
+@pytest.mark.unit
+class TestSaveEtymology:
+    async def test_saves_etymology(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await save_etymology(test_db, word_id, '{"origin": "Greek"}')
+        check = await test_db.execute_fetchall(
+            "SELECT etymology FROM vocabulary_words WHERE id = ?", (word_id,)
+        )
+        assert check[0]["etymology"] == '{"origin": "Greek"}'
+
+    async def test_overwrites_existing_etymology(self, test_db):
+        qs = _make_questions(1)
+        await save_words(test_db, "hotel_checkin", qs)
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await save_etymology(test_db, word_id, '{"origin": "Old English"}')
+        await save_etymology(test_db, word_id, '{"origin": "French"}')
+        check = await test_db.execute_fetchall(
+            "SELECT etymology FROM vocabulary_words WHERE id = ?", (word_id,)
+        )
+        assert check[0]["etymology"] == '{"origin": "French"}'
