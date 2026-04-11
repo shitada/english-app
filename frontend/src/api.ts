@@ -1231,6 +1231,42 @@ export async function evaluateSentenceExpand(data: {
   });
 }
 
+// ── Sentence Transform Drill ──
+
+export interface SentenceTransformExercise {
+  original_sentence: string;
+  transformation_type: string;
+  instruction: string;
+  expected_answer: string;
+  difficulty: string;
+}
+
+export interface SentenceTransformEvaluation {
+  grammar_score: number;
+  transformation_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  correct_version: string;
+}
+
+export async function getSentenceTransformExercises(difficulty = 'intermediate', count = 5): Promise<{ exercises: SentenceTransformExercise[] }> {
+  return request<{ exercises: SentenceTransformExercise[] }>('/api/pronunciation/sentence-transform?difficulty=' + difficulty + '&count=' + count);
+}
+
+export async function evaluateSentenceTransform(data: {
+  original_sentence: string;
+  transformation_type: string;
+  expected_answer: string;
+  user_response: string;
+}): Promise<SentenceTransformEvaluation> {
+  return request<SentenceTransformEvaluation>('/api/pronunciation/sentence-transform/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // ── Listen-and-Summarize ──
 
 export interface ListeningSummaryEvaluation {

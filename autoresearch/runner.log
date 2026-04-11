@@ -1155,3 +1155,202 @@ Now update the Conversation.tsx to use the green pulse:
 ● Edit Conversation.tsx +1 -1
   └ frontend/src/pages/Conversation.tsx
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #348: Add hands-free Voice Mode toggle to conversation chat
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Record post-test timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 348
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L680:730 (50 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L900:1050 (151 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.9 ≥ 6.0, all tests pass, QA passed with ux_score 7 — **KEEP**.
+
+Timing: T0=1775877326, T1=1775877616, T2=1775877684, T3=1775877745, T4=1775878073
+- propose: 290s, implement: 68s, test: 61s, evaluate: 328s, total: 747s
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "348" "4fb6d37" "2026-04-11" "290" "68" "61" "328" "747" \
+  │ "1025" "1025" "pass" "6.9" "kept" "Add hands-free Voice Mode toggle to conversation chat" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, row is properly tab-separated. Now update backlog and start iteration 349.
+
+● Record T0 for iteration 349 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 349
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L800:950 (151 lines read)
+  └ Read index.ts
+      │ frontend/src/components/pronunciation/index.ts
+      └ 7 lines read
+
+● Record T1 for iteration 349 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me implement it. First, let me check the existing pronunciation router and component patterns.
+
+● Check pronunciation components index (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/pronunciation/index.ts
+  └ 8 lines...
+
+● Check existing pronunciation endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "sentence.expand\|response.drill\|GET.*pronunciation" app/routers/pronunciation.py | head -20
+  └ 13 lines...
+
+● Check practice mode patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "practiceMode\|'expand'\|'response'" frontend/src/pages/Pronunciation.tsx | head -20
+  └ 20 lines...
+
+Let me see the existing patterns more closely:
+
+● Check model patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "SentenceExpand\|ResponseDrill"
+  │ app/routers/pronunciation.py | head -20
+  └ 17 lines...
+
+● Check response drill endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '815,850p'
+  │ app/routers/pronunciation.py
+  └ 37 lines...
+
+● Check evaluate pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '850,920p'
+  │ app/routers/pronunciation.py
+  └ 71 lines...
+
+Now let me check a frontend component for the pattern:
+
+● Check component pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60
+  │ frontend/src/components/pronunciation/ResponseDrill.tsx
+  └ 61 lines...
+
+I have a clear pattern. Now let me check how the API types are defined:
+
+● Check API type patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ResponseDrill\|SentenceExpand"
+  │ frontend/src/api.ts | head -20
+  └ 15 lines...
+
+Now let me see the Pronunciation.tsx mode button area and rendering:
+
+● Check mode buttons and rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '220,270p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 52 lines...
+
+Now let me check the Pronunciation.tsx import section and the end of the router file:
+
+● Check end of router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/pronunciation.py
+  └ 6 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 10 lines...
+
+Now I have all the context. Let me implement the feature. I'll create the backend endpoints, API types, and frontend component.
+
+● Add backend endpoints (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py << 'PYTHON'
+  │
+  │
+  │ # ── Sentence Transform Drill ──────────────────────────────────────…
+  └ 129 lines...
+
+Now add the API types and functions to api.ts:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "export async function
+  │ evaluateSentenceExpand" frontend/src/api.ts
+  └ 2 lines...
+
+● Check insertion area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1223,1240p' frontend/src/api.ts
+  └ 19 lines...
+
+● Edit api.ts +36
+  └ frontend/src/api.ts
+
+Now create the SentenceTransformDrill component:
+
+● Create SentenceTransformDrill.tsx +287
+  └ frontend/src/components/pronunciation/SentenceTransformDrill.tsx
+
+Now update the pronunciation index.ts:
+
+● Edit index.ts +1
+  └ frontend/src/components/pronunciation/index.ts
+
+Now wire it into Pronunciation.tsx:
+
+● Edit Pronunciation.tsx +1 -1
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add 'sentence-transform' to the practiceMode union type and add the button + rendering:
+
+● Edit Pronunciation.tsx +1 -1
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add the mode button after the Expand button:
+
+● Edit Pronunciation.tsx +7
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add the rendering branch:
+
+● Edit Pronunciation.tsx +2
+  └ frontend/src/pages/Pronunciation.tsx
+
+Now add the loading condition at the bottom of the file:
+
+● Check loading conditions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "sentence-expand.*loading\|if.*practiceMode.*sentence" frontend/src/pages/Pronunciation.tsx |
+  │ tail -10
+  └ 2 lines...
+
+● Check loading section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '330,355p'
+  │ frontend/src/pages/Pronunciation.tsx
+  └ 27 lines...
+
+● Edit Pronunciation.tsx +4
+  └ frontend/src/pages/Pronunciation.tsx
+
+● Record T2 for iteration 349 (shell)
+  │ date +%s
+  └ 2 lines...
+

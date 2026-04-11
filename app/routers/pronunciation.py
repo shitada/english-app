@@ -1091,3 +1091,125 @@ async def evaluate_listening_summary(req: ListeningSummaryEvalRequest, _rl=Depen
         "feedback": str(result.get("feedback", "")),
         "model_summary": str(result.get("model_summary", "")),
     }
+
+
+# ── Sentence Transform Drill ──────────────────────────────────────
+
+class SentenceTransformExercise(BaseModel):
+    original_sentence: str
+    transformation_type: str
+    instruction: str
+    expected_answer: str
+    difficulty: str
+
+
+class SentenceTransformExercisesResponse(BaseModel):
+    exercises: list[SentenceTransformExercise]
+
+
+@router.get("/sentence-transform", response_model=SentenceTransformExercisesResponse)
+async def get_sentence_transform_exercises(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=5, ge=1, le=10),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate sentence transformation exercises for grammar+speaking drill."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate {count} sentence transformation exercises for a {difficulty}-level English learner.\n"
+        "Each exercise gives a sentence and a grammar transformation the learner must apply while speaking.\n"
+        "Return JSON with an 'exercises' array. Each item has:\n"
+        "- original_sentence (string): the starting sentence (1-2 sentences)\n"
+        "- transformation_type (string): short label like 'past tense', 'question', 'passive voice', 'negative', 'conditional', 'reported speech'\n"
+        "- instruction (string): clear instruction, e.g., 'Change this sentence to the past tense'\n"
+        "- expected_answer (string): the correct transformed sentence\n"
+        "- difficulty (string): the difficulty level\n"
+        "Use varied transformation types. Keep sentences natural and practical."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_transform",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Exercise generation failed")
+
+    exercises = result.get("exercises", [])[:count]
+    return {
+        "exercises": [
+            {
+                "original_sentence": str(e.get("original_sentence", "I go to school every day.")),
+                "transformation_type": str(e.get("transformation_type", "past tense")),
+                "instruction": str(e.get("instruction", "Change to past tense")),
+                "expected_answer": str(e.get("expected_answer", "I went to school every day.")),
+                "difficulty": difficulty,
+            }
+            for e in exercises
+        ]
+    }
+
+
+class SentenceTransformEvalRequest(BaseModel):
+    original_sentence: str = Field(min_length=1, max_length=500)
+    transformation_type: str = Field(min_length=1, max_length=100)
+    expected_answer: str = Field(min_length=1, max_length=500)
+    user_response: str = Field(min_length=1, max_length=2000)
+
+
+class SentenceTransformEvalResponse(BaseModel):
+    grammar_score: float
+    transformation_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    correct_version: str
+
+
+@router.post("/sentence-transform/evaluate", response_model=SentenceTransformEvalResponse)
+async def evaluate_sentence_transform(
+    req: SentenceTransformEvalRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's spoken sentence transformation."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Original sentence: \"{req.original_sentence}\"\n"
+        f"Transformation required: {req.transformation_type}\n"
+        f"Expected answer: \"{req.expected_answer}\"\n"
+        f"User said: \"{req.user_response}\"\n\n"
+        "Evaluate the user's transformation. Return JSON with:\n"
+        "- grammar_score (number 1-10): grammar correctness of the transformed sentence\n"
+        "- transformation_score (number 1-10): how correctly the transformation was applied\n"
+        "- naturalness_score (number 1-10): how natural the result sounds\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback\n"
+        "- correct_version (string): the correct transformed sentence"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach evaluating sentence transformations. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_transform_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "transformation_score": clamp(result.get("transformation_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "correct_version": str(result.get("correct_version", req.expected_answer)),
+    }
