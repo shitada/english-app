@@ -195,5 +195,5 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add pronunciation minimal pairs scoring improvement (iteration 321)
 - [x] Add vocabulary etymology/word origin information (completed iteration #317)
 - [x] Add session analytics (time spent per exercise type) (completed iteration #315)
-- [ ] Add multi-language UI support framework
+- [x] Add multi-language UI support framework (completed iteration #335 shell + #345 Home page)
 - [x] Add conversation transcript download (completed iteration #329 — Anki CSV study card export)

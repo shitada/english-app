@@ -6,6 +6,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import VocabSRSProgress, { type SRSChange } from '../components/VocabSRSProgress';
 import VocabDrillMode from '../components/VocabDrillMode';
 import VocabFlashcardMode from '../components/VocabFlashcardMode';
+import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -17,7 +18,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -63,6 +64,9 @@ export default function Vocabulary() {
   const [pronIndex, setPronIndex] = useState(0);
   const [pronResults, setPronResults] = useState<{ word: string; matched: boolean; skipped: boolean }[]>([]);
   const [pronChecked, setPronChecked] = useState(false);
+
+  // Speak from memory state
+  const [srWords, setSrWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
 
   const tts = useSpeechSynthesis();
   const speech = useSpeechRecognition({ lang: 'en-US' });
@@ -402,6 +406,36 @@ export default function Vocabulary() {
           <Mic size={20} /> 🎤 Listen &amp; Repeat — practice word pronunciation
         </button>
 
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getDrillWords(10);
+              if (!data.words || data.words.length === 0) {
+                alert('No vocabulary words available for speak recall. Add words via a topic quiz first.');
+                return;
+              }
+              setSrWords(data.words.slice(0, 10));
+              speech.reset();
+              setPhase('speak-recall');
+            } catch {
+              alert('Failed to load words for speak recall.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #10b981', background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)',
+            color: '#065f46', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start speak from memory"
+        >
+          🧠 Speak from Memory — say the word from its meaning
+        </button>
+
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -518,6 +552,17 @@ export default function Vocabulary() {
       <VocabFlashcardMode
         initialWords={fcWords}
         tts={tts}
+        onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+      />
+    );
+  }
+
+  // Speak from memory
+  if (phase === 'speak-recall') {
+    return (
+      <VocabSpeakRecallMode
+        initialWords={srWords}
+        speech={speech}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
       />
     );

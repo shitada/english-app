@@ -344,3 +344,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 342	7757176	2026-04-11	20	50	45	15	130	1019	1019	pass	7.95	kept	Add integration tests for vocabulary drill, tiers, and sentence-craft endpoints
 343	b7ef825	2026-04-11	25	45	45	15	130	1021	1021	pass	7.8	kept	Wire DictationExercise to backend API for persistent scoring
 344	353fd5a	2026-04-11	15	30	45	15	105	1025	1025	pass	7.8	kept	Add 4 data-populated integration tests for pronunciation endpoints
+345	be4a59a	2026-04-11	95	342	61	217	715	1025	1025	pass	6.75	kept	Extend i18n translations to Home page with Japanese locale
