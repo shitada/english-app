@@ -1091,3 +1091,179 @@ async def test_session_analytics_with_all_modules(client, test_db):
     assert today_entry["conversation_seconds"] > 0
     assert today_entry["pronunciation_seconds"] > 0
     assert today_entry["vocabulary_seconds"] > 0
+
+
+# --- Data-populated tests for Confidence Trend ---
+
+
+@pytest.mark.integration
+async def test_confidence_trend_with_conversations(client, test_db):
+    """Confidence trend computes sub-scores and composite correctly from seeded data."""
+    import json
+
+    # Insert 4 ended conversations with performance data
+    for i in range(4):
+        summary = json.dumps({
+            "performance": {
+                "grammar_accuracy_rate": 60 + i * 10,  # 60, 70, 80, 90
+                "vocabulary_diversity": 50 + i * 5,      # 50, 55, 60, 65
+                "avg_words_per_message": 7.5 + i * 2.5,  # 7.5, 10, 12.5, 15
+                "total_user_messages": 5 + i * 2,         # 5, 7, 9, 11 (capped at 100)
+            }
+        })
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, summary_json) VALUES (?, ?, ?, ?, ?)",
+            ("hotel_checkin", "intermediate", "ended", f"2026-03-0{i+1}T10:00:00+00:00", summary),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/confidence-trend")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert len(data["sessions"]) == 4
+    # Sessions should be in chronological order (earliest first)
+    assert data["sessions"][0]["started_at"] < data["sessions"][-1]["started_at"]
+
+    # Verify sub-scores for the first session (accuracy=60, diversity=50, avg_words=7.5, msgs=5)
+    s0 = data["sessions"][0]
+    assert s0["grammar_score"] == 60.0
+    assert s0["diversity_score"] == 50.0
+    # complexity_score = min(7.5/15*100, 100) = 50.0
+    assert s0["complexity_score"] == 50.0
+    # participation_score = min(5/10*100, 100) = 50.0
+    assert s0["participation_score"] == 50.0
+    # composite = 60*0.4 + 50*0.3 + 50*0.2 + 50*0.1 = 24+15+10+5 = 54.0
+    assert s0["score"] == 54.0
+
+    # With 4 sessions, trend should be computed (not insufficient_data)
+    assert data["trend"] in ("improving", "stable", "declining")
+
+
+@pytest.mark.integration
+async def test_confidence_trend_improving(client, test_db):
+    """Confidence trend detects 'improving' when later sessions score higher."""
+    import json
+
+    # First 2 sessions: low scores
+    for i in range(2):
+        summary = json.dumps({
+            "performance": {
+                "grammar_accuracy_rate": 30,
+                "vocabulary_diversity": 20,
+                "avg_words_per_message": 3,
+                "total_user_messages": 2,
+            }
+        })
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, summary_json) VALUES (?, ?, ?, ?, ?)",
+            ("hotel_checkin", "beginner", "ended", f"2026-01-0{i+1}T10:00:00+00:00", summary),
+        )
+    # Last 2 sessions: high scores
+    for i in range(2):
+        summary = json.dumps({
+            "performance": {
+                "grammar_accuracy_rate": 95,
+                "vocabulary_diversity": 80,
+                "avg_words_per_message": 14,
+                "total_user_messages": 10,
+            }
+        })
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, summary_json) VALUES (?, ?, ?, ?, ?)",
+            ("hotel_checkin", "advanced", "ended", f"2026-02-0{i+1}T10:00:00+00:00", summary),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/confidence-trend")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert len(data["sessions"]) == 4
+    assert data["trend"] == "improving"
+
+
+# --- Data-populated tests for Learning Velocity ---
+
+
+@pytest.mark.integration
+async def test_learning_velocity_with_activity(client, test_db):
+    """Learning velocity returns non-empty data when activities exist."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Conversation
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "active", now_iso),
+    )
+
+    # Pronunciation attempt
+    await test_db.execute(
+        "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+        ("Hello there.", "hello there", '{}', 8.0, now_iso),
+    )
+
+    # Vocabulary word + quiz attempt
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (word, meaning, example_sentence, topic, difficulty) VALUES (?, ?, ?, ?, ?)",
+        ("receipt", "a written record", "Keep the receipt.", "shopping", 1),
+    )
+    word_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, last_reviewed) VALUES (?, ?, ?, ?)",
+        (word_id, 1, 0, now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+        (word_id, 1, now_iso),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/learning-velocity")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert len(data["weekly_data"]) >= 1
+    week0 = data["weekly_data"][-1]
+    assert week0["conversations"] >= 1
+    assert week0["pronunciation_attempts"] >= 1
+    assert week0["quiz_attempts"] >= 1
+    assert week0["new_words"] >= 1
+
+    assert data["total_active_days"] >= 1
+    assert data["words_per_study_day"] > 0
+
+    pace = data["current_pace"]
+    assert pace["conversations_per_day"] > 0
+    assert pace["pronunciation_per_day"] > 0
+    assert pace["words_per_day"] > 0
+    assert pace["quizzes_per_day"] > 0
+
+
+@pytest.mark.integration
+async def test_learning_velocity_trend_with_data(client, test_db):
+    """Learning velocity computes a real trend when enough weekly data exists."""
+    from datetime import datetime as dt, timezone, timedelta
+
+    now = dt.now(timezone.utc)
+
+    # Seed 5 weeks of conversations to get enough data for trend calculation
+    for week_offset in range(5):
+        week_date = now - timedelta(weeks=week_offset)
+        iso = week_date.isoformat()
+        for _ in range(2):
+            await test_db.execute(
+                "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+                ("hotel_checkin", "intermediate", "active", iso),
+            )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/learning-velocity")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    assert len(data["weekly_data"]) >= 4
+    # With 5 weeks of data, trend should be computed (not insufficient_data)
+    assert data["trend"] in ("accelerating", "decelerating", "steady")

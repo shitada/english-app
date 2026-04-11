@@ -3840,3 +3840,203 @@ T4 = 1775926486
 ● Create invocation-024.md +38
   └ autoresearch/logs/invocation-024.md
 
+● Commit session docs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: add
+  │ session log and update backlog for iterations 385-386
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+✅ **Iteration 386 complete — KEPT (8.1).**
+
+**Checklist**: ✅ proposer called, ✅ evaluator called, ✅ tester correctly skipped (test-only, no frontend UI changes).
+
+---
+
+## Summary
+
+Completed 2 iterations (385–386). Both kept.
+
+| Iter | Score | Verdict | Description |
+|------|-------|---------|-------------|
+| 385 | 6.7 | ✅ KEPT | Pronunciation Weak Spots card on Dashboard (sound confusions + mispronounced words) |
+| 386 | 8.1 | ✅ KEPT | 4 data-populated integration tests for weekly-report & session-analytics |
+
+**Tests:** 1217 → 1221 (+4). **Success rate:** 2/2 (100%). **Average score:** 7.40.
+
+
+Changes   +394 -4
+Requests  3 Premium (26m 31s)
+Tokens    ↑ 13.3m • ↓ 55.3k • 12.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-385-to-404.md
+[2026-04-12 01:55:30] Copilot invocation completed (duration: 1593s)
+[2026-04-12 01:55:30] Verifying Playwright test depth...
+[2026-04-12 01:55:30]   PW_SKIP iter=385 — UI changed but NO Playwright test was run
+[2026-04-12 01:55:30]   PW_NA iter=386 — no UI file changes, Playwright test not required
+[2026-04-12 01:55:30] Running post-invocation audit (iter 385-386)...
+============================================
+ Autoresearch Audit
+ Iterations: 385 — 386
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-12 01:55:30
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 386[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-12 01:55:32] Audit found 1 error(s) — fixes applied where possible
+[2026-04-12 01:55:32] Cleaned up old session logs (kept 5)
+[2026-04-12 01:55:35] Current iteration count: 386 / 404
+[2026-04-12 01:55:35] ------------------------------------------
+[2026-04-12 01:55:35] Invocation 7 / 10
+[2026-04-12 01:55:35] Resuming from iteration 387
+[2026-04-12 01:55:35] ------------------------------------------
+[2026-04-12 01:55:35] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-387-to-404.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 272 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-024.md
+  └ 38 lines...
+
+Starting autoresearch loop from iteration 387. Last iteration was 386 with 1221 tests passing.
+
+● Record T0 for iteration 387 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775926562. Now calling the proposer subagent.
+
+● Proposer Propose iteration 387
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L375:end (14 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1088:1140 (52 lines read)
+
+● Record T1 for iteration 387 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775927067, propose_sec=505. Now implementing. Let me look at the relevant code.
+
+● Find existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "confidence_trend\|learning_velocity" tests/integration/test_dashboard_api.py
+  └ 4 lines...
+
+● Find confidence trend and learning velocity functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "confidence.trend\|learning.velocity\|get_confidence_trend\|get_learning_velocity"
+  │ app/dal/dashboard.py | head -20
+  └ 4 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1058:1160 (103 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1567:1680 (114 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1680:1730 (51 lines read)
+
+● Find existing test lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "test_confidence_trend\|test_learning_velocity" tests/integration/test_dashboard_api.py
+  └ 4 lines...
+
+Now let me see the existing tests to understand the patterns used:
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L470:510 (40 lines read)
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L663:700 (38 lines read)
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_dashboard_api.py && tail -50 tests/integration/test_dashboard_api.py
+  └ 52 lines...
+
+Good, I have a clear picture. Let me look at how data-populated tests in iteration 384/386 were structured for the pattern:
+
+● Find data-populated test patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_vocabulary_forecast_with_data
+  │ \|test_grammar_weak_spots_with_data\|test_weekly_report_with_data\|test_session_analytics_with"
+  │ tests/integration/test_dashboard_api.py | head -10
+  └ 4 lines...
+
+● See data-populated test examples (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '900,990p'
+  │ tests/integration/test_dashboard_api.py
+  └ 92 lines...
+
+Now I have enough context. Let me implement the tests:
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L1088:1093 (6 lines read)
+
+● Edit test_dashboard_api.py +176
+  └ tests/integration/test_dashboard_api.py
+
