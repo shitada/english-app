@@ -223,3 +223,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add integration test for POST /api/conversation/retelling/evaluate endpoint (#362)
 - [x] Add integration tests for minimal pairs results/stats and listening difficulty endpoints (#363)
 - [x] Add integration tests for dashboard listening-progress endpoint (#364)
+- [x] Add Vocabulary Context Listening drill mode (#365)

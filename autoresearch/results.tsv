@@ -364,3 +364,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 362	95882f0	2026-04-11	74	26	68	57	225	1078	1078	pass	8.1	kept	Add integration tests for conversation retelling evaluate endpoint
 363	2247512	2026-04-11	528	75	147	69	819	1086	1086	pass	8.1	kept	Add integration tests for minimal pairs results/stats and listening difficulty endpoints
 364	55457b9	2026-04-11	592	35	61	63	751	1089	1089	pass	8.1	kept	Add integration tests for dashboard listening-progress endpoint
+365	38d390d	2026-04-11	268	144	80	416	908	1089	1089	pass	6.7	kept	Add Vocabulary Context Listening drill mode

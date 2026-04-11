@@ -8,6 +8,7 @@ import VocabDrillMode from '../components/VocabDrillMode';
 import VocabFlashcardMode from '../components/VocabFlashcardMode';
 import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
+import VocabSpellingBee from '../components/VocabSpellingBee';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -19,7 +20,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen' | 'spelling-bee'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -69,6 +70,7 @@ export default function Vocabulary() {
   // Speak from memory state
   const [srWords, setSrWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
   const [clWords, setClWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number; example_sentence: string }[]>([]);
+  const [sbWords, setSbWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
 
   const tts = useSpeechSynthesis();
   const speech = useSpeechRecognition({ lang: 'en-US' });
@@ -468,6 +470,35 @@ export default function Vocabulary() {
           🎧 Context Listening — hear sentences, find the word
         </button>
 
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getDrillWords(10);
+              if (!data.words || data.words.length === 0) {
+                alert('No vocabulary words available for spelling bee. Add words via a topic quiz first.');
+                return;
+              }
+              setSbWords(data.words.slice(0, 10));
+              setPhase('spelling-bee');
+            } catch {
+              alert('Failed to load words for spelling bee.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #f59e0b', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+            color: '#92400e', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start spelling bee"
+        >
+          🐝 Spelling Bee — hear and spell the word
+        </button>
+
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -604,6 +635,15 @@ export default function Vocabulary() {
     return (
       <VocabContextListenDrill
         initialWords={clWords}
+        onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+      />
+    );
+  }
+
+  if (phase === 'spelling-bee') {
+    return (
+      <VocabSpellingBee
+        initialWords={sbWords}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
       />
     );

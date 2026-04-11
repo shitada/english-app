@@ -283,3 +283,119 @@ Now fix the SRS mapping in VocabContextListenDrill:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
   └ 2 lines...
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #365: Add Vocabulary Context Listening drill mode
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 18 lines...
+
+Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 14 lines...
+
+● Get relevant diff (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 -- app/ frontend/src/ 2>&1
+  │ | head -200
+  └ 201 lines...
+
+● Evaluator Evaluate iteration 365
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L600:650 (51 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L150:280 (131 lines read)
+
+Evaluator score: 6.7 — KEEP. Let me record results.
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 365 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "365" "$HASH" "$DATE" "268" "144" "80" "416" "908" \
+  │ "1089" "1089" "pass" "6.7" "kept" "Add Vocabulary Context Listening drill mode" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, properly formatted. Now kill the server and update the backlog:
+
+● Kill QA server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+
+
+Iteration 365 complete (kept, 6.7). Starting iteration 366.
+
+● Record T0 for iteration 366 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 366
+  │ Read VocabFlashcardMode.tsx
+  │   │ frontend/src/components/VocabFlashcardMode.tsx
+  │   └ L1:40 (40 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L550:650 (101 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 295s. Now implementing the Spelling Bee feature. Frontend-only changes — no backend needed.
+
+● Create VocabSpellingBee.tsx +245
+  └ frontend/src/components/VocabSpellingBee.tsx
+
+Wait, I used a redundant `ArrowNext` wrapper. Let me simplify that:
+
+● Edit VocabSpellingBee.tsx +1 -5
+  └ frontend/src/components/VocabSpellingBee.tsx
+
+Now update Vocabulary.tsx:
+
+● Edit Vocabulary.tsx +1
+  └ frontend/src/pages/Vocabulary.tsx
+
+● Edit Vocabulary.tsx +1 -1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now add a state for spelling bee words and the button. Let me add state after clWords:
+
+● Edit Vocabulary.tsx +1
+  └ frontend/src/pages/Vocabulary.tsx
+
+Add the button after the Context Listening button:
+
+● Edit Vocabulary.tsx +29
+  └ frontend/src/pages/Vocabulary.tsx
+
+Add the rendering for spelling-bee phase:
+
+● Edit Vocabulary.tsx +9
+  └ frontend/src/pages/Vocabulary.tsx
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
