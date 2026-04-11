@@ -348,3 +348,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 346	a2c9c52	2026-04-11	295	90	60	349	794	1025	1025	pass	6.6	kept	Add Speak-from-Memory vocabulary recall mode
 347	5ba6c82	2026-04-11	205	85	63	233	586	1025	1025	pass	6.7	kept	Add adaptive difficulty recommendation to Listening quiz
 348	4fb6d37	2026-04-11	290	68	61	328	747	1025	1025	pass	6.9	kept	Add hands-free Voice Mode toggle to conversation chat
+349	aab7312	2026-04-11	179	163	1136	72	1550	1025	1025	pass	6.4	kept	Add Sentence Transform speaking drill to Pronunciation page

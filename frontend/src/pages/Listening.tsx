@@ -3,6 +3,7 @@ import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from '
 import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
+import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
 import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
@@ -428,6 +429,7 @@ export default function Listening() {
           {passage && <EchoPractice passage={passage} />}
           {passage && <ClozeListening passage={passage} />}
           {passage && <ListenAndSummarize passage={passage} />}
+          {passage && questions.length > 0 && <ListeningSpokenQA passage={passage} questions={questions} />}
         </div>
       )}
     </div>

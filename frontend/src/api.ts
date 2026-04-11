@@ -1267,6 +1267,30 @@ export async function evaluateSentenceTransform(data: {
   });
 }
 
+// ── Listening Spoken Q&A ──
+
+export interface ListeningQAEvaluation {
+  content_accuracy_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  overall_score: number;
+  feedback: string;
+  model_answer: string;
+}
+
+export async function evaluateListeningQA(data: {
+  passage: string;
+  question: string;
+  correct_answer: string;
+  user_spoken_answer: string;
+}): Promise<ListeningQAEvaluation> {
+  return request<ListeningQAEvaluation>('/api/pronunciation/listening-qa/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // ── Listen-and-Summarize ──
 
 export interface ListeningSummaryEvaluation {

@@ -1213,3 +1213,68 @@ async def evaluate_sentence_transform(
         "feedback": str(result.get("feedback", "")),
         "correct_version": str(result.get("correct_version", req.expected_answer)),
     }
+
+
+# ── Listening Spoken Q&A Drill ──────────────────────────────────────
+
+class ListeningQAEvalRequest(BaseModel):
+    passage: str = Field(min_length=1, max_length=5000)
+    question: str = Field(min_length=1, max_length=500)
+    correct_answer: str = Field(min_length=1, max_length=500)
+    user_spoken_answer: str = Field(min_length=1, max_length=2000)
+
+
+class ListeningQAEvalResponse(BaseModel):
+    content_accuracy_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_answer: str
+
+
+@router.post("/listening-qa/evaluate", response_model=ListeningQAEvalResponse)
+async def evaluate_listening_qa(
+    req: ListeningQAEvalRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a spoken answer to a listening comprehension question."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Listening passage: \"{req.passage[:1000]}\"\n"
+        f"Question: \"{req.question}\"\n"
+        f"Correct answer: \"{req.correct_answer}\"\n"
+        f"User spoke: \"{req.user_spoken_answer}\"\n\n"
+        "Evaluate the user's spoken answer to this listening comprehension question. Return JSON with:\n"
+        "- content_accuracy_score (number 1-10): how accurately they answered the question\n"
+        "- grammar_score (number 1-10): grammar correctness of their spoken answer\n"
+        "- vocabulary_score (number 1-10): vocabulary usage quality\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback\n"
+        "- model_answer (string): an example of a good spoken answer to this question"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English comprehension coach evaluating spoken answers. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listening_qa_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "content_accuracy_score": clamp(result.get("content_accuracy_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_answer": str(result.get("model_answer", "")),
+    }

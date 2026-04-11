@@ -1354,3 +1354,193 @@ Now add the loading condition at the bottom of the file:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 349 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #349: Add Sentence Transform speaking drill to Pronunciation page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+All 1025 tests pass, TypeScript check passes. Let me check if smoke test is needed:
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+Router changed — need smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Now check if tester is needed — frontend page/component changed and type is feature:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend UI changed — tester is MANDATORY. Let me start server and call tester:
+
+● Start server for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 349
+  │ List directory frontend/src
+  │   └ 11 files found
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:100 (99 lines read)
+
+Tester passed (ux_score 7). Let me record the time and call the evaluator.
+
+● Record T3 for iteration 349 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 349
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ L170:240 (71 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1200:1350 (92 lines read)
+
+● Record T4 for iteration 349 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.4 ≥ 6.0, all tests pass, QA passed — **KEEP**.
+
+Timing: T0=1775878115, T1=1775878294, T2=1775878457, T3=1775879593, T4=1775879665
+- propose: 179s, implement: 163s, test: 1136s, evaluate: 72s, total: 1550s
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "349" "aab7312" "2026-04-11" "179" "163" "1136" "72" "1550" \
+  │ "1025" "1025" "pass" "6.4" "kept" "Add Sentence Transform speaking drill to Pronunciation
+  │ page" \…
+  └ 3 lines...
+
+Good. Now **iteration 350**:
+
+● Record T0 for iteration 350 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 350
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L500:end (727 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1227:end (65 lines read)
+
+● Record T1 for iteration 350 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me check the Listening page to understand the results section:
+
+● Check Listening results section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "EchoPractice\|ClozeListening\|ListenAndSummarize\|results.*section\|expandable"
+  │ frontend/src/pages/Listening.tsx | head -20
+  └ 7 lines...
+
+● Check results rendering area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '415,445p'
+  │ frontend/src/pages/Listening.tsx
+  └ 22 lines...
+
+Let me look at an existing component pattern like EchoPractice:
+
+● Check EchoPractice pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60
+  │ frontend/src/components/EchoPractice.tsx
+  └ 61 lines...
+
+Now let me check the Listening quiz questions structure to understand what data is available:
+
+● Check quiz data structures (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuizQuestion\|quizResults\|interface.*Quiz\|results.*question" frontend/src/pages/Listening.tsx
+  │ | head -20
+  └ 4 lines...
+
+● Check API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ListeningQuizQuestion\|ListeningQuizResult" frontend/src/api.ts | head -10
+  └ 7 lines...
+
+● Check quiz question structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '341,360p' frontend/src/api.ts
+  └ 21 lines...
+
+Now let me check the Listening component state to understand what data is available for passing to the new component:
+
+● Check component state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '12,30p'
+  │ frontend/src/pages/Listening.tsx
+  └ 20 lines...
+
+Now I have all the context. Let me implement the feature:
+
+First, add the backend endpoint:
+
+● Add backend endpoint (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py << 'PYTHON'
+  │
+  │
+  │ # ── Listening Spoken Q&A Drill ──────────────────────────────────────…
+  └ 66 lines...
+
+Now add the API type and function:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "// ── Listen-and-Summarize"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Edit api.ts +24
+  └ frontend/src/api.ts
+
+Now create the ListeningSpokenQA component:
+
+● Create ListeningSpokenQA.tsx +279
+  └ frontend/src/components/ListeningSpokenQA.tsx
+
+Now wire it into Listening.tsx:
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+● Record T2 for iteration 350 (shell)
+  │ date +%s
+  └ 2 lines...
+
