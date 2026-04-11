@@ -7,4 +7,5 @@ export { SkillsRadarChart } from './SkillsRadarChart';
 export { ListeningProgress } from './ListeningProgress';
 export { PronunciationProgress } from './PronunciationProgress';
 export { SpeakingConfidence } from './SpeakingConfidence';
+export { VocabularyProgress } from './VocabularyProgress';
 export { WeeklyReport } from './WeeklyReport';
