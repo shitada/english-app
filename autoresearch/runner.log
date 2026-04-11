@@ -3763,3 +3763,80 @@ The column is `reference_text`, not `sentence`, and `user_transcription`, not `t
   │ tests/integration/test_dashboard_api.py
   └ 1 line...
 
+● Fix and re-run failing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #386: Add data-populated integration tests for weekly-report and
+  │ session-analytics
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && uv run pytest …
+  └ 36 lines...
+
+All 4 new tests pass. Let me run the full suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+1221 passed (1217 → 1221, +4 new tests). TS check already passed.
+
+● Record T3 for iteration 386 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1775926427, test_sec = 1775926427 - 1775926281 = 146
+
+### Step 5b — Smoke test check
+
+No database.py/routers/dal changes — only test files. Skip smoke test.
+
+### Step 5c — QA test check
+
+Type is `test`, not `feature`/`ux`. QA tester skip is OK.
+
+### Step 6 — Evaluate
+
+● Evaluator Evaluate iteration 386
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L700:870 (170 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L916:920 (4 lines read)
+
+Evaluator score: 8.1 — KEEP.
+
+● Record T4 for iteration 386 (shell)
+  │ date +%s
+  └ 2 lines...
+
+### Step 7 & 8 — Record Results
+
+T4 = 1775926486
+- propose_sec = 304
+- implement_sec = 84
+- test_sec = 146
+- evaluate_sec = 1775926486 - 1775926427 = 59
+- total_sec = 1775926486 - 1775925893 = 593
+
+● Record results and verify (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "386" "7c64244" "2026-04-12" "304" "84" "146" "59" "593" \
+  │ "1221" "1221" "pass" "8.1" "kept" "Add data-populated integration tests for weekly-report
+  │ and session-analytics" \…
+  └ 3 lines...
+
+### Step 9 — Update Backlog & Session Log
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 385–386
+  │
+  │ - [x] Add Pronunciation Weak Spots card to Dashboard with word & sound analysis (#385)…
+  └ 3 lines...
+
+● Create invocation-024.md +38
+  └ autoresearch/logs/invocation-024.md
+

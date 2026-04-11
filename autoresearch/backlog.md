@@ -264,3 +264,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add Grammar Weak Spots card to Dashboard with per-category breakdown (#383)
 - [x] Add data-populated integration tests for vocabulary-forecast and grammar-weak-spots (#384)
+
+## [NEW] Iterations 385–386
+
+- [x] Add Pronunciation Weak Spots card to Dashboard with word & sound analysis (#385)
+- [x] Add data-populated integration tests for weekly-report and session-analytics (#386)
