@@ -8,6 +8,7 @@ import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickShadowCard from '../components/QuickShadowCard';
+import QuickDictationCard from '../components/QuickDictationCard';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -849,6 +850,8 @@ export default function Home() {
       <RecentlyPracticedCard />
 
       <QuickShadowCard />
+
+      <QuickDictationCard />
 
       <StreakMilestonesCard />
 

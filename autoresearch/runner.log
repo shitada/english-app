@@ -722,3 +722,299 @@ All 3 iterations complete. Let me write the session log and commit.
 ● Create invocation-016.md +45
   └ autoresearch/logs/invocation-016.md
 
+● Commit session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: add
+  │ session log for iterations 365-367
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+Completed 3 iterations (365–367), all kept:
+
+| Iter | Score | Description |
+|------|-------|-------------|
+| 365 | 6.7 | **Vocabulary Context Listening** — hear sentences, type missing word |
+| 366 | 6.6 | **Vocabulary Spelling Bee** — hear word, type spelling with diff highlighting |
+| 367 | 6.7 | **Quick Shadow Practice card** — instant speaking practice on Home page |
+
+All 1089 tests pass, TypeScript clean, smoke tests pass. Tester caught and I fixed an SRS mapping bug (#365) and a stale closure race condition (#367).
+
+
+Changes   +799 -34
+Requests  3 Premium (41m 30s)
+Tokens    ↑ 11.8m • ↓ 101.8k • 11.0m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-365-to-374.md
+[2026-04-11 19:21:52] Copilot invocation completed (duration: 2493s)
+[2026-04-11 19:21:52] Verifying Playwright test depth...
+[2026-04-11 19:21:52]   PW_SKIP iter=365 — UI changed but NO Playwright test was run
+[2026-04-11 19:21:52]   PW_SKIP iter=366 — UI changed but NO Playwright test was run
+[2026-04-11 19:21:52]   PW_SKIP iter=367 — UI changed but NO Playwright test was run
+[2026-04-11 19:21:52] Running post-invocation audit (iter 365-367)...
+============================================
+ Autoresearch Audit
+ Iterations: 365 — 367
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-11 19:21:52
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-11 19:21:53] Audit passed — no issues
+[2026-04-11 19:21:53] Cleaned up old session logs (kept 5)
+[2026-04-11 19:21:56] Current iteration count: 367 / 374
+[2026-04-11 19:21:56] ------------------------------------------
+[2026-04-11 19:21:56] Invocation 2 / 10
+[2026-04-11 19:21:56] Resuming from iteration 368
+[2026-04-11 19:21:56] ------------------------------------------
+[2026-04-11 19:21:56] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-368-to-374.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 229 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-016.md
+  └ 45 lines...
+
+Good, I have the full context. Last iteration was 367, all kept. Starting iteration 368 now.
+
+---
+
+## Iteration 368
+
+● Record T0 for iteration 368 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 368
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L320:450 (131 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L450:600 (151 lines read)
+
+Good proposal. Now implementing.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check dictation API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "checkDictation\|dictation"
+  │ frontend/src/api.ts | head -20
+  └ 3 lines...
+
+● Check Home page imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickShadow\|QuickSpeak\|DailyChallenge\|WordOfTheDay" frontend/src/pages/Home.tsx | head -20
+  └ 12 lines...
+
+● Check checkDictation signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '785,810p' frontend/src/api.ts
+  └ 27 lines...
+
+● Check sentences API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getPronunciationSentences\|PronunciationSentence" frontend/src/api.ts | head -10
+  └ 2 lines...
+
+● Check DictationResult type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "DictationResult"
+  │ frontend/src/api.ts | head -5
+  └ 4 lines...
+
+● Check QuickShadowCard for pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickShadowCard.tsx | head -30
+  └ 31 lines...
+
+● Check DictationWordResult type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "DictationWordResult"
+  │ frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● Check sentences API details (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '135,165p' frontend/src/api.ts
+  └ 32 lines...
+
+● Check DictationWordResult (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '779,795p' frontend/src/api.ts
+  └ 18 lines...
+
+● Check Home page render area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '840,870p'
+  │ frontend/src/pages/Home.tsx
+  └ 32 lines...
+
+Now I have everything I need. Let me create the component and update Home.tsx.
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L1:12 (11 lines read)
+
+● Create QuickDictationCard.tsx +175
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test.
+
+● Commit iteration 368 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #368: Add Quick Dictation Card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1089 tests pass, TypeScript check passes. Now run tester (frontend UI changed, type is feature).
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill old server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+
+
+Server is up. Now calling the tester subagent.
+
+● Tester QA test iteration 368
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L400:550 (151 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L227:260 (33 lines read)
+
+The tester found critical issues. Let me fix them.
+
+● Check QuickShadowCard tts usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "tts\."
+  │ frontend/src/components/QuickShadowCard.tsx | head -10
+  └ 3 lines...
+
+● Check actual hook property names (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "isSupported\|supported"
+  │ frontend/src/hooks/useSpeechSynthesis.ts | head -10
+  └ 8 lines...
+
+Confirmed: `isSupported` not `supported`. Let me also check the CSS variable names.
+
+● Check CSS variables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -E "^\s*--bg|^\s*--border"
+  │ frontend/src/index.css | head -10
+  └ 7 lines...
+
+● Check btn-primary CSS (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "btn-primary" frontend/src/index.css |
+  │ head -10
+  └ 3 lines...
+
+● Check btn-primary styles (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A5 "^\.btn-primary"
+  │ frontend/src/index.css | head -15
+  └ 12 lines...
+
+● Check btn base class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A10 "^\.btn " frontend/src/index.css
+  │ | head -15
+  └ 12 lines...
+
+All 3 issues confirmed. Let me fix them all:
+
+● Edit QuickDictationCard.tsx +1 -1
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● Edit QuickDictationCard.tsx +1 -1
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● Edit QuickDictationCard.tsx +1 -1
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● Edit QuickDictationCard.tsx +1 -1
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● Edit QuickDictationCard.tsx +3 -2
+  └ frontend/src/components/QuickDictationCard.tsx
+
+● TypeScript check after fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TypeScript passes. Amend the commit with fixes:
+
