@@ -994,6 +994,75 @@ async def test_rephrase_evaluate_validation(client):
 
 
 @pytest.mark.integration
+async def test_retelling_evaluate_success(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "content_coverage": 8,
+        "grammar_score": 7,
+        "fluency_score": 9,
+        "vocabulary_score": 7.5,
+        "overall_score": 8,
+        "feedback": "Great retelling!",
+        "model_retelling": "The user checked into a hotel and asked about amenities.",
+    })
+    res = await client.post("/api/conversation/retelling/evaluate", json={
+        "original_summary": "The guest arrived at the hotel and inquired about room service.",
+        "user_retelling": "A person came to the hotel and asked about getting food in their room.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["content_coverage"] == 8
+    assert data["grammar_score"] == 7
+    assert data["fluency_score"] == 9
+    assert data["vocabulary_score"] == 7.5
+    assert data["overall_score"] == 8
+    assert data["feedback"] == "Great retelling!"
+    assert "hotel" in data["model_retelling"]
+
+
+@pytest.mark.integration
+async def test_retelling_evaluate_validation(client):
+    res = await client.post("/api/conversation/retelling/evaluate", json={
+        "original_summary": "",
+        "user_retelling": "Hello",
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_retelling_evaluate_llm_failure(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(side_effect=Exception("LLM error"))
+    res = await client.post("/api/conversation/retelling/evaluate", json={
+        "original_summary": "A conversation about hotels.",
+        "user_retelling": "They talked about hotels.",
+    })
+    assert res.status_code == 502
+
+
+@pytest.mark.integration
+async def test_retelling_evaluate_score_clamping(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "content_coverage": 0,
+        "grammar_score": 15,
+        "fluency_score": -2,
+        "vocabulary_score": 100,
+        "overall_score": 0,
+        "feedback": "Clamped",
+        "model_retelling": "Model text",
+    })
+    res = await client.post("/api/conversation/retelling/evaluate", json={
+        "original_summary": "Summary text.",
+        "user_retelling": "User retelling text.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["content_coverage"] == 1
+    assert data["grammar_score"] == 10
+    assert data["fluency_score"] == 1
+    assert data["vocabulary_score"] == 10
+    assert data["overall_score"] == 1
+
+
+@pytest.mark.integration
 async def test_message_returns_grammar_notes(client, mock_copilot):
     """Grammar notes field is present and correctly structured in message response."""
     mock_copilot.ask = AsyncMock(return_value="Welcome to our hotel!")

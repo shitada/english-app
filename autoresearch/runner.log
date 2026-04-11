@@ -4250,3 +4250,131 @@ T2=1775895363, implement_sec=36.
 
 **Step 4 — Commit**
 
+● Commit iteration 361 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #361: Extract shared ScoreBar component from RephraseChallenge and SpokenRetelling
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+**Step 5 — Test**
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+1074/1074 pass, TS check pass.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775895432, test_sec=69.
+
+**Step 5b — Smoke test**: No router/dal/database changes in this refactor (only frontend files).
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No backend changes — smoke test not needed.
+
+**Step 5c — QA test check**: This is a refactor type, not feature/ux → tester skip OK.
+
+**Step 6 — Evaluate**
+
+● Evaluator Evaluate iteration 361
+  │ Read index.ts
+  │   │ frontend/src/components/conversation/index.ts
+  │   └ 18 lines read
+  └ Read ScoreBar.tsx
+      │ frontend/src/components/conversation/ScoreBar.tsx
+      └ 15 lines read
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775895691. evaluate_sec=259, total_sec=1133. Score=7.05 ≥ 6.0 → **KEEP**.
+
+**Step 8 — Record Results**
+
+● Record results for iteration 361 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "361" "cc782f1" "2026-04-11" "769" "36" "69" "259" "1133" \
+  │ "1074" "1074" "pass" "7.05" "kept" "Extract shared ScoreBar component from RephraseChallenge
+  │ and SpokenRetelling" \…
+  └ 3 lines...
+
+**Step 9 — Update Backlog**
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ Iteration 361 complete. Checklist: ✅ proposer called, ✅ evaluator called, ✅ tester skip OK (refactor type).
+
+---
+
+**Iteration 362 — Step 1: Context Restore**
+
+● Context restore for iteration 362 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 14 lines...
+
+T0=1775895711.
+
+**Step 2 — Propose**
+
+● Proposer Propose iteration 362
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L900:1100 (201 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L1100:1300 (34 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775895785, propose_sec=74. Now implementing.
+
+**Step 3 — Implement**
+
+● Find rephrase test pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "rephrase_evaluate\|rephrase.evaluate\|test_rephrase" tests/integration/test_conversation_api.py
+  │ | head -10
+  └ 7 lines...
+
+● Read rephrase test pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '968,1000p'
+  │ tests/integration/test_conversation_api.py
+  └ 34 lines...
+
+Now let me find where to insert:
+
+● Check what's after rephrase validation test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '993,997p'
+  │ tests/integration/test_conversation_api.py
+  └ 6 lines...
+
+● Edit test_conversation_api.py +69
+  └ tests/integration/test_conversation_api.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775895811, implement_sec=26.
+
+**Step 4 — Commit**
+
