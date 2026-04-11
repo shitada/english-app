@@ -2535,3 +2535,90 @@ Now create the component:
 
 Now commit and test:
 
+● Commit iteration 382 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #382: Add Learning Velocity card to Dashboard with weekly pace chart"
+  └ 16 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1213 tests pass, TS check pass. Check frontend changes for tester requirement:
+
+● Check if tester needed (shell)
+  │ date +%s && git -C /Users/shingotada/Documents/vscode/english-app diff HEAD~1 --name-only | grep
+  │ -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+T3=1775922735. Frontend .tsx changed, type=feature → **MUST call tester**. Start server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 382
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1600:1700 (101 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1700:1720 (21 lines read)
+
+Tester passed (ux_score=7). Kill server and call evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 382
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1050:1250 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1250:1450 (159 lines read)
+
+● Record T4 for iteration 382 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775923023. Evaluator score: 6.45, verdict: keep.
+
+**Checklist:**
+- ✅ Called proposer → received JSON proposal
+- ✅ Called tester → received JSON with ux_score=7.0 (frontend .tsx changed, type=feature)
+- ✅ Called evaluator → received JSON with total_score=6.45
+- ✅ All 1213 tests pass, TS check pass
+- ✅ Score ≥ 6.0 → KEEP
+
+● Record results for iteration 382 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "382" "$HASH" "$DATE" "124" "105" "129" "183" "541" \
+  │ "1213" "1213" "pass" "6.45" "kept" "Add Learning Velocity card to Dashboard with weekly pace
+  │ chart" \…
+  └ 3 lines...
+
+Row verified. Now update the backlog and write session log:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+● Create invocation-022.md +39
+  └ autoresearch/logs/invocation-022.md
+

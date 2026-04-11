@@ -381,3 +381,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 379	30d9586	2026-04-12	138	123	195	68	524	1206	1206	pass	7.55	kept	Add grammar error category analysis endpoint with per-category trends
 380	5ad0a17	2026-04-12	108	304	304	68	480	1213	1213	pass	7.55	kept	Add vocabulary retention forecast endpoint with forgetting-risk scores
 381	a4b7c59	2026-04-12	171	112	200	183	666	1213	1213	pass	7.55	kept	Add Vocabulary Retention Forecast card to Dashboard
+382	75d7e2f	2026-04-12	124	105	129	183	541	1213	1213	pass	6.45	kept	Add Learning Velocity card to Dashboard with weekly pace chart
