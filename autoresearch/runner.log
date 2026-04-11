@@ -677,3 +677,48 @@ Also fix the loadSentence dependency:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
   └ 2 lines...
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #367: Add Quick Shadow Practice card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 367
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1:30 (30 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L800:900 (101 lines read)
+
+Evaluator score: 6.7 — KEEP. Record results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 367 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "367" "$HASH" "$DATE" "305" "73" "62" "285" "725" \
+  │ "1089" "1089" "pass" "6.7" "kept" "Add Quick Shadow Practice card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+● Kill QA server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Update backlog and write session log:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+All 3 iterations complete. Let me write the session log and commit.
+
+● Create invocation-016.md +45
+  └ autoresearch/logs/invocation-016.md
+

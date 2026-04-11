@@ -366,3 +366,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 364	55457b9	2026-04-11	592	35	61	63	751	1089	1089	pass	8.1	kept	Add integration tests for dashboard listening-progress endpoint
 365	38d390d	2026-04-11	268	144	80	416	908	1089	1089	pass	6.7	kept	Add Vocabulary Context Listening drill mode
 366	0e65d29	2026-04-11	295	78	61	299	733	1089	1089	pass	6.6	kept	Add Vocabulary Spelling Bee mode
+367	627e1c3	2026-04-11	305	73	62	285	725	1089	1089	pass	6.7	kept	Add Quick Shadow Practice card to Home page
