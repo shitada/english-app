@@ -244,3 +244,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ❌ Add Quick Writing Card with AI grammar feedback to Home page (#375 — discarded, Playwright unavailable)
 - [x] Add per-module study streak tracking endpoint to dashboard (#376)
+
+## [NEW] Iterations 377–378
+
+- [x] ❌ Add Collocation Match Drill for natural word pairing practice (#377 — discarded, QA failed due to undeclared variable)
+- [x] Add learning velocity tracking endpoint with weekly pace analytics (#378)
