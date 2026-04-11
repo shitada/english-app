@@ -1396,3 +1396,132 @@ Now write the session log and commit:
 ● Create invocation-017.md +42
   └ autoresearch/logs/invocation-017.md
 
+[2026-04-11 21:38:03] Copilot invocation completed (duration: 2243s)
+[2026-04-11 21:38:03] Verifying Playwright test depth...
+[2026-04-11 21:38:03]   PW_NA iter=372 — no UI file changes, Playwright test not required
+[2026-04-11 21:38:03]   PW_NA iter=373 — no UI file changes, Playwright test not required
+[2026-04-11 21:38:03] Running post-invocation audit (iter 371-373)...
+============================================
+ Autoresearch Audit
+ Iterations: 371 — 373
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-11 21:38:03
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 371 372 373[0m
+[0;31m  Tester: FAIL — missing: 371 372 373[0m
+[0;31m  Evaluator: FAIL — missing: 371 372 373[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-11 21:38:04] Audit found 3 error(s) — fixes applied where possible
+[2026-04-11 21:38:04] Cleaned up old session logs (kept 5)
+[2026-04-11 21:38:07] Current iteration count: 373 / 374
+[2026-04-11 21:38:07] ------------------------------------------
+[2026-04-11 21:38:07] Invocation 4 / 10
+[2026-04-11 21:38:07] Resuming from iteration 374
+[2026-04-11 21:38:07] ------------------------------------------
+[2026-04-11 21:38:07] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-374-to-374.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 238 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Record T0 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-018.md |
+  │ tail -50
+  └ 39 lines...
+
+Now I'll call the proposer subagent for iteration 374.
+
+● Proposer Propose iteration 374 change
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L400:600 (201 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L600:end (348 lines read)
+
+● Record T1 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775911424, propose_sec=317. Now let me implement. First, let me read the target functions.
+
+● Find function locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "_canonicalize_error\|_canonicalize_suggestion\|_normalize_grammar_feedback"
+  │ app/routers/conversation.py | head -20
+  └ 9 lines...
+
+● Read conversation.py
+  │ app/routers/conversation.py
+  └ L279:350 (72 lines read)
+
+● Find coerce_bool import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "coerce_bool"
+  │ app/routers/conversation.py | head -5
+  └ 3 lines...
+
+Now I'll create the test file:
+
+● Create test_grammar_feedback.py +278
+  └ tests/unit/test_grammar_feedback.py
+
+● Record T2 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
