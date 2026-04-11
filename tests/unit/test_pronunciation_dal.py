@@ -8,6 +8,7 @@ import pytest
 
 from app.dal.conversation import add_message, create_conversation
 from app.dal.pronunciation import (
+    _classify_score,
     _estimate_difficulty,
     clear_history,
     delete_attempt,
@@ -16,11 +17,15 @@ from app.dal.pronunciation import (
     get_listening_difficulty_recommendation,
     get_listening_quiz_history,
     get_minimal_pairs,
+    get_personal_records,
     get_phoneme_contrast_stats,
     get_progress,
     get_progress_by_difficulty,
     get_pronunciation_weaknesses,
+    get_retry_suggestions,
     get_score_distribution,
+    get_score_trend,
+    get_sentence_attempts,
     get_sentences_from_conversations,
     get_sentences_from_vocabulary,
     get_weekly_progress,
@@ -1167,3 +1172,172 @@ class TestGetPhonemeContrastStats:
         await save_minimal_pairs_results(test_db, results)
         stats = await get_phoneme_contrast_stats(test_db, limit=2)
         assert len(stats) == 2
+
+
+@pytest.mark.unit
+class TestClassifyScore:
+    def test_poor(self):
+        assert _classify_score(0) == "poor"
+        assert _classify_score(2.99) == "poor"
+
+    def test_fair(self):
+        assert _classify_score(3) == "fair"
+        assert _classify_score(4.99) == "fair"
+
+    def test_good(self):
+        assert _classify_score(5) == "good"
+        assert _classify_score(6.99) == "good"
+
+    def test_very_good(self):
+        assert _classify_score(7) == "very_good"
+        assert _classify_score(8.99) == "very_good"
+
+    def test_excellent(self):
+        assert _classify_score(9) == "excellent"
+        assert _classify_score(10) == "excellent"
+
+    def test_boundary_exactly_3(self):
+        assert _classify_score(3.0) == "fair"
+
+    def test_boundary_exactly_9(self):
+        assert _classify_score(9.0) == "excellent"
+
+
+@pytest.mark.unit
+class TestGetScoreTrend:
+    async def _seed_attempts(self, db, scores: list[float]):
+        for s in scores:
+            await save_attempt(db, f"Test sentence {s}", f"transcript {s}", {}, s)
+
+    async def test_insufficient_data(self, test_db):
+        await self._seed_attempts(test_db, [5.0, 6.0])
+        result = await get_score_trend(test_db, window=5)
+        assert result["trend"] == "insufficient_data"
+
+    async def test_improving_trend(self, test_db):
+        # Previous window: [3, 3, 3, 3, 3], Recent window: [8, 8, 8, 8, 8]
+        await self._seed_attempts(test_db, [3, 3, 3, 3, 3, 8, 8, 8, 8, 8])
+        result = await get_score_trend(test_db, window=5)
+        assert result["trend"] == "improving"
+        assert result["change"] > 0.5
+
+    async def test_declining_trend(self, test_db):
+        # Previous window: [8, 8, 8, 8, 8], Recent window: [3, 3, 3, 3, 3]
+        await self._seed_attempts(test_db, [8, 8, 8, 8, 8, 3, 3, 3, 3, 3])
+        result = await get_score_trend(test_db, window=5)
+        assert result["trend"] == "declining"
+        assert result["change"] < -0.5
+
+    async def test_stable_trend(self, test_db):
+        await self._seed_attempts(test_db, [5, 5, 5, 5, 5, 5.2, 5.2, 5.2, 5.2, 5.2])
+        result = await get_score_trend(test_db, window=5)
+        assert result["trend"] == "stable"
+        assert -0.5 <= result["change"] <= 0.5
+
+    async def test_exact_boundary_stable(self, test_db):
+        # change = exactly 0.5 should be stable
+        await self._seed_attempts(test_db, [5, 5, 5, 5, 5, 5.5, 5.5, 5.5, 5.5, 5.5])
+        result = await get_score_trend(test_db, window=5)
+        assert result["trend"] == "stable"
+
+
+@pytest.mark.unit
+class TestGetPersonalRecords:
+    async def test_empty_db(self, test_db):
+        result = await get_personal_records(test_db)
+        assert result["total_attempts"] == 0
+        assert result["avg_score"] == 0
+        assert result["best_attempts"] == []
+        assert result["worst_attempts"] == []
+
+    async def test_with_data(self, test_db):
+        await save_attempt(test_db, "Good morning", "Good morning", {}, 9.0)
+        await save_attempt(test_db, "How are you", "How are you", {}, 5.0)
+        await save_attempt(test_db, "Thank you", "Thank you", {}, 7.0)
+        result = await get_personal_records(test_db)
+        assert result["total_attempts"] == 3
+        assert result["best_score"] == 9.0
+        assert result["worst_score"] == 5.0
+        assert len(result["best_attempts"]) == 3
+        assert result["best_attempts"][0]["score"] == 9.0
+        assert len(result["worst_attempts"]) == 3
+        assert result["worst_attempts"][0]["score"] == 5.0
+
+    async def test_limits_to_3(self, test_db):
+        for i in range(5):
+            await save_attempt(test_db, f"Sentence {i}", f"Transcript {i}", {}, float(i + 3))
+        result = await get_personal_records(test_db)
+        assert len(result["best_attempts"]) == 3
+        assert len(result["worst_attempts"]) == 3
+
+
+@pytest.mark.unit
+class TestGetSentenceAttempts:
+    async def test_empty(self, test_db):
+        result = await get_sentence_attempts(test_db, "Nonexistent sentence")
+        assert result["attempts"] == []
+        assert result["summary"]["attempt_count"] == 0
+        assert result["summary"]["improvement"] == 0.0
+
+    async def test_single_attempt(self, test_db):
+        await save_attempt(test_db, "Hello world", "Hello world", {}, 8.0)
+        result = await get_sentence_attempts(test_db, "Hello world")
+        assert result["summary"]["attempt_count"] == 1
+        assert result["summary"]["first_score"] == 8.0
+        assert result["summary"]["latest_score"] == 8.0
+        assert result["summary"]["improvement"] == 0.0
+        assert len(result["attempts"]) == 1
+
+    async def test_multiple_attempts_with_improvement(self, test_db):
+        await save_attempt(test_db, "Hello world", "Helo world", {}, 4.0)
+        await save_attempt(test_db, "Hello world", "Hello world", {}, 7.0)
+        await save_attempt(test_db, "Hello world", "Hello world!", {}, 9.0)
+        result = await get_sentence_attempts(test_db, "Hello world")
+        assert result["summary"]["attempt_count"] == 3
+        assert result["summary"]["first_score"] == 4.0
+        assert result["summary"]["latest_score"] == 9.0
+        assert result["summary"]["improvement"] == 5.0
+        assert result["summary"]["best_score"] == 9.0
+        assert len(result["attempts"]) == 3
+
+    async def test_respects_limit(self, test_db):
+        for i in range(5):
+            await save_attempt(test_db, "Same sentence", f"Transcript {i}", {}, float(i + 3))
+        result = await get_sentence_attempts(test_db, "Same sentence", limit=2)
+        assert len(result["attempts"]) == 2
+        # Summary should still reflect all 5
+        assert result["summary"]["attempt_count"] == 5
+
+
+@pytest.mark.unit
+class TestGetRetrySuggestions:
+    async def test_empty_db(self, test_db):
+        result = await get_retry_suggestions(test_db)
+        assert result == []
+
+    async def test_all_above_threshold(self, test_db):
+        await save_attempt(test_db, "Good sentence", "Good sentence", {}, 8.0)
+        await save_attempt(test_db, "Another good one", "Another good one", {}, 9.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert result == []
+
+    async def test_below_threshold(self, test_db):
+        await save_attempt(test_db, "Hard sentence", "Hrd sentence", {}, 4.0)
+        await save_attempt(test_db, "Easy sentence", "Easy sentence", {}, 9.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert len(result) == 1
+        assert result[0]["text"] == "Hard sentence"
+        assert result[0]["latest_score"] == 4.0
+
+    async def test_respects_limit(self, test_db):
+        for i in range(5):
+            await save_attempt(test_db, f"Weak sentence {i}", f"Transcript {i}", {}, 3.0 + i * 0.5)
+        result = await get_retry_suggestions(test_db, threshold=7.0, limit=3)
+        assert len(result) == 3
+
+    async def test_uses_latest_score(self, test_db):
+        # First attempt bad, second attempt good — should NOT be suggested
+        await save_attempt(test_db, "Improving sentence", "Bad", {}, 3.0)
+        await save_attempt(test_db, "Improving sentence", "Good now", {}, 8.0)
+        result = await get_retry_suggestions(test_db, threshold=7.0)
+        assert len(result) == 0
