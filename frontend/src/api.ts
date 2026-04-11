@@ -216,7 +216,7 @@ export const api = {
     ),
 
   getDrillWords: (count = 10) =>
-    request<{ words: { id: number; word: string; meaning: string; topic: string; difficulty: number }[]; count: number }>(
+    request<{ words: { id: number; word: string; meaning: string; topic: string; difficulty: number; example_sentence: string }[]; count: number }>(
       `/api/vocabulary/drill?count=${count}`
     ),
 

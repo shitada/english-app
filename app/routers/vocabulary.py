@@ -302,6 +302,7 @@ class DrillWordItem(BaseModel):
     meaning: str
     topic: str
     difficulty: int
+    example_sentence: str = ""
 
 
 class DrillResponse(BaseModel):

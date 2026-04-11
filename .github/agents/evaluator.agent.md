@@ -75,9 +75,12 @@ total_score = (code_quality * 0.25) + (feature_value * 0.25) + (maintainability 
 
 Based on the QA tester's report:
 - If `qa_passed: false` → set ux_quality to **2 or lower**
-- If QA tester found critical or multiple major issues → score 1-3
+- If `spec_tests_failed > 0` and any failed test has `priority: critical` → set ux_quality to **2 or lower**
+- If `spec_tests_run == 0` AND frontend .tsx files were changed → set ux_quality to **3 or lower** (tester didn't run spec tests)
+- If `playwright_tool_calls` < 10 AND frontend .tsx files were changed → set ux_quality to **3 or lower** (too shallow)
+- If `spec_tests_passed / spec_tests_run < 0.8` → set ux_quality to **4 or lower** (too many failures)
+- If all spec tests pass and no issues → score 8-10
 - If minor issues only → score 5-7
-- If no issues and good overall impression → score 8-10
 - If QA tester was not run (no frontend changes) → default to **7** (neutral)
 
 ## Verdict Rules

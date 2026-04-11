@@ -106,6 +106,30 @@ date +%s
 ```
 Save as `T2`. Calculate `implement_sec = T2 - T1`.
 
+### Step 3.5 — Update UI Test Spec (if frontend UI changed)
+
+Check if any frontend page or component files were modified:
+```bash
+git diff --cached --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+```
+
+If YES, you MUST update `tests/e2e/ui-test-spec.yaml`:
+1. Read the current spec file
+2. For the affected page(s), add new test items for any NEW interactive elements you added
+3. Each new test item needs: `id` (page-NNN, increment from last), `target`, `action`, `expect`, `type`, `priority`, `added_in: <current_iteration>`
+4. Do NOT remove existing test items — only add new ones or update `expect` if behavior changed
+
+Example of adding a test item:
+```yaml
+      - id: conv-025
+        target: Voice mode toggle works
+        action: click Voice mode button
+        expect: Green highlight, pulse animation, status indicator appears
+        type: functional
+        priority: medium
+        added_in: 348
+```
+
 ### Step 4 — Commit
 ```bash
 git add -A && git commit -m "autoresearch #N: <short description>"

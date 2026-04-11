@@ -7,6 +7,7 @@ import VocabSRSProgress, { type SRSChange } from '../components/VocabSRSProgress
 import VocabDrillMode from '../components/VocabDrillMode';
 import VocabFlashcardMode from '../components/VocabFlashcardMode';
 import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
+import VocabContextListenDrill from '../components/VocabContextListenDrill';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -18,7 +19,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export default function Vocabulary() {
 
   // Speak from memory state
   const [srWords, setSrWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
+  const [clWords, setClWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number; example_sentence: string }[]>([]);
 
   const tts = useSpeechSynthesis();
   const speech = useSpeechRecognition({ lang: 'en-US' });
@@ -436,6 +438,36 @@ export default function Vocabulary() {
           🧠 Speak from Memory — say the word from its meaning
         </button>
 
+        <button
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getDrillWords(10);
+              const withSentence = data.words.filter(w => w.example_sentence && w.example_sentence.trim());
+              if (withSentence.length === 0) {
+                alert('No vocabulary words with example sentences available. Try a topic quiz first.');
+                return;
+              }
+              setClWords(withSentence.slice(0, 10));
+              setPhase('context-listen');
+            } catch {
+              alert('Failed to load words for context listening.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #7c3aed', background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+            color: '#5b21b6', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start context listening drill"
+        >
+          🎧 Context Listening — hear sentences, find the word
+        </button>
+
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -563,6 +595,15 @@ export default function Vocabulary() {
       <VocabSpeakRecallMode
         initialWords={srWords}
         speech={speech}
+        onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+      />
+    );
+  }
+
+  if (phase === 'context-listen') {
+    return (
+      <VocabContextListenDrill
+        initialWords={clWords}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
       />
     );

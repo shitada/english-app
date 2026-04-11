@@ -369,7 +369,7 @@ async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dic
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     # Due words first
     due_rows = await db.execute_fetchall(
-        """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty
+        """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty, vw.example_sentence
            FROM vocabulary_progress vp
            JOIN vocabulary_words vw ON vp.word_id = vw.id
            WHERE vp.next_review_at IS NULL OR vp.next_review_at <= ?
@@ -383,7 +383,7 @@ async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dic
     if len(results) < count:
         # Weak words next
         weak_rows = await db.execute_fetchall(
-            """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty
+            """SELECT vw.id, vw.word, vw.meaning, vw.topic, vw.difficulty, vw.example_sentence
                FROM vocabulary_progress vp
                JOIN vocabulary_words vw ON vp.word_id = vw.id
                WHERE (vp.correct_count + vp.incorrect_count) >= 2
@@ -402,7 +402,7 @@ async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dic
         remaining = count - len(results)
         placeholders = ",".join("?" for _ in seen_ids) if seen_ids else "0"
         random_rows = await db.execute_fetchall(
-            f"""SELECT id, word, meaning, topic, difficulty
+            f"""SELECT id, word, meaning, topic, difficulty, example_sentence
                 FROM vocabulary_words
                 WHERE id NOT IN ({placeholders})
                 ORDER BY RANDOM()

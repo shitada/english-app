@@ -1,0 +1,457 @@
+# =============================================================================
+# UI Test Specification — Playwright E2E Tests
+# =============================================================================
+# This file defines what to test on each page. The tester agent reads this
+# spec and executes each test item via Playwright MCP tools.
+#
+# Structure:
+#   pages.<page>.path          — URL path
+#   pages.<page>.tests[]       — list of test items
+#     .id                      — unique test ID (page-NNN)
+#     .target                  — human description of what to test
+#     .action                  — what Playwright should do
+#     .expect                  — pass criteria
+#     .type                    — functional | visual | state | navigation | error
+#     .added_in                — iteration number when this test was added
+#     .priority                — critical | high | medium | low
+#
+# The orchestrator MUST update this file when adding/modifying UI elements.
+# =============================================================================
+
+pages:
+  home:
+    path: /
+    tests:
+      - id: home-001
+        target: Navigation bar renders with all links
+        action: snapshot and check for nav links (Conversation, Pronunciation, Listening, Vocabulary, Dashboard)
+        expect: All 5 navigation links visible and not disabled
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: home-002
+        target: Theme toggle switches dark/light mode
+        action: click theme toggle button (Sun/Moon icon)
+        expect: Body class changes to dark/light, icon switches
+        type: functional
+        priority: medium
+        added_in: 291
+
+      - id: home-003
+        target: Locale toggle switches EN/JA
+        action: click locale toggle button (Globe icon)
+        expect: Language code display changes between EN and JA
+        type: functional
+        priority: medium
+        added_in: 335
+
+      - id: home-004
+        target: Daily streak card displays correctly
+        action: snapshot Home page
+        expect: Streak count visible with flame icon, no text overflow
+        type: visual
+        priority: high
+        added_in: 0
+
+      - id: home-005
+        target: Word of the Day TTS button works
+        action: click TTS button on Word of the Day card
+        expect: Button responds (not stuck disabled), no console errors
+        type: functional
+        priority: high
+        added_in: 313
+
+      - id: home-006
+        target: Recently Practiced card shows activities
+        action: snapshot Home page
+        expect: Activity items render with module icon, detail text, and relative time
+        type: visual
+        priority: medium
+        added_in: 334
+
+      - id: home-007
+        target: Streak milestones timeline renders
+        action: snapshot streak milestones section
+        expect: Milestone badges visible, achieved ones have gold background
+        type: visual
+        priority: medium
+        added_in: 333
+
+      - id: home-008
+        target: Mobile hamburger menu opens/closes
+        action: resize to 375px width, click hamburger button
+        expect: Nav menu expands, shows all links; click again to close
+        type: functional
+        priority: high
+        added_in: 0
+
+  conversation:
+    path: /conversation
+    tests:
+      # --- Select phase ---
+      - id: conv-001
+        target: Difficulty buttons toggle selection
+        action: click each difficulty button (Beginner, Intermediate, Advanced)
+        expect: Clicked button gets primary background, others reset to default
+        type: functional
+        priority: high
+        added_in: 0
+
+      - id: conv-002
+        target: Duration buttons toggle selection
+        action: click each duration button (3 min, 5 min, 10 min, No limit)
+        expect: Clicked button gets primary background, others reset
+        type: functional
+        priority: high
+        added_in: 265
+
+      - id: conv-003
+        target: Topic cards render with emoji, label, description
+        action: snapshot topic selection area
+        expect: All topic cards visible with emoji, name, description; no truncation
+        type: visual
+        priority: critical
+        added_in: 0
+
+      - id: conv-004
+        target: Topic favorite star toggles
+        action: click star icon on a topic card
+        expect: Star fills/unfills, card moves to top or stays
+        type: functional
+        priority: medium
+        added_in: 285
+
+      - id: conv-005
+        target: Topic card click starts conversation
+        action: click any topic card
+        expect: Loading spinner appears, then chat phase renders with AI message
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: conv-006
+        target: Past conversations list renders
+        action: snapshot past conversations section (if any exist)
+        expect: Each conversation shows emoji, topic, difficulty, message count, date
+        type: visual
+        priority: medium
+        added_in: 0
+
+      - id: conv-007
+        target: Role swap toggle works
+        action: click "You play the staff role" toggle
+        expect: Toggle shows enabled state, explanation text appears
+        type: functional
+        priority: medium
+        added_in: 293
+
+      # --- Chat phase (requires starting a conversation first) ---
+      - id: conv-010
+        target: Chat input accepts text and send works
+        action: type text in input, click Send button
+        expect: User message appears in chat, input clears, AI response appears
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: conv-011
+        target: Timer displays and counts down
+        action: start conversation with 3 min duration, observe timer
+        expect: Timer shows "3:00" format, visible in header
+        type: functional
+        priority: high
+        added_in: 265
+
+      - id: conv-012
+        target: End button stops conversation
+        action: click End button (Square icon)
+        expect: Summary phase renders with conversation stats
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: conv-013
+        target: Speech speed buttons toggle
+        action: click speed buttons (turtle, 1x, rabbit)
+        expect: Clicked button gets primary background
+        type: functional
+        priority: medium
+        added_in: 0
+
+      - id: conv-014
+        target: Listen mode toggle works
+        action: click Listen mode button (Headphones icon)
+        expect: AI messages become hidden with "Tap to reveal" placeholder
+        type: functional
+        priority: medium
+        added_in: 276
+
+      - id: conv-015
+        target: Voice mode toggle works
+        action: click Voice mode button
+        expect: Green highlight, pulse animation, status indicator appears
+        type: functional
+        priority: medium
+        added_in: 348
+
+      - id: conv-016
+        target: Grammar accuracy HUD shows in chat
+        action: send a message in chat, check stats bar
+        expect: Grammar stats bar shows correct/total with percentage
+        type: visual
+        priority: medium
+        added_in: 274
+
+      # --- Summary phase ---
+      - id: conv-020
+        target: Summary shows key vocabulary and tip
+        action: end conversation, check summary
+        expect: Key vocabulary tags visible, communication level shown, tip displayed
+        type: visual
+        priority: high
+        added_in: 0
+
+      - id: conv-021
+        target: Quick Quiz button starts quiz
+        action: click "Take Quick Quiz" button
+        expect: Quiz questions appear with multiple choice options
+        type: functional
+        priority: high
+        added_in: 270
+
+      - id: conv-022
+        target: Start New Conversation button works
+        action: click "Start New Conversation"
+        expect: Returns to select phase, state is clean
+        type: functional
+        priority: critical
+        added_in: 0
+
+  pronunciation:
+    path: /pronunciation
+    tests:
+      - id: pron-001
+        target: Practice mode buttons render and toggle
+        action: click each mode button (Shadowing, Dictation, Minimal Pairs, etc.)
+        expect: Selected mode highlighted, content area updates to match
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: pron-002
+        target: Difficulty filter buttons work
+        action: click each difficulty filter (All, Beginner, Intermediate, Advanced)
+        expect: Sentence list updates to show only matching difficulty
+        type: functional
+        priority: high
+        added_in: 0
+
+      - id: pron-003
+        target: Sentence card click starts practice
+        action: click a sentence in the list
+        expect: Practice phase renders with sentence text displayed
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: pron-004
+        target: Start Shadowing button enabled
+        action: navigate to practice phase, snapshot
+        expect: "Start Shadowing" button is visible and NOT disabled
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: pron-005
+        target: View History button works
+        action: click "View History" button
+        expect: History phase renders with past attempts list
+        type: functional
+        priority: high
+        added_in: 0
+
+      - id: pron-006
+        target: My Recordings button works
+        action: click "My Recordings" button
+        expect: Recordings panel opens showing saved recordings
+        type: functional
+        priority: medium
+        added_in: 292
+
+      - id: pron-007
+        target: Session summary scores display
+        action: complete multiple pronunciation attempts, check session summary
+        expect: Session summary shows scores per sentence, average, retry option
+        type: visual
+        priority: medium
+        added_in: 329
+
+  listening:
+    path: /listening
+    tests:
+      - id: list-001
+        target: Difficulty tabs render and switch
+        action: click each difficulty tab
+        expect: Selected tab highlighted, quiz content loads
+        type: functional
+        priority: high
+        added_in: 324
+
+      - id: list-002
+        target: Play button starts audio
+        action: click play button on listening quiz
+        expect: Audio plays, play button changes state, passages display
+        type: functional
+        priority: critical
+        added_in: 324
+
+      - id: list-003
+        target: Quiz answer selection provides feedback
+        action: select an answer option in quiz
+        expect: Correct answer highlighted green, wrong answer red, explanation shown
+        type: functional
+        priority: critical
+        added_in: 324
+
+      - id: list-004
+        target: Speed control adjusts playback
+        action: change playback speed control
+        expect: Speed indicator updates, audio rate changes
+        type: functional
+        priority: medium
+        added_in: 339
+
+      - id: list-005
+        target: Score history panel shows past results
+        action: check listening progress section
+        expect: Past quiz scores visible with dates
+        type: visual
+        priority: medium
+        added_in: 324
+
+  vocabulary:
+    path: /vocabulary
+    tests:
+      - id: vocab-001
+        target: Quick action buttons render
+        action: snapshot vocabulary page
+        expect: Quick Drill, Flashcard Review, Word Tiers, Listen & Repeat, Speak from Memory buttons visible
+        type: visual
+        priority: high
+        added_in: 0
+
+      - id: vocab-002
+        target: Quiz mode buttons toggle
+        action: click each mode button (Word→Meaning, Meaning→Word, Fill in Blank, etc.)
+        expect: Selected mode gets primary background, others reset
+        type: functional
+        priority: high
+        added_in: 0
+
+      - id: vocab-003
+        target: Topic card click starts quiz
+        action: click a topic card
+        expect: Loading state, then quiz questions appear
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: vocab-004
+        target: Quiz answer selection works
+        action: click an answer option in quiz
+        expect: Answer highlighted, correct/incorrect feedback shown, TTS plays
+        type: functional
+        priority: critical
+        added_in: 0
+
+      - id: vocab-005
+        target: Quick Drill button starts drill
+        action: click Quick Drill button
+        expect: Drill mode renders with word, timer counting down
+        type: functional
+        priority: high
+        added_in: 185
+
+      - id: vocab-006
+        target: Flashcard Review button works
+        action: click Flashcard Review button
+        expect: Flashcard mode renders with flip card, navigation buttons
+        type: functional
+        priority: high
+        added_in: 332
+
+      - id: vocab-007
+        target: Word Tiers button shows mastery view
+        action: click Word Tiers button
+        expect: Tiers view renders with words grouped by mastery level
+        type: visual
+        priority: medium
+        added_in: 290
+
+      - id: vocab-008
+        target: Topic mastery celebration shows on completion
+        action: complete all words in a topic quiz
+        expect: Confetti animation and celebration message appear
+        type: visual
+        priority: low
+        added_in: 335
+
+  dashboard:
+    path: /dashboard
+    tests:
+      - id: dash-001
+        target: Stats cards render with data
+        action: snapshot dashboard page
+        expect: Streak, total conversations, pronunciation score, vocab stats visible
+        type: visual
+        priority: high
+        added_in: 0
+
+      - id: dash-002
+        target: Activity heatmap calendar renders
+        action: snapshot heatmap section
+        expect: Calendar grid visible with colored cells for active days
+        type: visual
+        priority: medium
+        added_in: 321
+
+      - id: dash-003
+        target: Achievement badges display
+        action: snapshot achievements section
+        expect: Achievement badges visible with earned/locked states
+        type: visual
+        priority: medium
+        added_in: 0
+
+      - id: dash-004
+        target: Weekly report generates
+        action: click weekly report button/section
+        expect: Report content appears with stats, copy button works
+        type: functional
+        priority: medium
+        added_in: 299
+
+      - id: dash-005
+        target: Grammar trend chart renders
+        action: snapshot grammar trend section
+        expect: Chart or trend visualization visible without errors
+        type: visual
+        priority: medium
+        added_in: 305
+
+      - id: dash-006
+        target: Speaking confidence score displays
+        action: snapshot speaking confidence section
+        expect: Score value and trend indicator visible
+        type: visual
+        priority: medium
+        added_in: 311
+
+      - id: dash-007
+        target: Listening progress card displays
+        action: snapshot listening progress section
+        expect: Quiz count, average score, and trend visible
+        type: visual
+        priority: medium
+        added_in: 351
