@@ -4378,3 +4378,76 @@ T2=1775895811, implement_sec=26.
 
 **Step 4 — Commit**
 
+● Commit iteration 362 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #362: Add integration tests for conversation retelling evaluate endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+**Step 5 — Test**
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+1078/1078 pass (+4 new tests), TS check pass.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775895879, test_sec=68.
+
+**Step 5b — Smoke test**: No router/dal/database changes (test file only).
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No backend changes — smoke test not needed. QA test also not needed (test type, no frontend UI changes).
+
+**Step 6 — Evaluate**
+
+● Evaluator Evaluate iteration 362
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L700:850 (151 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L850:1000 (98 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775895936. evaluate_sec=57, total_sec=225. Score=8.1 ≥ 6.0 → **KEEP**.
+
+**Step 8 — Record Results**
+
+● Record results for iteration 362 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "362" "95882f0" "2026-04-11" "74" "26" "68" "57" "225" \
+  │ "1078" "1078" "pass" "8.1" "kept" "Add integration tests for conversation retelling evaluate
+  │ endpoint" \…
+  └ 3 lines...
+
+**Step 9 — Update Backlog**
+
+● Edit backlog.md +1 -1
+  └ autoresearch/backlog.md
+
+✅ Iteration 362 complete. Checklist: ✅ proposer called, ✅ evaluator called, ✅ tester skip OK (test type).
+
+Now let me write the session log and commit it:
+
+● Create invocation-014.md +43
+  └ autoresearch/logs/invocation-014.md
+

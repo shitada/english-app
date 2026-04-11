@@ -361,3 +361,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 359	c4cec7b	2026-04-11	172	35	178	84	469	1074	1074	pass	8.35	kept	Add unit tests for save_minimal_pairs_results and get_phoneme_contrast_stats
 360	1924df4	2026-04-11	249	113	66	634	1062	1074	1074	pass	6.85	kept	Add Spoken Retelling drill to conversation summary
 361	cc782f1	2026-04-11	769	36	69	259	1133	1074	1074	pass	7.05	kept	Extract shared ScoreBar component from RephraseChallenge and SpokenRetelling
+362	95882f0	2026-04-11	74	26	68	57	225	1078	1078	pass	8.1	kept	Add integration tests for conversation retelling evaluate endpoint

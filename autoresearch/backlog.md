@@ -220,4 +220,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add Spoken Retelling drill to conversation summary (#360)
 - [x] Extract shared ScoreBar component from RephraseChallenge and SpokenRetelling (#361)
-- [ ] Add integration test for POST /api/conversation/retelling/evaluate endpoint
+- [x] Add integration test for POST /api/conversation/retelling/evaluate endpoint (#362)
