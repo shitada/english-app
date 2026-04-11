@@ -521,3 +521,272 @@ Record T2 and commit:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 346 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #346: Add Speak-from-Memory vocabulary recall mode
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Run tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1025 tests pass, TypeScript check passes. Now check if frontend UI files changed (mandatory tester check):
+
+● Check frontend changes + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$" && date +%s
+  └ 4 lines...
+
+Frontend UI files changed, proposal type is "feature" → MUST run tester. Let me start the server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 346
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L310:440 (131 lines read)
+  └ Read VocabSpeakRecallMode.tsx
+      │ frontend/src/components/VocabSpeakRecallMode.tsx
+      └ L14:25 (11 lines read)
+
+Tester passed with ux_score 8.0. Stop server and call evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 346
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L420:500 (81 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L530:600 (71 lines read)
+
+● Record T4 for iteration 346 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.6 ≥ 6.0, all tests pass, QA passed. **KEEP**.
+
+● Record and verify results for 346 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "346" "a2c9c52" "2026-04-11" "295" "90" "60" "349" "794" \
+  │ "1025" "1025" "pass" "6.6" "kept" "Add Speak-from-Memory vocabulary recall mode" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 346 complete: **KEPT** (6.6). Proposer ✅, Evaluator ✅, Tester ✅.
+
+---
+
+## Iteration 347
+
+● Context restore for iteration 347 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git --no-pager log --oneline -5
+  └ 7 lines...
+
+T0 = 1775876659. Call the proposer:
+
+● Proposer Propose iteration 347
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L550:700 (151 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L700:900 (200 lines read)
+
+● Record T1 for iteration 347 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal. Let me examine the existing code:
+
+● Check existing listening quiz DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz"
+  │ app/dal/pronunciation.py | head -20
+  └ 5 lines...
+
+● Check schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz_results"
+  │ app/database.py | head -10
+  └ 4 lines...
+
+● Check existing listening quiz routes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "listening.quiz\|listening-quiz\|listeningQuiz" app/routers/pronunciation.py | head -20
+  └ 12 lines...
+
+● Check listening_quiz_results schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '111,120p' app/database.py
+  └ 11 lines...
+
+● Check existing DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '795,830p' app/dal/pronunciation.py
+  └ 29 lines...
+
+● Check existing API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ListeningQuizResult\|listening-quiz\|listeningQuiz\|ListeningDifficulty" frontend/src/api.ts |
+  │ head -20
+  └ 7 lines...
+
+Now let me check the Listening.tsx to understand where to add the recommendation:
+
+● Find difficulty selection in Listening.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "difficulty\|beginner\|intermediate\|advanced\|setDifficulty\|phase.*select\|setup"
+  │ frontend/src/pages/Listening.tsx | head -30
+  └ 18 lines...
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L1:55 (55 lines read)
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L125:200 (76 lines read)
+
+Now let me implement the changes. Start with the DAL:
+
+● Read pronunciation.py
+  │ app/dal/pronunciation.py
+  └ L820:835 (3 lines read)
+
+● Edit pronunciation.py +44
+  └ app/dal/pronunciation.py
+
+Now add the router endpoint:
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L785:800 (16 lines read)
+
+● Edit pronunciation.py +8
+  └ app/routers/pronunciation.py
+
+Now add the API client function. Let me find where the existing listening quiz functions are:
+
+● Find API location for listening quiz (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getListeningQuizHistory\|ListeningQuizResult" frontend/src/api.ts | head -10
+  └ 5 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L1152:1165 (14 lines read)
+
+● Edit api.ts +11
+  └ frontend/src/api.ts
+
+Now update Listening.tsx to fetch and display the recommendation:
+
+● Edit Listening.tsx +2 -2
+  └ frontend/src/pages/Listening.tsx
+
+Add state for recommendation and fetch it on mount:
+
+● Edit Listening.tsx +9
+  └ frontend/src/pages/Listening.tsx
+
+Now add the recommendation badge below the difficulty buttons:
+
+● Edit Listening.tsx +17
+  └ frontend/src/pages/Listening.tsx
+
+Record T2 and commit:
+
+● Record T2 for iteration 347 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 347 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #347: Add adaptive difficulty recommendation to Listening quiz
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+Run tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1025 tests pass, TypeScript passes. Check if smoke test needed and if frontend UI files changed:
+
+● Check smoke test and QA needs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "---SMOKE---" && git diff HEAD~1 --name-only | grep
+  │ -E "frontend/src/(pages|components)/.*\.tsx$" && echo "---UI---" && date +%s
+  └ 7 lines...
+
+Both smoke test AND tester are needed. Run smoke test first:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. Now run QA tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server + new endpoint (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health && echo "" && curl -s
+  │ http://localhost:8000/api/pronunciation/listening-quiz/difficulty-recommendation
+  └ 3 lines...
+
+New endpoint works. Call the tester:
+
+● Tester QA test iteration 347
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L20:50 (31 lines read)
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L116:131 (15 lines read)
+
+Tester passed with ux_score 7.0. The minor issues (beginner auto-select for new users, stale recommendation) are valid but not blocking. Let me fix the most impactful one quickly — don't auto-select when there's no history:
+
+● Edit Listening.tsx +1 -1
+  └ frontend/src/pages/Listening.tsx
+

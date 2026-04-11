@@ -3,8 +3,8 @@ import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from '
 import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
-import { api, saveListeningQuizResult, getListeningQuizHistory } from '../api';
-import type { ListeningQuizQuestion, ListeningQuizResult } from '../api';
+import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation } from '../api';
+import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
 type Phase = 'setup' | 'listen' | 'quiz' | 'results';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
@@ -35,9 +35,18 @@ export default function Listening() {
   const [showHistory, setShowHistory] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [saved, setSaved] = useState(false);
+  const [recommendation, setRecommendation] = useState<ListeningDifficultyRecommendation | null>(null);
 
   useEffect(() => {
     getListeningQuizHistory(10).then(setHistory).catch(() => {});
+    getListeningDifficultyRecommendation().then(rec => {
+      setRecommendation(rec);
+      if (rec.recommended_difficulty && rec.stats.quizzes_analyzed > 0) {
+        const d = rec.recommended_difficulty as Difficulty;
+        setDifficulty(d);
+        setPlaybackRate(d === 'beginner' ? 0.75 : d === 'advanced' ? 1.1 : 1.0);
+      }
+    }).catch(() => {});
   }, []);
 
   const generateQuiz = useCallback(async () => {
@@ -150,6 +159,23 @@ export default function Listening() {
               </button>
             ))}
           </div>
+          {recommendation && recommendation.stats.quizzes_analyzed > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '8px 12px',
+              borderRadius: 8, background: 'var(--bg-secondary, #f9fafb)', border: '1px solid var(--border, #e5e7eb)',
+              fontSize: '0.85rem',
+            }}>
+              <span>📊</span>
+              <div>
+                <div style={{ fontWeight: 600, textTransform: 'capitalize' }}>
+                  Recommended: {recommendation.recommended_difficulty}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)' }}>
+                  {recommendation.reason}
+                </div>
+              </div>
+            </div>
+          )}
           {error && <p style={{ color: 'var(--danger, #ef4444)', marginBottom: 12 }}>{error}</p>}
           <button
             className="btn btn-primary"

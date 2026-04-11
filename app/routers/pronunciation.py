@@ -791,6 +791,14 @@ async def get_listening_quiz_history(
     return await pron_dal.get_listening_quiz_history(db, limit=limit)
 
 
+@router.get("/listening-quiz/difficulty-recommendation")
+async def get_listening_difficulty_recommendation(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Recommend a listening quiz difficulty based on recent performance."""
+    return await pron_dal.get_listening_difficulty_recommendation(db)
+
+
 # ── Response Drill ──────────────────────────────────────────
 
 class ResponseDrillPrompt(BaseModel):

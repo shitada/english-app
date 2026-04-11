@@ -820,3 +820,47 @@ async def get_listening_quiz_history(
         (limit,),
     )
     return [dict(r) for r in rows]
+
+
+async def get_listening_difficulty_recommendation(
+    db: aiosqlite.Connection,
+) -> dict[str, Any]:
+    """Analyze recent listening quiz results and recommend a difficulty level."""
+    rows = await db.execute_fetchall(
+        """SELECT difficulty, score FROM listening_quiz_results
+           ORDER BY created_at DESC LIMIT 10""",
+    )
+    results = [dict(r) for r in rows]
+
+    if not results:
+        return {
+            "recommended_difficulty": "beginner",
+            "current_difficulty": None,
+            "reason": "No quiz history — start with beginner to build confidence",
+            "stats": {"avg_score": 0, "quizzes_analyzed": 0},
+        }
+
+    current_difficulty = results[0]["difficulty"]
+    same_level = [r for r in results if r["difficulty"] == current_difficulty]
+    analyze = same_level[:5] if len(same_level) >= 3 else results[:5]
+    avg_score = sum(r["score"] for r in analyze) / len(analyze)
+
+    difficulty_order = ["beginner", "intermediate", "advanced"]
+    idx = difficulty_order.index(current_difficulty) if current_difficulty in difficulty_order else 1
+
+    if avg_score >= 80 and idx < 2:
+        recommended = difficulty_order[idx + 1]
+        reason = f"You averaged {avg_score:.0f}% on {current_difficulty} — ready to level up!"
+    elif avg_score < 50 and idx > 0:
+        recommended = difficulty_order[idx - 1]
+        reason = f"You averaged {avg_score:.0f}% on {current_difficulty} — try an easier level to build skills"
+    else:
+        recommended = current_difficulty
+        reason = f"You averaged {avg_score:.0f}% on {current_difficulty} — this level suits you"
+
+    return {
+        "recommended_difficulty": recommended,
+        "current_difficulty": current_difficulty,
+        "reason": reason,
+        "stats": {"avg_score": round(avg_score, 1), "quizzes_analyzed": len(analyze)},
+    }

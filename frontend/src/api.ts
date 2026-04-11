@@ -1153,6 +1153,17 @@ export async function getListeningQuizHistory(limit = 20): Promise<ListeningQuiz
   return request<ListeningQuizResult[]>('/api/pronunciation/listening-quiz/history?limit=' + limit);
 }
 
+export interface ListeningDifficultyRecommendation {
+  recommended_difficulty: string;
+  current_difficulty: string | null;
+  reason: string;
+  stats: { avg_score: number; quizzes_analyzed: number };
+}
+
+export async function getListeningDifficultyRecommendation(): Promise<ListeningDifficultyRecommendation> {
+  return request<ListeningDifficultyRecommendation>('/api/pronunciation/listening-quiz/difficulty-recommendation');
+}
+
 // ── Response Drill ────────────────────────────────────
 
 export interface ResponseDrillPrompt {
