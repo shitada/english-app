@@ -278,3 +278,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [NEW] Iteration 389
 
 - [x] Add Phrase of the Day card to Home page with listen-and-repeat drill (#389)
+
+## [NEW] Iteration 390
+
+- [x] Add data-populated integration tests for phrase-of-the-day and module-streaks (#390)

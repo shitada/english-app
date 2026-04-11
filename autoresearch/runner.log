@@ -4809,3 +4809,65 @@ The column is `correct_count`, not `correct_answers`. Also needs `title`. Let me
 ● Edit test_dashboard_api.py +2 -2
   └ tests/integration/test_dashboard_api.py
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+● Re-run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+1231 passed (6 new tests). Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1775929394, test_sec = 141. This is a `test` type proposal — no frontend UI files changed, so QA tester is optional (skip OK). Now call evaluator:
+
+● Evaluator Evaluate iteration 390
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L1050:end (382 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L1240:1275 (36 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 8.1, verdict: keep. All criteria met.
+
+Checklist verification:
+- ✅ Called proposer
+- ✅ Called evaluator  
+- ✅ Tester skip OK (test-only, no frontend UI files changed)
+- ✅ Score matches evaluator's total_score (8.1)
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "390" "$HASH" "$DATE" "191" "60" "141" "50" "442" \
+  │ "1231" "1231" "pass" "8.1" "kept" "Add data-populated integration tests for
+  │ phrase-of-the-day and module-streaks" \…
+  └ 3 lines...
+
+Now update backlog and write session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iteration 390
+  │
+  │ - [x] Add data-populated integration tests for phrase-of-the-day and module-streaks (#390)…
+  └ 2 lines...
+
+● Create invocation-026.md +38
+  └ autoresearch/logs/invocation-026.md
+
