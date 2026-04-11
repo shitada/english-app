@@ -371,3 +371,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 369	c8c3de3	2026-04-11	252	113	823	0	1188	1089	1089	pass	6.7	kept	Add Quick Speak Card to Home page
 370	cdb634b	2026-04-11	3543	173	52	52	3768	1093	1093	pass	7.8	kept	Add integration tests for sentence-craft evaluate and sentence-transform endpoints
 371	none	2026-04-11	283	64	68	229	644	1093	1093	pass	5.9	discarded	Add Quick Grammar Fix card to Home page
+372	7959e6d	2026-04-11	379	223	266	54	922	1100	1100	pass	7.85	kept	Add integration tests for listening-qa evaluate and conversation bookmarks endpoints

@@ -1,7 +1,7 @@
 """Unit tests for normalization functions in routers."""
 
 import pytest
-from app.routers.conversation import _normalize_grammar_feedback, _normalize_summary
+from app.routers.conversation import _normalize_grammar_feedback, _normalize_summary, _swap_scenario_roles, _safe_quiz_index
 from app.routers.pronunciation import _normalize_feedback as _normalize_pronunciation_feedback
 
 
@@ -442,3 +442,105 @@ class TestGrammarKeyCanonicalization:
         assert err["original"] == "goed"
         assert err["correction"] == "went"
         assert err["explanation"] == "irregular"
+
+
+# --- _swap_scenario_roles ---
+
+@pytest.mark.unit
+class TestSwapScenarioRoles:
+    def test_standard_swap(self):
+        s = "You are a hotel front desk clerk. The user is a guest checking in."
+        result = _swap_scenario_roles(s)
+        assert result == "You are a guest checking in. The user is a hotel front desk clerk."
+
+    def test_missing_you_are_prefix(self):
+        s = "The AI is a doctor. The user is a patient."
+        result = _swap_scenario_roles(s)
+        assert result == s  # returned unchanged
+
+    def test_missing_user_clause(self):
+        s = "You are a restaurant waiter."
+        result = _swap_scenario_roles(s)
+        assert result == s  # returned unchanged
+
+    def test_empty_string(self):
+        assert _swap_scenario_roles("") == ""
+
+    def test_both_present_multiword(self):
+        s = "You are a friendly airport check-in agent. The user is a nervous first-time flyer."
+        result = _swap_scenario_roles(s)
+        assert result == "You are a nervous first-time flyer. The user is a friendly airport check-in agent."
+
+
+# --- _safe_quiz_index ---
+
+@pytest.mark.unit
+class TestSafeQuizIndex:
+    def test_none_returns_none(self):
+        assert _safe_quiz_index(None) is None
+
+    def test_valid_zero(self):
+        assert _safe_quiz_index(0) == 0
+
+    def test_valid_three(self):
+        assert _safe_quiz_index(3) == 3
+
+    def test_valid_middle(self):
+        assert _safe_quiz_index(2) == 2
+
+    def test_out_of_range_high(self):
+        assert _safe_quiz_index(4) is None
+
+    def test_out_of_range_negative(self):
+        assert _safe_quiz_index(-1) is None
+
+    def test_string_number(self):
+        assert _safe_quiz_index("2") == 2
+
+    def test_non_numeric_string(self):
+        assert _safe_quiz_index("abc") is None
+
+    def test_float_truncated(self):
+        assert _safe_quiz_index(1.9) == 1
+
+    def test_boolean_true(self):
+        # bool is subclass of int; True == 1
+        assert _safe_quiz_index(True) == 1
+
+    def test_large_number(self):
+        assert _safe_quiz_index(100) is None
+
+
+# --- _normalize_summary edge cases ---
+
+@pytest.mark.unit
+class TestNormalizeSummaryEdgeCases:
+    def test_key_vocabulary_as_comma_string(self):
+        raw = {"key_vocabulary": "hello, world, goodbye", "communication_level": "B1", "tip": "Try more", "summary": "Good chat"}
+        result = _normalize_summary(raw)
+        assert result["key_vocabulary"] == ["hello", "world", "goodbye"]
+
+    def test_key_vocabulary_absent(self):
+        raw = {"communication_level": "A2", "tip": "Keep going", "summary": "Nice try"}
+        result = _normalize_summary(raw)
+        assert result["key_vocabulary"] == []
+
+    def test_tip_as_integer(self):
+        raw = {"key_vocabulary": [], "communication_level": "B2", "tip": 42, "summary": "Good"}
+        result = _normalize_summary(raw)
+        assert result["tip"] == "42"
+
+    def test_summary_as_none(self):
+        raw = {"key_vocabulary": [], "communication_level": "A1", "tip": "ok", "summary": None}
+        result = _normalize_summary(raw)
+        assert result["summary"] == ""
+
+    def test_communication_level_as_number(self):
+        raw = {"key_vocabulary": [], "communication_level": 3, "tip": "", "summary": ""}
+        result = _normalize_summary(raw)
+        assert result["communication_level"] == "3"
+
+    def test_key_vocabulary_list_with_none_items(self):
+        raw = {"key_vocabulary": ["hello", None, "world"], "communication_level": "B1", "tip": "", "summary": ""}
+        result = _normalize_summary(raw)
+        assert result["key_vocabulary"] == ["hello", "world"]
