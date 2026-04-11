@@ -9,11 +9,13 @@ import pytest
 from app.dal.conversation import (
     add_message,
     cleanup_stale_conversations,
+    conversation_exists,
     count_bookmarked_messages,
     count_conversations,
     create_conversation,
     delete_conversation,
     delete_ended_conversations,
+    delete_message,
     end_conversation,
     format_history_text,
     get_active_conversation,
@@ -25,6 +27,7 @@ from app.dal.conversation import (
     get_conversation_status,
     get_conversation_summary,
     get_conversation_vocabulary,
+    get_difficulty_recommendation,
     get_grammar_accuracy,
     get_rephrase_sentences,
     get_shadowing_phrases,
@@ -1250,3 +1253,103 @@ class TestHistoricalSessionAverages:
         await end_conversation(test_db, cid, summary="not a dict")
         result = await get_historical_session_averages(test_db)
         assert result["session_count"] == 0
+
+
+@pytest.mark.unit
+class TestConversationExists:
+    async def test_existing_conversation(self, test_db):
+        """conversation_exists returns True for an existing ID."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        assert await conversation_exists(test_db, cid) is True
+
+    async def test_non_existent_conversation(self, test_db):
+        """conversation_exists returns False for a non-existent ID."""
+        assert await conversation_exists(test_db, 99999) is False
+
+
+@pytest.mark.unit
+class TestDeleteMessage:
+    async def test_delete_existing_message(self, test_db):
+        """delete_message returns True and removes the message."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "Hello")
+        assert await delete_message(test_db, mid) is True
+        # Verify message is gone
+        history = await get_conversation_history(test_db, cid)
+        assert len(history) == 0
+
+    async def test_delete_non_existent_message(self, test_db):
+        """delete_message returns False for a non-existent ID."""
+        assert await delete_message(test_db, 99999) is False
+
+    async def test_delete_one_of_many(self, test_db):
+        """Deleting one message preserves others."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid1 = await add_message(test_db, cid, "user", "Hello")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await delete_message(test_db, mid1)
+        history = await get_conversation_history(test_db, cid)
+        assert len(history) == 1
+        assert history[0]["content"] == "Welcome!"
+
+
+@pytest.mark.unit
+class TestGetDifficultyRecommendation:
+    async def test_no_conversations(self, test_db):
+        """No ended conversations returns intermediate default."""
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+        assert rec["stats"]["sessions_analyzed"] == 0
+
+    async def test_one_conversation(self, test_db):
+        """One ended conversation (< 2) returns intermediate default."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid, summary={"summary": "ok", "performance": {"grammar_accuracy_rate": 90, "avg_words_per_message": 15}})
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+        assert rec["stats"]["sessions_analyzed"] == 1
+
+    async def test_level_up_recommendation(self, test_db):
+        """High accuracy + words on beginner recommends intermediate."""
+        for i in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+            await end_conversation(test_db, cid, summary={"summary": f"s{i}", "performance": {"grammar_accuracy_rate": 90, "avg_words_per_message": 15}})
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+        assert rec["stats"]["accuracy"] > 85
+
+    async def test_level_down_recommendation(self, test_db):
+        """Low accuracy on advanced recommends intermediate."""
+        for i in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin", "advanced")
+            await end_conversation(test_db, cid, summary={"summary": f"s{i}", "performance": {"grammar_accuracy_rate": 30, "avg_words_per_message": 3}})
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_stay_at_level(self, test_db):
+        """Moderate stats keep current level."""
+        for i in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin", "intermediate")
+            await end_conversation(test_db, cid, summary={"summary": f"s{i}", "performance": {"grammar_accuracy_rate": 70, "avg_words_per_message": 8}})
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_malformed_summary(self, test_db):
+        """Malformed summary_json is handled gracefully."""
+        for i in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin", "intermediate")
+            await end_conversation(test_db, cid, summary="not valid json {{{")
+        # Force the summary_json to be malformed text
+        await test_db.execute("UPDATE conversations SET summary_json = 'not valid json {{{' WHERE status = 'ended'")
+        await test_db.commit()
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["stats"]["sessions_analyzed"] == 0
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_advanced_stays_at_top(self, test_db):
+        """High scores on advanced stay at advanced."""
+        for i in range(3):
+            cid = await create_conversation(test_db, "hotel_checkin", "advanced")
+            await end_conversation(test_db, cid, summary={"summary": f"s{i}", "performance": {"grammar_accuracy_rate": 95, "avg_words_per_message": 20}})
+        rec = await get_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "advanced"

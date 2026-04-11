@@ -2903,3 +2903,128 @@ Two failures. The ordering test fails because both rows get the same timestamp (
 ● Edit test_pronunciation_dal.py +3
   └ tests/unit/test_pronunciation_dal.py
 
+● Amend with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #355: Add unit tests for listening quiz DAL functions
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Re-run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+All 1043 tests pass (18 new). Now TS check:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All pass. This is a `test` type, no frontend UI changes — tester not needed. Call evaluator:
+
+● Evaluator Evaluate iteration 355
+  │ Read test_pronunciation_dal.py
+  │   │ tests/unit/test_pronunciation_dal.py
+  │   └ L850:end (236 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1100:end (372 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 → KEEP. Record results:
+
+● Record results for 355 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "355" "4804314" "2026-04-11" "209" "88" "119" "45" "461" \
+  │ "1043" "1043" "pass" "8.1" "kept" "Add unit tests for listening quiz DAL functions" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+---
+
+## Iteration 356
+
+● Record T0 for iteration 356 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for 356 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 12 lines...
+
+● Proposer Propose iteration 356
+  │ Read results.tsv
+  │   │ autoresearch/results.tsv
+  │   └ L336:360 (22 lines read)
+  └ Read backlog.md
+      │ autoresearch/backlog.md
+      └ 209 lines read
+
+● Record T1 for 356 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me examine the target functions:
+
+● Read delete_message (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '200,215p' app/dal/conversation.py
+  └ 17 lines...
+
+● Read conversation_exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '51,56p' app/dal/conversation.py
+  └ 7 lines...
+
+● Read get_difficulty_recommendation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '748,820p' app/dal/conversation.py
+  └ 72 lines...
+
+● See test file structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20
+  │ tests/unit/test_conversation_dal.py && echo "..." && tail -10
+  │ tests/unit/test_conversation_dal.py
+  └ 32 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal.conversation import"
+  │ tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+● See full import list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '9,40p'
+  │ tests/unit/test_conversation_dal.py
+  └ 33 lines...
+
+Now implement:
+
+● Edit test_conversation_dal.py +3
+  └ tests/unit/test_conversation_dal.py
+
+Now append test classes:
+
+● Append test classes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_conversation_dal.py << 'TESTS'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 105 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
