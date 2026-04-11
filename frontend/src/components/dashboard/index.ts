@@ -4,6 +4,7 @@ export { GrammarWeakSpots } from './GrammarWeakSpots';
 export { LearningVelocityCard } from './LearningVelocityCard';
 export { MistakeJournal } from './MistakeJournal';
 export { MistakeReviewDrill } from './MistakeReviewDrill';
+export { ModuleStreaksCard } from './ModuleStreaksCard';
 export { SessionAnalytics } from './SessionAnalytics';
 export { SkillsRadarChart } from './SkillsRadarChart';
 export { ListeningProgress } from './ListeningProgress';

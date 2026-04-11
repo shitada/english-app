@@ -386,3 +386,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 384	5dc5136	2026-04-12	599	104	210	67	980	1217	1217	pass	8.1	kept	Add data-populated integration tests for vocabulary-forecast and grammar-weak-spots
 385	04c8e0e	2026-04-12	376	91	352	95	914	1217	1217	pass	6.7	kept	Add Pronunciation Weak Spots card to Dashboard
 386	7c64244	2026-04-12	304	84	146	59	593	1221	1221	pass	8.1	kept	Add data-populated integration tests for weekly-report and session-analytics
+387	efef0b7	2026-04-12	505	72	69	58	704	1225	1225	pass	8.1	kept	Add data-populated integration tests for confidence-trend and learning-velocity

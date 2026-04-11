@@ -4040,3 +4040,198 @@ Now I have enough context. Let me implement the tests:
 ● Edit test_dashboard_api.py +176
   └ tests/integration/test_dashboard_api.py
 
+● Commit iteration 387 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #387: Add data-populated integration tests for confidence-trend and learning-velocity
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 for iteration 387 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775927139, implement_sec=72. Now running tests:
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+All 1225 tests pass (1221 → 1225, +4 new). Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS check passes. No frontend files changed, so no smoke or QA test needed. Let me record timestamps and call the evaluator:
+
+● Record T3 for iteration 387 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 5 lines...
+
+T3=1775927208, test_sec=69. Now calling evaluator:
+
+● Evaluator Evaluate iteration 387
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L1090:1100 (11 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● Record T4 for iteration 387 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775927266. Evaluator score: 8.1, verdict: keep. All checks pass. Recording results:
+
+● Record results for iteration 387 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "387" "efef0b7" "2026-04-12" "505" "72" "69" "58" "704" \
+  │ "1225" "1225" "pass" "8.1" "kept" "Add data-populated integration tests for confidence-trend
+  │ and learning-velocity" \…
+  └ 3 lines...
+
+Results recorded correctly. Iteration 387: ✅ proposer called, ✅ evaluator called, ✅ tester skip OK (test-only change). Now starting iteration 388.
+
+● Context restore for iteration 388 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && tail -5
+  │ autoresearch/results.tsv && git --no-pager log --oneline -5
+  └ 12 lines...
+
+T0=1775927280. Calling proposer for iteration 388:
+
+● Proposer Propose iteration 388
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1435:1457 (22 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L230:250 (21 lines read)
+
+● Record T1 for iteration 388 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775927459, propose_sec=179. This is a `feature` type that modifies frontend pages/components, so tester will be REQUIRED. Let me implement it.
+
+● Find module-streaks DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "module.streak\|module_streak"
+  │ app/dal/dashboard.py | head -10
+  └ 4 lines...
+
+● Find module-streaks endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "module.streak\|module_streak\|ModuleStreak" app/routers/dashboard.py | head -10
+  └ 7 lines...
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L567:590 (22 lines read)
+
+● Check current dashboard component exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 16 lines...
+
+Now let me check how other cards are imported in Dashboard.tsx and how existing cards look:
+
+● Check dashboard imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "import.*from.*dashboard"
+  │ frontend/src/pages/Dashboard.tsx | head -5
+  └ 2 lines...
+
+● Check card pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30
+  │ frontend/src/components/dashboard/LearningVelocityCard.tsx
+  └ 31 lines...
+
+● Check if API types exist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ModuleStreak\|module.streak\|module_streak" frontend/src/api.ts
+  └ 1 line...
+
+No existing types. Let me check how other types look and find where to add:
+
+● Find type patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "LearningVelocityResponse\|export
+  │ type" frontend/src/api.ts | tail -20
+  └ 3 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L1411:1440 (29 lines read)
+
+● Find dashboard API methods (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getConfidenceTrend\|getLearningVelocity\|getModuleStreak\|getWeeklyReport" frontend/src/api.ts
+  │ | head -10
+  └ 3 lines...
+
+● Check end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/api.ts && tail -20
+  │ frontend/src/api.ts
+  └ 22 lines...
+
+Now let me find where the dashboard API functions are defined to add the new one:
+
+● Find where to add API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getLearningVelocity\|getVocabForecast\|getGrammarWeakSpots" frontend/src/api.ts
+  └ 1 line...
+
+● Find dashboard API calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "learning.velocity\|module.streak\|vocab.*forecast\|grammar.*weak" frontend/src/api.ts
+  └ 5 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L235:260 (26 lines read)
+
+Now let me look at how the Dashboard.tsx renders cards to find the right spot:
+
+● Find card render locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "VocabForecast\|LearningVelocity\|GrammarWeak\|PronunciationWeak\|SpeakingConfidence"
+  │ frontend/src/pages/Dashboard.tsx | head -10
+  └ 7 lines...
+
+● Read Dashboard.tsx
+  │ frontend/src/pages/Dashboard.tsx
+  └ L115:150 (35 lines read)
+
+Now I have all the context. Let me implement:
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now add the types at the end of api.ts:
+
+● Edit api.ts +12
+  └ frontend/src/api.ts
+
+Now create the ModuleStreaksCard component:
+
+● Create ModuleStreaksCard.tsx +103
+  └ frontend/src/components/dashboard/ModuleStreaksCard.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx to import and render:
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+

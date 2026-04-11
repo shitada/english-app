@@ -243,6 +243,9 @@ export const api = {
   getDashboardGrammarWeakSpots: (limit = 10) =>
     request<GrammarWeakSpotsResponse>(`/api/dashboard/grammar-weak-spots?limit=${limit}`),
 
+  getDashboardModuleStreaks: () =>
+    request<ModuleStreaksResponse>('/api/dashboard/module-streaks'),
+
   // Pronunciation weak spots
   getPronunciationWeaknesses: (limit = 10) =>
     request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
@@ -1453,4 +1456,16 @@ export interface MistakePatternItem {
 export interface CommonMistakesResponse {
   patterns: MistakePatternItem[];
   total: number;
+}
+
+export interface ModuleStreakItem {
+  current_streak: number;
+  last_active: string | null;
+}
+
+export interface ModuleStreaksResponse {
+  overall_streak: number;
+  modules: Record<string, ModuleStreakItem>;
+  most_consistent: string | null;
+  least_consistent: string | null;
 }
