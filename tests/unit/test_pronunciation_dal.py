@@ -16,6 +16,7 @@ from app.dal.pronunciation import (
     get_listening_difficulty_recommendation,
     get_listening_quiz_history,
     get_minimal_pairs,
+    get_phoneme_contrast_stats,
     get_progress,
     get_progress_by_difficulty,
     get_pronunciation_weaknesses,
@@ -25,6 +26,7 @@ from app.dal.pronunciation import (
     get_weekly_progress,
     save_attempt,
     save_listening_quiz_result,
+    save_minimal_pairs_results,
 )
 
 
@@ -1083,3 +1085,85 @@ class TestGetListeningDifficultyRecommendation:
             await save_listening_quiz_result(test_db, "Q", "beginner", 10, 2, 20.0)
         rec = await get_listening_difficulty_recommendation(test_db)
         assert rec["recommended_difficulty"] == "beginner"
+
+
+@pytest.mark.unit
+class TestSaveMinimalPairsResults:
+    async def test_empty_list_returns_zero(self, test_db):
+        count = await save_minimal_pairs_results(test_db, [])
+        assert count == 0
+
+    async def test_single_result(self, test_db):
+        results = [{"phoneme_contrast": "l/r", "word_a": "light", "word_b": "right", "is_correct": True}]
+        count = await save_minimal_pairs_results(test_db, results)
+        assert count == 1
+
+    async def test_multiple_results(self, test_db):
+        results = [
+            {"phoneme_contrast": "l/r", "word_a": "light", "word_b": "right", "is_correct": True},
+            {"phoneme_contrast": "b/v", "word_a": "bat", "word_b": "vat", "is_correct": False},
+            {"phoneme_contrast": "l/r", "word_a": "lace", "word_b": "race", "is_correct": True},
+        ]
+        count = await save_minimal_pairs_results(test_db, results)
+        assert count == 3
+
+    async def test_data_persisted_correctly(self, test_db):
+        results = [{"phoneme_contrast": "th/s", "word_a": "think", "word_b": "sink", "is_correct": False}]
+        await save_minimal_pairs_results(test_db, results)
+        rows = await test_db.execute_fetchall("SELECT * FROM minimal_pairs_results")
+        assert len(rows) == 1
+        assert rows[0]["phoneme_contrast"] == "th/s"
+        assert rows[0]["word_a"] == "think"
+        assert rows[0]["word_b"] == "sink"
+        assert rows[0]["is_correct"] == 0
+
+
+@pytest.mark.unit
+class TestGetPhonemeContrastStats:
+    async def test_empty_database(self, test_db):
+        stats = await get_phoneme_contrast_stats(test_db)
+        assert stats == []
+
+    async def test_single_contrast(self, test_db):
+        results = [
+            {"phoneme_contrast": "l/r", "word_a": "light", "word_b": "right", "is_correct": True},
+            {"phoneme_contrast": "l/r", "word_a": "lace", "word_b": "race", "is_correct": True},
+            {"phoneme_contrast": "l/r", "word_a": "lead", "word_b": "read", "is_correct": False},
+        ]
+        await save_minimal_pairs_results(test_db, results)
+        stats = await get_phoneme_contrast_stats(test_db)
+        assert len(stats) == 1
+        assert stats[0]["phoneme_contrast"] == "l/r"
+        assert stats[0]["attempts"] == 3
+        assert stats[0]["correct"] == 2
+        assert stats[0]["accuracy"] == 66.7
+
+    async def test_multiple_contrasts_ordered_by_accuracy(self, test_db):
+        results = [
+            # l/r: 1/2 = 50%
+            {"phoneme_contrast": "l/r", "word_a": "light", "word_b": "right", "is_correct": True},
+            {"phoneme_contrast": "l/r", "word_a": "lace", "word_b": "race", "is_correct": False},
+            # b/v: 3/3 = 100%
+            {"phoneme_contrast": "b/v", "word_a": "bat", "word_b": "vat", "is_correct": True},
+            {"phoneme_contrast": "b/v", "word_a": "berry", "word_b": "very", "is_correct": True},
+            {"phoneme_contrast": "b/v", "word_a": "best", "word_b": "vest", "is_correct": True},
+        ]
+        await save_minimal_pairs_results(test_db, results)
+        stats = await get_phoneme_contrast_stats(test_db)
+        assert len(stats) == 2
+        # Worst accuracy first
+        assert stats[0]["phoneme_contrast"] == "l/r"
+        assert stats[0]["accuracy"] == 50.0
+        assert stats[1]["phoneme_contrast"] == "b/v"
+        assert stats[1]["accuracy"] == 100.0
+
+    async def test_respects_limit(self, test_db):
+        # Create 3 different contrasts
+        results = [
+            {"phoneme_contrast": "l/r", "word_a": "light", "word_b": "right", "is_correct": True},
+            {"phoneme_contrast": "b/v", "word_a": "bat", "word_b": "vat", "is_correct": False},
+            {"phoneme_contrast": "th/s", "word_a": "think", "word_b": "sink", "is_correct": True},
+        ]
+        await save_minimal_pairs_results(test_db, results)
+        stats = await get_phoneme_contrast_stats(test_db, limit=2)
+        assert len(stats) == 2

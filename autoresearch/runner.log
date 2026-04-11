@@ -3536,3 +3536,209 @@ Now append tests at the end of the file:
 
 implement_sec = 93. Commit and test:
 
+● Commit iteration 358 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #358: Add unit tests for 4 untested vocabulary DAL functions
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+1066 tests pass (+13 new), TypeScript passes. No smoke test needed (no backend code changed). Type is "test" so QA tester is optional — skipping.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now call evaluator:
+
+● Evaluator Evaluate iteration 358
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L599:650 (52 lines read)
+  └ Read test_vocabulary_dal.py
+      │ tests/unit/test_vocabulary_dal.py
+      └ L1415:1551 (136 lines read)
+
+Evaluator: total_score=8.1, verdict=keep. Record results:
+
+● Record results iteration 358 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && HASH=$(git rev-parse
+  │ --short HEAD) && DATE=$(date +%Y-%m-%d) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "358" "$HASH" "$DATE" "229" "93" "62" "$((T4-1775892855))" "$((T4-1775892471))" \
+  │ "1066" "1066" "pass" "8.1" "kept" "Add unit tests for 4 untested vocabulary DAL functions" \…
+  └ 3 lines...
+
+---
+
+**Iteration 359** — Starting.
+
+● Record T0 for iteration 359 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 359
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L900:1100 (201 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L1100:end (156 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+propose_sec=172. Now implement. Let me check the functions and existing test file:
+
+● Read untested functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '754,795p' app/dal/pronunciation.py
+  └ 43 lines...
+
+● Check test file structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -40
+  │ tests/unit/test_pronunciation_dal.py && echo "===" && tail -20
+  │ tests/unit/test_pronunciation_dal.py
+  └ 62 lines...
+
+Now add imports and tests:
+
+● Edit test_pronunciation_dal.py +2
+  └ tests/unit/test_pronunciation_dal.py
+
+● Append pronunciation DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ tests/unit/test_pronunciation_dal.py << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.unit…
+  └ 98 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+implement_sec=35. Commit and test:
+
+● Commit iteration 359 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #359: Add unit tests for save_minimal_pairs_results and get_phoneme_contrast_stats
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+The `minimal_pairs_results` table isn't in the test DB schema. Let me check the conftest fixture:
+
+● Find table definition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "minimal_pairs" app/database.py |
+  │ head -10
+  └ 11 lines...
+
+The table is in migrations, not the main SCHEMA. Let me check the test_db fixture:
+
+● Check test_db fixture (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 15 "async def test_db"
+  │ tests/conftest.py | head -20
+  └ 16 lines...
+
+The fixture uses `SCHEMA` but migrations run separately. Let me check if `init_db` runs migrations:
+
+● Check schema vs migrations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "minimal_pairs_results"
+  │ app/database.py | head -3 && echo "---" && grep -n "SCHEMA" app/database.py | head -5
+  └ 7 lines...
+
+● Check if table is in SCHEMA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "minimal_pairs" app/database.py | grep
+  │ -v "^#\|_MIGRATIONS\|DROP\|INDEX" | head -5
+  └ 6 lines...
+
+The table is only in `_MIGRATIONS`, not in `SCHEMA`. The test_db fixture only runs `SCHEMA`. I need to also run migrations in the test fixture, or create the table manually in the test. Let me check how other tests handle this - specifically tests that use tables from migrations:
+
+● Check existing minimal pairs tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B5 "minimal_pairs"
+  │ tests/unit/test_pronunciation_dal.py | head -10
+  └ 11 lines...
+
+The `get_minimal_pairs` function is imported but doesn't save to the table (it generates pairs). The issue is the test_db fixture doesn't run migrations. Let me update the conftest to run migrations:
+
+● Check conftest imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "from app.database import"
+  │ tests/conftest.py
+  └ 3 lines...
+
+● Find migration runner (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "run_migrations\|_run_migrations\|_MIGRATIONS" app/database.py | head -5
+  └ 3 lines...
+
+● Read migration runner (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '245,275p' app/database.py
+  └ 32 lines...
+
+The simplest fix is to update the conftest's `test_db` fixture to also run migrations. Let me check the function name:
+
+● Find migration function name (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '235,245p' app/database.py
+  └ 12 lines...
+
+● Find function signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '230,240p' app/database.py
+  └ 12 lines...
+
+I'll update the conftest to also apply migrations:
+
+● Edit conftest.py +1 -1
+  └ tests/conftest.py
+
+✗ Edit conftest.py
+  │ tests/conftest.py
+  └ Multiple matches found
+
+● Find exact locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "executescript(SCHEMA)"
+  │ tests/conftest.py
+  └ 3 lines...
+
+● Read conftest.py
+  │ tests/conftest.py
+  └ L25:40 (16 lines read)
+
+● Edit conftest.py +1
+  └ tests/conftest.py
+
+Now re-run tests:
+
+● Test new tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_pronunciation_dal.py::TestSaveMinimalPairsResults
+  │ tests/unit/test_pronunciation_dal.py::TestGetPhonemeContrastStats -v 2>&1 | tail -20
+  └ 20 lines...
+
+All new tests pass. Now run the full suite:
+
+● Run full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+1074 tests pass (+8 new). TypeScript already passed. Amend the commit with the conftest change:
+

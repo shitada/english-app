@@ -13,7 +13,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from app.database import SCHEMA
+from app.database import SCHEMA, _apply_migrations
 
 
 # ---------------------------------------------------------------------------
@@ -29,6 +29,7 @@ async def test_db(tmp_path: Path) -> AsyncGenerator[aiosqlite.Connection, None]:
     await db.execute("PRAGMA foreign_keys=ON")
     await db.executescript(SCHEMA)
     await db.commit()
+    await _apply_migrations(db)
     yield db
     await db.close()
 
