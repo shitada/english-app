@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, GrammarTrend, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, PronunciationProgress, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, PronunciationProgress, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -138,6 +138,9 @@ export default function Dashboard() {
       {grammarTrend && (
         <GrammarTrend conversations={grammarTrend.conversations} trend={grammarTrend.trend} />
       )}
+
+      {/* Grammar Weak Spots */}
+      <GrammarWeakSpots />
 
       {/* Achievements */}
       <AchievementsPanel achievements={achievements} unlocked={achievementsUnlocked} total={achievementsTotal} />

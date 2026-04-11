@@ -1,5 +1,6 @@
 export { AchievementsPanel } from './AchievementsPanel';
 export { GrammarTrend } from './GrammarTrend';
+export { GrammarWeakSpots } from './GrammarWeakSpots';
 export { LearningVelocityCard } from './LearningVelocityCard';
 export { MistakeJournal } from './MistakeJournal';
 export { MistakeReviewDrill } from './MistakeReviewDrill';

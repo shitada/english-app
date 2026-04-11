@@ -240,6 +240,9 @@ export const api = {
   getDashboardLearningVelocity: (weeks = 8) =>
     request<LearningVelocityResponse>(`/api/dashboard/learning-velocity?weeks=${weeks}`),
 
+  getDashboardGrammarWeakSpots: (limit = 10) =>
+    request<GrammarWeakSpotsResponse>(`/api/dashboard/grammar-weak-spots?limit=${limit}`),
+
   // Conversation export
   exportConversation: (conversationId: number) =>
     request<ConversationExport>(`/api/conversation/${conversationId}/export`),
@@ -1405,4 +1408,19 @@ export interface LearningVelocityResponse {
   trend: string;
   total_active_days: number;
   words_per_study_day: number;
+}
+
+export interface GrammarCategoryItem {
+  name: string;
+  total_count: number;
+  recent_count: number;
+  older_count: number;
+  trend: string;
+}
+
+export interface GrammarWeakSpotsResponse {
+  categories: GrammarCategoryItem[];
+  total_errors: number;
+  category_count: number;
+  most_common_category: string | null;
 }
