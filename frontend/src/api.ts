@@ -243,6 +243,12 @@ export const api = {
   getDashboardGrammarWeakSpots: (limit = 10) =>
     request<GrammarWeakSpotsResponse>(`/api/dashboard/grammar-weak-spots?limit=${limit}`),
 
+  // Pronunciation weak spots
+  getPronunciationWeaknesses: (limit = 10) =>
+    request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
+  getPronunciationCommonMistakes: (limit = 10) =>
+    request<CommonMistakesResponse>(`/api/pronunciation/common-mistakes?limit=${limit}`),
+
   // Conversation export
   exportConversation: (conversationId: number) =>
     request<ConversationExport>(`/api/conversation/${conversationId}/export`),
@@ -1423,4 +1429,28 @@ export interface GrammarWeakSpotsResponse {
   total_errors: number;
   category_count: number;
   most_common_category: string | null;
+}
+
+export interface PronunciationWeaknessItem {
+  word: string;
+  occurrence_count: number;
+  common_heard_as: string[][];
+  tips: string[];
+}
+
+export interface PronunciationWeaknessesResponse {
+  weaknesses: PronunciationWeaknessItem[];
+  total: number;
+}
+
+export interface MistakePatternItem {
+  target_sound: string;
+  produced_sound: string;
+  occurrence_count: number;
+  example_words: string[];
+}
+
+export interface CommonMistakesResponse {
+  patterns: MistakePatternItem[];
+  total: number;
 }
