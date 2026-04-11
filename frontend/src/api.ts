@@ -240,6 +240,9 @@ export const api = {
   getPronunciationDistribution: () =>
     request<ScoreDistributionResponse>('/api/pronunciation/distribution'),
 
+  getPronunciationDifficultyProgress: () =>
+    request<PronunciationDifficultyProgressResponse>('/api/pronunciation/difficulty-progress'),
+
   // Vocabulary extras
   getVocabularyForecast: (days = 14) =>
     request<ReviewForecastResponse>(`/api/vocabulary/forecast?days=${days}`),
@@ -512,6 +515,18 @@ export interface PronunciationProgress {
   best_score: number;
   scores_by_date: { date: string; avg_score: number; count: number }[];
   most_practiced: { text: string; attempt_count: number; avg_score: number }[];
+}
+
+export interface PronunciationDifficultyItem {
+  difficulty: string;
+  attempt_count: number;
+  avg_score: number;
+  best_score: number;
+  latest_score: number;
+}
+
+export interface PronunciationDifficultyProgressResponse {
+  items: PronunciationDifficultyItem[];
 }
 
 // Rate limit headers (from iteration 86)

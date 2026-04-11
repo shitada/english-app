@@ -2135,3 +2135,184 @@ One test failure — the test expects the old return shape. Let me fix it.
   │ tests/unit/test_dashboard_dal.py::TestGetTodayActivity -q 2>&1
   └ 3 lines...
 
+● Amend commit with test fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+● Full test run (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 1 line...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Verify test results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -3
+  └ 4 lines...
+
+All 1025 pass. This is a bugfix with only backend DAL changes (no frontend pages/components .tsx changed beyond a minor emoji tweak in Dashboard.tsx). Let me check tester condition:
+
+● Check if tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Proposal type is "bugfix" — tester skip OK. Smoke test needed since DAL changed.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 352
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L367:380 (13 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L486:505 (19 lines read)
+
+● Record T4 for iteration 352 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.7 — KEEP. Let me record results.
+
+T0=1775883970, T1=1775885653 (propose=1683), T3=1775886401, T4=1775886842
+implement ≈ T_commit - T1 ≈ 400, test = T3 - T2 ≈ 350, evaluate = T4 - T3 = 441, total = T4 - T0 = 2872
+
+● Record results for iteration 352 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "352" "17003a6" "2026-04-11" "1683" "400" "350" "441" "2872" \
+  │ "1025" "1025" "pass" "6.7" "kept" "Include listening quiz in streak, activity feed, and
+  │ achievements" \…
+  └ 3 lines...
+
+Good. Now iteration 353.
+
+● Record T0 for iteration 353 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 353
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1000:1200 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1200:1400 (136 lines read)
+
+● Record T1 for iteration 353 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Proposal received (1355s). Let me verify the existing API endpoints and implement.
+
+● Check existing pronunciation API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getPronunciationProgress\|getPronu
+  │ nciationScoreTrend\|difficulty-progress\|getPronunciationDifficulty" frontend/src/api.ts | head
+  │ -10
+  └ 3 lines...
+
+● Check backend endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "difficulty-progress\|pronunciation/progress\|pronunciation/trend" app/routers/pronunciation.py
+  │ | head -10
+  └ 2 lines...
+
+● Read difficulty-progress endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '378,400p'
+  │ app/routers/pronunciation.py
+  └ 23 lines...
+
+● Read existing API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '148,160p' frontend/src/api.ts &&
+  │ echo "---" && sed -n '235,242p' frontend/src/api.ts
+  └ 22 lines...
+
+● Check types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "PronunciationProgress\|ScoreTrendResponse" frontend/src/api.ts | head -10
+  └ 6 lines...
+
+● Read types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '443,460p' frontend/src/api.ts &&
+  │ echo "---" && sed -n '509,520p' frontend/src/api.ts
+  └ 32 lines...
+
+Good, existing types are available. Now I need to add `getPronunciationDifficultyProgress` to api.ts and create the component. Let me check the DifficultyProgressItem type:
+
+● Check if type exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "DifficultyProgressItem\|difficulty_progress" frontend/src/api.ts | head -5
+  └ 1 line...
+
+● Check backend model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class DifficultyProgressItem"
+  │ app/routers/pronunciation.py
+  └ 2 lines...
+
+● Read model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '371,380p'
+  │ app/routers/pronunciation.py
+  └ 11 lines...
+
+Now implement. First add API type and function:
+
+● Find insert location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getPronunciationDistribution"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● See context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '240,244p' frontend/src/api.ts
+  └ 6 lines...
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now add the type. Let me add it near PronunciationProgress:
+
+● Find type location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^export interface
+  │ PronunciationProgress" frontend/src/api.ts
+  └ 2 lines...
+
+● See after PronunciationProgress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '518,524p' frontend/src/api.ts
+  └ 8 lines...
+
+● Edit api.ts +12
+  └ frontend/src/api.ts
+
+Now create the component:
+
+● Create PronunciationProgress.tsx +93
+  └ frontend/src/components/dashboard/PronunciationProgress.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+
