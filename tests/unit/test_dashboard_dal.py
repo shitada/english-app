@@ -14,6 +14,7 @@ from app.dal.dashboard import (
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
+    get_learning_velocity,
     get_listening_progress,
     get_mistake_journal,
     get_mistake_review_items,
@@ -1538,3 +1539,62 @@ class TestGetModuleStreaks:
         """Response includes all four module keys."""
         result = await get_module_streaks(test_db)
         assert set(result["modules"].keys()) == {"conversation", "vocabulary", "pronunciation", "listening"}
+
+
+# ── Learning Velocity ──────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestLearningVelocity:
+    async def test_learning_velocity_empty_db(self, test_db):
+        """Learning velocity returns zeros when no activity exists."""
+        result = await get_learning_velocity(test_db, weeks=8)
+        assert result["weekly_data"] == []
+        assert result["current_pace"]["words_per_day"] == 0
+        assert result["trend"] == "insufficient_data"
+        assert result["total_active_days"] == 0
+        assert result["words_per_study_day"] == 0
+
+    async def test_learning_velocity_with_activity(self, test_db):
+        """Learning velocity calculates weekly data correctly."""
+        from datetime import datetime, timedelta, timezone
+
+        now = datetime.now(timezone.utc)
+
+        # Insert words and vocabulary progress across multiple weeks
+        for i in range(10):
+            days_ago = i * 3  # spread across ~30 days
+            reviewed = (now - timedelta(days=days_ago)).isoformat()
+            await test_db.execute(
+                "INSERT INTO vocabulary_words (word, meaning, topic, difficulty) VALUES (?, ?, ?, ?)",
+                (f"word{i}", f"meaning{i}", "hotel", 1),
+            )
+            rows = await test_db.execute_fetchall("SELECT last_insert_rowid() AS id")
+            word_id = rows[0]["id"]
+            await test_db.execute(
+                "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed) VALUES (?, 1, 0, 1, ?)",
+                (word_id, reviewed),
+            )
+
+        # Insert quiz attempts
+        for i in range(5):
+            days_ago = i * 2
+            answered = (now - timedelta(days=days_ago)).isoformat()
+            await test_db.execute(
+                "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+                (1, 1, answered),
+            )
+
+        await test_db.commit()
+
+        result = await get_learning_velocity(test_db, weeks=8)
+        assert len(result["weekly_data"]) > 0
+        assert result["total_active_days"] > 0
+        assert result["current_pace"]["words_per_day"] >= 0
+        assert result["trend"] in ("accelerating", "decelerating", "steady", "insufficient_data")
+
+    async def test_learning_velocity_weeks_param(self, test_db):
+        """Learning velocity respects the weeks parameter."""
+        result = await get_learning_velocity(test_db, weeks=2)
+        assert result["weekly_data"] == []  # empty DB
+        assert result["trend"] == "insufficient_data"

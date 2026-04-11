@@ -583,3 +583,38 @@ async def get_module_streaks(
     """Get per-module study streak breakdown."""
     data = await dash_dal.get_module_streaks(db)
     return data
+
+
+# ── Learning Velocity ──────────────────────────────────────────
+
+
+class WeeklyActivity(BaseModel):
+    week: str
+    new_words: int
+    quiz_attempts: int
+    conversations: int
+    pronunciation_attempts: int
+
+
+class CurrentPace(BaseModel):
+    words_per_day: float
+    quizzes_per_day: float
+    conversations_per_day: float
+    pronunciation_per_day: float
+
+
+class LearningVelocityResponse(BaseModel):
+    weekly_data: list[WeeklyActivity]
+    current_pace: CurrentPace
+    trend: str
+    total_active_days: int
+    words_per_study_day: float
+
+
+@router.get("/learning-velocity", response_model=LearningVelocityResponse)
+async def get_learning_velocity(
+    weeks: int = Query(default=8, ge=2, le=52),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get learning velocity analytics with weekly pace tracking."""
+    return await dash_dal.get_learning_velocity(db, weeks=weeks)

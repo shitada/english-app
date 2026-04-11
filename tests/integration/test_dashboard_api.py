@@ -657,3 +657,25 @@ async def test_module_streaks_with_activity(client):
     assert data["modules"]["conversation"]["current_streak"] >= 1
     assert data["modules"]["conversation"]["last_active"] is not None
     assert data["most_consistent"] == "conversation"
+
+
+@pytest.mark.integration
+async def test_learning_velocity_endpoint(client):
+    """GET /learning-velocity returns expected fields."""
+    resp = await client.get("/api/dashboard/learning-velocity")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "weekly_data" in data
+    assert "current_pace" in data
+    assert "trend" in data
+    assert "total_active_days" in data
+    assert "words_per_study_day" in data
+
+
+@pytest.mark.integration
+async def test_learning_velocity_custom_weeks(client):
+    """GET /learning-velocity accepts weeks query param."""
+    resp = await client.get("/api/dashboard/learning-velocity?weeks=4")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data["weekly_data"], list)

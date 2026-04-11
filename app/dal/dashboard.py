@@ -1562,3 +1562,144 @@ async def get_module_streaks(db: aiosqlite.Connection) -> dict[str, Any]:
         "most_consistent": most_consistent,
         "least_consistent": least_consistent,
     }
+
+
+async def get_learning_velocity(
+    db: aiosqlite.Connection, *, weeks: int = 8
+) -> dict[str, Any]:
+    """Return learning velocity analytics with weekly pace tracking."""
+    cutoff = f"-{weeks * 7} days"
+
+    # Weekly counts per activity type
+    queries: dict[str, str] = {
+        "new_words": f"""
+            SELECT strftime('%Y-W%W', last_reviewed) AS week, COUNT(DISTINCT word_id) AS cnt
+            FROM vocabulary_progress
+            WHERE last_reviewed IS NOT NULL
+              AND last_reviewed >= date('now', '{cutoff}')
+            GROUP BY week ORDER BY week
+        """,
+        "quiz_attempts": f"""
+            SELECT strftime('%Y-W%W', answered_at) AS week, COUNT(*) AS cnt
+            FROM quiz_attempts
+            WHERE answered_at >= date('now', '{cutoff}')
+            GROUP BY week ORDER BY week
+        """,
+        "conversations": f"""
+            SELECT strftime('%Y-W%W', started_at) AS week, COUNT(*) AS cnt
+            FROM conversations
+            WHERE started_at >= date('now', '{cutoff}')
+            GROUP BY week ORDER BY week
+        """,
+        "pronunciation_attempts": f"""
+            SELECT strftime('%Y-W%W', created_at) AS week, COUNT(*) AS cnt
+            FROM pronunciation_attempts
+            WHERE created_at >= date('now', '{cutoff}')
+            GROUP BY week ORDER BY week
+        """,
+    }
+
+    per_activity: dict[str, dict[str, int]] = {}
+    for key, sql in queries.items():
+        rows = await db.execute_fetchall(sql)
+        for row in rows:
+            week_label = row["week"]
+            per_activity.setdefault(week_label, {})[key] = row["cnt"]
+
+    all_weeks = sorted(per_activity.keys())
+    weekly_data: list[dict[str, Any]] = []
+    for w in all_weeks:
+        entry = per_activity[w]
+        weekly_data.append(
+            {
+                "week": w,
+                "new_words": entry.get("new_words", 0),
+                "quiz_attempts": entry.get("quiz_attempts", 0),
+                "conversations": entry.get("conversations", 0),
+                "pronunciation_attempts": entry.get("pronunciation_attempts", 0),
+            }
+        )
+
+    # --- Trend: compare recent 4 weeks vs prior 4 weeks ---
+    def _week_total(entry: dict[str, Any]) -> int:
+        return (
+            entry["new_words"]
+            + entry["quiz_attempts"]
+            + entry["conversations"]
+            + entry["pronunciation_attempts"]
+        )
+
+    if len(weekly_data) < 4:
+        trend = "insufficient_data"
+    else:
+        recent = weekly_data[-4:]
+        prior = weekly_data[-8:-4] if len(weekly_data) >= 8 else weekly_data[: len(weekly_data) - 4]
+        if not prior:
+            trend = "insufficient_data"
+        else:
+            recent_sum = sum(_week_total(e) for e in recent)
+            prior_sum = sum(_week_total(e) for e in prior)
+            if prior_sum == 0:
+                trend = "accelerating" if recent_sum > 0 else "steady"
+            elif recent_sum > prior_sum * 1.15:
+                trend = "accelerating"
+            elif recent_sum < prior_sum * 0.85:
+                trend = "decelerating"
+            else:
+                trend = "steady"
+
+    # --- Current pace: rolling 7-day averages ---
+    pace_queries: dict[str, str] = {
+        "words_per_day": """
+            SELECT COUNT(DISTINCT word_id) AS cnt
+            FROM vocabulary_progress
+            WHERE last_reviewed IS NOT NULL
+              AND last_reviewed >= date('now', '-7 days')
+        """,
+        "quizzes_per_day": """
+            SELECT COUNT(*) AS cnt FROM quiz_attempts
+            WHERE answered_at >= date('now', '-7 days')
+        """,
+        "conversations_per_day": """
+            SELECT COUNT(*) AS cnt FROM conversations
+            WHERE started_at >= date('now', '-7 days')
+        """,
+        "pronunciation_per_day": """
+            SELECT COUNT(*) AS cnt FROM pronunciation_attempts
+            WHERE created_at >= date('now', '-7 days')
+        """,
+    }
+    current_pace: dict[str, float] = {}
+    for key, sql in pace_queries.items():
+        row = await db.execute_fetchall(sql)
+        current_pace[key] = round(row[0]["cnt"] / 7.0, 1) if row else 0
+
+    # --- Total active days: distinct dates across all tables ---
+    active_days_sql = """
+        SELECT COUNT(*) AS cnt FROM (
+            SELECT DISTINCT date(last_reviewed) AS d FROM vocabulary_progress
+                WHERE last_reviewed IS NOT NULL
+            UNION
+            SELECT DISTINCT date(answered_at) FROM quiz_attempts
+            UNION
+            SELECT DISTINCT date(started_at) FROM conversations
+            UNION
+            SELECT DISTINCT date(created_at) FROM pronunciation_attempts
+        )
+    """
+    rows = await db.execute_fetchall(active_days_sql)
+    total_active_days: int = rows[0]["cnt"] if rows else 0
+
+    # --- Words per study day ---
+    total_words_sql = "SELECT COUNT(DISTINCT word_id) AS cnt FROM vocabulary_progress WHERE last_reviewed IS NOT NULL"
+    rows = await db.execute_fetchall(total_words_sql)
+    total_words = rows[0]["cnt"] if rows else 0
+    words_per_study_day = round(total_words / total_active_days, 1) if total_active_days > 0 else 0
+
+    return {
+        "weekly_data": weekly_data,
+        "current_pace": current_pace,
+        "trend": trend,
+        "total_active_days": total_active_days,
+        "words_per_study_day": words_per_study_day,
+    }
