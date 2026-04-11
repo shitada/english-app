@@ -4,5 +4,6 @@ export { MistakeJournal } from './MistakeJournal';
 export { MistakeReviewDrill } from './MistakeReviewDrill';
 export { SessionAnalytics } from './SessionAnalytics';
 export { SkillsRadarChart } from './SkillsRadarChart';
+export { ListeningProgress } from './ListeningProgress';
 export { SpeakingConfidence } from './SpeakingConfidence';
 export { WeeklyReport } from './WeeklyReport';

@@ -1406,3 +1406,61 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
     ]
 
     return {"modules": modules, "daily": daily_list}
+
+
+async def get_listening_progress(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get listening quiz progress stats."""
+    db.row_factory = aiosqlite.Row
+
+    # Overall stats
+    row = await db.execute_fetchall(
+        """SELECT COUNT(*) as total, COALESCE(AVG(score), 0) as avg_score,
+                  COALESCE(MAX(score), 0) as best_score
+           FROM listening_quiz_results"""
+    )
+    r = row[0]
+    total_quizzes = r["total"]
+    avg_score = round(float(r["avg_score"]), 1)
+    best_score = round(float(r["best_score"]), 1)
+
+    # By difficulty breakdown
+    diff_rows = await db.execute_fetchall(
+        """SELECT difficulty, COUNT(*) as count, COALESCE(AVG(score), 0) as avg_score
+           FROM listening_quiz_results
+           GROUP BY difficulty
+           ORDER BY difficulty"""
+    )
+    by_difficulty = [
+        {
+            "difficulty": dr["difficulty"],
+            "count": dr["count"],
+            "avg_score": round(float(dr["avg_score"]), 1),
+        }
+        for dr in diff_rows
+    ]
+
+    # Score trend (compare last 5 to previous 5)
+    recent_rows = await db.execute_fetchall(
+        """SELECT score FROM listening_quiz_results
+           ORDER BY created_at DESC LIMIT 10"""
+    )
+    scores = [float(r["score"]) for r in recent_rows]
+    if len(scores) >= 6:
+        recent_avg = sum(scores[:5]) / 5
+        older_avg = sum(scores[5:]) / len(scores[5:])
+        if recent_avg > older_avg + 5:
+            trend = "improving"
+        elif recent_avg < older_avg - 5:
+            trend = "declining"
+        else:
+            trend = "stable"
+    else:
+        trend = "insufficient_data"
+
+    return {
+        "total_quizzes": total_quizzes,
+        "avg_score": avg_score,
+        "best_score": best_score,
+        "by_difficulty": by_difficulty,
+        "trend": trend,
+    }

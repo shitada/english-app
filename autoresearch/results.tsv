@@ -349,3 +349,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 347	5ba6c82	2026-04-11	205	85	63	233	586	1025	1025	pass	6.7	kept	Add adaptive difficulty recommendation to Listening quiz
 348	4fb6d37	2026-04-11	290	68	61	328	747	1025	1025	pass	6.9	kept	Add hands-free Voice Mode toggle to conversation chat
 349	aab7312	2026-04-11	179	163	1136	72	1550	1025	1025	pass	6.4	kept	Add Sentence Transform speaking drill to Pronunciation page
+350	c01bbc4	2026-04-11T13:06:34+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add Spoken Q&A drill to Listening quiz results page

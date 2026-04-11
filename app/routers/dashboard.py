@@ -537,3 +537,28 @@ async def get_session_analytics(
     """Get time spent per exercise module over the specified number of days."""
     data = await dash_dal.get_session_analytics(db, days=days)
     return data
+
+
+# --- Listening Progress ---
+
+class DifficultyStats(BaseModel):
+    difficulty: str
+    count: int
+    avg_score: float
+
+
+class ListeningProgressResponse(BaseModel):
+    total_quizzes: int
+    avg_score: float
+    best_score: float
+    by_difficulty: list[DifficultyStats]
+    trend: str
+
+
+@router.get("/listening-progress", response_model=ListeningProgressResponse)
+async def get_listening_progress(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get listening quiz progress statistics."""
+    data = await dash_dal.get_listening_progress(db)
+    return data

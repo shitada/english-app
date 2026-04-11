@@ -1544,3 +1544,301 @@ Now wire it into Listening.tsx:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 350 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #350: Add Spoken Q&A drill to Listening quiz results page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 1 line...
+
+TypeScript passes. Let me wait for the backend tests:
+
+✗ Read test results (shell)
+  │ read_bash 74
+  └ <command with shellId: 74 is already running, wait for output with read_bash, stop it with
+    stop_bash tool>
+
+● Wait for test output (shell)
+  │ read_bash 74
+  └ 2 lines...
+
+
+Changes   +720 -3
+Requests  3 Premium (57m 51s)
+Tokens    ↑ 10.0m • ↓ 78.3k • 9.0m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-348-to-364.md
+[2026-04-11 13:12:54] Copilot invocation completed (duration: 3476s)
+[2026-04-11 13:12:54] Verifying Playwright test depth...
+[2026-04-11 13:12:54]   PW_SKIP iter=348 — UI changed but NO Playwright test was run
+[2026-04-11 13:12:55]   PW_SKIP iter=349 — UI changed but NO Playwright test was run
+[2026-04-11 13:12:55] Running post-invocation audit (iter 348-349)...
+============================================
+ Autoresearch Audit
+ Iterations: 348 — 349
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-11 13:12:55
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 350[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 350 (c01bbc4)[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-11 13:12:55] Audit found 1 error(s) — fixes applied where possible
+[2026-04-11 13:12:59] Current iteration count: 350 / 364
+[2026-04-11 13:12:59] ------------------------------------------
+[2026-04-11 13:12:59] Invocation 3 / 10
+[2026-04-11 13:12:59] Resuming from iteration 351
+[2026-04-11 13:12:59] ------------------------------------------
+[2026-04-11 13:12:59] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-351-to-364.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 202 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Record start timestamp T0 for iteration 351 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-010.md |
+  │ tail -60
+  └ 43 lines...
+
+Starting iteration 351. T0=1775880801. Calling proposer subagent.● Request failed due to a transient API error. Retrying...
+
+Starting iteration 351. Calling proposer subagent.
+
+● Proposer Propose iteration 351
+  │ Read dashboard.py
+  │   │ app/routers/dashboard.py
+  │   └ L60:180 (121 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L60:200 (141 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Proposal received (595s). Now implementing. Let me examine the relevant files.
+
+● Check existing listening refs in dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening"
+  │ app/routers/dashboard.py | head -20
+  └ 1 line...
+
+● Check listening quiz table schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz_results"
+  │ app/database.py | head -10
+  └ 4 lines...
+
+● Check existing listening references in dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async
+  │ def.*listening\|listening_quiz" app/dal/dashboard.py | head -20
+  └ 1 line...
+
+● Read listening_quiz_results schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '111,125p' app/database.py
+  └ 16 lines...
+
+● Read end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/dal/dashboard.py
+  └ 31 lines...
+
+● Read end of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/routers/dashboard.py
+  └ 29 lines...
+
+● Check if listening card already exists in Dashboard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ListeningProgress\|listening.*progress\|ListeningQuiz.*card" frontend/src/pages/Dashboard.tsx |
+  │ head -10
+  └ 1 line...
+
+● Check if listening progress already exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ListeningProgress\|listening.progress\|listening-progress" frontend/src/api.ts | head -5
+  └ 1 line...
+
+Good, nothing exists yet. Let me now look at the dashboard DAL and router structure more carefully to follow the patterns.
+
+● List dashboard router endpoints and models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^@router\|^async
+  │ def\|^class.*Model\|^class.*Response" app/routers/dashboard.py | head -30
+  └ 31 lines...
+
+● List dashboard DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^async def" app/dal/dashboard.py |
+  │ head -20
+  └ 21 lines...
+
+● Check API pattern for dashboard calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getSkillRadar\|getSpeakingConfidence\|getGrammarTrend" frontend/src/api.ts | head -10
+  └ 3 lines...
+
+Now I have enough context. Let me implement the changes.
+
+● Find end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_achievements"
+  │ app/dal/dashboard.py | tail -3
+  └ 2 lines...
+
+● Line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/dashboard.py
+  └ 2 lines...
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/dashboard.py
+  └ 6 lines...
+
+● Router line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/dashboard.py
+  └ 2 lines...
+
+● End of dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/dashboard.py
+  └ 6 lines...
+
+● Check API function pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getSpeakingConfidence\|getListening\|getDashboard" frontend/src/api.ts | head -10
+  └ 4 lines...
+
+● Check Dashboard cards (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "SpeakingConfidence\|GrammarTrend\|ListeningProgress" frontend/src/pages/Dashboard.tsx | head
+  │ -10
+  └ 8 lines...
+
+● See card layout area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '100,140p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 42 lines...
+
+Now let me look at the dashboard components directory:
+
+● List dashboard components (shell)
+  │ ls /Users/shingotada/Documents/vscode/english-app/frontend/src/components/dashboard/
+  └ 3 lines...
+
+● See component pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30
+  │ frontend/src/components/dashboard/SpeakingConfidence.tsx
+  └ 31 lines...
+
+● Check index exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 9 lines...
+
+Now I have enough context. Let me implement all the changes.
+
+● Add listening progress DAL function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/dal/dashboard.py << 'PYEOF'
+  │
+  │
+  │ async def get_listening_progress(db: aiosqlite.Connection) -> dict[str, Any]:
+  │ """Get listening quiz progress stats."""…
+  └ 56 lines...
+
+● Add listening progress endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/routers/dashboard.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ # --- Listening Progress ---…
+  └ 24 lines...
+
+Now add the API function and type to frontend:
+
+● Find location to add new type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ListeningDifficultyRecommendation"
+  │ frontend/src/api.ts | head -5
+  └ 4 lines...
+
+● See where to add (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1163,1170p' frontend/src/api.ts
+  └ 9 lines...
+
+● Edit api.ts +20
+  └ frontend/src/api.ts
+
+Now create the ListeningProgress component:
+
+● Create ListeningProgress.tsx +87
+  └ frontend/src/components/dashboard/ListeningProgress.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now add to Dashboard.tsx:
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+

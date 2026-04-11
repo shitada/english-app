@@ -1164,6 +1164,26 @@ export async function getListeningDifficultyRecommendation(): Promise<ListeningD
   return request<ListeningDifficultyRecommendation>('/api/pronunciation/listening-quiz/difficulty-recommendation');
 }
 
+// ── Listening Progress ────────────────────────────────
+
+export interface ListeningDifficultyBreakdown {
+  difficulty: string;
+  count: number;
+  avg_score: number;
+}
+
+export interface ListeningProgressResponse {
+  total_quizzes: number;
+  avg_score: number;
+  best_score: number;
+  by_difficulty: ListeningDifficultyBreakdown[];
+  trend: string;
+}
+
+export async function getListeningProgress(): Promise<ListeningProgressResponse> {
+  return request<ListeningProgressResponse>('/api/dashboard/listening-progress');
+}
+
 // ── Response Drill ────────────────────────────────────
 
 export interface ResponseDrillPrompt {
