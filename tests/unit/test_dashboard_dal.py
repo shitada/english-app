@@ -14,6 +14,7 @@ from app.dal.dashboard import (
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
+    get_listening_progress,
     get_mistake_journal,
     get_mistake_review_items,
     get_recent_activity,
@@ -25,7 +26,7 @@ from app.dal.dashboard import (
     get_word_of_the_day,
     set_learning_goal,
 )
-from app.dal.pronunciation import save_attempt
+from app.dal.pronunciation import save_attempt, save_listening_quiz_result
 from app.dal.vocabulary import save_words, update_progress
 
 
@@ -1410,3 +1411,61 @@ class TestGetSessionAnalytics:
             assert "pronunciation_seconds" in day
             assert "vocabulary_seconds" in day
             assert "date" in day
+
+
+@pytest.mark.unit
+class TestGetListeningProgress:
+    async def test_empty_database(self, test_db):
+        """Empty DB returns zeroed stats."""
+        result = await get_listening_progress(test_db)
+        assert result["total_quizzes"] == 0
+        assert result["avg_score"] == 0
+        assert result["best_score"] == 0
+        assert result["by_difficulty"] == []
+        assert result["trend"] == "insufficient_data"
+
+    async def test_with_data(self, test_db):
+        """Returns correct aggregate stats."""
+        await save_listening_quiz_result(test_db, "Q1", "beginner", 5, 4, 80.0)
+        await save_listening_quiz_result(test_db, "Q2", "beginner", 5, 5, 100.0)
+        await save_listening_quiz_result(test_db, "Q3", "intermediate", 5, 3, 60.0)
+        result = await get_listening_progress(test_db)
+        assert result["total_quizzes"] == 3
+        assert result["best_score"] == 100.0
+        assert result["avg_score"] == 80.0
+
+    async def test_by_difficulty_breakdown(self, test_db):
+        """Returns per-difficulty breakdown."""
+        await save_listening_quiz_result(test_db, "Q1", "beginner", 5, 4, 80.0)
+        await save_listening_quiz_result(test_db, "Q2", "advanced", 5, 3, 60.0)
+        result = await get_listening_progress(test_db)
+        difficulties = {d["difficulty"] for d in result["by_difficulty"]}
+        assert "beginner" in difficulties
+        assert "advanced" in difficulties
+
+    async def test_trend_insufficient_data(self, test_db):
+        """Trend is insufficient_data with < 6 results."""
+        for i in range(5):
+            await save_listening_quiz_result(test_db, f"Q{i}", "beginner", 5, 3, 60.0)
+        result = await get_listening_progress(test_db)
+        assert result["trend"] == "insufficient_data"
+
+    async def test_trend_improving(self, test_db):
+        """Trend is improving when recent scores > older scores."""
+        # Older 5 (low scores) — backdated
+        for i in range(5):
+            await save_listening_quiz_result(test_db, f"Old{i}", "beginner", 5, 2, 40.0)
+        await test_db.execute("UPDATE listening_quiz_results SET created_at = datetime('now', '-10 minutes')")
+        await test_db.commit()
+        # Recent 5 (high scores)
+        for i in range(5):
+            await save_listening_quiz_result(test_db, f"New{i}", "beginner", 5, 5, 90.0)
+        result = await get_listening_progress(test_db)
+        assert result["trend"] == "improving"
+
+    async def test_trend_stable(self, test_db):
+        """Trend is stable when scores are similar."""
+        for i in range(10):
+            await save_listening_quiz_result(test_db, f"Q{i}", "beginner", 5, 4, 70.0)
+        result = await get_listening_progress(test_db)
+        assert result["trend"] == "stable"

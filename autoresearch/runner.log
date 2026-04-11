@@ -2671,3 +2671,235 @@ The tester was right — `accuracy_rate` is already 59.0 (a percentage), so mult
 ● Edit VocabularyProgress.tsx +1 -1
   └ frontend/src/components/dashboard/VocabularyProgress.tsx
 
+● Amend with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #354: Add Vocabulary Progress card to Dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+● Verify TS still passes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Good. Now stop the server and call the evaluator:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -120
+  └ 121 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Get frontend diff only (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 -- frontend/ 2>&1
+  └ 80 lines...
+
+● Get rest of diff (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 -- frontend/
+  │ 2>&1 | tail -30
+  └ 30 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 354
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L800:1000 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1000:1200 (201 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.6 → KEEP. Let me record the results:
+
+● Record results for 354 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "354" "899b9f1" "2026-04-11" "172" "47" "57" "467" "743" \
+  │ "1025" "1025" "pass" "6.6" "kept" "Add Vocabulary Progress card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, properly tab-separated. Now update backlog and start iteration 355.
+
+● Find backlog item to mark done (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Add vocabulary progress card\|Add
+  │ Vocabulary Progress\|vocabulary progress card" autoresearch/backlog.md
+  └ 2 lines...
+
+That's already marked done (it was a Home page item). Let me add the new Dashboard item as completed:
+
+● Edit backlog.md +2 -1
+  └ autoresearch/backlog.md
+
+---
+
+## Iteration 355
+
+● Record T0 for iteration 355 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 355
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L600:end (267 lines read)
+  └ Read test_pronunciation_dal.py
+      │ tests/unit/test_pronunciation_dal.py
+      └ L25:end (431 lines read)
+
+Good proposal — test type, no frontend changes, so tester is optional. Let me implement:
+
+● Record T1 for 355 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find listening progress in dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_listening_progress"
+  │ app/dal/dashboard.py | head -5
+  └ 2 lines...
+
+● See end of pronunciation DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/unit/test_pronunciation_dal.py
+  └ 21 lines...
+
+● Find listening quiz DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "save_listening_quiz_result\|get_li
+  │ stening_quiz_history\|get_listening_difficulty_recommendation" app/dal/pronunciation.py | head
+  │ -10
+  └ 4 lines...
+
+● Read get_listening_progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1430,1530p' app/dal/dashboard.py
+  └ 57 lines...
+
+● Read listening quiz DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '795,870p' app/dal/pronunciation.py
+  └ 73 lines...
+
+Now let me check the existing test structures:
+
+● See test file imports/fixtures (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20
+  │ tests/unit/test_pronunciation_dal.py
+  └ 21 lines...
+
+● See dashboard test structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "^class\|^import\|^from\|test_db\|@pytest" tests/unit/test_dashboard_dal.py | head -30
+  └ 31 lines...
+
+● See all imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal"
+  │ tests/unit/test_pronunciation_dal.py | head -10
+  └ 3 lines...
+
+● See dashboard imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '8,30p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 23 lines...
+
+● Check table schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz_results"
+  │ app/database.py | head -5
+  └ 4 lines...
+
+Good, I have all the context. Let me implement the tests:
+
+● Edit test_pronunciation_dal.py +2
+  └ tests/unit/test_pronunciation_dal.py
+
+● Check if save_listening_quiz_result is imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "save_listening_quiz_result\|save_attempt" tests/unit/test_pronunciation_dal.py | head -5
+  └ 6 lines...
+
+● Find save functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "save_attempt\|save_listening"
+  │ app/dal/pronunciation.py | head -5
+  └ 3 lines...
+
+● See current imports around save_attempt (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '24,30p'
+  │ tests/unit/test_pronunciation_dal.py
+  └ 8 lines...
+
+● Edit test_pronunciation_dal.py +1
+  └ tests/unit/test_pronunciation_dal.py
+
+Now append the test classes at the end of the file:
+
+● Get line count (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_pronunciation_dal.py
+  └ 2 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/unit/test_pronunciation_dal.py
+  └ 6 lines...
+
+● Edit test_pronunciation_dal.py +92
+  └ tests/unit/test_pronunciation_dal.py
+
+Now add listening progress tests to the dashboard DAL tests:
+
+● See end of dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 tests/unit/test_dashboard_dal.py
+  └ 11 lines...
+
+● Edit test_dashboard_dal.py +1
+  └ tests/unit/test_dashboard_dal.py
+
+● Check pronunciation import in dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal.pronunciation"
+  │ tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
+Now append the listening progress tests:
+
+● Edit test_dashboard_dal.py +56
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 355 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #355: Add unit tests for listening quiz DAL functions
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+Two failures. The ordering test fails because both rows get the same timestamp (in-memory SQLite is fast). The trend test fails because the order issue means "recent" and "older" are reversed. Let me fix both:
+
+● Edit test_dashboard_dal.py +3 -1
+  └ tests/unit/test_dashboard_dal.py
+
+● Edit test_pronunciation_dal.py +3
+  └ tests/unit/test_pronunciation_dal.py
+

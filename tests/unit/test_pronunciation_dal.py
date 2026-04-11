@@ -13,6 +13,8 @@ from app.dal.pronunciation import (
     delete_attempt,
     get_common_mistake_patterns,
     get_history,
+    get_listening_difficulty_recommendation,
+    get_listening_quiz_history,
     get_minimal_pairs,
     get_progress,
     get_progress_by_difficulty,
@@ -22,6 +24,7 @@ from app.dal.pronunciation import (
     get_sentences_from_vocabulary,
     get_weekly_progress,
     save_attempt,
+    save_listening_quiz_result,
 )
 
 
@@ -985,3 +988,98 @@ class TestGetMinimalPairs:
         result = get_minimal_pairs(difficulty="advanced", count=100)
         assert len(result) > 0
         assert len(result) <= 100
+
+
+@pytest.mark.unit
+class TestSaveListeningQuizResult:
+    async def test_basic_save(self, test_db):
+        """save_listening_quiz_result inserts a row and returns an ID."""
+        rid = await save_listening_quiz_result(test_db, "Animals", "beginner", 5, 4, 80.0)
+        assert isinstance(rid, int)
+        assert rid > 0
+
+    async def test_data_persists(self, test_db):
+        """Saved listening quiz result is retrievable."""
+        await save_listening_quiz_result(test_db, "Weather", "intermediate", 10, 7, 70.0)
+        history = await get_listening_quiz_history(test_db, limit=1)
+        assert len(history) == 1
+        assert history[0]["title"] == "Weather"
+        assert history[0]["difficulty"] == "intermediate"
+        assert history[0]["score"] == 70.0
+
+    async def test_multiple_saves(self, test_db):
+        """Multiple quiz results can be saved."""
+        id1 = await save_listening_quiz_result(test_db, "Q1", "beginner", 5, 3, 60.0)
+        id2 = await save_listening_quiz_result(test_db, "Q2", "advanced", 5, 5, 100.0)
+        assert id2 > id1
+
+
+@pytest.mark.unit
+class TestGetListeningQuizHistory:
+    async def test_empty(self, test_db):
+        """Empty DB returns empty list."""
+        history = await get_listening_quiz_history(test_db)
+        assert history == []
+
+    async def test_ordering(self, test_db):
+        """Results are ordered most recent first."""
+        await save_listening_quiz_result(test_db, "First", "beginner", 5, 3, 60.0)
+        # Manually nudge the created_at to ensure ordering
+        await test_db.execute("UPDATE listening_quiz_results SET created_at = datetime('now', '-1 minute') WHERE title = 'First'")
+        await test_db.commit()
+        await save_listening_quiz_result(test_db, "Second", "beginner", 5, 4, 80.0)
+        history = await get_listening_quiz_history(test_db)
+        assert history[0]["title"] == "Second"
+        assert history[1]["title"] == "First"
+
+    async def test_limit(self, test_db):
+        """Limit parameter restricts result count."""
+        for i in range(5):
+            await save_listening_quiz_result(test_db, f"Q{i}", "beginner", 5, i, i * 20.0)
+        history = await get_listening_quiz_history(test_db, limit=3)
+        assert len(history) == 3
+
+
+@pytest.mark.unit
+class TestGetListeningDifficultyRecommendation:
+    async def test_empty_returns_beginner(self, test_db):
+        """No history recommends beginner."""
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "beginner"
+        assert rec["current_difficulty"] is None
+        assert rec["stats"]["quizzes_analyzed"] == 0
+
+    async def test_level_up(self, test_db):
+        """High scores on beginner recommends intermediate."""
+        for _ in range(5):
+            await save_listening_quiz_result(test_db, "Q", "beginner", 10, 9, 90.0)
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_level_down(self, test_db):
+        """Low scores on advanced recommends intermediate."""
+        for _ in range(5):
+            await save_listening_quiz_result(test_db, "Q", "advanced", 10, 3, 30.0)
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_stay_at_level(self, test_db):
+        """Moderate scores keep current level."""
+        for _ in range(5):
+            await save_listening_quiz_result(test_db, "Q", "intermediate", 10, 6, 60.0)
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "intermediate"
+
+    async def test_advanced_stays_at_top(self, test_db):
+        """High scores on advanced stay at advanced (no level above)."""
+        for _ in range(5):
+            await save_listening_quiz_result(test_db, "Q", "advanced", 10, 9, 90.0)
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "advanced"
+
+    async def test_beginner_stays_at_bottom(self, test_db):
+        """Low scores on beginner stay at beginner (no level below)."""
+        for _ in range(5):
+            await save_listening_quiz_result(test_db, "Q", "beginner", 10, 2, 20.0)
+        rec = await get_listening_difficulty_recommendation(test_db)
+        assert rec["recommended_difficulty"] == "beginner"
