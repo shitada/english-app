@@ -237,6 +237,9 @@ export const api = {
   getDashboardVocabForecast: (limit = 20) =>
     request<VocabForecastResponse>(`/api/dashboard/vocabulary-forecast?limit=${limit}`),
 
+  getDashboardLearningVelocity: (weeks = 8) =>
+    request<LearningVelocityResponse>(`/api/dashboard/learning-velocity?weeks=${weeks}`),
+
   // Conversation export
   exportConversation: (conversationId: number) =>
     request<ConversationExport>(`/api/conversation/${conversationId}/export`),
@@ -1377,4 +1380,29 @@ export interface VocabForecastResponse {
   overdue_count: number;
   avg_retention_score: number;
   recommended_review_count: number;
+}
+
+// --- Learning Velocity (Dashboard) ---
+
+export interface WeeklyActivityData {
+  week: string;
+  new_words: number;
+  quiz_attempts: number;
+  conversations: number;
+  pronunciation_attempts: number;
+}
+
+export interface CurrentPaceData {
+  words_per_day: number;
+  quizzes_per_day: number;
+  conversations_per_day: number;
+  pronunciation_per_day: number;
+}
+
+export interface LearningVelocityResponse {
+  weekly_data: WeeklyActivityData[];
+  current_pace: CurrentPaceData;
+  trend: string;
+  total_active_days: number;
+  words_per_study_day: number;
 }

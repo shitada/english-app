@@ -2375,3 +2375,163 @@ Now update Dashboard.tsx to import and render the component:
 
 Now commit and test:
 
+● Commit iteration 381 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #381: Add Vocabulary Retention Forecast card to Dashboard"
+  └ 16 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1213 tests passed, TypeScript check passed. Now record timestamps and check for frontend UI changes for tester requirement.
+
+● Check frontend changes and timestamp (shell)
+  │ date +%s && git -C /Users/shingotada/Documents/vscode/english-app diff HEAD~1 --name-only | grep
+  │ -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+T3=1775922117, test_sec=T3-T2. Frontend .tsx changed and type=feature → **MUST call tester**. Let me start the server and invoke the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester subagent:
+
+● Tester QA test iteration 381
+  │ List directory frontend/src
+  │   └ 11 files found
+  └ Read App.tsx
+      │ frontend/src/App.tsx
+      └ 97 lines read
+
+Good — tester passed with ux_score=7. Now kill the server and call the evaluator.
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 2>&1 | head -200
+  └ 201 lines...
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 381
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L900:end (478 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1700:1819 (119 lines read)
+
+● Record T4 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 7.55, verdict: keep. All checks pass. Let me record results.
+
+**Checklist:**
+- ✅ Called proposer → received JSON proposal
+- ✅ Called tester → received JSON with ux_score=7.0 (frontend .tsx changed, type=feature)
+- ✅ Called evaluator → received JSON with total_score=7.55
+- ✅ All 1213 tests pass, TS check pass
+
+● Record results for iteration 381 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short=7 HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "381" "$HASH" "$DATE" "171" "112" "200" "183" "666" \
+  │ "1213" "1213" "pass" "7.55" "kept" "Add Vocabulary Retention Forecast card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified with `|` separators. Now update the backlog and start iteration 382.
+
+● Edit backlog.md +4
+  └ autoresearch/backlog.md
+
+Now starting **iteration 382**. Context restore:
+
+● Context restore for iteration 382 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5 && echo "---" && date +%s
+  └ 29 lines...
+
+T0=1775922482. Calling the proposer for iteration 382.
+
+● Proposer Propose iteration 382
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1580:1710 (131 lines read)
+  └ Read SessionAnalytics.tsx
+      │ frontend/src/components/dashboard/SessionAnalytics.tsx
+      └ 133 lines read
+
+● Record T1 for iteration 382 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775922606, propose_sec=124. Now implementing. Let me examine the learning velocity endpoint.
+
+● Find learning velocity endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "learning.velocity\|LearningVelocity" app/routers/dashboard.py
+  └ 6 lines...
+
+● See velocity response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '590,625p' app/routers/dashboard.py
+  └ 34 lines...
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "SessionAnalytics\|SpeakingConfidence" frontend/src/pages/Dashboard.tsx
+  └ 4 lines...
+
+● See Dashboard around insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '113,122p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 10 lines...
+
+Now I have all the info I need. Let me implement all four changes:
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now add the types at the end of api.ts:
+
+● Check end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/api.ts
+  └ 6 lines...
+
+● Edit api.ts +25
+  └ frontend/src/api.ts
+
+Now create the component:
+
+● Create LearningVelocityCard.tsx +183
+  └ frontend/src/components/dashboard/LearningVelocityCard.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+

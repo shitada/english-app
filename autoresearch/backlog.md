@@ -254,3 +254,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add grammar error category analysis endpoint with per-category trends (#379)
 - [x] Add vocabulary retention forecast endpoint with forgetting-risk scores (#380)
+
+## [NEW] Iteration 381
+
+- [x] Add Vocabulary Retention Forecast card to Dashboard (#381)
