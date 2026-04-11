@@ -6,11 +6,13 @@ import pytest
 
 from app.dal.conversation import add_message, create_conversation, end_conversation, update_message_feedback
 from app.dal.dashboard import (
+    _categorize_error,
     delete_learning_goal,
     get_achievements,
     get_confidence_trend,
     get_daily_challenge,
     get_grammar_trend,
+    get_grammar_weak_spots,
     get_learning_goals,
     get_learning_insights,
     get_learning_summary,
@@ -1598,3 +1600,117 @@ class TestLearningVelocity:
         result = await get_learning_velocity(test_db, weeks=2)
         assert result["weekly_data"] == []  # empty DB
         assert result["trend"] == "insufficient_data"
+
+
+# ---------------------------------------------------------------------------
+# Grammar weak-spots analysis
+# ---------------------------------------------------------------------------
+
+
+class TestCategorizeError:
+    """Unit tests for _categorize_error helper."""
+
+    def test_article_keyword(self):
+        assert _categorize_error("Missing article before noun") == "Articles"
+
+    def test_tense_keyword(self):
+        assert _categorize_error("Wrong past tense form used") == "Verb Tenses"
+
+    def test_subject_verb_agreement(self):
+        assert _categorize_error("subject and verb agreement error") == "Subject-Verb Agreement"
+
+    def test_preposition(self):
+        assert _categorize_error("Wrong preposition after 'depend'") == "Prepositions"
+
+    def test_unknown_category(self):
+        assert _categorize_error("Completely unknown explanation") == "Other"
+
+
+class TestGrammarWeakSpots:
+    """Unit tests for get_grammar_weak_spots."""
+
+    @pytest.mark.unit
+    async def test_empty_database(self, test_db):
+        """Returns empty categories when no messages exist."""
+        result = await get_grammar_weak_spots(test_db)
+        assert result["categories"] == []
+        assert result["total_errors"] == 0
+        assert result["category_count"] == 0
+        assert result["most_common_category"] is None
+
+    @pytest.mark.unit
+    async def test_single_error_category(self, test_db):
+        """A single error is correctly categorized and returned."""
+        conv_id = await create_conversation(test_db, "hotel", "beginner")
+        feedback = {"is_correct": False, "errors": [
+            {"original": "go", "correction": "went", "explanation": "Wrong past tense form"}
+        ]}
+        msg_id = await add_message(test_db, conv_id, "user", "I go to hotel yesterday", feedback)
+
+        result = await get_grammar_weak_spots(test_db)
+        assert result["total_errors"] == 1
+        assert result["category_count"] == 1
+        assert result["most_common_category"] == "Verb Tenses"
+        assert len(result["categories"]) == 1
+        assert result["categories"][0]["name"] == "Verb Tenses"
+        assert result["categories"][0]["total_count"] == 1
+
+    @pytest.mark.unit
+    async def test_multiple_categories_ranked(self, test_db):
+        """Multiple categories are ranked by frequency."""
+        conv_id = await create_conversation(test_db, "hotel", "beginner")
+
+        # 3 article errors, 1 tense error
+        for i in range(3):
+            feedback = {"is_correct": False, "errors": [
+                {"original": "x", "correction": "y", "explanation": "Missing article before noun"}
+            ]}
+            await add_message(test_db, conv_id, "user", f"sentence {i}", feedback)
+
+        feedback = {"is_correct": False, "errors": [
+            {"original": "go", "correction": "went", "explanation": "Wrong verb tense"}
+        ]}
+        await add_message(test_db, conv_id, "user", "tense error", feedback)
+
+        result = await get_grammar_weak_spots(test_db)
+        assert result["total_errors"] == 4
+        assert result["category_count"] == 2
+        assert result["most_common_category"] == "Articles"
+        assert result["categories"][0]["name"] == "Articles"
+        assert result["categories"][0]["total_count"] == 3
+        assert result["categories"][1]["name"] == "Verb Tenses"
+
+    @pytest.mark.unit
+    async def test_trend_computation(self, test_db):
+        """Recent-vs-older trend is computed correctly."""
+        from datetime import datetime, timedelta, timezone
+
+        conv_id = await create_conversation(test_db, "hotel", "beginner")
+        old_date = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+
+        # 5 older article errors — insert with old created_at directly
+        for i in range(5):
+            feedback = {"is_correct": False, "errors": [
+                {"original": "x", "correction": "y", "explanation": "article usage error"}
+            ]}
+            mid = await add_message(test_db, conv_id, "user", f"old {i}", feedback)
+            await test_db.execute("UPDATE messages SET created_at = ? WHERE id = ?", (old_date, mid))
+        await test_db.commit()
+
+        # 1 recent article error → improving
+        feedback = {"is_correct": False, "errors": [
+            {"original": "x", "correction": "y", "explanation": "article usage error"}
+        ]}
+        await add_message(test_db, conv_id, "user", "recent", feedback)
+
+        result = await get_grammar_weak_spots(test_db)
+        articles = [c for c in result["categories"] if c["name"] == "Articles"][0]
+        assert articles["trend"] == "improving"
+        assert articles["recent_count"] == 1
+        assert articles["older_count"] == 5
+
+    @pytest.mark.unit
+    async def test_limit_parameter(self, test_db):
+        """Limit caps the number of categories returned."""
+        result = await get_grammar_weak_spots(test_db, limit=1)
+        assert len(result["categories"]) <= 1

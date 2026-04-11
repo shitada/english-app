@@ -679,3 +679,27 @@ async def test_learning_velocity_custom_weeks(client):
     assert resp.status_code == 200
     data = resp.json()
     assert isinstance(data["weekly_data"], list)
+
+
+# --- Grammar Weak Spots ---
+
+
+@pytest.mark.integration
+async def test_grammar_weak_spots_empty(client):
+    """GET /grammar-weak-spots returns empty results when no data."""
+    resp = await client.get("/api/dashboard/grammar-weak-spots")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["categories"] == []
+    assert data["total_errors"] == 0
+    assert data["category_count"] == 0
+    assert data["most_common_category"] is None
+
+
+@pytest.mark.integration
+async def test_grammar_weak_spots_limit(client):
+    """GET /grammar-weak-spots accepts limit query param."""
+    resp = await client.get("/api/dashboard/grammar-weak-spots?limit=3")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data["categories"], list)

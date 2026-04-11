@@ -1586,3 +1586,267 @@ Row verified with correct tab separators. Now update the backlog:
 ● Edit backlog.md +4
   └ autoresearch/backlog.md
 
+[2026-04-12 00:17:37] Copilot invocation completed (duration: 1928s)
+[2026-04-12 00:17:37] Verifying Playwright test depth...
+[2026-04-12 00:17:38]   PW_NA iter=378 — no UI file changes, Playwright test not required
+[2026-04-12 00:17:38] Running post-invocation audit (iter 377-378)...
+============================================
+ Autoresearch Audit
+ Iterations: 377 — 378
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-12 00:17:38
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 377 378[0m
+[0;31m  Tester: FAIL — missing: 377 378[0m
+[0;31m  Evaluator: FAIL — missing: 377 378[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-12 00:17:39] Audit found 3 error(s) — fixes applied where possible
+[2026-04-12 00:17:39] Cleaned up old session logs (kept 5)
+[2026-04-12 00:17:42] Current iteration count: 378 / 404
+[2026-04-12 00:17:42] ------------------------------------------
+[2026-04-12 00:17:42] Invocation 3 / 10
+[2026-04-12 00:17:42] Resuming from iteration 379
+[2026-04-12 00:17:42] ------------------------------------------
+[2026-04-12 00:17:42] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-379-to-404.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 252 lines...
+
+● Find latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-020.md |
+  │ head -80
+  └ 37 lines...
+
+Starting autoresearch loop from iteration 379. Let me begin.
+
+● Record T0 for iteration 379 (shell)
+  │ date +%s
+  └ 2 lines...
+
+**Iteration 379 — Step 2: Propose**
+
+● Proposer Propose iteration 379
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L1:50 (50 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 138s. Now implementing the grammar weak spots endpoint.
+
+● Find patterns in dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_learning_velocity\|def
+  │ get_module_streaks\|def get_grammar_accuracy" app/dal/dashboard.py | tail -10
+  └ 3 lines...
+
+● See end of dashboard DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -60 app/dal/dashboard.py
+  └ 61 lines...
+
+● Check if endpoint already exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammar_weak_spots\|grammar-weak-spots\|get_grammar_weak" app/dal/dashboard.py
+  │ app/routers/dashboard.py 2>/dev/null
+  └ 1 line...
+
+● Check feedback_json usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "feedback_json\|explanation"
+  │ app/dal/dashboard.py | head -20
+  └ 20 lines...
+
+● Check router patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammar-accuracy\|grammar_accuracy\|GrammarAccuracy\|learning-velocity\|LearningVelocity"
+  │ app/routers/dashboard.py | tail -10
+  └ 5 lines...
+
+● See existing grammar error extraction pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '650,700p' app/dal/dashboard.py
+  └ 52 lines...
+
+Now I have the pattern. Let me implement the feature.
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/dashboard.py
+  └ 2 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/dashboard.py
+  └ 6 lines...
+
+● Edit dashboard.py +110
+  └ app/dal/dashboard.py
+
+Now add the router endpoint:
+
+● See end of router file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/routers/dashboard.py
+  └ 31 lines...
+
+● Edit dashboard.py +27
+  └ app/routers/dashboard.py
+
+Now add tests. Let me check existing test patterns:
+
+● Find test patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def
+  │ test_get_learning_velocity\|def test_get_module_streaks" tests/unit/test_dashboard_dal.py | tail
+  │ -5
+  └ 1 line...
+
+● Find test names (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test_"
+  │ tests/unit/test_dashboard_dal.py | tail -10
+  └ 11 lines...
+
+● See test pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1549,1560p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 13 lines...
+
+● See end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 tests/unit/test_dashboard_dal.py
+  └ 6 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 tests/unit/test_dashboard_dal.py
+  └ 6 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from app.dal.dashboard
+  │ import\|^import" tests/unit/test_dashboard_dal.py | head -10
+  └ 3 lines...
+
+● See imports block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '5,30p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 27 lines...
+
+Now let me add the import and the tests:
+
+● Edit test_dashboard_dal.py +2
+  └ tests/unit/test_dashboard_dal.py
+
+Now add the test class at the end of the file:
+
+● Edit test_dashboard_dal.py +127
+  └ tests/unit/test_dashboard_dal.py
+
+Now add the integration test:
+
+● Find integration test patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test_learning_velocity\|def
+  │ test_module_streaks" tests/integration/test_dashboard_api.py | tail -5
+  └ 5 lines...
+
+● See end of integration tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -15
+  │ tests/integration/test_dashboard_api.py
+  └ 16 lines...
+
+● Edit test_dashboard_api.py +24
+  └ tests/integration/test_dashboard_api.py
+
+Now commit and test:
+
+● Commit iteration 379 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #379: Add grammar error category analysis endpoint with per-category trends
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+Need to fix the `_json` reference. Let me check how it's imported in the file:
+
+● Check json import alias (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "import json\|as _json"
+  │ app/dal/dashboard.py | head -5
+  └ 4 lines...
+
+It's imported locally in other functions. I need to do the same in my function:
+
+● Edit dashboard.py +1
+  └ app/dal/dashboard.py
+
+● Fix and retest (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  │ && uv run pytest tests/unit/test_dashboard_dal.py::TestGrammarWeakSpots -v 2>&1 | tail -15
+  └ 31 lines...
+
+● Check message functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def add_message\|async def
+  │ update_message_feedback" app/dal/conversation.py | head -5
+  └ 3 lines...
+
+● Check add_message signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '23,55p' app/dal/conversation.py
+  └ 34 lines...
+
+I see two issues: 1) `add_message` doesn't accept `created_at` as a positional arg (tests pass it as 5th arg which maps to `feedback`), and 2) `update_message_feedback` takes a dict, not a string. Let me fix the tests:
+
+● Edit test_dashboard_dal.py +10 -23
+  └ tests/unit/test_dashboard_dal.py
+

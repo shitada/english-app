@@ -618,3 +618,30 @@ async def get_learning_velocity(
 ):
     """Get learning velocity analytics with weekly pace tracking."""
     return await dash_dal.get_learning_velocity(db, weeks=weeks)
+
+
+# --- Grammar Weak Spots ---
+
+
+class GrammarCategoryItem(BaseModel):
+    name: str
+    total_count: int
+    recent_count: int
+    older_count: int
+    trend: str
+
+
+class GrammarWeakSpotsResponse(BaseModel):
+    categories: list[GrammarCategoryItem]
+    total_errors: int
+    category_count: int
+    most_common_category: str | None
+
+
+@router.get("/grammar-weak-spots", response_model=GrammarWeakSpotsResponse)
+async def get_grammar_weak_spots(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Analyse grammar errors by category with trend data."""
+    return await dash_dal.get_grammar_weak_spots(db, limit=limit)

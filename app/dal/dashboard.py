@@ -1703,3 +1703,114 @@ async def get_learning_velocity(
         "total_active_days": total_active_days,
         "words_per_study_day": words_per_study_day,
     }
+
+
+# ---------------------------------------------------------------------------
+# Grammar weak-spots analysis
+# ---------------------------------------------------------------------------
+
+_CATEGORY_KEYWORDS: list[tuple[str, list[str]]] = [
+    ("Subject-Verb Agreement", ["subject", "verb agreement", "subject-verb"]),
+    ("Verb Tenses", ["tense", "past tense", "present tense", "future tense", "verb form"]),
+    ("Articles", ["article", " a ", " an ", " the ", "determiner"]),
+    ("Prepositions", ["preposition", "prepositional"]),
+    ("Word Order", ["word order", "syntax", "sentence structure", "inverted"]),
+    ("Plurals", ["plural", "singular", "countable", "uncountable"]),
+    ("Pronouns", ["pronoun", "possessive pronoun"]),
+    ("Spelling", ["spelling", "misspell", "typo"]),
+    ("Punctuation", ["punctuation", "comma", "period", "apostrophe"]),
+    ("Vocabulary Choice", ["word choice", "vocabulary", "collocation", "wrong word"]),
+]
+
+
+def _categorize_error(explanation: str) -> str:
+    """Map a grammar error explanation to a category via keyword matching."""
+    lower = explanation.lower()
+    for category, keywords in _CATEGORY_KEYWORDS:
+        for kw in keywords:
+            if kw in lower:
+                return category
+    return "Other"
+
+
+async def get_grammar_weak_spots(
+    db: aiosqlite.Connection, *, limit: int = 10
+) -> dict[str, Any]:
+    """Analyse grammar errors by category with recent-vs-older trend."""
+    rows = await db.execute_fetchall(
+        """
+        SELECT m.feedback_json, m.created_at
+        FROM messages m
+        WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+        ORDER BY m.created_at DESC
+        LIMIT 500
+        """
+    )
+
+    import json as _json
+    from collections import Counter
+    from datetime import datetime, timedelta, timezone
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
+
+    recent_counts: Counter[str] = Counter()
+    older_counts: Counter[str] = Counter()
+    total_errors = 0
+
+    for row in rows:
+        try:
+            fb = _json.loads(row["feedback_json"]) if isinstance(row["feedback_json"], str) else row["feedback_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if not isinstance(fb, dict):
+            continue
+        errors = fb.get("errors", [])
+        if not isinstance(errors, list):
+            continue
+        for err in errors:
+            if not isinstance(err, dict):
+                continue
+            explanation = err.get("explanation", "")
+            if not explanation:
+                continue
+            category = _categorize_error(explanation)
+            total_errors += 1
+            created = row["created_at"] or ""
+            if created >= cutoff:
+                recent_counts[category] += 1
+            else:
+                older_counts[category] += 1
+
+    all_categories = set(recent_counts.keys()) | set(older_counts.keys())
+    category_list: list[dict[str, Any]] = []
+    for cat in all_categories:
+        recent = recent_counts.get(cat, 0)
+        older = older_counts.get(cat, 0)
+        total = recent + older
+        if older == 0:
+            trend = "new"
+        elif recent < older * 0.7:
+            trend = "improving"
+        elif recent > older * 1.3:
+            trend = "declining"
+        else:
+            trend = "stable"
+        category_list.append({
+            "name": cat,
+            "total_count": total,
+            "recent_count": recent,
+            "older_count": older,
+            "trend": trend,
+        })
+
+    category_list.sort(key=lambda c: c["total_count"], reverse=True)
+    category_list = category_list[:limit]
+
+    most_common = category_list[0]["name"] if category_list else None
+
+    return {
+        "categories": category_list,
+        "total_errors": total_errors,
+        "category_count": len(all_categories),
+        "most_common_category": most_common,
+    }
