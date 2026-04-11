@@ -399,3 +399,281 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 366 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #366: Add Vocabulary Spelling Bee mode
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1089 pass, TS check passes. No backend files changed so no smoke test needed. Check if tester is needed:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Feature type + frontend UI changed → MUST call tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 366
+  │ Read Dashboard.tsx
+  │   │ frontend/src/pages/Dashboard.tsx
+  │   └ L1:40 (40 lines read)
+  └ Read index.html
+      │ frontend/dist/index.html
+      └ 14 lines read
+
+Tester passed with ux_score 8. Now evaluate:
+
+● Evaluator Evaluate iteration 366
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L155:195 (41 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L630:700 (71 lines read)
+
+Evaluator score: 6.6 — KEEP. Record results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 366 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "366" "$HASH" "$DATE" "295" "78" "61" "299" "733" \
+  │ "1089" "1089" "pass" "6.6" "kept" "Add Vocabulary Spelling Bee mode" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+● Kill QA server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+
+
+Iteration 366 complete (kept, 6.6). Starting iteration 367.
+
+● Record T0 for iteration 367 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 367
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ L1:40 (40 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L820:920 (84 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 305s. Now implementing the Quick Shadowing card on the Home page.
+
+● Find pronunciation sentences API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getPronunciationSentences\|pronunciation/sentences" frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● Find Home page imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "RecentlyPracticed\|StreakMilestones\|QuickSpeak\|import.*Card" frontend/src/pages/Home.tsx |
+  │ head -20
+  └ 8 lines...
+
+● Find speech hooks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useSpeechRecognition\|useSpeechSynthesis" frontend/src/hooks/*.ts | head -10
+  └ 3 lines...
+
+● Read speech synthesis hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '14,40p'
+  │ frontend/src/hooks/useSpeechSynthesis.ts
+  └ 28 lines...
+
+● Read speech recognition hook signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '35,60p'
+  │ frontend/src/hooks/useSpeechRecognition.ts
+  └ 26 lines...
+
+● See Home page layout (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '840,860p'
+  │ frontend/src/pages/Home.tsx
+  └ 22 lines...
+
+● Find normalizeText pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "normalizeText\|function normalize"
+  │ frontend/src/components/DictationExercise.tsx | head -5
+  └ 2 lines...
+
+● Find normalize text function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "normalizeText\|function
+  │ normalize" frontend/src/ | head -5
+  └ 6 lines...
+
+● Read normalizeText (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '15,22p'
+  │ frontend/src/components/conversation/DictationExercise.tsx
+  └ 9 lines...
+
+Good, now I have everything I need. Let me check how speech hooks return values:
+
+● Check speak function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speak\b"
+  │ frontend/src/hooks/useSpeechSynthesis.ts | head -10
+  └ 5 lines...
+
+● Check hook return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "return {"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -3
+  └ 2 lines...
+
+Now create the component:
+
+● Create QuickShadowCard.tsx +173
+  └ frontend/src/components/QuickShadowCard.tsx
+
+Now update Home.tsx:
+
+● Find Home imports area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^import\|^function "
+  │ frontend/src/pages/Home.tsx | head -20
+  └ 21 lines...
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 367 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #367: Add Quick Shadow Practice card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1089 pass, TS check passes. Check if tester needed:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Feature + frontend UI changed → MUST call tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 367
+  │ Read QuickShadowCard.tsx
+  │   │ frontend/src/components/QuickShadowCard.tsx
+  │   └ L50:70 (21 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L846:862 (16 lines read)
+
+Tester passed with ux_score 7.0. The stale closure issue is worth fixing. Let me address the key concern before evaluating:
+
+● Read QuickShadowCard.tsx
+  │ frontend/src/components/QuickShadowCard.tsx
+  └ L55:72 (18 lines read)
+
+The stale closure is a valid concern. Let me fix it by using an effect to compute accuracy when listening stops:
+
+● Edit QuickShadowCard.tsx +1 -1
+  └ frontend/src/components/QuickShadowCard.tsx
+
+● Edit QuickShadowCard.tsx +12
+  └ frontend/src/components/QuickShadowCard.tsx
+
+Wait, that early return before hooks is a React rules-of-hooks violation. Let me restructure:
+
+● Edit QuickShadowCard.tsx +2 -3
+  └ frontend/src/components/QuickShadowCard.tsx
+
+Now simplify handleRecord to remove the setTimeout:
+
+● Edit QuickShadowCard.tsx +1 -8
+  └ frontend/src/components/QuickShadowCard.tsx
+
+Also fix the loadSentence dependency:
+
+● Edit QuickShadowCard.tsx +1 -2
+  └ frontend/src/components/QuickShadowCard.tsx
+
+● TypeScript check after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
