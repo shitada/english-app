@@ -73,10 +73,11 @@ async def client(tmp_path: Path, mock_copilot) -> AsyncGenerator[AsyncClient, No
         await db.execute("PRAGMA foreign_keys=ON")
         return db
 
-    # Initialize schema
+    # Initialize schema and run migrations
     db = await _get_test_db()
     await db.executescript(SCHEMA)
     await db.commit()
+    await _apply_migrations(db)
     await db.close()
 
     # Override the FastAPI Depends(get_db_session) with a test version

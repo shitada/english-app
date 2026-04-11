@@ -1253,3 +1253,143 @@ async def test_score_trend_with_data(client, mock_copilot):
     assert data["trend"] != "insufficient_data"
     assert data["recent_avg"] > data["previous_avg"]
     assert data["change"] > 0
+
+
+# ── Minimal Pairs Results & Stats ───────────────────────────
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_save_minimal_pairs_results_success(client):
+    """POST /minimal-pairs/results saves valid results and returns count."""
+    body = {
+        "results": [
+            {"phoneme_contrast": "p/b", "word_a": "pat", "word_b": "bat", "is_correct": True},
+            {"phoneme_contrast": "p/b", "word_a": "pin", "word_b": "bin", "is_correct": False},
+            {"phoneme_contrast": "s/z", "word_a": "sip", "word_b": "zip", "is_correct": True},
+        ]
+    }
+    res = await client.post("/api/pronunciation/minimal-pairs/results", json=body)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["saved"] == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_save_minimal_pairs_results_empty_rejected(client):
+    """POST /minimal-pairs/results rejects empty results list."""
+    res = await client.post("/api/pronunciation/minimal-pairs/results", json={"results": []})
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_minimal_pairs_stats_empty(client):
+    """GET /minimal-pairs/stats returns empty list when no results exist."""
+    res = await client.get("/api/pronunciation/minimal-pairs/stats")
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_minimal_pairs_stats_after_results(client):
+    """GET /minimal-pairs/stats reflects saved results accurately."""
+    body = {
+        "results": [
+            {"phoneme_contrast": "t/d", "word_a": "ten", "word_b": "den", "is_correct": True},
+            {"phoneme_contrast": "t/d", "word_a": "tip", "word_b": "dip", "is_correct": True},
+            {"phoneme_contrast": "t/d", "word_a": "tuck", "word_b": "duck", "is_correct": False},
+            {"phoneme_contrast": "f/v", "word_a": "fan", "word_b": "van", "is_correct": True},
+        ]
+    }
+    await client.post("/api/pronunciation/minimal-pairs/results", json=body)
+
+    res = await client.get("/api/pronunciation/minimal-pairs/stats")
+    assert res.status_code == 200
+    stats = res.json()
+    assert len(stats) >= 2
+
+    td_stat = next(s for s in stats if s["phoneme_contrast"] == "t/d")
+    assert td_stat["attempts"] == 3
+    assert td_stat["correct"] == 2
+    assert abs(td_stat["accuracy"] - 66.67) < 1
+
+    fv_stat = next(s for s in stats if s["phoneme_contrast"] == "f/v")
+    assert fv_stat["attempts"] == 1
+    assert fv_stat["correct"] == 1
+    assert fv_stat["accuracy"] == 100.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_minimal_pairs_stats_limit(client):
+    """GET /minimal-pairs/stats respects limit parameter."""
+    contrasts = ["a/b", "c/d", "e/f", "g/h", "i/j"]
+    results = [
+        {"phoneme_contrast": c, "word_a": "x", "word_b": "y", "is_correct": True}
+        for c in contrasts
+    ]
+    await client.post("/api/pronunciation/minimal-pairs/results", json={"results": results})
+
+    res = await client.get("/api/pronunciation/minimal-pairs/stats?limit=3")
+    assert res.status_code == 200
+    assert len(res.json()) <= 3
+
+
+# ── Listening Quiz Difficulty Recommendation ────────────────
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_difficulty_recommendation_empty(client):
+    """GET /listening-quiz/difficulty-recommendation returns beginner with no history."""
+    res = await client.get("/api/pronunciation/listening-quiz/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["recommended_difficulty"] == "beginner"
+    assert data["current_difficulty"] is None
+    assert data["stats"]["quizzes_analyzed"] == 0
+
+
+async def _insert_quiz_results(client, difficulty: str, scores: list[float]):
+    """Helper to insert listening quiz results via the results endpoint."""
+    for score in scores:
+        total = 5
+        correct = round(score / 100 * total)
+        body = {
+            "title": f"Test quiz {difficulty}",
+            "difficulty": difficulty,
+            "total_questions": total,
+            "correct_count": correct,
+            "score": score,
+        }
+        res = await client.post("/api/pronunciation/listening-quiz/results", json=body)
+        assert res.status_code == 200
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_difficulty_recommendation_level_up(client):
+    """High scores on beginner should recommend intermediate."""
+    await _insert_quiz_results(client, "beginner", [90, 85, 95, 80, 90])
+
+    res = await client.get("/api/pronunciation/listening-quiz/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["recommended_difficulty"] == "intermediate"
+    assert data["current_difficulty"] == "beginner"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_difficulty_recommendation_level_down(client):
+    """Low scores on advanced should recommend stepping down."""
+    await _insert_quiz_results(client, "advanced", [30, 25, 40, 35, 20])
+
+    res = await client.get("/api/pronunciation/listening-quiz/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["recommended_difficulty"] == "intermediate"
+    assert data["current_difficulty"] == "advanced"
