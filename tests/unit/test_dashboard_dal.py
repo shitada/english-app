@@ -17,6 +17,7 @@ from app.dal.dashboard import (
     get_listening_progress,
     get_mistake_journal,
     get_mistake_review_items,
+    get_module_streaks,
     get_recent_activity,
     get_session_analytics,
     get_skill_radar,
@@ -1469,3 +1470,71 @@ class TestGetListeningProgress:
             await save_listening_quiz_result(test_db, f"Q{i}", "beginner", 5, 4, 70.0)
         result = await get_listening_progress(test_db)
         assert result["trend"] == "stable"
+
+
+@pytest.mark.unit
+class TestGetModuleStreaks:
+    async def test_empty_database(self, test_db):
+        """All streaks are 0 with no data."""
+        result = await get_module_streaks(test_db)
+        assert result["overall_streak"] == 0
+        assert result["modules"]["conversation"]["current_streak"] == 0
+        assert result["modules"]["vocabulary"]["current_streak"] == 0
+        assert result["modules"]["pronunciation"]["current_streak"] == 0
+        assert result["modules"]["listening"]["current_streak"] == 0
+        assert result["modules"]["conversation"]["last_active"] is None
+        assert result["least_consistent"] is not None
+
+    async def test_conversation_only_streak(self, test_db):
+        """Streak shows for conversation when user has messages today."""
+        conv_id = await create_conversation(test_db, "hotel", "beginner")
+        await add_message(test_db, conv_id, "user", "Hello there")
+        result = await get_module_streaks(test_db)
+        assert result["modules"]["conversation"]["current_streak"] >= 1
+        assert result["modules"]["conversation"]["last_active"] is not None
+        assert result["modules"]["vocabulary"]["current_streak"] == 0
+        assert result["most_consistent"] == "conversation"
+
+    async def test_pronunciation_only_streak(self, test_db):
+        """Streak shows for pronunciation when user has attempts today."""
+        await save_attempt(test_db, "hello world", "hello world", {"overall": "Good"}, 85.0)
+        result = await get_module_streaks(test_db)
+        assert result["modules"]["pronunciation"]["current_streak"] >= 1
+        assert result["modules"]["pronunciation"]["last_active"] is not None
+        assert result["most_consistent"] == "pronunciation"
+
+    async def test_vocabulary_only_streak(self, test_db):
+        """Streak shows for vocabulary when user has quiz attempts today."""
+        await save_words(test_db, "travel", [
+            {"word": "hotel", "definition": "a place to stay", "example": "The hotel is nice"},
+        ])
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await update_progress(test_db, word_id, True)
+        result = await get_module_streaks(test_db)
+        assert result["modules"]["vocabulary"]["current_streak"] >= 1
+        assert result["most_consistent"] == "vocabulary"
+
+    async def test_listening_only_streak(self, test_db):
+        """Streak shows for listening when user has quiz results today."""
+        await save_listening_quiz_result(test_db, "Test Quiz", "beginner", 5, 4, 80.0)
+        result = await get_module_streaks(test_db)
+        assert result["modules"]["listening"]["current_streak"] >= 1
+        assert result["most_consistent"] == "listening"
+
+    async def test_multiple_modules_active(self, test_db):
+        """Most and least consistent are correct with multiple modules."""
+        conv_id = await create_conversation(test_db, "hotel", "beginner")
+        await add_message(test_db, conv_id, "user", "Hello")
+        await save_attempt(test_db, "test sentence", "test sentence", {"overall": "OK"}, 75.0)
+        result = await get_module_streaks(test_db)
+        assert result["modules"]["conversation"]["current_streak"] >= 1
+        assert result["modules"]["pronunciation"]["current_streak"] >= 1
+        assert result["overall_streak"] >= 1
+        assert result["most_consistent"] is not None
+        assert result["least_consistent"] is not None
+
+    async def test_all_four_modules_keys(self, test_db):
+        """Response includes all four module keys."""
+        result = await get_module_streaks(test_db)
+        assert set(result["modules"].keys()) == {"conversation", "vocabulary", "pronunciation", "listening"}

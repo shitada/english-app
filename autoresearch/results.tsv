@@ -374,3 +374,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 372	7959e6d	2026-04-11	379	223	266	54	922	1100	1100	pass	7.85	kept	Add integration tests for listening-qa evaluate and conversation bookmarks endpoints
 373	b1dc363	2026-04-11	412	57	64	54	587	1122	1122	pass	8.1	kept	Add unit tests for _swap_scenario_roles, _safe_quiz_index, and _normalize_summary edge cases
 374	0973e7d	2026-04-11	317	54	66	71	508	1180	1180	pass	8.1	kept	Add unit tests for _normalize_grammar_feedback and canonicalize helpers
+375	none	2026-04-11	318	132	74	299	823	1180	1180	pass	5.35	discarded	Add Quick Writing Card with AI grammar feedback to Home page

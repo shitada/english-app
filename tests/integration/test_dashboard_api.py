@@ -619,3 +619,41 @@ async def test_listening_progress_trend(client):
     data = res.json()
     assert data["trend"] in ("improving", "stable", "declining")
     assert data["total_quizzes"] == 10
+
+
+@pytest.mark.integration
+async def test_module_streaks_empty(client):
+    """GET /module-streaks returns all zeros on empty DB."""
+    res = await client.get("/api/dashboard/module-streaks")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["overall_streak"] == 0
+    assert "conversation" in data["modules"]
+    assert "vocabulary" in data["modules"]
+    assert "pronunciation" in data["modules"]
+    assert "listening" in data["modules"]
+    for mod in data["modules"].values():
+        assert mod["current_streak"] == 0
+
+
+@pytest.mark.integration
+async def test_module_streaks_with_activity(client):
+    """GET /module-streaks reflects activity after a conversation message."""
+    # Create conversation activity
+    res = await client.post(
+        "/api/conversation/start",
+        json={"topic": "hotel_checkin", "difficulty": "beginner"},
+    )
+    assert res.status_code == 200
+    conv_id = res.json()["conversation_id"]
+    await client.post(
+        "/api/conversation/message",
+        json={"conversation_id": conv_id, "content": "Hello"},
+    )
+
+    res = await client.get("/api/dashboard/module-streaks")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["modules"]["conversation"]["current_streak"] >= 1
+    assert data["modules"]["conversation"]["last_active"] is not None
+    assert data["most_consistent"] == "conversation"

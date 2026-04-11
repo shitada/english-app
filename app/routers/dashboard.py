@@ -562,3 +562,24 @@ async def get_listening_progress(
     """Get listening quiz progress statistics."""
     data = await dash_dal.get_listening_progress(db)
     return data
+
+
+class ModuleStreakItem(BaseModel):
+    current_streak: int
+    last_active: str | None
+
+
+class ModuleStreaksResponse(BaseModel):
+    overall_streak: int
+    modules: dict[str, ModuleStreakItem]
+    most_consistent: str | None
+    least_consistent: str | None
+
+
+@router.get("/module-streaks", response_model=ModuleStreaksResponse)
+async def get_module_streaks(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get per-module study streak breakdown."""
+    data = await dash_dal.get_module_streaks(db)
+    return data

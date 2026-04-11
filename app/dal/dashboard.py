@@ -1483,3 +1483,82 @@ async def get_listening_progress(db: aiosqlite.Connection) -> dict[str, Any]:
         "by_difficulty": by_difficulty,
         "trend": trend,
     }
+
+
+async def _calculate_module_streak(db: aiosqlite.Connection, query: str) -> tuple[int, str | None]:
+    """Calculate streak for a single module. Returns (streak, last_active_date)."""
+    rows = await db.execute_fetchall(query)
+    if not rows:
+        return 0, None
+
+    today = datetime.now(timezone.utc).date()
+    try:
+        most_recent = date.fromisoformat(rows[0]["d"])
+    except (ValueError, TypeError):
+        return 0, None
+
+    last_active = most_recent.isoformat()
+    gap = today.toordinal() - most_recent.toordinal()
+    if gap > 1:
+        return 0, last_active
+
+    streak = 0
+    start_ordinal = most_recent.toordinal()
+    for i, r in enumerate(rows):
+        try:
+            day = date.fromisoformat(r["d"])
+        except (ValueError, TypeError):
+            break
+        if day.toordinal() == start_ordinal - i:
+            streak += 1
+        else:
+            break
+    return streak, last_active
+
+
+async def get_module_streaks(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Get per-module study streak breakdown."""
+    modules = {
+        "conversation": """
+            SELECT DISTINCT date(created_at) as d FROM messages
+            WHERE role = 'user' AND created_at >= date('now', '-366 days')
+            ORDER BY d DESC
+        """,
+        "vocabulary": """
+            SELECT DISTINCT date(answered_at) as d FROM quiz_attempts
+            WHERE answered_at >= date('now', '-366 days')
+            ORDER BY d DESC
+        """,
+        "pronunciation": """
+            SELECT DISTINCT date(created_at) as d FROM pronunciation_attempts
+            WHERE created_at >= date('now', '-366 days')
+            ORDER BY d DESC
+        """,
+        "listening": """
+            SELECT DISTINCT date(created_at) as d FROM listening_quiz_results
+            WHERE created_at >= date('now', '-366 days')
+            ORDER BY d DESC
+        """,
+    }
+
+    overall_streak = await _calculate_streak(db)
+    results: dict[str, dict[str, Any]] = {}
+    for module_name, query in modules.items():
+        streak, last_active = await _calculate_module_streak(db, query)
+        results[module_name] = {
+            "current_streak": streak,
+            "last_active": last_active,
+        }
+
+    streaks = {k: v["current_streak"] for k, v in results.items()}
+    active_modules = {k: v for k, v in streaks.items() if v > 0}
+
+    most_consistent = max(active_modules, key=active_modules.get) if active_modules else None
+    least_consistent = min(streaks, key=streaks.get) if streaks else None
+
+    return {
+        "overall_streak": overall_streak,
+        "modules": results,
+        "most_consistent": most_consistent,
+        "least_consistent": least_consistent,
+    }
