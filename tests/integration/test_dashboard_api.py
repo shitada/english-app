@@ -726,3 +726,191 @@ async def test_vocabulary_forecast_limit(client):
     assert resp.status_code == 200
     data = resp.json()
     assert isinstance(data["at_risk_words"], list)
+
+
+# --- Data-populated tests for Grammar Weak Spots ---
+
+
+@pytest.mark.integration
+async def test_grammar_weak_spots_with_errors(client, test_db):
+    """GET /grammar-weak-spots returns categories when grammar errors exist."""
+    import json
+
+    # Create a conversation
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "active", "2026-04-10T10:00:00+00:00"),
+    )
+    conv_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+
+    # Insert user messages with feedback containing grammar errors
+    feedback_article = json.dumps({
+        "corrected_text": "I would like a room.",
+        "is_correct": False,
+        "errors": [
+            {"original": "I would like room", "corrected": "I would like a room", "explanation": "Missing article 'a' before singular countable noun."},
+        ],
+    })
+    feedback_tense = json.dumps({
+        "corrected_text": "I went there yesterday.",
+        "is_correct": False,
+        "errors": [
+            {"original": "I go there yesterday", "corrected": "I went there yesterday", "explanation": "Use past tense for completed actions."},
+            {"original": "I has been", "corrected": "I have been", "explanation": "Subject-verb agreement: 'I' requires 'have', not 'has'."},
+        ],
+    })
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        (conv_id, "user", "I would like room", feedback_article, "2026-04-10T10:01:00+00:00"),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        (conv_id, "user", "I go there yesterday", feedback_tense, "2026-04-10T10:02:00+00:00"),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/grammar-weak-spots")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_errors"] == 3
+    assert data["category_count"] >= 2
+    assert data["most_common_category"] is not None
+    assert len(data["categories"]) >= 2
+    # Each category must have valid fields
+    for cat in data["categories"]:
+        assert "name" in cat
+        assert cat["total_count"] > 0
+        assert cat["trend"] in ("new", "improving", "declining", "stable")
+
+
+@pytest.mark.integration
+async def test_grammar_weak_spots_trend_detection(client, test_db):
+    """Grammar weak spots shows 'improving' trend when recent errors < older errors."""
+    import json
+
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "active", "2026-01-01T10:00:00+00:00"),
+    )
+    conv_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+
+    # 3 older article errors (> 14 days ago)
+    for i in range(3):
+        fb = json.dumps({
+            "corrected_text": "corrected",
+            "is_correct": False,
+            "errors": [{"original": "x", "corrected": "y", "explanation": "Missing article before noun."}],
+        })
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+            (conv_id, "user", "old msg", fb, "2026-01-05T10:00:00+00:00"),
+        )
+    # 1 recent article error (within 14 days)
+    fb_recent = json.dumps({
+        "corrected_text": "corrected",
+        "is_correct": False,
+        "errors": [{"original": "x", "corrected": "y", "explanation": "Missing article before noun."}],
+    })
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        (conv_id, "user", "new msg", fb_recent, "2026-04-11T10:00:00+00:00"),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/grammar-weak-spots")
+    assert resp.status_code == 200
+    data = resp.json()
+    # Find the Articles category
+    article_cats = [c for c in data["categories"] if "article" in c["name"].lower()]
+    assert len(article_cats) >= 1
+    cat = article_cats[0]
+    assert cat["older_count"] == 3
+    assert cat["recent_count"] == 1
+    # recent (1) < older (3) * 0.7 = 2.1 → improving
+    assert cat["trend"] == "improving"
+
+
+# --- Data-populated tests for Vocabulary Forecast ---
+
+
+@pytest.mark.integration
+async def test_vocabulary_forecast_with_overdue_words(client, test_db, mock_copilot):
+    """Vocabulary forecast returns at-risk words when words are overdue."""
+    from unittest.mock import AsyncMock
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "reservation", "correct_meaning": "a booking", "example_sentence": "I have a reservation.", "difficulty": 1},
+        ],
+    })
+    # Create a word via quiz endpoint
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=1")
+    assert quiz_res.status_code == 200
+    word_id = quiz_res.json()["questions"][0]["id"]
+
+    # Create progress and mark it as overdue
+    await test_db.execute(
+        """INSERT OR REPLACE INTO vocabulary_progress
+           (word_id, level, correct_count, incorrect_count, last_reviewed, next_review_at)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (word_id, 1, 2, 1, "2026-03-01T00:00:00+00:00", "2026-03-02T00:00:00+00:00"),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/vocabulary-forecast")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_reviewed"] >= 1
+    assert data["overdue_count"] >= 1
+    assert len(data["at_risk_words"]) >= 1
+    word = data["at_risk_words"][0]
+    assert word["word"] == "reservation"
+    assert word["days_overdue"] > 0
+    assert word["risk_score"] > 0
+
+
+@pytest.mark.integration
+async def test_vocabulary_forecast_high_error_rate(client, test_db, mock_copilot):
+    """High-error-rate words have higher risk scores in forecast."""
+    from unittest.mock import AsyncMock
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "checkout", "correct_meaning": "leaving hotel", "example_sentence": "Checkout is at noon.", "difficulty": 1},
+            {"word": "lobby", "correct_meaning": "entrance hall", "example_sentence": "Meet in the lobby.", "difficulty": 1},
+        ],
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2")
+    assert quiz_res.status_code == 200
+    questions = quiz_res.json()["questions"]
+    high_err_id = questions[0]["id"]
+    low_err_id = questions[1]["id"]
+
+    # Both have progress — set next_review to recent so overdue factor is small
+    for wid in (high_err_id, low_err_id):
+        await test_db.execute(
+            """INSERT OR REPLACE INTO vocabulary_progress
+               (word_id, level, correct_count, incorrect_count, last_reviewed, next_review_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (wid, 2, 2, 0, "2026-04-10T00:00:00+00:00", "2026-04-11T00:00:00+00:00"),
+        )
+    # High error word: 4 wrong out of 5
+    for i in range(5):
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+            (high_err_id, 1 if i == 0 else 0, f"2026-03-15T10:{i:02d}:00+00:00"),
+        )
+    # Low error word: 4 correct out of 5
+    for i in range(5):
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+            (low_err_id, 0 if i == 0 else 1, f"2026-03-15T10:{i:02d}:00+00:00"),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/vocabulary-forecast")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_reviewed"] >= 2
+    risk_map = {w["word_id"]: w["risk_score"] for w in data["at_risk_words"]}
+    assert risk_map[high_err_id] > risk_map[low_err_id]

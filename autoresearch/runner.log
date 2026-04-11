@@ -2845,3 +2845,301 @@ Now update Dashboard.tsx to import and render:
 
 Now commit and test:
 
+● Commit iteration 383 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #383: Add Grammar Weak Spots card to Dashboard with per-category breakdown
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1213 tests pass, TS check passes. Now let me record T3 and run the tester since this is a `feature` type with frontend .tsx changes.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester subagent.
+
+● Tester QA test iteration 383
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1712:1817 (105 lines read)
+  └ Read dashboard-snapshot.md
+      └ L288:372 (85 lines read)
+
+QA passed with ux_score 7. Now stop server and call evaluator.
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 8 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 383
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1200:1350 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1350:1500 (77 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good. Let me compute timings and record results.
+
+T0=1775923091, T1=1775923264, T2=1775923358, T3=1775923415, T4=1775923889
+- propose_sec = 173
+- implement_sec = 94
+- test_sec = 57
+- evaluate_sec = 474
+- total_sec = 798
+
+● Record iteration 383 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "383" "fd716d9" "2026-04-12" "173" "94" "57" "474" "798" \
+  │ "1213" "1213" "pass" "6.15" "kept" "Add Grammar Weak Spots card to Dashboard with
+  │ per-category breakdown" \…
+  └ 2 lines...
+
+● Verify row format (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Row is properly formatted. ✅ Checklist for 383: proposer ✅, tester ✅ (frontend .tsx changed, type=feature), evaluator ✅, score matches (6.15).
+
+Now starting **Iteration 384**.
+
+● Record T0 for iteration 384 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for 384 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 27 lines...
+
+T0 = 1775923907. Now calling proposer.
+
+● Proposer Propose iteration 384
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L684:729 (45 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L662:684 (23 lines read)
+
+● Record T1 for 384 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775924506. propose_sec = 599. Now implementing. Let me examine the existing test patterns and the DAL functions.
+
+● See existing empty tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '680,740p'
+  │ tests/integration/test_dashboard_api.py
+  └ 50 lines...
+
+● Find existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabulary.forecast\|grammar.weak.spots\|vocab_forecast\|grammar_weak"
+  │ tests/integration/test_dashboard_api.py | head -20
+  └ 13 lines...
+
+● Find vocab forecast DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_vocabulary_forecast\|async
+  │ def get_vocabulary_forecast" app/dal/dashboard.py
+  └ 2 lines...
+
+● See grammar weak spots DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1736,1850p' app/dal/dashboard.py
+  └ 116 lines...
+
+● See rest of vocab forecast DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1850,1930p' app/dal/dashboard.py
+  └ 80 lines...
+
+Now let me look at how existing integration tests seed data:
+
+● Check how test_db is used (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_db\|execute("
+  │ tests/integration/test_dashboard_api.py | head -20
+  └ 1 line...
+
+● Check data seeding patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "feedback_json\|INSERT INTO
+  │ messages\|vocabulary_progress\|quiz_attempts" tests/integration/test_dashboard_api.py | head -20
+  └ 1 line...
+
+● Find test_db usage patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_db" tests/integration/*.py |
+  │ head -20
+  └ 14 lines...
+
+● See end of dashboard test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/integration/test_dashboard_api.py
+  └ 31 lines...
+
+● Check test_db fixture (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_db" tests/conftest.py | head
+  │ -10
+  └ 7 lines...
+
+● See conftest fixtures (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,100p' tests/conftest.py
+  └ 42 lines...
+
+I see — the integration tests use the `client` fixture which has its own DB. I need to seed data directly through the API or through the `test_db` fixture. Let me check how `test_db` is set up:
+
+● See test_db fixture (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '24,56p' tests/conftest.py
+  └ 34 lines...
+
+The `test_db` and `client` fixtures use **separate** DBs. I'll need to seed data through the `client` API endpoints or use the approach where I get access to the same DB. Let me see how vocabulary tests seed data:
+
+● See how test_db is used with client (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_get_etymology_cached" -A 25
+  │ tests/integration/test_vocabulary_api.py
+  └ 27 lines...
+
+Now I understand the patterns. Both `test_db` and `client` share the same `tmp_path / "test.db"`. Let me implement the tests:
+
+● Find exact line for insertion (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def
+  │ test_vocabulary_forecast_limit" tests/integration/test_dashboard_api.py
+  └ 2 lines...
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_dashboard_api.py
+  └ 2 lines...
+
+● See end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '723,728p'
+  │ tests/integration/test_dashboard_api.py
+  └ 7 lines...
+
+● Edit test_dashboard_api.py +184
+  └ tests/integration/test_dashboard_api.py
+
+Now commit and test:
+
+● Commit iteration 384 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #384: Add data-populated integration tests for vocabulary-forecast and grammar-weak-spots
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 for 384 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TS check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+The `quiz_attempts` table doesn't have a `quiz_type` column (it's likely from the SCHEMA without that column, or the column has a different name). Let me check:
+
+● Check quiz_attempts schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A5 "quiz_attempts" app/database.py |
+  │ head -15
+  └ 15 lines...
+
+No `quiz_type` column. Also, the grammar tests failed because `test_db` and `client` use separate databases. Let me also check the messages table:
+
+● Check messages schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B1 -A10 "CREATE TABLE IF NOT EXISTS
+  │ messages" app/database.py
+  └ 11 lines...
+
+Message IDs are autoincrement integers, not text. And conversation IDs are also integers. Let me also check what's going on — the grammar tests also failed. Let me look at the actual error:
+
+● Check grammar test error (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_grammar_weak_spots_with_errors -v 2>&1 | tail -30
+  └ 31 lines...
+
+`conversations` table doesn't have `created_at` — let me check the schema:
+
+● Check conversations schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A12 "CREATE TABLE IF NOT EXISTS
+  │ conversations" app/database.py
+  └ 14 lines...
+
+OK — conversations uses `started_at`, not `created_at`. And IDs are integers, not text. Let me fix the tests:
+
+● Edit test_dashboard_api.py +16 -12
+  └ tests/integration/test_dashboard_api.py
+
+Now fix the vocabulary forecast tests — remove `quiz_type`:
+
+● Edit test_dashboard_api.py +4 -4
+  └ tests/integration/test_dashboard_api.py
+
+But wait — the `test_db` and `client` use different DBs since `test_db` fixture creates its own DB in `tmp_path`. Let me verify this is actually the issue. Looking at the conftest, the `test_db` fixture and the `client` fixture both use `tmp_path / "test.db"`. Since `tmp_path` is per-test and both fixtures are in the same test, they should share the same path. But the `client` creates its OWN connection in `_get_test_db()` and `test_db` creates another. Since they both point to the same file, writes should be visible if committed. The etymology test (`test_get_etymology_cached`) uses this pattern successfully.
+
+Let me amend the commit and re-run:
+
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+● Run new tests only (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_grammar_weak_spots_with_errors
+  │ tests/integration/test_dashboard_api.py::test_grammar_weak_spots_trend_detection
+  │ tests/integration/test_dashboard_api.py::test_vocabulary_forecast_with_overdue_words
+  │ tests/integration/test_dashboard_api.py::test_vocabulary_forecast_high_error_rate -v 2>&1 | …
+  └ 32 lines...
+
+3 of 4 pass. Let me see what's wrong with the high error rate test:
+
+● Check failure details (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_vocabulary_forecast_high_error_rate -v 2>&1 | grep
+  │ -E "FAILED|AssertionError|assert"
+  └ 9 lines...
+
+Both have max risk score (100) because both are heavily overdue. The overdue factor dominates. I need to set `next_review_at` closer to now so overdue doesn't cap the scores:
+
+● Edit test_dashboard_api.py +2 -2
+  └ tests/integration/test_dashboard_api.py
+
