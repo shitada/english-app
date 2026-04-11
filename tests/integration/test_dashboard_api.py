@@ -1267,3 +1267,165 @@ async def test_learning_velocity_trend_with_data(client, test_db):
     assert len(data["weekly_data"]) >= 4
     # With 5 weeks of data, trend should be computed (not insufficient_data)
     assert data["trend"] in ("accelerating", "decelerating", "steady")
+
+
+@pytest.mark.integration
+async def test_phrase_of_the_day_empty(client):
+    """GET /phrase-of-the-day returns 204 on empty DB."""
+    res = await client.get("/api/dashboard/phrase-of-the-day")
+    assert res.status_code == 204
+
+
+@pytest.mark.integration
+async def test_phrase_of_the_day_from_conversation(client, test_db):
+    """Phrase of the day sources from ended conversation assistant messages."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Create an ended conversation with assistant messages
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+        (900, "hotel_checkin", "intermediate", "ended", now_iso),
+    )
+    # Assistant message with a sentence in the 20-80 char range
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (900, "assistant", "Welcome to the Grand Hotel, how may I help you today.", now_iso),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/dashboard/phrase-of-the-day")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["source"] == "conversation"
+    assert data["topic"] == "hotel_checkin"
+    assert len(data["phrase"]) >= 20
+
+
+@pytest.mark.integration
+async def test_phrase_of_the_day_vocab_fallback(client, test_db):
+    """Phrase of the day falls back to vocabulary example sentences when no conversations exist."""
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (word, meaning, example_sentence, topic, difficulty) VALUES (?, ?, ?, ?, ?)",
+        ("receipt", "a written acknowledgement", "Could you please give me the receipt for this purchase.", "shopping", 1),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/dashboard/phrase-of-the-day")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["source"] == "vocabulary"
+    assert data["topic"] == "shopping"
+    assert len(data["phrase"]) >= 20
+
+
+@pytest.mark.integration
+async def test_phrase_of_the_day_deterministic(client, test_db):
+    """Phrase of the day is deterministic — same result on repeated calls."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+        (901, "restaurant", "beginner", "ended", now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (901, "assistant", "Would you like to see the dessert menu today. We have a special cheesecake.", now_iso),
+    )
+    await test_db.commit()
+
+    res1 = await client.get("/api/dashboard/phrase-of-the-day")
+    res2 = await client.get("/api/dashboard/phrase-of-the-day")
+    assert res1.status_code == 200
+    assert res2.status_code == 200
+    assert res1.json()["phrase"] == res2.json()["phrase"]
+
+
+@pytest.mark.integration
+async def test_module_streaks_seeded_multi_module(client, test_db):
+    """Module streaks reflect directly seeded activity across multiple modules."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Conversation activity: user message today
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+        (950, "hotel_checkin", "intermediate", "active", now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (950, "user", "Hello, I need a room.", now_iso),
+    )
+
+    # Pronunciation activity today
+    await test_db.execute(
+        "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+        ("Good morning.", "good morning", '{"overall_score": 8.5}', 8.5, now_iso),
+    )
+
+    # Vocabulary activity today
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, word, meaning, example_sentence, topic, difficulty) VALUES (?, ?, ?, ?, ?, ?)",
+        (950, "lobby", "entrance hall", "Wait in the lobby.", "hotel_checkin", 1),
+    )
+    await test_db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+        (950, 1, now_iso),
+    )
+
+    # Listening activity today
+    await test_db.execute(
+        "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        ("Hotel Check-in", "beginner", 5, 4, 80.0, now_iso),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/dashboard/module-streaks")
+    assert res.status_code == 200
+    data = res.json()
+
+    for mod_name in ("conversation", "vocabulary", "pronunciation", "listening"):
+        mod = data["modules"][mod_name]
+        assert mod["current_streak"] >= 1, f"{mod_name} streak should be >= 1"
+        assert mod["last_active"] is not None, f"{mod_name} last_active should not be None"
+
+    assert data["most_consistent"] is not None
+    assert data["least_consistent"] is not None
+
+
+@pytest.mark.integration
+async def test_module_streaks_broken_streak(client, test_db):
+    """Module with activity 2 days ago but not yesterday has streak 0."""
+    from datetime import datetime as dt, timezone, timedelta
+
+    two_days_ago = (dt.now(timezone.utc) - timedelta(days=2)).isoformat()
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Pronunciation activity 2 days ago only (streak broken by yesterday gap)
+    await test_db.execute(
+        "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+        ("Thank you.", "thank you", '{"overall_score": 9.0}', 9.0, two_days_ago),
+    )
+
+    # Conversation activity today (streak = 1)
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+        (960, "hotel_checkin", "beginner", "active", now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (960, "user", "Hi there.", now_iso),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/dashboard/module-streaks")
+    assert res.status_code == 200
+    data = res.json()
+
+    assert data["modules"]["pronunciation"]["current_streak"] == 0
+    assert data["modules"]["conversation"]["current_streak"] >= 1
+    assert data["most_consistent"] == "conversation"

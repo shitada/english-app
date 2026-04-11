@@ -274,3 +274,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add data-populated integration tests for confidence-trend and learning-velocity (#387)
 - [x] Add Module Streaks card to Dashboard with per-module streak bars (#388)
+
+## [NEW] Iteration 389
+
+- [x] Add Phrase of the Day card to Home page with listen-and-repeat drill (#389)

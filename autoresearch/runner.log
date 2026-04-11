@@ -4590,3 +4590,222 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #389: Add Phrase of the Day card to Home page with listen-and-repeat drill
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+T2 = 1775928554, implement_sec = 91. Now run tests:
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All 1225 tests pass, TypeScript check passes. Now check if smoke test is needed:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed. Let me run it:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. Now check for QA tester requirement — this is a `feature` type with frontend `.tsx` changes:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Frontend UI changed — must run tester. Starting server and calling QA tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 2>&1 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server exited — restarting it before calling tester:
+
+● Restart server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ echo "PID=$!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 4 lines...
+
+Server is up. Calling the tester:
+
+● Tester QA test iteration 389
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L950:1100 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1100:end (385 lines read)
+
+QA passed with ux_score 7.0. Now stop server and call evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 8 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 389
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L900:1020 (121 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.7, verdict: keep. All criteria met — keeping iteration 389.
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "389" "$HASH" "$DATE" "499" "91" "67" "359" "1016" \
+  │ "1225" "1225" "pass" "6.7" "kept" "Add Phrase of the Day card to Home page with
+  │ listen-and-repeat drill" \…
+  └ 3 lines...
+
+Results recorded correctly. Now update backlog and start iteration 390.
+
+● T0 for iteration 390 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iteration 389
+  │
+  │ - [x] Add Phrase of the Day card to Home page with listen-and-repeat drill (#389)…
+  └ 2 lines...
+
+## Iteration 390
+
+T0 = 1775929002. Calling proposer:
+
+● Proposer Propose iteration 390
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L250:380 (131 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L1:50 (50 lines read)
+
+● Record T1 for iter 390 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1775929193, propose_sec = 191. Now implementing the integration tests. Let me check the existing test file:
+
+● Check test file end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -80
+  │ tests/integration/test_dashboard_api.py
+  └ 81 lines...
+
+● Check existing module streak tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "module.streak\|module_streak"
+  │ tests/integration/test_dashboard_api.py
+  └ 7 lines...
+
+● Check existing phrase tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "phrase.of.the.day\|phrase_of_the_day" tests/integration/test_dashboard_api.py
+  └ 1 line...
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L625:670 (46 lines read)
+
+Now let me look at the get_module_streaks DAL function to understand the data model:
+
+● Find DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def
+  │ get_module_streaks\|async def get_phrase_of_the_day" app/dal/dashboard.py
+  └ 3 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1519:1600 (82 lines read)
+
+Now I have enough context. Let me add the tests:
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L1:10 (10 lines read)
+
+● File length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_dashboard_api.py
+  └ 2 lines...
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L1260:1269 (10 lines read)
+
+● Edit test_dashboard_api.py +162
+  └ tests/integration/test_dashboard_api.py
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #390: Add data-populated integration tests for phrase-of-the-day and module-streaks
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+T2 = 1775929253, implement_sec = 60. Running tests:
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+The `listening_quiz_results` table schema differs. Let me check:
+
+● Check schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 10 "listening_quiz_results"
+  │ app/database.py | head -15
+  └ 16 lines...
+
+The column is `correct_count`, not `correct_answers`. Also needs `title`. Let me fix:
+
+● Edit test_dashboard_api.py +2 -2
+  └ tests/integration/test_dashboard_api.py
+
