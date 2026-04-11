@@ -207,3 +207,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Pronunciation Progress card to Dashboard (#353)
 - [x] Add Vocabulary Progress card to Dashboard (#354)
 - [x] Add unit tests for listening quiz DAL functions (#355)
+- [x] Add unit tests for 3 untested conversation DAL functions (#356)

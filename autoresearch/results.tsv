@@ -355,3 +355,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 353	0b7274b	2026-04-11	1355	100	37	518	2010	1025	1025	pass	6.85	kept	Add Pronunciation Progress card to Dashboard
 354	899b9f1	2026-04-11	172	47	57	467	743	1025	1025	pass	6.6	kept	Add Vocabulary Progress card to Dashboard
 355	4804314	2026-04-11	209	88	119	45	461	1043	1043	pass	8.1	kept	Add unit tests for listening quiz DAL functions
+356	4eeaf9a	2026-04-11	475	50	55	69	649	1053	1053	pass	7.85	kept	Add unit tests for 3 untested conversation DAL functions

@@ -3028,3 +3028,59 @@ Now append test classes:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 356 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #356: Add unit tests for 3 untested conversation DAL functions
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+All 1053 pass (+10 new). TS check:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All pass. Test-only change, no frontend UI changes, no smoke test needed. Call evaluator:
+
+● Evaluator Evaluate iteration 356
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L1:5 (5 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L1256:1356 (100 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.85 → KEEP. Record results:
+
+● Record results for 356 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "356" "4eeaf9a" "2026-04-11" "475" "50" "55" "69" "649" \
+  │ "1053" "1053" "pass" "7.85" "kept" "Add unit tests for 3 untested conversation DAL
+  │ functions" \…
+  └ 3 lines...
+
+Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Now create the session log:
+
+● Create invocation-012.md +39
+  └ autoresearch/logs/invocation-012.md
+
