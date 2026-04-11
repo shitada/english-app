@@ -1202,6 +1202,179 @@ async def test_session_averages_empty(client):
     assert data["avg_total_user_messages"] == 0.0
 
 
+@pytest.mark.integration
+async def test_difficulty_recommendation_level_up(client, test_db):
+    """Difficulty recommendation suggests level-up when accuracy is high."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+    perf = {"grammar_accuracy_rate": 90, "avg_words_per_message": 12, "vocabulary_diversity": 0.6, "total_user_messages": 8}
+    summary = _json.dumps({"performance": perf})
+
+    for i in range(3):
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+            ("hotel_checkin", "beginner", "ended", now_iso, now_iso, summary),
+        )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["current_difficulty"] == "beginner"
+    assert data["recommended_difficulty"] == "intermediate"
+    assert data["stats"]["accuracy"] == 90.0
+    assert data["stats"]["avg_words"] == 12.0
+    assert data["stats"]["sessions_analyzed"] == 3
+    assert "challenge" in data["reason"].lower() or "ready" in data["reason"].lower()
+
+
+@pytest.mark.integration
+async def test_difficulty_recommendation_stay(client, test_db):
+    """Difficulty recommendation says stay when performance is moderate."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+    perf = {"grammar_accuracy_rate": 70, "avg_words_per_message": 8, "vocabulary_diversity": 0.5, "total_user_messages": 6}
+    summary = _json.dumps({"performance": perf})
+
+    for i in range(3):
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+            ("restaurant", "intermediate", "ended", now_iso, now_iso, summary),
+        )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["current_difficulty"] == "intermediate"
+    assert data["recommended_difficulty"] == "intermediate"
+    assert "right level" in data["reason"].lower()
+
+
+@pytest.mark.integration
+async def test_difficulty_recommendation_level_down(client, test_db):
+    """Difficulty recommendation suggests level-down when accuracy is low."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+    perf = {"grammar_accuracy_rate": 35, "avg_words_per_message": 3, "vocabulary_diversity": 0.2, "total_user_messages": 4}
+    summary = _json.dumps({"performance": perf})
+
+    for i in range(3):
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+            ("job_interview", "advanced", "ended", now_iso, now_iso, summary),
+        )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["current_difficulty"] == "advanced"
+    assert data["recommended_difficulty"] == "intermediate"
+    assert data["stats"]["accuracy"] == 35.0
+
+
+@pytest.mark.integration
+async def test_difficulty_recommendation_malformed_summary(client, test_db):
+    """Difficulty recommendation handles malformed summary_json gracefully."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Insert conversations with bad JSON
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "beginner", "ended", now_iso, now_iso, "not-valid-json"),
+    )
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("restaurant", "beginner", "ended", now_iso, now_iso, '{"no_performance": true}'),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/difficulty-recommendation")
+    assert res.status_code == 200
+    data = res.json()
+    # Both summaries are unparseable/missing performance → valid_count == 0 → "Not enough performance data"
+    assert data["stats"]["sessions_analyzed"] == 0
+
+
+@pytest.mark.integration
+async def test_session_averages_with_data(client, test_db):
+    """Session averages correctly computes averages from seeded conversations."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Session 1: high performance
+    perf1 = {"grammar_accuracy_rate": 90, "avg_words_per_message": 12, "vocabulary_diversity": 0.8, "total_user_messages": 10}
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", now_iso, now_iso, _json.dumps({"performance": perf1})),
+    )
+
+    # Session 2: low performance
+    perf2 = {"grammar_accuracy_rate": 60, "avg_words_per_message": 6, "vocabulary_diversity": 0.4, "total_user_messages": 4}
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("restaurant", "beginner", "ended", now_iso, now_iso, _json.dumps({"performance": perf2})),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/session-averages")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["session_count"] == 2
+    assert data["avg_grammar_accuracy_rate"] == 75.0  # (90+60)/2
+    assert data["avg_avg_words_per_message"] == 9.0  # (12+6)/2
+    assert data["avg_vocabulary_diversity"] == 0.6  # (0.8+0.4)/2
+    assert data["avg_total_user_messages"] == 7.0  # (10+4)/2
+
+
+@pytest.mark.integration
+async def test_session_averages_skips_malformed(client, test_db):
+    """Session averages gracefully skips malformed summary_json entries."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Valid session
+    perf = {"grammar_accuracy_rate": 80, "avg_words_per_message": 10, "vocabulary_diversity": 0.5, "total_user_messages": 8}
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", now_iso, now_iso, _json.dumps({"performance": perf})),
+    )
+
+    # Malformed session (invalid JSON)
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("restaurant", "beginner", "ended", now_iso, now_iso, "{broken json}"),
+    )
+
+    # Missing performance key
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("job_interview", "advanced", "ended", now_iso, now_iso, _json.dumps({"summary": "no perf data"})),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/session-averages")
+    assert res.status_code == 200
+    data = res.json()
+    # Only the 1 valid session should be counted
+    assert data["session_count"] == 1
+    assert data["avg_grammar_accuracy_rate"] == 80.0
+    assert data["avg_avg_words_per_message"] == 10.0
+
+
 # --- Bookmarks endpoint ---
 
 @pytest.mark.integration
