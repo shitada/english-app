@@ -208,3 +208,10 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Vocabulary Progress card to Dashboard (#354)
 - [x] Add unit tests for listening quiz DAL functions (#355)
 - [x] Add unit tests for 3 untested conversation DAL functions (#356)
+
+## [NEW] Iterations 357–359
+
+- [x] Add passage replay and retry-wrong to Listening quiz results (#357)
+- [x] Add unit tests for 4 untested vocabulary DAL functions (#358)
+- [x] Add unit tests for save_minimal_pairs_results and get_phoneme_contrast_stats (#359)
+- [x] Fix test_db conftest fixture to run migrations for migration-only tables (#359)

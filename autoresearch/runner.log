@@ -3742,3 +3742,43 @@ All new tests pass. Now run the full suite:
 
 1074 tests pass (+8 new). TypeScript already passed. Amend the commit with the conftest change:
 
+● Amend commit and record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #359: Add unit tests for save_minimal_pairs_results and get_phoneme_contrast_stats
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 17 lines...
+
+Type is "test" so tester is optional. Now call evaluator:
+
+● Evaluator Evaluate iteration 359
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L530:650 (121 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L650:850 (200 lines read)
+
+Evaluator: total_score=8.35, verdict=keep.
+
+● Record results iteration 359 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && HASH=$(git rev-parse
+  │ --short HEAD) && DATE=$(date +%Y-%m-%d) && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "359" "$HASH" "$DATE" "172" "35" "178" "$((T4-1775893326))" "$((T4-1775892941))" \
+  │ "1074" "1074" "pass" "8.35" "kept" "Add unit tests for save_minimal_pairs_results and …
+  └ 4 lines...
+
+Now update the backlog and write the session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 357–359
+  │
+  │ - [x] Add passage replay and retry-wrong to Listening quiz results (#357)…
+  └ 5 lines...
+
+● Create invocation-013.md +39
+  └ autoresearch/logs/invocation-013.md
+
