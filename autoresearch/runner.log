@@ -3143,3 +3143,75 @@ Both have max risk score (100) because both are heavily overdue. The overdue fac
 ● Edit test_dashboard_api.py +2 -2
   └ tests/integration/test_dashboard_api.py
 
+● Amend with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+● Rerun failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_vocabulary_forecast_high_error_rate -v 2>&1 | tail
+  │ -10
+  └ 11 lines...
+
+Now run the full test suite:
+
+● Full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1217 tests pass (4 new). Now record timestamps and call evaluator:
+
+● Record T3 for 384 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Proposal type is `test`, no frontend files changed — tester skip is OK.
+
+● Evaluator Evaluate iteration 384
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L200:350 (151 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L730:917 (187 lines read)
+
+● Record T4 for 384 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1775923907, T1=1775924506, T2=1775924610, T3=1775924820, T4=1775924887
+- propose_sec = 599
+- implement_sec = 104
+- test_sec = 210
+- evaluate_sec = 67
+- total_sec = 980
+
+Score 8.1 ≥ 6.0, all tests pass → **KEEP**.
+
+● Record iteration 384 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "384" "5dc5136" "2026-04-12" "599" "104" "210" "67" "980" \
+  │ "1217" "1217" "pass" "8.1" "kept" "Add data-populated integration tests for
+  │ vocabulary-forecast and grammar-weak-spots" \…
+  └ 2 lines...
+
+● Verify row format (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Now update backlog and write session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iteration 383–384
+  │
+  │ - [x] Add Grammar Weak Spots card to Dashboard with per-category breakdown (#383)…
+  └ 4 lines...
+
+● Create invocation-023.md +38
+  └ autoresearch/logs/invocation-023.md
+

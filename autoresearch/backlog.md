@@ -259,3 +259,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add Vocabulary Retention Forecast card to Dashboard (#381)
 - [x] Add Learning Velocity card to Dashboard with weekly pace chart (#382)
+
+## [NEW] Iteration 383–384
+
+- [x] Add Grammar Weak Spots card to Dashboard with per-category breakdown (#383)
+- [x] Add data-populated integration tests for vocabulary-forecast and grammar-weak-spots (#384)
