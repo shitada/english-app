@@ -282,3 +282,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [NEW] Iteration 390
 
 - [x] Add data-populated integration tests for phrase-of-the-day and module-streaks (#390)
+
+## [NEW] Iterations 391–392
+
+- [x] ❌ Add Filler Word Tracker to conversation chat and summary (#391 — discarded, no unit tests for utility)
+- [x] Add unit tests for untested pronunciation DAL functions (#392)
