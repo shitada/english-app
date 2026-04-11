@@ -1842,3 +1842,296 @@ Now add to Dashboard.tsx:
 
 Now commit and test:
 
+● Commit iteration 351 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #351: Add Listening Quiz progress card to Dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 1 line...
+
+TypeScript passes. Waiting for pytest...
+
+● Read test results (shell)
+  │ read_bash 34
+  └ 2 lines...
+
+● Run tests again (quick mode) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -10
+  └ 11 lines...
+
+
+
+All 1025 tests pass, TypeScript passes. Now let me check if smoke test is needed and run the evaluator.
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed (dal/router changed) and tester needed (feature + frontend UI changed). Let me run the smoke test and start the tester.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. Now start the server for QA tester and call the tester subagent.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server stopped. Let me restart it and call the tester.
+
+● Restart server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 5 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn.log 2>&1 &
+  │ echo "PID: $!"
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start server backgrounded (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  │ disown
+  │ echo "started"
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 15 lines...
+
+Good, server is already running from before. Now let me call the tester:● Request failed due to a transient API error. Retrying...
+
+Good, server is already running from before. Let me call the tester now.
+
+● Tester QA test iteration 351
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L250:310 (61 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1340:1415 (76 lines read)
+
+QA tester passed (ux_score: 8). Now call the evaluator.
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 11 lines...
+
+● Evaluator Evaluate iteration 351
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L900:1050 (150 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1050:1200 (151 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.9, verdict: keep. All checks● Request failed due to a transient API error. Retrying...
+
+Score 6.9 — KEEP. All criteria met. Let me record results.
+
+● Record results for iteration 351 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "351" "15620cb" "2026-04-11" "595" "400" "440" "1327" "2761" \
+  │ "1025" "1025" "pass" "6.9" "kept" "Add Listening Quiz progress card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, properly tab-separated. Now update backlog and start iteration 352.
+
+● Record T0 for iteration 352 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore - results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+Now calling the proposer for iteration 352.● Request failed due to a transient API error. Retrying...
+
+● Proposer Propose iteration 352
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L250:400 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L400:550 (151 lines read)
+
+● Record T1 for iteration 352 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal (bugfix, 1683s). Now implementing — need to add listening_quiz_results to multiple DAL functions.
+
+● Read _calculate_longest_streak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '290,322p' app/dal/dashboard.py
+  └ 34 lines...
+
+● Read _get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '123,147p' app/dal/dashboard.py
+  └ 24 lines...
+
+● Read _calculate_streak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '82,120p' app/dal/dashboard.py
+  └ 40 lines...
+
+● Read get_today_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '610,640p' app/dal/dashboard.py
+  └ 32 lines...
+
+● Read get_achievements study_days (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '753,780p' app/dal/dashboard.py
+  └ 29 lines...
+
+Now let me implement the fixes:
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ Multiple matches found
+
+● Find both activity feed locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "SELECT 'conversation' as type"
+  │ app/dal/dashboard.py
+  └ 3 lines...
+
+● Read second activity feed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1289,1315p' app/dal/dashboard.py
+  └ 28 lines...
+
+● Read first activity feed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '125,150p' app/dal/dashboard.py
+  └ 27 lines...
+
+● Edit dashboard.py +5 -1
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +5 -1
+  └ app/dal/dashboard.py
+
+Now fix get_today_activity:
+
+● Edit dashboard.py +4
+  └ app/dal/dashboard.py
+
+Now fix get_achievements study_days:
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+Now check if there's a ROUTE_MAP to update for 'listening':
+
+● Check ROUTE_MAP (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ROUTE_MAP" app/dal/dashboard.py
+  └ 3 lines...
+
+● Read ROUTE_MAP (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1292,1297p' app/dal/dashboard.py
+  └ 6 lines...
+
+● Edit dashboard.py +1
+  └ app/dal/dashboard.py
+
+Now update the activity emoji in Dashboard.tsx for the 'listening' type:
+
+● Find emoji mapping in Dashboard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "conversation.*💬\|vocabulary.*📚\|🎙️" frontend/src/pages/Dashboard.tsx | head -5
+  └ 2 lines...
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+
+● Commit iteration 352 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #352: Include listening quiz in streak, activity feed, and achievements
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -10
+  └ 11 lines...
+
+One test failure — the test expects the old return shape. Let me fix it.
+
+● Find failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_empty_database"
+  │ tests/unit/test_dashboard_dal.py | head -5
+  └ 6 lines...
+
+● Find class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class TestGetTodayActivity"
+  │ tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Read failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '636,660p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 26 lines...
+
+● Edit test_dashboard_dal.py +1
+  └ tests/unit/test_dashboard_dal.py
+
+● Rerun failing test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetTodayActivity -q 2>&1
+  └ 3 lines...
+

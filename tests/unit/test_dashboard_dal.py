@@ -640,6 +640,7 @@ class TestGetTodayActivity:
             "conversations": 0,
             "vocabulary_reviews": 0,
             "pronunciation_attempts": 0,
+            "listening_quizzes": 0,
         }
 
     async def test_counts_today_activity(self, test_db):

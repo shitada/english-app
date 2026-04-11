@@ -137,7 +137,7 @@ export default function Dashboard() {
           {stats.recent_activity.map((a, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < stats.recent_activity.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <span style={{ fontSize: 18 }}>
-                {a.type === 'conversation' ? '💬' : a.type === 'vocabulary' ? '📚' : '🎙️'}
+                {a.type === 'conversation' ? '💬' : a.type === 'vocabulary' ? '📚' : a.type === 'listening' ? '🎧' : '🎙️'}
               </span>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 14 }}>{a.detail}</p>
