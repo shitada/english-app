@@ -790,3 +790,49 @@ Tester passed with ux_score 7.0. The minor issues (beginner auto-select for new 
 ● Edit Listening.tsx +1 -1
   └ frontend/src/pages/Listening.tsx
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+Stop the server and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 347
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1050:1150 (101 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1150:1210 (61 lines read)
+
+● Record T4 for iteration 347 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.7 ≥ 6.0, all tests pass, smoke OK, QA passed. **KEEP**.
+
+● Record and verify results for 347 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "347" "5ba6c82" "2026-04-11" "205" "85" "63" "233" "586" \
+  │ "1025" "1025" "pass" "6.7" "kept" "Add adaptive difficulty recommendation to Listening quiz"
+  │ \…
+  └ 3 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 347 complete: **KEPT** (6.7). Proposer ✅, Evaluator ✅, Tester ✅.
+
+---
+
+All 3 iterations complete. Let me write the session log:
+
+● Create invocation-010.md +43
+  └ autoresearch/logs/invocation-010.md
+

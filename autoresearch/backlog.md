@@ -197,4 +197,5 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add session analytics (time spent per exercise type) (completed iteration #315)
 - [x] Add multi-language UI support framework (completed iteration #335 shell + #345 Home page)
 - [x] Add Speak-from-Memory vocabulary recall mode (completed iteration #346)
+- [x] Add adaptive difficulty recommendation to Listening quiz (completed iteration #347)
 - [x] Add conversation transcript download (completed iteration #329 — Anki CSV study card export)
