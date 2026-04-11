@@ -234,6 +234,9 @@ export const api = {
   getConversationDuration: () =>
     request<ConversationDurationResponse>('/api/dashboard/conversation-duration'),
 
+  getDashboardVocabForecast: (limit = 20) =>
+    request<VocabForecastResponse>(`/api/dashboard/vocabulary-forecast?limit=${limit}`),
+
   // Conversation export
   exportConversation: (conversationId: number) =>
     request<ConversationExport>(`/api/conversation/${conversationId}/export`),
@@ -1352,4 +1355,26 @@ export async function evaluateListeningSummary(data: {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+}
+
+// --- Vocabulary Forecast (Dashboard) ---
+
+export interface VocabForecastAtRiskWord {
+  word_id: number;
+  word: string;
+  meaning: string;
+  topic: string;
+  level: number;
+  risk_score: number;
+  days_overdue: number;
+  error_rate: number;
+}
+
+export interface VocabForecastResponse {
+  at_risk_words: VocabForecastAtRiskWord[];
+  total_reviewed: number;
+  at_risk_count: number;
+  overdue_count: number;
+  avg_retention_score: number;
+  recommended_review_count: number;
 }

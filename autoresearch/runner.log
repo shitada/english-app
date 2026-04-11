@@ -2142,3 +2142,236 @@ Row verified. Update backlog and write session log:
 ● Create invocation-021.md +38
   └ autoresearch/logs/invocation-021.md
 
+● Commit docs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: add
+  │ session log and update backlog for iterations 379-380
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+**Autoresearch iterations 379–380 complete.** Both kept (100% success rate).
+
+| Iter | Score | Verdict | Description |
+|------|-------|---------|-------------|
+| 379  | 7.55  | ✅ KEPT | Grammar error category analysis endpoint with per-category trends |
+| 380  | 7.55  | ✅ KEPT | Vocabulary retention forecast endpoint with forgetting-risk scores |
+
+**Tests:** 1194 → 1213 (+19 new tests). All passing. TypeScript and smoke tests clean.
+
+
+Changes   +610 -25
+Requests  3 Premium (18m 9s)
+Tokens    ↑ 5.3m • ↓ 36.6k • 4.9m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-379-to-404.md
+[2026-04-12 00:35:54] Copilot invocation completed (duration: 1092s)
+[2026-04-12 00:35:54] Verifying Playwright test depth...
+[2026-04-12 00:35:54]   PW_NA iter=379 — no UI file changes, Playwright test not required
+[2026-04-12 00:35:54]   PW_NA iter=380 — no UI file changes, Playwright test not required
+[2026-04-12 00:35:54] Running post-invocation audit (iter 379-380)...
+============================================
+ Autoresearch Audit
+ Iterations: 379 — 380
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-12 00:35:54
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 379 380[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 2)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-12 00:35:55] Audit found 1 error(s) — fixes applied where possible
+[2026-04-12 00:35:55] Cleaned up old session logs (kept 5)
+[2026-04-12 00:35:58] Current iteration count: 380 / 404
+[2026-04-12 00:35:58] ------------------------------------------
+[2026-04-12 00:35:58] Invocation 4 / 10
+[2026-04-12 00:35:58] Resuming from iteration 381
+[2026-04-12 00:35:58] ------------------------------------------
+[2026-04-12 00:35:58] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-381-to-404.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 257 lines...
+
+● Read last 20 rows of results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Record start timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-021.md
+  └ 38 lines...
+
+Starting iteration 381. T0=1775921777. Calling the proposer subagent.
+
+● Proposer Propose iteration 381
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1700:1929 (229 lines read)
+  └ Read WeeklyReport.tsx
+      │ frontend/src/components/dashboard/WeeklyReport.tsx
+      └ L1:20 (20 lines read)
+
+● Record T1 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1775921948, propose_sec=171. Now implementing. Let me examine the existing patterns.
+
+● Find forecast endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabulary.forecast\|vocabulary-forecast\|vocab.*forecast" app/routers/dashboard.py | head -20
+  └ 4 lines...
+
+● Check existing API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getDashboard\|vocab.*forecast\|VocabForecast\|vocabulary-forecast" frontend/src/api.ts | head
+  │ -20
+  └ 3 lines...
+
+● Check dashboard index (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 12 lines...
+
+● Find insertion point in Dashboard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "VocabularyProgress\|PronunciationProgress" frontend/src/pages/Dashboard.tsx | head -10
+  └ 4 lines...
+
+● Find response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "VocabularyForecastResponse"
+  │ app/routers/dashboard.py | head -5
+  └ 3 lines...
+
+● See forecast endpoint details (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '640,700p' app/routers/dashboard.py
+  └ 40 lines...
+
+● See existing card pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/VocabularyProgress.tsx
+  └ 96 lines...
+
+● See Dashboard layout around insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '120,130p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 11 lines...
+
+Good. Now let me implement the changes. I need to:
+1. Add API function in `api.ts`
+2. Create `VocabForecastCard.tsx`
+3. Export from `dashboard/index.ts`
+4. Add to `Dashboard.tsx`
+
+● Find API pattern for dashboard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getDashboardStats\|getGrammarWeakSpots\|getVocabularyStats\|DashboardStats" frontend/src/api.ts
+  │ | head -10
+  └ 4 lines...
+
+● See dashboard API section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '220,260p' frontend/src/api.ts
+  └ 42 lines...
+
+● Check api.ts size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/api.ts
+  └ 2 lines...
+
+● Check if recent endpoints have API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "grammar.weak\|grammarWeak\|Grammar
+  │ Weak\|learning.velocity\|learningVelocity\|module.streak\|moduleStreak" frontend/src/api.ts |
+  │ head -10
+  └ 1 line...
+
+The dashboard vocabulary-forecast endpoint doesn't have a frontend API function yet. Let me add it and create the component.
+
+● Find insertion point for new API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getConversationDuration"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+Now add the type definition at the end of api.ts:
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/api.ts
+  └ 21 lines...
+
+● Edit api.ts +22
+  └ frontend/src/api.ts
+
+Now create the VocabForecastCard component:
+
+● Create VocabForecastCard.tsx +163
+  └ frontend/src/components/dashboard/VocabForecastCard.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx to import and render the component:
+
+● See Dashboard imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,10p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 11 lines...
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+
