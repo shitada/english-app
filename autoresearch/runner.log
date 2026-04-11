@@ -4235,3 +4235,104 @@ Now update Dashboard.tsx to import and render:
 
 Now commit and test:
 
+● Commit iteration 388 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #388: Add Module Streaks card to Dashboard with per-module streak bars
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 for iteration 388 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1775927559, implement_sec=100. Running tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+1225/1225 tests pass, TS check passes. This is a `feature` type with frontend page/component changes — tester is REQUIRED. Let me start the server and run QA:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now calling tester:
+
+● Changed files for tester (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 7 lines...
+
+● Tester QA test iteration 388
+  │ Read Dashboard.tsx
+  │   │ frontend/src/pages/Dashboard.tsx
+  │   └ L115:130 (15 lines read)
+  └ Read ModuleStreaksCard.tsx
+      │ frontend/src/components/dashboard/ModuleStreaksCard.tsx
+      └ L60:70 (11 lines read)
+
+QA passed with ux_score=7.0. Now stopping server and calling evaluator:
+
+● Stop server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1775927821, test_sec=262. Calling evaluator:
+
+● Evaluator Evaluate iteration 388
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1350:1600 (122 lines read)
+  └ List directory app
+      └ 11 files found
+
+Server shutdown confirmed. Recording iteration 388 results:
+
+● Record T4 for iteration 388 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775927897, evaluate_sec=76, total_sec=617. Evaluator score: 6.5, verdict: keep. All criteria met (tests pass, TS pass, QA passed with ux_score 7.0 ≥ 5.0, score 6.5 ≥ 6.0).
+
+**Checklist verification for iteration 388:**
+- ✅ Proposer called → received JSON proposal
+- ✅ Evaluator called → received JSON with total_score 6.5
+- ✅ Tester called → proposal type is "feature" AND frontend pages/components changed → received JSON with ux_score 7.0, passed: true
+- ✅ Score in results.tsv will match evaluator's 6.5
+
+● Record results for iteration 388 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "388" "ae6375d" "2026-04-12" "179" "100" "262" "76" "617" \
+  │ "1225" "1225" "pass" "6.5" "kept" "Add Module Streaks card to Dashboard with per-module
+  │ streak bars" \…
+  └ 3 lines...
+
+Row verified with pipe separators. Now updating backlog and writing session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 387–388
+  │
+  │ - [x] Add data-populated integration tests for confidence-trend and learning-velocity (#387)…
+  └ 3 lines...
+
+● Create invocation-025.md +38
+  └ autoresearch/logs/invocation-025.md
+

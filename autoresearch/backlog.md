@@ -269,3 +269,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add Pronunciation Weak Spots card to Dashboard with word & sound analysis (#385)
 - [x] Add data-populated integration tests for weekly-report and session-analytics (#386)
+
+## [NEW] Iterations 387–388
+
+- [x] Add data-populated integration tests for confidence-trend and learning-velocity (#387)
+- [x] Add Module Streaks card to Dashboard with per-module streak bars (#388)
