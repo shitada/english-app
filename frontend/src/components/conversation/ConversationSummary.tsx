@@ -10,6 +10,7 @@ import { DictationExercise } from './DictationExercise';
 import { ShadowingExercise } from './ShadowingExercise';
 import { ClozeExercise } from './ClozeExercise';
 import { RephraseChallenge } from './RephraseChallenge';
+import { SpokenRetelling } from './SpokenRetelling';
 import { ShareCard } from './ShareCard';
 
 interface Message {
@@ -406,6 +407,11 @@ export function ConversationSummary({
 
       {/* Rephrase Challenge — say the same thing differently */}
       {conversationId && <RephraseChallenge conversationId={conversationId} />}
+
+      {/* Spoken Retelling — summarize the conversation in your own words */}
+      {conversationId && summary?.summary && (
+        <SpokenRetelling conversationId={conversationId} summaryText={summary.summary} />
+      )}
 
       <ConversationQuiz
         questions={quizQuestions}

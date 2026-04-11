@@ -131,6 +131,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ original, user_rephrase }),
     }),
+  evaluateRetelling: (original_summary: string, user_retelling: string) =>
+    request<{ content_coverage: number; grammar_score: number; fluency_score: number; vocabulary_score: number; overall_score: number; feedback: string; model_retelling: string }>('/api/conversation/retelling/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ original_summary, user_retelling }),
+    }),
 
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {

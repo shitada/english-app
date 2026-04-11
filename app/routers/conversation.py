@@ -875,6 +875,62 @@ async def evaluate_rephrase(
     }
 
 
+class RetellEvaluateRequest(BaseModel):
+    original_summary: str = Field(min_length=1, max_length=2000)
+    user_retelling: str = Field(min_length=1, max_length=2000)
+
+
+class RetellEvaluateResponse(BaseModel):
+    content_coverage: float
+    grammar_score: float
+    fluency_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_retelling: str
+
+
+@router.post("/retelling/evaluate", response_model=RetellEvaluateResponse)
+async def evaluate_retelling(
+    body: RetellEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's spoken retelling of a conversation summary."""
+    copilot = get_copilot_service()
+    prompt = (
+        f"Original conversation summary:\n\"{body.original_summary}\"\n\n"
+        f"User's spoken retelling:\n\"{body.user_retelling}\"\n\n"
+        "Evaluate the retelling. Return JSON with:\n"
+        "- content_coverage (1-10): how well did the user cover the key events and topics?\n"
+        "- grammar_score (1-10): grammatical accuracy of the retelling\n"
+        "- fluency_score (1-10): how fluent and natural does it sound?\n"
+        "- vocabulary_score (1-10): variety and appropriateness of vocabulary used\n"
+        "- overall_score (1-10): overall quality combining all factors\n"
+        "- feedback (string): brief encouraging feedback highlighting strengths and one area to improve (2-3 sentences)\n"
+        "- model_retelling (string): provide a natural, fluent model retelling of the same conversation summary (3-5 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English teacher evaluating spoken retelling exercises. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="retelling_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Retelling evaluation failed")
+
+    return {
+        "content_coverage": min(10, max(1, float(result.get("content_coverage", 5)))),
+        "grammar_score": min(10, max(1, float(result.get("grammar_score", 5)))),
+        "fluency_score": min(10, max(1, float(result.get("fluency_score", 5)))),
+        "vocabulary_score": min(10, max(1, float(result.get("vocabulary_score", 5)))),
+        "overall_score": min(10, max(1, float(result.get("overall_score", 5)))),
+        "feedback": str(result.get("feedback", "")),
+        "model_retelling": str(result.get("model_retelling", "")),
+    }
+
+
 class SessionAveragesResponse(BaseModel):
     session_count: int
     avg_grammar_accuracy_rate: float
