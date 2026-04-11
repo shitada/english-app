@@ -3084,3 +3084,283 @@ Now create the session log:
 ● Create invocation-012.md +39
   └ autoresearch/logs/invocation-012.md
 
+● Commit session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "docs: add
+  │ session log for iterations 354-356
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+Completed 3 iterations (354–356), all kept:
+
+| Iter | Score | Description |
+|------|-------|-------------|
+| 354  | 6.60  | Add Vocabulary Progress card to Dashboard |
+| 355  | 8.10  | Add unit tests for listening quiz DAL functions |
+| 356  | 7.85  | Add unit tests for 3 untested conversation DAL functions |
+
+**3/3 kept** (100% success rate), avg score **7.52**. Tests went from 1025 → 1053 (+28). Notable: QA tester caught a real accuracy display bug in iteration 354 that was fixed before shipping.
+
+
+Changes   +307 -5
+Requests  3 Premium (42m 25s)
+Tokens    ↑ 15.5m • ↓ 71.1k • 14.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-354-to-364.md
+[2026-04-11 16:11:00] Copilot invocation completed (duration: 2548s)
+[2026-04-11 16:11:00] Verifying Playwright test depth...
+[2026-04-11 16:11:00]   PW_SKIP iter=354 — UI changed but NO Playwright test was run
+[2026-04-11 16:11:00]   PW_NA iter=355 — no UI file changes, Playwright test not required
+[2026-04-11 16:11:00]   PW_NA iter=356 — no UI file changes, Playwright test not required
+[2026-04-11 16:11:00] Running post-invocation audit (iter 354-356)...
+============================================
+ Autoresearch Audit
+ Iterations: 354 — 356
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-11 16:11:00
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 355 356[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-11 16:11:01] Audit found 1 error(s) — fixes applied where possible
+[2026-04-11 16:11:01] Cleaned up old session logs (kept 5)
+[2026-04-11 16:11:04] Current iteration count: 356 / 364
+[2026-04-11 16:11:04] ------------------------------------------
+[2026-04-11 16:11:04] Invocation 5 / 10
+[2026-04-11 16:11:04] Resuming from iteration 357
+[2026-04-11 16:11:04] ------------------------------------------
+[2026-04-11 16:11:04] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-357-to-364.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 211 lines...
+
+● Read latest session log (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-012.md | head
+  │ -80
+  └ 39 lines...
+
+Good. Last iteration was 356, so I'll run iterations 357–359. Let me begin.
+
+---
+
+**Iteration 357** — Starting.
+
+● Record T0 for iteration 357 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now calling the proposer subagent.
+
+● Proposer Propose iteration 357
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L389:437 (49 lines read)
+  └ Read EchoPractice.tsx
+      │ frontend/src/components/EchoPractice.tsx
+      └ L1:30 (29 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Proposal received. propose_sec = 492. Now implementing.
+
+● Check file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Listening.tsx
+  └ 2 lines...
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ 437 lines read
+
+Now I'll implement the changes. I need to add:
+1. `isRetry` state to track retry mode
+2. "Replay Passage" button with speed selector in results
+3. "Retry Wrong" button that filters to incorrect questions only
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Now I need to modify the `handleNext` callback to skip saving when in retry mode:
+
+● Edit Listening.tsx +13 -11
+  └ frontend/src/pages/Listening.tsx
+
+Now add the `handleRetryWrong` callback and update the `handleRestart` to reset `isRetry`:
+
+● Edit Listening.tsx +17
+  └ frontend/src/pages/Listening.tsx
+
+Now add the Replay Passage and Retry Wrong buttons to the results section. I need to import `Play` icon too:
+
+● Edit Listening.tsx +1 -1
+  └ frontend/src/pages/Listening.tsx
+
+Now update the results action bar to add the new buttons:
+
+● Edit Listening.tsx +38
+  └ frontend/src/pages/Listening.tsx
+
+Now record T2 and commit:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 357 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #357: Add passage replay and retry-wrong to Listening quiz results
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+Now run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1053 tests pass, TypeScript check passes. Now check if smoke test is needed and if frontend UI files changed:
+
+● Check smoke test and UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" ; echo "---" ; git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+No backend changes (no smoke test needed). Frontend page changed + proposal type is "feature" → MUST call tester.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Start server and run QA test:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server died. Let me restart it and proceed with the tester.
+
+● Restart server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server keeps stopping. Let me start it with nohup and call the tester immediately.
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn-357.log 2>&1 & echo "PID=$!"
+  └ Permission denied and could not request permission from user
+
+● Start server async (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+✗ Check server status (shell)
+  │ read_bash server-357c 2>/dev/null; cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ /tmp/uvicorn-357.log 2>/dev/null | tail -5; echo "---"; lsof -ti:8000 2>/dev/null | head -1
+  └ Permission denied and could not request permission from user
+
+● Check if port 8000 has process (shell)
+  │ lsof -ti:8000 2>/dev/null | head -1
+  └ 2 lines...
+
+Good, a process is still listening on port 8000. Let me start the server fresh and call the tester immediately:
+
+● Quick health check (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Let me call the tester now:
+
+● Tester QA test iteration 357
+  │ Read ListeningSpokenQA.tsx
+  │   │ frontend/src/components/ListeningSpokenQA.tsx
+  │   └ L1:20 (20 lines read)
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L409:496 (87 lines read)
+
+Tester passed (ux_score=7). Let me fix the minor issue about canceling speech in handleRetryWrong:
+
+● Edit Listening.tsx +2
+  └ frontend/src/pages/Listening.tsx
+

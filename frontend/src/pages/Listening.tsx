@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History } from 'lucide-react';
+import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play } from 'lucide-react';
 import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
@@ -37,6 +37,7 @@ export default function Listening() {
   const [playbackRate, setPlaybackRate] = useState(1.0);
   const [saved, setSaved] = useState(false);
   const [recommendation, setRecommendation] = useState<ListeningDifficultyRecommendation | null>(null);
+  const [isRetry, setIsRetry] = useState(false);
 
   useEffect(() => {
     getListeningQuizHistory(10).then(setHistory).catch(() => {});
@@ -101,18 +102,20 @@ export default function Listening() {
       setAnswered(false);
     } else {
       setPhase('results');
-      // Auto-save quiz result
-      const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length;
-      const totalQ = questions.length;
-      const scoreVal = Math.round((correctCount / totalQ) * 100);
-      saveListeningQuizResult({
-        title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal,
-      }).then(() => {
-        setSaved(true);
-        getListeningQuizHistory(10).then(setHistory).catch(() => {});
-      }).catch(() => {});
+      if (!isRetry) {
+        // Auto-save quiz result (skip on retry)
+        const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length;
+        const totalQ = questions.length;
+        const scoreVal = Math.round((correctCount / totalQ) * 100);
+        saveListeningQuizResult({
+          title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal,
+        }).then(() => {
+          setSaved(true);
+          getListeningQuizHistory(10).then(setHistory).catch(() => {});
+        }).catch(() => {});
+      }
     }
-  }, [quizIndex, questions, results, selectedOption, title, difficulty]);
+  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry]);
 
   const handleRestart = useCallback(() => {
     setPhase('setup');
@@ -125,10 +128,29 @@ export default function Listening() {
     setAnswered(false);
     setResults([]);
     setSaved(false);
+    setIsRetry(false);
     setError('');
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
   }, []);
+
+  const handleRetryWrong = useCallback(() => {
+    const wrongResults = results.filter(r => r.selectedIndex !== r.correctIndex);
+    if (wrongResults.length === 0) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    // Filter questions to only those the user got wrong
+    const wrongQuestions = wrongResults.map(r => {
+      return questions.find(q => q.question === r.question)!;
+    }).filter(Boolean);
+    setQuestions(wrongQuestions);
+    setQuizIndex(0);
+    setSelectedOption(null);
+    setAnswered(false);
+    setResults([]);
+    setIsRetry(true);
+    setPhase('quiz');
+  }, [results, questions]);
 
   return (
     <div className="page-container">
@@ -425,6 +447,44 @@ export default function Listening() {
             <button className="btn btn-primary" onClick={handleRestart} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <RotateCcw size={14} /> Try Again
             </button>
+            <button
+              onClick={playAudio}
+              className="btn"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <Volume2 size={14} /> {isSpeaking ? 'Stop' : 'Replay Passage'}
+            </button>
+            {results.some(r => r.selectedIndex !== r.correctIndex) && (
+              <button
+                className="btn"
+                onClick={handleRetryWrong}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  border: '2px solid var(--warning, #f59e0b)',
+                  color: 'var(--warning, #f59e0b)', fontWeight: 600,
+                }}
+              >
+                <Play size={14} /> Retry Wrong ({results.filter(r => r.selectedIndex !== r.correctIndex).length})
+              </button>
+            )}
+          </div>
+          {/* Playback speed for replay */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Playback speed:</span>
+            {[0.5, 0.75, 1.0, 1.25, 1.5].map(r => (
+              <button
+                key={r}
+                onClick={() => setPlaybackRate(r)}
+                style={{
+                  padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  border: playbackRate === r ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  background: playbackRate === r ? 'var(--primary)' : 'transparent',
+                  color: playbackRate === r ? 'white' : 'var(--text)',
+                }}
+              >
+                {r}x
+              </button>
+            ))}
           </div>
           {passage && <EchoPractice passage={passage} />}
           {passage && <ClozeListening passage={passage} />}
