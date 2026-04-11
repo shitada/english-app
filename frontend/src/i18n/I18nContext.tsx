@@ -5,6 +5,7 @@ interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: keyof Translations) => string;
+  tParam: (key: keyof Translations, params: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -27,8 +28,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback((key: keyof Translations) => translations[locale][key], [locale]);
 
+  const tParam = useCallback((key: keyof Translations, params: Record<string, string | number>) => {
+    let result = translations[locale][key];
+    for (const [k, v] of Object.entries(params)) {
+      result = result.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+    }
+    return result;
+  }, [locale]);
+
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, tParam }}>
       {children}
     </I18nContext.Provider>
   );

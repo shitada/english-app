@@ -119,6 +119,14 @@ build_prompt() {
     local next_iter=$((current_iter + 1))
     local remaining=$((target - current_iter))
 
+    # Cap iterations per invocation to prevent context exhaustion.
+    # When the orchestrator runs too many iterations in one invocation,
+    # it forgets mandatory rules and starts self-implementing.
+    local max_per_invocation=3
+    if [[ "$remaining" -gt "$max_per_invocation" ]]; then
+        remaining=$max_per_invocation
+    fi
+
     # Calculate feature quota for this run
     local feature_target=$(( ADDITIONAL_ITERATIONS * FEATURE_RATIO / 100 ))
     [[ "$feature_target" -lt 1 ]] && feature_target=1
@@ -143,10 +151,10 @@ build_prompt() {
 ## MANDATORY RULES — read before doing ANYTHING:
 1. You MUST call the **proposer** subagent via runSubagent for EVERY iteration. Do NOT propose changes yourself.
 2. You MUST call the **evaluator** subagent via runSubagent for EVERY iteration. Do NOT assign scores yourself.
-3. If frontend .tsx files changed OR proposal type is "feature"/"ux", you MUST call the **tester** subagent.
+3. You MUST call the **tester** subagent via runSubagent when the proposal type is "feature" or "ux" AND any frontend .tsx file in pages/ or components/ was changed. Check with: \`git diff HEAD~1 --name-only | grep -E 'frontend/src/(pages|components)/.*\\.tsx$'\`
 4. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
 5. Read only the last 20 rows of results.tsv (use \`tail -20\`), not the full file.
-6. Before recording results, verify: Did I call proposer? Did I call evaluator? If NO → STOP and call them.
+6. Before recording results, verify: Did I call proposer? Did I call evaluator? If frontend .tsx changed and type is feature/ux, did I call tester? If NO → STOP and call them NOW.
 ${feature_instruction}
 
 ## Task:

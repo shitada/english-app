@@ -7,6 +7,7 @@ import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 import { AchievementToastContainer } from '../components/AchievementToast';
+import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
   conversation: '/conversation',
@@ -14,10 +15,10 @@ const MODULE_ROUTES: Record<string, string> = {
   pronunciation: '/pronunciation',
 };
 
-const MODULE_LABELS: Record<string, string> = {
-  conversation: 'Conversation',
-  vocabulary: 'Vocabulary',
-  pronunciation: 'Pronunciation',
+const MODULE_LABEL_KEYS: Record<string, 'moduleConversation' | 'moduleVocabulary' | 'modulePronunciation'> = {
+  conversation: 'moduleConversation',
+  vocabulary: 'moduleVocabulary',
+  pronunciation: 'modulePronunciation',
 };
 
 function strengthColor(value: number): string {
@@ -35,14 +36,15 @@ function mapRecommendationToRoute(rec: string): string | null {
 }
 
 function ModuleStrengthsSection({ strengths }: { strengths: { conversation: number; vocabulary: number; pronunciation: number } }) {
+  const { t } = useI18n();
   const modules = (['conversation', 'vocabulary', 'pronunciation'] as const);
   return (
     <div style={{ marginBottom: '1rem' }}>
-      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Module Strengths</h4>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('moduleStrengths')}</h4>
       {modules.map(mod => (
         <div key={mod} style={{ marginBottom: 6 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: 2 }}>
-            <span>{MODULE_LABELS[mod]}</span>
+            <span>{t(MODULE_LABEL_KEYS[mod])}</span>
             <span>{Math.round(strengths[mod])}%</span>
           </div>
           <div style={{ background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
@@ -61,25 +63,26 @@ function ModuleStrengthsSection({ strengths }: { strengths: { conversation: numb
 }
 
 function WeeklyProgressSection({ comparison }: { comparison: LearningInsights['weekly_comparison'] }) {
+  const { t } = useI18n();
   const modules = (['conversations', 'vocabulary', 'pronunciation'] as const);
-  const labels: Record<string, string> = { conversations: 'Conversations', vocabulary: 'Vocab Reviews', pronunciation: 'Pronunciation' };
+  const labelKeys: Record<string, 'weeklyConversations' | 'weeklyVocabReviews' | 'weeklyPronunciation'> = { conversations: 'weeklyConversations', vocabulary: 'weeklyVocabReviews', pronunciation: 'weeklyPronunciation' };
   return (
     <div style={{ marginBottom: '1rem' }}>
-      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Weekly Progress</h4>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('weeklyProgress')}</h4>
       <div style={{ display: 'flex', gap: 12 }}>
         {modules.map(mod => {
           const data = comparison[mod];
           const diff = data.this_week - data.last_week;
           return (
             <div key={mod} style={{ flex: 1, background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, padding: '0.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 4 }}>{labels[mod]}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 4 }}>{t(labelKeys[mod])}</div>
               <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{data.this_week}</div>
               <div style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
                 {diff > 0 ? <TrendingUp size={12} color="var(--success, #10b981)" /> :
                  diff < 0 ? <TrendingDown size={12} color="var(--danger, #ef4444)" /> :
                  <Minus size={12} color="var(--text-secondary, #6b7280)" />}
                 <span style={{ color: diff > 0 ? 'var(--success, #10b981)' : diff < 0 ? 'var(--danger, #ef4444)' : 'var(--text-secondary, #6b7280)' }}>
-                  {diff > 0 ? `+${diff}` : diff === 0 ? '—' : `${diff}`} vs last wk
+                  {diff > 0 ? `+${diff}` : diff === 0 ? '—' : `${diff}`} {t('vsLastWeek')}
                 </span>
               </div>
             </div>
@@ -91,8 +94,10 @@ function WeeklyProgressSection({ comparison }: { comparison: LearningInsights['w
 }
 
 function FocusAreaCTA({ area }: { area: string }) {
+  const { t, tParam } = useI18n();
   const route = MODULE_ROUTES[area];
-  const label = MODULE_LABELS[area] || area;
+  const labelKey = MODULE_LABEL_KEYS[area];
+  const label = labelKey ? t(labelKey) : area;
   if (!route) return null;
   return (
     <div style={{ marginBottom: '1rem' }}>
@@ -101,19 +106,20 @@ function FocusAreaCTA({ area }: { area: string }) {
         background: 'var(--primary, #6366f1)', color: '#fff', textDecoration: 'none',
         fontWeight: 600, fontSize: '0.9rem',
       }}>
-        Focus on {label} — your weakest area →
+        {tParam('focusOnWeakest', { label })}
       </Link>
     </div>
   );
 }
 
-const QUICK_GOALS: { goalType: string; target: number; label: string }[] = [
-  { goalType: 'conversations', target: 3, label: '3 conversations/day' },
-  { goalType: 'vocabulary_reviews', target: 10, label: '10 vocab reviews/day' },
-  { goalType: 'pronunciation_attempts', target: 5, label: '5 pronunciations/day' },
+const QUICK_GOALS: { goalType: string; target: number; labelKey: 'goal3Conv' | 'goal10Vocab' | 'goal5Pron' }[] = [
+  { goalType: 'conversations', target: 3, labelKey: 'goal3Conv' },
+  { goalType: 'vocabulary_reviews', target: 10, labelKey: 'goal10Vocab' },
+  { goalType: 'pronunciation_attempts', target: 5, labelKey: 'goal5Pron' },
 ];
 
 function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal) => void }) {
+  const { t } = useI18n();
   const [creating, setCreating] = useState<string | null>(null);
 
   const handleCreate = useCallback(async (goalType: string, target: number) => {
@@ -130,9 +136,9 @@ function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal
 
   return (
     <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
-      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Set a Daily Goal</h4>
+      <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('setDailyGoal')}</h4>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {QUICK_GOALS.map(({ goalType, target, label }) => (
+        {QUICK_GOALS.map(({ goalType, target, labelKey }) => (
           <button key={goalType} onClick={() => handleCreate(goalType, target)}
             disabled={creating !== null}
             style={{
@@ -141,7 +147,7 @@ function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal
               color: creating === goalType ? '#fff' : 'var(--text, #111827)',
               cursor: creating !== null ? 'not-allowed' : 'pointer', fontSize: '0.8rem',
             }}>
-            {creating === goalType ? '…' : label}
+            {creating === goalType ? '…' : t(labelKey)}
           </button>
         ))}
       </div>
@@ -150,6 +156,7 @@ function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal
 }
 
 function GoalProgressBar({ goal, onDelete, onUpdate }: { goal: LearningGoal; onDelete: (goalType: string) => void; onUpdate: (goalType: string, newTarget: number) => void }) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [targetInput, setTargetInput] = useState(String(goal.daily_target));
   const pct = Math.min(100, Math.round((goal.today_count / goal.daily_target) * 100));
@@ -181,14 +188,14 @@ function GoalProgressBar({ goal, onDelete, onUpdate }: { goal: LearningGoal; onD
             <span
               onClick={() => { setTargetInput(String(goal.daily_target)); setEditing(true); }}
               style={{ cursor: 'pointer' }}
-              title="Click to edit target"
+              title={t('clickToEditTarget')}
             >
               {goal.today_count}/{goal.daily_target}{goal.completed ? ' ✓' : ''}
             </span>
           )}
           <button
             onClick={() => onDelete(goal.goal_type)}
-            title="Remove goal"
+            title={t('removeGoal')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-secondary, #6b7280)', display: 'flex', alignItems: 'center' }}
           >
             <Trash2 size={14} />
@@ -209,6 +216,7 @@ function GoalProgressBar({ goal, onDelete, onUpdate }: { goal: LearningGoal; onD
 }
 
 function DailyPracticeCard() {
+  const { t, tParam } = useI18n();
   const [insights, setInsights] = useState<LearningInsights | null>(null);
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [todayActivity, setTodayActivity] = useState<TodayActivity | null>(null);
@@ -260,7 +268,7 @@ function DailyPracticeCard() {
     <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
       <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
         <Target size={20} color="var(--primary, #6366f1)" />
-        Today's Practice
+        {t('todaysPractice')}
       </h3>
 
       {insights && (
@@ -270,10 +278,10 @@ function DailyPracticeCard() {
             : <Flame size={20} color="var(--warning, #f59e0b)" />
           }
           <div>
-            <strong>{insights.streak} day streak</strong>
+            <strong>{tParam('dayStreak', { count: insights.streak })}</strong>
             {insights.streak_at_risk && (
               <span style={{ color: 'var(--danger, #ef4444)', fontSize: '0.85rem', marginLeft: 8 }}>
-                Complete an activity to keep it!
+                {t('keepStreak')}
               </span>
             )}
           </div>
@@ -289,13 +297,13 @@ function DailyPracticeCard() {
       {todayActivity && (
         <div style={{ display: 'flex', gap: 12, marginBottom: '1rem' }}>
           {([
-            { label: 'Conversations', count: todayActivity.conversations, icon: <MessageSquare size={16} /> },
-            { label: 'Vocab Reviews', count: todayActivity.vocabulary_reviews, icon: <BookOpen size={16} /> },
-            { label: 'Pronunciation', count: todayActivity.pronunciation_attempts, icon: <Mic size={16} /> },
-          ]).map(({ label, count, icon }) => (
-            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '0.5rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+            { labelKey: 'todayConversations' as const, count: todayActivity.conversations, icon: <MessageSquare size={16} /> },
+            { labelKey: 'todayVocabReviews' as const, count: todayActivity.vocabulary_reviews, icon: <BookOpen size={16} /> },
+            { labelKey: 'todayPronunciation' as const, count: todayActivity.pronunciation_attempts, icon: <Mic size={16} /> },
+          ]).map(({ labelKey, count, icon }) => (
+            <div key={labelKey} style={{ flex: 1, textAlign: 'center', padding: '0.5rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, marginBottom: 4, color: 'var(--text-secondary, #6b7280)' }}>
-                {icon}<span style={{ fontSize: '0.75rem' }}>{label}</span>
+                {icon}<span style={{ fontSize: '0.75rem' }}>{t(labelKey)}</span>
               </div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{count}</div>
             </div>
@@ -306,13 +314,13 @@ function DailyPracticeCard() {
       {goals.length > 0 && goals.every(g => g.completed) && (
         <div style={{ marginBottom: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--success-bg, #f0fdf4)', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--success, #10b981)' }}>
           <CheckCircle size={18} />
-          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>🎉 All daily goals complete!</span>
+          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t('allGoalsComplete')}</span>
         </div>
       )}
 
       {goals.length > 0 ? (
         <div style={{ marginBottom: '1rem' }}>
-          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Daily Goals</h4>
+          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('dailyGoals')}</h4>
           {goals.map(g => <GoalProgressBar key={g.id} goal={g} onDelete={handleGoalDelete} onUpdate={handleGoalUpdate} />)}
         </div>
       ) : (
@@ -321,7 +329,7 @@ function DailyPracticeCard() {
 
       {insights && insights.recommendations.length > 0 && (
         <div>
-          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>Recommendations</h4>
+          <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('recommendations')}</h4>
           <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {insights.recommendations.map((rec, i) => {
               const route = mapRecommendationToRoute(rec);
@@ -345,6 +353,7 @@ function DailyPracticeCard() {
 }
 
 function WordOfTheDayCard() {
+  const { t } = useI18n();
   const [word, setWord] = useState<WordOfTheDay | null>(null);
 
   useEffect(() => {
@@ -372,7 +381,7 @@ function WordOfTheDayCard() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 18 }}>📖</span>
-        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Word of the Day</span>
+        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('wordOfTheDay')}</span>
         <span style={{ fontSize: 11, color: 'var(--text-secondary)', marginLeft: 'auto', textTransform: 'capitalize' }}>
           {word.topic?.replace(/_/g, ' ')}
         </span>
@@ -383,7 +392,7 @@ function WordOfTheDayCard() {
         <button
           onClick={() => speak(word.word)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-secondary)' }}
-          title="Listen"
+          title={t('listen')}
         >
           🔊
         </button>
@@ -401,7 +410,7 @@ function WordOfTheDayCard() {
           <button
             onClick={() => speak(word.example_sentence)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: 'var(--text-secondary)', flexShrink: 0 }}
-            title="Listen to example"
+            title={t('listenToExample')}
           >
             🔊
           </button>
@@ -409,13 +418,14 @@ function WordOfTheDayCard() {
       )}
 
       <Link to="/vocabulary" style={{ display: 'inline-block', marginTop: 10, fontSize: '0.85rem', color: 'var(--primary, #6366f1)', fontWeight: 600, textDecoration: 'none' }}>
-        Practice Vocabulary →
+        {t('practiceVocabulary')}
       </Link>
     </div>
   );
 }
 
 function RecentlyPracticedCard() {
+  const { t, tParam } = useI18n();
   const [items, setItems] = useState<RecentActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -437,13 +447,13 @@ function RecentlyPracticedCard() {
   const relativeTime = (ts: string) => {
     const diff = Date.now() - new Date(ts).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return t('justNow');
+    if (mins < 60) return tParam('minutesAgo', { count: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
+    if (hrs < 24) return tParam('hoursAgo', { count: hrs });
     const days = Math.floor(hrs / 24);
-    if (days === 1) return 'yesterday';
-    return `${days}d ago`;
+    if (days === 1) return t('yesterday');
+    return tParam('daysAgo', { count: days });
   };
 
   return (
@@ -452,7 +462,7 @@ function RecentlyPracticedCard() {
       boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: 16, border: '1px solid var(--border-color, #e5e7eb)',
     }}>
       <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
-        Recently Practiced
+        {t('recentlyPracticed')}
       </h3>
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -497,6 +507,7 @@ function RecentlyPracticedCard() {
 }
 
 function StreakMilestonesCard() {
+  const { t, tParam } = useI18n();
   const [data, setData] = useState<StreakMilestonesResponse | null>(null);
 
   useEffect(() => {
@@ -523,7 +534,7 @@ function StreakMilestonesCard() {
           <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>
             {current_streak} day{current_streak !== 1 ? 's' : ''}
           </div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Current streak</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t('currentStreak')}</div>
         </div>
         {longest_streak > 0 && (
           <div style={{
@@ -531,7 +542,7 @@ function StreakMilestonesCard() {
             background: 'var(--warning-bg, #fffbeb)', border: '1px solid var(--warning, #f59e0b)',
             fontSize: 12, fontWeight: 600, color: 'var(--warning, #f59e0b)',
           }}>
-            🏆 Best: {longest_streak}d
+            {tParam('bestStreak', { count: longest_streak })}
           </div>
         )}
       </div>
@@ -562,8 +573,8 @@ function StreakMilestonesCard() {
       {next_milestone && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Next: {next_milestone.label}</span>
-            <span style={{ fontWeight: 600 }}>{next_milestone.days_remaining} day{next_milestone.days_remaining !== 1 ? 's' : ''} to go</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{tParam('nextMilestone', { label: next_milestone.label })}</span>
+            <span style={{ fontWeight: 600 }}>{tParam('daysToGo', { count: next_milestone.days_remaining, s: next_milestone.days_remaining !== 1 ? 's' : '' })}</span>
           </div>
           <div style={{ height: 6, borderRadius: 3, background: 'var(--border, #e5e7eb)' }}>
             <div style={{
@@ -580,6 +591,7 @@ function StreakMilestonesCard() {
 }
 
 function VocabProgressCard() {
+  const { t, tParam } = useI18n();
   const [stats, setStats] = useState<VocabularyStatsResponse | null>(null);
   const [expanded, setExpanded] = useState(false);
 
@@ -610,7 +622,7 @@ function VocabProgressCard() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <BookOpen size={20} color="var(--color-primary, #6366f1)" />
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
-          Vocabulary Progress
+          {t('vocabularyProgress')}
         </h3>
       </div>
 
@@ -630,10 +642,10 @@ function VocabProgressCard() {
         </div>
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary, #1f2937)' }}>
-            {stats.total_mastered} / {stats.total_words} mastered
+            {tParam('masteredCount', { mastered: stats.total_mastered, total: stats.total_words })}
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary, #6b7280)' }}>
-            {stats.accuracy_rate > 0 ? `${Math.round(stats.accuracy_rate)}% accuracy` : 'Start practicing to track accuracy'}
+            {stats.accuracy_rate > 0 ? tParam('accuracyRate', { rate: Math.round(stats.accuracy_rate) }) : t('startPracticingToTrack')}
           </div>
         </div>
       </div>
@@ -663,7 +675,7 @@ function VocabProgressCard() {
             color: 'var(--color-primary, #6366f1)', fontWeight: 500, padding: 0,
           }}
         >
-          {expanded ? 'Show less' : `Show all ${sorted.length} topics`}
+          {expanded ? t('showLess') : tParam('showAllTopics', { count: sorted.length })}
         </button>
       )}
 
@@ -675,13 +687,14 @@ function VocabProgressCard() {
           textDecoration: 'none',
         }}
       >
-        Practice Vocabulary
+        {t('practiceVocabulary')}
       </Link>
     </div>
   );
 }
 
 function DailyChallengeCard() {
+  const { t } = useI18n();
   const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
 
   useEffect(() => {
@@ -707,7 +720,7 @@ function DailyChallengeCard() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <Zap size={18} color={challenge.completed ? '#10b981' : '#6366f1'} />
-        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Daily Challenge</span>
+        <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t('dailyChallenge')}</span>
         {challenge.completed && <span style={{ marginLeft: 'auto', fontSize: 18 }}>🎉</span>}
       </div>
 
@@ -749,7 +762,7 @@ function DailyChallengeCard() {
             textDecoration: 'none',
           }}
         >
-          Start Challenge →
+          {t('startChallenge')}
         </Link>
       )}
     </div>
@@ -757,6 +770,7 @@ function DailyChallengeCard() {
 }
 
 function RecentAchievementsRow() {
+  const { t } = useI18n();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [allAchievements, setAllAchievements] = useState<Achievement[]>([]);
 
@@ -774,9 +788,9 @@ function RecentAchievementsRow() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <Award size={18} color="#f59e0b" />
-            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Recent Achievements</h4>
+            <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{t('recentAchievements')}</h4>
             <Link to="/dashboard" style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--primary, #6366f1)' }}>
-              View all →
+              {t('viewAll')}
             </Link>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -805,6 +819,7 @@ function RecentAchievementsRow() {
 }
 
 export default function Home() {
+  const { t } = useI18n();
   const { isActive, currentStep, totalSteps, step, next, prev, skip, restartTour } = useOnboarding();
 
   return (
@@ -820,11 +835,11 @@ export default function Home() {
         />
       )}
       <div className="home-hero">
-        <h2>Improve Your English</h2>
-        <p>Practice conversations, pronunciation, and vocabulary with AI</p>
-        <button className="tour-restart-btn" onClick={restartTour} title="Take a guided tour">
+        <h2>{t('homeTitle')}</h2>
+        <p>{t('homeSubtitle')}</p>
+        <button className="tour-restart-btn" onClick={restartTour} title={t('takeTour')}>
           <HelpCircle size={16} />
-          Take a Tour
+          {t('takeTour')}
         </button>
       </div>
 
@@ -847,10 +862,9 @@ export default function Home() {
           <div className="icon" style={{ background: '#eef2ff' }}>
             <MessageSquare size={28} color="#6366f1" />
           </div>
-          <h3>Conversation</h3>
+          <h3>{t('moduleConversation')}</h3>
           <p>
-            Practice real-life scenarios like hotel check-in, job interviews, and
-            restaurant orders with AI role play.
+            {t('featureConversationDesc')}
           </p>
         </Link>
 
@@ -858,10 +872,9 @@ export default function Home() {
           <div className="icon" style={{ background: '#fef3c7' }}>
             <Mic size={28} color="#f59e0b" />
           </div>
-          <h3>Pronunciation</h3>
+          <h3>{t('modulePronunciation')}</h3>
           <p>
-            Shadowing practice: listen to a sentence, then repeat it
-            immediately. Get feedback on accuracy and fluency.
+            {t('featurePronunciationDesc')}
           </p>
         </Link>
 
@@ -869,10 +882,9 @@ export default function Home() {
           <div className="icon" style={{ background: '#d1fae5' }}>
             <BookOpen size={28} color="#10b981" />
           </div>
-          <h3>Vocabulary</h3>
+          <h3>{t('moduleVocabulary')}</h3>
           <p>
-            Learn scenario-specific words and phrases in context through
-            interactive quizzes with real-life examples.
+            {t('featureVocabularyDesc')}
           </p>
         </Link>
 
@@ -880,10 +892,9 @@ export default function Home() {
           <div className="icon" style={{ background: '#f3e8ff' }}>
             <BarChart3 size={28} color="#8b5cf6" />
           </div>
-          <h3>Dashboard</h3>
+          <h3>{t('featureDashboard')}</h3>
           <p>
-            Track your learning streak, view statistics, and see your
-            progress across all activities.
+            {t('featureDashboardDesc')}
           </p>
         </Link>
       </div>
