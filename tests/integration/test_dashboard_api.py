@@ -914,3 +914,180 @@ async def test_vocabulary_forecast_high_error_rate(client, test_db, mock_copilot
     assert data["total_reviewed"] >= 2
     risk_map = {w["word_id"]: w["risk_score"] for w in data["at_risk_words"]}
     assert risk_map[high_err_id] > risk_map[low_err_id]
+
+
+# --- Data-populated tests for Weekly Report ---
+
+
+@pytest.mark.integration
+async def test_weekly_report_with_activity(client, test_db):
+    """Weekly report aggregates conversations, messages, pronunciation, and vocabulary activity."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    # Seed a conversation with user messages
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "active", now_iso),
+    )
+    conv_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (conv_id, "user", "Hello, I need a room.", now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (conv_id, "assistant", "Welcome! How many nights?", now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+        (conv_id, "user", "Two nights please.", now_iso),
+    )
+
+    # Seed pronunciation attempts
+    await test_db.execute(
+        "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+        ("How are you?", "how are you", '{"overall":"good"}', 8.5, now_iso),
+    )
+
+    # Seed vocabulary quiz attempts
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (word, meaning, example_sentence, topic, difficulty) VALUES (?, ?, ?, ?, ?)",
+        ("reservation", "a booking", "I have a reservation.", "hotel_checkin", 1),
+    )
+    word_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+    await test_db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+        (word_id, 1, now_iso),
+    )
+    await test_db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+        (word_id, 0, now_iso),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/weekly-report")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["conversations"] >= 1
+    assert data["messages_sent"] >= 2
+    assert data["pronunciation_attempts"] >= 1
+    assert data["avg_pronunciation_score"] > 0
+    assert data["vocabulary_reviewed"] >= 2
+    assert 0 <= data["quiz_accuracy"] <= 100
+    assert isinstance(data["text_summary"], str)
+    assert len(data["text_summary"]) > 0
+    assert isinstance(data["highlights"], list)
+
+
+# --- Data-populated tests for Session Analytics ---
+
+
+@pytest.mark.integration
+async def test_session_analytics_with_conversation(client, test_db):
+    """Session analytics counts conversation time from started_at/ended_at."""
+    from datetime import datetime as dt, timezone, timedelta
+
+    now = dt.now(timezone.utc)
+    started = now - timedelta(minutes=10)
+
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at) VALUES (?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", started.isoformat(), now.isoformat()),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/session-analytics")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    conv_module = next((m for m in data["modules"] if m["module"] == "conversation"), None)
+    assert conv_module is not None
+    assert conv_module["session_count"] >= 1
+    assert conv_module["total_seconds"] >= 500  # ~600 expected for 10 min
+
+    # Daily breakdown should have an entry
+    assert len(data["daily"]) >= 1
+    today_entry = next((d for d in data["daily"] if d["conversation_seconds"] > 0), None)
+    assert today_entry is not None
+
+
+@pytest.mark.integration
+async def test_session_analytics_with_pronunciation(client, test_db):
+    """Session analytics estimates pronunciation time from attempt count."""
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+
+    for i in range(3):
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+            (f"Test sentence {i}", f"test sentence {i}", '{}', 7.0, now_iso),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/session-analytics")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    pron_module = next((m for m in data["modules"] if m["module"] == "pronunciation"), None)
+    assert pron_module is not None
+    assert pron_module["session_count"] >= 3
+    assert pron_module["total_seconds"] >= 360  # 3 * 120 = 360
+
+    assert len(data["daily"]) >= 1
+    today_entry = next((d for d in data["daily"] if d["pronunciation_seconds"] > 0), None)
+    assert today_entry is not None
+
+
+@pytest.mark.integration
+async def test_session_analytics_with_all_modules(client, test_db):
+    """Session analytics includes all three modules when all have activity."""
+    from datetime import datetime as dt, timezone, timedelta
+
+    now = dt.now(timezone.utc)
+    now_iso = now.isoformat()
+    started = (now - timedelta(minutes=5)).isoformat()
+
+    # Conversation
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at) VALUES (?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", started, now_iso),
+    )
+
+    # Pronunciation
+    await test_db.execute(
+        "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+        ("Good morning.", "good morning", '{}', 9.0, now_iso),
+    )
+
+    # Vocabulary
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (word, meaning, example_sentence, topic, difficulty) VALUES (?, ?, ?, ?, ?)",
+        ("lobby", "entrance hall", "Meet in the lobby.", "hotel_checkin", 1),
+    )
+    word_id = (await (await test_db.execute("SELECT last_insert_rowid()")).fetchone())[0]
+    await test_db.execute(
+        "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (?, ?, ?)",
+        (word_id, 1, now_iso),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/session-analytics")
+    assert resp.status_code == 200
+    data = resp.json()
+
+    for module_name in ("conversation", "pronunciation", "vocabulary"):
+        mod = next((m for m in data["modules"] if m["module"] == module_name), None)
+        assert mod is not None, f"Missing module: {module_name}"
+        assert mod["session_count"] >= 1, f"{module_name} session_count should be >= 1"
+        assert mod["total_seconds"] > 0, f"{module_name} total_seconds should be > 0"
+
+    assert len(data["daily"]) >= 1
+    today_str = now.strftime("%Y-%m-%d")
+    today_entry = next((d for d in data["daily"] if d["date"] == today_str), None)
+    assert today_entry is not None
+    assert today_entry["conversation_seconds"] > 0
+    assert today_entry["pronunciation_seconds"] > 0
+    assert today_entry["vocabulary_seconds"] > 0
