@@ -1200,3 +1200,84 @@ async def test_session_averages_empty(client):
     assert data["avg_avg_words_per_message"] == 0.0
     assert data["avg_vocabulary_diversity"] == 0.0
     assert data["avg_total_user_messages"] == 0.0
+
+
+# --- Bookmarks endpoint ---
+
+@pytest.mark.integration
+async def test_bookmarks_empty(client):
+    res = await client.get("/api/conversation/bookmarks")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["items"] == []
+    assert data["total"] == 0
+
+
+@pytest.mark.integration
+async def test_bookmarks_with_data(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Hello! Welcome to the hotel.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "is_correct": True,
+        "corrected_text": "",
+        "explanation": "",
+        "grammar_notes": [],
+    })
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    cid = start.json()["conversation_id"]
+    await client.post("/api/conversation/message", json={
+        "conversation_id": cid,
+        "content": "I'd like to check in please",
+    })
+    # Get message ID from history
+    hist = await client.get(f"/api/conversation/{cid}/history")
+    user_msgs = [m for m in hist.json()["messages"] if m["role"] == "user"]
+    mid = user_msgs[0]["id"]
+    # Bookmark the message
+    await client.put(f"/api/conversation/messages/{mid}/bookmark")
+    # Get bookmarks
+    res = await client.get("/api/conversation/bookmarks")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total"] == 1
+    assert len(data["items"]) == 1
+    assert data["items"][0]["id"] == mid
+
+
+@pytest.mark.integration
+async def test_bookmarks_filter_by_conversation(client, mock_copilot):
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "is_correct": True,
+        "corrected_text": "",
+        "explanation": "",
+        "grammar_notes": [],
+    })
+    # Create two conversations with bookmarks
+    start1 = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    cid1 = start1.json()["conversation_id"]
+    await client.post("/api/conversation/message", json={
+        "conversation_id": cid1,
+        "content": "Hello",
+    })
+    hist1 = await client.get(f"/api/conversation/{cid1}/history")
+    mid1 = [m for m in hist1.json()["messages"] if m["role"] == "user"][0]["id"]
+    await client.put(f"/api/conversation/messages/{mid1}/bookmark")
+
+    start2 = await client.post("/api/conversation/start", json={"topic": "restaurant_order"})
+    cid2 = start2.json()["conversation_id"]
+    await client.post("/api/conversation/message", json={
+        "conversation_id": cid2,
+        "content": "Hi there",
+    })
+    hist2 = await client.get(f"/api/conversation/{cid2}/history")
+    mid2 = [m for m in hist2.json()["messages"] if m["role"] == "user"][0]["id"]
+    await client.put(f"/api/conversation/messages/{mid2}/bookmark")
+
+    # All bookmarks
+    all_res = await client.get("/api/conversation/bookmarks")
+    assert all_res.json()["total"] == 2
+
+    # Filter by conversation
+    filtered = await client.get(f"/api/conversation/bookmarks?conversation_id={cid1}")
+    assert filtered.json()["total"] == 1
+    assert filtered.json()["items"][0]["id"] == mid1

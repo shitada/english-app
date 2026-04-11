@@ -370,3 +370,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 368	51142c7	2026-04-11	251	113	332	148	844	1089	1089	pass	6.2	kept	Add Quick Dictation Card to Home page
 369	c8c3de3	2026-04-11	252	113	823	0	1188	1089	1089	pass	6.7	kept	Add Quick Speak Card to Home page
 370	cdb634b	2026-04-11	3543	173	52	52	3768	1093	1093	pass	7.8	kept	Add integration tests for sentence-craft evaluate and sentence-transform endpoints
+371	none	2026-04-11	283	64	68	229	644	1093	1093	pass	5.9	discarded	Add Quick Grammar Fix card to Home page

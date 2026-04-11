@@ -1460,3 +1460,77 @@ async def test_sentence_transform_evaluate_validation(client):
         "user_response": "",
     })
     assert res.status_code == 422
+
+
+# --- Listening QA Evaluate ---
+
+@pytest.mark.integration
+async def test_listening_qa_evaluate_success(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "content_accuracy_score": 8,
+        "grammar_score": 7,
+        "vocabulary_score": 9,
+        "overall_score": 8,
+        "feedback": "Good answer with accurate content.",
+        "model_answer": "The main character went to the park.",
+    }
+    res = await client.post("/api/pronunciation/listening-qa/evaluate", json={
+        "passage": "The main character decided to visit the park on a sunny afternoon.",
+        "question": "Where did the main character go?",
+        "correct_answer": "The main character went to the park.",
+        "user_spoken_answer": "He went to the park in the afternoon.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert 1 <= data["content_accuracy_score"] <= 10
+    assert 1 <= data["grammar_score"] <= 10
+    assert 1 <= data["vocabulary_score"] <= 10
+    assert 1 <= data["overall_score"] <= 10
+    assert isinstance(data["feedback"], str)
+    assert isinstance(data["model_answer"], str)
+
+
+@pytest.mark.integration
+async def test_listening_qa_evaluate_validation(client):
+    # Missing required field
+    res = await client.post("/api/pronunciation/listening-qa/evaluate", json={
+        "passage": "Some passage",
+        "question": "Some question?",
+        "correct_answer": "The answer.",
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_listening_qa_evaluate_empty_spoken_answer(client):
+    res = await client.post("/api/pronunciation/listening-qa/evaluate", json={
+        "passage": "Some passage",
+        "question": "Some question?",
+        "correct_answer": "The answer.",
+        "user_spoken_answer": "",
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_listening_qa_evaluate_score_clamping(client, mock_copilot):
+    mock_copilot.ask_json.return_value = {
+        "content_accuracy_score": 15,
+        "grammar_score": -2,
+        "vocabulary_score": "not_a_number",
+        "overall_score": 0,
+        "feedback": "Evaluation complete",
+        "model_answer": "Model answer here",
+    }
+    res = await client.post("/api/pronunciation/listening-qa/evaluate", json={
+        "passage": "A short passage for testing.",
+        "question": "What is this about?",
+        "correct_answer": "Testing.",
+        "user_spoken_answer": "It is about testing.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["content_accuracy_score"] == 10.0  # clamped from 15
+    assert data["grammar_score"] == 1.0  # clamped from -2
+    assert data["vocabulary_score"] == 5.0  # fallback for non-numeric
+    assert data["overall_score"] == 1.0  # clamped from 0
