@@ -4860,3 +4860,53 @@ Good — no listening-progress tests exist, and the others only have empty-state
 ● Edit test_dashboard_api.py +81
   └ tests/integration/test_dashboard_api.py
 
+● Commit and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #364: Add integration tests for dashboard listening-progress endpoint
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && date +%s
+  └ 16 lines...
+
+T2=1775897465. Run tests:
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+1089 passed. TypeScript check:
+
+● TS check + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775897526. Test-only change, no smoke/QA needed. Call evaluator:
+
+● Evaluator Evaluate iteration 364
+  │ Read dashboard.py
+  │   │ app/routers/dashboard.py
+  │   └ L1:30 (30 lines read)
+  └ Read dashboard.py
+      │ app/routers/dashboard.py
+      └ L550:end (15 lines read)
+
+Evaluator score: 8.1, verdict: keep.
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T4=$(date +%s) && \
+  │ T0=1775896838 T1=1775897430 T2=1775897465 T3=1775897526 && \
+  │ PROPOSE=$((T1-T0)) IMPL=$((T2-T1)) TEST=$((T3-T2)) EVAL=$((T4-T3)) TOTAL=$((T4-T0)) && \
+  │ HASH=$(git rev-parse --short HEAD) && \…
+  └ 9 lines...
+
+Good, properly formatted. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Now write the session log:
+
+● Create invocation-015.md +32
+  └ autoresearch/logs/invocation-015.md
+
