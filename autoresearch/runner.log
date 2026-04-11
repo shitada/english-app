@@ -4740,3 +4740,123 @@ The `client` fixture initializes the schema but does NOT run migrations! That's 
 ● Edit conftest.py +2 -1
   └ tests/conftest.py
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #363: Add integration tests for minimal pairs results/stats and listening
+  │ difficulty endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests again (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1086 tests pass (up from 1078). Now run TypeScript check:
+
+● TypeScript check + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && date +%s
+  └ 2 lines...
+
+T3=1775896751. TS passes. This is a test-only change, no need for smoke test or QA tester (type=test, no frontend changes). Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 6 lines...
+
+● Evaluator Evaluate iteration 363
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L1258:end (138 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+Evaluator score: 8.1, verdict: keep. Now record results.
+
+● Record T4 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T0=1775896001 T1=1775896529 T2=1775896604 T3=1775896751 T4=1775896820 && \
+  │ PROPOSE=$((T1-T0)) IMPL=$((T2-T1)) TEST=$((T3-T2)) EVAL=$((T4-T3)) TOTAL=$((T4-T0)) && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ DATE=$(date +%Y-%m-%d) && \…
+  └ 8 lines...
+
+Good, properly tab-separated. Now update backlog and start iteration 364.
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+Now iteration 364. Re-read context and record T0:
+
+● Context restore for iter 364 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -3 && echo "---" && date +%s
+  └ 12 lines...
+
+T0=1775896838. Calling proposer for iteration 364:
+
+● Proposer Propose iteration 364
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L510:541 (31 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1400:end (72 lines read)
+
+T1 time:
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find listening progress endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "listening.progress\|listening_progress" app/routers/dashboard.py | head -10
+  └ 4 lines...
+
+● Read listening progress endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '558,575p' app/routers/dashboard.py
+  └ 8 lines...
+
+● Find response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class ListeningProgressResponse"
+  │ app/routers/dashboard.py
+  └ 2 lines...
+
+● Check dashboard test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_dashboard_api.py && tail -20 tests/integration/test_dashboard_api.py
+  └ 22 lines...
+
+● Find DAL function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_listening_progress"
+  │ app/dal/dashboard.py | head -5
+  └ 2 lines...
+
+● Read ListeningProgressResponse model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '550,558p' app/routers/dashboard.py
+  └ 10 lines...
+
+● Read get_listening_progress DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1430,1490p' app/dal/dashboard.py
+  └ 57 lines...
+
+Now let me check what dashboard tests exist for listening progress and other endpoints mentioned:
+
+● Check existing dashboard tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "listening.progress\|word.of.the.day\|weekly.report\|mistakes.*review"
+  │ tests/integration/test_dashboard_api.py | head -15
+  └ 7 lines...
+
+Good — no listening-progress tests exist, and the others only have empty-state tests. Let me implement:
+
+● Edit test_dashboard_api.py +81
+  └ tests/integration/test_dashboard_api.py
+

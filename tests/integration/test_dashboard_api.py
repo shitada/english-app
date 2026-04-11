@@ -538,3 +538,84 @@ async def test_migration_status_structure(client):
     assert isinstance(data["total_applied"], int)
     assert isinstance(data["current_version"], int)
     assert isinstance(data["migrations"], list)
+
+
+# ── Listening Progress ──────────────────────────────────────
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_progress_empty(client):
+    """GET /listening-progress returns zeroed structure on empty DB."""
+    res = await client.get("/api/dashboard/listening-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_quizzes"] == 0
+    assert data["avg_score"] == 0
+    assert data["best_score"] == 0
+    assert data["by_difficulty"] == []
+    assert data["trend"] == "insufficient_data"
+
+
+async def _seed_listening_quizzes(client, entries: list[tuple[str, float]]):
+    """Helper to seed listening quiz results. entries = [(difficulty, score), ...]"""
+    for difficulty, score in entries:
+        total = 5
+        correct = round(score / 100 * total)
+        body = {
+            "title": f"Quiz {difficulty}",
+            "difficulty": difficulty,
+            "total_questions": total,
+            "correct_count": correct,
+            "score": score,
+        }
+        r = await client.post("/api/pronunciation/listening-quiz/results", json=body)
+        assert r.status_code == 200
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_progress_with_data(client):
+    """GET /listening-progress returns correct stats after quiz submissions."""
+    await _seed_listening_quizzes(client, [
+        ("beginner", 80.0),
+        ("beginner", 90.0),
+        ("intermediate", 60.0),
+    ])
+
+    res = await client.get("/api/dashboard/listening-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_quizzes"] == 3
+    assert data["best_score"] == 90.0
+    assert 70 < data["avg_score"] < 80  # (80+90+60)/3 ≈ 76.7
+    assert len(data["by_difficulty"]) == 2
+
+    beginner = next(d for d in data["by_difficulty"] if d["difficulty"] == "beginner")
+    assert beginner["count"] == 2
+    assert beginner["avg_score"] == 85.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_progress_trend(client):
+    """GET /listening-progress shows trend when enough data exists."""
+    # 5 older low scores + 5 recent high scores → improving
+    await _seed_listening_quizzes(client, [
+        ("beginner", 40.0),
+        ("beginner", 35.0),
+        ("beginner", 45.0),
+        ("beginner", 40.0),
+        ("beginner", 38.0),
+        ("beginner", 85.0),
+        ("beginner", 90.0),
+        ("beginner", 88.0),
+        ("beginner", 92.0),
+        ("beginner", 95.0),
+    ])
+
+    res = await client.get("/api/dashboard/listening-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["trend"] in ("improving", "stable", "declining")
+    assert data["total_quizzes"] == 10
