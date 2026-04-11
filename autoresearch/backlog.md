@@ -239,3 +239,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [NEW] Iteration 374
 
 - [x] Add unit tests for _normalize_grammar_feedback and canonicalize helpers (#374)
+
+## [NEW] Iterations 375–376
+
+- [x] ❌ Add Quick Writing Card with AI grammar feedback to Home page (#375 — discarded, Playwright unavailable)
+- [x] Add per-module study streak tracking endpoint to dashboard (#376)
