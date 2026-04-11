@@ -235,3 +235,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Quick Grammar Fix card to Home page (#371 — discarded, Playwright unavailable)
 - [x] Add integration tests for listening-qa evaluate and conversation bookmarks endpoints (#372)
 - [x] Add unit tests for _swap_scenario_roles, _safe_quiz_index, and _normalize_summary edge cases (#373)
+
+## [NEW] Iteration 374
+
+- [x] Add unit tests for _normalize_grammar_feedback and canonicalize helpers (#374)

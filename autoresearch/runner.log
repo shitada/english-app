@@ -1525,3 +1525,64 @@ Now I'll create the test file:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 374 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #374: Add unit tests for _normalize_grammar_feedback and canonicalize helpers
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+T2=1775911478, implement_sec=54. Now run tests:
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Record T3 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1775911544, test_sec=66. Tests: 1180 passed/1180 total, ts_check=pass. No backend files changed (test-only), so smoke test not needed. Proposal type is "test" → tester skip OK.
+
+Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 5 lines...
+
+● Evaluator Evaluate iteration 374
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L300:500 (201 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L270:310 (41 lines read)
+
+● Record T4 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1775911615. Score=8.1, verdict=keep. All criteria met. Recording results:
+
+● Record results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ N=374 && \
+  │ HASH="0973e7d" && \
+  │ DATE="2026-04-11" && \
+  │ PROPOSE=317 && \…
+  └ 17 lines...
+
+Row verified with correct tab separators. Now update the backlog:
+
+● Check backlog end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md | tail -5
+  └ 6 lines...
+
+● Edit backlog.md +4
+  └ autoresearch/backlog.md
+
