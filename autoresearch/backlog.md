@@ -199,3 +199,9 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Speak-from-Memory vocabulary recall mode (completed iteration #346)
 - [x] Add adaptive difficulty recommendation to Listening quiz (completed iteration #347)
 - [x] Add conversation transcript download (completed iteration #329 — Anki CSV study card export)
+
+## [NEW] Iterations 351–353
+
+- [x] Add Listening Quiz progress card to Dashboard (#351)
+- [x] Include listening quiz in streak, activity feed, and achievements (#352)
+- [x] Add Pronunciation Progress card to Dashboard (#353)

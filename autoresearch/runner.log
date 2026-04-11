@@ -2316,3 +2316,90 @@ Now create the component:
 
 Now commit and test:
 
+● Commit iteration 353 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #353: Add Pronunciation Progress card to Dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -q 2>&1 | tail -5
+  └ 6 lines...
+
+All 1025 tests pass, TypeScript passes. This is a feature with frontend component changes — tester is needed.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Verify tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+No DAL/router changes so no smoke test needed. Tester required — server should still be running:
+
+● Check server (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 353
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L554:587 (33 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L68:100 (33 lines read)
+
+QA passed (ux_score: 8). Now call evaluator:
+
+● Evaluator Evaluate iteration 353
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L500:650 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L200:350 (150 lines read)
+
+● Record T4 for iteration 353 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.85 — KEEP. All criteria met.
+
+T0=1775886855, T1=1775888210 (propose=1355), T3=1775888347, T4=1775888865
+implement ≈ 100, test = 37, evaluate = 518, total = 2010
+
+● Record results for iteration 353 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "353" "0b7274b" "2026-04-11" "1355" "100" "37" "518" "2010" \
+  │ "1025" "1025" "pass" "6.85" "kept" "Add Pronunciation Progress card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Now let me stop the background server and update the backlog:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "Server stopped"
+  └ 2 lines...
+
+Now update backlog with completed items and create session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 351–353
+  │
+  │ - [x] Add Listening Quiz progress card to Dashboard (#351)…
+  └ 4 lines...
+
+● Create invocation-011.md +40
+  └ autoresearch/logs/invocation-011.md
+
