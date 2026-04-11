@@ -228,3 +228,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Quick Shadow Practice card to Home page (#367)
 - [x] Add Quick Dictation Card to Home page (#368)
 - [x] Add Quick Speak Card to Home page (#369)
+- [x] Add integration tests for sentence-craft evaluate and sentence-transform endpoints (#370)

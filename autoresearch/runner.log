@@ -1338,3 +1338,61 @@ Now add the sentence-transform tests to the pronunciation test file:
 
 Now commit and test:
 
+● Commit iteration 370 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #370: Add integration tests for sentence-craft evaluate and sentence-transform endpoints
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests for iteration 370 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+All 1093 tests pass (4 new), TS check passes. This is a `test` type proposal with no frontend changes, so tester is optional (skip OK — "test-only").
+
+● Record T3 for 370 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 370
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ L900:end (184 lines read)
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L1100:end (363 lines read)
+
+● Record T4 for 370 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8 ≥ 6.0, all tests pass → **KEEP**.
+
+● Record iteration 370 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "370" "$HASH" "2026-04-11" "3543" "173" "52" "52" "3768" \
+  │ "1093" "1093" "pass" "7.8" "kept" "Add integration tests for sentence-craft evaluate and
+  │ sentence-transform endpoints" \…
+  └ 3 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 370 complete. Checklist: proposer ✅, evaluator ✅, tester skipped (test-only, no frontend UI changes — OK).
+
+Now write the session log and commit:
+
+● Create invocation-017.md +42
+  └ autoresearch/logs/invocation-017.md
+
