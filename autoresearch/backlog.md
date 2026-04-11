@@ -226,3 +226,4 @@ The app's goal is to help users become fluent English speakers through short, ef
 - [x] Add Vocabulary Context Listening drill mode (#365)
 - [x] Add Vocabulary Spelling Bee mode (#366)
 - [x] Add Quick Shadow Practice card to Home page (#367)
+- [x] Add Quick Dictation Card to Home page (#368)

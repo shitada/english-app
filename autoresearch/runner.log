@@ -1018,3 +1018,124 @@ All 3 issues confirmed. Let me fix them all:
 
 TypeScript passes. Amend the commit with fixes:
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now call the evaluator:
+
+● Check diff stat (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 6 lines...
+
+● Evaluator Evaluate iteration 368
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L620:750 (131 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L750:900 (151 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.2 ≥ 6.0, all tests pass → **KEEP**.
+
+● Record iteration 368 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "368" "$HASH" "2026-04-11" "251" "113" "332" "148" "844" \
+  │ "1089" "1089" "pass" "6.2" "kept" "Add Quick Dictation Card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Good, properly tab-separated. Kill the server and update backlog:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L192:210 (19 lines read)
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L220:230 (9 lines read)
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 368 complete. Checklist: proposer ✅, tester ✅ (frontend UI changed), evaluator ✅, score 6.2 matches evaluator.
+
+---
+
+## Iteration 369
+
+● Record T0 for 369 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for 369 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 27 lines...
+
+● Proposer Propose iteration 369
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ 89 lines read
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L1:50 (49 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check quick speak API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getQuickSpeakPrompt\|evaluateQuickSpeak\|QuickSpeak" frontend/src/api.ts | head -15
+  └ 3 lines...
+
+● Check existing QuickSpeak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickSpeak\|quick-speak\|quickspeak" frontend/src/components/*.tsx frontend/src/pages/*.tsx
+  │ 2>/dev/null | head -15
+  └ 9 lines...
+
+● Check API signatures (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '183,200p' frontend/src/api.ts
+  └ 18 lines...
+
+● Check speech recognition hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "useSpeechRecognition"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -5
+  └ 2 lines...
+
+● Check speech recognition hook return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '35,90p'
+  │ frontend/src/hooks/useSpeechRecognition.ts
+  └ 57 lines...
+
+● Check return shape (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "return {"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -3
+  └ 2 lines...
+
+Good. Now I'll create the QuickSpeakCard:
+
+● Create QuickSpeakCard.tsx +208
+  └ frontend/src/components/QuickSpeakCard.tsx
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
