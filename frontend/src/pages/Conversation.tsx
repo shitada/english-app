@@ -82,6 +82,8 @@ export default function Conversation() {
   const [showGrammarPanel, setShowGrammarPanel] = useState(false);
   const [lastAssistantAt, setLastAssistantAt] = useState<number>(0);
   const [wpmValues, setWpmValues] = useState<number[]>([]);
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending'>('idle');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -217,6 +219,45 @@ export default function Conversation() {
       setInput(speech.transcript);
     }
   }, [speech.transcript]);
+
+  // Voice Mode: update status indicator
+  useEffect(() => {
+    if (!voiceMode || phase !== 'chat') { setVoiceStatus('idle'); return; }
+    if (tts.isSpeaking) setVoiceStatus('ai-speaking');
+    else if (speech.isListening) setVoiceStatus('listening');
+    else if (loading) setVoiceStatus('sending');
+    else setVoiceStatus('idle');
+  }, [voiceMode, phase, tts.isSpeaking, speech.isListening, loading]);
+
+  // Voice Mode: auto-start listening after AI finishes speaking
+  const prevSpeakingRef = useRef(false);
+  useEffect(() => {
+    const wasSpeaking = prevSpeakingRef.current;
+    prevSpeakingRef.current = tts.isSpeaking;
+    if (voiceMode && phase === 'chat' && wasSpeaking && !tts.isSpeaking && !loading && speech.isSupported) {
+      const timer = setTimeout(() => {
+        speech.reset();
+        speech.start();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [tts.isSpeaking, voiceMode, phase, loading, speech.isSupported]);
+
+  // Voice Mode: auto-send when user stops speaking
+  const prevListeningRef = useRef(false);
+  useEffect(() => {
+    const wasListening = prevListeningRef.current;
+    prevListeningRef.current = speech.isListening;
+    if (voiceMode && phase === 'chat' && wasListening && !speech.isListening && !loading && input.trim()) {
+      const timer = setTimeout(() => sendMessage(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [speech.isListening, voiceMode, phase, loading, input]);
+
+  // Turn off voice mode when leaving chat
+  useEffect(() => {
+    if (phase !== 'chat') setVoiceMode(false);
+  }, [phase]);
 
   // Fetch topics and favorites with stale-while-revalidate cache (10 min TTL)
   useEffect(() => {
@@ -924,8 +965,37 @@ export default function Conversation() {
           <button className="btn btn-sm chat-shortcuts-btn" onClick={() => setShowShortcuts(true)} aria-label="Keyboard shortcuts" title="Keyboard shortcuts" style={{ padding: '4px 6px' }}>
             <Keyboard size={14} />
           </button>
+          <button
+            className="btn-touch"
+            onClick={() => setVoiceMode(v => !v)}
+            aria-label={voiceMode ? 'Disable voice mode' : 'Enable voice mode'}
+            aria-pressed={voiceMode}
+            title={voiceMode ? 'Voice Mode ON — hands-free speaking loop' : 'Voice Mode — auto-listen and auto-send'}
+            style={{
+              background: voiceMode ? 'var(--success, #22c55e)' : 'transparent',
+              color: voiceMode ? '#fff' : 'var(--text-secondary)',
+              display: 'flex', alignItems: 'center', gap: 4,
+              animation: voiceMode && voiceStatus === 'listening' ? 'voice-pulse 1.5s ease-in-out infinite' : 'none',
+            }}
+          >
+            <Mic size={14} /> {voiceMode ? 'Voice' : ''}
+          </button>
         </div>
       </div>
+
+      {voiceMode && voiceStatus !== 'idle' && (
+        <div style={{
+          padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 8,
+          fontSize: 13, fontWeight: 500,
+          background: voiceStatus === 'listening' ? 'rgba(34,197,94,0.1)' : voiceStatus === 'ai-speaking' ? 'rgba(99,102,241,0.1)' : 'rgba(234,179,8,0.1)',
+          color: voiceStatus === 'listening' ? 'var(--success, #22c55e)' : voiceStatus === 'ai-speaking' ? 'var(--primary, #6366f1)' : 'var(--warning, #eab308)',
+          borderBottom: '1px solid var(--border, #e5e7eb)',
+        }}>
+          {voiceStatus === 'ai-speaking' && '🎧 AI speaking…'}
+          {voiceStatus === 'listening' && '🎤 Listening…'}
+          {voiceStatus === 'sending' && '⏳ Sending…'}
+        </div>
+      )}
 
       {(() => {
         const checked = messages.filter((m) => m.role === 'user' && m.feedback);
