@@ -368,3 +368,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 366	0e65d29	2026-04-11	295	78	61	299	733	1089	1089	pass	6.6	kept	Add Vocabulary Spelling Bee mode
 367	627e1c3	2026-04-11	305	73	62	285	725	1089	1089	pass	6.7	kept	Add Quick Shadow Practice card to Home page
 368	51142c7	2026-04-11	251	113	332	148	844	1089	1089	pass	6.2	kept	Add Quick Dictation Card to Home page
+369	c8c3de3	2026-04-11	252	113	823	0	1188	1089	1089	pass	6.7	kept	Add Quick Speak Card to Home page

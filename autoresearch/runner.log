@@ -1139,3 +1139,202 @@ Good. Now I'll create the QuickSpeakCard:
 ● Edit Home.tsx +2
   └ frontend/src/pages/Home.tsx
 
+● Commit iteration 369 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #369: Add Quick Speak Card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1089 tests pass, TS check passes. Frontend UI changed → must call tester.
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill old server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 369
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L700:800 (101 lines read)
+  └ Read QuickSpeakCard.tsx
+      │ frontend/src/components/QuickSpeakCard.tsx
+      └ L119:145 (27 lines read)
+
+Tester passed with ux_score 7. Issues are minor/cosmetic. Now evaluator:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 369
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L650:750 (101 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L750:900 (151 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.7 ≥ 6.0, all tests pass, QA passed with ux_score 7 → **KEEP**.
+
+● Record iteration 369 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "369" "$HASH" "2026-04-11" "252" "113" "823" "0" "1188" \
+  │ "1089" "1089" "pass" "6.7" "kept" "Add Quick Speak Card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|'
+  └ 2 lines...
+
+Good. Update backlog:
+
+● Edit backlog.md +1
+  └ autoresearch/backlog.md
+
+✅ Iteration 369 complete. Checklist: proposer ✅, tester ✅ (frontend UI changed), evaluator ✅, score 6.7 matches.
+
+---
+
+## Iteration 370
+
+● Record T0 for 370 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for 370 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/results.tsv && echo
+  │ "---" && git --no-pager log --oneline -5
+  └ 12 lines...
+
+● Proposer Propose iteration 370
+  │ Read backlog.md
+  │   │ autoresearch/backlog.md
+  │   └ 230 lines read
+  └ Read test_pronunciation_api.py
+      │ tests/integration/test_pronunciation_api.py
+      └ L50:150 (101 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good proposal — test coverage. Let me check the endpoints to implement tests.
+
+● Check endpoint definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "sentence.craft/evaluate\|sentence.transform\|sentence.expand" app/routers/vocabulary.py
+  │ app/routers/pronunciation.py | head -20
+  └ 18 lines...
+
+● Check existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "sentence_craft_evaluate\|sentence_transform\|sentence_expand"
+  │ tests/integration/test_vocabulary_api.py tests/integration/test_pronunciation_api.py 2>/dev/null
+  │ | head -20
+  └ 5 lines...
+
+So sentence-expand already has tests. Let me focus on what's actually missing: sentence-craft/evaluate success, sentence-transform GET and POST.
+
+● Check sentence-transform endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1110,1220p'
+  │ app/routers/pronunciation.py
+  └ 112 lines...
+
+● Check sentence-craft/evaluate endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '763,810p' app/routers/vocabulary.py
+  └ 49 lines...
+
+Now let me check existing test patterns:
+
+● Check existing sentence-craft test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1035,1055p'
+  │ tests/integration/test_vocabulary_api.py
+  └ 14 lines...
+
+● Check existing sentence-expand test pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1029,1075p'
+  │ tests/integration/test_pronunciation_api.py
+  └ 48 lines...
+
+Good. Now I need to add: 1) sentence-craft/evaluate success test (needs words in DB), 2) sentence-transform GET test, 3) sentence-transform/evaluate POST test. Let me check how words are inserted in tests:
+
+● Check word insertion in tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "INSERT INTO
+  │ vocabulary_words\|save_words" tests/integration/test_vocabulary_api.py | head -10
+  └ 1 line...
+
+● Check how words are created in tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B5 -A15 "test_drill_with_words"
+  │ tests/integration/test_vocabulary_api.py
+  └ 22 lines...
+
+Now I have the pattern. Let me add the tests:
+
+● Check end of pronunciation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_pronunciation_api.py
+  └ 6 lines...
+
+● Check end of vocab test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5
+  │ tests/integration/test_vocabulary_api.py
+  └ 6 lines...
+
+✗ Edit test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ Multiple matches found
+
+● Count lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_vocabulary_api.py
+  └ 2 lines...
+
+● Read test_vocabulary_api.py
+  │ tests/integration/test_vocabulary_api.py
+  └ L1040:1047 (8 lines read)
+
+● Edit test_vocabulary_api.py +36
+  └ tests/integration/test_vocabulary_api.py
+
+Now add the sentence-transform tests to the pronunciation test file:
+
+● Check pronunciation test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_pronunciation_api.py && grep "^from\|^import"
+  │ tests/integration/test_pronunciation_api.py | head -10
+  └ 4 lines...
+
+● Read test_pronunciation_api.py
+  │ tests/integration/test_pronunciation_api.py
+  └ L1389:1395 (7 lines read)
+
+● Edit test_pronunciation_api.py +67
+  └ tests/integration/test_pronunciation_api.py
+
+Now commit and test:
+

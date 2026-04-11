@@ -1045,3 +1045,39 @@ async def test_sentence_craft_evaluate_not_found(client):
         "user_sentence": "I have a luggage.",
     })
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_sentence_craft_evaluate_success(client, mock_copilot):
+    """Sentence craft evaluate returns LLM evaluation when words exist."""
+    mock_copilot.ask_json.return_value = {
+        "questions": [
+            {"word": "luggage", "correct_meaning": "bags", "wrong_options": ["a", "b", "c"], "example_sentence": "s", "difficulty": 1},
+            {"word": "passport", "correct_meaning": "ID doc", "wrong_options": ["a", "b", "c"], "example_sentence": "s", "difficulty": 1},
+        ]
+    }
+    await client.get("/api/vocabulary/quiz?topic=hotel_checkin&count=2&mode=multiple_choice")
+    drill_res = await client.get("/api/vocabulary/drill?count=5")
+    word_ids = [w["id"] for w in drill_res.json()["words"][:2]]
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "grammar_score": 8,
+        "naturalness_score": 7,
+        "word_usage": [
+            {"word": "luggage", "used_correctly": True, "feedback": "Good usage"},
+            {"word": "passport", "used_correctly": True, "feedback": "Correct"},
+        ],
+        "overall_feedback": "Well done!",
+        "model_sentence": "I checked my luggage and showed my passport at the counter.",
+    })
+    res = await client.post("/api/vocabulary/sentence-craft/evaluate", json={
+        "word_ids": word_ids,
+        "user_sentence": "I put my passport in my luggage.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["grammar_score"] == 8
+    assert data["naturalness_score"] == 7
+    assert len(data["word_usage"]) == 2
+    assert data["overall_feedback"] == "Well done!"
+    assert "model_sentence" in data

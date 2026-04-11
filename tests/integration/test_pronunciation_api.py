@@ -1393,3 +1393,70 @@ async def test_difficulty_recommendation_level_down(client):
     data = res.json()
     assert data["recommended_difficulty"] == "intermediate"
     assert data["current_difficulty"] == "advanced"
+
+
+@pytest.mark.integration
+async def test_sentence_transform_exercises(client, mock_copilot):
+    """Sentence transform GET returns exercises from LLM."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "exercises": [
+            {
+                "original_sentence": "She walks to school every day.",
+                "transformation_type": "past tense",
+                "instruction": "Change this sentence to the past tense",
+                "expected_answer": "She walked to school every day.",
+                "difficulty": "intermediate",
+            },
+            {
+                "original_sentence": "They eat lunch at noon.",
+                "transformation_type": "question",
+                "instruction": "Turn this into a question",
+                "expected_answer": "Do they eat lunch at noon?",
+                "difficulty": "intermediate",
+            },
+        ]
+    })
+    res = await client.get("/api/pronunciation/sentence-transform?difficulty=intermediate&count=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["exercises"]) == 2
+    assert data["exercises"][0]["transformation_type"] == "past tense"
+    assert data["exercises"][1]["original_sentence"] == "They eat lunch at noon."
+
+
+@pytest.mark.integration
+async def test_sentence_transform_evaluate(client, mock_copilot):
+    """Sentence transform evaluate returns clamped scores."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "grammar_score": 9,
+        "transformation_score": 8,
+        "naturalness_score": 7,
+        "overall_score": 8,
+        "feedback": "Excellent transformation!",
+        "correct_version": "She walked to school every day.",
+    })
+    res = await client.post("/api/pronunciation/sentence-transform/evaluate", json={
+        "original_sentence": "She walks to school every day.",
+        "transformation_type": "past tense",
+        "expected_answer": "She walked to school every day.",
+        "user_response": "She walked to school every day.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["grammar_score"] == 9
+    assert data["transformation_score"] == 8
+    assert data["overall_score"] == 8
+    assert data["feedback"] == "Excellent transformation!"
+    assert data["correct_version"] == "She walked to school every day."
+
+
+@pytest.mark.integration
+async def test_sentence_transform_evaluate_validation(client):
+    """Empty user response is rejected."""
+    res = await client.post("/api/pronunciation/sentence-transform/evaluate", json={
+        "original_sentence": "She walks to school.",
+        "transformation_type": "past tense",
+        "expected_answer": "She walked to school.",
+        "user_response": "",
+    })
+    assert res.status_code == 422
