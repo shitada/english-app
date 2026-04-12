@@ -113,6 +113,6 @@ Improvement ideas for the English Learning App, prioritized by importance.
 
 - [x] Add Quick Rephrase card to Home page (discarded — QA infra unavailable, score 5.9)
 - [x] Add fluency progression analytics endpoint (kept — score 7.3)
-- [ ] Add frontend Fluency Progression chart to Dashboard (uses new /api/dashboard/fluency-progression endpoint)
+- [x] Add frontend Fluency Progression chart to Dashboard (kept — score 7.2, iteration 409)
 - [ ] Add Quick Rephrase card to Home page (retry when QA tester is available)
 

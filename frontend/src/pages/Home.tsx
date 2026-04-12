@@ -12,6 +12,7 @@ import QuickDictationCard from '../components/QuickDictationCard';
 import QuickSpeakCard from '../components/QuickSpeakCard';
 import QuickListenRespondCard from '../components/QuickListenRespondCard';
 import QuickGrammarCard from '../components/QuickGrammarCard';
+import QuickRephraseCard from '../components/QuickRephraseCard';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -959,6 +960,8 @@ export default function Home() {
       <QuickListenRespondCard />
 
       <QuickGrammarCard />
+
+      <QuickRephraseCard />
 
       <StreakMilestonesCard />
 

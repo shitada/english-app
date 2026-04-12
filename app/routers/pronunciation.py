@@ -1384,3 +1384,42 @@ async def evaluate_listen_respond(
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
+
+
+class QuickRephrasePromptResponse(BaseModel):
+    original_sentence: str
+    instruction: str
+    difficulty: str
+
+
+@router.get("/quick-rephrase", response_model=QuickRephrasePromptResponse)
+async def get_quick_rephrase_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence with rephrase instruction for quick practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a {difficulty}-level English sentence for a rephrase exercise.\n"
+        "The learner will rewrite the sentence using different words while keeping the same meaning.\n"
+        "Return JSON with:\n"
+        "- original_sentence (string): a natural English sentence (8-20 words)\n"
+        "- instruction (string): a brief instruction like 'Use a synonym for the underlined word' "
+        "or 'Change the sentence structure' or 'Make it more formal' (1 short sentence)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English teacher creating rephrase exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="quick_rephrase_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "original_sentence": str(result.get("original_sentence", "The weather is really nice today.")),
+        "instruction": str(result.get("instruction", "Rephrase using different words while keeping the same meaning.")),
+        "difficulty": difficulty,
+    }
