@@ -116,3 +116,8 @@ Improvement ideas for the English Learning App, prioritized by importance.
 - [x] Add frontend Fluency Progression chart to Dashboard (kept — score 7.2, iteration 409)
 - [x] Add Quick Rephrase card to Home page (kept — score 6.9, iteration 410)
 
+## [NEW] Iterations 411–412
+
+- [x] Add Response Speed Analytics card to Dashboard (discarded — score 5.1, no tests, dashboard saturated)
+- [x] Add pronunciation sentence mastery overview endpoint with tests (kept — score 7.15, 11 new tests)
+
