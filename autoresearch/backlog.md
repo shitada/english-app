@@ -306,3 +306,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] Add unit tests for get_phrase_of_the_day and get_vocabulary_activation DAL (#399)
 - [x] Add unit tests for get_random_grammar_mistake DAL function (#400)
+
+## [NEW] Iterations 401–402
+
+- [x] ✅ Add Vocabulary Activation Card to Dashboard (#401)
+- [x] ✅ Add unit tests for untested vocabulary DAL functions (#402)

@@ -6057,3 +6057,71 @@ Now append the new test classes at the end of the file:
 
 Now commit and test:
 
+● Commit iteration 402 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #402: Add unit tests for untested vocabulary DAL functions
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+1296 passed (21 new tests). Now TypeScript check:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All passes. This is a test-only change (type: "test"), no frontend UI modified, so tester is skipped. Now call the evaluator:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 402
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L1:50 (50 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L1:10 (10 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1 (keep). Timings:
+- T0=1775962020, T1=1775962729, T2=1775962802, T3=1775962880, T4=1775962919
+- propose=709, implement=73, test=78, evaluate=39, total=899
+
+● Record iteration 402 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "402" "$HASH" "$DATE" "709" "73" "78" "39" "899" \
+  │ "1296" "1296" "pass" "8.1" "kept" "Add unit tests for untested vocabulary DAL functions" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Now let me update the backlog and write the session log:
+
+● Check backlog size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md | wc -l
+  └ 2 lines...
+
+● Check backlog end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 autoresearch/backlog.md
+  └ 5 lines...
+
+● Edit backlog.md +5
+  └ autoresearch/backlog.md
+
+● Create invocation-032.md +36
+  └ autoresearch/logs/invocation-032.md
+
