@@ -763,3 +763,264 @@ T2 = 1776009706. Implementation done. Now commit:
 
 Tests: 1308 passed, 1 failed (pre-existing failure), TypeScript passes. Let me check if this failure is pre-existing:
 
+[2026-04-13 02:07:29] Copilot invocation completed (duration: 1174s)
+[2026-04-13 02:07:29] Verifying Playwright test depth...
+[2026-04-13 02:07:29]   PW_NA iter=414 — no UI file changes, Playwright test not required
+[2026-04-13 02:07:29] Running post-invocation audit (iter 413-414)...
+============================================
+ Autoresearch Audit
+ Iterations: 413 — 414
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-13 02:07:29
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 413 414[0m
+[0;31m  Tester: FAIL — missing: 413 414[0m
+[0;31m  Evaluator: FAIL — missing: 413 414[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-13 02:07:30] Audit found 3 error(s) — fixes applied where possible
+[2026-04-13 02:07:33] Current iteration count: 414 / 434
+[2026-04-13 02:07:33] ------------------------------------------
+[2026-04-13 02:07:33] Invocation 6 / 10
+[2026-04-13 02:07:33] Resuming from iteration 415
+[2026-04-13 02:07:33] ------------------------------------------
+[2026-04-13 02:07:33] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-415-to-434.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read latest session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Record T0 for iteration 415 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read full backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 123 lines...
+
+Starting iteration 415. Calling the proposer subagent.
+
+● Proposer Propose iteration 415
+  │ Read SentenceTransformDrill.tsx
+  │   │ frontend/src/components/pronunciation/SentenceTransformDrill.tsx
+  │   └ L1:80 (80 lines read)
+  └ Read QuickRephraseCard.tsx
+      │ frontend/src/components/QuickRephraseCard.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 for iteration 415 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 315s. Now implementing. Let me look at the existing pattern.
+
+● Check API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'getSentenceTransform\|evaluateSentenceTransform' frontend/src/api.ts | head -20
+  └ 3 lines...
+
+● List quick card components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/Quick*.tsx
+  └ 4 lines...
+
+● Check types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'SentenceTransformExercise\|SentenceTransformResult' frontend/src/api.ts | head -20
+  └ 4 lines...
+
+● Check rephrase card size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ frontend/src/components/QuickRephraseCard.tsx
+  └ 2 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L1328:1370 (43 lines read)
+
+● Read QuickRephraseCard.tsx
+  │ frontend/src/components/QuickRephraseCard.tsx
+  └ 201 lines read
+
+● Find card import/usage locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'QuickRephrase\|QuickTransform\|StreakMilestones\|import.*Quick' frontend/src/pages/Home.tsx |
+  │ head -20
+  └ 13 lines...
+
+Now I have the pattern. Let me create the QuickTransformCard and update Home.tsx.
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Create QuickTransformCard.tsx +261
+  └ frontend/src/components/QuickTransformCard.tsx
+
+● Find QuickRephraseCard usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'QuickRephraseCard />'
+  │ frontend/src/pages/Home.tsx
+  └ 2 lines...
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L963:970 (7 lines read)
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test:
+
+● Commit iteration 415 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #415: Add Quick Sentence Transform card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Proposal type is "feature" and frontend UI files changed → MUST run tester. Let me start the server and run the QA test.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now calling the tester subagent.
+
+● Tester QA test iteration 415
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1200:1450 (251 lines read)
+  └ List directory frontend/src/hooks
+      └ 9 files found
+
+Critical bug found: property names don't match the `useSpeechRecognition` hook. Let me fix it.
+
+● Check hook return shape (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'export.*useSpeechRecognition\|return {' frontend/src/hooks/useSpeechRecognition.ts | head -5
+  └ 3 lines...
+
+● Edit QuickTransformCard.tsx +1 -1
+  └ frontend/src/components/QuickTransformCard.tsx
+
+● TypeScript check after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS passes. Amend the commit with the fix:
+
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+Now re-run the tester with the fixed code:
+
+● Tester Re-test iteration 415
+  │ Read QuickTransformCard.tsx
+  │   │ frontend/src/components/QuickTransformCard.tsx
+  │   └ L41:55 (15 lines read)
+  └ Read QuickTransformCard.tsx
+      │ frontend/src/components/QuickTransformCard.tsx
+      └ L91:101 (11 lines read)
+
+Tester passed (ux_score: 7) but found bugs. Let me fix the transcript accumulation and async start issues.
+
+● Read QuickTransformCard.tsx
+  │ frontend/src/components/QuickTransformCard.tsx
+  └ L17:17 (1 line read)
+
+● Edit QuickTransformCard.tsx +1 -1
+  └ frontend/src/components/QuickTransformCard.tsx
+
+● Edit QuickTransformCard.tsx +4 -3
+  └ frontend/src/components/QuickTransformCard.tsx
+
+Also clear the timer when transitioning to evaluating phase:
+
+● Edit QuickTransformCard.tsx +4
+  └ frontend/src/components/QuickTransformCard.tsx
+
+● TypeScript check after fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
