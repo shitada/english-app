@@ -1526,3 +1526,181 @@ async def test_vocabulary_activation_no_conversations(client, test_db):
     assert data["activation_rate"] == 0.0
     assert len(data["unactivated_words"]) == 1
     assert data["unactivated_words"][0]["word"] == "lobby"
+
+
+# ── Data-populated tests for grammar-trend and skill-radar ──────────
+
+
+@pytest.mark.integration
+async def test_grammar_trend_with_conversations(client, test_db):
+    """Grammar trend returns correct accuracy_rate and counts for seeded conversations."""
+    import json
+
+    # Create 2 ended conversations
+    for i, (topic, ts) in enumerate([
+        ("hotel_checkin", "2026-04-09T10:00:00+00:00"),
+        ("restaurant", "2026-04-10T10:00:00+00:00"),
+    ], start=1):
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+            (9000 + i, topic, "beginner", "ended", ts),
+        )
+
+    # Conv 1: 2 messages, 1 correct + 1 incorrect → 50% accuracy
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        (9001, "user", "I like room", json.dumps({"is_correct": True}), "2026-04-09T10:01:00+00:00"),
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        (9001, "user", "I go yesterday", json.dumps({"is_correct": False}), "2026-04-09T10:02:00+00:00"),
+    )
+    # Conv 2: 3 messages, 3 correct → 100% accuracy
+    for j in range(3):
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+            (9002, "user", f"Good sentence {j}", json.dumps({"is_correct": True}), f"2026-04-10T10:0{j+1}:00+00:00"),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/grammar-trend")
+    assert resp.status_code == 200
+    data = resp.json()
+    convs = data["conversations"]
+    assert len(convs) == 2
+
+    # Chronological order (oldest first)
+    assert convs[0]["topic"] == "hotel_checkin"
+    assert convs[0]["checked_count"] == 2
+    assert convs[0]["correct_count"] == 1
+    assert convs[0]["accuracy_rate"] == 50.0
+
+    assert convs[1]["topic"] == "restaurant"
+    assert convs[1]["checked_count"] == 3
+    assert convs[1]["correct_count"] == 3
+    assert convs[1]["accuracy_rate"] == 100.0
+
+
+@pytest.mark.integration
+async def test_grammar_trend_improving(client, test_db):
+    """Grammar trend detects 'improving' when later conversations have higher accuracy."""
+    import json
+
+    # 4 conversations: first 2 low accuracy, last 2 high accuracy
+    scenarios = [
+        (8001, "hotel_checkin", "2026-04-07T10:00:00+00:00", [(True,), (False,), (False,)]),  # 33%
+        (8002, "restaurant", "2026-04-08T10:00:00+00:00", [(False,), (False,), (True,)]),       # 33%
+        (8003, "job_interview", "2026-04-09T10:00:00+00:00", [(True,), (True,), (True,)]),      # 100%
+        (8004, "doctor_visit", "2026-04-10T10:00:00+00:00", [(True,), (True,), (False,)]),      # 66%
+    ]
+    for conv_id, topic, ts, msgs in scenarios:
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+            (conv_id, topic, "beginner", "ended", ts),
+        )
+        for k, (correct,) in enumerate(msgs):
+            await test_db.execute(
+                "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+                (conv_id, "user", f"msg {k}", json.dumps({"is_correct": correct}), f"{ts[:10]}T10:0{k+1}:00+00:00"),
+            )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/grammar-trend")
+    assert resp.status_code == 200
+    data = resp.json()
+    # First half avg ≈ 33.3%, second half avg ≈ 83.3% → diff > 3 → "improving"
+    assert data["trend"] == "improving"
+    assert len(data["conversations"]) == 4
+
+
+@pytest.mark.integration
+async def test_skill_radar_with_activity(client, test_db):
+    """Skill radar scores reflect seeded conversation, pronunciation, and vocabulary data."""
+    import json
+
+    # Speaking data: 2 ended conversations + 5 user messages
+    for i in range(2):
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, status, started_at) VALUES (?, ?, ?, ?, ?)",
+            (7001 + i, "hotel_checkin", "beginner", "ended", f"2026-04-0{i+1}T10:00:00+00:00"),
+        )
+    for i in range(5):
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (7001, "user", f"user msg {i}", f"2026-04-01T10:0{i}:00+00:00"),
+        )
+
+    # Grammar data: 4 messages with feedback, 3 correct
+    for i in range(4):
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, ?, ?, ?, ?)",
+            (7001, "user", f"grammar msg {i}", json.dumps({"is_correct": i < 3}), f"2026-04-01T10:1{i}:00+00:00"),
+        )
+
+    # Pronunciation: 3 attempts with scores 7, 8, 9 → avg 8.0
+    for i, score in enumerate([7, 8, 9]):
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+            (f"test sentence {i}", f"my attempt {i}", json.dumps({"overall_score": score}), score, f"2026-04-01T10:2{i}:00+00:00"),
+        )
+
+    # Vocabulary: 2 words, insert progress for both. word_id refs are arbitrary for this test.
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning) VALUES (?, ?, ?, ?)",
+        (7001, "hotel", "lobby", "entrance hall"),
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning) VALUES (?, ?, ?, ?)",
+        (7002, "hotel", "suite", "large room"),
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed) VALUES (?, ?, ?, ?, ?)",
+        (7001, 5, 1, 4, "2026-04-01"),
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed) VALUES (?, ?, ?, ?, ?)",
+        (7002, 1, 3, 1, "2026-04-01"),
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/skill-radar")
+    assert resp.status_code == 200
+    data = resp.json()
+    skills = {s["name"]: s["score"] for s in data["skills"]}
+
+    # All 5 axes should be > 0
+    for name in ("speaking", "listening", "vocabulary", "grammar", "pronunciation"):
+        assert skills[name] > 0, f"{name} score should be > 0"
+
+    # Grammar: 3/4 correct → 75
+    assert skills["grammar"] == 75
+
+    # Vocabulary: 1 mastered (level>=3) out of 2 → 50
+    assert skills["vocabulary"] == 50
+
+    # Pronunciation: avg_score 8.0 * 10 = 80
+    assert skills["pronunciation"] == 80
+
+
+@pytest.mark.integration
+async def test_skill_radar_vocabulary_mastery(client, test_db):
+    """Skill radar vocabulary score reflects mastered/total ratio."""
+    # 4 words, 3 mastered (level >= 3)
+    for i in range(4):
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (id, topic, word, meaning) VALUES (?, ?, ?, ?)",
+            (6001 + i, "hotel", f"word{i}", f"meaning{i}"),
+        )
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, last_reviewed) VALUES (?, ?, ?, ?, ?)",
+            (6001 + i, 5, 0, 3 if i < 3 else 1, "2026-04-01"),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/skill-radar")
+    assert resp.status_code == 200
+    data = resp.json()
+    skills = {s["name"]: s["score"] for s in data["skills"]}
+
+    # 3/4 mastered = 75%
+    assert skills["vocabulary"] == 75
