@@ -246,6 +246,9 @@ export const api = {
   getDashboardModuleStreaks: () =>
     request<ModuleStreaksResponse>('/api/dashboard/module-streaks'),
 
+  getDashboardVocabActivation: (limit = 20) =>
+    request<VocabularyActivationResponse>(`/api/dashboard/vocabulary-activation?limit=${limit}`),
+
   // Pronunciation weak spots
   getPronunciationWeaknesses: (limit = 10) =>
     request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
@@ -1495,4 +1498,30 @@ export interface GrammarMistake {
 
 export async function getRandomGrammarMistake(): Promise<GrammarMistake> {
   return request<GrammarMistake>('/api/conversation/random-grammar-mistake');
+}
+
+// ── Vocabulary Activation Analytics ──────────────────────────
+
+export interface ActivatedWordItem {
+  word: string;
+  meaning: string;
+  topic: string;
+  times_used: number;
+  last_used_at: string | null;
+}
+
+export interface TopicActivationItem {
+  topic: string;
+  studied: number;
+  activated: number;
+  rate: number;
+}
+
+export interface VocabularyActivationResponse {
+  total_studied: number;
+  total_activated: number;
+  activation_rate: number;
+  activated_words: ActivatedWordItem[];
+  unactivated_words: ActivatedWordItem[];
+  by_topic: TopicActivationItem[];
 }

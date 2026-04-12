@@ -11,6 +11,7 @@ export { ListeningProgress } from './ListeningProgress';
 export { PronunciationProgress } from './PronunciationProgress';
 export { PronunciationWeakSpots } from './PronunciationWeakSpots';
 export { SpeakingConfidence } from './SpeakingConfidence';
+export { VocabActivationCard } from './VocabActivationCard';
 export { VocabForecastCard } from './VocabForecastCard';
 export { VocabularyProgress } from './VocabularyProgress';
 export { WeeklyReport } from './WeeklyReport';
