@@ -413,3 +413,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 411	none	2026-04-13	257	122	85	296	760	1308	1309	pass	5.1	discarded	Add Response Speed Analytics card to Dashboard
 412	3966512	2026-04-13	307	102	158	95	662	1319	1320	pass	7.15	kept	Add pronunciation sentence mastery overview endpoint with tests
 413	none	2026-04-13	189	95	62	271	617	1319	1320	pass	5.7	discarded	Add Sentence Mastery Progress card to Pronunciation page
+414	6730577	2026-04-13	284	133	57	76	493	1325	1326	pass	7.85	kept	Add unit tests for get_topic_coverage DAL function
