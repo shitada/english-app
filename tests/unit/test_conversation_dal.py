@@ -29,6 +29,7 @@ from app.dal.conversation import (
     get_conversation_vocabulary,
     get_difficulty_recommendation,
     get_grammar_accuracy,
+    get_random_grammar_mistake,
     get_rephrase_sentences,
     get_shadowing_phrases,
     get_historical_session_averages,
@@ -1353,3 +1354,160 @@ class TestGetDifficultyRecommendation:
             await end_conversation(test_db, cid, summary={"summary": f"s{i}", "performance": {"grammar_accuracy_rate": 95, "avg_words_per_message": 20}})
         rec = await get_difficulty_recommendation(test_db)
         assert rec["recommended_difficulty"] == "advanced"
+
+
+@pytest.mark.unit
+class TestGetRandomGrammarMistake:
+    async def test_empty_database(self, test_db):
+        """Returns None when no messages exist."""
+        result = await get_random_grammar_mistake(test_db)
+        assert result is None
+
+    async def test_correct_messages_skipped(self, test_db):
+        """Messages with is_correct=True are skipped."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I would like a room")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({"is_correct": True, "errors": []})
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is None
+
+    async def test_message_with_errors_returns_result(self, test_db):
+        """Messages with grammar errors return a valid result dict."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I go to hotel yesterday")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({
+            "is_correct": False,
+            "corrected_text": "I went to the hotel yesterday",
+            "errors": [{
+                "original": "go",
+                "correction": "went",
+                "explanation": "Use past tense for past events"
+            }]
+        })
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is not None
+        assert result["original_text"] == "I go to hotel yesterday"
+        assert result["corrected_text"] == "I went to the hotel yesterday"
+        assert result["error_fragment"] == "go"
+        assert result["correction"] == "went"
+        assert result["explanation"] == "Use past tense for past events"
+
+    async def test_empty_errors_list_returns_none(self, test_db):
+        """Messages with empty errors list are skipped."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({"is_correct": False, "errors": []})
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is None
+
+    async def test_malformed_feedback_skipped(self, test_db):
+        """Malformed feedback_json is skipped gracefully."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hello")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", ("not valid json", msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is None
+
+    async def test_fragment_key_fallback(self, test_db):
+        """Falls back to 'fragment' key when 'original' is missing."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I has a problem")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({
+            "is_correct": False,
+            "corrected_text": "I have a problem",
+            "errors": [{
+                "fragment": "has",
+                "correction": "have",
+                "explanation": "Subject-verb agreement"
+            }]
+        })
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is not None
+        assert result["error_fragment"] == "has"
+
+    async def test_string_is_correct_handled(self, test_db):
+        """String 'true' for is_correct is coerced and skipped."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Good morning")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({
+            "is_correct": "true",
+            "errors": [{"original": "x", "correction": "y", "explanation": "z"}]
+        })
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        result = await get_random_grammar_mistake(test_db)
+        assert result is None
+
+    async def test_multiple_errors_produce_multiple_candidates(self, test_db):
+        """Multiple errors from one message produce distinct candidates."""
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "I go hotel yesterday")
+        msg_id = (await test_db.execute_fetchall(
+            "SELECT id FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1", (cid,)
+        ))[0]["id"]
+        feedback = json.dumps({
+            "is_correct": False,
+            "corrected_text": "I went to the hotel yesterday",
+            "errors": [
+                {"original": "go", "correction": "went", "explanation": "Past tense"},
+                {"original": "hotel", "correction": "the hotel", "explanation": "Missing article"},
+            ]
+        })
+        await test_db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?", (feedback, msg_id)
+        )
+        await test_db.commit()
+
+        # Run multiple times to verify both candidates can be selected
+        results = set()
+        for _ in range(50):
+            r = await get_random_grammar_mistake(test_db)
+            assert r is not None
+            results.add(r["error_fragment"])
+        assert "go" in results
+        assert "hotel" in results

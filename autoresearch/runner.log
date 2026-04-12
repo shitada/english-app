@@ -5468,3 +5468,123 @@ Let me verify no earlier test was affected by the sed:
 
 Good — only the new tests were affected. Let me amend the commit and re-run tests:
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+● Run tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1267 tests pass. Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_PASS"
+  └ 2 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Tests: 1267/1267 passed, TS: pass. This is a test-only change (type=test), no frontend .tsx files changed. QA tester skip is OK. Now call evaluator:
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Get test diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ tests/unit/test_dashboard_dal.py
+  └ 81 lines...
+
+● Get test diff for evaluator (no pager) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ tests/unit/test_dashboard_dal.py 2>&1 | tail -80
+  └ 81 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 399
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1:5 (5 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1810:1830 (21 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1, verdict: keep. All criteria met. Recording results:
+
+● Record results for iteration 399 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ N=399; HASH=$(git rev-parse --short HEAD); DATE="2026-04-12"; \
+  │ PROPOSE=$((1775959633-1775959506)); IMPL=$((1775959689-1775959633)); \
+  │ TEST=$((1775959845-1775959689)); EVAL=$((1775959970-1775959845)); \
+  │ TOTAL=$((1775959970-1775959506)); \…
+  └ 8 lines...
+
+Iteration 399 ✅ KEPT (8.1). Now starting iteration 400.
+
+● Record T0 for iteration 400 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore - recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 400
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L900:1100 (201 lines read)
+  └ Read test_conversation_dal.py
+      │ tests/unit/test_conversation_dal.py
+      └ L1:40 (39 lines read)
+
+● Record T1 for iteration 400 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read get_random_grammar_mistake (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '895,945p' app/dal/conversation.py
+  └ 42 lines...
+
+● Check test file imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -30
+  │ tests/unit/test_conversation_dal.py
+  └ 31 lines...
+
+● Find coerce_bool definition (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'coerce_bool'
+  │ app/dal/conversation.py | head -5
+  └ 6 lines...
+
+● See more imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,55p'
+  │ tests/unit/test_conversation_dal.py
+  └ 27 lines...
+
+● Check end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_conversation_dal.py
+  │ && tail -20 tests/unit/test_conversation_dal.py
+  └ 22 lines...
+
+Now I'll implement the tests:
+
+● Edit test_conversation_dal.py +1
+  └ tests/unit/test_conversation_dal.py
+
+Now add tests at end of file:
+
+● Edit test_conversation_dal.py +157
+  └ tests/unit/test_conversation_dal.py
+
