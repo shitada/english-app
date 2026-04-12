@@ -609,13 +609,19 @@ class ListeningQuizResponse(BaseModel):
 async def generate_listening_quiz(
     difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
     question_count: int = Query(default=5, ge=2, le=8),
+    topic: str = Query(default="", description="Optional topic ID to focus the passage on"),
     _rl=Depends(require_rate_limit),
 ):
     """Generate a listening comprehension quiz with a passage and questions."""
     copilot = get_copilot_service()
+    topic_phrase = "about an everyday topic"
+    if topic:
+        topics_list = get_conversation_topics()
+        label = get_topic_label(topics_list, topic)
+        topic_phrase = f"about a {label} scenario"
     prompt = (
         f"Generate a short English listening comprehension exercise at {difficulty} level.\n"
-        f"Create a passage of 3-6 sentences about an everyday topic.\n"
+        f"Create a passage of 3-6 sentences {topic_phrase}.\n"
         f"Then create {question_count} multiple-choice comprehension questions about the passage.\n\n"
         "Return JSON with:\n"
         "- title (string): a short title for the passage\n"

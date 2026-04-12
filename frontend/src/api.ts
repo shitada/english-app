@@ -177,8 +177,11 @@ export const api = {
   getMinimalPairsStats: (limit = 20) =>
     request<PhonemeContrastStat[]>(`/api/pronunciation/minimal-pairs/stats?limit=${limit}`),
 
-  generateListeningQuiz: (difficulty: string = 'intermediate', questionCount = 5) =>
-    request<ListeningQuizResponse>(`/api/pronunciation/listening-quiz?difficulty=${difficulty}&question_count=${questionCount}`, { method: 'POST' }),
+  generateListeningQuiz: (difficulty: string = 'intermediate', questionCount = 5, topic?: string) => {
+    let url = `/api/pronunciation/listening-quiz?difficulty=${difficulty}&question_count=${questionCount}`;
+    if (topic) url += `&topic=${encodeURIComponent(topic)}`;
+    return request<ListeningQuizResponse>(url, { method: 'POST' });
+  },
 
   getQuickSpeakPrompt: (difficulty: string = 'intermediate') =>
     request<{ prompt: string; context_hint: string; difficulty: string; suggested_phrases: string[] }>(`/api/pronunciation/quick-speak?difficulty=${difficulty}`),

@@ -1024,3 +1024,232 @@ Also clear the timer when transitioning to evaluating phase:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
   └ 2 lines...
 
+● Amend commit with bug fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Get code diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/components/QuickTransformCard.tsx frontend/src/pages/Home.tsx 2>&1 | head -80
+  └ 81 lines...
+
+● Record T3 actual (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 415
+  │ List directory app/routers
+  │   └ 7 files found
+  └ Read useSpeechRecognition.ts
+      │ frontend/src/hooks/useSpeechRecognition.ts
+      └ 167 lines read
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.7, verdict: keep. All criteria met. Recording results.
+
+● Record iteration 415 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "415" "e7c116b" "2026-04-13" "315" "66" "578" "94" "1053" \
+  │ "1325" "1326" "pass" "6.7" "kept" "Add Quick Sentence Transform card to Home page" \
+  │ >> autoresearch/results.tsv
+  └ 1 line...
+
+● Verify results row (shell)
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row is well-formed. Now kill the server and start iteration 416.
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Record T0 for iteration 416 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+Server stopped as expected. Continuing with iteration 416 — calling proposer.
+
+● Proposer Propose iteration 416
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L54:70 (17 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L180:182 (2 lines read)
+
+● Record T1 for iteration 416 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 438s. Let me look at the relevant files to implement.
+
+● Find listening quiz endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'generate_listening_quiz\|listening.quiz\|listening-quiz' app/routers/pronunciation.py | head
+  │ -10
+  └ 11 lines...
+
+● Check topic label helper (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_topic_label\|topic_label'
+  │ app/routers/pronunciation.py | head -5
+  └ 4 lines...
+
+● Find API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'generateListeningQuiz\|generate_listening_quiz\|listening-quiz/generate' frontend/src/api.ts |
+  │ head -10
+  └ 2 lines...
+
+● Read pronunciation.py
+  │ app/routers/pronunciation.py
+  └ L608:650 (43 lines read)
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L175:195 (21 lines read)
+
+Now let me check what topics look like and the Listening page:
+
+● Check topics API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'getConversationTopics\|conversation_topics\|/api/conversation/topics' frontend/src/api.ts |
+  │ head -5
+  └ 4 lines...
+
+● Check Listening page size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Listening.tsx
+  └ 2 lines...
+
+● Check config topics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'topics' config.yaml | head -10
+  └ 5 lines...
+
+● Check Listening page imports and state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60 frontend/src/pages/Listening.tsx
+  └ 61 lines...
+
+● Find setup phase rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'generateQuiz\|Start Quiz\|setup'
+  │ frontend/src/pages/Listening.tsx | head -20
+  └ 7 lines...
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L162:220 (59 lines read)
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L54:78 (25 lines read)
+
+Now I have the full picture. Let me implement the changes:
+
+● Check get_topic_label signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'get_topic_label' app/utils.py |
+  │ head -5
+  └ 2 lines...
+
+● Read utils.py
+  │ app/utils.py
+  └ L60:72 (13 lines read)
+
+Now implement the 3 changes:
+
+● Edit pronunciation.py +8 -1
+  └ app/routers/pronunciation.py
+
+Now check if `get_config` is already imported:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -25 app/routers/pronunciation.py |
+  │ grep -n 'get_config\|from app'
+  └ 7 lines...
+
+Need to import `get_config`:
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+Now update the frontend API function:
+
+● Edit api.ts +5 -2
+  └ frontend/src/api.ts
+
+Now update Listening.tsx to add topic selection:
+
+● Edit Listening.tsx +2
+  └ frontend/src/pages/Listening.tsx
+
+Add topic fetching to the useEffect:
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Update generateQuiz to pass topic:
+
+● Edit Listening.tsx +2 -2
+  └ frontend/src/pages/Listening.tsx
+
+Now add the topic selector UI in the setup phase, after the difficulty buttons and before the recommendation:
+
+● Edit Listening.tsx +34
+  └ frontend/src/pages/Listening.tsx
+
+Now commit and test:
+
+● Commit iteration 416 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #416: Add topic selection to Listening Quiz
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 for iteration 416 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+Import error — `get_config` doesn't exist. Let me check what's available:
+
+● Check config exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'def get_\|^_config' app/config.py
+  │ | head -20
+  └ 7 lines...
+
+I should use `get_conversation_topics()` directly instead:
+
+● Edit pronunciation.py +1 -1
+  └ app/routers/pronunciation.py
+
+● Edit pronunciation.py +1 -2
+  └ app/routers/pronunciation.py
+
+● Re-run tests after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+Good — back to normal (1325/1326 with the pre-existing failure). Let me amend the commit and check for smoke test:
+

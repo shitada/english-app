@@ -21,6 +21,8 @@ interface QuizResult {
 export default function Listening() {
   const [phase, setPhase] = useState<Phase>('setup');
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [topics, setTopics] = useState<{ id: string; label: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [title, setTitle] = useState('');
@@ -49,13 +51,14 @@ export default function Listening() {
         setPlaybackRate(d === 'beginner' ? 0.75 : d === 'advanced' ? 1.1 : 1.0);
       }
     }).catch(() => {});
+    api.getConversationTopics().then(t => setTopics(t.map(({ id, label }) => ({ id, label })))).catch(() => {});
   }, []);
 
   const generateQuiz = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.generateListeningQuiz(difficulty);
+      const data = await api.generateListeningQuiz(difficulty, 5, selectedTopic || undefined);
       setTitle(data.title);
       setPassage(data.passage);
       setQuestions(data.questions);
@@ -65,7 +68,7 @@ export default function Listening() {
     } finally {
       setLoading(false);
     }
-  }, [difficulty]);
+  }, [difficulty, selectedTopic]);
 
   const playAudio = useCallback(() => {
     if (isSpeaking) {
@@ -182,6 +185,40 @@ export default function Listening() {
               </button>
             ))}
           </div>
+          {topics.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <h4 style={{ marginBottom: 8, fontSize: '0.9rem' }}>Topic (optional)</h4>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setSelectedTopic('')}
+                  style={{
+                    padding: '0.4rem 0.8rem', borderRadius: 8, fontSize: '0.85rem',
+                    border: `2px solid ${!selectedTopic ? 'var(--primary, #6366f1)' : 'var(--border)'}`,
+                    background: !selectedTopic ? 'var(--primary, #6366f1)' : 'transparent',
+                    color: !selectedTopic ? '#fff' : 'var(--text)',
+                    fontWeight: 500, cursor: 'pointer',
+                  }}
+                >
+                  Any Topic
+                </button>
+                {topics.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTopic(t.id)}
+                    style={{
+                      padding: '0.4rem 0.8rem', borderRadius: 8, fontSize: '0.85rem',
+                      border: `2px solid ${selectedTopic === t.id ? 'var(--primary, #6366f1)' : 'var(--border)'}`,
+                      background: selectedTopic === t.id ? 'var(--primary, #6366f1)' : 'transparent',
+                      color: selectedTopic === t.id ? '#fff' : 'var(--text)',
+                      fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize',
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {recommendation && recommendation.stats.quizzes_analyzed > 0 && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '8px 12px',
