@@ -228,6 +228,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )""",
     ),
+    (
+        "add topic column to listening_quiz_results",
+        "ALTER TABLE listening_quiz_results ADD COLUMN topic TEXT NOT NULL DEFAULT ''",
+    ),
 ]
 
 

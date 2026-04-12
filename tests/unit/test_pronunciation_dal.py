@@ -1021,6 +1021,18 @@ class TestSaveListeningQuizResult:
         id2 = await save_listening_quiz_result(test_db, "Q2", "advanced", 5, 5, 100.0)
         assert id2 > id1
 
+    async def test_topic_persists(self, test_db):
+        """Topic field is saved and retrievable."""
+        await save_listening_quiz_result(test_db, "Hotel Check-in", "beginner", 5, 4, 80.0, topic="hotel")
+        history = await get_listening_quiz_history(test_db, limit=1)
+        assert history[0]["topic"] == "hotel"
+
+    async def test_topic_defaults_empty(self, test_db):
+        """Topic defaults to empty string when not provided."""
+        await save_listening_quiz_result(test_db, "General", "beginner", 5, 3, 60.0)
+        history = await get_listening_quiz_history(test_db, limit=1)
+        assert history[0]["topic"] == ""
+
 
 @pytest.mark.unit
 class TestGetListeningQuizHistory:

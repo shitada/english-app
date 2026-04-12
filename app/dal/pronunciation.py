@@ -799,12 +799,13 @@ async def save_listening_quiz_result(
     total_questions: int,
     correct_count: int,
     score: float,
+    topic: str = "",
 ) -> int:
     """Save a listening quiz result and return the ID."""
     cursor = await db.execute(
-        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score)
-           VALUES (?, ?, ?, ?, ?)""",
-        (title, difficulty, total_questions, correct_count, score),
+        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, topic)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (title, difficulty, total_questions, correct_count, score, topic),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
@@ -815,7 +816,7 @@ async def get_listening_quiz_history(
 ) -> list[dict[str, Any]]:
     """Get recent listening quiz results ordered by most recent."""
     rows = await db.execute_fetchall(
-        """SELECT id, title, difficulty, total_questions, correct_count, score, created_at
+        """SELECT id, title, difficulty, total_questions, correct_count, score, topic, created_at
            FROM listening_quiz_results ORDER BY created_at DESC LIMIT ?""",
         (limit,),
     )

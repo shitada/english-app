@@ -111,7 +111,7 @@ export default function Listening() {
         const totalQ = questions.length;
         const scoreVal = Math.round((correctCount / totalQ) * 100);
         saveListeningQuizResult({
-          title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal,
+          title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal, topic: selectedTopic,
         }).then(() => {
           setSaved(true);
           getListeningQuizHistory(10).then(setHistory).catch(() => {});
@@ -270,7 +270,7 @@ export default function Listening() {
                         {h.title}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {h.difficulty} · {h.correct_count}/{h.total_questions} correct · {new Date(h.created_at).toLocaleDateString()}
+                        {h.difficulty}{h.topic ? ` · ${h.topic}` : ''} · {h.correct_count}/{h.total_questions} correct · {new Date(h.created_at).toLocaleDateString()}
                       </div>
                     </div>
                     <div style={{

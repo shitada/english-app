@@ -795,6 +795,7 @@ class ListeningQuizResultRequest(BaseModel):
     total_questions: int = Field(ge=1, le=100)
     correct_count: int = Field(ge=0)
     score: float = Field(ge=0, le=100)
+    topic: str = Field(default="", max_length=100)
 
 
 class ListeningQuizResultResponse(BaseModel):
@@ -811,7 +812,7 @@ async def save_listening_quiz_result(
     if req.correct_count > req.total_questions:
         raise HTTPException(status_code=422, detail="correct_count cannot exceed total_questions")
     result_id = await pron_dal.save_listening_quiz_result(
-        db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score
+        db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score, req.topic
     )
     return {"id": result_id, "message": "Result saved"}
 
