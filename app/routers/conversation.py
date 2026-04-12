@@ -945,3 +945,14 @@ async def get_session_averages(
 ):
     """Get historical average performance metrics across past sessions."""
     return await conv_dal.get_historical_session_averages(db)
+
+
+@router.get("/random-grammar-mistake")
+async def random_grammar_mistake(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Return a random grammar mistake from the user's conversation history."""
+    result = await conv_dal.get_random_grammar_mistake(db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="No grammar mistakes found")
+    return result

@@ -1454,3 +1454,54 @@ async def test_bookmarks_filter_by_conversation(client, mock_copilot):
     filtered = await client.get(f"/api/conversation/bookmarks?conversation_id={cid1}")
     assert filtered.json()["total"] == 1
     assert filtered.json()["items"][0]["id"] == mid1
+
+
+@pytest.mark.integration
+async def test_random_grammar_mistake_empty(client):
+    res = await client.get("/api/conversation/random-grammar-mistake")
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_random_grammar_mistake_with_data(client, test_db):
+    import json
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, status) VALUES (?, ?, ?)",
+        (900, "hotel_checkin", "ended"),
+    )
+    feedback = json.dumps({
+        "is_correct": False,
+        "corrected_text": "I would like to check in.",
+        "errors": [{"fragment": "I want check in", "correction": "I would like to check in", "explanation": "Use 'would like to' for polite requests."}],
+    })
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json) VALUES (?, ?, ?, ?)",
+        (900, "user", "I want check in.", feedback),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/random-grammar-mistake")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["original_text"] == "I want check in."
+    assert data["corrected_text"] == "I would like to check in."
+    assert data["error_fragment"] == "I want check in"
+    assert data["explanation"] == "Use 'would like to' for polite requests."
+
+
+@pytest.mark.integration
+async def test_random_grammar_mistake_skips_correct(client, test_db):
+    import json
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, status) VALUES (?, ?, ?)",
+        (901, "hotel_checkin", "ended"),
+    )
+    feedback = json.dumps({"is_correct": True, "corrected_text": "Hello!", "errors": []})
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, feedback_json) VALUES (?, ?, ?, ?)",
+        (901, "user", "Hello!", feedback),
+    )
+    await test_db.commit()
+
+    res = await client.get("/api/conversation/random-grammar-mistake")
+    assert res.status_code == 404

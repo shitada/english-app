@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 from typing import Any
 
@@ -895,3 +896,40 @@ async def get_historical_session_averages(
         "session_count": count,
         **{f"avg_{k}": round(totals[k] / count, 1) for k in totals},
     }
+
+
+async def get_random_grammar_mistake(db: aiosqlite.Connection) -> dict[str, Any] | None:
+    """Pick a random grammar mistake from the user's conversation history."""
+    rows = await db.execute_fetchall(
+        """SELECT m.content, m.feedback_json
+           FROM messages m
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+           LIMIT 5000""",
+    )
+    candidates: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            feedback = json.loads(row["feedback_json"])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        if coerce_bool(feedback.get("is_correct", False)):
+            continue
+        errors = feedback.get("errors")
+        if not isinstance(errors, list) or len(errors) == 0:
+            continue
+        corrected = feedback.get("corrected_text", "")
+        for err in errors:
+            if not isinstance(err, dict):
+                continue
+            candidates.append({
+                "original_text": row["content"],
+                "corrected_text": corrected or row["content"],
+                "error_fragment": err.get("original", "") or err.get("fragment", ""),
+                "correction": err.get("correction", ""),
+                "explanation": err.get("explanation", ""),
+            })
+    if not candidates:
+        return None
+    return random.choice(candidates)

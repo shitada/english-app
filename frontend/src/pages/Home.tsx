@@ -10,6 +10,7 @@ import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickShadowCard from '../components/QuickShadowCard';
 import QuickDictationCard from '../components/QuickDictationCard';
 import QuickSpeakCard from '../components/QuickSpeakCard';
+import QuickGrammarCard from '../components/QuickGrammarCard';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -953,6 +954,8 @@ export default function Home() {
       <QuickDictationCard />
 
       <QuickSpeakCard />
+
+      <QuickGrammarCard />
 
       <StreakMilestonesCard />
 

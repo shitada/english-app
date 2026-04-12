@@ -1482,3 +1482,17 @@ export interface ModuleStreaksResponse {
   most_consistent: string | null;
   least_consistent: string | null;
 }
+
+// ── Quick Grammar Mistake ────────────────────────────────────
+
+export interface GrammarMistake {
+  original_text: string;
+  corrected_text: string;
+  error_fragment: string;
+  correction: string;
+  explanation: string;
+}
+
+export async function getRandomGrammarMistake(): Promise<GrammarMistake> {
+  return request<GrammarMistake>('/api/conversation/random-grammar-mistake');
+}

@@ -4871,3 +4871,383 @@ Now update backlog and write session log:
 ● Create invocation-026.md +38
   └ autoresearch/logs/invocation-026.md
 
+[2026-04-12 10:31:52] Copilot invocation completed (duration: 1776s)
+[2026-04-12 10:31:52] Verifying Playwright test depth...
+[2026-04-12 10:31:52]   PW_NA iter=396 — no UI file changes, Playwright test not required
+[2026-04-12 10:31:52] Running post-invocation audit (iter 395-396)...
+============================================
+ Autoresearch Audit
+ Iterations: 395 — 396
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-12 10:31:52
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 395 396[0m
+[0;31m  Tester: FAIL — missing: 395 396[0m
+[0;31m  Evaluator: FAIL — missing: 395 396[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-12 10:31:53] Audit found 3 error(s) — fixes applied where possible
+[2026-04-12 10:31:53] Cleaned up old session logs (kept 5)
+[2026-04-12 10:31:56] Current iteration count: 396 / 404
+[2026-04-12 10:31:56] ------------------------------------------
+[2026-04-12 10:31:56] Invocation 2 / 10
+[2026-04-12 10:31:56] Resuming from iteration 397
+[2026-04-12 10:31:56] ------------------------------------------
+[2026-04-12 10:31:56] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-397-to-404.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read full backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 14 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-029.md |
+  │ head -60
+  └ 36 lines...
+
+● Get uncompleted items only (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Search uncompleted items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Search for unchecked items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Check end of backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -80 autoresearch/backlog.md
+  └ 80 lines...
+
+All backlog items are completed. Starting iteration 397. Let me record the start timestamp and call the proposer.
+
+● Record T0 for iteration 397 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now calling the proposer for iteration 397.
+
+● Proposer Propose iteration 397
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L280:400 (121 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L400:500 (101 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Proposal received (286s). Now implementing: "Add Quick Grammar Fix card to Home page". Let me examine the existing patterns.
+
+● Check existing DAL patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "random\|quick"
+  │ app/dal/conversation.py | head -20
+  └ 1 line...
+
+● Check Home page imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickShadow\|QuickDictation\|QuickSpeak\|QuickGrammar" frontend/src/pages/Home.tsx | head -20
+  └ 7 lines...
+
+● Check QuickSpeakCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60
+  │ frontend/src/components/QuickSpeakCard.tsx 2>/dev/null || echo "NOT FOUND"
+  └ 61 lines...
+
+● Check feedback_json usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "feedback_json\|is_correct\|errors"
+  │ app/dal/conversation.py | head -20
+  └ 21 lines...
+
+● Check API patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getQuickSpeakPrompt\|getRandomGrammar\|QuickGrammar" frontend/src/api.ts | head -10
+  └ 2 lines...
+
+● Check router endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def " app/routers/conversation.py
+  │ | tail -20
+  └ 21 lines...
+
+● Check grammar accuracy DAL pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '285,340p' app/dal/conversation.py
+  └ 57 lines...
+
+● Check where to insert QuickGrammarCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '945,960p'
+  │ frontend/src/pages/Home.tsx
+  └ 16 lines...
+
+Now I have enough context. Let me implement the changes.
+
+● Check DAL file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/dal/conversation.py
+  └ 2 lines...
+
+● Check end of conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/conversation.py
+  └ 5 lines...
+
+● Check end of DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '893,897p' app/dal/conversation.py
+  └ 5 lines...
+
+● Check if random is imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "import random"
+  │ app/dal/conversation.py
+  └ 1 line...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -10 app/dal/conversation.py
+  └ 10 lines...
+
+Now let me implement all the changes:
+
+● Edit conversation.py +1
+  └ app/dal/conversation.py
+
+● Edit conversation.py +37
+  └ app/dal/conversation.py
+
+Now add the router endpoint:
+
+● Find session averages endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "session_averages\|get_session_averages" app/routers/conversation.py | head -10
+  └ 3 lines...
+
+● Check session averages endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '943,948p'
+  │ app/routers/conversation.py
+  └ 6 lines...
+
+● Edit conversation.py +11
+  └ app/routers/conversation.py
+
+Now add the API function in frontend:
+
+● Find Quick Speak API pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getQuickSpeakPrompt"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Check Quick Speak API pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '183,188p' frontend/src/api.ts
+  └ 7 lines...
+
+● Find session averages API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "sessionAverages\|session-averages"
+  │ frontend/src/api.ts | head -5
+  └ 2 lines...
+
+● Check end pattern of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1170,1185p' frontend/src/api.ts
+  └ 17 lines...
+
+● Check end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/api.ts
+  └ 21 lines...
+
+● Edit api.ts +14
+  └ frontend/src/api.ts
+
+Now create the QuickGrammarCard component:
+
+● Check QuickDictationCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickDictationCard.tsx | head -30
+  └ 31 lines...
+
+● Create QuickGrammarCard.tsx +184
+  └ frontend/src/components/QuickGrammarCard.tsx
+
+Now add it to Home.tsx:
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add integration tests:
+
+● Check existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -l
+  │ "random-grammar-mistake\|grammar_mistake\|grammar-accuracy" tests/integration/*.py 2>/dev/null |
+  │ head -5
+  └ 2 lines...
+
+● Check existing grammar tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammar.accuracy\|grammar_accuracy" tests/integration/test_conversation_api.py | head -5
+  └ 6 lines...
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_conversation_api.py
+  └ 21 lines...
+
+● Check test naming pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^@pytest.mark\|^async def test_"
+  │ tests/integration/test_conversation_api.py | tail -10
+  └ 11 lines...
+
+● Add integration tests (shell)
+  │ cat >>
+  │ /Users/shingotada/Documents/vscode/english-app/tests/integration/test_conversation_api.py <<
+  │ 'PYEOF'…
+  └ 56 lines...
+
+Now commit and test:
+
+● Commit changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #397: Add Quick Grammar Fix card to Home page for daily error correction practice
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now run tests:
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+1255 passed. Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All tests pass (1255/1255, TS pass). Now check if smoke test is needed:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+Smoke test needed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now need QA test — this is a feature type and frontend pages/components .tsx files changed:
+
+● Check if frontend UI changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend UI changed, feature type — MUST run tester. Start the server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server exited. Let me restart it and proceed with the tester.
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 397
+  │ Read QuickGrammarCard.tsx
+  │   │ frontend/src/components/QuickGrammarCard.tsx
+  │   └ L59:72 (14 lines read)
+  └ Read QuickSpeakCard.tsx
+      │ frontend/src/components/QuickSpeakCard.tsx
+      └ L22:50 (29 lines read)
+
+Good feedback from tester — two issues to fix. Let me patch them:
+
+● Edit QuickGrammarCard.tsx +1 -1
+  └ frontend/src/components/QuickGrammarCard.tsx
+
+● Edit conversation.py +1 -1
+  └ app/dal/conversation.py
+
