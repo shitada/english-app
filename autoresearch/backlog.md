@@ -301,3 +301,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 ## [NEW] Iteration 398
 
 - [x] ❌ Add Quick Vocab Review card on Home page for SRS-due word flashcards (#398 — discarded, QA tester false positive on endpoint + missing i18n/tests)
+
+## [NEW] Iterations 399–400
+
+- [x] Add unit tests for get_phrase_of_the_day and get_vocabulary_activation DAL (#399)
+- [x] Add unit tests for get_random_grammar_mistake DAL function (#400)

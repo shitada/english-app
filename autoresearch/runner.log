@@ -5588,3 +5588,59 @@ Now add tests at end of file:
 ● Edit test_conversation_dal.py +157
   └ tests/unit/test_conversation_dal.py
 
+● Record T2 and commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #400: Add unit tests for get_random_grammar_mistake DAL function
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests for iteration 400 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+All 1275 tests pass (+8 new). TS check:
+
+● TS check + T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1 && echo
+  │ "TS_PASS" && date +%s
+  └ 3 lines...
+
+Now call evaluator:
+
+● Evaluator Evaluate iteration 400
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L760:900 (139 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L900:1000 (36 lines read)
+
+● Record T4 for iteration 400 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 8.1, verdict: keep. Recording results:
+
+● Record results for iteration 400 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ N=400; HASH=$(git rev-parse --short HEAD); DATE="2026-04-12"; \
+  │ PROPOSE=$((1775960228-1775959985)); IMPL=$((1775960267-1775960228)); \
+  │ TEST=$((1775960330-1775960267)); EVAL=$((1775960405-1775960330)); \
+  │ TOTAL=$((1775960405-1775959985)); \…
+  └ 8 lines...
+
+Now update backlog and write session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 399–400
+  │
+  │ - [x] Add unit tests for get_phrase_of_the_day and get_vocabulary_activation DAL (#399)…
+  └ 3 lines...
+
+● Create invocation-031.md +33
+  └ autoresearch/logs/invocation-031.md
+
