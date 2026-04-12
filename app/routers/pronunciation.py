@@ -1278,3 +1278,109 @@ async def evaluate_listening_qa(
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
+
+
+# --- Quick Listen & Respond ---
+
+class ListenRespondPromptResponse(BaseModel):
+    question: str
+    difficulty: str
+    topic_hint: str
+
+
+@router.get("/listen-respond-prompt", response_model=ListenRespondPromptResponse)
+async def get_listen_respond_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a conversational question for listen-and-respond exercise."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a conversational question for a {difficulty}-level English learner.\n"
+        "The question should require a thoughtful spoken response (not yes/no).\n"
+        "Return JSON with:\n"
+        "- question (string): a natural conversational question (1-2 sentences)\n"
+        "- topic_hint (string): the topic area (e.g. 'daily life', 'travel', 'work')\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listen_respond_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "question": str(result.get("question", "What do you usually do on weekends?")),
+        "difficulty": difficulty,
+        "topic_hint": str(result.get("topic_hint", "daily life")),
+    }
+
+
+class ListenRespondEvaluateRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class ListenRespondEvaluateResponse(BaseModel):
+    comprehension_score: float
+    relevance_score: float
+    grammar_score: float
+    fluency_score: float
+    overall_score: float
+    feedback: str
+    model_answer: str
+
+
+@router.post("/listen-respond/evaluate", response_model=ListenRespondEvaluateResponse)
+async def evaluate_listen_respond(
+    body: ListenRespondEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a listen-and-respond attempt."""
+    word_count = len(body.transcript.split())
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Question asked (audio only, user had to listen): \"{body.question}\"\n"
+        f"User's spoken response ({body.duration_seconds}s, {word_count} words):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate whether the user understood the question and responded appropriately.\n"
+        "Return JSON with:\n"
+        "- comprehension_score (1-10): did they understand the question?\n"
+        "- relevance_score (1-10): how relevant is their response?\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- fluency_score (1-10): natural flow of speech\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_answer (string): an example good response (1-2 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="listen_respond_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "comprehension_score": clamp(result.get("comprehension_score", 5)),
+        "relevance_score": clamp(result.get("relevance_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "fluency_score": clamp(result.get("fluency_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_answer": str(result.get("model_answer", "")),
+    }

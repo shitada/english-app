@@ -280,3 +280,183 @@ Good catch from the tester! The grammar accuracy JSON path is wrong. Let me fix 
 ● Edit dashboard.py +2 -2
   └ app/dal/dashboard.py
 
+● Amend with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #405: Add Conversation Topic Coverage Map card to Dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 17 lines...
+
+Now stop the server and run the evaluator:
+
+● Stop server and record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1776006729, test_sec=366. Now call the evaluator:
+
+● Evaluator Evaluate iteration 405
+  │ Read test_dashboard_api.py
+  │   │ tests/integration/test_dashboard_api.py
+  │   └ L1750:end (58 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1950:end (54 lines read)
+
+Server killed as expected. Evaluator returned total_score=6.35, verdict=keep. Let me record the results.
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 405 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "405" "$HASH" "$DATE" "255" "204" "366" "125" "950" \
+  │ "1303" "1304" "pass" "6.35" "kept" "Add Conversation Topic Coverage Map card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Results recorded correctly. Now starting iteration 406.
+
+● Record T0 for iteration 406 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for 406 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0=1776006865. Now calling the proposer for iteration 406:
+
+● Proposer Propose iteration 406
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L800:900 (101 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L900:1000 (101 lines read)
+
+● Record T1 for iteration 406 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776007108, propose_sec=243. Now implementing the Quick Listen & Respond feature.
+
+● Check Home page quick cards (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickSpeak\|QuickShadow\|QuickDictation\|QuickGrammar" frontend/src/pages/Home.tsx | head -10
+  └ 9 lines...
+
+● Reference QuickSpeakCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickSpeakCard.tsx
+  └ 208 lines...
+
+● Check existing quick speak endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "quick.speak\|quick_speak\|getQuickSpeak\|evaluateQuickSpeak" app/routers/pronunciation.py |
+  │ head -10
+  └ 9 lines...
+
+● Check API functions for quick speak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getQuickSpeakPrompt\|evaluateQuickSpeak" frontend/src/api.ts | head -10
+  └ 3 lines...
+
+● Check quick speak endpoint pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '650,760p'
+  │ app/routers/pronunciation.py
+  └ 110 lines...
+
+Good, I have the pattern. Now let me check what's at the end of the pronunciation router and the useSpeechSynthesis hook:
+
+● Check end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/pronunciation.py
+  └ 6 lines...
+
+● Check speech synthesis hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "useSpeechSynthesis"
+  │ frontend/src/hooks/useSpeechSynthesis.ts | head -5
+  └ 2 lines...
+
+● Check speech synthesis API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def.*speak\|isSpeaking\|speak("
+  │ frontend/src/hooks/useSpeechSynthesis.ts | head -10
+  └ 5 lines...
+
+Now I'll implement the feature. Let me add the backend endpoints first:
+
+● Add listen-respond endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> app/routers/pronunciation.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ # --- Quick Listen & Respond ---…
+  └ 106 lines...
+
+Now add frontend API types and functions:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getQuickSpeakPrompt\|evaluateQuickSpeak" frontend/src/api.ts
+  └ 3 lines...
+
+● See exact lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '186,192p' frontend/src/api.ts
+  └ 8 lines...
+
+● Edit api.ts +9
+  └ frontend/src/api.ts
+
+Now add the types at the end of api.ts:
+
+● Add TypeScript types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> frontend/src/api.ts << 'TSEOF'
+  │
+  │ export interface ListenRespondPromptResponse {
+  │ question: string;
+  │ difficulty: string;…
+  └ 14 lines...
+
+Now create the QuickListenRespondCard component:
+
+● Create QuickListenRespondCard.tsx +253
+  └ frontend/src/components/QuickListenRespondCard.tsx
+
+Now add it to Home.tsx:
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Find render insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "QuickSpeakCard\|QuickGrammarCard"
+  │ frontend/src/pages/Home.tsx
+  └ 5 lines...
+
+● See exact context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '956,961p'
+  │ frontend/src/pages/Home.tsx
+  └ 6 lines...
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now let me check if the `useSpeechSynthesis` hook's `speak` method supports an `onEnd` callback:
+
+● Check speech synthesis hook signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/hooks/useSpeechSynthesis.ts
+  └ 90 lines...
+
+The `speak` function only takes `(text, lang)` — no `onEnd` callback. I need to update my component to use a different approach. Let me fix the component to listen for `isSpeaking` changes instead:
+
+● Edit QuickListenRespondCard.tsx +15 -6
+  └ frontend/src/components/QuickListenRespondCard.tsx
+
+Now commit and test:
+

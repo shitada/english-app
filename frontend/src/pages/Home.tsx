@@ -10,6 +10,7 @@ import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickShadowCard from '../components/QuickShadowCard';
 import QuickDictationCard from '../components/QuickDictationCard';
 import QuickSpeakCard from '../components/QuickSpeakCard';
+import QuickListenRespondCard from '../components/QuickListenRespondCard';
 import QuickGrammarCard from '../components/QuickGrammarCard';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -954,6 +955,8 @@ export default function Home() {
       <QuickDictationCard />
 
       <QuickSpeakCard />
+
+      <QuickListenRespondCard />
 
       <QuickGrammarCard />
 

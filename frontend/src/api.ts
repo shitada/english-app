@@ -189,6 +189,15 @@ export const api = {
       body: JSON.stringify({ prompt, transcript, duration_seconds }),
     }),
 
+  getListenRespondPrompt: (difficulty: string = 'intermediate') =>
+    request<ListenRespondPromptResponse>(`/api/pronunciation/listen-respond-prompt?difficulty=${difficulty}`),
+
+  evaluateListenRespond: (question: string, transcript: string, duration_seconds: number) =>
+    request<ListenRespondEvaluateResponse>('/api/pronunciation/listen-respond/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ question, transcript, duration_seconds }),
+    }),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -1543,4 +1552,20 @@ export interface TopicCoverageResponse {
   practiced_count: number;
   coverage_rate: number;
   topics: TopicCoverageItem[];
+}
+
+export interface ListenRespondPromptResponse {
+  question: string;
+  difficulty: string;
+  topic_hint: string;
+}
+
+export interface ListenRespondEvaluateResponse {
+  comprehension_score: number;
+  relevance_score: number;
+  grammar_score: number;
+  fluency_score: number;
+  overall_score: number;
+  feedback: string;
+  model_answer: string;
 }

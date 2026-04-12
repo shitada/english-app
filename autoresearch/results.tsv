@@ -404,3 +404,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 402	22934d2	2026-04-12	709	73	78	39	899	1296	1296	pass	8.1	kept	Add unit tests for untested vocabulary DAL functions
 403	b406205	2026-04-12	472	77	77	79	698	1300	1300	pass	8.1	kept	Add data-populated integration tests for grammar-trend and skill-radar
 404	b515b8c	2026-04-12	308	65	50	61	484	1304	1304	pass	7.55	kept	Add data-populated integration tests for daily-challenge and word-of-the-day
+405	dbbea92	2026-04-13	255	204	366	125	950	1303	1304	pass	6.35	kept	Add Conversation Topic Coverage Map card to Dashboard
