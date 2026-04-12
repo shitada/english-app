@@ -297,3 +297,7 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ❌ Add Speed Ladder Shadowing drill to Pronunciation page (#395 — discarded, Playwright unavailable for QA)
 - [x] ✅ Add vocabulary activation analytics endpoint tracking word usage in conversations (#396)
+
+## [NEW] Iteration 398
+
+- [x] ❌ Add Quick Vocab Review card on Home page for SRS-due word flashcards (#398 — discarded, QA tester false positive on endpoint + missing i18n/tests)
