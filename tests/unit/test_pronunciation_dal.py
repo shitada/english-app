@@ -26,6 +26,7 @@ from app.dal.pronunciation import (
     get_score_distribution,
     get_score_trend,
     get_sentence_attempts,
+    get_sentence_mastery_overview,
     get_sentences_from_conversations,
     get_sentences_from_vocabulary,
     get_weekly_progress,
@@ -1341,3 +1342,83 @@ class TestGetRetrySuggestions:
         await save_attempt(test_db, "Improving sentence", "Good now", {}, 8.0)
         result = await get_retry_suggestions(test_db, threshold=7.0)
         assert len(result) == 0
+
+
+@pytest.mark.unit
+class TestGetSentenceMasteryOverview:
+    async def test_empty_db(self, test_db):
+        result = await get_sentence_mastery_overview(test_db)
+        assert result["sentences"] == []
+        assert result["total_count"] == 0
+        assert result["mastered_count"] == 0
+        assert result["improving_count"] == 0
+        assert result["needs_work_count"] == 0
+
+    async def test_single_attempt_excluded(self, test_db):
+        """Sentences with only 1 attempt should be excluded (min_attempts=2)."""
+        await save_attempt(test_db, "One time only", "One time only", {}, 8.0)
+        result = await get_sentence_mastery_overview(test_db, min_attempts=2)
+        assert result["total_count"] == 0
+
+    async def test_mastered_status(self, test_db):
+        """Sentence with latest score >= 8 should be 'mastered'."""
+        await save_attempt(test_db, "Mastered sentence", "Bad", {}, 4.0)
+        await save_attempt(test_db, "Mastered sentence", "Good", {}, 9.0)
+        result = await get_sentence_mastery_overview(test_db)
+        assert result["total_count"] == 1
+        assert result["mastered_count"] == 1
+        s = result["sentences"][0]
+        assert s["status"] == "mastered"
+        assert s["first_score"] == 4.0
+        assert s["latest_score"] == 9.0
+        assert s["best_score"] == 9.0
+        assert s["improvement"] == 5.0
+        assert s["attempt_count"] == 2
+
+    async def test_improving_status(self, test_db):
+        """Sentence with improvement > 1 but latest < 8 should be 'improving'."""
+        await save_attempt(test_db, "Getting better", "Bad", {}, 3.0)
+        await save_attempt(test_db, "Getting better", "Better", {}, 5.5)
+        result = await get_sentence_mastery_overview(test_db)
+        assert result["total_count"] == 1
+        assert result["improving_count"] == 1
+        assert result["sentences"][0]["status"] == "improving"
+
+    async def test_needs_work_status(self, test_db):
+        """Sentence with little improvement and low latest score should be 'needs_work'."""
+        await save_attempt(test_db, "Still struggling", "Bad", {}, 3.0)
+        await save_attempt(test_db, "Still struggling", "Still bad", {}, 3.5)
+        result = await get_sentence_mastery_overview(test_db)
+        assert result["total_count"] == 1
+        assert result["needs_work_count"] == 1
+        assert result["sentences"][0]["status"] == "needs_work"
+
+    async def test_multiple_sentences_sorted(self, test_db):
+        """Results should be sorted by latest_score ascending (weakest first)."""
+        await save_attempt(test_db, "Strong sentence", "OK", {}, 7.0)
+        await save_attempt(test_db, "Strong sentence", "Good", {}, 9.0)
+        await save_attempt(test_db, "Weak sentence", "Bad", {}, 2.0)
+        await save_attempt(test_db, "Weak sentence", "Still bad", {}, 3.0)
+        result = await get_sentence_mastery_overview(test_db)
+        assert result["total_count"] == 2
+        assert result["sentences"][0]["reference_text"] == "Weak sentence"
+        assert result["sentences"][1]["reference_text"] == "Strong sentence"
+
+    async def test_min_attempts_filter(self, test_db):
+        """Higher min_attempts should filter out sentences with fewer attempts."""
+        await save_attempt(test_db, "Two tries", "A", {}, 5.0)
+        await save_attempt(test_db, "Two tries", "B", {}, 6.0)
+        await save_attempt(test_db, "Three tries", "A", {}, 4.0)
+        await save_attempt(test_db, "Three tries", "B", {}, 5.0)
+        await save_attempt(test_db, "Three tries", "C", {}, 7.0)
+        result = await get_sentence_mastery_overview(test_db, min_attempts=3)
+        assert result["total_count"] == 1
+        assert result["sentences"][0]["reference_text"] == "Three tries"
+
+    async def test_respects_limit(self, test_db):
+        """Limit parameter should cap results."""
+        for i in range(5):
+            await save_attempt(test_db, f"Sentence {i}", "A", {}, 3.0)
+            await save_attempt(test_db, f"Sentence {i}", "B", {}, 4.0)
+        result = await get_sentence_mastery_overview(test_db, limit=3)
+        assert result["total_count"] == 3

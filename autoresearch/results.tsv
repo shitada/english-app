@@ -410,3 +410,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 408	3c39805	2026-04-13	143	90	70	78	381	1308	1309	pass	7.3	kept	Add fluency progression analytics endpoint tracking speaking metrics over time
 409	685c955	2026-04-13	112	67	76	484	739	1308	1309	pass	7.2	kept	Add Fluency Progression chart to Dashboard
 410	7f173da	2026-04-13	151	98	66	333	648	1308	1309	pass	6.9	kept	Add Quick Rephrase card to Home page
+411	none	2026-04-13	257	122	85	296	760	1308	1309	pass	5.1	discarded	Add Response Speed Analytics card to Dashboard

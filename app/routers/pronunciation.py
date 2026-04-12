@@ -443,6 +443,34 @@ async def get_retry_suggestions(
     return {"suggestions": suggestions, "total": len(suggestions), "threshold": threshold}
 
 
+class SentenceMasteryItem(BaseModel):
+    reference_text: str
+    attempt_count: int
+    first_score: float
+    latest_score: float
+    best_score: float
+    improvement: float
+    status: str
+
+
+class SentenceMasteryResponse(BaseModel):
+    sentences: list[SentenceMasteryItem]
+    total_count: int
+    mastered_count: int
+    improving_count: int
+    needs_work_count: int
+
+
+@router.get("/sentence-mastery", response_model=SentenceMasteryResponse)
+async def get_sentence_mastery(
+    min_attempts: int = Query(default=2, ge=2, le=20),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get mastery overview for sentences practiced multiple times."""
+    return await pron_dal.get_sentence_mastery_overview(db, min_attempts=min_attempts, limit=limit)
+
+
 class MistakePatternItem(BaseModel):
     target_sound: str
     produced_sound: str

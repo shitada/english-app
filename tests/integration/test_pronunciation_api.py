@@ -1534,3 +1534,58 @@ async def test_listening_qa_evaluate_score_clamping(client, mock_copilot):
     assert data["grammar_score"] == 1.0  # clamped from -2
     assert data["vocabulary_score"] == 5.0  # fallback for non-numeric
     assert data["overall_score"] == 1.0  # clamped from 0
+
+
+@pytest.mark.integration
+async def test_sentence_mastery_empty(client):
+    """Empty DB returns empty mastery overview."""
+    res = await client.get("/api/pronunciation/sentence-mastery")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["sentences"] == []
+    assert data["total_count"] == 0
+    assert data["mastered_count"] == 0
+
+
+@pytest.mark.integration
+async def test_sentence_mastery_with_data(client, mock_copilot):
+    """Seeded pronunciation attempts produce correct mastery classifications."""
+    mock_copilot.ask_json.return_value = {
+        "accuracy_score": 5.0,
+        "fluency_score": 5.0,
+        "pronunciation_score": 5.0,
+        "overall_score": 5.0,
+        "feedback": "Test",
+        "phoneme_errors": [],
+    }
+    # Create multiple attempts for the same sentence via /check endpoint
+    for score_val in [3.0, 5.0, 9.0]:
+        mock_copilot.ask_json.return_value = {
+            "accuracy_score": score_val,
+            "fluency_score": score_val,
+            "pronunciation_score": score_val,
+            "overall_score": score_val,
+            "feedback": "Test",
+            "phoneme_errors": [],
+        }
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": "Mastery test sentence",
+            "user_transcription": "Mastery test sentence",
+        })
+
+    res = await client.get("/api/pronunciation/sentence-mastery?min_attempts=2")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    s = data["sentences"][0]
+    assert s["reference_text"] == "Mastery test sentence"
+    assert s["attempt_count"] >= 2
+
+
+@pytest.mark.integration
+async def test_sentence_mastery_min_attempts_filter(client):
+    """min_attempts query parameter filters correctly."""
+    res = await client.get("/api/pronunciation/sentence-mastery?min_attempts=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] == 0

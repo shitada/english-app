@@ -864,3 +864,88 @@ async def get_listening_difficulty_recommendation(
         "reason": reason,
         "stats": {"avg_score": round(avg_score, 1), "quizzes_analyzed": len(analyze)},
     }
+
+
+async def get_sentence_mastery_overview(
+    db: aiosqlite.Connection, min_attempts: int = 2, limit: int = 20
+) -> dict[str, Any]:
+    """Get mastery overview for sentences practiced multiple times."""
+    rows = await db.execute_fetchall(
+        """
+        SELECT
+            reference_text,
+            COUNT(*) as attempt_count,
+            MIN(score) as min_score,
+            MAX(score) as best_score,
+            created_at,
+            score
+        FROM pronunciation_attempts
+        WHERE score IS NOT NULL
+        GROUP BY reference_text
+        HAVING COUNT(*) >= ?
+        ORDER BY MAX(score) ASC
+        LIMIT ?
+        """,
+        (min_attempts, limit * 3),  # Fetch extra to compute per-sentence stats
+    )
+
+    # Need first/latest scores per sentence - query individual attempts
+    sentences: list[dict[str, Any]] = []
+    seen_texts: set[str] = set()
+
+    for row in rows:
+        text = row["reference_text"]
+        if text in seen_texts:
+            continue
+        seen_texts.add(text)
+
+        # Get first and latest scores for this sentence
+        detail_rows = await db.execute_fetchall(
+            """
+            SELECT score, created_at
+            FROM pronunciation_attempts
+            WHERE reference_text = ? AND score IS NOT NULL
+            ORDER BY created_at ASC
+            """,
+            (text,),
+        )
+        if len(detail_rows) < min_attempts:
+            continue
+
+        first_score = detail_rows[0]["score"]
+        latest_score = detail_rows[-1]["score"]
+        best_score = max(r["score"] for r in detail_rows)
+        improvement = latest_score - first_score
+
+        if latest_score >= 8:
+            status = "mastered"
+        elif improvement > 1:
+            status = "improving"
+        else:
+            status = "needs_work"
+
+        sentences.append({
+            "reference_text": text,
+            "attempt_count": len(detail_rows),
+            "first_score": round(first_score, 1),
+            "latest_score": round(latest_score, 1),
+            "best_score": round(best_score, 1),
+            "improvement": round(improvement, 1),
+            "status": status,
+        })
+
+    # Sort by latest_score ascending (weakest first)
+    sentences.sort(key=lambda s: s["latest_score"])
+    sentences = sentences[:limit]
+
+    mastered_count = sum(1 for s in sentences if s["status"] == "mastered")
+    improving_count = sum(1 for s in sentences if s["status"] == "improving")
+    needs_work_count = sum(1 for s in sentences if s["status"] == "needs_work")
+
+    return {
+        "sentences": sentences,
+        "total_count": len(sentences),
+        "mastered_count": mastered_count,
+        "improving_count": improving_count,
+        "needs_work_count": needs_work_count,
+    }
