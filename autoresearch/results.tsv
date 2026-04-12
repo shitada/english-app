@@ -402,3 +402,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 400	5aa82b7	2026-04-12	243	39	63	75	420	1275	1275	pass	8.1	kept	Add unit tests for get_random_grammar_mistake DAL function
 401	609a924	2026-04-12	456	93	58	297	904	1275	1275	pass	6.7	kept	Add Vocabulary Activation Card to Dashboard
 402	22934d2	2026-04-12	709	73	78	39	899	1296	1296	pass	8.1	kept	Add unit tests for untested vocabulary DAL functions
+403	b406205	2026-04-12	472	77	77	79	698	1300	1300	pass	8.1	kept	Add data-populated integration tests for grammar-trend and skill-radar

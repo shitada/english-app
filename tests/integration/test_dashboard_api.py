@@ -1704,3 +1704,104 @@ async def test_skill_radar_vocabulary_mastery(client, test_db):
 
     # 3/4 mastered = 75%
     assert skills["vocabulary"] == 75
+
+
+# ── Data-populated tests for daily-challenge and word-of-the-day ────
+
+
+@pytest.mark.integration
+async def test_word_of_the_day_with_words(client, test_db):
+    """Word of the day returns a valid word when vocabulary_words are seeded."""
+    # Seed 3 words
+    for i, (word, meaning, example) in enumerate([
+        ("lobby", "entrance hall", "Please wait in the lobby."),
+        ("suite", "large room", "We booked a suite for the weekend."),
+        ("receipt", "proof of payment", "May I have the receipt please?"),
+    ], start=1):
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (id, topic, word, meaning, example_sentence) VALUES (?, ?, ?, ?, ?)",
+            (5001 + i, "hotel", word, meaning, example),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/word-of-the-day")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "word_id" in data
+    assert isinstance(data["word"], str)
+    assert len(data["word"]) > 0
+    assert isinstance(data["meaning"], str)
+    assert data["topic"] == "hotel"
+    # The selected word should be one of the seeded words
+    assert data["word"] in ("lobby", "suite", "receipt")
+
+
+@pytest.mark.integration
+async def test_word_of_the_day_deterministic(client, test_db):
+    """Word of the day returns the same word on repeated calls (deterministic daily selection)."""
+    for i in range(5):
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (id, topic, word, meaning, example_sentence) VALUES (?, ?, ?, ?, ?)",
+            (5100 + i, "hotel", f"word{i}", f"meaning{i}", f"Example sentence {i}."),
+        )
+    await test_db.commit()
+
+    # Two calls should return the same word
+    resp1 = await client.get("/api/dashboard/word-of-the-day")
+    resp2 = await client.get("/api/dashboard/word-of-the-day")
+    assert resp1.status_code == 200
+    assert resp2.status_code == 200
+    assert resp1.json()["word_id"] == resp2.json()["word_id"]
+    assert resp1.json()["word"] == resp2.json()["word"]
+
+
+@pytest.mark.integration
+async def test_daily_challenge_current_count_with_activity(client, test_db):
+    """Daily challenge reflects today's activity in current_count."""
+    from datetime import date as date_cls
+
+    today = date_cls.today().isoformat()
+
+    # Seed today's pronunciation attempts
+    for i in range(4):
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, feedback_json, score, created_at) VALUES (?, ?, ?, ?, ?)",
+            (f"sentence {i}", f"attempt {i}", '{"overall_score": 7}', 7, f"{today}T10:0{i}:00+00:00"),
+        )
+    # Seed today's conversations
+    for i in range(2):
+        await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at) VALUES (?, ?, ?, ?)",
+            ("hotel_checkin", "beginner", "ended", f"{today}T09:0{i}:00+00:00"),
+        )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/daily-challenge")
+    assert resp.status_code == 200
+    data = resp.json()
+    # The challenge type should be one of conversation/vocabulary/pronunciation
+    assert data["challenge_type"] in ("conversation", "vocabulary", "pronunciation")
+    # current_count should reflect actual today activity for the chosen module
+    if data["challenge_type"] == "pronunciation":
+        assert data["current_count"] >= 3  # We seeded 4, target is 3 → capped at min(4,3)=3
+        assert data["completed"] is True
+    elif data["challenge_type"] == "conversation":
+        assert data["current_count"] >= 1  # We seeded 2, target is 1 → capped at min(2,1)=1
+        assert data["completed"] is True
+    elif data["challenge_type"] == "vocabulary":
+        assert data["current_count"] == 0  # No vocab reviews seeded
+        assert data["completed"] is False
+
+
+@pytest.mark.integration
+async def test_daily_challenge_route_matches_type(client):
+    """Daily challenge route field is consistent with challenge_type."""
+    resp = await client.get("/api/dashboard/daily-challenge")
+    assert resp.status_code == 200
+    data = resp.json()
+    expected_routes = {
+        "conversation": "/conversation",
+        "vocabulary": "/vocabulary",
+        "pronunciation": "/pronunciation",
+    }
+    assert data["route"] == expected_routes[data["challenge_type"]]
