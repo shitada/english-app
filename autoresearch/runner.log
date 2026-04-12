@@ -5889,3 +5889,171 @@ Now update Dashboard.tsx to import and render the card:
 
 Now commit and test:
 
+● Commit iteration 401 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #401: Add Vocabulary Activation Card to Dashboard
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1275 tests pass and TypeScript check passes. Now record T3 and run the tester (this is a `feature` type with frontend page/component changes).
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+This is a `feature` type and frontend components/pages were changed. I must run the tester. Let me start the server first:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 401
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1503:1528 (25 lines read)
+  └ Read VocabActivationCard.tsx
+      │ frontend/src/components/dashboard/VocabActivationCard.tsx
+      └ L92:150 (59 lines read)
+
+Tester passed (ux_score: 7.0). Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --stat
+  └ 8 lines...
+
+● Evaluator Evaluate iteration 401
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1300:1500 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1500:1650 (28 lines read)
+
+Evaluator score: 6.7 (keep). Let me record the results.
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ echo "server stopped"
+  └ 2 lines...
+
+Now calculate timings and record:
+- T0=1775961087, T1=1775961543, T2=1775961636, T3=1775961694, T4=1775961991
+- propose=456, implement=93, test=58, evaluate=297, total=904
+
+● Record iteration 401 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "401" "$HASH" "$DATE" "456" "93" "58" "297" "904" \
+  │ "1275" "1275" "pass" "6.7" "kept" "Add Vocabulary Activation Card to Dashboard" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+
+
+Iteration 401 complete (kept, score 6.7). Now starting iteration 402.
+
+---
+
+● Record T0 for iteration 402 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -5
+  └ 6 lines...
+
+Now call the proposer for iteration 402:
+
+● Proposer Propose iteration 402
+  │ Read test_vocabulary_dal.py
+  │   │ tests/unit/test_vocabulary_dal.py
+  │   └ L700:800 (101 lines read)
+  └ Read results.tsv
+      │ autoresearch/results.tsv
+      └ L396:404 (8 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good, test-only proposal (type: "test"). Let me examine the existing test file and the DAL functions:
+
+● Check existing test structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import\|^async def\|^def "
+  │ tests/unit/test_vocabulary_dal.py | head -40
+  └ 5 lines...
+
+● List vocabulary DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^async def\|^def "
+  │ app/dal/vocabulary.py | tail -30
+  └ 31 lines...
+
+● Check existing imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '7,40p'
+  │ tests/unit/test_vocabulary_dal.py
+  └ 35 lines...
+
+● Read export_words function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '426,470p' app/dal/vocabulary.py
+  └ 46 lines...
+
+● Read get_topic_summary and log_attempt and get_attempt_history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '493,560p' app/dal/vocabulary.py
+  └ 69 lines...
+
+● Read batch_import, update_word, toggle_favorite, get_favorites (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '611,740p' app/dal/vocabulary.py
+  └ 131 lines...
+
+Good, I have all the function signatures. Let me check the end of the existing test file and how `test_db` fixture works:
+
+● Check test file end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_vocabulary_dal.py &&
+  │ tail -20 tests/unit/test_vocabulary_dal.py
+  └ 22 lines...
+
+Now let me implement the tests. I'll add the new imports and test classes:
+
+● Edit test_vocabulary_dal.py +7
+  └ tests/unit/test_vocabulary_dal.py
+
+Now append the new test classes at the end of the file:
+
+● Edit test_vocabulary_dal.py +257
+  └ tests/unit/test_vocabulary_dal.py
+
+Now commit and test:
+

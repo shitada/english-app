@@ -6,13 +6,17 @@ import pytest
 
 from app.dal.vocabulary import (
     auto_adjust_difficulty,
+    batch_import_words,
     build_fill_blank_quiz,
     build_quiz,
     delete_word,
+    export_words,
+    get_attempt_history,
     get_drill_words,
     get_due_word_ids,
     get_due_words,
     get_etymology,
+    get_favorites,
     get_progress,
     get_random_words_for_craft,
     get_review_forecast,
@@ -20,6 +24,7 @@ from app.dal.vocabulary import (
     get_similar_words,
     get_srs_analytics,
     get_topic_accuracy,
+    get_topic_summary,
     get_vocabulary_stats,
     get_weak_words,
     get_word,
@@ -31,8 +36,10 @@ from app.dal.vocabulary import (
     save_etymology,
     save_words,
     search_words,
+    toggle_favorite,
     update_notes,
     update_progress,
+    update_word,
     get_words_by_tier,
 )
 
@@ -1548,3 +1555,260 @@ class TestSaveEtymology:
             "SELECT etymology FROM vocabulary_words WHERE id = ?", (word_id,)
         )
         assert check[0]["etymology"] == '{"origin": "French"}'
+
+
+# ── export_words ─────────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestExportWords:
+    async def test_empty_db(self, test_db):
+        result = await export_words(test_db)
+        assert result == []
+
+    async def test_no_topic_filter(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(2))
+        await save_words(test_db, "restaurant", _make_questions(1))
+        result = await export_words(test_db)
+        assert len(result) == 3
+        # Sorted by topic then word
+        topics = [r["topic"] for r in result]
+        assert topics == sorted(topics)
+
+    async def test_with_topic_filter(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(2))
+        await save_words(test_db, "restaurant", _make_questions(1))
+        result = await export_words(test_db, topic="restaurant")
+        assert len(result) == 1
+        assert result[0]["topic"] == "restaurant"
+
+    async def test_includes_progress_data(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await update_progress(test_db, word_id, True)
+        result = await export_words(test_db)
+        assert result[0]["correct_count"] >= 1
+
+    async def test_no_progress_defaults_zero(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        result = await export_words(test_db)
+        assert result[0]["correct_count"] == 0
+        assert result[0]["incorrect_count"] == 0
+        assert result[0]["level"] == 0
+
+
+# ── get_topic_summary ────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestGetTopicSummary:
+    async def test_empty_db(self, test_db):
+        result = await get_topic_summary(test_db)
+        assert result == []
+
+    async def test_single_topic(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(3))
+        result = await get_topic_summary(test_db)
+        assert len(result) == 1
+        assert result[0]["topic"] == "hotel_checkin"
+        assert result[0]["total_words"] == 3
+        assert result[0]["mastered_words"] == 0
+
+    async def test_multiple_topics(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(2))
+        await save_words(test_db, "restaurant", _make_questions(1))
+        result = await get_topic_summary(test_db)
+        assert len(result) == 2
+        topics = [r["topic"] for r in result]
+        assert "hotel_checkin" in topics
+        assert "restaurant" in topics
+
+
+# ── batch_import_words ───────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestBatchImportWords:
+    async def test_successful_import(self, test_db):
+        words = [
+            {"topic": "hotel_checkin", "word": "lobby", "meaning": "entrance hall"},
+            {"topic": "hotel_checkin", "word": "suite", "meaning": "luxury room"},
+        ]
+        result = await batch_import_words(test_db, words)
+        assert result["imported_count"] == 2
+        assert result["skipped_count"] == 0
+        assert len(result["words"]) == 2
+
+    async def test_skip_duplicates_case_insensitive(self, test_db):
+        words1 = [{"topic": "hotel_checkin", "word": "Lobby", "meaning": "entrance hall"}]
+        await batch_import_words(test_db, words1)
+        words2 = [{"topic": "hotel_checkin", "word": "lobby", "meaning": "entrance hall again"}]
+        result = await batch_import_words(test_db, words2)
+        assert result["imported_count"] == 0
+        assert result["skipped_count"] == 1
+
+    async def test_mixed_import_skip(self, test_db):
+        words1 = [{"topic": "hotel_checkin", "word": "lobby", "meaning": "entrance hall"}]
+        await batch_import_words(test_db, words1)
+        words2 = [
+            {"topic": "hotel_checkin", "word": "lobby", "meaning": "entrance hall"},
+            {"topic": "hotel_checkin", "word": "suite", "meaning": "luxury room"},
+        ]
+        result = await batch_import_words(test_db, words2)
+        assert result["imported_count"] == 1
+        assert result["skipped_count"] == 1
+
+    async def test_empty_list(self, test_db):
+        result = await batch_import_words(test_db, [])
+        assert result["imported_count"] == 0
+        assert result["skipped_count"] == 0
+
+
+# ── update_word ──────────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestUpdateWord:
+    async def test_update_meaning(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        result = await update_word(test_db, word_id, meaning="new meaning")
+        assert result is not None
+        assert result["meaning"] == "new meaning"
+
+    async def test_update_multiple_fields(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        result = await update_word(test_db, word_id, meaning="updated", difficulty=3)
+        assert result is not None
+        assert result["meaning"] == "updated"
+        assert result["difficulty"] == 3
+
+    async def test_nonexistent_word(self, test_db):
+        result = await update_word(test_db, 99999, meaning="nope")
+        assert result is None
+
+    async def test_no_updates(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id, meaning FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        original_meaning = rows[0]["meaning"]
+        result = await update_word(test_db, word_id)
+        assert result is not None
+        assert result["meaning"] == original_meaning
+
+
+# ── toggle_favorite ──────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestToggleFavorite:
+    async def test_toggle_on(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        result = await toggle_favorite(test_db, word_id)
+        assert result is not None
+        assert result["is_favorite"] is True
+
+    async def test_toggle_off(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await toggle_favorite(test_db, word_id)  # on
+        result = await toggle_favorite(test_db, word_id)  # off
+        assert result is not None
+        assert result["is_favorite"] is False
+
+    async def test_nonexistent_word(self, test_db):
+        result = await toggle_favorite(test_db, 99999)
+        assert result is None
+
+
+# ── get_favorites ────────────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestGetFavorites:
+    async def test_empty(self, test_db):
+        result = await get_favorites(test_db)
+        assert result["total_count"] == 0
+        assert result["words"] == []
+
+    async def test_with_favorites(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(2))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words")
+        await toggle_favorite(test_db, rows[0]["id"])
+        result = await get_favorites(test_db)
+        assert result["total_count"] == 1
+        assert len(result["words"]) == 1
+
+    async def test_topic_filter(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        await save_words(test_db, "restaurant", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id, topic FROM vocabulary_words")
+        for r in rows:
+            await toggle_favorite(test_db, r["id"])
+        result = await get_favorites(test_db, topic="restaurant")
+        assert result["total_count"] == 1
+        assert result["words"][0]["topic"] == "restaurant"
+
+    async def test_pagination(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(3))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words")
+        for r in rows:
+            await toggle_favorite(test_db, r["id"])
+        result = await get_favorites(test_db, limit=2, offset=0)
+        assert result["total_count"] == 3
+        assert len(result["words"]) == 2
+
+
+# ── get_attempt_history ──────────────────────────────────────
+
+
+@pytest.mark.unit
+class TestGetAttemptHistory:
+    async def test_empty_db(self, test_db):
+        result = await get_attempt_history(test_db)
+        assert result["total_count"] == 0
+        assert result["attempts"] == []
+
+    async def test_with_attempts(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        await log_attempt(test_db, word_id, True)
+        await log_attempt(test_db, word_id, False)
+        result = await get_attempt_history(test_db)
+        assert result["total_count"] == 2
+
+    async def test_word_id_filter(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(2))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words")
+        w1, w2 = rows[0]["id"], rows[1]["id"]
+        await log_attempt(test_db, w1, True)
+        await log_attempt(test_db, w2, False)
+        result = await get_attempt_history(test_db, word_id=w1)
+        assert result["total_count"] == 1
+
+    async def test_topic_filter(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        await save_words(test_db, "restaurant", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id, topic FROM vocabulary_words")
+        for r in rows:
+            await log_attempt(test_db, r["id"], True)
+        result = await get_attempt_history(test_db, topic="restaurant")
+        assert result["total_count"] == 1
+
+    async def test_pagination(self, test_db):
+        await save_words(test_db, "hotel_checkin", _make_questions(1))
+        rows = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = rows[0]["id"]
+        for _ in range(5):
+            await log_attempt(test_db, word_id, True)
+        result = await get_attempt_history(test_db, limit=2, offset=0)
+        assert result["total_count"] == 5
+        assert len(result["attempts"]) == 2
