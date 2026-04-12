@@ -396,4 +396,5 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 394	01d3894	2026-04-12	282	130	80	80	492	1248	1248	pass	8.1	kept	Add data-populated integration tests for difficulty-recommendation and session-averages
 395	none	2026-04-12	162	60	121	221	564	1248	1248	pass	5.4	discarded	Add Speed Ladder Shadowing drill to Pronunciation page
 396	2b61045	2026-04-12	135	100	158	68	461	1252	1252	pass	6.75	kept	Add vocabulary activation analytics endpoint tracking word usage in conversations
+397	8387fec	2026-04-12T10:39:46+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add Quick Grammar Fix card to Home page for daily error correction practice
 398	none	2026-04-12	265	81	301	117	764	1255	1255	pass	5.05	discarded	Add Quick Vocab Review card on Home page for SRS-due word flashcards

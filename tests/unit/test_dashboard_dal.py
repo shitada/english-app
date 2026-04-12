@@ -26,6 +26,8 @@ from app.dal.dashboard import (
     get_skill_radar,
     get_stats,
     get_today_activity,
+    get_phrase_of_the_day,
+    get_vocabulary_activation,
     get_vocabulary_forecast,
     get_weekly_report,
     get_word_of_the_day,
@@ -1816,3 +1818,186 @@ class TestVocabularyForecast:
         """Limit caps the number of at-risk words returned."""
         result = await get_vocabulary_forecast(test_db, limit=1)
         assert len(result["at_risk_words"]) <= 1
+
+
+@pytest.mark.unit
+class TestGetPhraseOfTheDay:
+    async def test_empty_database(self, test_db):
+        """Returns None when no conversations or vocabulary exist."""
+        result = await get_phrase_of_the_day(test_db)
+        assert result is None
+
+    async def test_phrases_from_conversations(self, test_db):
+        """Extracts phrases from completed conversation assistant messages."""
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        # Short phrase (<20 chars) should be excluded
+        await add_message(test_db, conv, "assistant", "Hi there.")
+        # Valid phrase (20-80 chars)
+        await add_message(
+            test_db, conv, "assistant",
+            "Welcome to the Grand Hotel, how can I help you today?"
+        )
+        await end_conversation(test_db, conv)
+
+        result = await get_phrase_of_the_day(test_db)
+        assert result is not None
+        assert result["source"] == "conversation"
+        assert 20 <= len(result["phrase"]) <= 80
+        assert result["topic"] == "hotel_checkin"
+
+    async def test_phrases_starting_with_star_excluded(self, test_db):
+        """Phrases starting with * are filtered out."""
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(
+            test_db, conv, "assistant",
+            "*This is a correction note that should be excluded from phrases."
+        )
+        await end_conversation(test_db, conv)
+
+        result = await get_phrase_of_the_day(test_db)
+        assert result is None
+
+    async def test_deterministic_selection(self, test_db):
+        """Same day always produces the same phrase selection."""
+        conv = await create_conversation(test_db, "restaurant", "beginner")
+        await add_message(
+            test_db, conv, "assistant",
+            "Would you like to see our menu today? We have many great options for you."
+        )
+        await add_message(
+            test_db, conv, "assistant",
+            "Our special today is grilled salmon with fresh vegetables on the side."
+        )
+        await end_conversation(test_db, conv)
+
+        result1 = await get_phrase_of_the_day(test_db)
+        result2 = await get_phrase_of_the_day(test_db)
+        assert result1 == result2
+
+    async def test_vocabulary_fallback(self, test_db):
+        """Falls back to vocabulary example_sentence when no conversations exist."""
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "reservation", "meaning": "予約",
+             "example_sentence": "I would like to make a reservation for two nights please."},
+        ])
+        assert len(words) == 1
+
+        result = await get_phrase_of_the_day(test_db)
+        assert result is not None
+        assert result["source"] == "vocabulary"
+        assert result["topic"] == "hotel_checkin"
+
+    async def test_long_phrases_excluded(self, test_db):
+        """Phrases longer than 80 chars are filtered out."""
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        long_msg = "A" * 81  # Exactly 81 chars — too long
+        await add_message(test_db, conv, "assistant", long_msg + ".")
+        await end_conversation(test_db, conv)
+
+        result = await get_phrase_of_the_day(test_db)
+        assert result is None
+
+
+@pytest.mark.unit
+class TestGetVocabularyActivation:
+    async def test_empty_database(self, test_db):
+        """Returns zeroes when no vocabulary progress exists."""
+        result = await get_vocabulary_activation(test_db)
+        assert result["total_studied"] == 0
+        assert result["total_activated"] == 0
+        assert result["activation_rate"] == 0.0
+        assert result["activated_words"] == []
+        assert result["unactivated_words"] == []
+        assert result["by_topic"] == []
+
+    async def test_word_boundary_matching(self, test_db):
+        """'at' should NOT match 'cat' — word boundary matching."""
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "at", "meaning": "〜で", "example_sentence": "Meet me at the hotel lobby."},
+        ])
+        await update_progress(test_db, words[0]["id"], True)
+
+        # Create conversation with 'cat' but not standalone 'at'
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, conv, "user", "I saw a cat in the lobby")
+        await end_conversation(test_db, conv)
+
+        result = await get_vocabulary_activation(test_db)
+        assert result["total_studied"] == 1
+        assert result["total_activated"] == 0
+        assert len(result["unactivated_words"]) == 1
+
+    async def test_activated_word_counting(self, test_db):
+        """Counts times_used correctly across multiple messages."""
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "reservation", "meaning": "予約",
+             "example_sentence": "I have a reservation."},
+        ])
+        await update_progress(test_db, words[0]["id"], True)
+
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, conv, "user", "I have a reservation for tonight")
+        await add_message(test_db, conv, "user", "Can you check my reservation please")
+        await end_conversation(test_db, conv)
+
+        result = await get_vocabulary_activation(test_db)
+        assert result["total_studied"] == 1
+        assert result["total_activated"] == 1
+        assert result["activated_words"][0]["times_used"] == 2
+
+    async def test_per_topic_stats(self, test_db):
+        """Computes per-topic activation rates correctly."""
+        hotel_words = await save_words(test_db, "hotel_checkin", [
+            {"word": "lobby", "meaning": "ロビー", "example_sentence": "Wait in the lobby."},
+        ])
+        restaurant_words = await save_words(test_db, "restaurant", [
+            {"word": "menu", "meaning": "メニュー", "example_sentence": "May I see the menu?"},
+        ])
+        await update_progress(test_db, hotel_words[0]["id"], True)
+        await update_progress(test_db, restaurant_words[0]["id"], True)
+
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, conv, "user", "I will wait in the lobby")
+        await end_conversation(test_db, conv)
+
+        result = await get_vocabulary_activation(test_db)
+        topic_map = {t["topic"]: t for t in result["by_topic"]}
+        assert topic_map["hotel_checkin"]["activated"] == 1
+        assert topic_map["hotel_checkin"]["rate"] == 100.0
+        assert topic_map["restaurant"]["activated"] == 0
+        assert topic_map["restaurant"]["rate"] == 0.0
+
+    async def test_limit_parameter(self, test_db):
+        """Limit caps both activated and unactivated lists."""
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "lobby", "meaning": "ロビー", "example_sentence": "Wait in the lobby."},
+            {"word": "check", "meaning": "チェック", "example_sentence": "Please check in here."},
+            {"word": "room", "meaning": "部屋", "example_sentence": "This is your room key."},
+        ])
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+
+        result = await get_vocabulary_activation(test_db, limit=1)
+        assert len(result["unactivated_words"]) <= 1
+
+    async def test_activated_sorted_by_usage(self, test_db):
+        """Activated words are sorted by times_used descending."""
+        words = await save_words(test_db, "hotel_checkin", [
+            {"word": "lobby", "meaning": "ロビー", "example_sentence": "Wait in the lobby."},
+            {"word": "room", "meaning": "部屋", "example_sentence": "This is your room key."},
+        ])
+        for w in words:
+            await update_progress(test_db, w["id"], True)
+
+        conv = await create_conversation(test_db, "hotel_checkin", "beginner")
+        await add_message(test_db, conv, "user", "I need a room")
+        await add_message(test_db, conv, "user", "Show me the room and lobby")
+        await add_message(test_db, conv, "user", "The room is nice")
+        await end_conversation(test_db, conv)
+
+        result = await get_vocabulary_activation(test_db)
+        assert len(result["activated_words"]) == 2
+        assert result["activated_words"][0]["word"] == "room"
+        assert result["activated_words"][0]["times_used"] == 3
+        assert result["activated_words"][1]["word"] == "lobby"
+        assert result["activated_words"][1]["times_used"] == 1

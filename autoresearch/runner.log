@@ -5251,3 +5251,220 @@ Good feedback from tester — two issues to fix. Let me patch them:
 ● Edit conversation.py +1 -1
   └ app/dal/conversation.py
 
+[2026-04-12 11:04:24] Copilot invocation completed (duration: 1948s)
+[2026-04-12 11:04:24] Verifying Playwright test depth...
+[2026-04-12 11:04:24] Running post-invocation audit (iter 397-398)...
+============================================
+ Autoresearch Audit
+ Iterations: 397 — 398
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-12 11:04:24
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 397[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 398[0m
+[0;31m  Tester: FAIL — missing: 398[0m
+[0;31m  Evaluator: FAIL — missing: 397 398[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 397 (8387fec)[0m
+
+============================================
+[0;31m  AUDIT: 4 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-12 11:04:25] Audit found 4 error(s) — fixes applied where possible
+[2026-04-12 11:04:25] Cleaned up old session logs (kept 5)
+[2026-04-12 11:04:28] Current iteration count: 398 / 404
+[2026-04-12 11:04:28] ------------------------------------------
+[2026-04-12 11:04:28] Invocation 3 / 10
+[2026-04-12 11:04:28] Resuming from iteration 399
+[2026-04-12 11:04:28] ------------------------------------------
+[2026-04-12 11:04:28] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-399-to-404.md)...
+● Recent git history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log --oneline -10
+  └ 11 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Find latest session log (shell)
+  │ ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/invocation-*.md
+  │ 2>/dev/null | head -1
+  └ 2 lines...
+
+● Read full backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 14 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/logs/invocation-030.md |
+  │ head -80
+  └ 37 lines...
+
+● Get uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Find uncompleted items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Find uncompleted items with flexible pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[\s*\]' autoresearch/backlog.md |
+  │ head -20
+  └ 1 line...
+
+● Check end of backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -60 autoresearch/backlog.md
+  └ 60 lines...
+
+All backlog items are completed. Starting iteration 399. Let me record the start timestamp and call the proposer.
+
+● Record T0 for iteration 399 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now calling the proposer subagent for iteration 399.
+
+● Proposer Propose iteration 399
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1650:1819 (169 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L1250:1400 (151 lines read)
+
+Good proposal. Now let me record T1 and implement.
+
+● Record T1 for iteration 399 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read the two DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1931,2050p' app/dal/dashboard.py
+  └ 121 lines...
+
+● Check test file end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_dashboard_dal.py &&
+  │ tail -30 tests/unit/test_dashboard_dal.py
+  └ 32 lines...
+
+● Read rest of get_vocabulary_activation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '2050,2090p' app/dal/dashboard.py
+  └ 24 lines...
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 tests/unit/test_dashboard_dal.py
+  └ 21 lines...
+
+● Check more imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '20,50p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 31 lines...
+
+● Edit test_dashboard_dal.py +2
+  └ tests/unit/test_dashboard_dal.py
+
+Now add the test classes at the end of the file:
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L1815:1820 (6 lines read)
+
+● Edit test_dashboard_dal.py +183
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
+● Record T2 and commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git add -A && git commit -m
+  │ "autoresearch #399: Add unit tests for get_phrase_of_the_day and get_vocabulary_activation DAL
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+The issue is `create_conversation` returns an int, not a dict. Let me check and fix:
+
+● Check create_conversation signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'async def create_conversation'
+  │ app/dal/conversation.py | head -3
+  └ 2 lines...
+
+Right, it returns an int. Need to fix all `conv["id"]` to just `conv`:
+
+● Find all conv["id"] usages (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'conv\["id"\]'
+  │ tests/unit/test_dashboard_dal.py | head -20
+  └ 21 lines...
+
+● Fix all conv["id"] to conv (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' 's/conv\["id"\]/conv/g'
+  │ tests/unit/test_dashboard_dal.py
+  └ 1 line...
+
+Wait, I need to make sure this only affects the new tests (lines 1834+), not earlier tests. Let me check:
+
+● Verify no remaining conv["id"] (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'conv\["id"\]'
+  │ tests/unit/test_dashboard_dal.py
+  └ 1 line...
+
+● Check what changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff --stat HEAD
+  └ 4 lines...
+
+Let me verify no earlier test was affected by the sed:
+
+● Check diff (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff tests/unit/test_dashboard_dal.py |
+  │ head -80
+  └ 81 lines...
+
+Good — only the new tests were affected. Let me amend the commit and re-run tests:
+
