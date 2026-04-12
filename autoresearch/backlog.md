@@ -311,3 +311,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ✅ Add Vocabulary Activation Card to Dashboard (#401)
 - [x] ✅ Add unit tests for untested vocabulary DAL functions (#402)
+
+## [NEW] Iterations 403–404
+
+- [x] ✅ Add data-populated integration tests for grammar-trend and skill-radar (#403)
+- [x] ✅ Add data-populated integration tests for daily-challenge and word-of-the-day (#404)

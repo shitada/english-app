@@ -6478,3 +6478,61 @@ Now I have enough context. Let me implement the tests:
 ● Edit test_dashboard_api.py +101
   └ tests/integration/test_dashboard_api.py
 
+● Commit iteration 404 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #404: Add data-populated integration tests for daily-challenge and word-of-the-day
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+1304 passed (+4 new). TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+All passing. Record T3 and call evaluator:
+
+● Record T3 for iteration 404 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 404
+  │ Read dashboard.py
+  │   │ app/routers/dashboard.py
+  │   └ L1:50 (50 lines read)
+  └ Read test_dashboard_api.py
+      │ tests/integration/test_dashboard_api.py
+      └ L1709:1808 (99 lines read)
+
+Evaluator score: 7.55, verdict: keep. Let me record results:
+
+● Record results for iteration 404 (shell)
+  │ T4=$(date +%s)
+  │ T0=1775963722
+  │ T1=1775964030
+  │ T3=1775964145…
+  └ 19 lines...
+
+Row verified with proper tab separators. Now update the backlog and write session log:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L1:5 (4 lines read)
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 403–404
+  │
+  │ - [x] ✅ Add data-populated integration tests for grammar-trend and skill-radar (#403)…
+  └ 3 lines...
+
+● Create invocation-033.md +32
+  └ autoresearch/logs/invocation-033.md
+
