@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
 from app.copilot_client import get_copilot_service
 from app.dal import pronunciation as pron_dal
+from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
 from app.utils import coerce_bool, compute_dictation_score, get_topic_label, safe_llm_call
@@ -848,6 +849,92 @@ async def get_listening_quiz_detail(
     if detail is None:
         raise HTTPException(status_code=404, detail="Quiz not found")
     return detail
+
+
+# ── Passage Vocabulary Extraction ───────────────────────────
+
+
+class PassageVocabRequest(BaseModel):
+    passage: str = Field(min_length=10, max_length=10000)
+
+
+class PassageVocabWord(BaseModel):
+    word: str
+    part_of_speech: str
+    meaning: str
+    context_sentence: str
+
+
+class PassageVocabResponse(BaseModel):
+    words: list[PassageVocabWord]
+
+
+@router.post("/passage-vocabulary", response_model=PassageVocabResponse)
+async def extract_passage_vocabulary(
+    req: PassageVocabRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Extract key vocabulary words from a listening passage using LLM."""
+    copilot = get_copilot_service()
+    prompt = (
+        f"Extract 5-8 key English vocabulary words from the following passage that would be most useful for an English learner.\n\n"
+        f"Passage:\n{req.passage}\n\n"
+        "Return JSON with:\n"
+        '- words (array): each with "word", "part_of_speech", "meaning" (brief definition), '
+        '"context_sentence" (the exact sentence from the passage where the word appears)\n'
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary extraction assistant. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="passage_vocabulary",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Vocabulary extraction failed")
+
+    words_raw = result.get("words", [])
+    validated: list[dict[str, str]] = []
+    for w in words_raw[:8]:
+        if not isinstance(w, dict):
+            continue
+        word = str(w.get("word", "")).strip()
+        if not word:
+            continue
+        validated.append({
+            "word": word,
+            "part_of_speech": str(w.get("part_of_speech", "")),
+            "meaning": str(w.get("meaning", "")),
+            "context_sentence": str(w.get("context_sentence", "")),
+        })
+    return {"words": validated}
+
+
+class SavePassageVocabRequest(BaseModel):
+    words: list[dict] = Field(min_length=1, max_length=20)
+
+
+@router.post("/passage-vocabulary/save")
+async def save_passage_vocabulary(
+    req: SavePassageVocabRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Save extracted passage vocabulary words to the vocabulary bank under 'listening' topic."""
+    questions = [
+        {
+            "word": w.get("word", ""),
+            "meaning": w.get("meaning", ""),
+            "example_sentence": w.get("context_sentence", w.get("example_sentence", "")),
+        }
+        for w in req.words
+        if w.get("word")
+    ]
+    if not questions:
+        raise HTTPException(status_code=422, detail="No valid words to save")
+    saved = await vocab_dal.save_words(db, "listening", questions)
+    return {"saved_count": len(saved), "words": saved}
 
 
 # ── Response Drill ──────────────────────────────────────────

@@ -1234,6 +1234,29 @@ export async function getListeningQuizDetail(quizId: number): Promise<ListeningQ
   return request<ListeningQuizResult>(`/api/pronunciation/listening-quiz/${quizId}`);
 }
 
+export interface PassageVocabWord {
+  word: string;
+  part_of_speech: string;
+  meaning: string;
+  context_sentence: string;
+}
+
+export async function extractPassageVocabulary(passage: string): Promise<{ words: PassageVocabWord[] }> {
+  return request<{ words: PassageVocabWord[] }>('/api/pronunciation/passage-vocabulary', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ passage }),
+  });
+}
+
+export async function savePassageVocabulary(words: { word: string; meaning: string; context_sentence: string }[]): Promise<{ saved_count: number }> {
+  return request<{ saved_count: number }>('/api/pronunciation/passage-vocabulary/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ words }),
+  });
+}
+
 export async function getListeningQuizHistory(limit = 20): Promise<ListeningQuizResult[]> {
   return request<ListeningQuizResult[]>('/api/pronunciation/listening-quiz/history?limit=' + limit);
 }
