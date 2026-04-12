@@ -695,3 +695,40 @@ async def get_vocabulary_forecast(
 ):
     """Predict vocabulary retention risk and return at-risk words."""
     return await dash_dal.get_vocabulary_forecast(db, limit=limit)
+
+
+# --- Vocabulary Activation Analytics ---
+
+
+class ActivatedWord(BaseModel):
+    word_id: int
+    word: str
+    meaning: str
+    topic: str
+    times_used: int
+    last_used_at: str | None
+
+
+class TopicActivation(BaseModel):
+    topic: str
+    studied: int
+    activated: int
+    rate: float
+
+
+class VocabularyActivationResponse(BaseModel):
+    total_studied: int
+    total_activated: int
+    activation_rate: float
+    activated_words: list[ActivatedWord]
+    unactivated_words: list[ActivatedWord]
+    by_topic: list[TopicActivation]
+
+
+@router.get("/vocabulary-activation", response_model=VocabularyActivationResponse)
+async def get_vocabulary_activation(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Analyze active usage of studied vocabulary words in conversations."""
+    return await dash_dal.get_vocabulary_activation(db, limit=limit)

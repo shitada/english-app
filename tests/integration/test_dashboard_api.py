@@ -1429,3 +1429,100 @@ async def test_module_streaks_broken_streak(client, test_db):
     assert data["modules"]["pronunciation"]["current_streak"] == 0
     assert data["modules"]["conversation"]["current_streak"] >= 1
     assert data["most_consistent"] == "conversation"
+
+
+# --- Vocabulary Activation Analytics ---
+
+
+@pytest.mark.integration
+async def test_vocabulary_activation_empty(client):
+    """GET /vocabulary-activation returns empty results when no data."""
+    resp = await client.get("/api/dashboard/vocabulary-activation")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_studied"] == 0
+    assert data["total_activated"] == 0
+    assert data["activation_rate"] == 0.0
+    assert data["activated_words"] == []
+    assert data["unactivated_words"] == []
+    assert data["by_topic"] == []
+
+
+@pytest.mark.integration
+async def test_vocabulary_activation_limit(client):
+    """GET /vocabulary-activation accepts limit query param."""
+    resp = await client.get("/api/dashboard/vocabulary-activation?limit=5")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data["activated_words"], list)
+    assert isinstance(data["unactivated_words"], list)
+
+
+@pytest.mark.integration
+async def test_vocabulary_activation_with_data(client, test_db):
+    """Vocabulary activation correctly detects words used in conversations."""
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning, difficulty) VALUES (1, 'hotel', 'reservation', 'a booking', 1)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning, difficulty) VALUES (2, 'hotel', 'checkout', 'leaving the hotel', 1)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning, difficulty) VALUES (3, 'restaurant', 'appetizer', 'starter dish', 1)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level) VALUES (1, 3, 0, 2)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level) VALUES (2, 1, 1, 1)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level) VALUES (3, 2, 0, 2)"
+    )
+    await test_db.execute(
+        "INSERT INTO conversations (id, topic, difficulty, status) VALUES (1, 'hotel', 'intermediate', 'ended')"
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (1, 'user', 'I have a reservation under Smith', '2026-04-10 10:00:00')"
+    )
+    await test_db.execute(
+        "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (1, 'user', 'I need to make a reservation for tonight', '2026-04-10 10:05:00')"
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/vocabulary-activation")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_studied"] == 3
+    assert data["total_activated"] == 1
+    activated_words = [w["word"] for w in data["activated_words"]]
+    assert "reservation" in activated_words
+    unactivated_words = [w["word"] for w in data["unactivated_words"]]
+    assert "checkout" in unactivated_words
+    assert "appetizer" in unactivated_words
+    assert len(data["by_topic"]) >= 1
+    hotel_topic = next((t for t in data["by_topic"] if t["topic"] == "hotel"), None)
+    assert hotel_topic is not None
+    assert hotel_topic["studied"] == 2
+    assert hotel_topic["activated"] == 1
+
+
+@pytest.mark.integration
+async def test_vocabulary_activation_no_conversations(client, test_db):
+    """Words with progress but no conversations are all unactivated."""
+    await test_db.execute(
+        "INSERT INTO vocabulary_words (id, topic, word, meaning, difficulty) VALUES (1, 'hotel', 'lobby', 'entrance area', 1)"
+    )
+    await test_db.execute(
+        "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level) VALUES (1, 2, 0, 1)"
+    )
+    await test_db.commit()
+
+    resp = await client.get("/api/dashboard/vocabulary-activation")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_studied"] == 1
+    assert data["total_activated"] == 0
+    assert data["activation_rate"] == 0.0
+    assert len(data["unactivated_words"]) == 1
+    assert data["unactivated_words"][0]["word"] == "lobby"

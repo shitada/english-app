@@ -1973,3 +1973,100 @@ async def get_phrase_of_the_day(db: aiosqlite.Connection) -> dict[str, Any] | No
         "topic": topic,
         "source": "conversation" if rows else "vocabulary",
     }
+
+
+async def get_vocabulary_activation(
+    db: aiosqlite.Connection, limit: int = 20
+) -> dict[str, Any]:
+    """Analyze how many studied vocabulary words appear in user conversation messages."""
+
+    # Get all studied words (have progress records)
+    studied_rows = await db.execute_fetchall(
+        """
+        SELECT vw.id, vw.word, vw.meaning, vw.topic
+        FROM vocabulary_words vw
+        INNER JOIN vocabulary_progress vp ON vp.word_id = vw.id
+        ORDER BY vw.word
+        """
+    )
+
+    if not studied_rows:
+        return {
+            "total_studied": 0,
+            "total_activated": 0,
+            "activation_rate": 0.0,
+            "activated_words": [],
+            "unactivated_words": [],
+            "by_topic": [],
+        }
+
+    # Get all user messages
+    user_messages = await db.execute_fetchall(
+        "SELECT content, created_at FROM messages WHERE role = 'user' ORDER BY created_at DESC"
+    )
+
+    # Check each studied word for occurrences in user messages
+    activated: list[dict[str, Any]] = []
+    unactivated: list[dict[str, Any]] = []
+    topic_stats: dict[str, dict[str, int]] = {}
+
+    for row in studied_rows:
+        word = row["word"].lower()
+        topic = row["topic"] or "general"
+
+        if topic not in topic_stats:
+            topic_stats[topic] = {"studied": 0, "activated": 0}
+        topic_stats[topic]["studied"] += 1
+
+        times_used = 0
+        last_used_at: str | None = None
+        for msg in user_messages:
+            content = (msg["content"] or "").lower()
+            # Word boundary-aware match
+            if f" {word} " in f" {content} ":
+                times_used += 1
+                if last_used_at is None:
+                    last_used_at = msg["created_at"]
+
+        entry = {
+            "word_id": row["id"],
+            "word": row["word"],
+            "meaning": row["meaning"],
+            "topic": topic,
+            "times_used": times_used,
+            "last_used_at": last_used_at,
+        }
+
+        if times_used > 0:
+            activated.append(entry)
+            topic_stats[topic]["activated"] += 1
+        else:
+            unactivated.append(entry)
+
+    total_studied = len(studied_rows)
+    total_activated = len(activated)
+    activation_rate = round(
+        (total_activated / total_studied * 100) if total_studied > 0 else 0.0, 1
+    )
+
+    # Sort activated by times_used desc, unactivated by word
+    activated.sort(key=lambda x: x["times_used"], reverse=True)
+
+    by_topic = [
+        {
+            "topic": t,
+            "studied": s["studied"],
+            "activated": s["activated"],
+            "rate": round(s["activated"] / s["studied"] * 100, 1) if s["studied"] else 0.0,
+        }
+        for t, s in sorted(topic_stats.items())
+    ]
+
+    return {
+        "total_studied": total_studied,
+        "total_activated": total_activated,
+        "activation_rate": activation_rate,
+        "activated_words": activated[:limit],
+        "unactivated_words": unactivated[:limit],
+        "by_topic": by_topic,
+    }

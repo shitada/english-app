@@ -394,3 +394,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 392	956f8fd	2026-04-12	298	130	123	69	620	1242	1242	pass	7.85	kept	Add unit tests for untested pronunciation DAL functions
 393	none	2026-04-12	223	140	259	259	622	1242	1242	pass	5.9	discarded	Add Vocabulary Used section to Conversation Summary
 394	01d3894	2026-04-12	282	130	80	80	492	1248	1248	pass	8.1	kept	Add data-populated integration tests for difficulty-recommendation and session-averages
+395	none	2026-04-12	162	60	121	221	564	1248	1248	pass	5.4	discarded	Add Speed Ladder Shadowing drill to Pronunciation page
