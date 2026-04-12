@@ -121,3 +121,8 @@ Improvement ideas for the English Learning App, prioritized by importance.
 - [x] Add Response Speed Analytics card to Dashboard (discarded — score 5.1, no tests, dashboard saturated)
 - [x] Add pronunciation sentence mastery overview endpoint with tests (kept — score 7.15, 11 new tests)
 
+
+## [NEW] Iterations 415–416
+
+- [x] Add Quick Sentence Transform card to Home page (kept — score 6.7, grammar+speaking drill)
+- [x] Add topic selection to Listening Quiz (kept — score 6.9, scenario-focused listening)

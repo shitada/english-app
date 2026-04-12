@@ -1253,3 +1253,90 @@ I should use `get_conversation_topics()` directly instead:
 
 Good — back to normal (1325/1326 with the pre-existing failure). Let me amend the commit and check for smoke test:
 
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 16 lines...
+
+Router changed — need smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py
+  └ 23 lines...
+
+Now check if tester is needed — frontend UI files changed and type is "feature":
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Frontend UI changed → must run tester. Start server and call tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 416
+  │ Read config.yaml
+  │   └ L1:80 (80 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L180:184 (5 lines read)
+
+Tester passed with ux_score 8. Now call evaluator:
+
+● Evaluator Evaluate iteration 416
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:30 (30 lines read)
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L250:350 (101 lines read)
+
+● Record T4 for iteration 416 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 6.9 — KEEP. Recording results and cleaning up.
+
+● Record and verify results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "416" "e0b158e" "2026-04-13" "438" "95" "86" "271" "890" \
+  │ "1325" "1326" "pass" "6.9" "kept" "Add topic selection to Listening Quiz" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified. Now update backlog and commit the results:
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L1:10 (8 lines read)
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 415–416
+  │
+  │ - [x] Add Quick Sentence Transform card to Home page (kept — score 6.7, grammar+speaking …
+  └ 4 lines...
+
