@@ -420,3 +420,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 418	4e38cff	2026-04-13	165	83	157	302	707	1328	1329	pass	7.75	kept	Add topic breakdown to Listening Progress dashboard card
 419	af2af39	2026-04-13	569	160	67	403	1199	1328	1329	pass	6.7	kept	Save listening quiz passages for replay and re-practice
 420	ef19f4d	2026-04-13	277	99	81	622	1079	1328	1329	pass	6.15	kept	Add Key Vocabulary extraction panel to Listening Quiz results
+421	none	2026-04-13	214	73	358	113	758	1328	1329	pass	5.4	discarded	Add Passage Dictation drill to Listening Quiz results

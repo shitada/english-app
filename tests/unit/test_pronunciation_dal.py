@@ -15,6 +15,7 @@ from app.dal.pronunciation import (
     get_common_mistake_patterns,
     get_history,
     get_listening_difficulty_recommendation,
+    get_listening_quiz_detail,
     get_listening_quiz_history,
     get_minimal_pairs,
     get_personal_records,
@@ -1434,3 +1435,120 @@ class TestGetSentenceMasteryOverview:
             await save_attempt(test_db, f"Sentence {i}", "B", {}, 4.0)
         result = await get_sentence_mastery_overview(test_db, limit=3)
         assert result["total_count"] == 3
+
+
+@pytest.mark.unit
+class TestGetListeningQuizDetail:
+    """Tests for get_listening_quiz_detail DAL function."""
+
+    async def test_returns_none_for_nonexistent_id(self, test_db):
+        """Returns None when quiz ID does not exist."""
+        result = await get_listening_quiz_detail(test_db, 9999)
+        assert result is None
+
+    async def test_retrieves_saved_quiz_with_all_fields(self, test_db):
+        """Retrieves a quiz with all fields including passage and questions."""
+        import json
+        questions = [{"question": "What color?", "options": ["red", "blue"], "answer": 0}]
+        rid = await save_listening_quiz_result(
+            test_db, "Animals", "beginner", 5, 4, 80.0,
+            topic="animals",
+            passage="The cat sat on the mat.",
+            questions_json=json.dumps(questions),
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail is not None
+        assert detail["id"] == rid
+        assert detail["title"] == "Animals"
+        assert detail["difficulty"] == "beginner"
+        assert detail["total_questions"] == 5
+        assert detail["correct_count"] == 4
+        assert detail["score"] == 80.0
+        assert detail["topic"] == "animals"
+        assert detail["passage"] == "The cat sat on the mat."
+        assert detail["questions"] == questions
+
+    async def test_parses_questions_json_into_list(self, test_db):
+        """questions_json is parsed into a Python list in the returned dict."""
+        import json
+        qs = [{"q": "Q1"}, {"q": "Q2"}]
+        rid = await save_listening_quiz_result(
+            test_db, "T", "beginner", 2, 1, 50.0,
+            questions_json=json.dumps(qs),
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert isinstance(detail["questions"], list)
+        assert len(detail["questions"]) == 2
+        assert "questions_json" not in detail
+
+    async def test_handles_invalid_questions_json(self, test_db):
+        """Corrupted questions_json returns empty list."""
+        rid = await save_listening_quiz_result(
+            test_db, "Bad", "beginner", 3, 1, 33.0,
+            questions_json="not valid json{{{",
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail is not None
+        assert detail["questions"] == []
+
+    async def test_returns_correct_topic(self, test_db):
+        """Topic field is correctly retrieved."""
+        rid = await save_listening_quiz_result(
+            test_db, "Hotel", "intermediate", 5, 5, 100.0, topic="hotel"
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["topic"] == "hotel"
+
+    async def test_default_passage_and_questions(self, test_db):
+        """When passage and questions not provided, defaults are returned."""
+        rid = await save_listening_quiz_result(
+            test_db, "Minimal", "beginner", 5, 3, 60.0
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["passage"] == ""
+        assert detail["questions"] == []
+
+
+@pytest.mark.unit
+class TestSaveListeningQuizResultPassageQuestions:
+    """Tests for passage and questions_json persistence in save_listening_quiz_result."""
+
+    async def test_passage_persisted(self, test_db):
+        """passage parameter is stored and retrievable."""
+        import json
+        rid = await save_listening_quiz_result(
+            test_db, "T", "beginner", 5, 4, 80.0,
+            passage="A long passage about weather.",
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["passage"] == "A long passage about weather."
+
+    async def test_questions_json_persisted(self, test_db):
+        """questions_json parameter is stored and parseable."""
+        import json
+        qs = [{"q": "What?", "options": ["a", "b"], "answer": 0}]
+        rid = await save_listening_quiz_result(
+            test_db, "T", "beginner", 1, 1, 100.0,
+            questions_json=json.dumps(qs),
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["questions"] == qs
+
+    async def test_roundtrip_save_and_detail(self, test_db):
+        """Full round-trip: save with all params, retrieve via detail."""
+        import json
+        qs = [{"q": "Q1", "answer": 1}, {"q": "Q2", "answer": 0}]
+        passage = "The quick brown fox jumps over the lazy dog."
+        rid = await save_listening_quiz_result(
+            test_db, "Roundtrip", "advanced", 2, 2, 100.0,
+            topic="general",
+            passage=passage,
+            questions_json=json.dumps(qs),
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["title"] == "Roundtrip"
+        assert detail["difficulty"] == "advanced"
+        assert detail["passage"] == passage
+        assert detail["questions"] == qs
+        assert detail["topic"] == "general"
+        assert "created_at" in detail
