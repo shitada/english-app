@@ -417,3 +417,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 415	e7c116b	2026-04-13	315	66	578	94	1053	1325	1326	pass	6.7	kept	Add Quick Sentence Transform card to Home page
 416	e0b158e	2026-04-13	438	95	86	271	890	1325	1326	pass	6.9	kept	Add topic selection to Listening Quiz
 417	1eb3219	2026-04-13	356	82	76	445	959	1327	1328	pass	6.8	kept	Save and display topic in Listening Quiz results
+418	4e38cff	2026-04-13	165	83	157	302	707	1328	1329	pass	7.75	kept	Add topic breakdown to Listening Progress dashboard card
