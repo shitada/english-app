@@ -30,6 +30,7 @@ from app.dal.dashboard import (
     get_vocabulary_activation,
     get_vocabulary_forecast,
     get_fluency_progression,
+    get_topic_coverage,
     get_weekly_report,
     get_word_of_the_day,
     set_learning_goal,
@@ -2095,3 +2096,75 @@ class TestGetFluencyProgression:
         result = await get_fluency_progression(test_db)
         assert result["sessions"] == []
         assert result["session_count"] == 0
+
+
+@pytest.mark.unit
+class TestGetTopicCoverage:
+    async def test_empty_database_returns_all_topics_with_zero_counts(self, test_db):
+        result = await get_topic_coverage(test_db)
+        assert result["total_topics"] > 0
+        assert result["practiced_count"] == 0
+        assert result["coverage_rate"] == 0.0
+        for topic in result["topics"]:
+            assert topic["practice_count"] == 0
+            assert topic["last_practiced_at"] is None
+            assert topic["grammar_accuracy"] is None
+            assert "topic_id" in topic
+            assert "label" in topic
+
+    async def test_practiced_topic_has_correct_count(self, test_db):
+        cid1 = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid1)
+        cid2 = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid2)
+        await test_db.commit()
+
+        result = await get_topic_coverage(test_db)
+        hotel = next(t for t in result["topics"] if t["topic_id"] == "hotel_checkin")
+        assert hotel["practice_count"] == 2
+        assert hotel["last_practiced_at"] is not None
+
+    async def test_coverage_rate_reflects_practiced_ratio(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        await test_db.commit()
+
+        result = await get_topic_coverage(test_db)
+        total = result["total_topics"]
+        expected_rate = round(1 / total * 100, 1)
+        assert result["practiced_count"] == 1
+        assert result["coverage_rate"] == expected_rate
+
+    async def test_grammar_accuracy_from_summary(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {"performance": {"grammar_accuracy_rate": 85.0}}
+        await end_conversation(test_db, cid, summary=summary)
+        await test_db.commit()
+
+        result = await get_topic_coverage(test_db)
+        hotel = next(t for t in result["topics"] if t["topic_id"] == "hotel_checkin")
+        assert hotel["grammar_accuracy"] == 85.0
+
+    async def test_unpracticed_topic_has_null_accuracy(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await end_conversation(test_db, cid)
+        await test_db.commit()
+
+        result = await get_topic_coverage(test_db)
+        unpracticed = [t for t in result["topics"] if t["practice_count"] == 0]
+        assert len(unpracticed) > 0
+        for t in unpracticed:
+            assert t["grammar_accuracy"] is None
+
+    async def test_multiple_topics_practiced(self, test_db):
+        for topic_id in ["hotel_checkin", "restaurant_order"]:
+            cid = await create_conversation(test_db, topic_id)
+            await end_conversation(test_db, cid)
+        await test_db.commit()
+
+        result = await get_topic_coverage(test_db)
+        assert result["practiced_count"] == 2
+        hotel = next(t for t in result["topics"] if t["topic_id"] == "hotel_checkin")
+        restaurant = next(t for t in result["topics"] if t["topic_id"] == "restaurant_order")
+        assert hotel["practice_count"] == 1
+        assert restaurant["practice_count"] == 1

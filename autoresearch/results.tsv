@@ -412,3 +412,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 410	7f173da	2026-04-13	151	98	66	333	648	1308	1309	pass	6.9	kept	Add Quick Rephrase card to Home page
 411	none	2026-04-13	257	122	85	296	760	1308	1309	pass	5.1	discarded	Add Response Speed Analytics card to Dashboard
 412	3966512	2026-04-13	307	102	158	95	662	1319	1320	pass	7.15	kept	Add pronunciation sentence mastery overview endpoint with tests
+413	none	2026-04-13	189	95	62	271	617	1319	1320	pass	5.7	discarded	Add Sentence Mastery Progress card to Pronunciation page
