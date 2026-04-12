@@ -1209,6 +1209,8 @@ export interface ListeningQuizResult {
   score: number;
   topic: string;
   created_at: string;
+  passage?: string;
+  questions?: ListeningQuizQuestion[];
 }
 
 export async function saveListeningQuizResult(data: {
@@ -1218,12 +1220,18 @@ export async function saveListeningQuizResult(data: {
   correct_count: number;
   score: number;
   topic?: string;
+  passage?: string;
+  questions?: ListeningQuizQuestion[];
 }): Promise<{ id: number; message: string }> {
   return request<{ id: number; message: string }>('/api/pronunciation/listening-quiz/results', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+}
+
+export async function getListeningQuizDetail(quizId: number): Promise<ListeningQuizResult> {
+  return request<ListeningQuizResult>(`/api/pronunciation/listening-quiz/${quizId}`);
 }
 
 export async function getListeningQuizHistory(limit = 20): Promise<ListeningQuizResult[]> {

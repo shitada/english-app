@@ -1623,3 +1623,321 @@ Now add a test for topic persistence:
 
 1327 passed, 1 failed (pre-existing failure in daily-challenge test, not related to my changes). TypeScript passes. Let me verify this failure is pre-existing:
 
+[2026-04-13 03:20:14] Copilot invocation completed (duration: 2328s)
+[2026-04-13 03:20:14] Verifying Playwright test depth...
+[2026-04-13 03:20:14]   PW_SKIP iter=417 — UI changed but NO Playwright test was run
+[2026-04-13 03:20:14]   PW_SKIP iter=418 — UI changed but NO Playwright test was run
+[2026-04-13 03:20:14] Running post-invocation audit (iter 417-418)...
+============================================
+ Autoresearch Audit
+ Iterations: 417 — 418
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-13 03:20:14
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 418[0m
+[0;31m  Tester: FAIL — missing: 417 418[0m
+[0;31m  Evaluator: FAIL — missing: 417 418[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-13 03:20:15] Audit found 3 error(s) — fixes applied where possible
+[2026-04-13 03:20:18] Current iteration count: 418 / 434
+[2026-04-13 03:20:18] ------------------------------------------
+[2026-04-13 03:20:18] Invocation 8 / 10
+[2026-04-13 03:20:18] Resuming from iteration 419
+[2026-04-13 03:20:18] ------------------------------------------
+[2026-04-13 03:20:18] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-419-to-434.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read latest session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Backlog is empty, last iteration was 418. Starting iteration 419. Let me get the timestamp and call the proposer.
+
+● Record T0 for iteration 419 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 419
+  │ Read pronunciation.py
+  │   │ app/dal/pronunciation.py
+  │   └ L600:800 (201 lines read)
+  └ Read pronunciation.py
+      │ app/dal/pronunciation.py
+      └ L795:900 (106 lines read)
+
+Got proposal. Let me record T1 and start implementing.
+
+● Record T1 for iteration 419 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find listening quiz schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz_results"
+  │ app/database.py | head -20
+  └ 6 lines...
+
+● Find listening quiz DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening_quiz"
+  │ app/dal/pronunciation.py | head -20
+  └ 6 lines...
+
+● Find listening quiz routes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening.quiz"
+  │ app/routers/pronunciation.py | head -20
+  └ 14 lines...
+
+● View DAL functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '793,845p' app/dal/pronunciation.py
+  └ 52 lines...
+
+● View schema for listening_quiz_results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '108,130p' app/database.py
+  └ 24 lines...
+
+● View router endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '798,840p'
+  │ app/routers/pronunciation.py
+  └ 44 lines...
+
+● View request model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '788,800p'
+  │ app/routers/pronunciation.py
+  └ 12 lines...
+
+● Find frontend API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "saveListeningQuizResult\|ListeningQuiz" frontend/src/api.ts | head -20
+  └ 10 lines...
+
+● Find relevant lines in Listening.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "saveListeningQuizResult\|listeningQuizHistory\|handleNext" frontend/src/pages/Listening.tsx |
+  │ head -20
+  └ 5 lines...
+
+● View saveListeningQuizResult API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1203,1235p' frontend/src/api.ts
+  └ 34 lines...
+
+● View handleNext function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '95,140p'
+  │ frontend/src/pages/Listening.tsx
+  └ 47 lines...
+
+● View ListeningQuizResponse interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '391,410p' frontend/src/api.ts
+  └ 21 lines...
+
+Now I have full context. Let me implement all the changes.
+
+● See end of database.py (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/database.py
+  └ 11 lines...
+
+● Count migrations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "^    (" app/database.py
+  └ 2 lines...
+
+● Find last listening migration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "add topic column to
+  │ listening_quiz_results" app/database.py
+  └ 2 lines...
+
+● View migration area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '230,240p' app/database.py
+  └ 11 lines...
+
+Now let me implement all changes in parallel:
+
+● Edit database.py +2
+  └ app/database.py
+
+● Edit database.py +8
+  └ app/database.py
+
+Now update the DAL:
+
+● Edit pronunciation.py +5 -3
+  └ app/dal/pronunciation.py
+
+Now add the `get_listening_quiz_detail` function after `get_listening_quiz_history`:
+
+● View after get_listening_quiz_history (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '822,832p' app/dal/pronunciation.py
+  └ 12 lines...
+
+● Edit pronunciation.py +22
+  └ app/dal/pronunciation.py
+
+Now update the router — add `passage` and `questions` to request model and add GET endpoint:
+
+● Edit pronunciation.py +2
+  └ app/routers/pronunciation.py
+
+● Check imports in router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^import\|^from"
+  │ app/routers/pronunciation.py | head -20
+  └ 15 lines...
+
+Now update the save endpoint to pass passage and questions_json:
+
+● Edit pronunciation.py +2 -1
+  └ app/routers/pronunciation.py
+
+Need to add `import json` — check if it's already there:
+
+● Check if json imported (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "^import json"
+  │ app/routers/pronunciation.py
+  └ 1 line...
+
+● Edit pronunciation.py +1
+  └ app/routers/pronunciation.py
+
+Now add the GET endpoint for quiz detail. Let me find the right place (after the history endpoint):
+
+● Edit pronunciation.py +12
+  └ app/routers/pronunciation.py
+
+Wait — there's a route ordering issue. The `{quiz_id}` route will catch `difficulty-recommendation` before it reaches the static route. Let me fix the ordering:
+
+● Edit pronunciation.py -12
+  └ app/routers/pronunciation.py
+
+Now find where the difficulty-recommendation endpoint ends and add the quiz_id route after it:
+
+● Find where to insert (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "difficulty-recommendation\|Response Drill\|class ResponseDrill" app/routers/pronunciation.py |
+  │ head -10
+  └ 7 lines...
+
+● View difficulty-recommendation block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '833,842p'
+  │ app/routers/pronunciation.py
+  └ 10 lines...
+
+● Edit pronunciation.py +12
+  └ app/routers/pronunciation.py
+
+Now update the frontend API:
+
+● Edit api.ts +8
+  └ frontend/src/api.ts
+
+Now update the frontend Listening.tsx — pass passage/questions to save, add replay button:
+
+● View imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,15p'
+  │ frontend/src/pages/Listening.tsx
+  └ 16 lines...
+
+● Edit Listening.tsx +1 -1
+  └ frontend/src/pages/Listening.tsx
+
+Now update the save call to include passage and questions:
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+Now I need to check the `handleNext` dependencies to include `passage` and `questions`:
+
+● Find handleNext deps (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "quizIndex, questions, results,
+  │ selectedOption, title, difficulty, isRetry" frontend/src/pages/Listening.tsx
+  └ 2 lines...
+
+● Edit Listening.tsx +1 -1
+  └ frontend/src/pages/Listening.tsx
+
+Now add a replay button in the history section. Let me find where history is rendered:
+
+● Find history rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "history\|History\|h\.id\|h\.title\|h\.score" frontend/src/pages/Listening.tsx | head -30
+  └ 19 lines...
+
+● View history rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '260,300p'
+  │ frontend/src/pages/Listening.tsx
+  └ 42 lines...
+
+Now I need to add a replay handler and a replay button next to each history entry. Let me add a `handleReplay` function and update the history rendering:
+
+● View after handleNext (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '122,145p'
+  │ frontend/src/pages/Listening.tsx
+  └ 25 lines...
+
+● Edit Listening.tsx +24
+  └ frontend/src/pages/Listening.tsx
+
+Now add the replay button in the history UI:
+
+● Edit Listening.tsx +11
+  └ frontend/src/pages/Listening.tsx
+
+Now let me also check that `selectedTopic` state variable exists:
+
+● Verify state vars exist (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "selectedTopic\|setSelectedTopic\|setDifficulty" frontend/src/pages/Listening.tsx | head -10
+  └ 11 lines...
+
+Good. Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

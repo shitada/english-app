@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
@@ -796,6 +797,8 @@ class ListeningQuizResultRequest(BaseModel):
     correct_count: int = Field(ge=0)
     score: float = Field(ge=0, le=100)
     topic: str = Field(default="", max_length=100)
+    passage: str = Field(default="", max_length=10000)
+    questions: list[dict] = Field(default_factory=list)
 
 
 class ListeningQuizResultResponse(BaseModel):
@@ -812,7 +815,8 @@ async def save_listening_quiz_result(
     if req.correct_count > req.total_questions:
         raise HTTPException(status_code=422, detail="correct_count cannot exceed total_questions")
     result_id = await pron_dal.save_listening_quiz_result(
-        db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score, req.topic
+        db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score, req.topic,
+        req.passage, json.dumps(req.questions),
     )
     return {"id": result_id, "message": "Result saved"}
 
@@ -832,6 +836,18 @@ async def get_listening_difficulty_recommendation(
 ):
     """Recommend a listening quiz difficulty based on recent performance."""
     return await pron_dal.get_listening_difficulty_recommendation(db)
+
+
+@router.get("/listening-quiz/{quiz_id}")
+async def get_listening_quiz_detail(
+    quiz_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get a single listening quiz result with passage and questions for replay."""
+    detail = await pron_dal.get_listening_quiz_detail(db, quiz_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return detail
 
 
 # ── Response Drill ──────────────────────────────────────────

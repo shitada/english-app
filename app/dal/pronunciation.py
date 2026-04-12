@@ -800,12 +800,14 @@ async def save_listening_quiz_result(
     correct_count: int,
     score: float,
     topic: str = "",
+    passage: str = "",
+    questions_json: str = "[]",
 ) -> int:
     """Save a listening quiz result and return the ID."""
     cursor = await db.execute(
-        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, topic)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (title, difficulty, total_questions, correct_count, score, topic),
+        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
@@ -821,6 +823,28 @@ async def get_listening_quiz_history(
         (limit,),
     )
     return [dict(r) for r in rows]
+
+
+async def get_listening_quiz_detail(
+    db: aiosqlite.Connection, quiz_id: int
+) -> dict[str, Any] | None:
+    """Get a single listening quiz result including passage and questions for replay."""
+    row = await db.execute(
+        """SELECT id, title, difficulty, total_questions, correct_count, score, topic, passage, questions_json, created_at
+           FROM listening_quiz_results WHERE id = ?""",
+        (quiz_id,),
+    )
+    result = await row.fetchone()
+    if result is None:
+        return None
+    d = dict(result)
+    import json
+    try:
+        d["questions"] = json.loads(d.pop("questions_json"))
+    except (json.JSONDecodeError, KeyError):
+        d["questions"] = []
+        d.pop("questions_json", None)
+    return d
 
 
 async def get_listening_difficulty_recommendation(

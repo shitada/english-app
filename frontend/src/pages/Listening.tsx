@@ -4,7 +4,7 @@ import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
 import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
-import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation } from '../api';
+import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
 type Phase = 'setup' | 'listen' | 'quiz' | 'results';
@@ -112,13 +112,14 @@ export default function Listening() {
         const scoreVal = Math.round((correctCount / totalQ) * 100);
         saveListeningQuizResult({
           title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal, topic: selectedTopic,
+          passage, questions,
         }).then(() => {
           setSaved(true);
           getListeningQuizHistory(10).then(setHistory).catch(() => {});
         }).catch(() => {});
       }
     }
-  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry]);
+  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry, passage, selectedTopic]);
 
   const handleRestart = useCallback(() => {
     setPhase('setup');
@@ -135,6 +136,30 @@ export default function Listening() {
     setError('');
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
+  }, []);
+
+  const handleReplay = useCallback(async (quizId: number) => {
+    try {
+      const detail = await getListeningQuizDetail(quizId);
+      if (!detail.passage || !detail.questions || detail.questions.length === 0) return;
+      setTitle(detail.title);
+      setPassage(detail.passage);
+      setDifficulty(detail.difficulty as Difficulty);
+      setQuestions(detail.questions);
+      setQuizIndex(0);
+      setSelectedOption(null);
+      setAnswered(false);
+      setResults([]);
+      setSaved(false);
+      setIsRetry(true);
+      setShowText(false);
+      setError('');
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setPhase('listen');
+    } catch {
+      // silently ignore replay errors
+    }
   }, []);
 
   const handleRetryWrong = useCallback(() => {
@@ -279,6 +304,17 @@ export default function Listening() {
                     }}>
                       {h.score}%
                     </div>
+                    <button
+                      onClick={() => handleReplay(h.id)}
+                      title="Replay this quiz"
+                      style={{
+                        marginLeft: 8, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border, #e5e7eb)',
+                        background: 'var(--bg-primary, #fff)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                        fontSize: 12, color: 'var(--primary, #3b82f6)',
+                      }}
+                    >
+                      <Play size={12} /> Replay
+                    </button>
                   </div>
                 ))}
               </div>
