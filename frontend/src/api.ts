@@ -1254,6 +1254,7 @@ export interface ListeningProgressResponse {
   avg_score: number;
   best_score: number;
   by_difficulty: ListeningDifficultyBreakdown[];
+  by_topic: { topic: string; count: number; avg_score: number }[];
   trend: string;
 }
 

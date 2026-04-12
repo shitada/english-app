@@ -1476,11 +1476,29 @@ async def get_listening_progress(db: aiosqlite.Connection) -> dict[str, Any]:
     else:
         trend = "insufficient_data"
 
+    # By topic breakdown
+    topic_rows = await db.execute_fetchall(
+        """SELECT topic, COUNT(*) as count, COALESCE(AVG(score), 0) as avg_score
+           FROM listening_quiz_results
+           WHERE topic != ''
+           GROUP BY topic
+           ORDER BY avg_score ASC"""
+    )
+    by_topic = [
+        {
+            "topic": tr["topic"],
+            "count": tr["count"],
+            "avg_score": round(float(tr["avg_score"]), 1),
+        }
+        for tr in topic_rows
+    ]
+
     return {
         "total_quizzes": total_quizzes,
         "avg_score": avg_score,
         "best_score": best_score,
         "by_difficulty": by_difficulty,
+        "by_topic": by_topic,
         "trend": trend,
     }
 

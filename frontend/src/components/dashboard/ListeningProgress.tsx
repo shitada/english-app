@@ -81,6 +81,33 @@ export function ListeningProgress() {
           ))}
         </div>
       )}
+
+      {data.by_topic && data.by_topic.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <h4 style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>By Topic</h4>
+          {data.by_topic.map((t) => (
+            <div key={t.topic} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, textTransform: 'capitalize', minWidth: 100 }}>
+                {t.topic.replace(/_/g, ' ')}
+              </span>
+              <div style={{ flex: 1, height: 8, background: 'var(--bg-secondary)', borderRadius: 4, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: `${Math.min(t.avg_score, 100)}%`,
+                    height: '100%',
+                    background: scoreColor(t.avg_score),
+                    borderRadius: 4,
+                    transition: 'width 0.3s ease',
+                  }}
+                />
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 60, textAlign: 'right' }}>
+                {t.avg_score}% ({t.count})
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

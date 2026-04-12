@@ -554,6 +554,7 @@ async def test_listening_progress_empty(client):
     assert data["avg_score"] == 0
     assert data["best_score"] == 0
     assert data["by_difficulty"] == []
+    assert data["by_topic"] == []
     assert data["trend"] == "insufficient_data"
 
 
@@ -619,6 +620,33 @@ async def test_listening_progress_trend(client):
     data = res.json()
     assert data["trend"] in ("improving", "stable", "declining")
     assert data["total_quizzes"] == 10
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listening_progress_by_topic(client):
+    """GET /listening-progress includes by_topic breakdown."""
+    for topic, score in [("hotel", 80.0), ("hotel", 90.0), ("restaurant", 60.0)]:
+        body = {
+            "title": f"Quiz {topic}",
+            "difficulty": "beginner",
+            "total_questions": 5,
+            "correct_count": round(score / 100 * 5),
+            "score": score,
+            "topic": topic,
+        }
+        r = await client.post("/api/pronunciation/listening-quiz/results", json=body)
+        assert r.status_code == 200
+
+    res = await client.get("/api/dashboard/listening-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["by_topic"]) == 2
+    # Ordered by avg_score ASC so restaurant (60) comes first
+    assert data["by_topic"][0]["topic"] == "restaurant"
+    assert data["by_topic"][0]["avg_score"] == 60.0
+    assert data["by_topic"][1]["topic"] == "hotel"
+    assert data["by_topic"][1]["avg_score"] == 85.0
 
 
 @pytest.mark.integration

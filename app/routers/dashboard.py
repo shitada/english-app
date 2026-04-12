@@ -565,11 +565,18 @@ class DifficultyStats(BaseModel):
     avg_score: float
 
 
+class TopicStats(BaseModel):
+    topic: str
+    count: int
+    avg_score: float
+
+
 class ListeningProgressResponse(BaseModel):
     total_quizzes: int
     avg_score: float
     best_score: float
     by_difficulty: list[DifficultyStats]
+    by_topic: list[TopicStats]
     trend: str
 
 
