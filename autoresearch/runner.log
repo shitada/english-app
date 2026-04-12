@@ -541,3 +541,205 @@ Now update the backlog and create session log:
 ● Create session-2026-04-13-405-406.md +26
   └ autoresearch/logs/session-2026-04-13-405-406.md
 
+[2026-04-13 00:58:18] Copilot invocation completed (duration: 1744s)
+[2026-04-13 00:58:18] Verifying Playwright test depth...
+[2026-04-13 00:58:18]   PW_NA iter=408 — no UI file changes, Playwright test not required
+[2026-04-13 00:58:18] Running post-invocation audit (iter 407-408)...
+============================================
+ Autoresearch Audit
+ Iterations: 407 — 408
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-13 00:58:18
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 407 408[0m
+[0;31m  Tester: FAIL — missing: 407 408[0m
+[0;31m  Evaluator: FAIL — missing: 407 408[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-13 00:58:19] Audit found 3 error(s) — fixes applied where possible
+[2026-04-13 00:58:22] Current iteration count: 408 / 434
+[2026-04-13 00:58:22] ------------------------------------------
+[2026-04-13 00:58:22] Invocation 3 / 10
+[2026-04-13 00:58:22] Resuming from iteration 409
+[2026-04-13 00:58:22] ------------------------------------------
+[2026-04-13 00:58:22] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-409-to-434.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read latest session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 3 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Starting autoresearch loop from iteration 409. Two backlog items remain, targeting 2 iterations.
+
+**Iteration 409 — Step 1: Context Restore + Start Timer**
+
+● Record T0 for iteration 409 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1776009527. Now calling the proposer subagent.
+
+**Iteration 409 — Step 2: Propose**
+
+● Proposer Propose iteration 409
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1350:1600 (222 lines read)
+  └ Read api.ts
+      └ frontend/src/api.ts
+
+Got the proposal. Let me record T1 and examine the existing patterns before implementing.
+
+● Record T1 for iteration 409 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check existing fluency types in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "fluency\|FluencyProgression\|fluency_progression" frontend/src/api.ts | head -20
+  └ 6 lines...
+
+● List dashboard components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/dashboard/
+  └ 8 lines...
+
+● Check dashboard index exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 19 lines...
+
+● Read SpeakingConfidence as pattern reference (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/SpeakingConfidence.tsx
+  └ 124 lines...
+
+● Check Dashboard imports and usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "SpeakingConfidence\|TopicCoverageMap\|VocabActivation" frontend/src/pages/Dashboard.tsx | head
+  │ -20
+  └ 5 lines...
+
+● Find backend endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "fluency.progression\|fluency-progression" app/routers/*.py app/dal/*.py 2>/dev/null | head -10
+  └ 7 lines...
+
+● Get response model structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 30 "class
+  │ FluencyProgressionResponse\|class FluencySession" app/routers/dashboard.py | head -40
+  └ 26 lines...
+
+● Check Dashboard around SpeakingConfidence (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '125,145p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 21 lines...
+
+Now I have the full picture. Let me implement the changes. The component will follow the SpeakingConfidence pattern (self-fetching like TopicCoverageMap/VocabActivationCard).
+
+**Iteration 409 — Step 3: Implement**
+
+● Find API function patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "TopicCoverage\|VocabActivation\|getFluency\|getTopicCoverage" frontend/src/api.ts | head -10
+  └ 7 lines...
+
+● See end of api.ts for where to add types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 frontend/src/api.ts
+  └ 31 lines...
+
+● See API pattern around vocab activation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '255,270p' frontend/src/api.ts
+  └ 17 lines...
+
+Now let me implement all the changes:
+
+● Find exact line for API function insertion (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getDashboardTopicCoverage"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Edit api.ts +3
+  └ frontend/src/api.ts
+
+● Edit api.ts +18
+  └ frontend/src/api.ts
+
+Now create the component:
+
+● Create FluencyProgressionChart.tsx +144
+  └ frontend/src/components/dashboard/FluencyProgressionChart.tsx
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx:
+
+● Check import line (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '5,5p'
+  │ frontend/src/pages/Dashboard.tsx
+  └ 2 lines...
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Record T2 and commit:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2 = 1776009706. Implementation done. Now commit:
+

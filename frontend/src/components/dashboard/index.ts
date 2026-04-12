@@ -16,3 +16,4 @@ export { VocabForecastCard } from './VocabForecastCard';
 export { VocabularyProgress } from './VocabularyProgress';
 export { TopicCoverageMap } from './TopicCoverageMap';
 export { WeeklyReport } from './WeeklyReport';
+export { FluencyProgressionChart } from './FluencyProgressionChart';

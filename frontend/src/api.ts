@@ -261,6 +261,9 @@ export const api = {
   getDashboardTopicCoverage: () =>
     request<TopicCoverageResponse>('/api/dashboard/topic-coverage'),
 
+  getDashboardFluencyProgression: (limit = 30) =>
+    request<FluencyProgressionResponse>(`/api/dashboard/fluency-progression?limit=${limit}`),
+
   // Pronunciation weak spots
   getPronunciationWeaknesses: (limit = 10) =>
     request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
@@ -1552,6 +1555,24 @@ export interface TopicCoverageResponse {
   practiced_count: number;
   coverage_rate: number;
   topics: TopicCoverageItem[];
+}
+
+export interface FluencySession {
+  conversation_id: number;
+  topic: string;
+  date: string;
+  grammar_accuracy_rate: number;
+  vocabulary_diversity: number;
+  avg_words_per_message: number;
+  total_user_messages: number;
+  fluency_score: number;
+  personal_best: boolean;
+}
+
+export interface FluencyProgressionResponse {
+  sessions: FluencySession[];
+  session_count: number;
+  trend: string;
 }
 
 export interface ListenRespondPromptResponse {
