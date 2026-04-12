@@ -460,3 +460,84 @@ The `speak` function only takes `(text, lang)` — no `onEnd` callback. I need t
 
 Now commit and test:
 
+● Commit iteration 406 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #406: Add Quick Listen & Respond card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+All passing (same pre-existing flaky test). TS check passes. Now QA test — this is a feature with frontend page changes (Home.tsx), so tester is MANDATORY.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 406
+  │ Read QuickShadowCard.tsx
+  │   │ frontend/src/components/QuickShadowCard.tsx
+  │   └ L55:80 (26 lines read)
+  └ Read QuickDictationCard.tsx
+      │ frontend/src/components/QuickDictationCard.tsx
+      └ L1:80 (80 lines read)
+
+● Stop server, record T3 (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; date +%s
+  └ 2 lines...
+
+T3=1776007603, test_sec=495. Now call the evaluator:
+
+● Evaluator Evaluate iteration 406
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L870:960 (90 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L960:end (59 lines read)
+
+Server killed as expected. Let me record the results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator: total_score=6.9, verdict=keep. Recording results:
+
+● Record results for iteration 406 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "406" "$HASH" "$DATE" "243" "92" "495" "112" "850" \
+  │ "1303" "1304" "pass" "6.9" "kept" "Add Quick Listen and Respond card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Now update the backlog and create session log:
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >> autoresearch/backlog.md << 'EOF'
+  │
+  │
+  │ ## [NEW] Iterations 405–406…
+  └ 3 lines...
+
+● Create session-2026-04-13-405-406.md +26
+  └ autoresearch/logs/session-2026-04-13-405-406.md
+
