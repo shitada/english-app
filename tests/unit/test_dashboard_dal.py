@@ -29,6 +29,7 @@ from app.dal.dashboard import (
     get_phrase_of_the_day,
     get_vocabulary_activation,
     get_vocabulary_forecast,
+    get_fluency_progression,
     get_weekly_report,
     get_word_of_the_day,
     set_learning_goal,
@@ -2001,3 +2002,96 @@ class TestGetVocabularyActivation:
         assert result["activated_words"][0]["times_used"] == 3
         assert result["activated_words"][1]["word"] == "lobby"
         assert result["activated_words"][1]["times_used"] == 1
+
+
+@pytest.mark.unit
+class TestGetFluencyProgression:
+    async def test_empty_database(self, test_db):
+        result = await get_fluency_progression(test_db)
+        assert result["sessions"] == []
+        assert result["session_count"] == 0
+        assert result["trend"] == "insufficient_data"
+
+    async def test_single_session(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {
+            "performance": {
+                "grammar_accuracy_rate": 80,
+                "vocabulary_diversity": 60,
+                "avg_words_per_message": 12,
+                "total_user_messages": 8,
+            }
+        }
+        await end_conversation(test_db, cid, summary=summary)
+
+        result = await get_fluency_progression(test_db)
+        assert result["session_count"] == 1
+        assert len(result["sessions"]) == 1
+        session = result["sessions"][0]
+        assert session["topic"] == "hotel_checkin"
+        assert session["grammar_accuracy_rate"] == 80.0
+        assert session["vocabulary_diversity"] == 60.0
+        assert session["avg_words_per_message"] == 12.0
+        assert session["total_user_messages"] == 8
+        assert session["fluency_score"] > 0
+        assert session["personal_best"] is True
+        assert result["trend"] == "insufficient_data"
+
+    async def test_improving_trend(self, test_db):
+        import json
+
+        for i in range(6):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            summary = {
+                "performance": {
+                    "grammar_accuracy_rate": 40 + i * 10,
+                    "vocabulary_diversity": 30 + i * 10,
+                    "avg_words_per_message": 5 + i * 2,
+                    "total_user_messages": 3 + i * 2,
+                }
+            }
+            await test_db.execute(
+                "UPDATE conversations SET started_at = ?, status = 'ended', summary_json = ? WHERE id = ?",
+                (f"2026-01-0{i + 1} 10:00:00", json.dumps(summary), cid),
+            )
+        await test_db.commit()
+
+        result = await get_fluency_progression(test_db)
+        assert result["session_count"] == 6
+        assert result["trend"] == "improving"
+        # Last session should have highest score and be personal best
+        assert result["sessions"][-1]["personal_best"] is True
+
+    async def test_personal_best_on_highest_score(self, test_db):
+        import json
+
+        scores = [50, 80, 60, 70]
+        for i, grammar in enumerate(scores):
+            cid = await create_conversation(test_db, "hotel_checkin")
+            summary = {
+                "performance": {
+                    "grammar_accuracy_rate": grammar,
+                    "vocabulary_diversity": grammar,
+                    "avg_words_per_message": 10,
+                    "total_user_messages": 5,
+                }
+            }
+            await test_db.execute(
+                "UPDATE conversations SET started_at = ?, status = 'ended', summary_json = ? WHERE id = ?",
+                (f"2026-01-0{i + 1} 10:00:00", json.dumps(summary), cid),
+            )
+        await test_db.commit()
+
+        result = await get_fluency_progression(test_db)
+        best_sessions = [s for s in result["sessions"] if s["personal_best"]]
+        assert len(best_sessions) == 1
+        assert best_sessions[0]["grammar_accuracy_rate"] == 80.0
+
+    async def test_skips_conversations_without_performance(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        summary = {"other_key": "value"}
+        await end_conversation(test_db, cid, summary=summary)
+
+        result = await get_fluency_progression(test_db)
+        assert result["sessions"] == []
+        assert result["session_count"] == 0

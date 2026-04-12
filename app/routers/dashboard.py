@@ -754,3 +754,30 @@ class TopicCoverageResponse(BaseModel):
 async def get_topic_coverage(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get conversation topic coverage showing which topics have been practiced."""
     return await dash_dal.get_topic_coverage(db)
+
+
+class FluencySession(BaseModel):
+    conversation_id: int
+    topic: str
+    date: str
+    grammar_accuracy_rate: float
+    vocabulary_diversity: float
+    avg_words_per_message: float
+    total_user_messages: int
+    fluency_score: float
+    personal_best: bool
+
+
+class FluencyProgressionResponse(BaseModel):
+    sessions: list[FluencySession]
+    session_count: int
+    trend: str
+
+
+@router.get("/fluency-progression", response_model=FluencyProgressionResponse)
+async def get_fluency_progression(
+    limit: int = Query(default=30, ge=3, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get fluency progression metrics over time from conversation history."""
+    return await dash_dal.get_fluency_progression(db, limit=limit)

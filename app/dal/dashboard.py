@@ -2144,3 +2144,94 @@ async def get_topic_coverage(db: aiosqlite.Connection) -> dict:
         "coverage_rate": coverage_rate,
         "topics": items,
     }
+
+
+async def get_fluency_progression(
+    db: aiosqlite.Connection,
+    *,
+    limit: int = 30,
+) -> dict[str, Any]:
+    """Compute fluency progression from ended conversations with performance data."""
+    import json as _json
+
+    rows = await db.execute_fetchall(
+        """
+        SELECT id, topic, started_at, summary_json
+        FROM conversations
+        WHERE status = 'ended' AND summary_json IS NOT NULL
+        ORDER BY started_at ASC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+
+    sessions: list[dict[str, Any]] = []
+    best_idx = -1
+    best_score = -1.0
+
+    for row in rows:
+        try:
+            summary = _json.loads(row["summary_json"]) if isinstance(row["summary_json"], str) else row["summary_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if not isinstance(summary, dict):
+            continue
+        perf = summary.get("performance")
+        if not isinstance(perf, dict):
+            continue
+
+        accuracy = float(perf.get("grammar_accuracy_rate", 0))
+        diversity = float(perf.get("vocabulary_diversity", 0))
+        avg_words = float(perf.get("avg_words_per_message", 0))
+        total_msgs = int(perf.get("total_user_messages", 0))
+
+        # Composite fluency score (0-100)
+        fluency_score = round(
+            accuracy * 0.3
+            + diversity * 0.3
+            + min(avg_words / 15.0 * 100, 100.0) * 0.25
+            + min(total_msgs / 10.0 * 100, 100.0) * 0.15,
+            1,
+        )
+
+        idx = len(sessions)
+        sessions.append({
+            "conversation_id": row["id"],
+            "topic": row["topic"],
+            "date": row["started_at"],
+            "grammar_accuracy_rate": round(accuracy, 1),
+            "vocabulary_diversity": round(diversity, 1),
+            "avg_words_per_message": round(avg_words, 1),
+            "total_user_messages": total_msgs,
+            "fluency_score": fluency_score,
+            "personal_best": False,
+        })
+
+        if fluency_score > best_score:
+            best_score = fluency_score
+            best_idx = idx
+
+    # Mark personal best
+    if best_idx >= 0:
+        sessions[best_idx]["personal_best"] = True
+
+    # Compute trend
+    if len(sessions) < 2:
+        trend = "insufficient_data"
+    else:
+        mid = len(sessions) // 2
+        first_half_avg = sum(s["fluency_score"] for s in sessions[:mid]) / mid
+        second_half_avg = sum(s["fluency_score"] for s in sessions[mid:]) / (len(sessions) - mid)
+        diff = second_half_avg - first_half_avg
+        if diff > 2:
+            trend = "improving"
+        elif diff < -2:
+            trend = "declining"
+        else:
+            trend = "stable"
+
+    return {
+        "sessions": sessions,
+        "session_count": len(sessions),
+        "trend": trend,
+    }
