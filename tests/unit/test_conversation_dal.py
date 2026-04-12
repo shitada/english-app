@@ -1214,6 +1214,106 @@ class TestSpeakingPaceMetrics:
         metrics = await get_conversation_metrics(test_db, cid)
         assert metrics["speaking_pace_wpm"] == 0
 
+    async def test_basic_wpm_calculation(self, test_db):
+        """Insert assistant msg at T, user msg at T+10s with 5 words → WPM = 30."""
+        from app.dal.conversation import _compute_speaking_pace
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "How can I help you?", "2026-01-01T12:00:00"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "I need a room please", "2026-01-01T12:00:10"),
+        )
+        await test_db.commit()
+        result = await _compute_speaking_pace(test_db, cid)
+        assert result["speaking_pace_wpm"] == 30.0
+        assert result["fastest_wpm"] == 30.0
+        assert result["slowest_wpm"] == 30.0
+        assert len(result["pace_trend"]) == 1
+
+    async def test_fast_message_skipped(self, test_db):
+        """Messages with elapsed < 2s should be skipped."""
+        from app.dal.conversation import _compute_speaking_pace
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Hello", "2026-01-01T12:00:00"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "Hi there friend", "2026-01-01T12:00:01"),
+        )
+        await test_db.commit()
+        result = await _compute_speaking_pace(test_db, cid)
+        assert result["speaking_pace_wpm"] == 0
+        assert result["pace_trend"] == []
+
+    async def test_multiple_exchanges_avg_fastest_slowest(self, test_db):
+        """Two exchanges with different speeds → verify avg, fastest, slowest."""
+        from app.dal.conversation import _compute_speaking_pace
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # Exchange 1: 6 words in 10s → 36.0 WPM
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Tell me about yourself", "2026-01-01T12:00:00"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "I am a software engineer here", "2026-01-01T12:00:10"),
+        )
+        # Exchange 2: 3 words in 20s → 9.0 WPM
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "That is interesting", "2026-01-01T12:00:30"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "Yes it is", "2026-01-01T12:00:50"),
+        )
+        await test_db.commit()
+        result = await _compute_speaking_pace(test_db, cid)
+        assert result["fastest_wpm"] == 36.0
+        assert result["slowest_wpm"] == 9.0
+        assert len(result["pace_trend"]) == 2
+        # avg = (36.0 + 9.0) / 2 = 22.5
+        assert result["speaking_pace_wpm"] == 22.5
+
+    async def test_invalid_timestamp_gracefully_skipped(self, test_db):
+        """Corrupted created_at should be skipped without crashing."""
+        from app.dal.conversation import _compute_speaking_pace
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Hello", "not-a-date"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "Hi there", "also-not-a-date"),
+        )
+        await test_db.commit()
+        result = await _compute_speaking_pace(test_db, cid)
+        assert result["speaking_pace_wpm"] == 0
+        assert result["pace_trend"] == []
+
+    async def test_empty_content_user_message(self, test_db):
+        """User message with empty content should not produce a pace entry."""
+        from app.dal.conversation import _compute_speaking_pace
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "assistant", "Go ahead", "2026-01-01T12:00:00"),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+            (cid, "user", "   ", "2026-01-01T12:00:10"),
+        )
+        await test_db.commit()
+        result = await _compute_speaking_pace(test_db, cid)
+        assert result["speaking_pace_wpm"] == 0
+        assert result["pace_trend"] == []
+
 
 @pytest.mark.unit
 class TestHistoricalSessionAverages:
