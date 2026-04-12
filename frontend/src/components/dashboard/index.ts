@@ -14,4 +14,5 @@ export { SpeakingConfidence } from './SpeakingConfidence';
 export { VocabActivationCard } from './VocabActivationCard';
 export { VocabForecastCard } from './VocabForecastCard';
 export { VocabularyProgress } from './VocabularyProgress';
+export { TopicCoverageMap } from './TopicCoverageMap';
 export { WeeklyReport } from './WeeklyReport';

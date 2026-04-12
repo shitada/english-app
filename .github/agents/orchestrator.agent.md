@@ -9,11 +9,11 @@ You are the orchestrator of a Karpathy-style autoresearch loop for an English le
 
 ## Setup
 
-Before starting the loop, read these files to understand the current state:
+Before starting the loop, read these to understand the current state:
 
-1. `autoresearch/results.tsv` — past experiment results
-2. `autoresearch/backlog.md` — improvement ideas prioritized by importance
-3. Run `git log --oneline -10` to see recent commits
+1. `tail -20 autoresearch/results.tsv` — last 20 iteration results (do NOT read the full file)
+2. Uncompleted backlog items ONLY: `grep '^- \[ \]' autoresearch/backlog.md` (do NOT read completed items)
+3. Run `git log --oneline -5` to see recent commits
 
 Determine the next iteration number from `results.tsv` (start at 1 if empty, or resume from last iteration + 1).
 
@@ -56,14 +56,14 @@ You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do 
 
 ### Step 1 — Context Restore
 At the START of every iteration, re-read:
-- The **last 20 rows** of `autoresearch/results.tsv` (do NOT read the full file — use `tail -20`)
-- `autoresearch/backlog.md` (current priorities)
+- The **last 20 rows** of `autoresearch/results.tsv` (use `tail -20`, do NOT read the full file)
+- **Uncompleted backlog items ONLY**: `grep '^- \[ \]' autoresearch/backlog.md` (do NOT read completed items — they waste context)
 - `git log --oneline -5` (recent changes)
-- The latest session log in `autoresearch/logs/` if it exists:
+- The latest session log — read ONLY the **last 50 lines** (`tail -50 <file>`):
   ```bash
-  ls -t autoresearch/logs/invocation-*.md 2>/dev/null | head -1
+  tail -50 "$(ls -t autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
   ```
-  Read this file to understand what the previous invocation accomplished.
+  This gives you a summary without consuming excessive context.
 
 Record the start timestamp:
 ```bash
@@ -77,11 +77,11 @@ Save this as `T0`.
 **You MUST include the following in the prompt you pass to the proposer** (do NOT just reference file names — paste the actual content):
 
 1. The literal text: "Iteration: N" (current iteration number)
-2. The **full contents** of `autoresearch/backlog.md` — read the file and paste its content into the prompt
+2. **ONLY the uncompleted items** from the backlog: `grep '^- \[ \]' autoresearch/backlog.md` — do NOT paste completed items
 3. The **last 20 rows** of `autoresearch/results.tsv` — read and paste so the proposer can avoid duplicates
 4. For iterations 1-2: Add "PRIORITY: Focus on test coverage"
 
-If the backlog contains uncompleted feature items, tell the proposer: "The backlog has uncompleted feature items. Prioritize those over finding new bugs."
+If there are uncompleted backlog items, tell the proposer: "Prioritize uncompleted feature items over finding new bugs."
 
 The proposer will return a JSON proposal: `{type, title, description, files_to_modify, priority, estimated_complexity}`
 

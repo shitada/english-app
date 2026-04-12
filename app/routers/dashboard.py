@@ -732,3 +732,25 @@ async def get_vocabulary_activation(
 ):
     """Analyze active usage of studied vocabulary words in conversations."""
     return await dash_dal.get_vocabulary_activation(db, limit=limit)
+
+
+class TopicCoverageItem(BaseModel):
+    topic_id: str
+    label: str
+    description: str
+    practice_count: int
+    last_practiced_at: str | None
+    grammar_accuracy: float | None
+
+
+class TopicCoverageResponse(BaseModel):
+    total_topics: int
+    practiced_count: int
+    coverage_rate: float
+    topics: list[TopicCoverageItem]
+
+
+@router.get("/topic-coverage", response_model=TopicCoverageResponse)
+async def get_topic_coverage(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get conversation topic coverage showing which topics have been practiced."""
+    return await dash_dal.get_topic_coverage(db)

@@ -2070,3 +2070,77 @@ async def get_vocabulary_activation(
         "unactivated_words": unactivated[:limit],
         "by_topic": by_topic,
     }
+
+
+async def get_topic_coverage(db: aiosqlite.Connection) -> dict:
+    """Get conversation topic coverage with practice counts and accuracy."""
+    from app.config import get_conversation_topics
+
+    topics = get_conversation_topics()
+    topic_map = {t["id"]: t for t in topics}
+
+    # Get practice counts and last practiced per topic
+    rows = await db.execute_fetchall(
+        """
+        SELECT
+            topic,
+            COUNT(*) as practice_count,
+            MAX(started_at) as last_practiced_at
+        FROM conversations
+        WHERE status IN ('active', 'ended')
+        GROUP BY topic
+        """
+    )
+    practice_data: dict = {}
+    for row in rows:
+        practice_data[row["topic"]] = {
+            "practice_count": row["practice_count"],
+            "last_practiced_at": row["last_practiced_at"],
+        }
+
+    # Get grammar accuracy per topic from summary_json
+    accuracy_rows = await db.execute_fetchall(
+        """
+        SELECT
+            topic,
+            AVG(
+                CASE
+                    WHEN json_extract(summary_json, '$.performance.grammar_accuracy_rate') IS NOT NULL
+                    THEN CAST(json_extract(summary_json, '$.performance.grammar_accuracy_rate') AS REAL)
+                    ELSE NULL
+                END
+            ) as avg_accuracy
+        FROM conversations
+        WHERE status IN ('active', 'ended') AND summary_json IS NOT NULL
+        GROUP BY topic
+        """
+    )
+    accuracy_map: dict = {}
+    for row in accuracy_rows:
+        if row["avg_accuracy"] is not None:
+            accuracy_map[row["topic"]] = round(row["avg_accuracy"], 1)
+
+    # Build coverage items
+    items = []
+    for topic in topics:
+        tid = topic["id"]
+        pd = practice_data.get(tid, {})
+        items.append({
+            "topic_id": tid,
+            "label": topic["label"],
+            "description": topic.get("description", ""),
+            "practice_count": pd.get("practice_count", 0),
+            "last_practiced_at": pd.get("last_practiced_at"),
+            "grammar_accuracy": accuracy_map.get(tid),
+        })
+
+    total_topics = len(topics)
+    practiced_count = sum(1 for i in items if i["practice_count"] > 0)
+    coverage_rate = round(practiced_count / total_topics * 100, 1) if total_topics > 0 else 0.0
+
+    return {
+        "total_topics": total_topics,
+        "practiced_count": practiced_count,
+        "coverage_rate": coverage_rate,
+        "topics": items,
+    }

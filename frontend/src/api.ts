@@ -249,6 +249,9 @@ export const api = {
   getDashboardVocabActivation: (limit = 20) =>
     request<VocabularyActivationResponse>(`/api/dashboard/vocabulary-activation?limit=${limit}`),
 
+  getDashboardTopicCoverage: () =>
+    request<TopicCoverageResponse>('/api/dashboard/topic-coverage'),
+
   // Pronunciation weak spots
   getPronunciationWeaknesses: (limit = 10) =>
     request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
@@ -1524,4 +1527,20 @@ export interface VocabularyActivationResponse {
   activated_words: ActivatedWordItem[];
   unactivated_words: ActivatedWordItem[];
   by_topic: TopicActivationItem[];
+}
+
+export interface TopicCoverageItem {
+  topic_id: string;
+  label: string;
+  description: string;
+  practice_count: number;
+  last_practiced_at: string | null;
+  grammar_accuracy: number | null;
+}
+
+export interface TopicCoverageResponse {
+  total_topics: number;
+  practiced_count: number;
+  coverage_rate: number;
+  topics: TopicCoverageItem[];
 }

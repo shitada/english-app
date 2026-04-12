@@ -17,6 +17,7 @@ MAX_SESSION_LOGS=5
 # Defaults
 ADDITIONAL_ITERATIONS=20
 MAX_INVOCATIONS=10
+MAX_PER_INVOCATION=2
 FEATURE_RATIO=20
 DRY_RUN=false
 
@@ -34,6 +35,7 @@ The script automatically re-invokes until the target iteration count is reached.
 Options:
   -n, --iterations <N>      Number of additional iterations to run (default: $ADDITIONAL_ITERATIONS)
   -m, --max-invocations <N> Maximum copilot invocations to prevent runaway (default: $MAX_INVOCATIONS)
+  --max-per-invocation <N>  Max iterations per copilot invocation (default: $MAX_PER_INVOCATION)
   --feature-ratio <N>       Percentage of iterations that should be features (default: $FEATURE_RATIO)
   --dry-run                 Show what would be executed without running
   -h, --help                Show this help message
@@ -56,6 +58,8 @@ while [[ $# -gt 0 ]]; do
             ADDITIONAL_ITERATIONS="$2"; shift 2 ;;
         -m|--max-invocations)
             MAX_INVOCATIONS="$2"; shift 2 ;;
+        --max-per-invocation)
+            MAX_PER_INVOCATION="$2"; shift 2 ;;
         --feature-ratio)
             FEATURE_RATIO="$2"; shift 2 ;;
         --dry-run)
@@ -120,11 +124,9 @@ build_prompt() {
     local remaining=$((target - current_iter))
 
     # Cap iterations per invocation to prevent context exhaustion.
-    # When the orchestrator runs too many iterations in one invocation,
-    # it forgets mandatory rules and starts self-implementing.
-    local max_per_invocation=3
-    if [[ "$remaining" -gt "$max_per_invocation" ]]; then
-        remaining=$max_per_invocation
+    # Controlled by --max-per-invocation CLI arg (not hardcoded, survives git resets).
+    if [[ "$remaining" -gt "$MAX_PER_INVOCATION" ]]; then
+        remaining=$MAX_PER_INVOCATION
     fi
 
     # Calculate feature quota for this run
@@ -185,10 +187,26 @@ main() {
     log "Target iteration:  $TARGET_ITERATIONS"
     log "Feature ratio:     ${FEATURE_RATIO}% ($(( ADDITIONAL_ITERATIONS * FEATURE_RATIO / 100 )) features target)"
     log "Max invocations:   $MAX_INVOCATIONS"
+    log "Max per invoc:     $MAX_PER_INVOCATION"
     log "Project dir:       $PROJECT_DIR"
     log "=========================================="
 
     check_git_clean
+
+    # Auto-clean backlog: archive completed items to keep context small
+    local backlog_file="$PROJECT_DIR/autoresearch/backlog.md"
+    if [[ -f "$backlog_file" ]]; then
+        local completed_count
+        completed_count=$(grep -c '^- \[x\]' "$backlog_file" 2>/dev/null || true)
+        if [[ "$completed_count" -gt 10 ]]; then
+            log "Archiving $completed_count completed backlog items..."
+            awk '/^#/ || /^$/ || /^- \[ \]/ || /^Improvement ideas/' "$backlog_file" > "${backlog_file}.tmp"
+            mv "${backlog_file}.tmp" "$backlog_file"
+            local new_count
+            new_count=$(wc -l < "$backlog_file")
+            log "Backlog cleaned: $new_count lines remain"
+        fi
+    fi
 
     # Rotate runner.log at start of each run
     if [[ -f "$LOG_FILE" ]]; then
