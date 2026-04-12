@@ -292,3 +292,8 @@ The app's goal is to help users become fluent English speakers through short, ef
 
 - [x] ❌ Add Vocabulary Used section to Conversation Summary (#393 — discarded, Playwright unavailable for UX validation)
 - [x] Add data-populated integration tests for difficulty-recommendation and session-averages (#394)
+
+## [NEW] Iterations 395–396
+
+- [x] ❌ Add Speed Ladder Shadowing drill to Pronunciation page (#395 — discarded, Playwright unavailable for QA)
+- [x] ✅ Add vocabulary activation analytics endpoint tracking word usage in conversations (#396)
