@@ -1443,6 +1443,46 @@ export async function evaluateListeningSummary(data: {
   });
 }
 
+// ── Listening Discussion ──
+
+export interface ListeningDiscussionQuestion {
+  question: string;
+  hints: string[];
+}
+
+export interface ListeningDiscussionEvaluation {
+  argument_score: number;
+  relevance_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  overall_score: number;
+  feedback: string;
+  model_answer: string;
+}
+
+export async function getListeningDiscussionQuestion(data: {
+  passage: string;
+}): Promise<ListeningDiscussionQuestion> {
+  return request<ListeningDiscussionQuestion>('/api/pronunciation/listening-discussion/question', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function evaluateListeningDiscussion(data: {
+  passage: string;
+  question: string;
+  user_response: string;
+  duration_seconds: number;
+}): Promise<ListeningDiscussionEvaluation> {
+  return request<ListeningDiscussionEvaluation>('/api/pronunciation/listening-discussion/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // --- Vocabulary Forecast (Dashboard) ---
 
 export interface VocabForecastAtRiskWord {

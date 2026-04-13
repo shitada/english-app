@@ -161,9 +161,10 @@ ${feature_instruction}
 
 ## Task:
 Resume the autoresearch improvement loop starting from iteration ${next_iter}.
-Run up to ${remaining} more iterations (target: iteration ${target}).
-Read \`autoresearch/backlog.md\` and \`tail -20 autoresearch/results.tsv\` to understand current state.
-If a session log exists in \`autoresearch/logs/\`, read the latest one for context from the previous invocation.
+**Run EXACTLY ${remaining} iteration(s), then STOP.** Do NOT run more than ${remaining}. After completing ${remaining} iteration(s), stop immediately — the runner will re-invoke you for more.
+Read ONLY uncompleted backlog items: \`grep '^- \\[ \\]' autoresearch/backlog.md\` — do NOT read completed items.
+Read \`tail -20 autoresearch/results.tsv\` to see recent results.
+If a session log exists in \`autoresearch/logs/\`, read ONLY the last 50 lines (\`tail -50 <file>\`). Do NOT read the full session log.
 Follow your orchestrator instructions for each iteration: propose → implement → test → evaluate → keep/discard.
 EOF
 }

@@ -52,7 +52,7 @@ You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do 
 
 ## The Experiment Loop
 
-**REPEAT for iterations 1 through 20:**
+**Run ONLY the number of iterations specified in the task prompt ("Run up to N more iterations"). Do NOT exceed this number. When you have completed N iterations, STOP and let the runner re-invoke you.**
 
 ### Step 1 — Context Restore
 At the START of every iteration, re-read:
@@ -313,7 +313,11 @@ Edit `autoresearch/backlog.md`:
 - Add any new ideas discovered during implementation
 - Adjust priorities based on what was learned
 
-### Step 10 — Continue
+### Step 10 — Continue or Stop
+**Check**: Have you completed the number of iterations specified in the task prompt ("Run up to N more iterations")?
+- If YES → **STOP NOW**. Do not start another iteration. The runner will re-invoke you if more iterations are needed.
+- If NO → Continue to the next iteration.
+
 **BEFORE starting the next iteration**, re-read the **Mandatory Rules** section at the top of this file. Verify:
 - You called `proposer` via `runSubagent` in the iteration you just completed
 - You called `evaluator` via `runSubagent` in the iteration you just completed
@@ -334,17 +338,9 @@ If a test run crashes or an implementation fails catastrophically:
 
 If you encounter the same crash pattern twice, skip that type of change and try something different.
 
-## After 20 Iterations — Summary Report
+## After Completing All Requested Iterations
 
-After completing all 20 iterations (or reaching iteration 20), generate `autoresearch/summary.md` containing:
-
-1. **Run Overview**: Start time, end time, total duration
-2. **Results Summary**: Total iterations, kept/discarded/crashed counts, success rate
-3. **Timing Analysis**: Average iteration time, fastest/slowest iteration, average time per phase (propose/implement/test/evaluate)
-4. **Key Improvements**: List of all kept changes with their scores
-5. **Discarded Attempts**: List of discarded changes with reasons
-6. **Remaining Backlog**: Current state of backlog.md
-7. **Recommendations**: Top 3 priorities for the next autoresearch run
+When you have completed all iterations requested in the prompt, simply stop. The runner script will handle summary generation and re-invocation if needed.
 
 
 

@@ -5,6 +5,7 @@ import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
 import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
 import { ListeningKeyVocab } from '../components/ListeningKeyVocab';
+import { ListeningDiscussion } from '../components/ListeningDiscussion';
 import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
@@ -565,6 +566,7 @@ export default function Listening() {
           {passage && <ListenAndSummarize passage={passage} />}
           {passage && questions.length > 0 && <ListeningSpokenQA passage={passage} questions={questions} />}
           {passage && <ListeningKeyVocab passage={passage} />}
+          {passage && <ListeningDiscussion passage={passage} />}
         </div>
       )}
     </div>

@@ -1231,6 +1231,114 @@ async def evaluate_listening_summary(req: ListeningSummaryEvalRequest, _rl=Depen
     }
 
 
+# ── Listening Discussion ──────────────────────────────────────────
+
+class ListeningDiscussionQuestionRequest(BaseModel):
+    passage: str = Field(..., min_length=10, max_length=5000)
+
+
+class ListeningDiscussionQuestionResponse(BaseModel):
+    question: str
+    hints: list[str]
+
+
+class ListeningDiscussionEvalRequest(BaseModel):
+    passage: str = Field(..., min_length=10, max_length=5000)
+    question: str = Field(..., min_length=5, max_length=1000)
+    user_response: str = Field(..., min_length=3, max_length=3000)
+    duration_seconds: float = Field(default=0, ge=0)
+
+
+class ListeningDiscussionEvalResponse(BaseModel):
+    argument_score: float
+    relevance_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_answer: str
+
+
+@router.post("/listening-discussion/question", response_model=ListeningDiscussionQuestionResponse)
+async def generate_listening_discussion_question(req: ListeningDiscussionQuestionRequest, _rl=Depends(require_rate_limit)):
+    """Generate a discussion question based on a listening passage."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Passage:\n\"{req.passage}\"\n\n"
+        "Based on this passage, create ONE thought-provoking discussion question that asks the learner "
+        "to express their personal opinion about the topic. Also provide 2-3 short starter phrases "
+        "they could use to begin their response.\n"
+        "Return JSON with:\n"
+        "- question (string): the discussion question\n"
+        "- hints (array of strings): 2-3 starter phrases like 'I think...', 'In my opinion...'"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English discussion facilitator. Generate discussion questions for listening passages. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listening_discussion_question",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Question generation failed")
+
+    hints = result.get("hints", ["I think...", "In my opinion..."])
+    if not isinstance(hints, list):
+        hints = ["I think...", "In my opinion..."]
+
+    return {
+        "question": str(result.get("question", "What do you think about the topic discussed in the passage?")),
+        "hints": [str(h) for h in hints[:3]],
+    }
+
+
+@router.post("/listening-discussion/evaluate", response_model=ListeningDiscussionEvalResponse)
+async def evaluate_listening_discussion(req: ListeningDiscussionEvalRequest, _rl=Depends(require_rate_limit)):
+    """Evaluate a user's spoken discussion response about a listening passage."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Original passage:\n\"{req.passage}\"\n\n"
+        f"Discussion question:\n\"{req.question}\"\n\n"
+        f"User's spoken response:\n\"{req.user_response}\"\n\n"
+        f"Speaking duration: {req.duration_seconds:.1f} seconds\n\n"
+        "Evaluate the user's response. Return JSON with:\n"
+        "- argument_score (number 1-10): coherence and depth of their opinion/argument\n"
+        "- relevance_score (number 1-10): how well it connects to the passage topic\n"
+        "- grammar_score (number 1-10): grammar and sentence structure quality\n"
+        "- vocabulary_score (number 1-10): range and appropriateness of vocabulary\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- feedback (string): brief constructive feedback\n"
+        "- model_answer (string): a model response to the discussion question for comparison"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach evaluating spoken discussion responses. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listening_discussion_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "argument_score": clamp(result.get("argument_score", 5)),
+        "relevance_score": clamp(result.get("relevance_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_answer": str(result.get("model_answer", "")),
+    }
+
+
 # ── Sentence Transform Drill ──────────────────────────────────────
 
 class SentenceTransformExercise(BaseModel):
