@@ -21,3 +21,4 @@ export { default as ConversationWarmUp } from './ConversationWarmUp';
 export { VocabTargetBar } from './VocabTargetBar';
 export { ConversationCoach } from './ConversationCoach';
 export { ResponseTimer } from './ResponseTimer';
+export { GoalSelector, GoalTracker, GoalSummary } from './ConversationGoals';

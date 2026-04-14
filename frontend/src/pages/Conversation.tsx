@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -54,6 +54,7 @@ export default function Conversation() {
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [diffRec, setDiffRec] = useState<DifficultyRecommendation | null>(null);
   const [roleSwap, setRoleSwap] = useState(false);
+  const [sessionGoals, setSessionGoals] = useState<string[]>([]);
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
   const [historySummary, setHistorySummary] = useState<import('../api').ConversationSummary | null>(null);
@@ -656,6 +657,12 @@ export default function Conversation() {
                 </p>
               )}
             </div>
+            <GoalSelector
+              selectedGoals={sessionGoals}
+              onToggleGoal={(id) => setSessionGoals(prev =>
+                prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
+              )}
+            />
             {topicsLoading ? (
               <div className="topic-grid">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -911,9 +918,13 @@ export default function Conversation() {
       setQuizFinished(false);
       setQuizError('');
       setResponseTimes([]);
+      setSessionGoals([]);
     };
     return (
       <PhaseTransition phase={phase}>
+      {sessionGoals.length > 0 && (
+        <GoalSummary selectedGoals={sessionGoals} messages={messages} />
+      )}
       <ConversationSummaryView
         summary={summary}
         messages={messages}
@@ -1118,6 +1129,10 @@ export default function Conversation() {
 
       {vocabTargets.length > 0 && (
         <VocabTargetBar targetWords={vocabTargets} usedWords={usedVocabWords} onSpeak={tts.speak} />
+      )}
+
+      {sessionGoals.length > 0 && phase === 'chat' && (
+        <GoalTracker selectedGoals={sessionGoals} messages={messages} />
       )}
 
       {phase === 'chat' && (
