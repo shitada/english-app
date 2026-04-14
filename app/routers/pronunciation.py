@@ -1785,3 +1785,109 @@ async def evaluate_opinion(
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
+
+
+# ── Quick Question Formation ────────────────────────────────────
+
+
+class QuestionFormationPromptResponse(BaseModel):
+    answer_sentence: str
+    expected_question: str
+    hint: str
+    difficulty: str
+
+
+@router.get("/question-formation", response_model=QuestionFormationPromptResponse)
+async def get_question_formation_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate an answer sentence for the learner to form the corresponding question."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a question formation exercise for a {difficulty}-level English learner.\n"
+        "Provide an answer sentence and the question that would produce that answer.\n"
+        "Return JSON with:\n"
+        "- answer_sentence (string): a statement/answer (e.g., 'I have been living here for 5 years.')\n"
+        "- expected_question (string): the correct question (e.g., 'How long have you been living here?')\n"
+        "- hint (string): a brief hint about the question type (e.g., 'Use a wh-question with how long')\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="question_formation_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "answer_sentence": str(result.get("answer_sentence", "I go to the gym three times a week.")),
+        "expected_question": str(result.get("expected_question", "How often do you go to the gym?")),
+        "hint": str(result.get("hint", "Ask about frequency.")),
+        "difficulty": difficulty,
+    }
+
+
+class QuestionFormationEvaluateRequest(BaseModel):
+    answer_sentence: str = Field(min_length=1, max_length=500)
+    expected_question: str = Field(min_length=1, max_length=500)
+    user_question: str = Field(min_length=1, max_length=1000)
+
+
+class QuestionFormationEvaluateResponse(BaseModel):
+    grammar_score: float
+    accuracy_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    corrected_question: str
+
+
+@router.post("/question-formation/evaluate", response_model=QuestionFormationEvaluateResponse)
+async def evaluate_question_formation(
+    body: QuestionFormationEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a learner's question formation attempt."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Answer sentence: \"{body.answer_sentence}\"\n"
+        f"Expected question: \"{body.expected_question}\"\n"
+        f"Learner's question: \"{body.user_question}\"\n\n"
+        "Evaluate this question formation attempt. Return JSON with:\n"
+        "- grammar_score (1-10): grammatical correctness of the question\n"
+        "- accuracy_score (1-10): does the question correctly target the answer\n"
+        "- naturalness_score (1-10): does it sound natural in English\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- corrected_question (string): the best version of the question"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="question_formation_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "accuracy_score": clamp(result.get("accuracy_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "corrected_question": str(result.get("corrected_question", body.expected_question)),
+    }

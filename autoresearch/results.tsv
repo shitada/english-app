@@ -428,3 +428,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 426	41143ca	2026-04-14	467	75	70	688	1300	1343	1343	pass	7.45	kept	Add Listening Paraphrase drill to quiz results
 427	12b78c0	2026-04-14	364	231	146	344	1085	1345	1345	pass	7.7	kept	Add Conversation Topic Warm-Up with phrase speaking practice
 428	c9f178b	2026-04-14	223	142	69	315	749	1347	1347	pass	7.25	kept	Add Quick Vocab Sentence card for spoken vocabulary activation
+429	b0f7de1	2026-04-14	257	83	80	398	818	1347	1347	pass	6.4	kept	Add Quick Opinion Practice card to Home page

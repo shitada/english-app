@@ -1750,3 +1750,33 @@ export function evaluateOpinion(question: string, transcript: string, duration_s
     body: JSON.stringify({ question, transcript, duration_seconds }),
   });
 }
+
+// ── Quick Question Formation ────────────────────────────────────
+
+export interface QuestionFormationPromptResponse {
+  answer_sentence: string;
+  expected_question: string;
+  hint: string;
+  difficulty: string;
+}
+
+export interface QuestionFormationEvaluateResponse {
+  grammar_score: number;
+  accuracy_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  corrected_question: string;
+}
+
+export function getQuestionFormationPrompt(difficulty: string = 'intermediate'): Promise<QuestionFormationPromptResponse> {
+  return request<QuestionFormationPromptResponse>(`/api/pronunciation/question-formation?difficulty=${difficulty}`);
+}
+
+export function evaluateQuestionFormation(answer_sentence: string, expected_question: string, user_question: string): Promise<QuestionFormationEvaluateResponse> {
+  return request<QuestionFormationEvaluateResponse>('/api/pronunciation/question-formation/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answer_sentence, expected_question, user_question }),
+  });
+}

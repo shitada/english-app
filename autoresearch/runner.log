@@ -1197,3 +1197,172 @@ Now add the import and card to Home.tsx:
 
 Now commit and test:
 
+● Commit iteration 429 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #429: Add Quick Opinion Practice card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+1347 passed, TypeScript check passed. Now record T2 and get T3:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1776128482. Tests: 1347/1347, ts_check=pass. Frontend .tsx was changed (QuickOpinionCard.tsx + Home.tsx) and type=feature, so tester is REQUIRED. But first, let me start the server and call the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server died. Let me restart it and proceed with the tester.
+
+● Start server and verify (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+Server is up. Now calling the tester.
+
+● Tester QA test iteration 429
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L200:300 (101 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L150:200 (50 lines read)
+
+Tester passed (ux_score=7). Now calling the evaluator.
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 9 lines...
+
+● Evaluator Evaluate iteration 429
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L800:900 (101 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L900:1050 (131 lines read)
+
+Evaluator: total_score=6.4, verdict=keep. Now record results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 429 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "429" "$HASH" "2026-04-14" "257" "83" "80" "398" "818" \
+  │ "1347" "1347" "pass" "6.4" "kept" "Add Quick Opinion Practice card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Iteration 429 ✅ KEPT (6.4). Checklist verified: ✅ proposer called, ✅ evaluator called, ✅ tester called (frontend .tsx changed + type=feature).
+
+---
+
+## Iteration 430
+
+● Record T0 for iteration 430 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read uncompleted backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0 = 1776128904. Backlog empty. Calling proposer for iteration 430.
+
+● Proposer Propose iteration 430
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L800:900 (101 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L900:1000 (100 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1776129129 (propose_sec = 225). Implementing "Add Quick Question Formation speaking drill to Home page".
+
+● Check end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/routers/pronunciation.py
+  └ 11 lines...
+
+✗ Edit pronunciation.py
+  │ app/routers/pronunciation.py
+  └ Multiple matches found
+
+● Edit api.ts +30
+  └ frontend/src/api.ts
+
+The pronunciation.py edit failed due to duplicate `model_answer`. Let me be more specific:
+
+● Find model_answer occurrences (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "model_answer"
+  │ app/routers/pronunciation.py
+  └ 13 lines...
+
+● Exact end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3 app/routers/pronunciation.py
+  └ 4 lines...
+
+● Get unique context for edit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1780,1787p'
+  │ app/routers/pronunciation.py
+  └ 9 lines...
+
+● Edit pronunciation.py +106
+  └ app/routers/pronunciation.py
+
+Now create the frontend component:
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+● Create QuickQuestionCard.tsx +181
+  └ frontend/src/components/QuickQuestionCard.tsx
+
+Commit and test:
+
