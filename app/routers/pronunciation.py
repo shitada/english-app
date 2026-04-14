@@ -2005,3 +2005,117 @@ async def evaluate_story(
         "feedback": str(result.get("feedback", "")),
         "model_continuation": str(result.get("model_continuation", "")),
     }
+
+
+# ── Quick Follow-Up Question ────────────────────────────────────
+
+
+class FollowUpPromptResponse(BaseModel):
+    statement: str
+    topic_hint: str
+    difficulty: str
+
+
+@router.get("/follow-up-prompt", response_model=FollowUpPromptResponse)
+async def get_follow_up_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a conversational statement for follow-up question practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a conversational statement that a {difficulty}-level English learner "
+        "could ask a natural follow-up question about.\n"
+        "The statement should be 1-2 sentences that share a personal experience or opinion.\n"
+        "Return JSON with:\n"
+        "- statement (string): a conversational statement (1-2 sentences)\n"
+        "- topic_hint (string): brief topic category like 'hobbies', 'travel', 'work'\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="follow_up_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Follow-up prompt generation failed")
+
+    return {
+        "statement": str(result.get("statement", "I just got back from a two-week trip to Japan.")),
+        "topic_hint": str(result.get("topic_hint", "travel")),
+        "difficulty": difficulty,
+    }
+
+
+class FollowUpEvaluateRequest(BaseModel):
+    statement: str = Field(min_length=1, max_length=500)
+    user_question: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class FollowUpEvaluateResponse(BaseModel):
+    relevance_score: float
+    depth_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    word_count: int
+    wpm: float
+    feedback: str
+    model_questions: list[str]
+
+
+@router.post("/follow-up-prompt/evaluate", response_model=FollowUpEvaluateResponse)
+async def evaluate_follow_up(
+    body: FollowUpEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a spoken follow-up question attempt."""
+    word_count = len(body.user_question.split())
+    wpm = round(word_count / (body.duration_seconds / 60), 1) if body.duration_seconds > 0 else 0
+
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original statement: \"{body.statement}\"\n"
+        f"User's follow-up question ({body.duration_seconds}s, {word_count} words):\n"
+        f"\"{body.user_question}\"\n\n"
+        "Evaluate this follow-up question. Return JSON with:\n"
+        "- relevance_score (1-10): how relevant the question is to the statement\n"
+        "- depth_score (1-10): how thoughtful and engaging the question is\n"
+        "- grammar_score (1-10): grammatical accuracy of the question\n"
+        "- naturalness_score (1-10): how natural the question sounds in conversation\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_questions (array of 3 strings): example good follow-up questions"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach specializing in active listening. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="follow_up_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Follow-up evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "relevance_score": clamp(result.get("relevance_score", 5)),
+        "depth_score": clamp(result.get("depth_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "word_count": word_count,
+        "wpm": wpm,
+        "feedback": str(result.get("feedback", "")),
+        "model_questions": [str(q) for q in result.get("model_questions", ["What was your favorite part?", "How did you feel about it?", "Would you do it again?"])[:3]],
+    }

@@ -1812,3 +1812,35 @@ export function evaluateStory(story_beginning: string, transcript: string, durat
     body: JSON.stringify({ story_beginning, transcript, duration_seconds }),
   });
 }
+
+// ── Quick Follow-Up Question ────────────────────────────────────
+
+export interface FollowUpPromptResponse {
+  statement: string;
+  topic_hint: string;
+  difficulty: string;
+}
+
+export interface FollowUpEvaluateResponse {
+  relevance_score: number;
+  depth_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  word_count: number;
+  wpm: number;
+  feedback: string;
+  model_questions: string[];
+}
+
+export function getFollowUpPrompt(difficulty: string = 'intermediate'): Promise<FollowUpPromptResponse> {
+  return request<FollowUpPromptResponse>(`/api/pronunciation/follow-up-prompt?difficulty=${difficulty}`);
+}
+
+export function evaluateFollowUp(statement: string, user_question: string, duration_seconds: number): Promise<FollowUpEvaluateResponse> {
+  return request<FollowUpEvaluateResponse>('/api/pronunciation/follow-up-prompt/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ statement, user_question, duration_seconds }),
+  });
+}

@@ -1666,3 +1666,216 @@ Now add the import and usage in Home.tsx:
 
 Now commit and test:
 
+● Commit iteration 431 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #431: Add Quick Storytelling card for narrative speaking practice
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1347 tests pass, TypeScript check passes. Record T3:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1776129920. Now I need to check for tester requirement: proposal type is "feature" and frontend .tsx files in pages/components changed.
+
+● Check if frontend UI files changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend UI files changed + type is "feature" → MUST call tester. Let me start the server and call the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+
+
+Server crashed. Let me restart it properly and continue.
+
+● Restart server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 > /dev/null 2>&1 &
+  │ disown
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 3 lines...
+
+Server is up. Now calling the tester subagent.
+
+● Tester QA test iteration 431
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L978:980 (2 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L1893:1937 (44 lines read)
+
+Tester passed with ux_score 7.0. Now calling the evaluator.
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 9 lines...
+
+● Evaluator Evaluate iteration 431
+  │ List directory tests/unit
+  │   └ 16 files found
+  └ List directory tests/integration
+      └ 13 files found
+
+Evaluator score: 6.15 (keep). Let me record T4 and the results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me verify the keep/discard decision:
+- Tests: 1347/1347 ✅
+- TS check: pass ✅
+- QA tester: passed=true, ux_score=7.0 ✅
+- Evaluator: 6.15 ≥ 6.0 ✅
+→ **KEEP**
+
+● Record iteration 431 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "431" "$HASH" "2026-04-14" "228" "107" "250" "230" "815" \
+  │ "1347" "1347" "pass" "6.15" "kept" "Add Quick Storytelling card for narrative speaking
+  │ practice" \…
+  └ 3 lines...
+
+Iteration 431 ✅ KEPT (6.15). Checklist: ✅ proposer, ✅ tester, ✅ evaluator.
+
+Now starting **iteration 432**. Let me restore context.
+
+● Record T0 for iteration 432 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0 = 1776130364. Backlog is empty. Calling the proposer for iteration 432.
+
+● Proposer Propose iteration 432
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L180:320 (141 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L320:460 (141 lines read)
+
+● Record T1 for iteration 432 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1776130651, propose_sec = 287. Now implementing the Quick Follow-Up Question card.
+
+● Add follow-up prompt endpoints (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/app/routers/pronunciation.py << 'PYEOF'
+  │
+  │
+  │ # ── Quick Follow-Up Question ────────────────────────────────────…
+  └ 120 lines...
+
+● Edit api.ts +32
+  └ frontend/src/api.ts
+
+● Create QuickFollowUpCard.tsx +205
+  └ frontend/src/components/QuickFollowUpCard.tsx
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+● Commit iteration 432 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #432: Add Quick Follow-Up Question speaking card to Home page
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -15
+  └ 16 lines...
+
+1347/1347 tests pass, TS check passes. Now check tester requirement:
+
+● Check frontend changes and record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$" && date +%s
+  └ 4 lines...
+
+T3 = 1776130794. Frontend UI changed + type=feature → MUST call tester. Server should still be running.
+
+● Check server status (shell)
+  │ curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server still running. Call tester and evaluator.
+
+● Tester QA test iteration 432
+  │ Read QuickQuestionCard.tsx
+  │   │ frontend/src/components/QuickQuestionCard.tsx
+  │   └ L60:120 (61 lines read)
+  └ Read QuickQuestionCard.tsx
+      │ frontend/src/components/QuickQuestionCard.tsx
+      └ L120:200 (61 lines read)
+
+Tester passed (ux_score=7.0) with a minor icon collision issue. Let me fix that quickly before evaluating.
+
+● Check QuickQuestionCard icon (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "HelpCircle"
+  │ frontend/src/components/QuickQuestionCard.tsx | head -3
+  └ 3 lines...
+
+The tester is right — both use the same icon. Let me fix QuickFollowUpCard to use a different icon and color:
+
+● Edit QuickFollowUpCard.tsx +1 -1
+  └ frontend/src/components/QuickFollowUpCard.tsx
+
+● Edit QuickFollowUpCard.tsx +1 -1
+  └ frontend/src/components/QuickFollowUpCard.tsx
+
+● Edit QuickFollowUpCard.tsx +1 -1
+  └ frontend/src/components/QuickFollowUpCard.tsx
+
+● Edit QuickFollowUpCard.tsx +1 -1
+  └ frontend/src/components/QuickFollowUpCard.tsx
+

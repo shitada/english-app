@@ -18,6 +18,7 @@ import QuickVocabSentenceCard from '../components/QuickVocabSentenceCard';
 import QuickOpinionCard from '../components/QuickOpinionCard';
 import QuickQuestionCard from '../components/QuickQuestionCard';
 import QuickStoryCard from '../components/QuickStoryCard';
+import QuickFollowUpCard from '../components/QuickFollowUpCard';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -977,6 +978,8 @@ export default function Home() {
       <QuickQuestionCard />
 
       <QuickStoryCard />
+
+      <QuickFollowUpCard />
 
       <StreakMilestonesCard />
 
