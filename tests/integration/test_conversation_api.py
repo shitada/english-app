@@ -1505,3 +1505,34 @@ async def test_random_grammar_mistake_skips_correct(client, test_db):
 
     res = await client.get("/api/conversation/random-grammar-mistake")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_topic_warmup_success(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "phrases": [
+            {"phrase": "I'd like to check in, please.", "hint": "when arriving"},
+            {"phrase": "Do you have any rooms available?", "hint": "asking about availability"},
+            {"phrase": "Could I get a room with a view?", "hint": "requesting preferences"},
+            {"phrase": "What time is checkout?", "hint": "departure info"},
+        ]
+    })
+    res = await client.post(
+        "/api/conversation/topic-warmup",
+        json={"topic": "hotel_checkin", "difficulty": "intermediate"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["topic"] == "hotel_checkin"
+    assert len(data["phrases"]) == 4
+    assert data["phrases"][0]["phrase"] == "I'd like to check in, please."
+    assert data["phrases"][0]["hint"] == "when arriving"
+
+
+@pytest.mark.integration
+async def test_topic_warmup_invalid_topic(client):
+    res = await client.post(
+        "/api/conversation/topic-warmup",
+        json={"topic": "nonexistent_topic", "difficulty": "intermediate"},
+    )
+    assert res.status_code == 404

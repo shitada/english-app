@@ -169,3 +169,431 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+[2026-04-14 09:22:11] Copilot invocation completed (duration: 2934s)
+[2026-04-14 09:22:11] Verifying Playwright test depth...
+[2026-04-14 09:22:11]   PW_SKIP iter=426 — UI changed but NO Playwright test was run
+[2026-04-14 09:22:11] Running post-invocation audit (iter 425-426)...
+============================================
+ Autoresearch Audit
+ Iterations: 425 — 426
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-14 09:22:11
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 425[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 426[0m
+[0;31m  Tester: FAIL — missing: 425 426[0m
+[0;31m  Evaluator: FAIL — missing: 425 426[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 425 (ca47262)[0m
+
+============================================
+[0;31m  AUDIT: 4 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-14 09:22:12] Audit found 4 error(s) — fixes applied where possible
+[2026-04-14 09:22:15] Current iteration count: 426 / 454
+[2026-04-14 09:22:15] ------------------------------------------
+[2026-04-14 09:22:15] Invocation 2 / 10
+[2026-04-14 09:22:15] Resuming from iteration 427
+[2026-04-14 09:22:15] ------------------------------------------
+[2026-04-14 09:22:15] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-427-to-454.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Record T0 for iteration 427 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md | head -50
+  └ 49 lines...
+
+Starting iteration 427. T0=1776126160. Backlog is empty, so the proposer will need to find new improvements.
+
+## Iteration 427 — Step 2: Propose
+
+● Proposer Propose iteration 427
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L350:550 (201 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L550:700 (151 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776126524, propose_sec=364. Now implementing the Conversation Topic Warm-Up feature.
+
+## Iteration 427 — Step 3: Implement
+
+● Check LLM call patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "safe_llm_call\|ask_json\|ask("
+  │ app/routers/conversation.py | head -10
+  └ 11 lines...
+
+● Check if warmup already exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "topic-warmup\|warm.up\|warmup"
+  │ app/routers/conversation.py | head -5
+  └ 1 line...
+
+● See end of conversation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/routers/conversation.py
+  └ 31 lines...
+
+● See imports and setup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -25 app/routers/conversation.py
+  └ 25 lines...
+
+● Check topic functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_topics\|TOPICS"
+  │ app/routers/conversation.py | head -5
+  └ 6 lines...
+
+● Check if warmup exists in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getTopicWarmup\|topicWarmup\|topic-warmup\|warmup" frontend/src/api.ts | head -5
+  └ 1 line...
+
+● List conversation components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/conversation/
+  └ 8 lines...
+
+● Check conversation phases (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase\|setPhase\|Phase"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 21 lines...
+
+● See topics endpoint pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '85,120p'
+  │ app/routers/conversation.py
+  └ 37 lines...
+
+● See phase state and related (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '42,50p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 10 lines...
+
+● Check rate limit usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "rate_limit\|require_rate_limit"
+  │ app/routers/conversation.py | head -5
+  └ 6 lines...
+
+● Find speech comparison pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickShadow\|normalize\|compareSpeech\|wordAccuracy" frontend/src/components/ -r | head -10
+  └ 11 lines...
+
+● Check speech hooks usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useSpeechRecognition\|useSpeechSynthesis" frontend/src/pages/Conversation.tsx | head -10
+  └ 5 lines...
+
+● See QuickShadowCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickShadowCard.tsx | head -25
+  └ 25 lines...
+
+● Find topic card rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "topic
+  │ card\|TopicCard\|topic-card\|scenario-card" frontend/src/pages/Conversation.tsx | head -10
+  └ 2 lines...
+
+● See topic card rendering area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '630,700p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 72 lines...
+
+Now let me look at the api.ts to understand the pattern for API calls:
+
+● See conversation API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversation\."
+  │ frontend/src/api.ts | head -20
+  └ 1 line...
+
+● Check file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● Check conversation api patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversation" frontend/src/api.ts
+  │ | head -20
+  └ 21 lines...
+
+● More conversation api functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "conversation" frontend/src/api.ts
+  │ | tail -20
+  └ 21 lines...
+
+Now I have a good understanding of the codebase patterns. Let me implement the feature.
+
+● Check api.ts size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/api.ts
+  └ 2 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 frontend/src/api.ts
+  └ 11 lines...
+
+● Find api object (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^export const api"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Find end of api object (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^}" frontend/src/api.ts | tail -5
+  └ 6 lines...
+
+● See near end of api object (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1645,1655p' frontend/src/api.ts
+  └ 12 lines...
+
+● Find last api methods (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getRandomGrammarMistake\|random-grammar\|session-averages" frontend/src/api.ts
+  └ 4 lines...
+
+● See api function pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1593,1600p' frontend/src/api.ts
+  └ 8 lines...
+
+Now let me implement all the changes. I'll add the backend endpoint, the API function, the component, and integrate it into the Conversation page.
+
+● Edit conversation.py +59
+  └ app/routers/conversation.py
+
+Now add the API function to frontend:
+
+● Edit api.ts +22
+  └ frontend/src/api.ts
+
+Now create the ConversationWarmUp component:
+
+● Create ConversationWarmUp.tsx +229
+  └ frontend/src/components/conversation/ConversationWarmUp.tsx
+
+Now export it from the index:
+
+● See current exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 19 lines...
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Now integrate into Conversation.tsx. I need to add the warmup phase and a Warm Up button to each topic card:
+
+● See imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,15p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 16 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now update the phase type to include 'warmup':
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now I need to add a state for the warmup topic and add the Warm Up button + warmup phase rendering. Let me find where to add state:
+
+● See more state vars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '46,60p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 16 lines...
+
+● See more state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,80p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+● More state and hooks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '80,95p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+Add warmupTopic state after voiceStatus:
+
+● Edit Conversation.tsx +1
+  └ frontend/src/pages/Conversation.tsx
+
+Now I need to find where `startConversation` function is and the topic card section. I need to add a "Warm Up" button to each topic card, and add a warmup phase rendering section:
+
+● Find startConversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "startConversation"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 5 lines...
+
+Now add the Warm Up button next to each topic card. Let me look at the topic card button more closely:
+
+● See topic card buttons (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '643,700p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 59 lines...
+
+I'll add a small "Warm Up" link button inside each topic card, after the stats section:
+
+● Edit Conversation.tsx +7
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the warmup phase rendering. Let me find where the phase conditions are rendered:
+
+● Find phase conditionals (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'select'"
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 2 lines...
+
+● See phase loading logic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '488,500p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 14 lines...
+
+I need to add the warmup phase rendering right before or after the select phase. Let me find where the select phase block ends:
+
+● Find other phase conditions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'replay'\|phase ===
+  │ 'history'\|phase === 'bookmarks'\|phase === 'chat'\|phase === 'summary'"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 11 lines...
+
+● See after select phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '775,810p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 37 lines...
+
+Now add the warmup phase between select and bookmarks:
+
+● Edit Conversation.tsx
+  └ frontend/src/pages/Conversation.tsx
+
+● See exact lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '777,782p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 7 lines...
+
+● Edit Conversation.tsx +18
+  └ frontend/src/pages/Conversation.tsx
+
+Now add a test for the backend endpoint:
+
+● Find conversation test files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_conversation*
+  │ tests/integration/test_conversation* 2>/dev/null | head -5
+  └ 3 lines...
+
+● See existing test patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def test_"
+  │ tests/integration/test_conversation_api.py | tail -5
+  └ 6 lines...
+
+● See test file ending (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/integration/test_conversation_api.py
+  └ 31 lines...
+
+● See mock_copilot fixture (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "mock_copilot" tests/conftest.py |
+  │ head -10
+  └ 6 lines...
+
+● See mock_copilot fixture (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '42,55p' tests/conftest.py
+  └ 13 lines...
+
+Now add the test for the topic-warmup endpoint:
+
+● Edit test_conversation_api.py +31
+  └ tests/integration/test_conversation_api.py
+
+● Check imports in test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import"
+  │ tests/integration/test_conversation_api.py | head -10
+  └ 4 lines...
+
+Good, AsyncMock is already imported. Now let me commit and test:
+
+● Commit iteration 427 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #427: Add Conversation Topic Warm-Up with phrase speaking practice"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1776126755, implement_sec=231. Now run tests.
+
+## Iteration 427 — Step 5: Test
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+Fix the `get_topic_label` call — it takes topics as well:
+
+● Check function signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def get_topic_label" app/utils.py
+  └ 2 lines...
+
+● Edit conversation.py +1 -1
+  └ app/routers/conversation.py
+

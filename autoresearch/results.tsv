@@ -424,3 +424,5 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 422	2c1c0a8	2026-04-13	222	46	71	76	415	1337	1338	pass	7.55	kept	Add unit tests for get_listening_quiz_detail and passage/questions persistence
 423	none	2026-04-13	206	60	68	193	527	1337	1338	pass	5.95	discarded	Add sentence-by-sentence playback mode to Listening Quiz
 424	5a6cd69	2026-04-13	412	48	64	90	614	1342	1343	pass	7.8	kept	Add unit tests for speaking pace WPM computation
+425	ca47262	2026-04-14T08:41:10+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add Listening Discussion panel for spoken opinion practice
+426	41143ca	2026-04-14	467	75	70	688	1300	1343	1343	pass	7.45	kept	Add Listening Paraphrase drill to quiz results

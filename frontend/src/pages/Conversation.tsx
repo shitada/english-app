@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -43,7 +43,7 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
 ];
 
 export default function Conversation() {
-  const [phase, setPhase] = useState<'select' | 'chat' | 'summary' | 'history' | 'replay' | 'bookmarks'>('select');
+  const [phase, setPhase] = useState<'select' | 'warmup' | 'chat' | 'summary' | 'history' | 'replay' | 'bookmarks'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -84,6 +84,7 @@ export default function Conversation() {
   const [wpmValues, setWpmValues] = useState<number[]>([]);
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending'>('idle');
+  const [warmupTopicId, setWarmupTopicId] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -683,6 +684,13 @@ export default function Conversation() {
                           </span>
                         )}
                       </div>
+                      <div
+                        role="button"
+                        onClick={(e) => { e.stopPropagation(); setWarmupTopicId(s.id); setPhase('warmup'); }}
+                        style={{ marginTop: 6, fontSize: '0.72rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        🔥 Warm Up
+                      </div>
                     </button>
                   );
                 })}
@@ -765,6 +773,24 @@ export default function Conversation() {
           </div>
         )}
       </div>
+      </PhaseTransition>
+    );
+  }
+
+  // Warm-up phase
+  if (phase === 'warmup' && warmupTopicId) {
+    const warmupTopic = topics.find(t => t.id === warmupTopicId);
+    return (
+      <PhaseTransition phase={phase}>
+        <div>
+          <ConversationWarmUp
+            topicId={warmupTopicId}
+            topicLabel={warmupTopic?.label || warmupTopicId}
+            difficulty={difficulty}
+            onDone={() => { setWarmupTopicId(''); setPhase('select'); }}
+            onStartConversation={() => startConversation(warmupTopicId)}
+          />
+        </div>
       </PhaseTransition>
     );
   }

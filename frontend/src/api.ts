@@ -1676,3 +1676,25 @@ export interface QuickRephrasePromptResponse {
   instruction: string;
   difficulty: string;
 }
+
+// ── Topic Warm-Up ──────────────────────────
+
+export interface WarmupPhrase {
+  phrase: string;
+  hint: string;
+}
+
+export interface TopicWarmupResponse {
+  topic: string;
+  topic_label: string;
+  difficulty: string;
+  phrases: WarmupPhrase[];
+}
+
+export async function getTopicWarmup(topic: string, difficulty: string = 'intermediate'): Promise<TopicWarmupResponse> {
+  return request<TopicWarmupResponse>('/api/conversation/topic-warmup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, difficulty }),
+  });
+}

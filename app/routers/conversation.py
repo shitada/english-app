@@ -956,3 +956,62 @@ async def random_grammar_mistake(
     if result is None:
         raise HTTPException(status_code=404, detail="No grammar mistakes found")
     return result
+
+
+class TopicWarmupRequest(BaseModel):
+    topic: str = Field(min_length=1, max_length=100)
+    difficulty: str = Field(default="intermediate")
+
+
+class WarmupPhrase(BaseModel):
+    phrase: str
+    hint: str
+
+
+class TopicWarmupResponse(BaseModel):
+    topic: str
+    topic_label: str
+    difficulty: str
+    phrases: list[WarmupPhrase]
+
+
+@router.post("/topic-warmup", response_model=TopicWarmupResponse)
+async def get_topic_warmup(
+    req: TopicWarmupRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Generate warm-up phrases for a conversation topic."""
+    topics = get_conversation_topics()
+    valid_ids = {t["id"] for t in topics}
+    if req.topic not in valid_ids:
+        raise HTTPException(status_code=404, detail=f"Topic '{req.topic}' not found")
+
+    label = get_topic_label(topics, req.topic)
+    copilot = get_copilot_service()
+
+    system = (
+        "You are an English tutor. Generate exactly 4 key phrases a learner "
+        f"would need for a {label} scenario at {req.difficulty} level. "
+        "Return JSON: {\"phrases\": [{\"phrase\": \"...\", \"hint\": \"...\"}]}. "
+        "Each hint is a short context note (e.g., 'when arriving'). "
+        "Phrases should be practical and commonly used."
+    )
+
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(system, f"Generate warm-up phrases for: {label}"),
+        context="topic_warmup",
+    )
+    if not result or "phrases" not in result:
+        raise HTTPException(status_code=502, detail="Failed to generate warm-up phrases")
+
+    phrases = [
+        WarmupPhrase(phrase=p["phrase"], hint=p.get("hint", ""))
+        for p in result["phrases"][:4]
+    ]
+
+    return TopicWarmupResponse(
+        topic=req.topic,
+        topic_label=label,
+        difficulty=req.difficulty,
+        phrases=phrases,
+    )
