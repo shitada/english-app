@@ -1,5 +1,6 @@
 ---
 description: "Autoresearch evaluator — reviews code changes and test results to score quality and decide keep/discard. Use when: evaluating code changes, scoring improvements, reviewing diffs."
+model: claude-opus-4.6
 tools: [read, search]
 user-invocable: false
 ---

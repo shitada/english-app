@@ -1885,6 +1885,7 @@ export interface SpeakingJournalEntry {
   unique_word_count: number;
   duration_seconds: number;
   wpm: number;
+  filler_word_count: number;
   created_at: string;
 }
 

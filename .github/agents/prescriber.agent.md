@@ -1,5 +1,6 @@
 ---
 description: "Autoresearch prescriber — analyzes audit findings, diagnoses root causes, and decides whether to patch agent prompts. Use when: audit detects MEDIUM/LOW confidence issues that need deeper analysis."
+model: claude-opus-4.6
 tools: [read, search]
 user-invocable: false
 ---

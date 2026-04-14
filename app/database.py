@@ -288,6 +288,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )""",
     ),
+    (
+        "add filler_word_count column to speaking_journal",
+        "ALTER TABLE speaking_journal ADD COLUMN filler_word_count INTEGER NOT NULL DEFAULT 0",
+    ),
 ]
 
 

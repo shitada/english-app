@@ -1,5 +1,6 @@
 ---
 description: "Autoresearch QA tester — operates the app via Playwright MCP as a strict end-user, checking functionality, display, and UX quality. Use when: testing UI changes, verifying user-facing features, checking for visual or interaction bugs."
+model: claude-opus-4.6
 tools: [read, search, "playwright/*"]
 user-invocable: false
 ---

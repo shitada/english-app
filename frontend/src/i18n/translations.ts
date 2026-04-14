@@ -86,6 +86,7 @@ export interface Translations {
   startingLabel: string;
   savingLabel: string;
   wordsLabel: string;
+  fillersLabel: string;
   trendLabel: string;
 }
 
@@ -177,6 +178,7 @@ export const en: Translations = {
   startingLabel: 'Starting...',
   savingLabel: 'Saving...',
   wordsLabel: 'words',
+  fillersLabel: 'Fillers',
   trendLabel: 'Trend',
 };
 
@@ -268,6 +270,7 @@ export const ja: Translations = {
   startingLabel: '開始中...',
   savingLabel: '保存中...',
   wordsLabel: '単語',
+  fillersLabel: 'つなぎ言葉',
   trendLabel: 'トレンド',
 };
 

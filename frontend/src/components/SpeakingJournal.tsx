@@ -210,7 +210,7 @@ export default function SpeakingJournal() {
           <div>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '0.5rem',
               marginBottom: '0.75rem',
             }}>
@@ -236,6 +236,22 @@ export default function SpeakingJournal() {
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary, #6b7280)' }}>
                   {t('uniqueWords')}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 700,
+                  color: (savedEntry.filler_word_count ?? 0) === 0
+                    ? '#22c55e'
+                    : (savedEntry.filler_word_count ?? 0) <= 2
+                      ? '#eab308'
+                      : '#ef4444',
+                }}>
+                  {savedEntry.filler_word_count ?? 0}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary, #6b7280)' }}>
+                  {t('fillersLabel')}
                 </div>
               </div>
             </div>

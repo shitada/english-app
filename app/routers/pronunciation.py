@@ -2201,6 +2201,7 @@ class SpeakingJournalEntryResponse(BaseModel):
     unique_word_count: int
     duration_seconds: int
     wpm: float
+    filler_word_count: int = 0
     created_at: str
 
 
@@ -2217,6 +2218,17 @@ async def get_speaking_journal_prompt():
     return {"prompt": prompt}
 
 
+_FILLER_WORDS = re.compile(
+    r"\b(?:um|uh|erm|er|ah|like|you know|basically|i mean|sort of|kind of|actually|literally|right|okay so|well)\b",
+    re.IGNORECASE,
+)
+
+
+def _count_filler_words(transcript: str) -> int:
+    """Count common English filler words in a transcript."""
+    return len(_FILLER_WORDS.findall(transcript))
+
+
 @router.post("/speaking-journal", response_model=SpeakingJournalEntryResponse)
 async def save_speaking_journal(
     entry: SpeakingJournalEntry,
@@ -2227,6 +2239,7 @@ async def save_speaking_journal(
     word_count = len(words)
     unique_word_count = len(set(w.lower().strip(".,!?;:'\"") for w in words if w.strip(".,!?;:'\"") ))
     wpm = round((word_count / max(entry.duration_seconds, 1)) * 60, 1)
+    filler_word_count = _count_filler_words(entry.transcript)
 
     result = await pron_dal.save_speaking_journal_entry(
         db,
@@ -2236,6 +2249,7 @@ async def save_speaking_journal(
         unique_word_count=unique_word_count,
         duration_seconds=entry.duration_seconds,
         wpm=wpm,
+        filler_word_count=filler_word_count,
     )
     return {
         "id": result["id"],
@@ -2245,6 +2259,7 @@ async def save_speaking_journal(
         "unique_word_count": unique_word_count,
         "duration_seconds": entry.duration_seconds,
         "wpm": wpm,
+        "filler_word_count": filler_word_count,
         "created_at": "",
     }
 

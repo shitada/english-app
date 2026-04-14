@@ -1,5 +1,6 @@
 ---
 description: "Autoresearch orchestrator — runs a 20-iteration autonomous improvement loop on the English learning app. Use when: starting autoresearch, running improvement loop, autonomous coding."
+model: claude-opus-4.6
 tools: [read, edit, search, execute, agent, todo]
 ---
 

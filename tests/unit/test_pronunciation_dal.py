@@ -1703,3 +1703,37 @@ class TestGetSentencesFromCorrections:
             await self._create_conversation_with_feedback(test_db)
         result = await get_sentences_from_corrections(test_db)
         assert len(result) == 1
+
+
+class TestFillerWordDetection:
+    """Tests for filler word detection in speaking journal."""
+
+    def test_count_filler_words_none(self):
+        from app.routers.pronunciation import _count_filler_words
+        assert _count_filler_words("I went to the store yesterday.") == 0
+
+    def test_count_filler_words_basic(self):
+        from app.routers.pronunciation import _count_filler_words
+        assert _count_filler_words("Um, I think, uh, that is good.") == 2
+
+    def test_count_filler_words_multiple(self):
+        from app.routers.pronunciation import _count_filler_words
+        assert _count_filler_words("Like, you know, I basically, um, sort of like it.") >= 4
+
+    def test_count_filler_words_case_insensitive(self):
+        from app.routers.pronunciation import _count_filler_words
+        assert _count_filler_words("UM well UH") == 3
+
+    @pytest.mark.asyncio
+    async def test_save_journal_with_filler_count(self, test_db):
+        result = await save_speaking_journal_entry(
+            test_db,
+            prompt="Test",
+            transcript="Um, I like, you know, went there.",
+            word_count=7,
+            unique_word_count=6,
+            duration_seconds=10,
+            wpm=42.0,
+            filler_word_count=3,
+        )
+        assert result["id"] is not None

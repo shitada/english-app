@@ -984,12 +984,13 @@ async def save_speaking_journal_entry(
     unique_word_count: int,
     duration_seconds: int,
     wpm: float,
+    filler_word_count: int = 0,
 ) -> dict:
     """Save a speaking journal entry."""
     cursor = await db.execute(
-        """INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm),
+        """INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, filler_word_count)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, filler_word_count),
     )
     await db.commit()
     return {"id": cursor.lastrowid}
@@ -1001,7 +1002,7 @@ async def get_speaking_journal_entries(
     """Get recent speaking journal entries."""
     cursor = await db.execute(
         """SELECT id, prompt, transcript, word_count, unique_word_count,
-                  duration_seconds, wpm, created_at
+                  duration_seconds, wpm, created_at, COALESCE(filler_word_count, 0)
            FROM speaking_journal ORDER BY created_at DESC LIMIT ?""",
         (limit,),
     )
@@ -1016,6 +1017,7 @@ async def get_speaking_journal_entries(
             "duration_seconds": row[5],
             "wpm": row[6],
             "created_at": row[7],
+            "filler_word_count": row[8],
         }
         for row in rows
     ]
