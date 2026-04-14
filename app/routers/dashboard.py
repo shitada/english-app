@@ -788,3 +788,29 @@ async def get_fluency_progression(
 ):
     """Get fluency progression metrics over time from conversation history."""
     return await dash_dal.get_fluency_progression(db, limit=limit)
+
+
+class ReviewQueueItemDetail(BaseModel):
+    model_config = {"extra": "allow"}
+
+
+class ReviewQueueItem(BaseModel):
+    module: str
+    priority: int
+    detail: ReviewQueueItemDetail
+    route: str
+
+
+class ReviewQueueResponse(BaseModel):
+    items: list[ReviewQueueItem]
+    total_count: int
+
+
+@router.get("/review-queue", response_model=ReviewQueueResponse)
+async def get_review_queue(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get a prioritized review queue of items to practice across all modules."""
+    items = await dash_dal.get_review_queue(db, limit=limit)
+    return {"items": items, "total_count": len(items)}

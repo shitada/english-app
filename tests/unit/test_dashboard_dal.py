@@ -31,6 +31,7 @@ from app.dal.dashboard import (
     get_vocabulary_forecast,
     get_fluency_progression,
     get_topic_coverage,
+    get_review_queue,
     get_weekly_report,
     get_word_of_the_day,
     set_learning_goal,
@@ -2168,3 +2169,72 @@ class TestGetTopicCoverage:
         restaurant = next(t for t in result["topics"] if t["topic_id"] == "restaurant_order")
         assert hotel["practice_count"] == 1
         assert restaurant["practice_count"] == 1
+
+
+@pytest.mark.unit
+class TestGetReviewQueue:
+    async def test_empty_database(self, test_db):
+        result = await get_review_queue(test_db)
+        assert result == []
+
+    async def test_vocabulary_items_due(self, test_db):
+        words = [{"word": "hello", "meaning": "greeting", "example_sentence": "Hello!", "difficulty": 1}]
+        await save_words(test_db, "greetings", words)
+        await test_db.commit()
+        # Get the word id
+        row = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = row[0]["id"]
+        # Set progress with past review date
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 1, 0, 2, '2020-01-01T00:00:00+00:00')",
+            (word_id,),
+        )
+        await test_db.commit()
+        result = await get_review_queue(test_db)
+        assert len(result) == 1
+        assert result[0]["module"] == "vocabulary"
+        assert result[0]["detail"]["word"] == "hello"
+        assert result[0]["priority"] > 0
+        assert result[0]["route"] == "/vocabulary"
+
+    async def test_pronunciation_items(self, test_db):
+        await save_attempt(test_db, "Good morning", "Good morning", {}, 4.5)
+        await test_db.commit()
+        result = await get_review_queue(test_db)
+        assert len(result) == 1
+        assert result[0]["module"] == "pronunciation"
+        assert result[0]["detail"]["latest_score"] == 4.5
+        assert result[0]["priority"] == 55  # (10 - 4.5) * 10
+
+    async def test_mixed_items_sorted_by_priority(self, test_db):
+        # Add pronunciation with low score (high priority)
+        await save_attempt(test_db, "Test phrase", "Test", {}, 2.0)
+        # Add vocabulary due for review
+        words = [{"word": "cat", "meaning": "animal", "example_sentence": "A cat.", "difficulty": 1}]
+        await save_words(test_db, "animals", words)
+        await test_db.commit()
+        row = await test_db.execute_fetchall("SELECT id FROM vocabulary_words LIMIT 1")
+        word_id = row[0]["id"]
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 0, 0, 0, '2026-04-14T00:00:00+00:00')",
+            (word_id,),
+        )
+        await test_db.commit()
+        result = await get_review_queue(test_db)
+        assert len(result) >= 2
+        # Pronunciation with score 2.0 should have priority 80, likely higher
+        assert result[0]["priority"] >= result[1]["priority"]
+
+    async def test_limit_parameter(self, test_db):
+        # Add multiple pronunciation attempts with different texts
+        for i in range(5):
+            await save_attempt(test_db, f"Phrase {i}", f"Phrase {i}", {}, float(i))
+        await test_db.commit()
+        result = await get_review_queue(test_db, limit=3)
+        assert len(result) == 3
+
+    async def test_pronunciation_above_threshold_excluded(self, test_db):
+        await save_attempt(test_db, "Good phrase", "Good phrase", {}, 8.5)
+        await test_db.commit()
+        result = await get_review_queue(test_db)
+        assert len(result) == 0

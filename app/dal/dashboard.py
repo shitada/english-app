@@ -2252,3 +2252,126 @@ async def get_fluency_progression(
         "session_count": len(sessions),
         "trend": trend,
     }
+
+
+async def get_review_queue(
+    db: aiosqlite.Connection, *, limit: int = 10
+) -> list[dict[str, Any]]:
+    """Return a prioritized queue of items to review across all modules."""
+    import json as _json
+    from collections import Counter
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc).isoformat()
+    items: list[dict[str, Any]] = []
+
+    # 1. Vocabulary words due for SRS review
+    vocab_rows = await db.execute_fetchall(
+        """
+        SELECT vp.word_id, vp.next_review_at, vp.level, vp.correct_count,
+               vw.word, vw.meaning, vw.topic
+        FROM vocabulary_progress vp
+        JOIN vocabulary_words vw ON vw.id = vp.word_id
+        WHERE vp.next_review_at IS NOT NULL AND vp.next_review_at <= ?
+        ORDER BY vp.next_review_at ASC
+        LIMIT 50
+        """,
+        (now,),
+    )
+    for row in vocab_rows:
+        overdue_days = 0.0
+        if row["next_review_at"]:
+            try:
+                review_dt = datetime.fromisoformat(row["next_review_at"].replace("Z", "+00:00"))
+                now_dt = datetime.now(timezone.utc)
+                overdue_days = max(0.0, (now_dt - review_dt).total_seconds() / 86400)
+            except (ValueError, TypeError):
+                pass
+        priority = min(100, int(20 * overdue_days + row["level"] * 2))
+        items.append({
+            "module": "vocabulary",
+            "priority": priority,
+            "detail": {
+                "word_id": row["word_id"],
+                "word": row["word"],
+                "meaning": row["meaning"],
+                "topic": row["topic"],
+                "level": row["level"],
+                "overdue_days": round(overdue_days, 1),
+            },
+            "route": "/vocabulary",
+        })
+
+    # 2. Pronunciation phrases needing retry (latest score < 7.0)
+    pron_rows = await db.execute_fetchall(
+        """
+        SELECT pa.reference_text, pa.score, pa.created_at
+        FROM pronunciation_attempts pa
+        INNER JOIN (
+            SELECT reference_text, MAX(id) AS max_id
+            FROM pronunciation_attempts
+            GROUP BY reference_text
+        ) latest ON pa.id = latest.max_id
+        WHERE pa.score IS NOT NULL AND pa.score < 7.0
+        ORDER BY pa.score ASC
+        LIMIT 30
+        """
+    )
+    for row in pron_rows:
+        score = row["score"] or 0.0
+        priority = min(100, int((10 - score) * 10))
+        items.append({
+            "module": "pronunciation",
+            "priority": priority,
+            "detail": {
+                "reference_text": row["reference_text"],
+                "latest_score": round(score, 1),
+            },
+            "route": "/pronunciation",
+        })
+
+    # 3. Grammar error patterns from recent messages
+    msg_rows = await db.execute_fetchall(
+        """
+        SELECT m.feedback_json
+        FROM messages m
+        WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+        ORDER BY m.created_at DESC
+        LIMIT 200
+        """
+    )
+    error_counts: Counter[str] = Counter()
+    for row in msg_rows:
+        try:
+            fb = _json.loads(row["feedback_json"]) if isinstance(row["feedback_json"], str) else row["feedback_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if not isinstance(fb, dict):
+            continue
+        errors = fb.get("errors", [])
+        if not isinstance(errors, list):
+            continue
+        for err in errors:
+            if not isinstance(err, dict):
+                continue
+            explanation = err.get("explanation", "")
+            category = _categorize_error(explanation)
+            error_counts[category] += 1
+
+    for category, count in error_counts.most_common(20):
+        if category == "Other":
+            continue
+        priority = min(100, count * 5)
+        items.append({
+            "module": "grammar",
+            "priority": priority,
+            "detail": {
+                "category": category,
+                "occurrence_count": count,
+            },
+            "route": "/conversation",
+        })
+
+    # Sort by priority descending, return top `limit`
+    items.sort(key=lambda x: x["priority"], reverse=True)
+    return items[:limit]
