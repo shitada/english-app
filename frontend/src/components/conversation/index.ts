@@ -6,6 +6,7 @@ export { ConversationQuiz } from './ConversationQuiz';
 export { ConversationReplay } from './ConversationReplay';
 export { ConversationSummary } from './ConversationSummary';
 export { ConversationHistory } from './ConversationHistory';
+export { TurnRepracticeDrill } from './TurnRepracticeDrill';
 export { CorrectionDrill } from './CorrectionDrill';
 export { SpeakCorrectionDrill } from './SpeakCorrectionDrill';
 export { DictationExercise } from './DictationExercise';

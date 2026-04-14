@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { PlayCircle, Download } from 'lucide-react';
+import { PlayCircle, Download, RotateCcw } from 'lucide-react';
 import type { ChatMessage, ConversationSummary as ConversationSummaryType } from '../../api';
 import { api } from '../../api';
 import { FeedbackPanel } from './FeedbackPanel';
+import { TurnRepracticeDrill } from './TurnRepracticeDrill';
 import { formatDateTime } from '../../utils/formatDate';
 
 interface ConversationHistoryProps {
@@ -25,6 +26,7 @@ export function ConversationHistory({
   tts,
 }: ConversationHistoryProps) {
   const [downloading, setDownloading] = useState(false);
+  const [repracticeIdx, setRepracticeIdx] = useState<number | null>(null);
 
   async function handleDownload() {
     if (!conversationId || downloading) return;
@@ -118,17 +120,44 @@ export function ConversationHistory({
       )}
 
       <div className="chat-container" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-        {historyMessages.map((msg, i) => (
-          <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
-            <div className={`message-bubble ${msg.role}`}>
-              <p>{msg.content}</p>
-              {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
+        {historyMessages.map((msg, i) => {
+          const isUser = msg.role === 'user';
+          const prevMsg = i > 0 ? historyMessages[i - 1] : null;
+          const hasAiContext = isUser && prevMsg && prevMsg.role === 'assistant';
+
+          return (
+            <div key={i} className={`chat-message ${msg.role}`} style={{ marginBottom: 12 }}>
+              <div className={`message-bubble ${msg.role}`}>
+                <p>{msg.content}</p>
+                {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
+                {isUser && hasAiContext && (
+                  <button
+                    onClick={() => setRepracticeIdx(repracticeIdx === i ? null : i)}
+                    style={{
+                      marginTop: 6, padding: '4px 10px', borderRadius: 6,
+                      border: '1px solid var(--border)', background: 'transparent',
+                      color: 'var(--primary)', cursor: 'pointer', fontSize: 12,
+                      display: 'flex', alignItems: 'center', gap: 4,
+                    }}
+                  >
+                    <RotateCcw size={12} /> Re-practice
+                  </button>
+                )}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                {formatDateTime(msg.created_at)}
+              </span>
+              {repracticeIdx === i && hasAiContext && prevMsg && (
+                <TurnRepracticeDrill
+                  aiMessage={prevMsg.content}
+                  originalUserMessage={msg.content}
+                  ttsSpeak={tts.speak}
+                  onClose={() => setRepracticeIdx(null)}
+                />
+              )}
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              {formatDateTime(msg.created_at)}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -432,3 +432,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 430	ad0f16c	2026-04-14	225	80	84	180	569	1347	1347	pass	6.7	kept	Add Quick Question Formation speaking drill to Home page
 431	a73cc4c	2026-04-14	228	107	250	230	815	1347	1347	pass	6.15	kept	Add Quick Storytelling card for narrative speaking practice
 432	691f3aa	2026-04-14	287	143	236	0	666	1347	1347	pass	6.15	kept	Add Quick Follow-Up Question speaking card to Home page
+433	6b87209	2026-04-14	201	97	288	85	671	1347	1347	pass	6.15	kept	Add tabbed Quick Practice Hub to organize 12 cards by skill category
