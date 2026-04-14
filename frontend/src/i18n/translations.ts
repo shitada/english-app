@@ -75,6 +75,8 @@ export interface Translations {
   featureVocabularyDesc: string;
   featureDashboard: string;
   featureDashboardDesc: string;
+  smartReviewQueue: string;
+  allCaughtUp: string;
 }
 
 export const en: Translations = {
@@ -154,6 +156,8 @@ export const en: Translations = {
   featureVocabularyDesc: 'Learn scenario-specific words and phrases in context through interactive quizzes with real-life examples.',
   featureDashboard: 'Dashboard',
   featureDashboardDesc: 'Track your learning streak, view statistics, and see your progress across all activities.',
+  smartReviewQueue: 'Smart Review Queue',
+  allCaughtUp: 'All caught up! 🎉',
 };
 
 export const ja: Translations = {
@@ -233,6 +237,8 @@ export const ja: Translations = {
   featureVocabularyDesc: 'インタラクティブなクイズで場面別の単語やフレーズを文脈の中で学習。',
   featureDashboard: 'ダッシュボード',
   featureDashboardDesc: '学習の継続記録を追跡、統計を確認、全アクティビティの進捗を表示。',
+  smartReviewQueue: 'スマート復習キュー',
+  allCaughtUp: '全部完了！🎉',
 };
 
 export type Locale = 'en' | 'ja';

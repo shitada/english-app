@@ -774,3 +774,355 @@ T2=1776183385, implement_sec=271. Now run tests:
 
 1 pre-existing test failure (dashboard daily challenge), not related to my changes. All my new tests passed. TS check passed. Let me verify that failure is pre-existing:
 
+[2026-04-15 02:03:44] Copilot invocation completed (duration: 1420s)
+[2026-04-15 02:03:44] Verifying Playwright test depth...
+[2026-04-15 02:03:44]   PW_NA iter=450 — no UI file changes, Playwright test not required
+[2026-04-15 02:03:44] Running post-invocation audit (iter 449-450)...
+============================================
+ Autoresearch Audit
+ Iterations: 449 — 450
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 02:03:44
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 449 450[0m
+[0;31m  Tester: FAIL — missing: 449 450[0m
+[0;31m  Evaluator: FAIL — missing: 449 450[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 02:03:45] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 02:03:48] Current iteration count: 450 / 474
+[2026-04-15 02:03:48] ------------------------------------------
+[2026-04-15 02:03:48] Invocation 4 / 10
+[2026-04-15 02:03:48] Resuming from iteration 451
+[2026-04-15 02:03:48] ------------------------------------------
+[2026-04-15 02:03:48] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-451-to-474.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 50 lines...
+
+● Record T0 for iteration 451 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read full backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat autoresearch/backlog.md
+  └ 129 lines...
+
+Now I'll call the proposer for iteration 451.
+
+● Proposer Propose iteration 451
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L2300:end (78 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1600:end (257 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776186442, propose_sec=192. Now implementing. Let me examine the existing code patterns.
+
+● Check Home.tsx structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "DailyChallenge\|QuickPractice\|import.*Home" frontend/src/pages/Home.tsx | head -20
+  └ 8 lines...
+
+● Check if review queue already in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "review.queue\|review_queue\|ReviewQueue" frontend/src/api.ts | head -20
+  └ 1 line...
+
+● Find review queue endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "review.queue\|review_queue"
+  │ app/routers/*.py app/dal/*.py 2>/dev/null | head -20
+  └ 6 lines...
+
+● Find response models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "class
+  │ ReviewQueue\|ReviewQueueItem\|ReviewQueueResponse" app/routers/dashboard.py
+  └ 7 lines...
+
+● Read Home.tsx render area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '940,965p'
+  │ frontend/src/pages/Home.tsx
+  └ 27 lines...
+
+● Read review queue endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '800,830p' app/routers/dashboard.py
+  └ 18 lines...
+
+● Check api.ts base URL pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "BASE_URL\|const API\|fetch("
+  │ frontend/src/api.ts | head -10
+  └ 4 lines...
+
+● Check api.ts exports pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "export.*function\|export.*const\|export.*type\|export.*interface" frontend/src/api.ts | tail
+  │ -30
+  └ 31 lines...
+
+● Read ReviewQueueItem model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '793,808p' app/routers/dashboard.py
+  └ 15 lines...
+
+● List components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/ | head -20
+  └ 21 lines...
+
+● Read api.ts fetch helper pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,50p' frontend/src/api.ts
+  └ 22 lines...
+
+Good, I have enough context. Let me implement the feature now.
+
+● Check end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 frontend/src/api.ts
+  └ 6 lines...
+
+● Find dashboard API pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getDashboardStats\|getStats\|/api/dashboard/" frontend/src/api.ts | head -10
+  └ 11 lines...
+
+Now let me implement all three files:
+
+● Edit api.ts +21
+  └ frontend/src/api.ts
+
+● Check i18n usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "useTranslation\|useLanguage\|i18n\|t(" frontend/src/pages/Home.tsx | head -5
+  └ 6 lines...
+
+● Check i18n import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '11,13p' frontend/src/pages/Home.tsx
+  └ 4 lines...
+
+Now create the SmartReviewQueue component:
+
+● Create SmartReviewQueue.tsx +190
+  └ frontend/src/components/SmartReviewQueue.tsx
+
+Now add it to Home.tsx:
+
+● Check import area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '10,11p' frontend/src/pages/Home.tsx
+  └ 3 lines...
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1776186519, implement_sec=77. Now commit and test.
+
+● Commit iteration 451 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #451: Add Smart Review Queue card to Home page"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+Tests: 1362 passed, 1 failed (pre-existing failure), TS check passes. Now run smoke test since we didn't change backend files. Let me check:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No smoke test needed. T3=1776186591, test_sec=72. Frontend .tsx files changed and type=feature, so tester is MANDATORY. Let me also update the UI test spec and start the QA tester.
+
+● Verify frontend UI changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+● Find last Home test ID (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "home-" tests/e2e/ui-test-spec.yaml
+  │ | tail -5
+  └ 6 lines...
+
+● Read last Home test item (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '81,90p' tests/e2e/ui-test-spec.yaml
+  └ 11 lines...
+
+● Edit ui-test-spec.yaml +14
+  └ tests/e2e/ui-test-spec.yaml
+
+● Amend with test spec (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+Now start the server and run the QA tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now invoke the tester subagent:
+
+● Tester QA test iteration 451
+  │ Read SmartReviewQueue.tsx
+  │   │ frontend/src/components/SmartReviewQueue.tsx
+  │   └ L26:40 (15 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L2320:2378 (58 lines read)
+
+The tester found a major issue with the translation key and field mismatches. Let me fix these.
+
+● Check t() function signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "function t\|const t "
+  │ frontend/src/i18n/I18nContext.tsx | head -5
+  └ 2 lines...
+
+● Find i18n translation interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "smartReview\|interface
+  │ Translations" frontend/src/i18n/*.ts frontend/src/i18n/*.tsx 2>/dev/null | head -20
+  └ 2 lines...
+
+● Read end of translations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/i18n/translations.ts
+  └ 21 lines...
+
+● Find en and ja positions for last key (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "featureDashboardDesc"
+  │ frontend/src/i18n/translations.ts
+  └ 4 lines...
+
+● Check interface end area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '77,78p'
+  │ frontend/src/i18n/translations.ts
+  └ 3 lines...
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Check en end area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '156,157p'
+  │ frontend/src/i18n/translations.ts
+  └ 3 lines...
+
+● Check en section end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '158,160p'
+  │ frontend/src/i18n/translations.ts
+  └ 3 lines...
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+Now find and fix the ja section:
+
+● Find ja featureDashboardDesc (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "featureDashboardDesc:"
+  │ frontend/src/i18n/translations.ts
+  └ 4 lines...
+
+● Check ja end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '239,241p'
+  │ frontend/src/i18n/translations.ts
+  └ 3 lines...
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+Now fix the SmartReviewQueue component — remove the fallback arg from t(), use proper field names, and internationalize the empty state:
+
+● Edit SmartReviewQueue.tsx +1 -1
+  └ frontend/src/components/SmartReviewQueue.tsx
+
+● Edit SmartReviewQueue.tsx +1 -1
+  └ frontend/src/components/SmartReviewQueue.tsx
+
+● Edit SmartReviewQueue.tsx +1 -1
+  └ frontend/src/components/SmartReviewQueue.tsx
+
+● Edit SmartReviewQueue.tsx +1 -1
+  └ frontend/src/components/SmartReviewQueue.tsx
+
+Now re-run TS check and amend the commit:
+
+● TypeScript check after fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+

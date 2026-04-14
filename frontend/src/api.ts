@@ -1854,3 +1854,24 @@ export function evaluateFollowUp(statement: string, user_question: string, durat
     body: JSON.stringify({ statement, user_question, duration_seconds }),
   });
 }
+
+// Smart Review Queue
+export interface ReviewQueueItemDetail {
+  [key: string]: unknown;
+}
+
+export interface ReviewQueueItem {
+  module: string;
+  priority: number;
+  detail: ReviewQueueItemDetail;
+  route: string;
+}
+
+export interface ReviewQueueResponse {
+  items: ReviewQueueItem[];
+  total_count: number;
+}
+
+export function getReviewQueue(limit: number = 8): Promise<ReviewQueueResponse> {
+  return request<ReviewQueueResponse>(`/api/dashboard/review-queue?limit=${limit}`);
+}

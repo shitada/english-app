@@ -85,6 +85,20 @@ pages:
         type: functional
         priority: high
         added_in: 0
+      - id: home-009
+        target: Smart Review Queue card displays
+        action: scroll to Smart Review Queue section
+        expect: Card visible with title, count badge, items grouped by module with priority dots
+        type: functional
+        priority: medium
+        added_in: 451
+      - id: home-010
+        target: Smart Review Queue collapse/expand
+        action: click the Smart Review Queue header
+        expect: Card collapses hiding items; click again expands showing items
+        type: functional
+        priority: low
+        added_in: 451
 
   conversation:
     path: /conversation
