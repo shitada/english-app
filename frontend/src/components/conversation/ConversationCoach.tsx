@@ -10,6 +10,7 @@ interface ConversationCoachProps {
   grammarCorrect: number;
   grammarTotal: number;
   wpmValues: number[];
+  responseTimeValues?: number[];
 }
 
 interface Tip {
@@ -19,7 +20,7 @@ interface Tip {
   priority: number;
 }
 
-export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmValues }: ConversationCoachProps) {
+export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues = [] }: ConversationCoachProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState(false);
 
@@ -67,11 +68,21 @@ export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmV
       }
     }
 
+    // Response time feedback
+    if (responseTimeValues.length >= 3) {
+      const avgRT = responseTimeValues.reduce((a, b) => a + b, 0) / responseTimeValues.length;
+      if (avgRT > 20) {
+        tips.push({ id: 'rt-slow', emoji: '⏱️', text: 'Try responding faster — even short replies build fluency momentum!', priority: 6 });
+      } else if (avgRT < 8) {
+        tips.push({ id: 'rt-fast', emoji: '⚡', text: 'Lightning-fast responses! You\'re thinking in English.', priority: 7 });
+      }
+    }
+
     const available = tips.filter((t) => !dismissed.has(t.id));
     if (available.length === 0) return null;
     available.sort((a, b) => a.priority - b.priority);
     return available[0];
-  }, [userMessages, grammarCorrect, grammarTotal, wpmValues, dismissed]);
+  }, [userMessages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues, dismissed]);
 
   if (!tip) return null;
 

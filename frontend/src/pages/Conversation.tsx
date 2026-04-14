@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -82,6 +82,7 @@ export default function Conversation() {
   const [showGrammarPanel, setShowGrammarPanel] = useState(false);
   const [lastAssistantAt, setLastAssistantAt] = useState<number>(0);
   const [wpmValues, setWpmValues] = useState<number[]>([]);
+  const [responseTimes, setResponseTimes] = useState<number[]>([]);
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending'>('idle');
   const [warmupTopicId, setWarmupTopicId] = useState<string>('');
@@ -438,6 +439,7 @@ export default function Conversation() {
       setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] }]);
       setLastAssistantAt(Date.now());
       setWpmValues([]);
+      setResponseTimes([]);
       setPhase('chat');
       setTimeLeft(duration);
       setPhraseSuggestions(res.phrase_suggestions || []);
@@ -908,6 +910,7 @@ export default function Conversation() {
       setQuizRevealed(false);
       setQuizFinished(false);
       setQuizError('');
+      setResponseTimes([]);
     };
     return (
       <PhaseTransition phase={phase}>
@@ -1117,6 +1120,15 @@ export default function Conversation() {
         <VocabTargetBar targetWords={vocabTargets} usedWords={usedVocabWords} onSpeak={tts.speak} />
       )}
 
+      {phase === 'chat' && (
+        <ResponseTimer
+          isSpeaking={tts.isSpeaking}
+          lastAssistantIndex={messages.filter(m => m.role === 'assistant').length - 1}
+          userMessageCount={messages.filter(m => m.role === 'user').length}
+          onTimeRecord={(sec) => setResponseTimes(prev => [...prev, sec])}
+        />
+      )}
+
       {(() => {
         const checked = messages.filter((m) => m.role === 'user' && m.feedback);
         const correct = checked.filter((m) => m.feedback!.is_correct);
@@ -1126,6 +1138,7 @@ export default function Conversation() {
             grammarCorrect={correct.length}
             grammarTotal={checked.length}
             wpmValues={wpmValues}
+            responseTimeValues={responseTimes}
           />
         );
       })()}
