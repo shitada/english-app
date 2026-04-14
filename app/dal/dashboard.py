@@ -80,6 +80,8 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
             SELECT answered_at AS created_at FROM quiz_attempts WHERE answered_at >= date('now', '-366 days')
             UNION ALL
             SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-366 days')
         ) ORDER BY d DESC
     """)
 
@@ -133,8 +135,12 @@ async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list
         SELECT type, detail, ts FROM (
             SELECT 'listening' as type, title as detail, created_at as ts FROM listening_quiz_results ORDER BY created_at DESC LIMIT ?
         )
+        UNION ALL
+        SELECT type, detail, ts FROM (
+            SELECT 'speaking_journal' as type, prompt as detail, created_at as ts FROM speaking_journal ORDER BY created_at DESC LIMIT ?
+        )
         ORDER BY ts DESC LIMIT ?
-    """, (limit, limit, limit, limit, limit))
+    """, (limit, limit, limit, limit, limit, limit))
     return [
         {"type": r["type"], "detail": r["detail"][:60], "timestamp": r["ts"]}
         for r in rows
@@ -205,7 +211,8 @@ async def get_daily_activity(
                COALESCE(conv.cnt, 0) AS conversations,
                COALESCE(msg.cnt, 0) AS messages,
                COALESCE(pron.cnt, 0) AS pronunciation_attempts,
-               COALESCE(vocab.cnt, 0) AS vocabulary_reviews
+               COALESCE(vocab.cnt, 0) AS vocabulary_reviews,
+               COALESCE(sj.cnt, 0) AS speaking_journal_entries
            FROM dates
            LEFT JOIN (
                SELECT date(started_at) AS d, COUNT(*) AS cnt
@@ -231,8 +238,14 @@ async def get_daily_activity(
                WHERE answered_at >= date('now', '-' || (? - 1) || ' days')
                GROUP BY date(answered_at)
            ) vocab ON dates.d = vocab.d
+           LEFT JOIN (
+               SELECT date(created_at) AS d, COUNT(*) AS cnt
+               FROM speaking_journal
+               WHERE created_at >= date('now', '-' || (? - 1) || ' days')
+               GROUP BY date(created_at)
+           ) sj ON dates.d = sj.d
            ORDER BY dates.d ASC""",
-        (days, days, days, days, days),
+        (days, days, days, days, days, days),
     )
     return [
         {
@@ -241,6 +254,7 @@ async def get_daily_activity(
             "messages": r["messages"],
             "pronunciation_attempts": r["pronunciation_attempts"],
             "vocabulary_reviews": r["vocabulary_reviews"],
+            "speaking_journal_entries": r["speaking_journal_entries"],
         }
         for r in rows
     ]
@@ -294,6 +308,8 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
             SELECT answered_at AS created_at FROM quiz_attempts WHERE answered_at >= date('now', '-1095 days')
             UNION ALL
             SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-1095 days')
+            UNION ALL
+            SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-1095 days')
         ) ORDER BY d ASC
     """)
     if not rows:
@@ -364,6 +380,8 @@ async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
             SELECT created_at FROM pronunciation_attempts
             UNION ALL
             SELECT answered_at AS created_at FROM quiz_attempts
+            UNION ALL
+            SELECT created_at FROM speaking_journal
         )
     """)
     study_days = rows[0]["study_days"] if rows else 0
@@ -583,7 +601,8 @@ async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
             (SELECT COUNT(*) FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')) AS conversations,
             (SELECT COUNT(*) FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')) AS vocabulary_reviews,
             (SELECT COUNT(*) FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS pronunciation_attempts,
-            (SELECT COUNT(*) FROM listening_quiz_results WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS listening_quizzes
+            (SELECT COUNT(*) FROM listening_quiz_results WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS listening_quizzes,
+            (SELECT COUNT(*) FROM speaking_journal WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS speaking_journal_entries
     """)
     row = rows[0] if rows else {}
     return {
@@ -591,6 +610,7 @@ async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
         "vocabulary_reviews": row["vocabulary_reviews"] if row else 0,
         "pronunciation_attempts": row["pronunciation_attempts"] if row else 0,
         "listening_quizzes": row["listening_quizzes"] if row else 0,
+        "speaking_journal_entries": row["speaking_journal_entries"] if row else 0,
     }
 
 
@@ -732,6 +752,8 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
             SELECT answered_at AS created_at FROM quiz_attempts
             UNION ALL
             SELECT created_at FROM listening_quiz_results
+            UNION ALL
+            SELECT created_at FROM speaking_journal
         )
     """)
     study_days = streak_rows[0]["days"] if streak_rows else 0
@@ -1266,6 +1288,7 @@ ROUTE_MAP = {
     "pronunciation": "/pronunciation",
     "vocabulary": "/vocabulary",
     "listening": "/listening",
+    "speaking_journal": "/speaking",
 }
 
 
@@ -1290,8 +1313,12 @@ async def get_recent_activity(db: aiosqlite.Connection, limit: int = 5) -> list[
         SELECT type, detail, ts FROM (
             SELECT 'listening' as type, title as detail, created_at as ts FROM listening_quiz_results ORDER BY created_at DESC LIMIT ?
         )
+        UNION ALL
+        SELECT type, detail, ts FROM (
+            SELECT 'speaking_journal' as type, prompt as detail, created_at as ts FROM speaking_journal ORDER BY created_at DESC LIMIT ?
+        )
         ORDER BY ts DESC LIMIT ?
-    """, (limit, limit, limit, limit, limit))
+    """, (limit, limit, limit, limit, limit, limit))
     return [
         {
             "type": r["type"],
@@ -1526,6 +1553,11 @@ async def get_module_streaks(db: aiosqlite.Connection) -> dict[str, Any]:
         """,
         "listening": """
             SELECT DISTINCT date(created_at) as d FROM listening_quiz_results
+            WHERE created_at >= date('now', '-366 days')
+            ORDER BY d DESC
+        """,
+        "speaking_journal": """
+            SELECT DISTINCT date(created_at) as d FROM speaking_journal
             WHERE created_at >= date('now', '-366 days')
             ORDER BY d DESC
         """,

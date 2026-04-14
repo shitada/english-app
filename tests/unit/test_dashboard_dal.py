@@ -652,6 +652,7 @@ class TestGetTodayActivity:
             "vocabulary_reviews": 0,
             "pronunciation_attempts": 0,
             "listening_quizzes": 0,
+            "speaking_journal_entries": 0,
         }
 
     async def test_counts_today_activity(self, test_db):
@@ -1625,9 +1626,9 @@ class TestGetModuleStreaks:
         assert result["least_consistent"] is not None
 
     async def test_all_four_modules_keys(self, test_db):
-        """Response includes all four module keys."""
+        """Response includes all five module keys."""
         result = await get_module_streaks(test_db)
-        assert set(result["modules"].keys()) == {"conversation", "vocabulary", "pronunciation", "listening"}
+        assert set(result["modules"].keys()) == {"conversation", "vocabulary", "pronunciation", "listening", "speaking_journal"}
 
 
 # ── Learning Velocity ──────────────────────────────────────────
@@ -2319,3 +2320,57 @@ class TestGetReviewQueue:
         await test_db.commit()
         result = await get_review_queue(test_db)
         assert len(result) == 0
+
+
+class TestSpeakingJournalTracking:
+    """speaking_journal entries should count in streaks, activity, and achievements."""
+
+    async def test_streak_includes_speaking_journal(self, test_db):
+        """A speaking_journal entry today should give streak >= 1."""
+        from app.dal.dashboard import _calculate_streak
+
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Describe your day", "I went shopping", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        streak = await _calculate_streak(test_db)
+        assert streak >= 1
+
+    async def test_today_activity_includes_speaking_journal(self, test_db):
+        """get_today_activity should include speaking_journal_entries."""
+        from app.dal.dashboard import get_today_activity
+
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Talk about food", "I like sushi", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        result = await get_today_activity(test_db)
+        assert "speaking_journal_entries" in result
+        assert result["speaking_journal_entries"] >= 1
+
+    async def test_learning_summary_includes_speaking_journal(self, test_db):
+        """get_learning_summary study_days should count speaking_journal days."""
+        from app.dal.dashboard import get_learning_summary
+
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Talk about weather", "It is sunny", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        result = await get_learning_summary(test_db)
+        assert result["total_study_days"] >= 1
+
+    async def test_module_streaks_includes_speaking_journal(self, test_db):
+        """get_module_streaks should have a speaking_journal module."""
+        from app.dal.dashboard import get_module_streaks
+
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Describe a trip", "I visited Tokyo", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        result = await get_module_streaks(test_db)
+        assert "speaking_journal" in result["modules"]
+        assert result["modules"]["speaking_journal"]["current_streak"] >= 1

@@ -1623,3 +1623,347 @@ Now commit and test:
 
 1 pre-existing test failure (daily challenge test, not related to my change). TS check passed. Let me verify it's pre-existing and run smoke test since I changed dashboard DAL.
 
+[2026-04-15 04:44:59] Copilot invocation completed (duration: 956s)
+[2026-04-15 04:44:59] Verifying Playwright test depth...
+[2026-04-15 04:44:59]   PW_NA iter=461 — no UI file changes, Playwright test not required
+[2026-04-15 04:44:59]   PW_NA iter=462 — no UI file changes, Playwright test not required
+[2026-04-15 04:44:59] Running post-invocation audit (iter 461-462)...
+============================================
+ Autoresearch Audit
+ Iterations: 461 — 462
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 04:44:59
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 462[0m
+[0;31m  Tester: FAIL — missing: 461 462[0m
+[0;31m  Evaluator: FAIL — missing: 461 462[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 2)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 04:45:00] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 04:45:03] Current iteration count: 462 / 474
+[2026-04-15 04:45:03] ------------------------------------------
+[2026-04-15 04:45:03] Invocation 10 / 10
+[2026-04-15 04:45:03] Resuming from iteration 463
+[2026-04-15 04:45:03] ------------------------------------------
+[2026-04-15 04:45:03] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-463-to-474.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 50 lines...
+
+Backlog is empty, last iteration was 462. Starting iteration 463.
+
+## Iteration 463
+
+● Record T0 for iteration 463 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 463
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1:80 (80 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L80:250 (171 lines read)
+
+Good proposal — bugfix type, backend only. Let me implement it.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check existing speaking_journal refs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speaking_journal"
+  │ app/dal/dashboard.py | head -20
+  └ 1 line...
+
+● Check speaking_journal table (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speaking_journal" app/database.py
+  │ | head -10
+  └ 4 lines...
+
+● Find function locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "_calculate_streak\|_calculate_longest_streak\|get_today_activity\|get_daily_activity\|get_learn
+  │ ing_summary\|get_achievements\|get_recent_activity\|get_module_streaks" app/dal/dashboard.py |
+  │ head -20
+  └ 21 lines...
+
+● Read _calculate_streak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '72,114p' app/dal/dashboard.py
+  └ 42 lines...
+
+● Read _calculate_longest_streak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '286,330p' app/dal/dashboard.py
+  └ 46 lines...
+
+● Read get_daily_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '193,260p' app/dal/dashboard.py
+  └ 69 lines...
+
+● Read get_today_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '579,640p' app/dal/dashboard.py
+  └ 63 lines...
+
+● Read get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1272,1340p' app/dal/dashboard.py
+  └ 70 lines...
+
+● Read get_learning_summary (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '357,400p' app/dal/dashboard.py
+  └ 45 lines...
+
+● Read get_module_streaks (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1509,1580p' app/dal/dashboard.py
+  └ 73 lines...
+
+● Read get_achievements (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '722,800p' app/dal/dashboard.py
+  └ 80 lines...
+
+● Check speaking_journal schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '133,150p' app/database.py
+  └ 19 lines...
+
+Now I'll implement all the changes. Let me do them in parallel:
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +3 -1
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+Now add speaking_journal to `get_recent_activity` and `get_module_streaks`:
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ Multiple matches found
+
+● Edit dashboard.py +5
+  └ app/dal/dashboard.py
+
+● Find listening line in get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "listening.*title as detail"
+  │ app/dal/dashboard.py
+  └ 3 lines...
+
+● See context around line 1301 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1295,1315p' app/dal/dashboard.py
+  └ 20 lines...
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ Multiple matches found
+
+● Get full context of get_recent_activity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1275,1310p' app/dal/dashboard.py
+  └ 37 lines...
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ No match found
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1282:1312 (31 lines read)
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ No match found
+
+● Check exact chars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat -A app/dal/dashboard.py | sed -n
+  │ '1299,1304p'
+  └ 3 lines...
+
+● Check exact chars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1299,1304p' app/dal/dashboard.py |
+  │ cat -v
+  └ 7 lines...
+
+● Edit dashboard.py +5 -1
+  └ app/dal/dashboard.py
+
+Now add the ROUTE_MAP entry for speaking_journal and update `get_daily_activity`:
+
+● Find ROUTE_MAP (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "ROUTE_MAP" app/dal/dashboard.py
+  └ 3 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1274:1280 (6 lines read)
+
+● Edit dashboard.py +1
+  └ app/dal/dashboard.py
+
+Now add `get_daily_activity` speaking_journal LEFT JOIN. Let me also check there's another `_get_recent_activity` function:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L115:170 (56 lines read)
+
+● Edit dashboard.py +5 -1
+  └ app/dal/dashboard.py
+
+Now add the `get_daily_activity` LEFT JOIN for speaking_journal:
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L193:260 (68 lines read)
+
+● Edit dashboard.py +10 -2
+  └ app/dal/dashboard.py
+
+Now let me add a test and commit:
+
+● Check existing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "speaking_journal"
+  │ tests/unit/test_dashboard_dal.py | head -5
+  └ 1 line...
+
+● See test file end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 tests/unit/test_dashboard_dal.py
+  └ 31 lines...
+
+● Find streak/activity tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "class.*Test.*Streak\|class.*Test.*Activity\|class.*Test.*Today\|def test_.*streak\|def
+  │ test_.*today_activity" tests/unit/test_dashboard_dal.py | head -10
+  └ 11 lines...
+
+● Add tests for speaking_journal tracking (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/unit/test_dashboard_dal.py <<
+  │ 'PYEOF'
+  │
+  │
+  │ class TestSpeakingJournalTracking:…
+  └ 57 lines...
+
+● Commit iteration 463 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #463: Include speaking_journal in streak, activity, and achievement tracking
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -40
+  └ 41 lines...
+
+3 test failures. Let me fix them:
+
+● Check failure details (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit/test_dashboard_dal.py::TestGetTodayActivity::test_empty_database
+  │ tests/unit/test_dashboard_dal.py::TestGetModuleStreaks::test_all_four_modules_keys
+  │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity -v
+  │ 2>&1 | grep -A 10 "FAILED\|AssertionError\|assert"
+  └ 90 lines...
+
+● Find module keys test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_all_four_modules_keys"
+  │ tests/unit/test_dashboard_dal.py
+  └ 2 lines...
+
+● Find test to fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "test_empty_database"
+  │ tests/unit/test_dashboard_dal.py | head -5
+  └ 6 lines...
+
+● See daily challenge test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1810,1820p'
+  │ tests/integration/test_dashboard_api.py
+  └ 12 lines...
+
+● See empty db test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '645,660p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 16 lines...
+
+Now let me check the daily challenge issue - the `get_today_activity` now returns `speaking_journal_entries` which changes the challenge selection logic:
+
+● Find daily challenge function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "daily.challenge\|daily_challenge\|get_daily_challenge" app/dal/dashboard.py | head -10
+  └ 3 lines...
+
+● Read daily challenge function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1127,1195p' app/dal/dashboard.py
+  └ 70 lines...
+
+The daily challenge function itself doesn't use the new key. The issue is likely that the hash-based selection is now different because `get_today_activity` returned a different result. Let me check what's happening in the test:
+
+● See full daily challenge test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1780,1825p'
+  │ tests/integration/test_dashboard_api.py
+  └ 47 lines...
+
+The test failure for daily_challenge seems unrelated to my change - the `get_today_activity` returns additional key but the daily challenge function uses `.get()` with specific keys. The hash-based selection depends on today's date and `get_learning_insights`, not on `get_today_activity` output. Let me check if this test was already failing before my change:
+
