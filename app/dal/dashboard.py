@@ -2023,6 +2023,14 @@ async def get_vocabulary_activation(
         "SELECT content, created_at FROM messages WHERE role = 'user' ORDER BY created_at DESC"
     )
 
+    # Pre-process messages: lowercase once, pad for word-boundary matching
+    prepared_msgs = [
+        {"content_padded": f" {(msg['content'] or '').lower()} ", "created_at": msg["created_at"]}
+        for msg in user_messages
+    ]
+    # Build a single corpus string for fast O(1) amortized rejection
+    corpus = " ".join(m["content_padded"] for m in prepared_msgs)
+
     # Check each studied word for occurrences in user messages
     activated: list[dict[str, Any]] = []
     unactivated: list[dict[str, Any]] = []
@@ -2038,13 +2046,14 @@ async def get_vocabulary_activation(
 
         times_used = 0
         last_used_at: str | None = None
-        for msg in user_messages:
-            content = (msg["content"] or "").lower()
-            # Word boundary-aware match
-            if f" {word} " in f" {content} ":
-                times_used += 1
-                if last_used_at is None:
-                    last_used_at = msg["created_at"]
+        word_padded = f" {word} "
+        # Quick corpus check: skip per-message scan if word not in any message
+        if word_padded in corpus:
+            for msg in prepared_msgs:
+                if word_padded in msg["content_padded"]:
+                    times_used += 1
+                    if last_used_at is None:
+                        last_used_at = msg["created_at"]
 
         entry = {
             "word_id": row["id"],

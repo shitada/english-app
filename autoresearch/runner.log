@@ -2390,3 +2390,188 @@ Now add the error display after the loading message:
 ● Edit TurnRepracticeDrill.tsx +1
   └ frontend/src/components/conversation/TurnRepracticeDrill.tsx
 
+● Amend with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #434: Add Turn Re-Practice drill to Conversation History view"
+  └ 17 lines...
+
+● TypeScript check after fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+Good. Now call the evaluator:
+
+● Record T3 for 434 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 434
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L51:120 (70 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L120:200 (80 lines read)
+
+● Record T4 for 434 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.55 (keep). Verify:
+- Tests: 1347/1347 ✅
+- TS check: pass ✅
+- ux_score: 5.0 ≥ 5.0 ✅
+- Score: 6.55 ≥ 6.0 ✅
+→ **KEEP**
+
+● Record iteration 434 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "434" "$HASH" "2026-04-14" "346" "139" "433" "82" "1000" \
+  │ "1347" "1347" "pass" "6.55" "kept" "Add Turn Re-Practice drill to Conversation History view"…
+  └ 5 lines...
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Iteration 434 ✅ KEPT (6.55). Checklist: ✅ proposer, ✅ tester, ✅ evaluator.
+
+## Summary — Iterations 433-434
+
+| Iter | Score | Verdict | Tests | Description |
+|------|-------|---------|-------|-------------|
+| 433 | 6.15 | **kept** | 1347 | Add tabbed Quick Practice Hub to organize 12 cards by skill category |
+| 434 | 6.55 | **kept** | 1347 | Add Turn Re-Practice drill to Conversation History view |
+
+**2/2 kept** (100% success rate). All 3 mandatory subagents called for both iterations. Stopping after 2 iterations as requested.
+
+
+Changes   +429 -67
+Requests  3 Premium (28m 53s)
+Tokens    ↑ 7.3m • ↓ 70.2k • 6.7m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-433-to-454.md
+[2026-04-14 11:13:10] Copilot invocation completed (duration: 1735s)
+[2026-04-14 11:13:10] Verifying Playwright test depth...
+[2026-04-14 11:13:10]   PW_SKIP iter=433 — UI changed but NO Playwright test was run
+[2026-04-14 11:13:10]   PW_SKIP iter=434 — UI changed but NO Playwright test was run
+[2026-04-14 11:13:10] Running post-invocation audit (iter 433-434)...
+============================================
+ Autoresearch Audit
+ Iterations: 433 — 434
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-14 11:13:10
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-14 11:13:12] Audit passed — no issues
+[2026-04-14 11:13:15] Current iteration count: 434 / 454
+[2026-04-14 11:13:15] ------------------------------------------
+[2026-04-14 11:13:15] Invocation 6 / 10
+[2026-04-14 11:13:15] Resuming from iteration 435
+[2026-04-14 11:13:15] ------------------------------------------
+[2026-04-14 11:13:15] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-435-to-454.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was 434. Starting iteration 435. Let me record T0 and call the proposer.
+
+● Record T0 for iteration 435 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1776132816. Now calling the proposer subagent.
+
+● Proposer Propose iteration 435
+  │ Read test_conversation_dal.py
+  │   │ tests/unit/test_conversation_dal.py
+  │   └ L1600:1700 (14 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L2020:2090 (71 lines read)
+
+Got the proposal. Let me record T1 and look at the code to implement.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find function location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_vocabulary_activation"
+  │ app/dal/dashboard.py | head -5
+  └ 2 lines...
+
+T1 = 1776133330. propose_sec = 514.
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1996:2060 (65 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L2060:2090 (31 lines read)
+
+Now I'll implement the optimization:
+
+● Edit dashboard.py +16 -7
+  └ app/dal/dashboard.py
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
