@@ -381,6 +381,8 @@ async def get_learning_summary(db: aiosqlite.Connection) -> dict[str, Any]:
             UNION ALL
             SELECT answered_at AS created_at FROM quiz_attempts
             UNION ALL
+            SELECT created_at FROM listening_quiz_results
+            UNION ALL
             SELECT created_at FROM speaking_journal
         )
     """)
@@ -477,6 +479,12 @@ async def get_learning_insights(db: aiosqlite.Connection) -> dict[str, Any]:
                 UNION ALL
                 SELECT 1 FROM quiz_attempts
                     WHERE date(answered_at) = date('now')
+                UNION ALL
+                SELECT 1 FROM listening_quiz_results
+                    WHERE date(created_at) = date('now')
+                UNION ALL
+                SELECT 1 FROM speaking_journal
+                    WHERE date(created_at) = date('now')
             )
         """)
         if today_rows[0]["cnt"] == 0:

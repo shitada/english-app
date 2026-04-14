@@ -456,3 +456,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 460	141e329	2026-04-15	130	272	93	103	529	1375	1376	pass	7.55	kept	Add pronunciation practice sentences from grammar corrections
 461	c2ed076	2026-04-15	205	58	63	121	447	1376	1377	pass	7.8	kept	Fix weekly report grammar_accuracy using all-time data instead of weekly
 462	66afc6c	2026-04-15	229	60	78	94	461	1379	1379	pass	7.8	kept	Fix skill radar: listening ignores quiz data, grammar misses string is_correct
+463	2b56aa6	2026-04-15	344	0	347	118	809	1382	1383	pass	7.8	kept	Include speaking_journal in streak, activity, and achievement tracking

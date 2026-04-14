@@ -2374,3 +2374,47 @@ class TestSpeakingJournalTracking:
         result = await get_module_streaks(test_db)
         assert "speaking_journal" in result["modules"]
         assert result["modules"]["speaking_journal"]["current_streak"] >= 1
+
+
+class TestStreakAtRiskFalsePositive:
+    """streak_at_risk should be False when only listening or speaking_journal activity today."""
+
+    async def test_listening_quiz_clears_streak_at_risk(self, test_db):
+        """Listening quiz today should not trigger streak_at_risk."""
+        from app.dal.dashboard import get_learning_insights
+
+        # Create activity yesterday to establish a streak
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, started_at) VALUES (1, 'hotel_checkin', 'beginner', datetime('now', '-1 day'))",
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (1, 'user', 'hi', datetime('now', '-1 day'))",
+        )
+        # Only listening quiz today
+        await test_db.execute(
+            "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, questions_json, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Test Quiz", "beginner", 5, 4, 80.0, "[]"),
+        )
+        await test_db.commit()
+        result = await get_learning_insights(test_db)
+        assert result["streak_at_risk"] is False
+
+    async def test_speaking_journal_clears_streak_at_risk(self, test_db):
+        """Speaking journal today should not trigger streak_at_risk."""
+        from app.dal.dashboard import get_learning_insights
+
+        # Create activity yesterday
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, started_at) VALUES (1, 'hotel_checkin', 'beginner', datetime('now', '-1 day'))",
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, created_at) VALUES (1, 'user', 'hello', datetime('now', '-1 day'))",
+        )
+        # Only speaking journal today
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Talk about travel", "I love Japan", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        result = await get_learning_insights(test_db)
+        assert result["streak_at_risk"] is False
