@@ -305,3 +305,448 @@ T2=1776181185, implement_sec=193. Now run tests:
 
 Tests: 1350 passed, 1 failed (pre-existing dashboard test failure), TS check passed. Let me verify the failing test is pre-existing:
 
+[2026-04-15 01:06:29] Copilot invocation completed (duration: 2147s)
+[2026-04-15 01:06:29] Verifying Playwright test depth...
+[2026-04-15 01:06:29]   PW_SKIP iter=445 — UI changed but NO Playwright test was run
+[2026-04-15 01:06:29]   PW_SKIP iter=446 — UI changed but NO Playwright test was run
+[2026-04-15 01:06:29] Running post-invocation audit (iter 445-446)...
+============================================
+ Autoresearch Audit
+ Iterations: 445 — 446
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 01:06:29
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 446[0m
+[0;31m  Tester: FAIL — missing: 445 446[0m
+[0;31m  Evaluator: FAIL — missing: 445 446[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 01:06:30] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 01:06:33] Current iteration count: 446 / 474
+[2026-04-15 01:06:33] ------------------------------------------
+[2026-04-15 01:06:33] Invocation 2 / 10
+[2026-04-15 01:06:33] Resuming from iteration 447
+[2026-04-15 01:06:33] ------------------------------------------
+[2026-04-15 01:06:33] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-447-to-474.md)...
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 50 lines...
+
+● Record T0 for iteration 447 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+● Check backlog structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 autoresearch/backlog.md && echo
+  │ "---" && grep -c '^\- \[' autoresearch/backlog.md
+  └ 8 lines...
+
+● Check all backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^\- \[' autoresearch/backlog.md
+  └ 9 lines...
+
+All backlog items are completed. Starting iteration 447. T0=1776182820.
+
+## Iteration 447 — Step 2: Propose
+
+● Proposer Propose iteration 447
+  │ Read config.py
+  │   │ app/config.py
+  │   └ 61 lines read
+  └ Read utils.py
+      │ app/utils.py
+      └ 178 lines read
+
+● Record T1 for proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776183114, propose_sec=294. Now implementing the Custom Conversation Scenario Creator.
+
+## Iteration 447 — Step 3: Implement
+
+● Check conversation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def list_topics\|def
+  │ start_conversation\|validate_topic\|def get_topics" app/routers/conversation.py | head -20
+  └ 5 lines...
+
+● Check database.py structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "custom_topics\|_MIGRATIONS\|SCHEMA" app/database.py | head -30
+  └ 5 lines...
+
+● Check conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5 app/dal/conversation.py && wc -l
+  │ app/dal/conversation.py
+  └ 7 lines...
+
+● Check api.ts for existing custom topic code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "createCustom\|customTopic\|/custom" frontend/src/api.ts | head -10
+  └ 1 line...
+
+● Find validate_topic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "validate_topic" app/utils.py
+  └ 2 lines...
+
+● View list_topics and start_conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '88,210p'
+  │ app/routers/conversation.py
+  └ 124 lines...
+
+● View _MIGRATIONS area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '125,170p' app/database.py
+  └ 47 lines...
+
+● Find get_conversation_topics import (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_topics"
+  │ app/routers/conversation.py | head -5
+  └ 6 lines...
+
+● View validate_topic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '77,95p' app/utils.py
+  └ 20 lines...
+
+● Check schema tables (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/database.py | cat && echo
+  │ "---SCHEMA_END---" && sed -n '17,128p' app/database.py | grep -n "CREATE TABLE"
+  └ 17 lines...
+
+● Find config functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "get_conversation_topics\|def
+  │ get_prompt\|def get_vocabulary_topics" app/config.py | head -10
+  └ 4 lines...
+
+● Check database.py size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/database.py && tail -1
+  │ autoresearch/results.tsv | cut -f1
+  └ 3 lines...
+
+● View end of SCHEMA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '120,128p' app/database.py
+  └ 10 lines...
+
+● View config functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '48,65p' app/config.py
+  └ 15 lines...
+
+● Count migrations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c "_MIGRATIONS" app/database.py &&
+  │ grep -n "^    (" app/database.py | tail -5
+  └ 7 lines...
+
+● View last migrations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '237,265p' app/database.py
+  └ 30 lines...
+
+● Check config topic structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "conversation_topics\|\"id\".*\"label\"\|scenario" config.yaml | head -20
+  └ 17 lines...
+
+● View conversation topics structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '17,48p' config.yaml
+  └ 33 lines...
+
+● Find topic selection UI (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "TopicCard\|topic-card\|select.*phase\|phase.*select\|ConversationSelect\|SelectPhase"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 6 lines...
+
+● View topic select phase UI (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '554,740p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 188 lines...
+
+● View more of select phase (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '740,790p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 52 lines...
+
+Now let me look at the frontend API types and the relevant imports:
+
+● Find API topic functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "topics\|/conversation"
+  │ frontend/src/api.ts | head -30
+  └ 31 lines...
+
+● Find how topics are fetched (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "conversation.*topics\|fetchTopics\|getTopics\|topics.*api\|topics.*fetch\|sortedTopics"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 3 lines...
+
+● Find topics state in Conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "const
+  │ \[topics\|topics.*useState\|setTopics\|useEffect.*topics\|fetchTopics"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 7 lines...
+
+● View topics loading logic (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '295,330p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 37 lines...
+
+Now I have enough context. Let me implement the feature. I'll need to:
+1. Add `custom_topics` table to database.py (SCHEMA + migration)
+2. Add DAL functions in `app/dal/conversation.py`
+3. Add API routes in `app/routers/conversation.py`
+4. Add API functions in `frontend/src/api.ts`
+5. Add UI in `frontend/src/pages/Conversation.tsx`
+6. Add tests
+
+● View router imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,20p' app/routers/conversation.py
+  └ 21 lines...
+
+● View Conversation imports/state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '30,60p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 32 lines...
+
+● View more state vars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,80p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+● View top imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,30p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 31 lines...
+
+Now let me implement. I'll do all the edits:
+
+● View end of SCHEMA precisely (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '117,122p' app/database.py
+  └ 7 lines...
+
+● Edit database.py +10
+  └ app/database.py
+
+Now add the migration:
+
+● View last migration entry (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '253,259p' app/database.py
+  └ 8 lines...
+
+● Edit database.py +12
+  └ app/database.py
+
+Now add DAL functions:
+
+● View end of conversation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/dal/conversation.py
+  └ 6 lines...
+
+● Edit conversation.py +30
+  └ app/dal/conversation.py
+
+Now add API routes. Let me find a good place to add them:
+
+● Find route definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^@router\.\|^async def "
+  │ app/routers/conversation.py | head -40
+  └ 41 lines...
+
+I'll add the custom topic routes after the favorite toggle route:
+
+● View around line 127 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '120,135p'
+  │ app/routers/conversation.py
+  └ 17 lines...
+
+Now I need to modify `list_topics` to merge custom topics, and add custom topic CRUD routes. Also need to modify `start_conversation` to handle custom topics.
+
+● Edit conversation.py +5 -2
+  └ app/routers/conversation.py
+
+Now add custom topic CRUD routes after the favorite toggle:
+
+● Edit conversation.py +33
+  └ app/routers/conversation.py
+
+Now modify `start_conversation` to handle custom topics:
+
+● Find start_conversation lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "async def
+  │ start_conversation\|topic_data = validate_topic\|topic_label = topic_data"
+  │ app/routers/conversation.py
+  └ 5 lines...
+
+● View start_conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '233,240p'
+  │ app/routers/conversation.py
+  └ 8 lines...
+
+● Edit conversation.py +9 -1
+  └ app/routers/conversation.py
+
+Now let me also fix the `toggle_topic_favorite` to accept custom topics:
+
+● View toggle_topic_favorite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '108,130p'
+  │ app/routers/conversation.py
+  └ 24 lines...
+
+● Edit conversation.py +2
+  └ app/routers/conversation.py
+
+Now update frontend API:
+
+● View current topic API lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '70,73p' frontend/src/api.ts
+  └ 4 lines...
+
+● Edit api.ts +8 -1
+  └ frontend/src/api.ts
+
+Now update the Conversation.tsx to add the create custom scenario UI:
+
+● View topics state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '61,63p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 4 lines...
+
+● Edit Conversation.tsx +4 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now I need to add the create scenario handler function and delete handler. Let me find a good spot:
+
+● Find favorite handler (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "const handleToggleFavorite"
+  │ frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● View handleToggleFavorite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '335,350p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+● Edit Conversation.tsx +25
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the Create Scenario card and delete button UI in the topic grid. Let me also add `Trash2` import — it's already imported. Let me add the UI after the topic grid closing `</div>`:
+
+● Find topic grid lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "topic-grid\|topic-card\|TOPIC_EMOJIS\[s.id\]" frontend/src/pages/Conversation.tsx | head -10
+  └ 5 lines...
+
+● View topic grid section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '735,800p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 67 lines...
+
+I need to modify the topic card rendering to show custom badge and delete button, and add a Create Scenario card at the end of the grid:
+
+● Edit Conversation.tsx +15 -2
+  └ frontend/src/pages/Conversation.tsx
+
+Now add the Create Scenario button card at the end of the topic grid:
+
+● Edit Conversation.tsx +50
+  └ frontend/src/pages/Conversation.tsx
+
+Now let me add tests:
+
+● Find existing conversation tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/unit/test_*conv*
+  │ tests/integration/test_*conv* 2>/dev/null
+  └ 2 lines...
+
+● View end of DAL tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ tests/unit/test_conversation_dal.py
+  └ 31 lines...
+
+● View DAL test imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -15
+  │ tests/unit/test_conversation_dal.py
+  └ 16 lines...
+
+● View more imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '15,40p'
+  │ tests/unit/test_conversation_dal.py
+  └ 27 lines...
+
+● Edit test_conversation_dal.py +3
+  └ tests/unit/test_conversation_dal.py
+
+Now add the test class at the end of the file:
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l tests/unit/test_conversation_dal.py
+  └ 2 lines...
+
+● View last lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3 tests/unit/test_conversation_dal.py
+  └ 4 lines...
+
+● Edit test_conversation_dal.py +31
+  └ tests/unit/test_conversation_dal.py
+
+Now add integration tests for the API:
+
+● View end of integration tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_conversation_api.py
+  └ 21 lines...
+
+● Edit test_conversation_api.py +45
+  └ tests/integration/test_conversation_api.py
+
+Now commit and test:
+

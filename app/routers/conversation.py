@@ -90,8 +90,11 @@ class ConversationListResponse(BaseModel):
 
 
 @router.get("/topics")
-async def list_topics():
-    return get_conversation_topics()
+async def list_topics(db: aiosqlite.Connection = Depends(get_db_session)):
+    config_topics = get_conversation_topics()
+    custom = await conv_dal.list_custom_topics(db)
+    custom_as_topics = [{"id": t["id"], "label": t["label"], "description": t["description"], "is_custom": True} for t in custom]
+    return config_topics + custom_as_topics
 
 
 @router.get("/topics/favorites")
@@ -110,6 +113,8 @@ async def toggle_topic_favorite(
     """Toggle a topic's favorite status."""
     topics = get_conversation_topics()
     valid_ids = {t["id"] for t in topics}
+    custom_topics = await conv_dal.list_custom_topics(db)
+    valid_ids |= {t["id"] for t in custom_topics}
     if topic_id not in valid_ids:
         raise HTTPException(status_code=404, detail=f"Topic '{topic_id}' not found")
 
@@ -125,6 +130,39 @@ async def toggle_topic_favorite(
 
     await pref_dal.set_preference(db, "favorite_topics", json.dumps(favorites))
     return {"topic_id": topic_id, "is_favorite": is_favorite, "favorites": favorites}
+
+
+class CreateCustomTopicRequest(BaseModel):
+    label: str = Field(min_length=1, max_length=100)
+    description: str = Field(default="", max_length=300)
+    scenario: str = Field(min_length=5, max_length=500)
+    goal: str = Field(default="Have a natural conversation", max_length=300)
+
+
+@router.get("/custom-topics")
+async def get_custom_topics(db: aiosqlite.Connection = Depends(get_db_session)):
+    """List all user-created custom topics."""
+    return await conv_dal.list_custom_topics(db)
+
+
+@router.post("/custom-topics")
+async def create_custom_topic(req: CreateCustomTopicRequest, db: aiosqlite.Connection = Depends(get_db_session)):
+    """Create a new custom conversation scenario."""
+    import re as _re
+    topic_id = "custom_" + _re.sub(r"[^a-z0-9]+", "_", req.label.lower()).strip("_")[:40]
+    existing = await conv_dal.list_custom_topics(db)
+    if any(t["id"] == topic_id for t in existing):
+        raise HTTPException(status_code=409, detail=f"A custom topic with ID '{topic_id}' already exists")
+    return await conv_dal.create_custom_topic(db, topic_id, req.label, req.description, req.scenario, req.goal)
+
+
+@router.delete("/custom-topics/{topic_id}")
+async def delete_custom_topic(topic_id: str = Path(min_length=1), db: aiosqlite.Connection = Depends(get_db_session)):
+    """Delete a custom topic."""
+    deleted = await conv_dal.delete_custom_topic(db, topic_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Custom topic '{topic_id}' not found")
+    return {"deleted": True}
 
 
 async def _extract_reply_helpers(
@@ -197,7 +235,15 @@ def _swap_scenario_roles(scenario: str) -> str:
 @router.post("/start", response_model=StartResponse)
 async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
     topics = get_conversation_topics()
-    topic_data = validate_topic(topics, req.topic)
+    # Try config topics first, then fall back to custom topics
+    try:
+        topic_data = validate_topic(topics, req.topic)
+    except HTTPException:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        custom_match = next((t for t in custom_topics if t["id"] == req.topic), None)
+        if not custom_match:
+            raise
+        topic_data = custom_match
     topic_label = topic_data["label"]
 
     conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap)

@@ -1622,3 +1622,48 @@ async def test_topic_progress_not_found(client):
     """Topic progress returns 404 for nonexistent conversation."""
     res = await client.get("/api/conversation/999999/topic-progress")
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_custom_topic_crud(client):
+    """Create, list, and delete a custom conversation topic."""
+    # Create
+    res = await client.post("/api/conversation/custom-topics", json={
+        "label": "Bank Visit",
+        "description": "Open an account",
+        "scenario": "You are a bank teller. The user is opening an account.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["label"] == "Bank Visit"
+    topic_id = data["id"]
+
+    # List
+    res = await client.get("/api/conversation/custom-topics")
+    assert res.status_code == 200
+    assert any(t["id"] == topic_id for t in res.json())
+
+    # Appears in merged topics
+    res = await client.get("/api/conversation/topics")
+    assert res.status_code == 200
+    merged = res.json()
+    custom_item = next((t for t in merged if t["id"] == topic_id), None)
+    assert custom_item is not None
+    assert custom_item.get("is_custom") is True
+
+    # Delete
+    res = await client.delete(f"/api/conversation/custom-topics/{topic_id}")
+    assert res.status_code == 200
+
+    # Verify deleted
+    res = await client.get("/api/conversation/custom-topics")
+    assert not any(t["id"] == topic_id for t in res.json())
+
+
+@pytest.mark.integration
+async def test_custom_topic_duplicate_returns_409(client):
+    """Creating a custom topic with duplicate label returns 409."""
+    payload = {"label": "Duplicate Test", "scenario": "You are a test agent."}
+    await client.post("/api/conversation/custom-topics", json=payload)
+    res = await client.post("/api/conversation/custom-topics", json=payload)
+    assert res.status_code == 409

@@ -58,9 +58,12 @@ export default function Conversation() {
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
   const [historySummary, setHistorySummary] = useState<import('../api').ConversationSummary | null>(null);
-  const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
+  const [topics, setTopics] = useState<{ id: string; label: string; description: string; is_custom?: boolean }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [favoriteTopics, setFavoriteTopics] = useState<Set<string>>(new Set());
+  const [showCreateScenario, setShowCreateScenario] = useState(false);
+  const [customForm, setCustomForm] = useState({ label: '', description: '', scenario: '', goal: '' });
+  const [customSaving, setCustomSaving] = useState(false);
   const [topicSuggestions, setTopicSuggestions] = useState<TopicRecommendation[]>([]);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
   const [userRoleName, setUserRoleName] = useState('');
@@ -340,6 +343,31 @@ export default function Conversation() {
     } catch {
       setFavoriteTopics(favoriteTopics);
     }
+  };
+
+  const handleCreateCustomTopic = async () => {
+    if (!customForm.label.trim() || !customForm.scenario.trim()) return;
+    setCustomSaving(true);
+    try {
+      const created = await api.createCustomTopic({
+        label: customForm.label.trim(),
+        description: customForm.description.trim(),
+        scenario: customForm.scenario.trim(),
+        goal: customForm.goal.trim() || 'Have a natural conversation',
+      });
+      setTopics(prev => [...prev, { id: created.id, label: created.label, description: created.description, is_custom: true }]);
+      setCustomForm({ label: '', description: '', scenario: '', goal: '' });
+      setShowCreateScenario(false);
+    } catch { /* ignore */ }
+    setCustomSaving(false);
+  };
+
+  const handleDeleteCustomTopic = async (e: React.MouseEvent, topicId: string) => {
+    e.stopPropagation();
+    try {
+      await api.deleteCustomTopic(topicId);
+      setTopics(prev => prev.filter(t => t.id !== topicId));
+    } catch { /* ignore */ }
   };
 
   const sortedTopics = [...topics].sort((a, b) => {
@@ -722,11 +750,24 @@ export default function Conversation() {
                         role="button"
                         aria-label={favoriteTopics.has(s.id) ? 'Unfavorite' : 'Favorite'}
                         onClick={(e) => handleToggleFavorite(e, s.id)}
-                        style={{ position: 'absolute', top: 8, right: 8, cursor: 'pointer', lineHeight: 1 }}
+                        style={{ position: 'absolute', top: 8, right: s.is_custom ? 32 : 8, cursor: 'pointer', lineHeight: 1 }}
                       >
                         <Star size={16} fill={favoriteTopics.has(s.id) ? '#f59e0b' : 'none'} stroke={favoriteTopics.has(s.id) ? '#f59e0b' : '#9ca3af'} />
                       </span>
-                      <h3>{TOPIC_EMOJIS[s.id] || '💬'} {s.label}</h3>
+                      {s.is_custom && (
+                        <span
+                          role="button"
+                          aria-label="Delete custom scenario"
+                          onClick={(e) => handleDeleteCustomTopic(e, s.id)}
+                          style={{ position: 'absolute', top: 8, right: 8, cursor: 'pointer', lineHeight: 1 }}
+                        >
+                          <Trash2 size={14} stroke="#ef4444" />
+                        </span>
+                      )}
+                      <h3>{s.is_custom ? '🎨' : (TOPIC_EMOJIS[s.id] || '💬')} {s.label}</h3>
+                      {s.is_custom && (
+                        <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: 9999, background: '#8b5cf620', color: '#8b5cf6', fontWeight: 600, marginBottom: 4, display: 'inline-block' }}>Custom</span>
+                      )}
                       <p>{s.description}</p>
                       <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                         {stats ? (
@@ -762,7 +803,57 @@ export default function Conversation() {
                     </button>
                   );
                 })}
+                <button
+                  className="topic-card"
+                  onClick={() => setShowCreateScenario(true)}
+                  style={{ border: '2px dashed var(--border)', background: 'transparent', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 100, opacity: 0.7 }}
+                >
+                  <span style={{ fontSize: '1.5rem' }}>➕</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Create Scenario</span>
+                </button>
               </div>
+              {showCreateScenario && (
+                <div style={{ marginTop: 16, padding: 20, borderRadius: 12, background: 'var(--card-bg, #f8f9fa)', border: '1px solid var(--border)' }}>
+                  <h3 style={{ marginBottom: 12 }}>🎨 Create Custom Scenario</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <input
+                      placeholder="Scenario name (e.g. Parent-Teacher Meeting)"
+                      value={customForm.label}
+                      onChange={(e) => setCustomForm(prev => ({ ...prev, label: e.target.value }))}
+                      style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem' }}
+                    />
+                    <input
+                      placeholder="Short description (optional)"
+                      value={customForm.description}
+                      onChange={(e) => setCustomForm(prev => ({ ...prev, description: e.target.value }))}
+                      style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem' }}
+                    />
+                    <textarea
+                      placeholder="AI role scenario (e.g. You are a plumber. The user is a homeowner with a leaking pipe.)"
+                      value={customForm.scenario}
+                      onChange={(e) => setCustomForm(prev => ({ ...prev, scenario: e.target.value }))}
+                      rows={3}
+                      style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', resize: 'vertical' }}
+                    />
+                    <input
+                      placeholder="Goal (default: Have a natural conversation)"
+                      value={customForm.goal}
+                      onChange={(e) => setCustomForm(prev => ({ ...prev, goal: e.target.value }))}
+                      style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem' }}
+                    />
+                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleCreateCustomTopic}
+                        disabled={customSaving || !customForm.label.trim() || !customForm.scenario.trim()}
+                      >
+                        {customSaving ? 'Creating...' : 'Create'}
+                      </button>
+                      <button className="btn btn-secondary" onClick={() => setShowCreateScenario(false)}>Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              )}
               </>
             )}
           </>

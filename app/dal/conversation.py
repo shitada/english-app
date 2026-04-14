@@ -992,3 +992,33 @@ async def get_random_grammar_mistake(db: aiosqlite.Connection) -> dict[str, Any]
     if not candidates:
         return None
     return random.choice(candidates)
+
+
+async def list_custom_topics(db: aiosqlite.Connection) -> list[dict]:
+    """Return all custom topics."""
+    rows = await db.execute_fetchall(
+        "SELECT topic_id, label, description, scenario, goal, created_at FROM custom_topics ORDER BY created_at DESC"
+    )
+    return [
+        {"id": r[0], "label": r[1], "description": r[2], "scenario": r[3], "goal": r[4], "created_at": r[5]}
+        for r in rows
+    ]
+
+
+async def create_custom_topic(
+    db: aiosqlite.Connection, topic_id: str, label: str, description: str, scenario: str, goal: str
+) -> dict:
+    """Create a new custom topic."""
+    await db.execute(
+        "INSERT INTO custom_topics (topic_id, label, description, scenario, goal) VALUES (?, ?, ?, ?, ?)",
+        (topic_id, label, description, scenario, goal),
+    )
+    await db.commit()
+    return {"id": topic_id, "label": label, "description": description, "scenario": scenario, "goal": goal}
+
+
+async def delete_custom_topic(db: aiosqlite.Connection, topic_id: str) -> bool:
+    """Delete a custom topic. Returns True if deleted."""
+    cursor = await db.execute("DELETE FROM custom_topics WHERE topic_id = ?", (topic_id,))
+    await db.commit()
+    return cursor.rowcount > 0

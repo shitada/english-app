@@ -67,9 +67,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // Conversation
 export const api = {
   // Topics
-  getConversationTopics: () => request<{ id: string; label: string; description: string }[]>('/api/conversation/topics'),
+  getConversationTopics: () => request<{ id: string; label: string; description: string; is_custom?: boolean }[]>('/api/conversation/topics'),
   getFavoriteTopics: () => request<{ favorites: string[] }>('/api/conversation/topics/favorites'),
   toggleTopicFavorite: (topicId: string) => request<{ topic_id: string; is_favorite: boolean; favorites: string[] }>(`/api/conversation/topics/${topicId}/favorite`, { method: 'PUT' }),
+  getCustomTopics: () => request<{ id: string; label: string; description: string; scenario: string; goal: string }[]>('/api/conversation/custom-topics'),
+  createCustomTopic: (data: { label: string; description: string; scenario: string; goal?: string }) =>
+    request<{ id: string; label: string; description: string; scenario: string; goal: string }>('/api/conversation/custom-topics', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
+    }),
+  deleteCustomTopic: (topicId: string) =>
+    request<{ deleted: boolean }>(`/api/conversation/custom-topics/${topicId}`, { method: 'DELETE' }),
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>

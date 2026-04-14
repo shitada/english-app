@@ -119,6 +119,16 @@ CREATE TABLE IF NOT EXISTS listening_quiz_results (
     questions_json TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS custom_topics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    topic_id TEXT NOT NULL UNIQUE,
+    label TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    scenario TEXT NOT NULL,
+    goal TEXT NOT NULL DEFAULT 'Have a natural conversation',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------
@@ -241,6 +251,18 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add questions_json column to listening_quiz_results",
         "ALTER TABLE listening_quiz_results ADD COLUMN questions_json TEXT NOT NULL DEFAULT '[]'",
+    ),
+    (
+        "create custom_topics table for user-defined conversation scenarios",
+        """CREATE TABLE IF NOT EXISTS custom_topics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            topic_id TEXT NOT NULL UNIQUE,
+            label TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            scenario TEXT NOT NULL,
+            goal TEXT NOT NULL DEFAULT 'Have a natural conversation',
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
     ),
 ]
 

@@ -13,7 +13,9 @@ from app.dal.conversation import (
     count_bookmarked_messages,
     count_conversations,
     create_conversation,
+    create_custom_topic,
     delete_conversation,
+    delete_custom_topic,
     delete_ended_conversations,
     delete_message,
     end_conversation,
@@ -35,6 +37,7 @@ from app.dal.conversation import (
     get_historical_session_averages,
     get_topic_recommendations,
     list_conversations,
+    list_custom_topics,
     toggle_message_bookmark,
     update_message_feedback,
 )
@@ -1611,3 +1614,34 @@ class TestGetRandomGrammarMistake:
             results.add(r["error_fragment"])
         assert "go" in results
         assert "hotel" in results
+
+
+@pytest.mark.unit
+class TestCustomTopics:
+    """Tests for custom topic CRUD operations."""
+
+    async def test_create_and_list_custom_topic(self, test_db):
+        result = await create_custom_topic(test_db, "custom_plumber", "Calling a Plumber", "Fix a leak", "You are a plumber.", "Fix the pipe")
+        assert result["id"] == "custom_plumber"
+        assert result["label"] == "Calling a Plumber"
+
+        topics = await list_custom_topics(test_db)
+        assert len(topics) == 1
+        assert topics[0]["id"] == "custom_plumber"
+        assert topics[0]["scenario"] == "You are a plumber."
+
+    async def test_delete_custom_topic(self, test_db):
+        await create_custom_topic(test_db, "custom_test", "Test", "", "Scenario.", "Goal")
+        deleted = await delete_custom_topic(test_db, "custom_test")
+        assert deleted is True
+        topics = await list_custom_topics(test_db)
+        assert len(topics) == 0
+
+    async def test_delete_nonexistent_returns_false(self, test_db):
+        deleted = await delete_custom_topic(test_db, "nonexistent")
+        assert deleted is False
+
+    async def test_duplicate_topic_id_raises(self, test_db):
+        await create_custom_topic(test_db, "custom_dup", "Topic 1", "", "Scenario 1.", "Goal")
+        with pytest.raises(Exception):
+            await create_custom_topic(test_db, "custom_dup", "Topic 2", "", "Scenario 2.", "Goal")
