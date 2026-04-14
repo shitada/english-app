@@ -1589,3 +1589,35 @@ async def test_sentence_mastery_min_attempts_filter(client):
     assert res.status_code == 200
     data = res.json()
     assert data["total_count"] == 0
+
+
+@pytest.mark.integration
+async def test_speaking_journal_progress_empty(client):
+    """Progress endpoint returns zeros with no entries."""
+    res = await client.get("/api/pronunciation/speaking-journal/progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_entries"] == 0
+    assert data["avg_wpm"] == 0.0
+    assert data["wpm_trend"] == "insufficient_data"
+    assert data["entries_by_date"] == []
+
+
+@pytest.mark.integration
+async def test_speaking_journal_progress_with_entries(client):
+    """Progress endpoint returns correct stats after adding entries."""
+    for i in range(3):
+        await client.post("/api/pronunciation/speaking-journal", json={
+            "prompt": f"Test prompt {i}",
+            "transcript": f"This is my test transcript number {i} with some words",
+            "duration_seconds": 30,
+        })
+    res = await client.get("/api/pronunciation/speaking-journal/progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_entries"] == 3
+    assert data["total_speaking_time_seconds"] > 0
+    assert data["avg_wpm"] > 0
+    assert data["longest_entry"] is not None
+    assert "wpm" in data["longest_entry"]
+    assert "vocabulary_diversity" in data["longest_entry"]

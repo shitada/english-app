@@ -1019,3 +1019,95 @@ async def get_speaking_journal_entries(
         }
         for row in rows
     ]
+
+
+async def get_speaking_journal_progress(db: aiosqlite.Connection) -> dict:
+    """Compute speaking journal progress analytics."""
+    cursor = await db.execute(
+        """SELECT id, word_count, unique_word_count, duration_seconds, wpm,
+                  DATE(created_at) as entry_date, created_at
+           FROM speaking_journal ORDER BY created_at ASC"""
+    )
+    rows = await cursor.fetchall()
+
+    if not rows:
+        return {
+            "total_entries": 0,
+            "total_speaking_time_seconds": 0,
+            "avg_wpm": 0.0,
+            "avg_vocabulary_diversity": 0.0,
+            "wpm_trend": "insufficient_data",
+            "entries_by_date": [],
+            "longest_entry": None,
+            "highest_wpm": None,
+            "best_vocabulary_diversity": None,
+        }
+
+    total_entries = len(rows)
+    total_time = sum(r[3] for r in rows)
+    avg_wpm = round(sum(r[4] for r in rows) / total_entries, 1)
+
+    diversities = [
+        (r[2] / r[1]) if r[1] > 0 else 0.0 for r in rows
+    ]
+    avg_diversity = round(sum(diversities) / total_entries, 3)
+
+    # Entries by date
+    date_groups: dict[str, list] = {}
+    for r in rows:
+        d = r[5]
+        date_groups.setdefault(d, []).append(r)
+
+    entries_by_date = []
+    for d, group in date_groups.items():
+        entries_by_date.append({
+            "date": d,
+            "count": len(group),
+            "avg_wpm": round(sum(g[4] for g in group) / len(group), 1),
+            "avg_vocabulary_diversity": round(
+                sum((g[2] / g[1]) if g[1] > 0 else 0.0 for g in group) / len(group), 3
+            ),
+        })
+
+    # WPM trend: compare recent half vs older half
+    if total_entries < 4:
+        wpm_trend = "insufficient_data"
+    else:
+        mid = total_entries // 2
+        older_avg = sum(r[4] for r in rows[:mid]) / mid
+        recent_avg = sum(r[4] for r in rows[mid:]) / (total_entries - mid)
+        diff_pct = ((recent_avg - older_avg) / older_avg * 100) if older_avg > 0 else 0
+        if diff_pct > 5:
+            wpm_trend = "improving"
+        elif diff_pct < -5:
+            wpm_trend = "declining"
+        else:
+            wpm_trend = "stable"
+
+    # Notable entries
+    longest = max(rows, key=lambda r: r[3])
+    highest_wpm = max(rows, key=lambda r: r[4])
+    best_diversity_idx = max(range(len(rows)), key=lambda i: diversities[i])
+    best_diversity = rows[best_diversity_idx]
+
+    def entry_summary(r: tuple) -> dict:
+        return {
+            "id": r[0],
+            "word_count": r[1],
+            "wpm": r[4],
+            "duration_seconds": r[3],
+            "vocabulary_diversity": round((r[2] / r[1]) if r[1] > 0 else 0.0, 3),
+            "created_at": r[6],
+        }
+
+    return {
+        "total_entries": total_entries,
+        "total_speaking_time_seconds": total_time,
+        "avg_wpm": avg_wpm,
+        "avg_vocabulary_diversity": avg_diversity,
+        "wpm_trend": wpm_trend,
+        "entries_by_date": entries_by_date,
+        "longest_entry": entry_summary(longest),
+        "highest_wpm": entry_summary(highest_wpm),
+        "best_vocabulary_diversity": entry_summary(best_diversity),
+    }

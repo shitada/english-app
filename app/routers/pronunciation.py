@@ -2229,3 +2229,39 @@ async def get_speaking_journal_entries(
     """Get recent speaking journal entries."""
     entries = await pron_dal.get_speaking_journal_entries(db, limit=limit)
     return {"entries": entries}
+
+
+class SpeakingJournalEntrySummary(BaseModel):
+    id: int
+    word_count: int
+    wpm: float
+    duration_seconds: int
+    vocabulary_diversity: float
+    created_at: str
+
+
+class SpeakingJournalDateStats(BaseModel):
+    date: str
+    count: int
+    avg_wpm: float
+    avg_vocabulary_diversity: float
+
+
+class SpeakingJournalProgressResponse(BaseModel):
+    total_entries: int
+    total_speaking_time_seconds: int
+    avg_wpm: float
+    avg_vocabulary_diversity: float
+    wpm_trend: str
+    entries_by_date: list[SpeakingJournalDateStats]
+    longest_entry: SpeakingJournalEntrySummary | None
+    highest_wpm: SpeakingJournalEntrySummary | None
+    best_vocabulary_diversity: SpeakingJournalEntrySummary | None
+
+
+@router.get("/speaking-journal/progress", response_model=SpeakingJournalProgressResponse)
+async def get_speaking_journal_progress(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get speaking journal progress analytics."""
+    return await pron_dal.get_speaking_journal_progress(db)

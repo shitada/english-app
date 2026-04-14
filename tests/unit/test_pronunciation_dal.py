@@ -34,6 +34,8 @@ from app.dal.pronunciation import (
     save_attempt,
     save_listening_quiz_result,
     save_minimal_pairs_results,
+    get_speaking_journal_progress,
+    save_speaking_journal_entry,
 )
 
 
@@ -1552,3 +1554,58 @@ class TestSaveListeningQuizResultPassageQuestions:
         assert detail["questions"] == qs
         assert detail["topic"] == "general"
         assert "created_at" in detail
+
+
+@pytest.mark.unit
+class TestSpeakingJournalProgress:
+    async def test_empty_journal_returns_zeros(self, test_db):
+        """Empty journal should return zero stats."""
+        result = await get_speaking_journal_progress(test_db)
+        assert result["total_entries"] == 0
+        assert result["total_speaking_time_seconds"] == 0
+        assert result["avg_wpm"] == 0.0
+        assert result["avg_vocabulary_diversity"] == 0.0
+        assert result["wpm_trend"] == "insufficient_data"
+        assert result["entries_by_date"] == []
+        assert result["longest_entry"] is None
+        assert result["highest_wpm"] is None
+        assert result["best_vocabulary_diversity"] is None
+
+    async def test_single_entry(self, test_db):
+        """Single entry should return correct stats and insufficient_data trend."""
+        await save_speaking_journal_entry(
+            test_db, "Tell me about your day", "I had a great day today",
+            word_count=6, unique_word_count=5, duration_seconds=30, wpm=12.0,
+        )
+        result = await get_speaking_journal_progress(test_db)
+        assert result["total_entries"] == 1
+        assert result["total_speaking_time_seconds"] == 30
+        assert result["avg_wpm"] == 12.0
+        assert result["wpm_trend"] == "insufficient_data"
+        assert result["longest_entry"]["word_count"] == 6
+        assert result["highest_wpm"]["wpm"] == 12.0
+
+    async def test_multiple_entries_with_improving_trend(self, test_db):
+        """Multiple entries with increasing WPM should show improving trend."""
+        for i, wpm in enumerate([10.0, 11.0, 15.0, 18.0, 20.0]):
+            await save_speaking_journal_entry(
+                test_db, f"Prompt {i}", f"Transcript for entry {i}",
+                word_count=10 + i, unique_word_count=8 + i,
+                duration_seconds=60, wpm=wpm,
+            )
+        result = await get_speaking_journal_progress(test_db)
+        assert result["total_entries"] == 5
+        assert result["wpm_trend"] == "improving"
+        assert result["highest_wpm"]["wpm"] == 20.0
+        assert len(result["entries_by_date"]) >= 1
+
+    async def test_vocabulary_diversity_zero_word_count(self, test_db):
+        """Entry with zero word count shouldn't cause division error."""
+        await save_speaking_journal_entry(
+            test_db, "Silent prompt", "",
+            word_count=0, unique_word_count=0, duration_seconds=5, wpm=0.0,
+        )
+        result = await get_speaking_journal_progress(test_db)
+        assert result["total_entries"] == 1
+        assert result["avg_vocabulary_diversity"] == 0.0
+        assert result["best_vocabulary_diversity"]["vocabulary_diversity"] == 0.0
