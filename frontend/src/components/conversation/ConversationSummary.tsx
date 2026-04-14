@@ -36,6 +36,8 @@ interface ConversationSummaryProps {
   onNewConversation: () => void;
   tts: { speak: (text: string) => void; isSpeaking: boolean };
   conversationId?: number;
+  vocabTargetCount?: number;
+  vocabUsedCount?: number;
   speechRecognition?: {
     isListening: boolean;
     transcript: string;
@@ -61,6 +63,8 @@ export function ConversationSummary({
   onNewConversation,
   tts,
   conversationId,
+  vocabTargetCount,
+  vocabUsedCount,
   speechRecognition,
 }: ConversationSummaryProps) {
   const [copied, setCopied] = useState(false);
@@ -217,6 +221,14 @@ export function ConversationSummary({
                   {summary.performance.speaking_pace_wpm}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>WPM Pace</div>
+              </div>
+            )}
+            {vocabTargetCount != null && vocabTargetCount > 0 && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: (vocabUsedCount ?? 0) === vocabTargetCount ? 'var(--success, #22c55e)' : (vocabUsedCount ?? 0) > 0 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)' }}>
+                  {vocabUsedCount ?? 0}/{vocabTargetCount}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Target Words</div>
               </div>
             )}
             {summary.performance.pace_trend && summary.performance.pace_trend.length >= 3 && (

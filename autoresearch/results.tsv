@@ -436,3 +436,5 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 434	835a6f0	2026-04-14	346	139	433	82	1000	1347	1347	pass	6.55	kept	Add Turn Re-Practice drill to Conversation History view
 435	8143928	2026-04-14	514	20	70	85	689	1347	1347	pass	7.0	kept	Optimize get_vocabulary_activation O(n*m) word matching with corpus pre-check
 436	1b7878e	2026-04-14	692	24	67	55	838	1347	1347	pass	7.25	kept	Fix Listening TTS audio leak on unmount and Conversation unnecessary refetches
+437	f4b810d	2026-04-14T11:59:26+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add QuickMinimalPairsCard to Quick Practice Hub Listening tab
+438	none	2026-04-14	231	55	64	178	528	1347	1347	pass	5.1	discarded	Add Quick Reverse Flashcard speaking card to Vocabulary tab

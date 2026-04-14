@@ -2917,3 +2917,318 @@ Now record T2, commit, and test:
   │ date +%s
   └ 2 lines...
 
+[2026-04-14 12:14:56] Copilot invocation completed (duration: 1517s)
+[2026-04-14 12:14:56] Verifying Playwright test depth...
+[2026-04-14 12:14:56] Running post-invocation audit (iter 437-438)...
+============================================
+ Autoresearch Audit
+ Iterations: 437 — 438
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-14 12:14:56
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 437[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 438[0m
+[0;31m  Tester: FAIL — missing: 437 438[0m
+[0;31m  Evaluator: FAIL — missing: 437 438[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 437 (f4b810d)[0m
+
+============================================
+[0;31m  AUDIT: 4 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-14 12:14:57] Audit found 4 error(s) — fixes applied where possible
+[2026-04-14 12:15:00] Current iteration count: 438 / 454
+[2026-04-14 12:15:00] ------------------------------------------
+[2026-04-14 12:15:00] Invocation 8 / 10
+[2026-04-14 12:15:00] Resuming from iteration 439
+[2026-04-14 12:15:00] ------------------------------------------
+[2026-04-14 12:15:00] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-439-to-454.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last session log lines (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Starting iterations 439-440. Backlog is empty, last iteration was 438.
+
+## Iteration 439
+
+● Record T0 for iteration 439 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 439
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L180:280 (100 lines read)
+  └ Read index.ts
+      │ frontend/src/components/conversation/index.ts
+      └ 20 lines read
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 474s. Now implementing. Let me examine the relevant files first.
+
+● Check API for vocab progress (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getVocabularyProgress"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Check conversation component exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 21 lines...
+
+● Check existing vocab refs in Conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabTarget\|VocabTarget\|getVocabularyProgress\|topicId" frontend/src/pages/Conversation.tsx |
+  │ head -20
+  └ 7 lines...
+
+● Check vocab progress API signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '220,230p' frontend/src/api.ts
+  └ 12 lines...
+
+● Check ConversationSummary props (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "interface.*Props\|props\.\|phase
+  │ ==\|ConversationSummary" frontend/src/components/conversation/ConversationSummary.tsx | head -20
+  └ 4 lines...
+
+● Check startConversation function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '395,450p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 57 lines...
+
+● Check VocabularyProgressItem type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "VocabularyProgressItem"
+  │ frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● Check ConversationSummary props interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '23,66p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 45 lines...
+
+● Check VocabularyProgressItem interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '438,455p' frontend/src/api.ts
+  └ 19 lines...
+
+● Find chat phase rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'chat'"
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 6 lines...
+
+● Find chat phase render section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "phase === 'chat'"
+  │ frontend/src/pages/Conversation.tsx | tail -10
+  └ 10 lines...
+
+● Find stats bar and chat phase rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "StatsBar\|stats-bar\|phraseSuggestions\|{phase === 'chat' &&"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 4 lines...
+
+● See chat area rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1080,1140p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 62 lines...
+
+● Find message container (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "messages-container\|messagesEnd\|message-list\|chat-area\|conversation-messages"
+  │ frontend/src/pages/Conversation.tsx | head -10
+  └ 4 lines...
+
+● Find message area start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1020,1060p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 42 lines...
+
+Now I have enough context. Let me look at the ConversationSummary rendering to find where to add the target words metric.
+
+● Find performance section in summary (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "performance\|Grammar.*rate\|correct\|accuracy\|WPM\|metric"
+  │ frontend/src/components/conversation/ConversationSummary.tsx | head -20
+  └ 21 lines...
+
+● See end of performance metrics (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '214,240p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 28 lines...
+
+● Find end of performance grid (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '240,260p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 22 lines...
+
+Now I have enough context. Let me implement the feature.
+
+● Create VocabTargetBar.tsx +89
+  └ frontend/src/components/conversation/VocabTargetBar.tsx
+
+Now update the index.ts export, add the feature to Conversation.tsx, and add the metric to ConversationSummary.
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+Now let me look at the imports and state in Conversation.tsx:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,30p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 31 lines...
+
+● Check state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '50,90p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 42 lines...
+
+Now I need to add state for vocabTargets and usedVocabWords, update startConversation, update sendMessage, and render the bar. Let me also look at the ConversationSummary rendering call:
+
+● Find summary rendering (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "ConversationSummaryView\|<ConversationSummary" frontend/src/pages/Conversation.tsx
+  └ 3 lines...
+
+● See summary props (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '856,880p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 26 lines...
+
+Now let me implement all changes:
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now update startConversation to fetch vocab targets:
+
+✗ Edit Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ Multiple matches found
+
+● Find tts.speak lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "tts.speak(res.message)"
+  │ frontend/src/pages/Conversation.tsx
+  └ 3 lines...
+
+● Get unique context around first tts.speak (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '418,425p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+● Edit Conversation.tsx +13
+  └ frontend/src/pages/Conversation.tsx
+
+Now update sendMessage to track used vocab words:
+
+● See sendMessage after userMsg (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '440,460p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 22 lines...
+
+● Edit Conversation.tsx +11
+  └ frontend/src/pages/Conversation.tsx
+
+Now render the VocabTargetBar in the chat phase. Let me find where the stats bar is rendered (above the chat messages):
+
+● Find grammar panel location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "showGrammarPanel &&"
+  │ frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● See grammar panel and chat messages start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1078,1085p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 9 lines...
+
+● Edit Conversation.tsx +4
+  └ frontend/src/pages/Conversation.tsx
+
+Now update ConversationSummary to accept and display the vocab target metric:
+
+● Edit Conversation.tsx +2
+  └ frontend/src/pages/Conversation.tsx
+
+Now update ConversationSummary props and rendering:
+
+● Edit ConversationSummary.tsx +2
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add vocabTargetCount/vocabUsedCount to the destructured props:
+
+● See destructured props (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '48,68p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 22 lines...
+
+● Edit ConversationSummary.tsx +2
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now add the vocab target metric to the performance grid. Let me find a good spot after the speaking_pace_wpm section:
+
+● Find pace_trend section start (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '220,225p'
+  │ frontend/src/components/conversation/ConversationSummary.tsx
+  └ 7 lines...
+
+● Edit ConversationSummary.tsx +8
+  └ frontend/src/components/conversation/ConversationSummary.tsx
+
+Now commit and test:
+

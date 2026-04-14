@@ -18,3 +18,4 @@ export { SpokenRetelling } from './SpokenRetelling';
 export { ShareCard } from './ShareCard';
 export { PhaseTransition } from './PhaseTransition';
 export { default as ConversationWarmUp } from './ConversationWarmUp';
+export { VocabTargetBar } from './VocabTargetBar';

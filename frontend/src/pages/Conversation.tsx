@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -85,6 +85,8 @@ export default function Conversation() {
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending'>('idle');
   const [warmupTopicId, setWarmupTopicId] = useState<string>('');
+  const [vocabTargets, setVocabTargets] = useState<string[]>([]);
+  const [usedVocabWords, setUsedVocabWords] = useState<Set<string>>(new Set());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -417,6 +419,19 @@ export default function Conversation() {
         setShowBriefing(false);
       }
       tts.speak(res.message);
+      // Fetch vocab target words for this topic
+      try {
+        const vocabRes = await api.getVocabularyProgress(topicId);
+        const words = vocabRes.progress
+          .filter((w) => w.level >= 1 && w.level <= 3)
+          .slice(0, 5)
+          .map((w) => w.word);
+        setVocabTargets(words);
+        setUsedVocabWords(new Set());
+      } catch {
+        setVocabTargets([]);
+        setUsedVocabWords(new Set());
+      }
     } catch (err) {
       alert('Failed to start conversation. Make sure the backend is running.');
       console.error(err);
@@ -435,6 +450,17 @@ export default function Conversation() {
     speech.reset();
     setPhraseSuggestions([]);
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    // Check for target vocabulary words used
+    if (vocabTargets.length > 0) {
+      const lowerMsg = userMsg.toLowerCase();
+      setUsedVocabWords((prev) => {
+        const next = new Set(prev);
+        for (const w of vocabTargets) {
+          if (lowerMsg.includes(w.toLowerCase())) next.add(w.toLowerCase());
+        }
+        return next;
+      });
+    }
     if (lastAssistantAt > 0) {
       const elapsed = (Date.now() - lastAssistantAt) / 1000;
       const wordCount = userMsg.split(/\s+/).length;
@@ -869,6 +895,8 @@ export default function Conversation() {
         onNewConversation={handleNewConversation}
         tts={tts}
         conversationId={conversationId ?? undefined}
+        vocabTargetCount={vocabTargets.length}
+        vocabUsedCount={vocabTargets.filter((w) => usedVocabWords.has(w.toLowerCase())).length}
         speechRecognition={{
           isListening: speech.isListening,
           transcript: speech.transcript,
@@ -1051,6 +1079,10 @@ export default function Conversation() {
 
       {showGrammarPanel && (
         <GrammarNotesPanel notes={allGrammarNotes} onSpeak={tts.speak} onClose={() => setShowGrammarPanel(false)} />
+      )}
+
+      {vocabTargets.length > 0 && (
+        <VocabTargetBar targetWords={vocabTargets} usedWords={usedVocabWords} onSpeak={tts.speak} />
       )}
 
       <div className="chat-messages" role="log" aria-live="polite">
