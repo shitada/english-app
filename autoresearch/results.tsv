@@ -434,3 +434,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 432	691f3aa	2026-04-14	287	143	236	0	666	1347	1347	pass	6.15	kept	Add Quick Follow-Up Question speaking card to Home page
 433	6b87209	2026-04-14	201	97	288	85	671	1347	1347	pass	6.15	kept	Add tabbed Quick Practice Hub to organize 12 cards by skill category
 434	835a6f0	2026-04-14	346	139	433	82	1000	1347	1347	pass	6.55	kept	Add Turn Re-Practice drill to Conversation History view
+435	8143928	2026-04-14	514	20	70	85	689	1347	1347	pass	7.0	kept	Optimize get_vocabulary_activation O(n*m) word matching with corpus pre-check

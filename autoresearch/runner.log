@@ -2575,3 +2575,127 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 435 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #435: Optimize get_vocabulary_activation O(n*m) word matching with corpus pre-check
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+T2 = 1776133350. implement_sec = 20. Now run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1347 tests pass, TS check passes. Now record T3 and check if smoke test needed:
+
+● Record T3 and check smoke test need (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E "database\.py|app/routers/|app/dal/"
+  └ 3 lines...
+
+T3 = 1776133420. test_sec = 70. DAL file changed, need smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passes. This is a backend-only refactor (type=refactor, no frontend changes), so tester is not required. Now call the evaluator:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1
+  └ 76 lines...
+
+● Evaluator Evaluate iteration 435
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L2010:2080 (71 lines read)
+
+Evaluator returned total_score=7.0, verdict=keep. Record T4 and results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4 = 1776133505. evaluate_sec = 85. total_sec = 689.
+
+● Record results for 435 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "435" "$HASH" "2026-04-14" "514" "20" "70" "85" "689" \
+  │ "1347" "1347" "pass" "7.0" "kept" "Optimize get_vocabulary_activation O(n*m) word matching …
+  └ 5 lines...
+
+Iteration 435 ✅ KEPT (7.0). Checklist: ✅ proposer, ✅ evaluator, ✅ tester skipped (backend-only refactor).
+
+---
+
+Now starting **iteration 436**. Re-read context:
+
+● Context restore for 436 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && grep '^- \[ \]' autoresearch/backlog.md 2>/dev/null; echo "---" && git log --oneline -5
+  │ && echo "---" && date +%s
+  └ 30 lines...
+
+T0 = 1776133520. Backlog empty. Calling proposer for iteration 436:
+
+● Proposer Propose iteration 436
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ L78:89 (12 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L44:50 (7 lines read)
+
+Good proposal. Let me record T1 and examine the files:
+
+● Record T1 for 436 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find phase useEffect in Conversation (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ "phase.*useEffect\|useEffect.*phase\|\[phase\]" Conversation.tsx | head -10
+  └ 3 lines...
+
+● Find TTS usage in Listening (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ "speechSynthesis\|useEffect\|speak(" Listening.tsx | head -20
+  └ 9 lines...
+
+● Read Conversation.tsx
+  │ frontend/src/pages/Conversation.tsx
+  └ L310:330 (21 lines read)
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L44:55 (12 lines read)
+
+Let me check the Listening.tsx unmount cleanup:
+
+● Check for existing cleanup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend/src/pages && grep -n
+  │ "return.*cancel\|cleanup\|unmount" Listening.tsx | head -10
+  └ 1 line...
+
+● Read Listening.tsx
+  │ frontend/src/pages/Listening.tsx
+  └ L47:67 (21 lines read)
+
+Now I'll implement both fixes:
+
+● Edit Listening.tsx +1
+  └ frontend/src/pages/Listening.tsx
+
+● Edit Conversation.tsx +2 -1
+  └ frontend/src/pages/Conversation.tsx
+

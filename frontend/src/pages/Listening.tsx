@@ -55,6 +55,7 @@ export default function Listening() {
       }
     }).catch(() => {});
     api.getConversationTopics().then(t => setTopics(t.map(({ id, label }) => ({ id, label })))).catch(() => {});
+    return () => { window.speechSynthesis.cancel(); };
   }, []);
 
   const generateQuiz = useCallback(async () => {

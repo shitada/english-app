@@ -312,8 +312,9 @@ export default function Conversation() {
     return aFav - bFav;
   });
 
-  // Load past conversations for history browsing
+  // Load past conversations for history browsing (only on select phase)
   useEffect(() => {
+    if (phase !== 'select') return;
     api.listConversations().then((res) => {
       setPastConversations(res.conversations.filter((c) => c.status === 'ended'));
     }).catch(() => {});
