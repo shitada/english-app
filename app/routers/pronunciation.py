@@ -1669,3 +1669,119 @@ async def get_quick_rephrase_prompt(
         "instruction": str(result.get("instruction", "Rephrase using different words while keeping the same meaning.")),
         "difficulty": difficulty,
     }
+
+
+# ── Quick Opinion Practice ──────────────────────────────────────
+
+
+class OpinionPromptResponse(BaseModel):
+    question: str
+    hint: str
+    difficulty: str
+    discourse_markers: list[str]
+
+
+@router.get("/opinion-prompt", response_model=OpinionPromptResponse)
+async def get_opinion_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a debatable opinion question for speaking practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a debatable opinion question for a {difficulty}-level English learner.\n"
+        "The question should invite the learner to state and defend a personal opinion.\n"
+        "Return JSON with:\n"
+        "- question (string): a debatable question (1-2 sentences)\n"
+        "- hint (string): brief hint on how to structure the answer (1 sentence)\n"
+        "- difficulty (string): the difficulty level\n"
+        "- discourse_markers (array of 4 strings): helpful discourse markers like 'I believe...', 'On the other hand...'"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="opinion_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "question": str(result.get("question", "Do you prefer working from home or in an office?")),
+        "hint": str(result.get("hint", "State your position clearly, then give reasons.")),
+        "difficulty": difficulty,
+        "discourse_markers": [str(m) for m in result.get("discourse_markers", ["I believe...", "For example...", "On the other hand...", "In conclusion..."])[:4]],
+    }
+
+
+class OpinionEvaluateRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class OpinionEvaluateResponse(BaseModel):
+    argument_structure_score: float
+    coherence_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    word_count: int
+    wpm: float
+    feedback: str
+    model_answer: str
+
+
+@router.post("/opinion-prompt/evaluate", response_model=OpinionEvaluateResponse)
+async def evaluate_opinion(
+    body: OpinionEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a spoken opinion attempt."""
+    word_count = len(body.transcript.split())
+    wpm = round(word_count / (body.duration_seconds / 60), 1) if body.duration_seconds > 0 else 0
+
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Opinion question: \"{body.question}\"\n"
+        f"User's spoken response ({body.duration_seconds}s, {word_count} words, {wpm} WPM):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this opinion response. Return JSON with:\n"
+        "- argument_structure_score (1-10): clear position statement + supporting reasons\n"
+        "- coherence_score (1-10): logical flow and use of discourse markers\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary\n"
+        "- overall_score (1-10): overall quality of the opinion expression\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_answer (string): a well-structured model answer to the question (3-4 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in argumentation. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="opinion_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "argument_structure_score": clamp(result.get("argument_structure_score", 5)),
+        "coherence_score": clamp(result.get("coherence_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "word_count": word_count,
+        "wpm": wpm,
+        "feedback": str(result.get("feedback", "")),
+        "model_answer": str(result.get("model_answer", "")),
+    }

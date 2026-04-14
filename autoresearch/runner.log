@@ -877,3 +877,323 @@ Now add a test for the backend endpoint:
 
 Now commit and test:
 
+● Commit iteration 428 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #428: Add Quick Vocab Sentence card for spoken vocabulary activation"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1776127628, implement_sec=142. Now run tests:
+
+## Iteration 428 — Step 5: Test
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -20
+  └ 21 lines...
+
+All 1347 passed, TS check passed. Now check smoke test and QA:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+● Check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" && echo "SMOKE_NEEDED" || echo "SKIP_SMOKE"
+  └ 3 lines...
+
+T3=1776127697, test_sec=69. Need both smoke test and QA tester.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke passed. Now start server for QA tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 428
+  │ Read test_vocabulary_api.py
+  │   │ tests/integration/test_vocabulary_api.py
+  │   └ L300:end (503 lines read)
+  └ Read test_vocabulary_api.py
+      │ tests/integration/test_vocabulary_api.py
+      └ L1050:1118 (68 lines read)
+
+Tester blocked by Playwright infrastructure (MCP tools unavailable). Code review found no issues. Per instructions, I'll use neutral defaults (qa_passed=true, ux_score=7.0) for infrastructure failure. Let me stop the server and call evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+## Iteration 428 — Step 6: Evaluate
+
+● Evaluator Evaluate iteration 428
+  │ Read QuickTransformCard.tsx
+  │   │ frontend/src/components/QuickTransformCard.tsx
+  │   └ L1:30 (30 lines read)
+  └ Read QuickSpeakCard.tsx
+      │ frontend/src/components/QuickSpeakCard.tsx
+      └ L1:30 (30 lines read)
+
+Evaluator returned total_score=7.25, verdict=keep. Recording results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1776128012. Times: propose=223, implement=142, test=69, evaluate=315, total=749.
+
+## Iteration 428 — Step 8: Record Results
+
+● Record iteration 428 results (shell)
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "428" "c9f178b" "2026-04-14" "223" "142" "69" "315" "749" \
+  │ "1347" "1347" "pass" "7.25" "kept" "Add Quick Vocab Sentence card for spoken vocabulary
+  │ activation" \
+  │ >> autoresearch/results.tsv
+  └ 1 line...
+
+● Verify results row (shell)
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified. 
+
+**Mandatory checklist for iteration 428:**
+- ✅ Proposer called → received JSON proposal
+- ✅ Evaluator called → received total_score=7.25
+- ✅ Frontend changed + type=feature → Tester called (Playwright infra unavailable, code review passed, neutral defaults used)
+- ✅ Score in results.tsv matches evaluator's total_score
+
+---
+
+## Summary — Iterations 427-428
+
+| Iter | Score | Verdict | Tests | Description |
+|------|-------|---------|-------|-------------|
+| 427 | 7.7 | **kept** | 1345 | Add Conversation Topic Warm-Up with phrase speaking practice |
+| 428 | 7.25 | **kept** | 1347 | Add Quick Vocab Sentence card for spoken vocabulary activation |
+
+**2/2 kept** (100% success rate). Test count grew from 1343→1347. All 3 mandatory subagents called for both iterations. Stopping after 2 iterations as requested.
+
+
+Changes   +682 -3
+Requests  3 Premium (31m 34s)
+Tokens    ↑ 10.8m • ↓ 73.8k • 10.2m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-427-to-454.md
+[2026-04-14 09:53:54] Copilot invocation completed (duration: 1899s)
+[2026-04-14 09:53:54] Verifying Playwright test depth...
+[2026-04-14 09:53:54]   PW_SKIP iter=427 — UI changed but NO Playwright test was run
+[2026-04-14 09:53:54]   PW_SKIP iter=428 — UI changed but NO Playwright test was run
+[2026-04-14 09:53:54] Running post-invocation audit (iter 427-428)...
+============================================
+ Autoresearch Audit
+ Iterations: 427 — 428
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-14 09:53:54
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-14 09:53:55] Audit passed — no issues
+[2026-04-14 09:53:59] Current iteration count: 428 / 454
+[2026-04-14 09:53:59] ------------------------------------------
+[2026-04-14 09:53:59] Invocation 3 / 10
+[2026-04-14 09:53:59] Resuming from iteration 429
+[2026-04-14 09:53:59] ------------------------------------------
+[2026-04-14 09:53:59] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-429-to-454.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was 428. Starting iteration 429.
+
+## Iteration 429
+
+● Record T0 for iteration 429 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1776128062. Now calling the proposer.
+
+● Proposer Propose iteration 429
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L800:1000 (200 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L1000:1200 (201 lines read)
+
+Got proposal: "Add Quick Opinion Practice card to Home page". Now implementing.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find Quick card imports in Home (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickSpeakCard\|QuickRephraseCard\|QuickTransformCard\|QuickVocab\|QuickListen"
+  │ frontend/src/pages/Home.tsx | head -20
+  └ 11 lines...
+
+● Read pronunciation router header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat app/routers/pronunciation.py | head -50
+  └ 51 lines...
+
+● Study QuickSpeakCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ frontend/src/components/QuickSpeakCard.tsx && head -80
+  │ frontend/src/components/QuickSpeakCard.tsx
+  └ 82 lines...
+
+● Find QuickSpeak API functions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getQuickSpeakPrompt\|evaluateQuickSpeak\|quickSpeak\|quick-speak" frontend/src/api.ts
+  └ 5 lines...
+
+● Find quick-speak endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "quick-speak"
+  │ app/routers/pronunciation.py
+  └ 5 lines...
+
+● Read rest of QuickSpeakCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '80,207p'
+  │ frontend/src/components/QuickSpeakCard.tsx
+  └ 129 lines...
+
+● Read quick-speak endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '688,800p'
+  │ app/routers/pronunciation.py
+  └ 114 lines...
+
+● Check router length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/pronunciation.py
+  └ 2 lines...
+
+● See card placement area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '955,970p'
+  │ frontend/src/pages/Home.tsx
+  └ 16 lines...
+
+Now I'll implement all the changes in parallel.
+
+● Check if opinion API already exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "getOpinion\|opinion-prompt\|opinionPrompt" frontend/src/api.ts | head -5
+  └ 1 line...
+
+● See API function pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '183,200p' frontend/src/api.ts
+  └ 18 lines...
+
+● Check end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/pronunciation.py
+  └ 6 lines...
+
+● Find last API function pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "evaluateQuickRephrase\|evaluateQuickTransform\|evaluateVocabSentence" frontend/src/api.ts |
+  │ head -5
+  └ 2 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/api.ts
+  └ 21 lines...
+
+Now I have all the context. Let me implement everything.
+
+● Edit pronunciation.py +116
+  └ app/routers/pronunciation.py
+
+● Edit api.ts +33
+  └ frontend/src/api.ts
+
+● Create QuickOpinionCard.tsx +216
+  └ frontend/src/components/QuickOpinionCard.tsx
+
+Now add the import and card to Home.tsx:
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test:
+

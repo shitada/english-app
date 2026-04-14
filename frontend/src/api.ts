@@ -1717,3 +1717,36 @@ export async function evaluateVocabSentenceUse(word: string, meaning: string, us
     body: JSON.stringify({ word, meaning, user_sentence }),
   });
 }
+
+// ── Quick Opinion Practice ──────────────────────────────────────
+
+export interface OpinionPromptResponse {
+  question: string;
+  hint: string;
+  difficulty: string;
+  discourse_markers: string[];
+}
+
+export interface OpinionEvaluateResponse {
+  argument_structure_score: number;
+  coherence_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  overall_score: number;
+  word_count: number;
+  wpm: number;
+  feedback: string;
+  model_answer: string;
+}
+
+export function getOpinionPrompt(difficulty: string = 'intermediate'): Promise<OpinionPromptResponse> {
+  return request<OpinionPromptResponse>(`/api/pronunciation/opinion-prompt?difficulty=${difficulty}`);
+}
+
+export function evaluateOpinion(question: string, transcript: string, duration_seconds: number): Promise<OpinionEvaluateResponse> {
+  return request<OpinionEvaluateResponse>('/api/pronunciation/opinion-prompt/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, transcript, duration_seconds }),
+  });
+}
