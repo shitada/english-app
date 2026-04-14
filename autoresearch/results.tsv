@@ -451,3 +451,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 450	5e1a91b	2026-04-15	253	103	68	93	517	1362	1363	pass	7.55	kept	Add unified Smart Review Queue endpoint across all modules
 451	6ba8a64	2026-04-15	192	77	72	575	916	1362	1363	pass	6.4	kept	Add Smart Review Queue card to Home page
 455	none	2026-04-15	324	89	77	216	706	1362	1363	pass	5.55	discarded	Add AI Feedback to Speaking Journal with score bars and suggestions
+457	none	2026-04-15	176	84	273	119	723	1368	1369	pass	5.7	discarded	Add Speaking Journal Progress dashboard with WPM trends and personal bests

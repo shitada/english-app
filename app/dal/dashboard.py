@@ -398,26 +398,11 @@ async def get_learning_goals(db: aiosqlite.Connection) -> list[dict[str, Any]]:
     goals = await db.execute_fetchall(
         "SELECT id, goal_type, daily_target, created_at, updated_at FROM learning_goals"
     )
+    today = await get_today_activity(db)
     result = []
     for g in goals:
         goal = dict(g)
-        goal_type = goal["goal_type"]
-        # Count today's activity
-        if goal_type == "conversations":
-            rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
-            )
-        elif goal_type == "vocabulary_reviews":
-            rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
-            )
-        elif goal_type == "pronunciation_attempts":
-            rows = await db.execute_fetchall(
-                "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
-            )
-        else:
-            rows = [{"cnt": 0}]
-        today_count = rows[0]["cnt"] if rows else 0
+        today_count = today.get(goal["goal_type"], 0)
         goal["today_count"] = today_count
         goal["completed"] = today_count >= goal["daily_target"]
         result.append(goal)
@@ -440,22 +425,8 @@ async def set_learning_goal(
         (goal_type,),
     )
     goal = dict(rows[0])
-    # Compute today_count so the frontend can display progress immediately
-    if goal_type == "conversations":
-        count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
-        )
-    elif goal_type == "vocabulary_reviews":
-        count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
-        )
-    elif goal_type == "pronunciation_attempts":
-        count_rows = await db.execute_fetchall(
-            "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
-        )
-    else:
-        count_rows = [{"cnt": 0}]
-    today_count = count_rows[0]["cnt"] if count_rows else 0
+    today = await get_today_activity(db)
+    today_count = today.get(goal_type, 0)
     goal["today_count"] = today_count
     goal["completed"] = today_count >= goal["daily_target"]
     return goal
@@ -606,24 +577,20 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
 
 
 async def get_today_activity(db: aiosqlite.Connection) -> dict[str, int]:
-    """Get today's activity counts across all modules."""
-    conv_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')"
-    )
-    vocab_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')"
-    )
-    pron_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
-    )
-    listening_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM listening_quiz_results WHERE created_at >= date('now') AND created_at < date('now', '+1 day')"
-    )
+    """Get today's activity counts across all modules in a single query."""
+    rows = await db.execute_fetchall("""
+        SELECT
+            (SELECT COUNT(*) FROM conversations WHERE started_at >= date('now') AND started_at < date('now', '+1 day')) AS conversations,
+            (SELECT COUNT(*) FROM quiz_attempts WHERE answered_at >= date('now') AND answered_at < date('now', '+1 day')) AS vocabulary_reviews,
+            (SELECT COUNT(*) FROM pronunciation_attempts WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS pronunciation_attempts,
+            (SELECT COUNT(*) FROM listening_quiz_results WHERE created_at >= date('now') AND created_at < date('now', '+1 day')) AS listening_quizzes
+    """)
+    row = rows[0] if rows else {}
     return {
-        "conversations": conv_rows[0]["cnt"] if conv_rows else 0,
-        "vocabulary_reviews": vocab_rows[0]["cnt"] if vocab_rows else 0,
-        "pronunciation_attempts": pron_rows[0]["cnt"] if pron_rows else 0,
-        "listening_quizzes": listening_rows[0]["cnt"] if listening_rows else 0,
+        "conversations": row["conversations"] if row else 0,
+        "vocabulary_reviews": row["vocabulary_reviews"] if row else 0,
+        "pronunciation_attempts": row["pronunciation_attempts"] if row else 0,
+        "listening_quizzes": row["listening_quizzes"] if row else 0,
     }
 
 
@@ -755,7 +722,7 @@ _ACHIEVEMENT_DEFS: list[dict[str, Any]] = [
 async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     """Compute achievements from existing learning data."""
 
-    # Gather counts from existing tables
+    # Gather counts from existing tables - batched into 2 queries
     streak_rows = await db.execute_fetchall("""
         SELECT COUNT(DISTINCT date(created_at)) as days FROM (
             SELECT created_at FROM messages WHERE role = 'user'
@@ -769,25 +736,21 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     """)
     study_days = streak_rows[0]["days"] if streak_rows else 0
 
-    # Current streak (from get_stats logic)
-    conv_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM conversations WHERE ended_at IS NOT NULL")
-    total_convs = conv_rows[0]["cnt"] if conv_rows else 0
-
-    vocab_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 3"
-    )
-    vocab_mastered = vocab_rows[0]["cnt"] if vocab_rows else 0
-
-    pron_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM pronunciation_attempts")
-    total_pron = pron_rows[0]["cnt"] if pron_rows else 0
-
-    perfect_rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM pronunciation_attempts WHERE score >= 9.0"
-    )
-    perfect_count = perfect_rows[0]["cnt"] if perfect_rows else 0
-
-    quiz_rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM quiz_attempts")
-    total_quiz = quiz_rows[0]["cnt"] if quiz_rows else 0
+    # Batch 5 COUNT queries into 1
+    count_rows = await db.execute_fetchall("""
+        SELECT
+            (SELECT COUNT(*) FROM conversations WHERE ended_at IS NOT NULL) AS total_convs,
+            (SELECT COUNT(*) FROM vocabulary_progress WHERE level >= 3) AS vocab_mastered,
+            (SELECT COUNT(*) FROM pronunciation_attempts) AS total_pron,
+            (SELECT COUNT(*) FROM pronunciation_attempts WHERE score >= 9.0) AS perfect_count,
+            (SELECT COUNT(*) FROM quiz_attempts) AS total_quiz
+    """)
+    cr = count_rows[0] if count_rows else {}
+    total_convs = cr["total_convs"] if cr else 0
+    vocab_mastered = cr["vocab_mastered"] if cr else 0
+    total_pron = cr["total_pron"] if cr else 0
+    perfect_count = cr["perfect_count"] if cr else 0
+    total_quiz = cr["total_quiz"] if cr else 0
 
     # Modules used
     modules_used = sum([
