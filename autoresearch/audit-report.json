@@ -1,2 +1,3 @@
 [
+  {"check":"playwright_shallow","severity":"warning","iterations":" 430(2)","root_cause":"tester_early_return","confidence":"MEDIUM","evidence":"100% of tested iterations had <5 Playwright tool calls","action":"none"}
 ]

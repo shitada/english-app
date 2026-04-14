@@ -1891,3 +1891,117 @@ async def evaluate_question_formation(
         "feedback": str(result.get("feedback", "")),
         "corrected_question": str(result.get("corrected_question", body.expected_question)),
     }
+
+
+# ── Quick Storytelling ────────────────────────────────────
+
+
+class StoryPromptResponse(BaseModel):
+    story_beginning: str
+    suggested_words: list[str]
+    difficulty: str
+
+
+@router.get("/story-prompt", response_model=StoryPromptResponse)
+async def get_story_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a story beginning for storytelling speaking practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a creative story beginning for a {difficulty}-level English learner.\n"
+        "The opening should be 1-2 sentences that set a scene and invite continuation.\n"
+        "Return JSON with:\n"
+        "- story_beginning (string): an engaging opening 1-2 sentences\n"
+        "- suggested_words (array of 5 strings): useful narrative vocabulary/phrases "
+        "like 'suddenly', 'after that', 'meanwhile'\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in narrative skills. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="story_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Story prompt generation failed")
+
+    return {
+        "story_beginning": str(result.get("story_beginning", "Last weekend, I was walking through an old market when I noticed something unusual...")),
+        "suggested_words": [str(w) for w in result.get("suggested_words", ["suddenly", "after that", "meanwhile", "finally", "to my surprise"])[:5]],
+        "difficulty": difficulty,
+    }
+
+
+class StoryEvaluateRequest(BaseModel):
+    story_beginning: str = Field(min_length=1, max_length=500)
+    transcript: str = Field(min_length=1, max_length=3000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class StoryEvaluateResponse(BaseModel):
+    coherence_score: float
+    grammar_score: float
+    vocabulary_score: float
+    narrative_flow_score: float
+    overall_score: float
+    word_count: int
+    wpm: float
+    feedback: str
+    model_continuation: str
+
+
+@router.post("/story-prompt/evaluate", response_model=StoryEvaluateResponse)
+async def evaluate_story(
+    body: StoryEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a spoken story continuation."""
+    word_count = len(body.transcript.split())
+    wpm = round(word_count / (body.duration_seconds / 60), 1) if body.duration_seconds > 0 else 0
+
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Story beginning: \"{body.story_beginning}\"\n"
+        f"User's spoken continuation ({body.duration_seconds}s, {word_count} words, {wpm} WPM):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this story continuation. Return JSON with:\n"
+        "- coherence_score (1-10): logical connection to the story opening\n"
+        "- grammar_score (1-10): grammatical accuracy including correct tenses\n"
+        "- vocabulary_score (1-10): range and richness of descriptive language\n"
+        "- narrative_flow_score (1-10): use of sequencing language (then, after that, finally) and pacing\n"
+        "- overall_score (1-10): overall quality of the story continuation\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_continuation (string): a well-crafted model continuation (3-4 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in narrative storytelling. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="story_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Story evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "coherence_score": clamp(result.get("coherence_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "narrative_flow_score": clamp(result.get("narrative_flow_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "word_count": word_count,
+        "wpm": wpm,
+        "feedback": str(result.get("feedback", "")),
+        "model_continuation": str(result.get("model_continuation", "")),
+    }

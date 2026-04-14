@@ -1780,3 +1780,35 @@ export function evaluateQuestionFormation(answer_sentence: string, expected_ques
     body: JSON.stringify({ answer_sentence, expected_question, user_question }),
   });
 }
+
+// ── Quick Storytelling ────────────────────────────────────
+
+export interface StoryPromptResponse {
+  story_beginning: string;
+  suggested_words: string[];
+  difficulty: string;
+}
+
+export interface StoryEvaluateResponse {
+  coherence_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  narrative_flow_score: number;
+  overall_score: number;
+  word_count: number;
+  wpm: number;
+  feedback: string;
+  model_continuation: string;
+}
+
+export function getStoryPrompt(difficulty: string = 'intermediate'): Promise<StoryPromptResponse> {
+  return request<StoryPromptResponse>(`/api/pronunciation/story-prompt?difficulty=${difficulty}`);
+}
+
+export function evaluateStory(story_beginning: string, transcript: string, duration_seconds: number): Promise<StoryEvaluateResponse> {
+  return request<StoryEvaluateResponse>('/api/pronunciation/story-prompt/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ story_beginning, transcript, duration_seconds }),
+  });
+}
