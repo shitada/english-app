@@ -1353,6 +1353,45 @@ class TestGetWeeklyReport:
         streak_highlight = [h for h in result["highlights"] if "streak" in h.lower()]
         assert len(streak_highlight) > 0
 
+    async def test_grammar_accuracy_weekly_scoped(self, test_db):
+        """Grammar accuracy in weekly report should only count messages from the past 7 days."""
+        import json
+        from datetime import datetime, timedelta, timezone
+
+        now = datetime.now(timezone.utc)
+        recent_date = now.isoformat()
+        old_date = (now - timedelta(days=30)).isoformat()
+
+        # Create a conversation
+        cursor = await test_db.execute(
+            "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at) VALUES (?, ?, 'ended', ?, ?)",
+            ("hotel_checkin", "beginner", recent_date, recent_date),
+        )
+        cid = cursor.lastrowid
+
+        # Insert old messages (30 days ago) — all incorrect grammar
+        for i in range(5):
+            await test_db.execute(
+                "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, 'user', ?, ?, ?)",
+                (cid, f"old msg {i}", json.dumps({"is_correct": False}), old_date),
+            )
+
+        # Insert recent messages — 3 correct, 1 incorrect
+        for i in range(3):
+            await test_db.execute(
+                "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, 'user', ?, ?, ?)",
+                (cid, f"recent correct {i}", json.dumps({"is_correct": True}), recent_date),
+            )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) VALUES (?, 'user', ?, ?, ?)",
+            (cid, "recent wrong", json.dumps({"is_correct": False}), recent_date),
+        )
+        await test_db.commit()
+
+        result = await get_weekly_report(test_db)
+        # Weekly grammar accuracy: 3/4 = 75.0% (NOT 3/9 = 33.3% which would be all-time)
+        assert result["grammar_accuracy"] == 75.0
+
 
 @pytest.mark.unit
 class TestGetSessionAnalytics:

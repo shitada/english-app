@@ -1460,3 +1460,148 @@ Tester is mandatory. Let me update the UI test spec and start the tester:
 ● Edit ui-test-spec.yaml +14
   └ tests/e2e/ui-test-spec.yaml
 
+[2026-04-15 04:28:59] Copilot invocation completed (duration: 1346s)
+[2026-04-15 04:28:59] Verifying Playwright test depth...
+[2026-04-15 04:28:59]   PW_NA iter=460 — no UI file changes, Playwright test not required
+[2026-04-15 04:28:59] Running post-invocation audit (iter 459-460)...
+============================================
+ Autoresearch Audit
+ Iterations: 459 — 460
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 04:28:59
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 459 460[0m
+[0;31m  Tester: FAIL — missing: 459 460[0m
+[0;31m  Evaluator: FAIL — missing: 459 460[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 04:29:00] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 04:29:03] Current iteration count: 460 / 474
+[2026-04-15 04:29:03] ------------------------------------------
+[2026-04-15 04:29:03] Invocation 9 / 10
+[2026-04-15 04:29:03] Resuming from iteration 461
+[2026-04-15 04:29:03] ------------------------------------------
+[2026-04-15 04:29:03] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-461-to-474.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was 460. Starting iteration 461. Let me record the start timestamp and call the proposer.
+
+● Record T0 for iteration 461 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 461
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L799:850 (52 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L155:169 (14 lines read)
+
+Got proposal: Fix weekly report grammar_accuracy using all-time data instead of weekly. Let me record T1 and examine the relevant code.
+
+● Record T1 for iteration 461 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Examine weekly report code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '800,860p' app/dal/dashboard.py
+  └ 62 lines...
+
+● Examine get_grammar_stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '150,175p' app/dal/dashboard.py
+  └ 27 lines...
+
+Confirmed the bug. Let me check the existing test structure and implement the fix.
+
+● Find weekly report tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'TestGetWeeklyReport\|def
+  │ test_.*weekly' tests/unit/test_dashboard_dal.py | head -20
+  └ 5 lines...
+
+● View TestGetWeeklyReport tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1298,1400p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 104 lines...
+
+Now let me implement the fix. I'll replace the `get_grammar_stats(db)` call in `get_weekly_report` with an inline weekly-scoped query, and add a test.
+
+● Edit dashboard.py +13 -3
+  └ app/dal/dashboard.py
+
+Now add the test for weekly grammar accuracy scoping:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'from.*dal.*dashboard.*import\|from
+  │ app.dal.dashboard import' tests/unit/test_dashboard_dal.py | head -5
+  └ 6 lines...
+
+● Find insertion point for new test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1347,1350p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 5 lines...
+
+● Find exact spot after streak test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1352,1360p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 9 lines...
+
+● Edit test_dashboard_dal.py +39
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+

@@ -837,9 +837,19 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
     pronunciation_attempts = rows[0]["cnt"] if rows else 0
     avg_pronunciation_score = round(rows[0]["avg_score"] or 0, 1)
 
-    # Grammar accuracy from feedback this week
-    grammar_stats = await get_grammar_stats(db)
-    grammar_accuracy = grammar_stats["grammar_accuracy"]
+    # Grammar accuracy from feedback this week (weekly-scoped, not all-time)
+    rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as total_checked,
+                  SUM(CASE WHEN json_extract(feedback_json, '$.is_correct') = 1
+                            OR LOWER(json_extract(feedback_json, '$.is_correct')) IN ('true', 'yes', '1')
+                       THEN 1 ELSE 0 END) as error_free
+           FROM messages
+           WHERE role = 'user' AND feedback_json IS NOT NULL
+             AND created_at >= date('now', '-6 days')"""
+    )
+    grammar_total = rows[0]["total_checked"] or 0
+    grammar_error_free = rows[0]["error_free"] or 0
+    grammar_accuracy = round(grammar_error_free / grammar_total * 100, 1) if grammar_total > 0 else 0
 
     # Streak
     streak = await _calculate_streak(db)
