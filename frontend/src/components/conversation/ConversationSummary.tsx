@@ -70,10 +70,22 @@ export function ConversationSummary({
   const [copied, setCopied] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [averages, setAverages] = useState<SessionAveragesResponse | null>(null);
+  const [topicProgress, setTopicProgress] = useState<{
+    has_previous: boolean;
+    current: Record<string, number>;
+    previous: Record<string, number> | null;
+    deltas: Record<string, number> | null;
+  } | null>(null);
 
   useEffect(() => {
     getSessionAverages().then(setAverages).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (conversationId) {
+      api.getTopicProgress(conversationId).then(setTopicProgress).catch(() => {});
+    }
+  }, [conversationId]);
 
   function formatSummaryText(): string {
     const lines: string[] = ['📝 English Practice Session', ''];
@@ -305,6 +317,67 @@ export function ConversationSummary({
               );
             })()}
           </div>
+        </div>
+      )}
+
+      {/* Topic Improvement Comparison */}
+      {topicProgress && (
+        <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+          <h4 style={{ marginBottom: 10, fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>
+            {topicProgress.has_previous ? '📈 vs. Last Time on This Topic' : '🆕 First Time on This Topic!'}
+          </h4>
+          {topicProgress.has_previous && topicProgress.deltas ? (
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              {topicProgress.deltas.grammar_accuracy_rate !== undefined && (() => {
+                const d = topicProgress.deltas!.grammar_accuracy_rate;
+                const icon = d > 1 ? '↑' : d < -1 ? '↓' : '→';
+                const color = d > 1 ? 'var(--success, #22c55e)' : d < -1 ? 'var(--danger, #ef4444)' : 'var(--text-secondary)';
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                    <span style={{ color }}>{icon}</span>
+                    <span style={{ color }}>Grammar: {topicProgress.previous?.grammar_accuracy_rate}% → {topicProgress.current.grammar_accuracy_rate}%</span>
+                  </div>
+                );
+              })()}
+              {topicProgress.deltas.avg_words_per_message !== undefined && (() => {
+                const d = topicProgress.deltas!.avg_words_per_message;
+                const icon = d > 0.5 ? '↑' : d < -0.5 ? '↓' : '→';
+                const color = d > 0.5 ? 'var(--success, #22c55e)' : d < -0.5 ? 'var(--danger, #ef4444)' : 'var(--text-secondary)';
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                    <span style={{ color }}>{icon}</span>
+                    <span style={{ color }}>Words/msg: {topicProgress.previous?.avg_words_per_message} → {topicProgress.current.avg_words_per_message}</span>
+                  </div>
+                );
+              })()}
+              {topicProgress.deltas.vocabulary_diversity !== undefined && (() => {
+                const d = topicProgress.deltas!.vocabulary_diversity;
+                const icon = d > 1 ? '↑' : d < -1 ? '↓' : '→';
+                const color = d > 1 ? 'var(--success, #22c55e)' : d < -1 ? 'var(--danger, #ef4444)' : 'var(--text-secondary)';
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                    <span style={{ color }}>{icon}</span>
+                    <span style={{ color }}>Vocab diversity: {topicProgress.previous?.vocabulary_diversity}% → {topicProgress.current.vocabulary_diversity}%</span>
+                  </div>
+                );
+              })()}
+              {topicProgress.deltas.total_user_messages !== undefined && (() => {
+                const d = topicProgress.deltas!.total_user_messages;
+                const icon = d > 0 ? '↑' : d < 0 ? '↓' : '→';
+                const color = d > 0 ? 'var(--success, #22c55e)' : d < 0 ? 'var(--danger, #ef4444)' : 'var(--text-secondary)';
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                    <span style={{ color }}>{icon}</span>
+                    <span style={{ color }}>Messages: {topicProgress.previous?.total_user_messages} → {topicProgress.current.total_user_messages}</span>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
+              Complete this topic again to see your improvement!
+            </p>
+          )}
         </div>
       )}
 

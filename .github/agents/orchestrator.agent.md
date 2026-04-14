@@ -239,8 +239,10 @@ Invoke the **tester** subagent. Pass it:
 - `changed_files`: List of files modified in this iteration (from `git diff HEAD~1 --name-only`)
 - `changed_pages`: The list of affected page names (e.g., `["Conversation", "Dashboard"]`)
 
-The tester uses Playwright MCP tools to open a real browser, navigate the app as a strict end-user, and returns:
-`{passed, ux_score, pages_tested, issues, performance_notes, overall_impression}`
+**IMPORTANT**: In the prompt you pass to the tester, include this instruction:
+"First, read the test spec file `tests/e2e/ui-test-spec.yaml`. Find all test items under the `changed_pages` sections. Execute each test item using Playwright MCP tools: navigate to the page, take a snapshot, perform the action, verify the expect criteria, and report PASS/FAIL for each test ID."
+
+The tester returns: `{passed, ux_score, spec_tests_run, spec_tests_passed, test_results, issues}`
 
 After the tester finishes, stop the server:
 ```bash

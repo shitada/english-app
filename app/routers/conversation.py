@@ -1024,3 +1024,15 @@ async def get_topic_warmup(
         difficulty=req.difficulty,
         phrases=phrases,
     )
+
+
+@router.get("/{conversation_id}/topic-progress")
+async def get_topic_progress(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get performance comparison with the previous conversation on the same topic."""
+    result = await conv_dal.get_topic_progress(db, conversation_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Conversation not found or no performance data")
+    return result

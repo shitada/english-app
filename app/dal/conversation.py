@@ -125,6 +125,65 @@ async def get_conversation_summary(
     return None
 
 
+async def get_topic_progress(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+) -> dict[str, Any] | None:
+    """Compare current conversation performance with the previous one on the same topic."""
+    row = await db.execute_fetchall(
+        "SELECT id, topic, summary_json FROM conversations WHERE id = ?",
+        (conversation_id,),
+    )
+    if not row:
+        return None
+    current = dict(row[0])
+    topic = current["topic"]
+    if not current["summary_json"]:
+        return None
+    try:
+        current_summary = json.loads(current["summary_json"])
+    except (json.JSONDecodeError, TypeError):
+        return None
+    current_perf = current_summary.get("performance", {})
+    if not current_perf:
+        return None
+
+    prev_rows = await db.execute_fetchall(
+        """SELECT summary_json FROM conversations
+           WHERE topic = ? AND status = 'ended' AND id < ? AND summary_json IS NOT NULL
+           ORDER BY id DESC LIMIT 1""",
+        (topic, conversation_id),
+    )
+
+    metrics = ["grammar_accuracy_rate", "avg_words_per_message", "vocabulary_diversity",
+               "total_user_messages", "speaking_pace_wpm"]
+
+    def extract(perf: dict) -> dict:
+        return {m: perf.get(m) for m in metrics if perf.get(m) is not None}
+
+    current_metrics = extract(current_perf)
+
+    if not prev_rows:
+        return {"has_previous": False, "current": current_metrics, "previous": None, "deltas": None}
+
+    try:
+        prev_summary = json.loads(prev_rows[0]["summary_json"])
+    except (json.JSONDecodeError, TypeError):
+        return {"has_previous": False, "current": current_metrics, "previous": None, "deltas": None}
+
+    prev_perf = prev_summary.get("performance", {})
+    prev_metrics = extract(prev_perf)
+
+    deltas = {}
+    for m in metrics:
+        cur_val = current_metrics.get(m)
+        prev_val = prev_metrics.get(m)
+        if cur_val is not None and prev_val is not None:
+            deltas[m] = round(cur_val - prev_val, 2)
+
+    return {"has_previous": True, "current": current_metrics, "previous": prev_metrics, "deltas": deltas}
+
+
 async def list_conversations(
     db: aiosqlite.Connection,
     topic: str | None = None,

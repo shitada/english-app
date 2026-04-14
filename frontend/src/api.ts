@@ -137,6 +137,9 @@ export const api = {
       body: JSON.stringify({ original_summary, user_retelling }),
     }),
 
+  getTopicProgress: (conversation_id: number) =>
+    request<{ has_previous: boolean; current: Record<string, number>; previous: Record<string, number> | null; deltas: Record<string, number> | null }>(`/api/conversation/${conversation_id}/topic-progress`),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';

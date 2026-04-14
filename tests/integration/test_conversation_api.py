@@ -1559,3 +1559,66 @@ async def test_topic_warmup_invalid_topic(client):
         json={"topic": "nonexistent_topic", "difficulty": "intermediate"},
     )
     assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_topic_progress_no_previous(client, test_db):
+    """Topic progress returns has_previous=False when only one conversation on topic."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+    perf = {"grammar_accuracy_rate": 80, "avg_words_per_message": 10, "vocabulary_diversity": 55, "total_user_messages": 6}
+    summary = _json.dumps({"performance": perf})
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", now_iso, now_iso, summary),
+    )
+    await test_db.commit()
+    row = await test_db.execute_fetchall("SELECT id FROM conversations ORDER BY id DESC LIMIT 1")
+    cid = row[0]["id"]
+
+    res = await client.get(f"/api/conversation/{cid}/topic-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["has_previous"] is False
+    assert data["current"]["grammar_accuracy_rate"] == 80
+
+
+@pytest.mark.integration
+async def test_topic_progress_with_previous(client, test_db):
+    """Topic progress returns deltas when a previous conversation on same topic exists."""
+    import json as _json
+    from datetime import datetime as dt, timezone
+
+    now_iso = dt.now(timezone.utc).isoformat()
+    perf1 = {"grammar_accuracy_rate": 70, "avg_words_per_message": 8, "vocabulary_diversity": 45, "total_user_messages": 5}
+    perf2 = {"grammar_accuracy_rate": 85, "avg_words_per_message": 12, "vocabulary_diversity": 60, "total_user_messages": 8}
+    summary1 = _json.dumps({"performance": perf1})
+    summary2 = _json.dumps({"performance": perf2})
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", now_iso, now_iso, summary1),
+    )
+    await test_db.execute(
+        "INSERT INTO conversations (topic, difficulty, status, started_at, ended_at, summary_json) VALUES (?, ?, ?, ?, ?, ?)",
+        ("hotel_checkin", "intermediate", "ended", now_iso, now_iso, summary2),
+    )
+    await test_db.commit()
+    row = await test_db.execute_fetchall("SELECT id FROM conversations ORDER BY id DESC LIMIT 1")
+    cid = row[0]["id"]
+
+    res = await client.get(f"/api/conversation/{cid}/topic-progress")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["has_previous"] is True
+    assert data["deltas"]["grammar_accuracy_rate"] == 15.0
+    assert data["deltas"]["avg_words_per_message"] == 4.0
+    assert data["current"]["grammar_accuracy_rate"] == 85
+
+
+@pytest.mark.integration
+async def test_topic_progress_not_found(client):
+    """Topic progress returns 404 for nonexistent conversation."""
+    res = await client.get("/api/conversation/999999/topic-progress")
+    assert res.status_code == 404
