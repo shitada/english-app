@@ -1293,6 +1293,48 @@ class TestGetSkillRadar:
         speaking = next(r for r in result if r["name"] == "speaking")
         assert speaking["score"] <= 100
 
+    async def test_listening_includes_quiz_results(self, test_db):
+        """Listening skill score should incorporate listening_quiz_results data."""
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+        # Insert listening quiz results
+        for i in range(5):
+            await test_db.execute(
+                "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, passage, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (f"Quiz {i}", "beginner", 10, 8, 80.0, "test passage", now),
+            )
+        await test_db.commit()
+        result = await get_skill_radar(test_db)
+        listening = next(r for r in result if r["name"] == "listening")
+        # 5 quiz results with avg score 80 should contribute to listening score
+        assert listening["score"] > 0
+
+    async def test_grammar_handles_string_is_correct(self, test_db):
+        """Grammar skill score should count string 'true' as correct."""
+        import json
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+        cid = await create_conversation(test_db, "hotel_checkin", "beginner")
+        # Insert messages with string is_correct values
+        for val in [True, "true", "yes", "1"]:
+            await test_db.execute(
+                "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) "
+                "VALUES (?, 'user', ?, ?, ?)",
+                (cid, f"msg {val}", json.dumps({"is_correct": val}), now),
+            )
+        # Insert one incorrect message
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, feedback_json, created_at) "
+            "VALUES (?, 'user', ?, ?, ?)",
+            (cid, "wrong", json.dumps({"is_correct": False}), now),
+        )
+        await test_db.commit()
+        result = await get_skill_radar(test_db)
+        grammar = next(r for r in result if r["name"] == "grammar")
+        # 4/5 correct = 80%
+        assert grammar["score"] == 80
+
 
 @pytest.mark.unit
 class TestGetWeeklyReport:

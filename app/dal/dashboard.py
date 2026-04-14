@@ -1205,39 +1205,48 @@ async def get_skill_radar(db: aiosqlite.Connection) -> list[dict[str, Any]]:
     row = await db.execute_fetchall(
         "SELECT COUNT(*) as cnt FROM conversations WHERE status = 'ended'"
     )
-    conv_count = row[0][0] if row else 0
+    conv_count = row[0]["cnt"] if row else 0
     row = await db.execute_fetchall(
         "SELECT COUNT(*) as cnt FROM messages WHERE role = 'user'"
     )
-    msg_count = row[0][0] if row else 0
+    msg_count = row[0]["cnt"] if row else 0
     speaking = min(100, int((conv_count * 5 + msg_count) / 2))
 
-    # Listening: proxy from pronunciation attempts with decent scores
+    # Listening: blend pronunciation attempts + listening quiz results
     row = await db.execute_fetchall(
         "SELECT COUNT(*) as cnt, AVG(CAST(json_extract(feedback_json, '$.overall_score') AS REAL)) as avg_s "
         "FROM pronunciation_attempts WHERE feedback_json IS NOT NULL"
     )
-    pron_count = row[0][0] if row and row[0][0] else 0
-    pron_avg = row[0][1] if row and row[0][1] else 0
-    listening = min(100, int(pron_count * 3 + pron_avg * 5))
+    pron_count = row[0]["cnt"] if row and row[0]["cnt"] else 0
+    pron_avg = row[0]["avg_s"] if row and row[0]["avg_s"] else 0
+    row = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt, AVG(score) as avg_s FROM listening_quiz_results WHERE score IS NOT NULL"
+    )
+    quiz_listen_count = row[0]["cnt"] if row and row[0]["cnt"] else 0
+    quiz_listen_avg = row[0]["avg_s"] if row and row[0]["avg_s"] else 0
+    listening = min(100, int(
+        (pron_count + quiz_listen_count) * 3 + (pron_avg * 2.5 + quiz_listen_avg * 2.5)
+    ))
 
     # Vocabulary: mastery percentage
     row = await db.execute_fetchall(
         "SELECT COUNT(*) as total, SUM(CASE WHEN level >= 3 THEN 1 ELSE 0 END) as mastered "
         "FROM vocabulary_progress"
     )
-    vocab_total = row[0][0] if row and row[0][0] else 0
-    vocab_mastered = row[0][1] if row and row[0][1] else 0
+    vocab_total = row[0]["total"] if row and row[0]["total"] else 0
+    vocab_mastered = row[0]["mastered"] if row and row[0]["mastered"] else 0
     vocabulary = int((vocab_mastered / vocab_total * 100) if vocab_total > 0 else 0)
 
-    # Grammar: accuracy from feedback
+    # Grammar: accuracy from feedback (handle both integer and string is_correct)
     row = await db.execute_fetchall(
         "SELECT COUNT(*) as total, "
-        "SUM(CASE WHEN json_extract(feedback_json, '$.is_correct') = 1 THEN 1 ELSE 0 END) as correct "
+        "SUM(CASE WHEN json_extract(feedback_json, '$.is_correct') = 1 "
+        "          OR LOWER(json_extract(feedback_json, '$.is_correct')) IN ('true', 'yes', '1') "
+        "     THEN 1 ELSE 0 END) as correct "
         "FROM messages WHERE feedback_json IS NOT NULL AND role = 'user'"
     )
-    grammar_total = row[0][0] if row and row[0][0] else 0
-    grammar_correct = row[0][1] if row and row[0][1] else 0
+    grammar_total = row[0]["total"] if row and row[0]["total"] else 0
+    grammar_correct = row[0]["correct"] if row and row[0]["correct"] else 0
     grammar = int((grammar_correct / grammar_total * 100) if grammar_total > 0 else 0)
 
     # Pronunciation: avg score * 10

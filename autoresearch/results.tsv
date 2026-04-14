@@ -454,3 +454,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 457	none	2026-04-15	176	84	273	119	723	1368	1369	pass	5.7	discarded	Add Speaking Journal Progress dashboard with WPM trends and personal bests
 459	none	2026-04-15	444	6	68	214	732	1368	1369	pass	5.6	discarded	Add Quick Speed Shadow Card with progressive speed ladder
 460	141e329	2026-04-15	130	272	93	103	529	1375	1376	pass	7.55	kept	Add pronunciation practice sentences from grammar corrections
+461	c2ed076	2026-04-15	205	58	63	121	447	1376	1377	pass	7.8	kept	Fix weekly report grammar_accuracy using all-time data instead of weekly

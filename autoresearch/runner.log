@@ -1605,3 +1605,21 @@ Now add the test for weekly grammar accuracy scoping:
 
 Now commit and test:
 
+● Commit iteration 461 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #461: Fix weekly report grammar_accuracy using all-time data instead of weekly
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+1 pre-existing test failure (daily challenge test, not related to my change). TS check passed. Let me verify it's pre-existing and run smoke test since I changed dashboard DAL.
+
