@@ -90,6 +90,38 @@ export default function Conversation() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+  const conversationIdRef = useRef<number | null>(null);
+  const phaseRef = useRef(phase);
+
+  // Keep refs in sync with state
+  useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+
+  // Warn before tab close/refresh during active chat
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (phaseRef.current === 'chat') {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, []);
+
+  // Gracefully end conversation on unmount
+  useEffect(() => {
+    return () => {
+      const cid = conversationIdRef.current;
+      if (cid && phaseRef.current === 'chat') {
+        fetch('/api/conversation/end', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: cid, skip_summary: true }),
+          keepalive: true,
+        }).catch(() => {});
+      }
+    };
+  }, []);
 
   const speech = useSpeechRecognition({ continuous: true });
   const tts = useSpeechSynthesis();

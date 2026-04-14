@@ -1,5 +1,3 @@
 [
-  {"check":"missing_iterations","severity":"error","iterations":" 437","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
-,
-  {"check":"agent_skip","severity":"error","iterations":" 437 438  437 438","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 440 ","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ]

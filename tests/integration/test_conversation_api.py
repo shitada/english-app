@@ -116,6 +116,29 @@ async def test_end_nonexistent_conversation(client):
 
 
 @pytest.mark.asyncio
+async def test_end_conversation_skip_summary(client, mock_copilot):
+    """Ending with skip_summary=true should skip LLM call and use fallback summary."""
+    mock_copilot.ask = AsyncMock(return_value="Let's chat!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "restaurant_order"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # ask_json should NOT be called when skip_summary=true
+    mock_copilot.ask_json = AsyncMock(side_effect=AssertionError("LLM should not be called"))
+
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id, "skip_summary": True})
+    assert res.status_code == 200
+    data = res.json()
+    assert "summary" in data
+    assert data["summary"]["note"] == "Session ended without summary"
+    assert data["summary"]["key_vocabulary"] == []
+    assert data["summary"]["communication_level"] == "unknown"
+
+    # Verify conversation is actually ended (second end should fail)
+    res2 = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res2.status_code == 409
+
+
+@pytest.mark.asyncio
 async def test_get_history(client, mock_copilot):
     mock_copilot.ask = AsyncMock(return_value="Hello! How are you?")
     start_res = await client.post("/api/conversation/start", json={"topic": "restaurant_order"})

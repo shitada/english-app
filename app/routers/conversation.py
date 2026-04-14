@@ -39,6 +39,7 @@ class MessageRequest(BaseModel):
 
 class EndRequest(BaseModel):
     conversation_id: int = Field(ge=1)
+    skip_summary: bool = False
 
 
 class GrammarNote(BaseModel):
@@ -447,26 +448,34 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     if status != "active":
         raise HTTPException(status_code=409, detail="Conversation is already ended")
 
-    history = await conv_dal.format_history_text(db, req.conversation_id)
-
-    copilot = get_copilot_service()
-    summary_prompt = get_prompt("conversation_summary").format(conversation=history)
-    try:
-        summary = await safe_llm_call(
-            lambda: copilot.ask_json(
-                "You are an English learning assistant. Return ONLY valid JSON.",
-                summary_prompt,
-            ),
-            context="end_conversation",
-        )
-    except HTTPException:
-        logger.warning("Summary generation failed for conversation %s; using fallback", req.conversation_id)
+    if req.skip_summary:
         summary = {
-            "note": "Summary could not be generated",
+            "note": "Session ended without summary",
             "key_vocabulary": [],
             "communication_level": "unknown",
             "tip": "",
         }
+    else:
+        history = await conv_dal.format_history_text(db, req.conversation_id)
+
+        copilot = get_copilot_service()
+        summary_prompt = get_prompt("conversation_summary").format(conversation=history)
+        try:
+            summary = await safe_llm_call(
+                lambda: copilot.ask_json(
+                    "You are an English learning assistant. Return ONLY valid JSON.",
+                    summary_prompt,
+                ),
+                context="end_conversation",
+            )
+        except HTTPException:
+            logger.warning("Summary generation failed for conversation %s; using fallback", req.conversation_id)
+            summary = {
+                "note": "Summary could not be generated",
+                "key_vocabulary": [],
+                "communication_level": "unknown",
+                "tip": "",
+            }
 
     summary = _normalize_summary(summary)
 

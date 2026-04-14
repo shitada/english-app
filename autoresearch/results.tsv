@@ -439,3 +439,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 437	f4b810d	2026-04-14T11:59:26+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add QuickMinimalPairsCard to Quick Practice Hub Listening tab
 438	none	2026-04-14	231	55	64	178	528	1347	1347	pass	5.1	discarded	Add Quick Reverse Flashcard speaking card to Vocabulary tab
 439	f4d7c0a	2026-04-14	474	163	64	255	956	1347	1347	pass	7.15	kept	Add Vocabulary Target Words challenge during conversations
+440	309b3bd	2026-04-14	332	58	74	117	581	1347	1347	pass	7.25	kept	Batch get_stats 7 sequential COUNT queries into 1 and fix f-string SQL
