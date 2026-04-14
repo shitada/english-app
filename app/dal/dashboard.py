@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import aiosqlite
@@ -11,38 +11,28 @@ import aiosqlite
 async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
     """Gather all dashboard statistics from the database."""
 
-    # Total conversations
-    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM conversations")
-    total_conversations = rows[0]["cnt"]
-
-    # Total messages by user
-    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM messages WHERE role = 'user'")
-    total_messages = rows[0]["cnt"]
-
-    # Total pronunciation attempts
-    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM pronunciation_attempts")
-    total_pronunciation = rows[0]["cnt"]
-
-    # Average pronunciation score
-    rows = await db.execute_fetchall(
-        "SELECT AVG(score) as avg_score FROM pronunciation_attempts WHERE score IS NOT NULL"
-    )
-    avg_pronunciation_score = round(rows[0]["avg_score"] or 0, 1)
-
-    # Vocabulary words learned (have progress)
-    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM vocabulary_progress")
-    total_vocab_reviewed = rows[0]["cnt"]
-
-    # Vocabulary words mastered (level >= 3)
-    rows = await db.execute_fetchall("SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE level >= 3")
-    vocab_mastered = rows[0]["cnt"]
-
-    # Vocabulary words due for review
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     rows = await db.execute_fetchall(
-        "SELECT COUNT(*) as cnt FROM vocabulary_progress WHERE next_review_at IS NULL OR next_review_at <= ?", (now,)
+        """
+        SELECT
+            (SELECT COUNT(*) FROM conversations) AS total_conversations,
+            (SELECT COUNT(*) FROM messages WHERE role = 'user') AS total_messages,
+            (SELECT COUNT(*) FROM pronunciation_attempts) AS total_pronunciation,
+            COALESCE((SELECT AVG(score) FROM pronunciation_attempts WHERE score IS NOT NULL), 0) AS avg_pronunciation_score,
+            (SELECT COUNT(*) FROM vocabulary_progress) AS total_vocab_reviewed,
+            (SELECT COUNT(*) FROM vocabulary_progress WHERE level >= 3) AS vocab_mastered,
+            (SELECT COUNT(*) FROM vocabulary_progress WHERE next_review_at IS NULL OR next_review_at <= ?) AS vocab_due_count
+        """,
+        (now,),
     )
-    vocab_due_count = rows[0]["cnt"]
+    r = rows[0]
+    total_conversations = r["total_conversations"]
+    total_messages = r["total_messages"]
+    total_pronunciation = r["total_pronunciation"]
+    avg_pronunciation_score = round(r["avg_pronunciation_score"] or 0, 1)
+    total_vocab_reviewed = r["total_vocab_reviewed"]
+    vocab_mastered = r["vocab_mastered"]
+    vocab_due_count = r["vocab_due_count"]
 
     # Streak: count consecutive days with activity
     streak = await _calculate_streak(db)
@@ -1333,7 +1323,7 @@ async def get_recent_activity(db: aiosqlite.Connection, limit: int = 5) -> list[
 
 async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict[str, Any]:
     """Compute time spent per exercise module over the given number of days."""
-    from_date = (date.today() - __import__("datetime").timedelta(days=days)).isoformat()
+    from_date = (date.today() - timedelta(days=days)).isoformat()
 
     # Conversation time from started_at/ended_at
     conv_rows = await db.execute_fetchall(
@@ -1588,38 +1578,38 @@ async def get_learning_velocity(
     """Return learning velocity analytics with weekly pace tracking."""
     cutoff = f"-{weeks * 7} days"
 
-    # Weekly counts per activity type
-    queries: dict[str, str] = {
-        "new_words": f"""
+    # Weekly counts per activity type — use parameterized queries
+    queries: dict[str, tuple[str, tuple[str]]] = {
+        "new_words": ("""
             SELECT strftime('%Y-W%W', last_reviewed) AS week, COUNT(DISTINCT word_id) AS cnt
             FROM vocabulary_progress
             WHERE last_reviewed IS NOT NULL
-              AND last_reviewed >= date('now', '{cutoff}')
+              AND last_reviewed >= date('now', ?)
             GROUP BY week ORDER BY week
-        """,
-        "quiz_attempts": f"""
+        """, (cutoff,)),
+        "quiz_attempts": ("""
             SELECT strftime('%Y-W%W', answered_at) AS week, COUNT(*) AS cnt
             FROM quiz_attempts
-            WHERE answered_at >= date('now', '{cutoff}')
+            WHERE answered_at >= date('now', ?)
             GROUP BY week ORDER BY week
-        """,
-        "conversations": f"""
+        """, (cutoff,)),
+        "conversations": ("""
             SELECT strftime('%Y-W%W', started_at) AS week, COUNT(*) AS cnt
             FROM conversations
-            WHERE started_at >= date('now', '{cutoff}')
+            WHERE started_at >= date('now', ?)
             GROUP BY week ORDER BY week
-        """,
-        "pronunciation_attempts": f"""
+        """, (cutoff,)),
+        "pronunciation_attempts": ("""
             SELECT strftime('%Y-W%W', created_at) AS week, COUNT(*) AS cnt
             FROM pronunciation_attempts
-            WHERE created_at >= date('now', '{cutoff}')
+            WHERE created_at >= date('now', ?)
             GROUP BY week ORDER BY week
-        """,
+        """, (cutoff,)),
     }
 
     per_activity: dict[str, dict[str, int]] = {}
-    for key, sql in queries.items():
-        rows = await db.execute_fetchall(sql)
+    for key, (sql, params) in queries.items():
+        rows = await db.execute_fetchall(sql, params)
         for row in rows:
             week_label = row["week"]
             per_activity.setdefault(week_label, {})[key] = row["cnt"]

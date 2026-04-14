@@ -3232,3 +3232,168 @@ Now add the vocab target metric to the performance grid. Let me find a good spot
 
 Now commit and test:
 
+● Commit iteration 439 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #439: Add Vocabulary Target Words challenge during conversations
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+● Record T2 after implementation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1347 tests pass and TypeScript check passes. Now record T3 and check for smoke test and QA test needs:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+Frontend UI files changed and proposal type is "feature" — MUST run tester. Let me start the server and run QA.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 439
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L200:350 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L350:500 (151 lines read)
+
+Now call the evaluator:
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 9 lines...
+
+● Evaluator Evaluate iteration 439
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ L120:250 (131 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L950:1100 (151 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score: 7.15 → KEEP. All tests pass, TS passes, QA passed with ux_score 8.
+
+Timing: T0=1776136525, T1=1776136999 (propose=474), T2=1776137162 (implement=163), T3=1776137226 (test=64), T4=1776137481 (evaluate=255, total=956).
+
+● Record results for iteration 439 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "439" "$HASH" "$DATE" "474" "163" "64" "255" "956" \
+  │ "1347" "1347" "pass" "7.15" "kept" "Add Vocabulary Target Words challenge during
+  │ conversations" \…
+  └ 3 lines...
+
+Row verified with tab separators. Now stop the server and start iteration 440.
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+## Iteration 440
+
+● Record T0 for iteration 440 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+Server stopped as expected. Continuing with iteration 440 — calling proposer.
+
+● Proposer Propose iteration 440
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L1585:1620 (36 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L1334:1340 (7 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 332s. Now implementing the batch query optimization. Let me examine the current code:
+
+● Check get_stats function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,60p' app/dal/dashboard.py
+  └ 61 lines...
+
+● See rest of get_stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '60,100p' app/dal/dashboard.py
+  └ 41 lines...
+
+Now check the f-string SQL in get_learning_velocity:
+
+● Find f-string SQL and timedelta hack (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "get_learning_velocity\|f\"date\|f'date\|__import__.*timedelta" app/dal/dashboard.py | head -20
+  └ 3 lines...
+
+● Check get_learning_velocity (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1585,1640p' app/dal/dashboard.py
+  └ 56 lines...
+
+● Check timedelta hack line (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1333,1340p' app/dal/dashboard.py
+  └ 8 lines...
+
+Now implement the changes:
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+Now batch the 7 queries in get_stats:
+
+● Edit dashboard.py +19 -29
+  └ app/dal/dashboard.py
+
+Now fix the timedelta hack:
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+Now fix the f-string SQL in get_learning_velocity:
+
+● Edit dashboard.py +16 -16
+  └ app/dal/dashboard.py
+
+Now commit and test:
+
