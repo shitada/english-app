@@ -1111,3 +1111,62 @@ async def get_speaking_journal_progress(db: aiosqlite.Connection) -> dict:
         "highest_wpm": entry_summary(highest_wpm),
         "best_vocabulary_diversity": entry_summary(best_diversity),
     }
+
+
+async def get_sentences_from_corrections(
+    db: aiosqlite.Connection, limit: int = 10, difficulty: str | None = None
+) -> list[dict[str, str]]:
+    """Extract corrected sentences from grammar feedback for pronunciation practice."""
+    params: list[Any] = []
+    where_clauses = ["m.role = 'user'", "m.feedback_json IS NOT NULL", "m.feedback_json != ''"]
+    if difficulty:
+        where_clauses.append("c.difficulty = ?")
+        params.append(difficulty)
+    params.append(limit * 5)  # fetch more to filter
+    query = f"""SELECT m.content, m.feedback_json, c.topic, c.difficulty
+           FROM messages m
+           JOIN conversations c ON m.conversation_id = c.id
+           WHERE {' AND '.join(where_clauses)}
+           ORDER BY m.created_at DESC
+           LIMIT ?"""
+    rows = await db.execute_fetchall(query, params)
+    sentences: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for r in rows:
+        try:
+            feedback = json.loads(r["feedback_json"]) if isinstance(r["feedback_json"], str) else r["feedback_json"]
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if not isinstance(feedback, dict):
+            continue
+        corrected = feedback.get("corrected_text", "").strip()
+        errors = feedback.get("errors", [])
+        if not corrected or not isinstance(errors, list) or len(errors) == 0:
+            continue
+        # Only use corrections where there were actual errors with corrections
+        has_correction = any(
+            isinstance(e, dict) and e.get("correction", "").strip()
+            for e in errors
+        )
+        if not has_correction:
+            continue
+        if corrected in seen:
+            continue
+        word_count = len(corrected.split())
+        if word_count < 3 or word_count > 30:
+            continue
+        seen.add(corrected)
+        error_types = [
+            e.get("explanation", "grammar") for e in errors
+            if isinstance(e, dict) and e.get("correction", "").strip()
+        ]
+        sentences.append({
+            "text": corrected,
+            "original": r["content"],
+            "topic": r["topic"] or "general",
+            "difficulty": r["difficulty"] or "intermediate",
+            "error_type": error_types[0] if error_types else "grammar",
+        })
+        if len(sentences) >= limit:
+            break
+    return sentences

@@ -29,6 +29,7 @@ from app.dal.pronunciation import (
     get_sentence_attempts,
     get_sentence_mastery_overview,
     get_sentences_from_conversations,
+    get_sentences_from_corrections,
     get_sentences_from_vocabulary,
     get_weekly_progress,
     save_attempt,
@@ -1609,3 +1610,96 @@ class TestSpeakingJournalProgress:
         assert result["total_entries"] == 1
         assert result["avg_vocabulary_diversity"] == 0.0
         assert result["best_vocabulary_diversity"]["vocabulary_diversity"] == 0.0
+
+
+class TestGetSentencesFromCorrections:
+    """Tests for get_sentences_from_corrections."""
+
+    async def _create_conversation_with_feedback(self, db, topic="hotel", difficulty="intermediate", user_text="I goed to hotel", feedback=None):
+        """Helper to create a conversation with user message and grammar feedback."""
+        conv_id = await create_conversation(db, topic=topic, difficulty=difficulty)
+        if feedback is None:
+            feedback = {
+                "corrected_text": "I went to the hotel",
+                "errors": [{"original": "goed", "correction": "went", "explanation": "Past tense of go is went"}],
+            }
+        msg_id = await add_message(db, conv_id, "user", user_text)
+        await db.execute(
+            "UPDATE messages SET feedback_json = ? WHERE id = ?",
+            (json.dumps(feedback), msg_id),
+        )
+        await db.commit()
+        return conv_id
+
+    async def test_returns_corrected_sentences(self, test_db):
+        """Should return corrected sentences from grammar feedback."""
+        await self._create_conversation_with_feedback(test_db)
+        result = await get_sentences_from_corrections(test_db)
+        assert len(result) == 1
+        assert result[0]["text"] == "I went to the hotel"
+        assert result[0]["original"] == "I goed to hotel"
+        assert result[0]["topic"] == "hotel"
+        assert result[0]["difficulty"] == "intermediate"
+        assert result[0]["error_type"] == "Past tense of go is went"
+
+    async def test_no_corrections_available(self, test_db):
+        """Should return empty list when no corrections exist."""
+        result = await get_sentences_from_corrections(test_db)
+        assert result == []
+
+    async def test_skips_feedback_without_errors(self, test_db):
+        """Should skip messages where feedback has no actual corrections."""
+        feedback = {"corrected_text": "Hello there", "errors": []}
+        await self._create_conversation_with_feedback(
+            test_db, user_text="Hello there", feedback=feedback,
+        )
+        result = await get_sentences_from_corrections(test_db)
+        assert result == []
+
+    async def test_skips_feedback_without_correction_field(self, test_db):
+        """Should skip errors that have no correction field."""
+        feedback = {
+            "corrected_text": "Good morning",
+            "errors": [{"original": "morning", "explanation": "just a note"}],
+        }
+        await self._create_conversation_with_feedback(
+            test_db, user_text="Good morning", feedback=feedback,
+        )
+        result = await get_sentences_from_corrections(test_db)
+        assert result == []
+
+    async def test_difficulty_filter(self, test_db):
+        """Should filter by difficulty when specified."""
+        await self._create_conversation_with_feedback(test_db, difficulty="beginner")
+        await self._create_conversation_with_feedback(
+            test_db, difficulty="advanced",
+            user_text="She don't know",
+            feedback={
+                "corrected_text": "She doesn't know",
+                "errors": [{"original": "don't", "correction": "doesn't", "explanation": "Subject-verb agreement"}],
+            },
+        )
+        result = await get_sentences_from_corrections(test_db, difficulty="advanced")
+        assert len(result) == 1
+        assert result[0]["text"] == "She doesn't know"
+
+    async def test_limit_parameter(self, test_db):
+        """Should respect the limit parameter."""
+        for i in range(5):
+            await self._create_conversation_with_feedback(
+                test_db,
+                user_text=f"I goed to place {i}",
+                feedback={
+                    "corrected_text": f"I went to place {i}",
+                    "errors": [{"original": "goed", "correction": "went", "explanation": "irregular verb"}],
+                },
+            )
+        result = await get_sentences_from_corrections(test_db, limit=2)
+        assert len(result) == 2
+
+    async def test_deduplicates_identical_corrections(self, test_db):
+        """Should not return the same corrected text twice."""
+        for _ in range(3):
+            await self._create_conversation_with_feedback(test_db)
+        result = await get_sentences_from_corrections(test_db)
+        assert len(result) == 1

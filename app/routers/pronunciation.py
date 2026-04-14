@@ -100,6 +100,34 @@ async def get_sentences(
     return {"sentences": sentences}
 
 
+class CorrectionSentenceItem(BaseModel):
+    text: str
+    original: str
+    topic: str
+    difficulty: str
+    error_type: str
+
+
+class CorrectionSentencesResponse(BaseModel):
+    sentences: list[CorrectionSentenceItem]
+
+
+@router.get("/sentences/corrections", response_model=CorrectionSentencesResponse)
+async def get_correction_sentences(
+    limit: int = Query(default=10, ge=1, le=50),
+    difficulty: str | None = Query(default=None, pattern="^(beginner|intermediate|advanced)$"),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get corrected sentences from grammar feedback for pronunciation practice."""
+    sentences = await pron_dal.get_sentences_from_corrections(db, limit=limit, difficulty=difficulty)
+    topics = get_conversation_topics()
+    sentences = [
+        {**s, "topic": get_topic_label(topics, s["topic"])}
+        for s in sentences
+    ]
+    return {"sentences": sentences}
+
+
 def _parse_score(value: Any) -> float | None:
     """Parse a score value from various LLM string formats to float in [0, 10]."""
     if value is None:

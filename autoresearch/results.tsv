@@ -452,3 +452,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 451	6ba8a64	2026-04-15	192	77	72	575	916	1362	1363	pass	6.4	kept	Add Smart Review Queue card to Home page
 455	none	2026-04-15	324	89	77	216	706	1362	1363	pass	5.55	discarded	Add AI Feedback to Speaking Journal with score bars and suggestions
 457	none	2026-04-15	176	84	273	119	723	1368	1369	pass	5.7	discarded	Add Speaking Journal Progress dashboard with WPM trends and personal bests
+459	none	2026-04-15	444	6	68	214	732	1368	1369	pass	5.6	discarded	Add Quick Speed Shadow Card with progressive speed ladder
