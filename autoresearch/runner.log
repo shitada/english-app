@@ -3686,3 +3686,224 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 441 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #441: Add navigation guard and skip_summary for graceful conversation cleanup"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1348 tests pass, TS check passes. Now check if smoke test is needed and run QA tester:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+● Check if tester needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Smoke test needed (routers changed) and tester needed (ux type + frontend pages changed).
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py
+  └ 23 lines...
+
+Smoke test passes. Now start the server and run the QA tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 441
+  │ Read ConversationSummary.tsx
+  │   │ frontend/src/components/conversation/ConversationSummary.tsx
+  │   └ L80:200 (121 lines read)
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L145:170 (26 lines read)
+
+QA tester passed with ux_score 8. Now stop the server and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 8 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ app/routers/conversation.py frontend/src/pages/Conversation.tsx
+  │ tests/integration/test_conversation_api.py
+  └ 81 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ app/routers/conversation.py frontend/src/pages/Conversation.tsx
+  │ tests/integration/test_conversation_api.py 2>&1 | cat
+  └ 140 lines...
+
+● Evaluator Evaluate iteration 441
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L17:30 (14 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L90:130 (41 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score 7.8, verdict keep. All tests pass. Recording results.
+
+T0=1776138123, T1=1776138751 (propose=628), T2=1776138818 (implement=67), T3=1776138884 (test=66), T4=1776139377 (evaluate=493, total=1254).
+
+● Record iteration 441 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "441" "$HASH" "$DATE" "628" "67" "66" "493" "1254" \
+  │ "1348" "1348" "pass" "7.8" "kept" "Add navigation guard and skip_summary for graceful
+  │ conversation cleanup" \…
+  └ 3 lines...
+
+Row verified. ✅ Proposer called, ✅ Evaluator called, ✅ Tester called (ux type + frontend .tsx changed). Now starting **Iteration 442**.
+
+---
+
+**Iteration 442 — Step 1: Context Restore**
+
+● Record T0 for iteration 442 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0 = 1776139393. Backlog empty. Calling proposer.
+
+● Proposer Propose iteration 442
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1086:1120 (35 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L474:502 (29 lines read)
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1776139943 (propose=550). Now implementing.
+
+● Check conversation components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/conversation/
+  └ 9 lines...
+
+● Check index exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/index.ts
+  └ 22 lines...
+
+● View area around VocabTargetBar (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1110,1125p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+● Check Message type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Message"
+  │ frontend/src/pages/Conversation.tsx | head -5
+  └ 6 lines...
+
+● View Message interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '12,18p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 8 lines...
+
+Now I'll create the ConversationCoach component:
+
+● Create ConversationCoach.tsx +115
+  └ frontend/src/components/conversation/ConversationCoach.tsx
+
+Now add export and integrate into Conversation.tsx:
+
+● Edit index.ts +1
+  └ frontend/src/components/conversation/index.ts
+
+● View import line (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '9,9p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 2 lines...
+
+● Edit Conversation.tsx +1 -1
+  └ frontend/src/pages/Conversation.tsx
+
+Now find where to insert the coach (after VocabTargetBar):
+
+● Find grammar stats vars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "VocabTargetBar\|grammarCorrect\|grammarTotal" frontend/src/pages/Conversation.tsx | head -10
+  └ 3 lines...
+
+● Find grammar tracking vars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "grammarCorrect\|grammarTotal\|grammarChecked\|correctCount\|totalCount\|grammar"
+  │ frontend/src/pages/Conversation.tsx | head -20
+  └ 8 lines...
+
+● Find grammar accuracy (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "feedback\|correct\|Correct\|accuracy" frontend/src/pages/Conversation.tsx | grep -i "gram" |
+  │ head -10
+  └ 4 lines...
+
+● View grammar stats area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1085,1100p'
+  │ frontend/src/pages/Conversation.tsx
+  └ 17 lines...
+
+Now insert ConversationCoach after VocabTargetBar:
+
+● Edit Conversation.tsx +13
+  └ frontend/src/pages/Conversation.tsx
+
+Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

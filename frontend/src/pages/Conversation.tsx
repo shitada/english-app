@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -1116,6 +1116,19 @@ export default function Conversation() {
       {vocabTargets.length > 0 && (
         <VocabTargetBar targetWords={vocabTargets} usedWords={usedVocabWords} onSpeak={tts.speak} />
       )}
+
+      {(() => {
+        const checked = messages.filter((m) => m.role === 'user' && m.feedback);
+        const correct = checked.filter((m) => m.feedback!.is_correct);
+        return (
+          <ConversationCoach
+            messages={messages}
+            grammarCorrect={correct.length}
+            grammarTotal={checked.length}
+            wpmValues={wpmValues}
+          />
+        );
+      })()}
 
       <div className="chat-messages" role="log" aria-live="polite">
         {showBriefing && userRoleName && (
