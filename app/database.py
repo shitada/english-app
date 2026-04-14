@@ -129,6 +129,17 @@ CREATE TABLE IF NOT EXISTS custom_topics (
     goal TEXT NOT NULL DEFAULT 'Have a natural conversation',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS speaking_journal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    prompt TEXT NOT NULL,
+    transcript TEXT NOT NULL,
+    word_count INTEGER NOT NULL DEFAULT 0,
+    unique_word_count INTEGER NOT NULL DEFAULT 0,
+    duration_seconds INTEGER NOT NULL DEFAULT 0,
+    wpm REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------
@@ -261,6 +272,19 @@ _MIGRATIONS: list[tuple[str, str]] = [
             description TEXT NOT NULL DEFAULT '',
             scenario TEXT NOT NULL,
             goal TEXT NOT NULL DEFAULT 'Have a natural conversation',
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "create speaking_journal table for daily speaking practice",
+        """CREATE TABLE IF NOT EXISTS speaking_journal (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt TEXT NOT NULL,
+            transcript TEXT NOT NULL,
+            word_count INTEGER NOT NULL DEFAULT 0,
+            unique_word_count INTEGER NOT NULL DEFAULT 0,
+            duration_seconds INTEGER NOT NULL DEFAULT 0,
+            wpm REAL NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )""",
     ),

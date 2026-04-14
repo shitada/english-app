@@ -974,3 +974,48 @@ async def get_sentence_mastery_overview(
         "improving_count": improving_count,
         "needs_work_count": needs_work_count,
     }
+
+
+async def save_speaking_journal_entry(
+    db: aiosqlite.Connection,
+    prompt: str,
+    transcript: str,
+    word_count: int,
+    unique_word_count: int,
+    duration_seconds: int,
+    wpm: float,
+) -> dict:
+    """Save a speaking journal entry."""
+    cursor = await db.execute(
+        """INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm),
+    )
+    await db.commit()
+    return {"id": cursor.lastrowid}
+
+
+async def get_speaking_journal_entries(
+    db: aiosqlite.Connection, limit: int = 10
+) -> list[dict]:
+    """Get recent speaking journal entries."""
+    cursor = await db.execute(
+        """SELECT id, prompt, transcript, word_count, unique_word_count,
+                  duration_seconds, wpm, created_at
+           FROM speaking_journal ORDER BY created_at DESC LIMIT ?""",
+        (limit,),
+    )
+    rows = await cursor.fetchall()
+    return [
+        {
+            "id": row[0],
+            "prompt": row[1],
+            "transcript": row[2],
+            "word_count": row[3],
+            "unique_word_count": row[4],
+            "duration_seconds": row[5],
+            "wpm": row[6],
+            "created_at": row[7],
+        }
+        for row in rows
+    ]

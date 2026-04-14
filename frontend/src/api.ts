@@ -1875,3 +1875,30 @@ export interface ReviewQueueResponse {
 export function getReviewQueue(limit: number = 8): Promise<ReviewQueueResponse> {
   return request<ReviewQueueResponse>(`/api/dashboard/review-queue?limit=${limit}`);
 }
+
+// Speaking Journal
+export interface SpeakingJournalEntry {
+  id: number;
+  prompt: string;
+  transcript: string;
+  word_count: number;
+  unique_word_count: number;
+  duration_seconds: number;
+  wpm: number;
+  created_at: string;
+}
+
+export function getSpeakingJournalPrompt(): Promise<{ prompt: string }> {
+  return request<{ prompt: string }>('/api/pronunciation/speaking-journal/prompt');
+}
+
+export function saveSpeakingJournalEntry(prompt: string, transcript: string, duration_seconds: number): Promise<SpeakingJournalEntry> {
+  return request<SpeakingJournalEntry>('/api/pronunciation/speaking-journal', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, transcript, duration_seconds }),
+  });
+}
+
+export function getSpeakingJournalEntries(limit: number = 10): Promise<{ entries: SpeakingJournalEntry[] }> {
+  return request<{ entries: SpeakingJournalEntry[] }>(`/api/pronunciation/speaking-journal/entries?limit=${limit}`);
+}

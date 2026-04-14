@@ -9,6 +9,7 @@ import OnboardingOverlay from '../components/OnboardingOverlay';
 import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickPracticeHub from '../components/QuickPracticeHub';
 import SmartReviewQueue from '../components/SmartReviewQueue';
+import SpeakingJournal from '../components/SpeakingJournal';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -948,6 +949,8 @@ export default function Home() {
       <RecentlyPracticedCard />
 
       <QuickPracticeHub />
+
+      <SpeakingJournal />
 
       <StreakMilestonesCard />
 

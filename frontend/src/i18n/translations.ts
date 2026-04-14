@@ -77,6 +77,16 @@ export interface Translations {
   featureDashboardDesc: string;
   smartReviewQueue: string;
   allCaughtUp: string;
+  speakingJournal: string;
+  startSpeaking: string;
+  stopAndSave: string;
+  tryAnother: string;
+  uniqueWords: string;
+  listeningLabel: string;
+  startingLabel: string;
+  savingLabel: string;
+  wordsLabel: string;
+  trendLabel: string;
 }
 
 export const en: Translations = {
@@ -158,6 +168,16 @@ export const en: Translations = {
   featureDashboardDesc: 'Track your learning streak, view statistics, and see your progress across all activities.',
   smartReviewQueue: 'Smart Review Queue',
   allCaughtUp: 'All caught up! 🎉',
+  speakingJournal: 'Speaking Journal',
+  startSpeaking: 'Start Speaking',
+  stopAndSave: 'Stop & Save',
+  tryAnother: 'Try Another Prompt',
+  uniqueWords: 'unique',
+  listeningLabel: 'Listening...',
+  startingLabel: 'Starting...',
+  savingLabel: 'Saving...',
+  wordsLabel: 'words',
+  trendLabel: 'Trend',
 };
 
 export const ja: Translations = {
@@ -239,6 +259,16 @@ export const ja: Translations = {
   featureDashboardDesc: '学習の継続記録を追跡、統計を確認、全アクティビティの進捗を表示。',
   smartReviewQueue: 'スマート復習キュー',
   allCaughtUp: '全部完了！🎉',
+  speakingJournal: 'スピーキング日記',
+  startSpeaking: '話し始める',
+  stopAndSave: '停止して保存',
+  tryAnother: '別のお題に挑戦',
+  uniqueWords: 'ユニーク',
+  listeningLabel: '聞いています...',
+  startingLabel: '開始中...',
+  savingLabel: '保存中...',
+  wordsLabel: '単語',
+  trendLabel: 'トレンド',
 };
 
 export type Locale = 'en' | 'ja';

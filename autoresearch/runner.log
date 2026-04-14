@@ -1126,3 +1126,337 @@ Now re-run TS check and amend the commit:
   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
   └ 2 lines...
 
+● Amend with i18n fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+Now call the evaluator:
+
+● Get diff stat for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 10 lines...
+
+● Evaluator Evaluate iteration 451
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L1:60 (60 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L60:150 (91 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Timings: propose=192, implement=77, test=72, evaluate=575, total=916. Score=6.4, verdict=keep. All criteria met. Recording results.
+
+● Record iteration 451 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "451" "$HASH" "$(date +%Y-%m-%d)" "192" "77" "72" "575" "916" \
+  │ "1362" "1363" "pass" "6.4" "kept" "Add Smart Review Queue card to Home page" \
+  │ >> autoresearch/results.tsv && tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified ✅. Checklist: ✅ proposer called, ✅ tester called (frontend UI changed), ✅ evaluator called, ✅ score matches (6.4).
+
+Now kill the server and start iteration 452.
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "killed"
+  └ 2 lines...
+
+● Context restore - backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Context restore - results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Context restore - commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Record T0 for iteration 452 (shell)
+  │ date +%s
+  └ 2 lines...
+
+
+
+T0=1776187188. No uncompleted backlog items. Calling proposer for iteration 452.
+
+● Proposer Propose iteration 452
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L960:1020 (50 lines read)
+  └ Read QuickSpeakCard.tsx
+      │ frontend/src/components/QuickSpeakCard.tsx
+      └ L50:130 (81 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776187743, propose_sec=555. Now implementing. Let me check existing patterns.
+
+● List DAL files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls app/dal/
+  └ 3 lines...
+
+● Check if table exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "CREATE
+  │ TABLE.*speaking_journal\|speaking_journal" app/database.py | head -5
+  └ 1 line...
+
+● Find migrations area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_MIGRATIONS\|Migration.*applied"
+  │ app/database.py | tail -10
+  └ 5 lines...
+
+● Check speech recognition hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "useSpeechRecognition"
+  │ frontend/src/hooks/*.ts frontend/src/hooks/*.tsx 2>/dev/null | head -5
+  └ 2 lines...
+
+● Find SCHEMA location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "SCHEMA\s*=" app/database.py | head
+  │ -3
+  └ 2 lines...
+
+● Read end of SCHEMA area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '130,145p' app/database.py
+  └ 17 lines...
+
+● Read end of SCHEMA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '125,133p' app/database.py
+  └ 9 lines...
+
+● Check end of migrations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -10 app/database.py
+  └ 11 lines...
+
+● Find last migration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^    (" app/database.py | tail -5
+  └ 6 lines...
+
+● Read last migration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '255,265p' app/database.py
+  └ 12 lines...
+
+● Check after last migration (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '265,270p' app/database.py
+  └ 7 lines...
+
+Now let me check the pronunciation router for patterns and the existing DAL:
+
+● Check pronunciation router imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -20 app/routers/pronunciation.py
+  └ 21 lines...
+
+● Read hook API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '35,55p'
+  │ frontend/src/hooks/useSpeechRecognition.ts
+  └ 22 lines...
+
+● Check hook signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "export function
+  │ useSpeechRecognition" frontend/src/hooks/useSpeechRecognition.ts
+  └ 2 lines...
+
+● Check hook return (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "return {"
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -3
+  └ 2 lines...
+
+Good. Now I have enough context. Let me implement everything:
+
+● Edit database.py +11
+  └ app/database.py
+
+● Edit database.py +13 -3
+  └ app/database.py
+
+Now I need to re-add the `async def _apply_migrations` line:
+
+● Check if _apply_migrations still exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "_apply_migrations" app/database.py
+  └ 2 lines...
+
+The definition was removed! Let me check what happened:
+
+● Check area after migrations list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '278,285p' app/database.py
+  └ 9 lines...
+
+● Check after migration list end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '288,296p' app/database.py
+  └ 10 lines...
+
+The `]` and the function definition got merged. Let me fix this:
+
+● Edit database.py +3
+  └ app/database.py
+
+Now add the DAL functions:
+
+● Check end of pronunciation DAL (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 app/dal/pronunciation.py
+  └ 21 lines...
+
+● Edit pronunciation.py +45
+  └ app/dal/pronunciation.py
+
+Now add router endpoints:
+
+● Check end of pronunciation router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/pronunciation.py
+  └ 6 lines...
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/pronunciation.py
+  └ 2 lines...
+
+● Read last lines (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '2117,2121p'
+  │ app/routers/pronunciation.py
+  └ 6 lines...
+
+● Edit pronunciation.py +110
+  └ app/routers/pronunciation.py
+
+Now add frontend API types:
+
+● Edit api.ts +27
+  └ frontend/src/api.ts
+
+Now create the SpeakingJournal component:
+
+● Create SpeakingJournal.tsx +288
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add it to Home.tsx:
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add i18n keys. I need to check if t() supports fallback or if I need to add all keys:
+
+● Check t() signature (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '29,29p'
+  │ frontend/src/i18n/I18nContext.tsx
+  └ 2 lines...
+
+t() only takes one arg (keyof Translations), so I need to add all keys to the interface and translations. But my component uses `t('speakingJournal', 'Speaking Journal')` with a second arg that will be ignored. Let me fix the component to only pass the key, and add all keys to translations.
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+Now find the en section end and add keys:
+
+● Find allCaughtUp in en and ja (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "allCaughtUp:"
+  │ frontend/src/i18n/translations.ts
+  └ 4 lines...
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+Now fix the SpeakingJournal component to remove the second args from t() calls:
+
+● Find all t() calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "t('"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 10 lines...
+
+I also need to check if `listening`, `starting`, `saving`, `words`, and `trend` already exist as translation keys:
+
+● Check existing keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c
+  │ "listening:\|starting:\|saving:\|words:\|trend:" frontend/src/i18n/translations.ts
+  └ 2 lines...
+
+These keys don't exist. I need to either add them or use keys that exist. Let me add them:
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +5
+  └ frontend/src/i18n/translations.ts
+
+Now update the SpeakingJournal component to use proper key names (no second args):
+
+● Fix t() calls in SpeakingJournal (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -i '' "s/t('speakingJournal',
+  │ 'Speaking Journal')/t('speakingJournal')/g; s/t('startSpeaking', 'Start
+  │ Speaking')/t('startSpeaking')/g; s/t('listening', 'Listening...')/t('listeningLabel')/g;
+  │ s/t('starting', 'Starting...')/t('startingLabel')/g; s/t('stopAndSave', 'Stop \\&
+  │ Save')/t('stopAndSave')/g; s/t('saving', 'Saving...')/t('savingLabel')/g; s/t('words', …
+  └ 4 lines...
+
+● Verify t() calls fixed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep "t('"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 10 lines...
+
+Good. Now record T2 and run tests:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T2=1776187952, implement_sec=209. Commit and test:
+
+● Commit iteration 452 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #452: Add Speaking Journal with daily prompts and fluency trend tracking"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+Tests pass (1362/1363, 1 pre-existing failure). TS check passes. Now check if smoke test is needed:
+
+● Check smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 4 lines...
+
+Smoke test needed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py
+  └ 23 lines...
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3=1776188032, test_sec=80. Now check if tester is needed — frontend UI files changed + type=feature:
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Tester is mandatory. Let me update the UI test spec and start the tester:
+
+● Edit ui-test-spec.yaml +14
+  └ tests/e2e/ui-test-spec.yaml
+

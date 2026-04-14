@@ -2119,3 +2119,113 @@ async def evaluate_follow_up(
         "feedback": str(result.get("feedback", "")),
         "model_questions": [str(q) for q in result.get("model_questions", ["What was your favorite part?", "How did you feel about it?", "Would you do it again?"])[:3]],
     }
+
+
+# ---------------------------------------------------------------------------
+# Speaking Journal
+# ---------------------------------------------------------------------------
+
+_SPEAKING_JOURNAL_PROMPTS = [
+    "Describe your ideal weekend.",
+    "Talk about a skill you want to learn.",
+    "Describe your favorite place to relax.",
+    "What would you do with an extra hour each day?",
+    "Talk about a book or movie that changed your perspective.",
+    "Describe a memorable meal you've had.",
+    "What advice would you give your younger self?",
+    "Talk about a hobby you enjoy.",
+    "Describe your morning routine.",
+    "What does a perfect vacation look like for you?",
+    "Talk about someone who inspires you.",
+    "Describe a challenge you've overcome.",
+    "What's your favorite season and why?",
+    "Talk about a goal you're working toward.",
+    "Describe a tradition you enjoy.",
+    "What would you do if you could travel anywhere?",
+    "Talk about a technology that amazes you.",
+    "Describe your favorite way to spend a rainy day.",
+    "What makes a good friend?",
+    "Talk about something new you tried recently.",
+    "Describe a place you'd like to visit.",
+    "What do you enjoy most about your daily life?",
+    "Talk about a lesson you learned the hard way.",
+    "Describe your favorite celebration or holiday.",
+    "What would your dream job look like?",
+    "Talk about a time you helped someone.",
+    "Describe an outdoor activity you enjoy.",
+    "What's the best gift you've ever received?",
+    "Talk about a cultural difference you find interesting.",
+    "Describe what makes you happy.",
+]
+
+
+class SpeakingJournalEntry(BaseModel):
+    prompt: str
+    transcript: str
+    duration_seconds: int = Field(ge=1)
+
+
+class SpeakingJournalEntryResponse(BaseModel):
+    id: int
+    prompt: str
+    transcript: str
+    word_count: int
+    unique_word_count: int
+    duration_seconds: int
+    wpm: float
+    created_at: str
+
+
+class SpeakingJournalEntriesResponse(BaseModel):
+    entries: list[SpeakingJournalEntryResponse]
+
+
+@router.get("/speaking-journal/prompt")
+async def get_speaking_journal_prompt():
+    """Get today's speaking journal prompt."""
+    import datetime
+    day_of_year = datetime.date.today().timetuple().tm_yday
+    prompt = _SPEAKING_JOURNAL_PROMPTS[day_of_year % len(_SPEAKING_JOURNAL_PROMPTS)]
+    return {"prompt": prompt}
+
+
+@router.post("/speaking-journal", response_model=SpeakingJournalEntryResponse)
+async def save_speaking_journal(
+    entry: SpeakingJournalEntry,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Save a speaking journal entry with computed metrics."""
+    words = entry.transcript.split()
+    word_count = len(words)
+    unique_word_count = len(set(w.lower().strip(".,!?;:'\"") for w in words if w.strip(".,!?;:'\"") ))
+    wpm = round((word_count / max(entry.duration_seconds, 1)) * 60, 1)
+
+    result = await pron_dal.save_speaking_journal_entry(
+        db,
+        prompt=entry.prompt,
+        transcript=entry.transcript,
+        word_count=word_count,
+        unique_word_count=unique_word_count,
+        duration_seconds=entry.duration_seconds,
+        wpm=wpm,
+    )
+    return {
+        "id": result["id"],
+        "prompt": entry.prompt,
+        "transcript": entry.transcript,
+        "word_count": word_count,
+        "unique_word_count": unique_word_count,
+        "duration_seconds": entry.duration_seconds,
+        "wpm": wpm,
+        "created_at": "",
+    }
+
+
+@router.get("/speaking-journal/entries", response_model=SpeakingJournalEntriesResponse)
+async def get_speaking_journal_entries(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get recent speaking journal entries."""
+    entries = await pron_dal.get_speaking_journal_entries(db, limit=limit)
+    return {"entries": entries}

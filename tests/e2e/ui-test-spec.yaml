@@ -99,6 +99,20 @@ pages:
         type: functional
         priority: low
         added_in: 451
+      - id: home-011
+        target: Speaking Journal card displays with daily prompt
+        action: scroll to Speaking Journal section
+        expect: Card visible with title, quoted prompt text, Start Speaking button
+        type: functional
+        priority: medium
+        added_in: 452
+      - id: home-012
+        target: Speaking Journal WPM trend sparkline
+        action: check Speaking Journal card after entries exist
+        expect: WPM trend bar chart appears below main card area when history has 2+ entries
+        type: functional
+        priority: low
+        added_in: 452
 
   conversation:
     path: /conversation
