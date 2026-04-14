@@ -431,3 +431,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 429	b0f7de1	2026-04-14	257	83	80	398	818	1347	1347	pass	6.4	kept	Add Quick Opinion Practice card to Home page
 430	ad0f16c	2026-04-14	225	80	84	180	569	1347	1347	pass	6.7	kept	Add Quick Question Formation speaking drill to Home page
 431	a73cc4c	2026-04-14	228	107	250	230	815	1347	1347	pass	6.15	kept	Add Quick Storytelling card for narrative speaking practice
+432	691f3aa	2026-04-14	287	143	236	0	666	1347	1347	pass	6.15	kept	Add Quick Follow-Up Question speaking card to Home page

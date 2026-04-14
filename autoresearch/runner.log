@@ -1879,3 +1879,284 @@ The tester is right — both use the same icon. Let me fix QuickFollowUpCard to 
 ● Edit QuickFollowUpCard.tsx +1 -1
   └ frontend/src/components/QuickFollowUpCard.tsx
 
+● Amend commit with icon fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend --no-edit
+  └ 17 lines...
+
+Now call the evaluator:
+
+● Evaluator Evaluate iteration 432
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L870:960 (91 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L960:1030 (71 lines read)
+
+● Record T4 for iteration 432 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 6.15 (keep). Verify keep/discard:
+- Tests: 1347/1347 ✅
+- TS check: pass ✅
+- QA: passed=true, ux_score=7.0 ✅
+- Evaluator: 6.15 ≥ 6.0 ✅
+→ **KEEP**
+
+● Record iteration 432 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "432" "$HASH" "2026-04-14" "287" "143" "236" "0" "666" \
+  │ "1347" "1347" "pass" "6.15" "kept" "Add Quick Follow-Up Question speaking card to Home page"
+  │ \…
+  └ 3 lines...
+
+Now kill the server:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Iteration 432 ✅ KEPT (6.15). Checklist: ✅ proposer, ✅ tester, ✅ evaluator.
+
+## Summary — Iterations 431-432
+
+| Iter | Score | Verdict | Tests | Description |
+|------|-------|---------|-------|-------------|
+| 431 | 6.15 | **kept** | 1347 | Add Quick Storytelling card for narrative speaking practice |
+| 432 | 6.15 | **kept** | 1347 | Add Quick Follow-Up Question speaking card to Home page |
+
+**2/2 kept** (100% success rate). Both iterations added new speaking practice features to the Home page. All 3 mandatory subagents called for both iterations. Stopping after 2 iterations as requested.
+
+
+Changes   +494 -4
+Requests  3 Premium (25m 55s)
+Tokens    ↑ 6.8m • ↓ 62.7k • 6.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-431-to-454.md
+[2026-04-14 10:44:10] Copilot invocation completed (duration: 1557s)
+[2026-04-14 10:44:10] Verifying Playwright test depth...
+[2026-04-14 10:44:10]   PW_SKIP iter=431 — UI changed but NO Playwright test was run
+[2026-04-14 10:44:10]   PW_SKIP iter=432 — UI changed but NO Playwright test was run
+[2026-04-14 10:44:10] Running post-invocation audit (iter 431-432)...
+============================================
+ Autoresearch Audit
+ Iterations: 431 — 432
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-14 10:44:10
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 2)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-14 10:44:12] Audit passed — no issues
+[2026-04-14 10:44:15] Current iteration count: 432 / 454
+[2026-04-14 10:44:15] ------------------------------------------
+[2026-04-14 10:44:15] Invocation 5 / 10
+[2026-04-14 10:44:15] Resuming from iteration 433
+[2026-04-14 10:44:15] ------------------------------------------
+[2026-04-14 10:44:15] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-433-to-454.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read last session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+Backlog is empty, last iteration was 432. Starting iteration 433. Let me record the start time and call the proposer.
+
+● Record T0 for iteration 433 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 433
+  │ Read QuickStoryCard.tsx
+  │   │ frontend/src/components/QuickStoryCard.tsx
+  │   └ L1:30 (30 lines read)
+  └ Read QuickFollowUpCard.tsx
+      │ frontend/src/components/QuickFollowUpCard.tsx
+      └ L1:30 (30 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check Home.tsx size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l frontend/src/pages/Home.tsx
+  └ 2 lines...
+
+● Find Quick card usage in Home (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "Quick\|quickPractice\|quick-practice" frontend/src/pages/Home.tsx | head -40
+  └ 25 lines...
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L955:990 (36 lines read)
+
+Good. Now let me create the QuickPracticeHub component and update Home.tsx.
+
+● Edit Home.tsx +1 -12
+  └ frontend/src/pages/Home.tsx
+
+● Create QuickPracticeHub.tsx +127
+  └ frontend/src/components/QuickPracticeHub.tsx
+
+● Edit Home.tsx +1 -23
+  └ frontend/src/pages/Home.tsx
+
+Now commit and test:
+
+● Commit iteration 433 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #433: Add tabbed Quick Practice Hub to organize 12 cards by skill category"
+  └ 16 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && uv run pytest tests/unit
+  │ tests/integration -v 2>&1 | tail -30
+  └ 32 lines...
+
+All 1347 tests pass, TypeScript check passes. This is a `ux` proposal with frontend page/component changes, so I must run the tester.
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill old server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server in background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Get changed files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only
+  └ 6 lines...
+
+● Tester QA test iteration 433
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L80:180 (101 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L180:280 (101 lines read)
+
+Critical bug found: dark mode detection uses wrong method. Let me fix it.
+
+● Find theme usage pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "data-theme\|dataset.theme"
+  │ frontend/src/ | head -10
+  └ 11 lines...
+
+● Check how other Quick cards handle theme/i18n (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "useI18n\|useTheme"
+  │ frontend/src/components/QuickSpeakCard.tsx | head -5
+  └ 1 line...
+
+● Check theme detection (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -r
+  │ "useTheme\|data-theme\|classList.*dark" frontend/src/hooks/useTheme.ts 2>/dev/null | head -10
+  └ 2 lines...
+
+● Read useTheme hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat frontend/src/hooks/useTheme.ts
+  └ 25 lines...
+
+● Check how other components detect dark mode (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ "isDark\|useTheme\|data-theme\|dataset.theme" frontend/src/components/DailyPracticeCard.tsx |
+  │ head -10
+  └ 2 lines...
+
+● Check i18n in quick cards (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "useI18n"
+  │ frontend/src/components/QuickShadowCard.tsx | head -3
+  └ 1 line...
+
+● Check pattern in another card (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "isDark\|useTheme\|dataset.theme"
+  │ frontend/src/components/StreakMilestonesCard.tsx | head -5
+  └ 2 lines...
+
+● Find component files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/ | grep -i
+  │ "Quick\|Streak\|Daily" | head -10
+  └ 11 lines...
+
+● Check theme pattern in QuickShadowCard (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "isDark\|useTheme\|dataset.theme\|var(--" frontend/src/components/QuickShadowCard.tsx | head -10
+  └ 11 lines...
+
+The other Quick cards use CSS variables (`var(--card-bg)`, `var(--border)`, etc.) instead of checking dark mode directly. Let me fix QuickPracticeHub to use CSS variables too.
+
+● Read QuickPracticeHub.tsx
+  │ frontend/src/components/QuickPracticeHub.tsx
+  └ 126 lines read
+
+● Edit QuickPracticeHub.tsx +11 -11
+  └ frontend/src/components/QuickPracticeHub.tsx
+
+Also remove the unused `count` from TabDef and TABS since we removed counts from display:
+
+● Edit QuickPracticeHub.tsx +4 -5
+  └ frontend/src/components/QuickPracticeHub.tsx
+

@@ -7,18 +7,7 @@ import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 import { AchievementToastContainer } from '../components/AchievementToast';
-import QuickShadowCard from '../components/QuickShadowCard';
-import QuickDictationCard from '../components/QuickDictationCard';
-import QuickSpeakCard from '../components/QuickSpeakCard';
-import QuickListenRespondCard from '../components/QuickListenRespondCard';
-import QuickGrammarCard from '../components/QuickGrammarCard';
-import QuickRephraseCard from '../components/QuickRephraseCard';
-import QuickTransformCard from '../components/QuickTransformCard';
-import QuickVocabSentenceCard from '../components/QuickVocabSentenceCard';
-import QuickOpinionCard from '../components/QuickOpinionCard';
-import QuickQuestionCard from '../components/QuickQuestionCard';
-import QuickStoryCard from '../components/QuickStoryCard';
-import QuickFollowUpCard from '../components/QuickFollowUpCard';
+import QuickPracticeHub from '../components/QuickPracticeHub';
 import { useI18n } from '../i18n/I18nContext';
 
 const MODULE_ROUTES: Record<string, string> = {
@@ -957,29 +946,7 @@ export default function Home() {
 
       <RecentlyPracticedCard />
 
-      <QuickShadowCard />
-
-      <QuickDictationCard />
-
-      <QuickSpeakCard />
-
-      <QuickListenRespondCard />
-
-      <QuickGrammarCard />
-
-      <QuickRephraseCard />
-
-      <QuickOpinionCard />
-
-      <QuickTransformCard />
-
-      <QuickVocabSentenceCard />
-
-      <QuickQuestionCard />
-
-      <QuickStoryCard />
-
-      <QuickFollowUpCard />
+      <QuickPracticeHub />
 
       <StreakMilestonesCard />
 
