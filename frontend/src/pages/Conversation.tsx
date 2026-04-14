@@ -83,6 +83,8 @@ export default function Conversation() {
   const [quizError, setQuizError] = useState('');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [correctionAttempts, setCorrectionAttempts] = useState(0);
+  const [correctionSuccesses, setCorrectionSuccesses] = useState(0);
   const [showGrammarPanel, setShowGrammarPanel] = useState(false);
   const [lastAssistantAt, setLastAssistantAt] = useState<number>(0);
   const [wpmValues, setWpmValues] = useState<number[]>([]);
@@ -1226,6 +1228,12 @@ export default function Conversation() {
         <GoalTracker selectedGoals={sessionGoals} messages={messages} />
       )}
 
+      {phase === 'chat' && correctionAttempts > 0 && (
+        <div style={{ margin: '8px 0', padding: '6px 12px', borderRadius: 8, background: correctionSuccesses > 0 ? '#dcfce7' : '#fef3c7', fontSize: '0.8rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          ✏️ Corrections practiced: {correctionSuccesses}/{correctionAttempts}
+        </div>
+      )}
+
       {phase === 'chat' && (
         <ResponseTimer
           isSpeaking={tts.isSpeaking}
@@ -1299,7 +1307,10 @@ export default function Conversation() {
                 <Volume2 size={14} color="var(--primary, #6366f1)" />
               </button>
             </div>
-            {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} />}
+            {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} onCorrectionAttempt={(success) => {
+              setCorrectionAttempts(p => p + 1);
+              if (success) setCorrectionSuccesses(p => p + 1);
+            }} />}
           </div>
         ))}
         {loading && (
