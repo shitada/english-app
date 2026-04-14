@@ -11,6 +11,7 @@ import QuickOpinionCard from './QuickOpinionCard';
 import QuickQuestionCard from './QuickQuestionCard';
 import QuickStoryCard from './QuickStoryCard';
 import QuickFollowUpCard from './QuickFollowUpCard';
+import QuickMinimalPairsCard from './QuickMinimalPairsCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 
@@ -107,6 +108,7 @@ export default function QuickPracticeHub() {
           <>
             <QuickDictationCard />
             <QuickListenRespondCard />
+            <QuickMinimalPairsCard />
           </>
         )}
         {activeTab === 'grammar' && (
