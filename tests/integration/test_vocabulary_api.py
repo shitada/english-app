@@ -1081,3 +1081,37 @@ async def test_sentence_craft_evaluate_success(client, mock_copilot):
     assert len(data["word_usage"]) == 2
     assert data["overall_feedback"] == "Well done!"
     assert "model_sentence" in data
+
+
+@pytest.mark.integration
+async def test_evaluate_sentence_use_success(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "correctness": 9,
+        "naturalness": 8,
+        "grammar": 9,
+        "feedback": "Great use of the word in context!",
+        "model_sentence": "She showed remarkable resilience during the crisis.",
+    })
+    res = await client.post("/api/vocabulary/evaluate-sentence-use", json={
+        "word": "resilience",
+        "meaning": "the ability to recover from difficulties",
+        "user_sentence": "Her resilience helped her overcome the challenge.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["correctness"] == 9
+    assert data["naturalness"] == 8
+    assert data["grammar"] == 9
+    assert data["overall_score"] == 9
+    assert data["feedback"] == "Great use of the word in context!"
+    assert "model_sentence" in data
+
+
+@pytest.mark.integration
+async def test_evaluate_sentence_use_empty_word(client):
+    res = await client.post("/api/vocabulary/evaluate-sentence-use", json={
+        "word": "",
+        "meaning": "test",
+        "user_sentence": "test sentence",
+    })
+    assert res.status_code == 422

@@ -597,3 +597,283 @@ Fix the `get_topic_label` call — it takes topics as well:
 ● Edit conversation.py +1 -1
   └ app/routers/conversation.py
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #427: Add Conversation Topic Warm-Up with phrase speaking practice" --no-edit
+  └ 17 lines...
+
+● Run warmup tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_conversation_api.py::test_topic_warmup_success
+  │ tests/integration/test_conversation_api.py::test_topic_warmup_invalid_topic -v 2>&1 | tail -15
+  └ 14 lines...
+
+Now run the full test suite:
+
+● Run full test suite (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1345 passed. TS check already passed. Let me record T3 and check if smoke test needed:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 2 lines...
+
+T3=1776126901, test_sec=146. Smoke test needed since routers changed.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+Smoke test passed. Now check if QA tester is needed:
+
+● Check if frontend UI changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Feature type + frontend UI changed → MUST call tester. Let me start the server and call the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 427
+  │ Read test_conversation_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   └ L400:end (452 lines read)
+  └ Read test_conversation_api.py
+      │ tests/integration/test_conversation_api.py
+      └ L1450:end (89 lines read)
+
+QA passed with ux_score=8. Now stop the server and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+## Iteration 427 — Step 6: Evaluate
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 11 lines...
+
+● Evaluator Evaluate iteration 427
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1300:1500 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1500:1700 (201 lines read)
+
+Evaluator returned total_score=7.7, verdict=keep. Let me record results and proceed.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T4=1776127245. Computing times: propose=364, implement=231, test=146, evaluate=344, total=1085.
+
+## Iteration 427 — Step 8: Record Results
+
+● Record iteration 427 results (shell)
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "427" "12b78c0" "2026-04-14" "364" "231" "146" "344" "1085" \
+  │ "1345" "1345" "pass" "7.7" "kept" "Add Conversation Topic Warm-Up with phrase speaking practice"
+  │ \
+  │ >> autoresearch/results.tsv
+  └ 1 line...
+
+● Verify results row (shell)
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified. Checklist for iteration 427:
+- ✅ Proposer called → received JSON proposal
+- ✅ Evaluator called → received total_score=7.7
+- ✅ Frontend changed + type=feature → Tester called, ux_score=8, passed=true
+- ✅ Score in results.tsv matches evaluator's total_score
+
+---
+
+## Iteration 428 — Step 1: Context Restore
+
+● Record T0 for iteration 428 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0=1776127263. Backlog empty. Now call proposer for iteration 428.
+
+## Iteration 428 — Step 2: Propose
+
+● Proposer Propose iteration 428
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L700:900 (201 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L900:end (125 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776127486, propose_sec=223. Now implementing.
+
+## Iteration 428 — Step 3: Implement
+
+● Check LLM patterns in vocab (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "safe_llm_call\|ask_json\|get_copilot" app/routers/vocabulary.py | head -10
+  └ 11 lines...
+
+● See end of vocabulary router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30 app/routers/vocabulary.py
+  └ 31 lines...
+
+● Check existing vocabulary endpoints (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "sentence.craft\|sentence-craft\|evaluate-sentence" app/routers/vocabulary.py | head -5
+  └ 6 lines...
+
+● See imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,20p' app/routers/vocabulary.py
+  └ 20 lines...
+
+● Check rate limit usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "require_rate_limit"
+  │ app/routers/vocabulary.py | head -5
+  └ 5 lines...
+
+● Check file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l app/routers/vocabulary.py
+  └ 2 lines...
+
+Now let me look at the existing drill endpoint and QuickSpeakCard for patterns:
+
+● Find drill endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "def.*drill\|/drill"
+  │ app/routers/vocabulary.py | head -5
+  └ 3 lines...
+
+● See QuickSpeakCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -50
+  │ frontend/src/components/QuickSpeakCard.tsx
+  └ 51 lines...
+
+● Find where to add card in Home (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "QuickTransformCard\|QuickVocab\|quick-vocab" frontend/src/pages/Home.tsx | head -10
+  └ 3 lines...
+
+● See QuickTransformCard location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '960,975p'
+  │ frontend/src/pages/Home.tsx
+  └ 16 lines...
+
+Now let me look at the vocab drill response format:
+
+● See drill endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '300,340p' app/routers/vocabulary.py
+  └ 40 lines...
+
+Now I have enough context. Let me implement the backend endpoint and frontend component:
+
+● Get exact end of file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/vocabulary.py
+  └ 6 lines...
+
+● Edit vocabulary.py +57
+  └ app/routers/vocabulary.py
+
+Now add the API function to frontend:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getTopicWarmup"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● See end of api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1694,1701p' frontend/src/api.ts
+  └ 8 lines...
+
+● Edit api.ts +19
+  └ frontend/src/api.ts
+
+Now create the QuickVocabSentenceCard component:
+
+● Create QuickVocabSentenceCard.tsx +232
+  └ frontend/src/components/QuickVocabSentenceCard.tsx
+
+Now I need to check the api.getDrillWords function:
+
+● Find getDrillWords (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getDrillWords\|drill"
+  │ frontend/src/api.ts | head -10
+  └ 5 lines...
+
+Good, `getDrillWords` exists. Now add the card to Home page:
+
+● See Home imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1,20p' frontend/src/pages/Home.tsx
+  └ 21 lines...
+
+● Edit Home.tsx +1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now add a test for the backend endpoint:
+
+● See end of vocab test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ tests/integration/test_vocabulary_api.py
+  └ 21 lines...
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^from\|^import"
+  │ tests/integration/test_vocabulary_api.py | head -10
+  └ 3 lines...
+
+● Add vocab sentence use tests (shell)
+  │ cat >> /Users/shingotada/Documents/vscode/english-app/tests/integration/test_vocabulary_api.py
+  │ << 'PYEOF'
+  │
+  │
+  │ @pytest.mark.integration…
+  └ 33 lines...
+
+Now commit and test:
+

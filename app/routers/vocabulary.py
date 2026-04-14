@@ -908,3 +908,60 @@ async def get_word_etymology(
 
     await vocab_dal.save_etymology(db, word_id, _json.dumps(result))
     return {"word_id": word_id, "word": word_text, "etymology": result}
+
+
+class EvaluateSentenceUseRequest(BaseModel):
+    word: str = Field(min_length=1, max_length=100)
+    meaning: str = Field(min_length=1, max_length=500)
+    user_sentence: str = Field(min_length=1, max_length=1000)
+
+
+class EvaluateSentenceUseResponse(BaseModel):
+    correctness: int
+    naturalness: int
+    grammar: int
+    overall_score: int
+    feedback: str
+    model_sentence: str
+
+
+@router.post("/evaluate-sentence-use", response_model=EvaluateSentenceUseResponse)
+async def evaluate_sentence_use(
+    req: EvaluateSentenceUseRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate whether the user correctly used a vocabulary word in a spoken sentence."""
+    copilot = get_copilot_service()
+
+    system = (
+        "You are an English teacher evaluating vocabulary usage in sentences. "
+        f'The target word is "{req.word}" (meaning: {req.meaning}). '
+        "Evaluate the student's sentence on three criteria (each 1-10): "
+        "correctness (is the word used with the right meaning?), "
+        "naturalness (does it sound like something a native speaker would say?), "
+        "grammar (is the sentence grammatically correct?). "
+        "Return JSON: {\"correctness\": N, \"naturalness\": N, \"grammar\": N, "
+        "\"feedback\": \"brief constructive feedback\", "
+        "\"model_sentence\": \"a natural example sentence using the word\"}"
+    )
+
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(system, f"Student sentence: \"{req.user_sentence}\""),
+        context="evaluate_sentence_use",
+    )
+    if not result:
+        raise HTTPException(status_code=502, detail="Failed to evaluate sentence")
+
+    correctness = min(10, max(1, int(result.get("correctness", 5))))
+    naturalness = min(10, max(1, int(result.get("naturalness", 5))))
+    grammar = min(10, max(1, int(result.get("grammar", 5))))
+    overall = round((correctness + naturalness + grammar) / 3)
+
+    return EvaluateSentenceUseResponse(
+        correctness=correctness,
+        naturalness=naturalness,
+        grammar=grammar,
+        overall_score=overall,
+        feedback=str(result.get("feedback", "")),
+        model_sentence=str(result.get("model_sentence", "")),
+    )

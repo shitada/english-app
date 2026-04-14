@@ -1698,3 +1698,22 @@ export async function getTopicWarmup(topic: string, difficulty: string = 'interm
     body: JSON.stringify({ topic, difficulty }),
   });
 }
+
+// ── Vocabulary Sentence Use Evaluation ──────────────────────────
+
+export interface EvaluateSentenceUseResponse {
+  correctness: number;
+  naturalness: number;
+  grammar: number;
+  overall_score: number;
+  feedback: string;
+  model_sentence: string;
+}
+
+export async function evaluateVocabSentenceUse(word: string, meaning: string, user_sentence: string): Promise<EvaluateSentenceUseResponse> {
+  return request<EvaluateSentenceUseResponse>('/api/vocabulary/evaluate-sentence-use', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ word, meaning, user_sentence }),
+  });
+}
