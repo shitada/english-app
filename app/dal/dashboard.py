@@ -1240,7 +1240,12 @@ async def get_skill_radar(db: aiosqlite.Connection) -> list[dict[str, Any]]:
         "SELECT COUNT(*) as cnt FROM messages WHERE role = 'user'"
     )
     msg_count = row[0]["cnt"] if row else 0
-    speaking = min(100, int((conv_count * 5 + msg_count) / 2))
+    # Include speaking journal entries in Speaking score
+    row = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM speaking_journal"
+    )
+    sj_count = row[0]["cnt"] if row else 0
+    speaking = min(100, int((conv_count * 5 + msg_count + sj_count * 3) / 2))
 
     # Listening: blend pronunciation attempts + listening quiz results
     row = await db.execute_fetchall(
@@ -1296,7 +1301,7 @@ ROUTE_MAP = {
     "pronunciation": "/pronunciation",
     "vocabulary": "/vocabulary",
     "listening": "/listening",
-    "speaking_journal": "/speaking",
+    "speaking_journal": "/",
 }
 
 

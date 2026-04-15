@@ -1212,6 +1212,19 @@ class TestGetRecentActivity:
         assert "route" in item
         assert item["route"] == "/conversation"
 
+    async def test_speaking_journal_routes_to_home(self, test_db):
+        """speaking_journal activity should route to '/' (Home page)."""
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+            ("Talk about travel", "I love Japan", 3, 3, 60, 3.0),
+        )
+        await test_db.commit()
+        result = await get_recent_activity(test_db)
+        sj_items = [r for r in result if r["type"] == "speaking_journal"]
+        assert len(sj_items) >= 1
+        assert sj_items[0]["route"] == "/"
+
 
 @pytest.mark.unit
 class TestGetAchievements:
@@ -1264,7 +1277,7 @@ class TestGetSkillRadar:
         await end_conversation(test_db, cid)
         result = await get_skill_radar(test_db)
         speaking = next(r for r in result if r["name"] == "speaking")
-        # 1 conversation * 5 + 2 user messages = 7, / 2 = 3
+        # 1 conversation * 5 + 2 user messages + 0 journal entries * 3 = 7, / 2 = 3
         assert speaking["score"] >= 3
 
     async def test_vocabulary_score_from_mastery(self, test_db):
@@ -1310,6 +1323,21 @@ class TestGetSkillRadar:
         listening = next(r for r in result if r["name"] == "listening")
         # 5 quiz results with avg score 80 should contribute to listening score
         assert listening["score"] > 0
+
+    async def test_speaking_score_includes_speaking_journal(self, test_db):
+        """Speaking skill score should incorporate speaking_journal entries."""
+        # Add speaking journal entries only (no conversations)
+        for i in range(5):
+            await test_db.execute(
+                "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+                (f"Prompt {i}", f"Transcript {i}", 10, 8, 60, 10.0),
+            )
+        await test_db.commit()
+        result = await get_skill_radar(test_db)
+        speaking = next(r for r in result if r["name"] == "speaking")
+        # 5 entries * 3 = 15, / 2 = 7 minimum
+        assert speaking["score"] >= 7
 
     async def test_grammar_handles_string_is_correct(self, test_db):
         """Grammar skill score should count string 'true' as correct."""

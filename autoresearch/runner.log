@@ -232,3 +232,165 @@ T2=1776210733. Now run tests:
 
 1389 passed, 1 failed (pre-existing daily challenge test), TypeScript passes. Let me check if the failure is pre-existing:
 
+[2026-04-15 09:11:47] Copilot invocation completed (duration: 1839s)
+[2026-04-15 09:11:47] Verifying Playwright test depth...
+[2026-04-15 09:11:47]   PW_SKIP iter=465 — UI changed but NO Playwright test was run
+[2026-04-15 09:11:47]   PW_SKIP iter=466 — UI changed but NO Playwright test was run
+[2026-04-15 09:11:47] Running post-invocation audit (iter 465-466)...
+============================================
+ Autoresearch Audit
+ Iterations: 465 — 466
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 09:11:47
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 466[0m
+[0;31m  Tester: FAIL — missing: 465 466[0m
+[0;31m  Evaluator: FAIL — missing: 465 466[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 09:11:48] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 09:11:51] Current iteration count: 466 / 474
+[2026-04-15 09:11:51] ------------------------------------------
+[2026-04-15 09:11:51] Invocation 2 / 10
+[2026-04-15 09:11:51] Resuming from iteration 467
+[2026-04-15 09:11:51] ------------------------------------------
+[2026-04-15 09:11:51] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-467-to-474.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read last session log lines (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was #466. Starting iteration 467.
+
+## Iteration 467
+
+● Record T0 for iteration 467 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1776211934. Now calling the proposer.
+
+● Proposer Propose iteration 467
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1:80 (80 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L80:200 (121 lines read)
+
+Good proposal — bugfix type, backend-only. Let me record T1 and implement.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find speaking-related code in dashboard dal (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'speaking' app/dal/dashboard.py |
+  │ head -30
+  └ 20 lines...
+
+● Find ROUTE_MAP and speaking_journal refs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'ROUTE_MAP\|speaking_journal'
+  │ app/dal/dashboard.py | head -20
+  └ 18 lines...
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L1225:1305 (81 lines read)
+
+Now I can see the issues. Let me implement both fixes:
+
+● Edit dashboard.py +6 -1
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +1 -1
+  └ app/dal/dashboard.py
+
+Now let me check for existing tests and add new ones:
+
+● Find existing skill radar tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'skill_radar\|get_skill_radar\|ROUTE_MAP\|recent_activity' tests/unit/test_dashboard_dal.py |
+  │ head -20
+  └ 21 lines...
+
+● See end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 tests/unit/test_dashboard_dal.py
+  └ 51 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L1248:1350 (103 lines read)
+
+Now let me add the tests and also look at how speaking_journal route shows in recent_activity:
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L1186:1215 (28 lines read)
+
+Now add the two new tests after the existing skill radar tests:
+
+● Edit test_dashboard_dal.py +15
+  └ tests/unit/test_dashboard_dal.py
+
+● Edit test_dashboard_dal.py +13
+  └ tests/unit/test_dashboard_dal.py
+
+Now update the existing test comment that references the old formula:
+
+● Edit test_dashboard_dal.py +1 -1
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
