@@ -14,12 +14,16 @@ const MODULE_COLORS: Record<string, string> = {
   conversation: '#3b82f6',
   pronunciation: '#f59e0b',
   vocabulary: '#22c55e',
+  listening: '#8b5cf6',
+  speaking_journal: '#ec4899',
 };
 
 const MODULE_LABELS: Record<string, string> = {
   conversation: 'Conversation',
   pronunciation: 'Pronunciation',
   vocabulary: 'Vocabulary',
+  listening: 'Listening',
+  speaking_journal: 'Speaking Journal',
 };
 
 export function SessionAnalytics() {
@@ -35,7 +39,7 @@ export function SessionAnalytics() {
   const maxDaily = Math.max(
     1,
     ...data.daily.map(
-      (d) => d.conversation_seconds + d.pronunciation_seconds + d.vocabulary_seconds,
+      (d) => d.conversation_seconds + d.pronunciation_seconds + d.vocabulary_seconds + d.listening_seconds + d.speaking_journal_seconds,
     ),
   );
 
@@ -92,10 +96,15 @@ export function SessionAnalytics() {
           <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem' }}>Daily Breakdown</h4>
           <div style={{ display: 'flex', gap: '3px', alignItems: 'flex-end', height: '60px' }}>
             {data.daily.map((d) => {
-              const dayTotal = d.conversation_seconds + d.pronunciation_seconds + d.vocabulary_seconds;
+              const dayTotal = d.conversation_seconds + d.pronunciation_seconds + d.vocabulary_seconds + d.listening_seconds + d.speaking_journal_seconds;
               const h = (dayTotal / maxDaily) * 100;
-              const convPct = dayTotal > 0 ? (d.conversation_seconds / dayTotal) * 100 : 0;
-              const pronPct = dayTotal > 0 ? (d.pronunciation_seconds / dayTotal) * 100 : 0;
+              const segments = [
+                { key: 'conversation', seconds: d.conversation_seconds },
+                { key: 'pronunciation', seconds: d.pronunciation_seconds },
+                { key: 'vocabulary', seconds: d.vocabulary_seconds },
+                { key: 'listening', seconds: d.listening_seconds },
+                { key: 'speaking_journal', seconds: d.speaking_journal_seconds },
+              ];
               return (
                 <div
                   key={d.date}
@@ -109,9 +118,9 @@ export function SessionAnalytics() {
                     flexDirection: 'column',
                   }}
                 >
-                  <div style={{ flex: `${convPct}`, background: MODULE_COLORS.conversation }} />
-                  <div style={{ flex: `${pronPct}`, background: MODULE_COLORS.pronunciation }} />
-                  <div style={{ flex: `${100 - convPct - pronPct}`, background: MODULE_COLORS.vocabulary }} />
+                  {segments.map((seg) => (
+                    <div key={seg.key} style={{ flex: `${dayTotal > 0 ? (seg.seconds / dayTotal) * 100 : 0}`, background: MODULE_COLORS[seg.key] }} />
+                  ))}
                 </div>
               );
             })}

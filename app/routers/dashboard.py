@@ -544,6 +544,8 @@ class DailyAnalytics(BaseModel):
     conversation_seconds: int
     pronunciation_seconds: int
     vocabulary_seconds: int
+    listening_seconds: int = 0
+    speaking_journal_seconds: int = 0
 
 
 class SessionAnalyticsResponse(BaseModel):

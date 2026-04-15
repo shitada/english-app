@@ -1416,6 +1416,35 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
         (from_date,),
     )
 
+    # Listening quiz: estimate 5 min per quiz session
+    listen_rows = await db.execute_fetchall(
+        """
+        SELECT DATE(created_at) as day,
+               COUNT(*) as cnt
+        FROM listening_quiz_results
+        WHERE DATE(created_at) >= ?
+        GROUP BY DATE(created_at)
+        ORDER BY day
+        """,
+        (from_date,),
+    )
+
+    # Speaking journal: use actual duration_seconds
+    speak_rows = await db.execute_fetchall(
+        """
+        SELECT DATE(created_at) as day,
+               SUM(COALESCE(duration_seconds, 0)) as secs,
+               COUNT(*) as cnt
+        FROM speaking_journal
+        WHERE DATE(created_at) >= ?
+        GROUP BY DATE(created_at)
+        ORDER BY day
+        """,
+        (from_date,),
+    )
+
+    defaults = {"conversation": 0, "pronunciation": 0, "vocabulary": 0, "listening": 0, "speaking_journal": 0}
+
     # Build per-day breakdown
     daily: dict[str, dict[str, int]] = {}
     conv_total_secs = 0
@@ -1423,7 +1452,7 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
     for r in conv_rows:
         d = r["day"]
         s = max(r["secs"] or 0, 0)
-        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily.setdefault(d, {**defaults})
         daily[d]["conversation"] = s
         conv_total_secs += s
         conv_total_cnt += r["cnt"]
@@ -1433,7 +1462,7 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
     for r in pron_rows:
         d = r["day"]
         s = r["cnt"] * 120  # 2 min per attempt
-        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily.setdefault(d, {**defaults})
         daily[d]["pronunciation"] = s
         pron_total_secs += s
         pron_total_cnt += r["cnt"]
@@ -1443,15 +1472,37 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
     for r in vocab_rows:
         d = r["day"]
         s = r["cnt"] * 30  # 30 sec per attempt
-        daily.setdefault(d, {"conversation": 0, "pronunciation": 0, "vocabulary": 0})
+        daily.setdefault(d, {**defaults})
         daily[d]["vocabulary"] = s
         vocab_total_secs += s
         vocab_total_cnt += r["cnt"]
+
+    listen_total_secs = 0
+    listen_total_cnt = 0
+    for r in listen_rows:
+        d = r["day"]
+        s = r["cnt"] * 300  # 5 min per quiz session
+        daily.setdefault(d, {**defaults})
+        daily[d]["listening"] = s
+        listen_total_secs += s
+        listen_total_cnt += r["cnt"]
+
+    speak_total_secs = 0
+    speak_total_cnt = 0
+    for r in speak_rows:
+        d = r["day"]
+        s = max(r["secs"] or 0, 0)
+        daily.setdefault(d, {**defaults})
+        daily[d]["speaking_journal"] = s
+        speak_total_secs += s
+        speak_total_cnt += r["cnt"]
 
     modules = [
         {"module": "conversation", "total_seconds": conv_total_secs, "session_count": conv_total_cnt},
         {"module": "pronunciation", "total_seconds": pron_total_secs, "session_count": pron_total_cnt},
         {"module": "vocabulary", "total_seconds": vocab_total_secs, "session_count": vocab_total_cnt},
+        {"module": "listening", "total_seconds": listen_total_secs, "session_count": listen_total_cnt},
+        {"module": "speaking_journal", "total_seconds": speak_total_secs, "session_count": speak_total_cnt},
     ]
 
     daily_list = [
@@ -1460,6 +1511,8 @@ async def get_session_analytics(db: aiosqlite.Connection, days: int = 7) -> dict
             "conversation_seconds": v["conversation"],
             "pronunciation_seconds": v["pronunciation"],
             "vocabulary_seconds": v["vocabulary"],
+            "listening_seconds": v["listening"],
+            "speaking_journal_seconds": v["speaking_journal"],
         }
         for d, v in sorted(daily.items())
     ]

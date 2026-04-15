@@ -1507,7 +1507,7 @@ class TestGetSessionAnalytics:
     async def test_empty_db_returns_empty_daily(self, test_db):
         result = await get_session_analytics(test_db)
         assert result["daily"] == []
-        assert len(result["modules"]) == 3
+        assert len(result["modules"]) == 5
         for m in result["modules"]:
             assert m["total_seconds"] == 0
             assert m["session_count"] == 0

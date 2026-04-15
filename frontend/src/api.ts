@@ -1169,6 +1169,8 @@ export interface DailyAnalytics {
   conversation_seconds: number;
   pronunciation_seconds: number;
   vocabulary_seconds: number;
+  listening_seconds: number;
+  speaking_journal_seconds: number;
 }
 
 export interface SessionAnalyticsResponse {
