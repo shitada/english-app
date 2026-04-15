@@ -1946,3 +1946,16 @@ export function getSpeakingJournalGrammarCheck(transcript: string): Promise<Gram
     body: JSON.stringify({ transcript }),
   });
 }
+
+export interface ModelAnswerResult {
+  model_answer: string;
+  key_phrases: string[];
+  comparison_tip: string;
+}
+
+export function getSpeakingJournalModelAnswer(prompt: string, transcript: string): Promise<ModelAnswerResult> {
+  return request<ModelAnswerResult>('/api/pronunciation/speaking-journal/model-answer', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, user_transcript: transcript }),
+  });
+}

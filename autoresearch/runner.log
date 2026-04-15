@@ -437,3 +437,333 @@ Now add a test for the new endpoint:
 
 Now commit and test:
 
+● Commit iteration 477 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #477: Add grammar check feedback to Speaking Journal results"
+  └ 15 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1400 tests pass, TypeScript check passes. Now run smoke test since we changed a router:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All tests pass and smoke test is OK. Now I need to run the QA tester since frontend components changed. Let me start the server and call the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Restart server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+✗ Start server with nohup (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && nohup uv run uvicorn app.main:app --host
+  │ 0.0.0.0 --port 8000 --timeout-keep-alive 30 > /tmp/uvicorn.log 2>&1 &
+  │ echo "PID=$!"
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ Permission denied and could not request permission from user
+
+● Start server async (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Check server error (shell)
+  │ read_bash
+  └ 2 lines...
+
+● Start server again (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+The server is already running (uptime 44.7s). The new instances are failing because port 8000 is already bound. Let me proceed with the QA tester.
+
+● Tester QA test iteration 477
+  │ Read test_pronunciation_api.py
+  │   │ tests/integration/test_pronunciation_api.py
+  │   └ L1700:1800 (4 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L60:120 (61 lines read)
+
+QA passed with ux_score 8. Now call the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 9 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 477
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L2200:2400 (200 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L2400:2500 (51 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 7.25, verdict: keep. All criteria met. Let me record the results:
+
+- T0=1776233595, T1=1776233814, T2=1776233948, T3=1776234320, T4=1776234432
+- propose=219, implement=134, test=372, evaluate=112, total=837
+
+● Record iteration 477 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "477" "$HASH" "$DATE" "219" "134" "372" "112" "837" \
+  │ "1400" "1400" "pass" "7.25" "kept" "Add grammar check feedback to Speaking Journal results"
+  │ \…
+  └ 3 lines...
+
+Iteration 477 recorded. Now kill the server and start iteration 478.
+
+● Record T0 for iteration 478 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Context restore - commits (shell)
+  │ git log --oneline -5
+  └ 6 lines...
+
+● Context restore - backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Context restore - results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+Now call the proposer for iteration 478:
+
+● Proposer Propose iteration 478
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L1700:1950 (251 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L2250:2550 (201 lines read)
+
+● Record T1 for iteration 478 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now implement. Let me add the backend endpoint, frontend API, and UI:
+
+● Check end of router file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -5 app/routers/pronunciation.py
+  └ 6 lines...
+
+● Edit pronunciation.py +59
+  └ app/routers/pronunciation.py
+
+Now add frontend API:
+
+● Find grammar check function location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "getSpeakingJournalGrammarCheck"
+  │ frontend/src/api.ts
+  └ 2 lines...
+
+● Read grammar check function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1943,1950p' frontend/src/api.ts
+  └ 7 lines...
+
+● Edit api.ts +13
+  └ frontend/src/api.ts
+
+Now update SpeakingJournal component:
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Add state variables:
+
+● Edit SpeakingJournal.tsx +3
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Add reset:
+
+● Edit SpeakingJournal.tsx +3
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add the model answer panel after the grammar check panel. Let me find the right insertion point:
+
+● Find insertion point (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Unable to check grammar\|Grammar
+  │ Check Panel\|handleReset" frontend/src/components/SpeakingJournal.tsx | head -10
+  └ 5 lines...
+
+● Read insertion point area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '427,436p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 11 lines...
+
+● Edit SpeakingJournal.tsx +103 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add integration tests:
+
+● Edit test_pronunciation_api.py +33
+  └ tests/integration/test_pronunciation_api.py
+
+Commit and test:
+
+● Commit iteration 478 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #478: Add model answer with TTS playback to Speaking Journal results"
+  └ 15 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+1402/1402 tests pass, TypeScript check passes. Run smoke test:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All pass. Now run QA tester since frontend component changed:
+
+● Start server for QA 478 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 3 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 478
+  │ Read SpeakingJournal.tsx
+  │   │ frontend/src/components/SpeakingJournal.tsx
+  │   └ L530:550 (21 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L460:534 (74 lines read)
+
+The tester found a critical issue - let me verify the "Try Another" button:
+
+● Check Try Another button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "handleReset\|Try
+  │ Another\|tryAnother" frontend/src/components/SpeakingJournal.tsx | head -10
+  └ 3 lines...
+
+● Check button code (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '533,555p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 24 lines...
+
+The tester was right — the button is missing `onClick={handleReset}`. Let me check if this was a pre-existing issue or introduced by my changes:
+
+● Check if pre-existing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git show
+  │ HEAD~1:frontend/src/components/SpeakingJournal.tsx | grep -A5 -B2 "tryAnother"
+  └ 9 lines...
+
+Pre-existing issue — the onClick was already missing before my change. But let me also fix the empty model_answer edge case since that's from my code. Let me fix both:
+
+● Edit SpeakingJournal.tsx +1 -12
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now fix the empty model_answer edge case:
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now I need to close the ternary properly. Let me find the end of the model answer content section:
+
+● Find fallback sections (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Unable to generate
+  │ model\|modelAnswerExpanded && !modelAnswerLoading" frontend/src/components/SpeakingJournal.tsx
+  └ 1 line...
+
+● Find model answer sections (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Unable to generate\|modelAnswer"
+  │ frontend/src/components/SpeakingJournal.tsx | tail -10
+  └ 11 lines...
+
+● Check closing section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '525,535p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 12 lines...
+
+I changed the `&&` to `?` for a ternary but need to add the `) : null}` and fix the fallback condition. Let me look at the full block:
+
+● Check full model answer block (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '463,533p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 72 lines...
+
+Actually, the simpler fix is to revert the ternary approach and instead fix the fallback condition to also trigger when model_answer is empty:
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now amend the commit:
+

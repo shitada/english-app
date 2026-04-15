@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, getSpeakingJournalGrammarCheck, type SpeakingJournalEntry, type VocabUpgradeItem, type GrammarCorrection, type GrammarCheckResult } from '../api';
+import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, getSpeakingJournalGrammarCheck, getSpeakingJournalModelAnswer, type SpeakingJournalEntry, type VocabUpgradeItem, type GrammarCorrection, type GrammarCheckResult, type ModelAnswerResult } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -20,6 +20,9 @@ export default function SpeakingJournal() {
   const [grammarResult, setGrammarResult] = useState<GrammarCheckResult | null>(null);
   const [grammarLoading, setGrammarLoading] = useState(false);
   const [grammarExpanded, setGrammarExpanded] = useState(false);
+  const [modelAnswer, setModelAnswer] = useState<ModelAnswerResult | null>(null);
+  const [modelAnswerLoading, setModelAnswerLoading] = useState(false);
+  const [modelAnswerExpanded, setModelAnswerExpanded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -86,6 +89,9 @@ export default function SpeakingJournal() {
     setGrammarResult(null);
     setGrammarLoading(false);
     setGrammarExpanded(false);
+    setModelAnswer(null);
+    setModelAnswerLoading(false);
+    setModelAnswerExpanded(false);
     getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)).catch(() => {});
   }, [reset]);
 
@@ -423,21 +429,112 @@ export default function SpeakingJournal() {
               )}
             </div>
 
+            {/* Model Answer Panel */}
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => {
+                  if (modelAnswer) {
+                    setModelAnswerExpanded(!modelAnswerExpanded);
+                    return;
+                  }
+                  setModelAnswerLoading(true);
+                  setModelAnswerExpanded(true);
+                  getSpeakingJournalModelAnswer(prompt, savedEntry.transcript)
+                    .then((r) => setModelAnswer(r))
+                    .catch(() => setModelAnswer(null))
+                    .finally(() => setModelAnswerLoading(false));
+                }}
+                disabled={modelAnswerLoading}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  background: modelAnswerExpanded ? 'var(--primary, #6366f1)' : 'linear-gradient(135deg, #f59e0b, #d97706)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: modelAnswerLoading ? 'wait' : 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  opacity: modelAnswerLoading ? 0.7 : 1,
+                }}
+              >
+                {modelAnswerLoading ? '⏳ Generating...' : `🎯 See Model Answer ${modelAnswerExpanded ? '▲' : '▼'}`}
+              </button>
+              {modelAnswerExpanded && modelAnswer && modelAnswer.model_answer && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{
+                    padding: '0.6rem',
+                    background: 'var(--bg-secondary, #f3f4f6)',
+                    borderRadius: 8,
+                    fontSize: '0.85rem',
+                    lineHeight: 1.5,
+                    color: 'var(--text-primary, #1f2937)',
+                    marginBottom: '0.4rem',
+                  }}>
+                    {modelAnswer.model_answer}
+                  </div>
+                  <button
+                    onClick={() => {
+                      const u = new SpeechSynthesisUtterance(modelAnswer.model_answer);
+                      u.lang = 'en-US';
+                      u.rate = 0.9;
+                      window.speechSynthesis.cancel();
+                      window.speechSynthesis.speak(u);
+                    }}
+                    style={{
+                      padding: '0.35rem 0.7rem',
+                      background: 'var(--primary, #6366f1)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '0.78rem',
+                      marginBottom: '0.4rem',
+                    }}
+                  >
+                    🔊 Listen to Model Answer
+                  </button>
+                  {modelAnswer.key_phrases.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.4rem' }}>
+                      {modelAnswer.key_phrases.map((phrase, i) => (
+                        <span key={i} style={{
+                          padding: '0.2rem 0.5rem',
+                          background: 'var(--primary, #6366f1)',
+                          color: '#fff',
+                          borderRadius: 12,
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                        }}>
+                          {phrase}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {modelAnswer.comparison_tip && (
+                    <div style={{
+                      padding: '0.4rem 0.6rem',
+                      background: 'var(--bg-secondary, #f3f4f6)',
+                      borderRadius: 8,
+                      fontSize: '0.78rem',
+                      color: 'var(--text-secondary, #6b7280)',
+                      fontStyle: 'italic',
+                    }}>
+                      💡 {modelAnswer.comparison_tip}
+                    </div>
+                  )}
+                </div>
+              )}
+              {modelAnswerExpanded && !modelAnswerLoading && (!modelAnswer || !modelAnswer.model_answer) && (
+                <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)', textAlign: 'center' }}>
+                  Unable to generate model answer right now.
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleReset}
               style={{
-                width: '100%',
-                padding: '0.5rem',
-                background: 'var(--bg-secondary, #f3f4f6)',
-                color: 'var(--text-primary, #1f2937)',
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-              }}
-            >
-              {t('tryAnother')}
             </button>
           </div>
         )}

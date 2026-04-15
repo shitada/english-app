@@ -1701,3 +1701,36 @@ async def test_speaking_journal_grammar_check_empty(client, mock_copilot):
     data = res.json()
     assert data["grammar_score"] == 0.0
     assert data["corrections"] == []
+
+
+@pytest.mark.integration
+async def test_speaking_journal_model_answer(client, mock_copilot):
+    """Model answer endpoint returns model response from LLM."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "model_answer": "I usually start my mornings with a cup of coffee while reading the news.",
+        "key_phrases": ["start my mornings", "while reading"],
+        "comparison_tip": "Try using more connecting phrases to link your ideas.",
+    })
+    res = await client.post("/api/pronunciation/speaking-journal/model-answer", json={
+        "prompt": "Describe your morning routine.",
+        "user_transcript": "I wake up and eat breakfast then go to work.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert "coffee" in data["model_answer"]
+    assert len(data["key_phrases"]) == 2
+    assert data["comparison_tip"] != ""
+
+
+@pytest.mark.integration
+async def test_speaking_journal_model_answer_empty(client, mock_copilot):
+    """Model answer handles empty LLM response gracefully."""
+    mock_copilot.ask_json = AsyncMock(return_value={})
+    res = await client.post("/api/pronunciation/speaking-journal/model-answer", json={
+        "prompt": "Tell me about your hobby.",
+        "user_transcript": "I like reading books.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["model_answer"] == ""
+    assert data["key_phrases"] == []

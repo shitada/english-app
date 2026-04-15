@@ -469,3 +469,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 474	b156b45	2026-04-15	163	45	84	98	390	1396	1396	pass	6.95	kept	Fix activity-history missing listening quiz and speaking journal data
 475	db39f03	2026-04-15T14:46:28+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add vocabulary upgrade suggestions to Speaking Journal results
 476	none	2026-04-15	479	328	30	204	1041	1400	1400	pass	5.65	discarded	Add Fluency Score card with animated ring chart to Home page
+477	b04e6c0	2026-04-15	219	134	372	112	837	1400	1400	pass	7.25	kept	Add grammar check feedback to Speaking Journal results

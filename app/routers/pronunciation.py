@@ -2448,3 +2448,62 @@ async def get_grammar_check(
         corrections=corrections,
         overall_feedback=str(result.get("overall_feedback", "")),
     )
+
+
+class ModelAnswerRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=2000)
+    user_transcript: str = Field(min_length=1, max_length=5000)
+
+
+class ModelAnswerResponse(BaseModel):
+    model_answer: str
+    key_phrases: list[str]
+    comparison_tip: str
+
+
+@router.post("/speaking-journal/model-answer", response_model=ModelAnswerResponse)
+async def get_model_answer(
+    req: ModelAnswerRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a model answer for the speaking journal prompt."""
+    copilot = get_copilot_service()
+
+    llm_prompt = (
+        "A learner was given this speaking prompt and recorded their response. "
+        "Generate a natural, fluent model answer to the same prompt.\n\n"
+        f"Prompt: \"{req.prompt}\"\n"
+        f"Learner's response: \"{req.user_transcript}\"\n\n"
+        "Return JSON with this exact structure:\n"
+        '{"model_answer": "A natural, fluent 3-5 sentence response to the prompt", '
+        '"key_phrases": ["useful phrase 1", "useful phrase 2", "useful phrase 3"], '
+        '"comparison_tip": "Brief tip comparing their attempt with the model"}\n\n'
+        "Rules:\n"
+        "- The model answer should be natural and conversational (B2-C1 level)\n"
+        "- Pick 3-4 key phrases from the model answer worth learning\n"
+        "- Keep the comparison tip encouraging and constructive (one sentence)\n"
+        "- Do NOT repeat the learner's exact words in the model answer"
+    )
+
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(
+            "You are an English speaking coach. Return ONLY valid JSON.",
+            llm_prompt,
+        ),
+        context="model_answer",
+    )
+
+    if not result or "model_answer" not in result:
+        return ModelAnswerResponse(
+            model_answer="",
+            key_phrases=[],
+            comparison_tip="Unable to generate model answer at this time.",
+        )
+
+    key_phrases = [str(p) for p in result.get("key_phrases", [])[:5]]
+
+    return ModelAnswerResponse(
+        model_answer=str(result.get("model_answer", "")),
+        key_phrases=key_phrases,
+        comparison_tip=str(result.get("comparison_tip", "")),
+    )
