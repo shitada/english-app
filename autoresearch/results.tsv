@@ -470,3 +470,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 475	db39f03	2026-04-15T14:46:28+09:00	0	0	0	0	0	0	0	pass	7.0	keep	Add vocabulary upgrade suggestions to Speaking Journal results
 476	none	2026-04-15	479	328	30	204	1041	1400	1400	pass	5.65	discarded	Add Fluency Score card with animated ring chart to Home page
 477	b04e6c0	2026-04-15	219	134	372	112	837	1400	1400	pass	7.25	kept	Add grammar check feedback to Speaking Journal results
+478	ce0bcfb	2026-04-15	175	89	490	207	961	1402	1402	pass	7.05	kept	Add model answer with TTS playback to Speaking Journal results

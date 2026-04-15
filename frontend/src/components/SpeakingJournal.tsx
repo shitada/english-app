@@ -23,6 +23,7 @@ export default function SpeakingJournal() {
   const [modelAnswer, setModelAnswer] = useState<ModelAnswerResult | null>(null);
   const [modelAnswerLoading, setModelAnswerLoading] = useState(false);
   const [modelAnswerExpanded, setModelAnswerExpanded] = useState(false);
+  const [previousEntry, setPreviousEntry] = useState<SpeakingJournalEntry | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -81,6 +82,7 @@ export default function SpeakingJournal() {
     const handleReset = useCallback(() => {
     reset();
     setSavedEntry(null);
+    setPreviousEntry(null);
     setPhase('idle');
     setTimeLeft(60);
     setVocabUpgrades([]);
@@ -94,6 +96,23 @@ export default function SpeakingJournal() {
     setModelAnswerExpanded(false);
     getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)).catch(() => {});
   }, [reset]);
+
+  const handleRetry = useCallback(() => {
+    setPreviousEntry(savedEntry);
+    reset();
+    setSavedEntry(null);
+    setPhase('idle');
+    setTimeLeft(60);
+    setVocabUpgrades([]);
+    setVocabLoading(false);
+    setVocabExpanded(false);
+    setGrammarResult(null);
+    setGrammarLoading(false);
+    setGrammarExpanded(false);
+    setModelAnswer(null);
+    setModelAnswerLoading(false);
+    setModelAnswerExpanded(false);
+  }, [reset, savedEntry]);
 
   if (loading || !prompt) return null;
 
@@ -274,6 +293,45 @@ export default function SpeakingJournal() {
                 </div>
               </div>
             </div>
+
+            {/* Retry Comparison Card */}
+            {previousEntry && (
+              <div style={{
+                marginBottom: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                background: 'var(--surface-alt, #f0f9ff)',
+                borderRadius: 8,
+                border: '1px solid var(--border, #e5e7eb)',
+              }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-secondary, #6b7280)', marginBottom: '0.35rem' }}>
+                  vs Previous Attempt
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  {(() => {
+                    const metrics: { label: string; prev: number; curr: number; lowerBetter?: boolean }[] = [
+                      { label: 'WPM', prev: previousEntry.wpm, curr: savedEntry.wpm },
+                      { label: 'Words', prev: previousEntry.word_count, curr: savedEntry.word_count },
+                      { label: 'Unique %', prev: previousEntry.unique_word_count > 0 ? Math.round((previousEntry.unique_word_count / previousEntry.word_count) * 100) : 0, curr: savedEntry.unique_word_count > 0 ? Math.round((savedEntry.unique_word_count / savedEntry.word_count) * 100) : 0 },
+                      { label: 'Fillers', prev: previousEntry.filler_word_count ?? 0, curr: savedEntry.filler_word_count ?? 0, lowerBetter: true },
+                    ];
+                    return metrics.map((m) => {
+                      const delta = m.curr - m.prev;
+                      const improved = m.lowerBetter ? delta < 0 : delta > 0;
+                      const same = delta === 0;
+                      return (
+                        <div key={m.label} style={{ fontSize: '0.75rem' }}>
+                          <span style={{ color: 'var(--text-secondary, #6b7280)' }}>{m.label}: </span>
+                          <span>{m.prev} → {m.curr} </span>
+                          <span style={{ color: same ? 'var(--text-secondary, #6b7280)' : improved ? '#22c55e' : '#ef4444', fontWeight: 600 }}>
+                            {same ? '—' : `${improved ? '↑' : '↓'}${Math.abs(delta)}`}
+                          </span>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            )}
 
             {/* Vocab Upgrade Panel */}
             <div style={{ marginBottom: '0.5rem' }}>
@@ -532,10 +590,40 @@ export default function SpeakingJournal() {
               )}
             </div>
 
-            <button
-              onClick={handleReset}
-              style={{
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={handleRetry}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  borderRadius: 8,
+                  border: '1px solid var(--primary, #6366f1)',
+                  background: 'transparent',
+                  color: 'var(--primary, #6366f1)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                }}
+              >
+                🔄 Try Again
+              </button>
+              <button
+                onClick={handleReset}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'var(--primary, #6366f1)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                }}
+              >
+                ➡️ New Prompt
+              </button>
+            </div>
           </div>
         )}
 

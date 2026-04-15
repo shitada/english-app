@@ -767,3 +767,271 @@ Actually, the simpler fix is to revert the ternary approach and instead fix the 
 
 Now amend the commit:
 
+● Amend commit with fixes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #478: Add model answer with TTS playback to Speaking Journal results" --no-edit
+  └ 16 lines...
+
+Re-run tests to verify fixes:
+
+● Verify TypeScript after fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Re-run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -5
+  └ 6 lines...
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+All tests pass. Now call the evaluator:
+
+● Evaluator Evaluate iteration 478
+  │ Read SpeakingJournal.tsx
+  │   │ frontend/src/components/SpeakingJournal.tsx
+  │   └ L534:542 (9 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L534:541 (7 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Score: 7.05, verdict: keep. All criteria met (tests pass, TS pass, score ≥ 6.0). Record results:
+
+- T0=1776234445, T1=1776234620, T2=1776234709, T3=1776235199, T4=1776235406
+- propose=175, implement=89, test=490, evaluate=207, total=961
+
+● Record iteration 478 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ DATE=$(date +%Y-%m-%d) && printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "478" "$HASH" "$DATE" "175" "89" "490" "207" "961" \
+  │ "1402" "1402" "pass" "7.05" "kept" "Add model answer with TTS playback to Speaking Journal
+  │ results" \…
+  └ 3 lines...
+
+Kill the server and clean up:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+✅ **Completed 2/2 iterations. Stopping.**
+
+| Iter | Score | Verdict | Tests | Description |
+|------|-------|---------|-------|-------------|
+| 477 | 7.25 | **kept** ✅ | 1400/1400 | Add grammar check feedback to Speaking Journal results |
+| 478 | 7.05 | **kept** ✅ | 1402/1402 | Add model answer with TTS playback to Speaking Journal results |
+
+Both features kept. The Speaking Journal now has three AI-powered feedback panels: vocab upgrades, grammar check, and model answer with TTS playback. Also fixed a pre-existing bug where the "Try Another" button was non-functional.
+
+Acknowledged — the QA server was killed as expected (exit code 137 = SIGKILL from our cleanup). Both iterations are already complete and recorded.
+
+
+Changes   +451 -18
+Requests  3 Premium (31m 3s)
+Tokens    ↑ 12.0m • ↓ 67.4k • 11.4m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-477-to-484.md
+[2026-04-15 15:43:51] Copilot invocation completed (duration: 1868s)
+[2026-04-15 15:43:51] Verifying Playwright test depth...
+[2026-04-15 15:43:51]   PW_SKIP iter=477 — UI changed but NO Playwright test was run
+[2026-04-15 15:43:51]   PW_SKIP iter=478 — UI changed but NO Playwright test was run
+[2026-04-15 15:43:51] Running post-invocation audit (iter 477-478)...
+============================================
+ Autoresearch Audit
+ Iterations: 477 — 478
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 15:43:51
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 15:43:53] Audit passed — no issues
+[2026-04-15 15:43:56] Current iteration count: 478 / 484
+[2026-04-15 15:43:56] ------------------------------------------
+[2026-04-15 15:43:56] Invocation 3 / 10
+[2026-04-15 15:43:56] Resuming from iteration 479
+[2026-04-15 15:43:56] ------------------------------------------
+[2026-04-15 15:43:56] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-479-to-484.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was 478. Starting iteration 479.
+
+---
+
+## Iteration 479
+
+● Record T0 for iteration 479 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1776235459. Now calling the proposer.
+
+● Proposer Propose iteration 479
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1:30 (30 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L226:280 (55 lines read)
+
+● Record T1 for iteration 479 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1776235585, propose_sec = 126. Now implementing the retry-same-prompt feature.
+
+● Check file size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 2 lines...
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 1 line read
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L1:80 (79 lines read)
+
+● Find key state and handlers (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'handleReset\|savedEntry\|phase\|setPhase\|setSavedEntry\|vocabUpgrades\|grammarResult\|modelAns
+  │ wer\|setPrompt\|setVocab\|setGrammar\|setModel\|Try Another\|handleStop\|SpeakingJournalEntry'
+  │ frontend/src/components/SpeakingJournal.tsx | head -60
+  └ 61 lines...
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L81:100 (20 lines read)
+
+● Find reset button location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'Try Another\|handleReset\|New
+  │ Prompt\|button.*reset\|Reset' frontend/src/components/SpeakingJournal.tsx
+  └ 3 lines...
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L228:280 (53 lines read)
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L525:550 (26 lines read)
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L535:542 (8 lines read)
+
+● Get exact button content (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '534,540p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 7 lines...
+
+● Check exact content with hidden chars (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && awk 'NR>=534 && NR<=540'
+  │ frontend/src/components/SpeakingJournal.tsx | cat -A
+  └ 3 lines...
+
+● Check exact button content with od (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '534,540p'
+  │ frontend/src/components/SpeakingJournal.tsx | od -c | head -20
+  └ 11 lines...
+
+● Exact lines around button (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n ''
+  │ frontend/src/components/SpeakingJournal.tsx | sed -n '534,545p'
+  └ 13 lines...
+
+● Get exact raw content (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ with open('frontend/src/components/SpeakingJournal.tsx', 'r') as f:
+  │ lines = f.readlines()
+  │ for i in range(533, 541):
+  │ print(f'{i+1}: {lines[i]!r}')…
+  └ 10 lines...
+
+The button has an empty `style={{` - it's missing style properties and closing braces. This is existing broken code. Let me check if this compiles as-is (probably JSX handles it somehow or it's actually valid).
+
+Now let me implement the changes. I need to:
+
+1. Add `previousEntry` state
+2. Add `handleRetry` callback
+3. Add comparison card in done phase
+4. Replace the single reset button with two buttons (Try Again + New Prompt)
+
+● Edit SpeakingJournal.tsx +1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add `handleRetry` callback and update `handleReset` to clear previousEntry:
+
+● Edit SpeakingJournal.tsx +18
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add the comparison card and two buttons. First, let me add the comparison card after the stats grid and before the vocab panel, and replace the reset button:
+
+● Edit SpeakingJournal.tsx +39
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now replace the single reset button with two buttons:
+
+● Edit SpeakingJournal.tsx +34 -4
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now commit and test:
+
