@@ -812,6 +812,67 @@ class TestGetAchievementsStudyDays:
         )
 
 
+    async def test_century_achievement_includes_listening_and_speaking(self, test_db):
+        """total_activities for 'century' must count listening_quiz_results and speaking_journal."""
+        from app.dal.dashboard import get_achievements
+
+        # Add listening quiz results
+        await test_db.execute(
+            "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score) "
+            "VALUES ('Test Quiz', 'beginner', 5, 4, 80.0)"
+        )
+        await test_db.execute(
+            "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score) "
+            "VALUES ('Test Quiz 2', 'intermediate', 5, 3, 60.0)"
+        )
+        # Add speaking journal entries
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, duration_seconds, word_count, unique_word_count, wpm) "
+            "VALUES ('Talk about food', 'I like sushi', 30, 3, 3, 6.0)"
+        )
+        await test_db.commit()
+
+        achievements_data = await get_achievements(test_db)
+        century = [a for a in achievements_data["achievements"] if a["id"] == "century"]
+        assert century[0]["progress"]["current"] >= 3, (
+            "century achievement should include listening quiz and speaking journal entries"
+        )
+
+    async def test_all_rounder_includes_listening_and_speaking(self, test_db):
+        """all_rounder modules_used must count listening and speaking_journal modules."""
+        from app.dal.dashboard import get_achievements
+
+        # Add one of each module type
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await test_db.execute(
+            "UPDATE conversations SET ended_at = datetime('now') WHERE id = ?", (cid,)
+        )
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (word, meaning, topic) VALUES ('hi', 'こんにちは', 'daily_life')"
+        )
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct) VALUES (1, 1)"
+        )
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score) VALUES ('hi', 'hi', 9.0)"
+        )
+        await test_db.execute(
+            "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score) "
+            "VALUES ('Test', 'beginner', 5, 5, 100.0)"
+        )
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, duration_seconds, word_count, unique_word_count, wpm) "
+            "VALUES ('Talk', 'hello world', 30, 2, 2, 4.0)"
+        )
+        await test_db.commit()
+
+        achievements_data = await get_achievements(test_db)
+        all_rounder = [a for a in achievements_data["achievements"] if a["id"] == "all_rounder"]
+        assert all_rounder[0]["progress"]["current"] >= 5, (
+            "all_rounder should count 5 modules: conversation, quiz, pronunciation, listening, speaking_journal"
+        )
+
+
 @pytest.mark.unit
 class TestGetMistakeJournal:
     async def test_empty_database(self, test_db):

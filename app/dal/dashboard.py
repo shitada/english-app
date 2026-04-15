@@ -755,7 +755,7 @@ _ACHIEVEMENT_DEFS: list[dict[str, Any]] = [
     {"id": "pron_25", "title": "Sound Scholar", "description": "Complete 25 pronunciation attempts", "emoji": "🎓", "category": "pronunciation", "target": 25},
     {"id": "pron_perfect", "title": "Perfect Score", "description": "Score 9.0+ on pronunciation", "emoji": "⭐", "category": "pronunciation", "target": 1},
     # General
-    {"id": "all_rounder", "title": "All-Rounder", "description": "Use all 3 learning modules", "emoji": "🎯", "category": "general", "target": 3},
+    {"id": "all_rounder", "title": "All-Rounder", "description": "Use all 5 learning modules", "emoji": "🎯", "category": "general", "target": 5},
     {"id": "dedicated_10", "title": "Dedicated", "description": "Study for 10 different days", "emoji": "📅", "category": "general", "target": 10},
     {"id": "century", "title": "Century", "description": "Complete 100 total activities", "emoji": "💯", "category": "general", "target": 100},
 ]
@@ -780,14 +780,16 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     """)
     study_days = streak_rows[0]["days"] if streak_rows else 0
 
-    # Batch 5 COUNT queries into 1
+    # Batch 7 COUNT queries into 1
     count_rows = await db.execute_fetchall("""
         SELECT
             (SELECT COUNT(*) FROM conversations WHERE ended_at IS NOT NULL) AS total_convs,
             (SELECT COUNT(*) FROM vocabulary_progress WHERE level >= 3) AS vocab_mastered,
             (SELECT COUNT(*) FROM pronunciation_attempts) AS total_pron,
             (SELECT COUNT(*) FROM pronunciation_attempts WHERE score >= 9.0) AS perfect_count,
-            (SELECT COUNT(*) FROM quiz_attempts) AS total_quiz
+            (SELECT COUNT(*) FROM quiz_attempts) AS total_quiz,
+            (SELECT COUNT(*) FROM listening_quiz_results) AS total_listening,
+            (SELECT COUNT(*) FROM speaking_journal) AS total_speaking
     """)
     cr = count_rows[0] if count_rows else {}
     total_convs = cr["total_convs"] if cr else 0
@@ -795,15 +797,19 @@ async def get_achievements(db: aiosqlite.Connection) -> dict[str, Any]:
     total_pron = cr["total_pron"] if cr else 0
     perfect_count = cr["perfect_count"] if cr else 0
     total_quiz = cr["total_quiz"] if cr else 0
+    total_listening = cr["total_listening"] if cr else 0
+    total_speaking = cr["total_speaking"] if cr else 0
 
     # Modules used
     modules_used = sum([
         1 if total_convs > 0 else 0,
         1 if total_quiz > 0 else 0,
         1 if total_pron > 0 else 0,
+        1 if total_listening > 0 else 0,
+        1 if total_speaking > 0 else 0,
     ])
 
-    total_activities = total_convs + total_quiz + total_pron
+    total_activities = total_convs + total_quiz + total_pron + total_listening + total_speaking
 
     # Reuse canonical streak calculation
     streak = await _calculate_streak(db)
