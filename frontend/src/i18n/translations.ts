@@ -47,6 +47,8 @@ export interface Translations {
   todayConversations: string;
   todayVocabReviews: string;
   todayPronunciation: string;
+  todayListening: string;
+  todaySpeakingJournal: string;
   recommendations: string;
   wordOfTheDay: string;
   listen: string;
@@ -144,6 +146,8 @@ export const en: Translations = {
   todayConversations: 'Conversations',
   todayVocabReviews: 'Vocab Reviews',
   todayPronunciation: 'Pronunciation',
+  todayListening: 'Listening',
+  todaySpeakingJournal: 'Speaking',
   recommendations: 'Recommendations',
   wordOfTheDay: 'Word of the Day',
   listen: 'Listen',
@@ -241,6 +245,8 @@ export const ja: Translations = {
   todayConversations: '会話',
   todayVocabReviews: '語彙復習',
   todayPronunciation: '発音',
+  todayListening: 'リスニング',
+  todaySpeakingJournal: 'スピーキング',
   recommendations: 'おすすめ',
   wordOfTheDay: '今日の単語',
   listen: '聴く',

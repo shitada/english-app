@@ -752,6 +752,8 @@ export interface TodayActivity {
   conversations: number;
   vocabulary_reviews: number;
   pronunciation_attempts: number;
+  listening_quizzes: number;
+  speaking_journal_entries: number;
 }
 
 export async function getTodayActivity(): Promise<TodayActivity> {

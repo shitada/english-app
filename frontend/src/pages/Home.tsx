@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award } from 'lucide-react';
+import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award, Headphones, PenTool } from 'lucide-react';
 import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getPhraseOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type PhraseOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
@@ -298,13 +298,15 @@ function DailyPracticeCard() {
       {insights && insights.weakest_area && <FocusAreaCTA area={insights.weakest_area} />}
 
       {todayActivity && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '1rem' }}>
           {([
             { labelKey: 'todayConversations' as const, count: todayActivity.conversations, icon: <MessageSquare size={16} /> },
             { labelKey: 'todayVocabReviews' as const, count: todayActivity.vocabulary_reviews, icon: <BookOpen size={16} /> },
             { labelKey: 'todayPronunciation' as const, count: todayActivity.pronunciation_attempts, icon: <Mic size={16} /> },
+            { labelKey: 'todayListening' as const, count: todayActivity.listening_quizzes, icon: <Headphones size={16} /> },
+            { labelKey: 'todaySpeakingJournal' as const, count: todayActivity.speaking_journal_entries, icon: <PenTool size={16} /> },
           ]).map(({ labelKey, count, icon }) => (
-            <div key={labelKey} style={{ flex: 1, textAlign: 'center', padding: '0.5rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
+            <div key={labelKey} style={{ flex: '1 1 calc(33% - 8px)', minWidth: 80, textAlign: 'center', padding: '0.5rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, marginBottom: 4, color: 'var(--text-secondary, #6b7280)' }}>
                 {icon}<span style={{ fontSize: '0.75rem' }}>{t(labelKey)}</span>
               </div>
@@ -543,6 +545,8 @@ function RecentlyPracticedCard() {
     conversation: { icon: MessageSquare, color: '#6366f1', bg: '#eef2ff' },
     pronunciation: { icon: Mic, color: '#f59e0b', bg: '#fef3c7' },
     vocabulary: { icon: BookOpen, color: '#10b981', bg: '#d1fae5' },
+    listening: { icon: Headphones, color: '#06b6d4', bg: '#cffafe' },
+    speaking_journal: { icon: PenTool, color: '#f43f5e', bg: '#ffe4e6' },
   };
 
   const relativeTime = (ts: string) => {

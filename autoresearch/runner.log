@@ -1038,3 +1038,212 @@ I should add assertions for the new modules:
 
 Now commit and test:
 
+[2026-04-15 10:14:40] Copilot invocation completed (duration: 1490s)
+[2026-04-15 10:14:40] Verifying Playwright test depth...
+[2026-04-15 10:14:40]   PW_NA iter=472 — no UI file changes, Playwright test not required
+[2026-04-15 10:14:40] Running post-invocation audit (iter 471-472)...
+============================================
+ Autoresearch Audit
+ Iterations: 471 — 472
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 10:14:40
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 471 472[0m
+[0;31m  Tester: FAIL — missing: 471 472[0m
+[0;31m  Evaluator: FAIL — missing: 471 472[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 10:14:41] Audit found 3 error(s) — fixes applied where possible
+[2026-04-15 10:14:44] Current iteration count: 472 / 474
+[2026-04-15 10:14:44] ------------------------------------------
+[2026-04-15 10:14:44] Invocation 5 / 10
+[2026-04-15 10:14:44] Resuming from iteration 473
+[2026-04-15 10:14:44] ------------------------------------------
+[2026-04-15 10:14:44] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-473-to-474.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Backlog is empty, last iteration was 472. Starting iteration 473. Let me get the timestamp and invoke the proposer.
+
+● Record T0 for iteration 473 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0 = 1776215710. Now calling the proposer subagent.
+
+● Proposer Propose iteration 473
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L300:316 (16 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L751:759 (9 lines read)
+
+Got the proposal. Let me record T1 and start implementing.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find TodayActivity interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'TodayActivity' frontend/src/api.ts
+  │ | head -10
+  └ 4 lines...
+
+● Find relevant sections in Home.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'iconMap\|DailyPracticeCard\|TodayA
+  │ ctivity\|todayConv\|todayVocab\|todayPron\|recently_practiced\|RecentlyPracticed'
+  │ frontend/src/pages/Home.tsx | head -30
+  └ 14 lines...
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L751:760 (9 lines read)
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L1:10 (10 lines read)
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L538:580 (43 lines read)
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L295:320 (26 lines read)
+
+Now let me check the i18n translations and verify backend fields:
+
+● Check backend fields (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'listening_quizzes\|speaking_journal' app/dal/dashboard.py | head -20
+  └ 21 lines...
+
+● Check existing icon imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'Headphones\|PenTool\|PenLine\|Pen\b' frontend/src/pages/Home.tsx | head -5
+  └ 1 line...
+
+● Check i18n keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'todayConv\|todayVocab\|todayPron\|todayListen\|todaySpeaking' frontend/src/pages/Home.tsx |
+  │ head -10
+  └ 4 lines...
+
+● Check translation keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'todayConv\|todayVocab\|todayPron\|todayListen\|todaySpeaking'
+  │ frontend/src/hooks/useTranslation.ts | head -10
+  └ 2 lines...
+
+● Find translation definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ 'todayConversations\|todayVocab\|todayPron' frontend/src/ | grep -v node_modules | head -10
+  └ 11 lines...
+
+● Read translations.ts
+  │ frontend/src/i18n/translations.ts
+  └ L237:250 (14 lines read)
+
+● Read translations.ts
+  │ frontend/src/i18n/translations.ts
+  └ L44:55 (12 lines read)
+
+● Read translations.ts
+  │ frontend/src/i18n/translations.ts
+  └ L140:150 (11 lines read)
+
+Now I have all the context. Let me implement the changes:
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit api.ts +2
+  └ frontend/src/api.ts
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit Home.tsx +2
+  └ frontend/src/pages/Home.tsx
+
+Now let me also update the activity tiles layout to handle 5 items better (flex-wrap), commit, and run tests:
+
+● Read Home.tsx
+  │ frontend/src/pages/Home.tsx
+  └ L300:318 (18 lines read)
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+Now record T2, commit, and run tests:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
