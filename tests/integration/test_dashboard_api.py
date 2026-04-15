@@ -245,7 +245,7 @@ class TestLearningInsights:
         assert data["weakest_area"] is None or isinstance(data["weakest_area"], str)
         assert isinstance(data["recommendations"], list)
         assert isinstance(data["weekly_comparison"], dict)
-        for module in ("conversations", "vocabulary", "pronunciation"):
+        for module in ("conversations", "vocabulary", "pronunciation", "listening", "speaking_journal"):
             assert "this_week" in data["weekly_comparison"][module]
             assert "last_week" in data["weekly_comparison"][module]
 

@@ -205,6 +205,8 @@ class WeeklyComparison(BaseModel):
     conversations: WeeklyCount
     vocabulary: WeeklyCount
     pronunciation: WeeklyCount
+    listening: WeeklyCount
+    speaking_journal: WeeklyCount
 
 
 class LearningInsightsResponse(BaseModel):
