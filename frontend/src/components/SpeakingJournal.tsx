@@ -13,6 +13,7 @@ export default function SpeakingJournal() {
   const [savedEntry, setSavedEntry] = useState<SpeakingJournalEntry | null>(null);
   const [history, setHistory] = useState<SpeakingJournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedEntryId, setExpandedEntryId] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -295,6 +296,76 @@ export default function SpeakingJournal() {
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Expandable history */}
+        {history.length > 0 && (
+          <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border, #e5e7eb)', paddingTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', marginBottom: '0.5rem', fontWeight: 600 }}>
+              {t('journalHistory')}
+            </div>
+            {[...history].slice(0, 10).map((entry) => {
+              const isExpanded = expandedEntryId === entry.id;
+              const fillerColor = (entry.filler_word_count ?? 0) === 0
+                ? '#22c55e'
+                : (entry.filler_word_count ?? 0) <= 2
+                  ? '#eab308'
+                  : '#ef4444';
+              const relTime = entry.created_at
+                ? new Date(entry.created_at + 'Z').toLocaleDateString()
+                : '';
+              return (
+                <div key={entry.id} style={{ marginBottom: '0.25rem' }}>
+                  <button
+                    onClick={() => setExpandedEntryId(isExpanded ? null : entry.id)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.35rem 0.5rem',
+                      background: isExpanded ? 'var(--bg-tertiary, #e5e7eb)' : 'var(--bg-secondary, #f3f4f6)',
+                      border: 'none',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-primary, #1f2937)',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>{entry.wpm} WPM</span>
+                    <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span style={{ color: fillerColor, fontWeight: 600 }}>
+                        {entry.filler_word_count ?? 0} {t('fillersLabel').toLowerCase()}
+                      </span>
+                      <span style={{ color: 'var(--text-secondary, #6b7280)' }}>{relTime}</span>
+                      <span>{isExpanded ? '▲' : '▼'}</span>
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div style={{
+                      padding: '0.5rem',
+                      background: 'var(--bg-secondary, #f3f4f6)',
+                      borderRadius: '0 0 6px 6px',
+                      fontSize: '0.75rem',
+                      marginTop: -2,
+                    }}>
+                      <div style={{ color: 'var(--text-secondary, #6b7280)', fontStyle: 'italic', marginBottom: '0.35rem' }}>
+                        {t('promptLabel')}: {entry.prompt}
+                      </div>
+                      <div style={{ marginBottom: '0.35rem', lineHeight: 1.4, color: 'var(--text-primary, #1f2937)' }}>
+                        {entry.transcript}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', color: 'var(--text-secondary, #6b7280)', fontSize: '0.7rem' }}>
+                        <span>{entry.word_count} {t('wordsLabel')}</span>
+                        <span>{entry.unique_word_count > 0 ? Math.round((entry.unique_word_count / entry.word_count) * 100) : 0}% {t('uniqueWords')}</span>
+                        <span>{Math.floor(entry.duration_seconds / 60)}:{String(entry.duration_seconds % 60).padStart(2, '0')} {t('durationLabel')}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

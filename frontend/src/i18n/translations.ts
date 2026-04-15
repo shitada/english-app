@@ -87,6 +87,9 @@ export interface Translations {
   savingLabel: string;
   wordsLabel: string;
   fillersLabel: string;
+  journalHistory: string;
+  promptLabel: string;
+  durationLabel: string;
   trendLabel: string;
 }
 
@@ -179,6 +182,9 @@ export const en: Translations = {
   savingLabel: 'Saving...',
   wordsLabel: 'words',
   fillersLabel: 'Fillers',
+  journalHistory: 'Past Entries',
+  promptLabel: 'Prompt',
+  durationLabel: 'duration',
   trendLabel: 'Trend',
 };
 
@@ -271,6 +277,9 @@ export const ja: Translations = {
   savingLabel: '保存中...',
   wordsLabel: '単語',
   fillersLabel: 'つなぎ言葉',
+  journalHistory: '過去のエントリー',
+  promptLabel: 'プロンプト',
+  durationLabel: '時間',
   trendLabel: 'トレンド',
 };
 
