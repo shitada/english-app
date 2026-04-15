@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, type SpeakingJournalEntry, type VocabUpgradeItem } from '../api';
+import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, getSpeakingJournalGrammarCheck, type SpeakingJournalEntry, type VocabUpgradeItem, type GrammarCorrection, type GrammarCheckResult } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -17,6 +17,9 @@ export default function SpeakingJournal() {
   const [vocabUpgrades, setVocabUpgrades] = useState<VocabUpgradeItem[]>([]);
   const [vocabLoading, setVocabLoading] = useState(false);
   const [vocabExpanded, setVocabExpanded] = useState(false);
+  const [grammarResult, setGrammarResult] = useState<GrammarCheckResult | null>(null);
+  const [grammarLoading, setGrammarLoading] = useState(false);
+  const [grammarExpanded, setGrammarExpanded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -80,6 +83,9 @@ export default function SpeakingJournal() {
     setVocabUpgrades([]);
     setVocabLoading(false);
     setVocabExpanded(false);
+    setGrammarResult(null);
+    setGrammarLoading(false);
+    setGrammarExpanded(false);
     getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)).catch(() => {});
   }, [reset]);
 
@@ -322,6 +328,97 @@ export default function SpeakingJournal() {
               {vocabExpanded && !vocabLoading && vocabUpgrades.length === 0 && (
                 <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)', textAlign: 'center' }}>
                   Great vocabulary! No upgrades suggested.
+                </div>
+              )}
+            </div>
+
+            {/* Grammar Check Panel */}
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => {
+                  if (grammarResult) {
+                    setGrammarExpanded(!grammarExpanded);
+                    return;
+                  }
+                  setGrammarLoading(true);
+                  setGrammarExpanded(true);
+                  getSpeakingJournalGrammarCheck(savedEntry.transcript)
+                    .then((r) => setGrammarResult(r))
+                    .catch(() => setGrammarResult(null))
+                    .finally(() => setGrammarLoading(false));
+                }}
+                disabled={grammarLoading}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  background: grammarExpanded ? 'var(--primary, #6366f1)' : 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: grammarLoading ? 'wait' : 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  opacity: grammarLoading ? 0.7 : 1,
+                }}
+              >
+                {grammarLoading ? '⏳ Checking...' : `📝 Check Grammar ${grammarExpanded ? '▲' : '▼'}`}
+              </button>
+              {grammarExpanded && grammarResult && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginBottom: '0.4rem',
+                    padding: '0.4rem 0.6rem',
+                    background: 'var(--bg-secondary, #f3f4f6)',
+                    borderRadius: 8,
+                  }}>
+                    <span style={{ fontWeight: 700, fontSize: '1.1rem', color: grammarResult.grammar_score >= 8 ? '#10b981' : grammarResult.grammar_score >= 5 ? '#f59e0b' : '#ef4444' }}>
+                      {grammarResult.grammar_score.toFixed(1)}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)' }}>/10 Grammar Score</span>
+                  </div>
+                  {grammarResult.corrections.length > 0 ? grammarResult.corrections.map((c: GrammarCorrection, i: number) => (
+                    <div key={i} style={{
+                      padding: '0.5rem',
+                      marginBottom: '0.35rem',
+                      background: 'var(--bg-secondary, #f3f4f6)',
+                      borderRadius: 8,
+                      fontSize: '0.8rem',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
+                        <span style={{ color: '#ef4444', textDecoration: 'line-through' }}>{c.original}</span>
+                        <span>→</span>
+                        <span style={{ color: '#10b981', fontWeight: 700 }}>{c.corrected}</span>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary, #6b7280)', fontSize: '0.75rem' }}>
+                        {c.explanation}
+                      </div>
+                    </div>
+                  )) : (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)', textAlign: 'center', padding: '0.3rem' }}>
+                      Perfect grammar! No corrections needed. 🎉
+                    </div>
+                  )}
+                  {grammarResult.overall_feedback && (
+                    <div style={{
+                      marginTop: '0.3rem',
+                      padding: '0.4rem 0.6rem',
+                      background: 'var(--bg-secondary, #f3f4f6)',
+                      borderRadius: 8,
+                      fontSize: '0.78rem',
+                      color: 'var(--text-secondary, #6b7280)',
+                      fontStyle: 'italic',
+                    }}>
+                      {grammarResult.overall_feedback}
+                    </div>
+                  )}
+                </div>
+              )}
+              {grammarExpanded && !grammarLoading && !grammarResult && (
+                <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)', textAlign: 'center' }}>
+                  Unable to check grammar right now.
                 </div>
               )}
             </div>

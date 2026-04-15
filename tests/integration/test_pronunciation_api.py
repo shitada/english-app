@@ -1662,3 +1662,42 @@ async def test_speaking_journal_vocab_upgrade_empty_result(client, mock_copilot)
     assert res.status_code == 200
     data = res.json()
     assert data["upgrades"] == []
+
+
+@pytest.mark.integration
+async def test_speaking_journal_grammar_check(client, mock_copilot):
+    """Grammar check endpoint returns corrections from LLM."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "grammar_score": 7.5,
+        "corrections": [
+            {
+                "original": "I go to store yesterday",
+                "corrected": "I went to the store yesterday",
+                "explanation": "Past tense needed and missing article 'the'",
+            },
+        ],
+        "overall_feedback": "Good effort, watch your verb tenses.",
+    })
+    res = await client.post("/api/pronunciation/speaking-journal/grammar-check", json={
+        "transcript": "I go to store yesterday and buy some food.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["grammar_score"] == 7.5
+    assert len(data["corrections"]) == 1
+    assert data["corrections"][0]["original"] == "I go to store yesterday"
+    assert data["corrections"][0]["corrected"] == "I went to the store yesterday"
+    assert data["overall_feedback"] == "Good effort, watch your verb tenses."
+
+
+@pytest.mark.integration
+async def test_speaking_journal_grammar_check_empty(client, mock_copilot):
+    """Grammar check handles empty LLM response gracefully."""
+    mock_copilot.ask_json = AsyncMock(return_value={})
+    res = await client.post("/api/pronunciation/speaking-journal/grammar-check", json={
+        "transcript": "Hello world.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["grammar_score"] == 0.0
+    assert data["corrections"] == []

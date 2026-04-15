@@ -1927,3 +1927,22 @@ export function getSpeakingJournalVocabUpgrade(transcript: string): Promise<{ up
     body: JSON.stringify({ transcript }),
   });
 }
+
+export interface GrammarCorrection {
+  original: string;
+  corrected: string;
+  explanation: string;
+}
+
+export interface GrammarCheckResult {
+  grammar_score: number;
+  corrections: GrammarCorrection[];
+  overall_feedback: string;
+}
+
+export function getSpeakingJournalGrammarCheck(transcript: string): Promise<GrammarCheckResult> {
+  return request<GrammarCheckResult>('/api/pronunciation/speaking-journal/grammar-check', {
+    method: 'POST',
+    body: JSON.stringify({ transcript }),
+  });
+}

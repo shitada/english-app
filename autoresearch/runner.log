@@ -200,3 +200,240 @@ Good. Now add an integration test for the new endpoint:
 
 Good, AsyncMock is already imported. Now commit and test:
 
+[2026-04-15 15:12:38] Copilot invocation completed (duration: 1939s)
+[2026-04-15 15:12:38] Verifying Playwright test depth...
+[2026-04-15 15:12:38] Running post-invocation audit (iter 475-476)...
+============================================
+ Autoresearch Audit
+ Iterations: 475 — 476
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 15:12:38
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 475[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 476[0m
+[0;31m  Tester: FAIL — missing: 475 476[0m
+[0;31m  Evaluator: FAIL — missing: 475 476[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 475 (db39f03)[0m
+
+============================================
+[0;31m  AUDIT: 4 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 15:12:40] Audit found 4 error(s) — fixes applied where possible
+[2026-04-15 15:12:43] Current iteration count: 476 / 484
+[2026-04-15 15:12:43] ------------------------------------------
+[2026-04-15 15:12:43] Invocation 2 / 10
+[2026-04-15 15:12:43] Resuming from iteration 477
+[2026-04-15 15:12:43] ------------------------------------------
+[2026-04-15 15:12:43] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-477-to-484.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+Starting iteration 477. No uncompleted backlog items found. Let me begin.
+
+● Record T0 for iteration 477 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Proposer Propose iteration 477
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L1700:1900 (201 lines read)
+  └ Read pronunciation.py
+      │ app/routers/pronunciation.py
+      └ L2200:2500 (175 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find vocab upgrade API pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "SpeakingJournalVocab\|vocab.*upgrade\|speaking.*journal" frontend/src/api.ts | head -20
+  └ 12 lines...
+
+● Find vocab-upgrade pattern in router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocab-upgrade\|vocab_upgrade\|speaking-journal" app/routers/pronunciation.py | head -30
+  └ 8 lines...
+
+● Read vocab-upgrade endpoint as template (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '2328,2380p'
+  │ app/routers/pronunciation.py
+  └ 48 lines...
+
+● Find vocab upgrade UI pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "Level
+  │ Up\|vocab.*upgrade\|vocabUpgrade\|showVocab\|VocabUpgrade"
+  │ frontend/src/components/SpeakingJournal.tsx | head -20
+  └ 13 lines...
+
+● Read vocab upgrade API function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1920,1935p' frontend/src/api.ts
+  └ 11 lines...
+
+● Find Pydantic models (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "VocabUpgradeRequest\|VocabUpgradeResponse\|VocabUpgradeItem" app/routers/pronunciation.py |
+  │ head -10
+  └ 10 lines...
+
+● Read vocab upgrade UI section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '260,340p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 82 lines...
+
+● Read Pydantic model definitions (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '2313,2326p'
+  │ app/routers/pronunciation.py
+  └ 14 lines...
+
+Now I have enough context. Let me implement the grammar check feature following the exact same pattern as vocab-upgrade.
+
+● Edit pronunciation.py +76
+  └ app/routers/pronunciation.py
+
+Now add the frontend API function and type:
+
+● Find VocabUpgradeItem type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "VocabUpgradeItem"
+  │ frontend/src/api.ts
+  └ 4 lines...
+
+● Read full VocabUpgrade section (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1917,1932p' frontend/src/api.ts
+  └ 14 lines...
+
+● Edit api.ts +19
+  └ frontend/src/api.ts
+
+Now update the SpeakingJournal component:
+
+● Check imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -5
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 5 lines...
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add state variables for grammar check:
+
+● Find state declarations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "vocabUpgrades\|vocabLoading\|vocabExpanded" frontend/src/components/SpeakingJournal.tsx | head
+  │ -6
+  └ 7 lines...
+
+● Edit SpeakingJournal.tsx +3
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now find where state is reset on new recording and add grammar reset:
+
+● Find reset location (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "setVocabUpgrades\(\[\]\)"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 1 line...
+
+● Find all setVocabUpgrades calls (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "setVocabUpgrades"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 5 lines...
+
+● Read reset area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '78,90p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 13 lines...
+
+● Edit SpeakingJournal.tsx +3
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add the Grammar Check panel right after the Vocab Upgrade panel. Let me find the exact location:
+
+● Find end of vocab panel (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '325,340p'
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 17 lines...
+
+● Edit SpeakingJournal.tsx +91
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add a test for the new endpoint:
+
+● Find existing vocab upgrade tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn "vocab.upgrade\|vocab-upgrade"
+  │ tests/ | grep -v __pycache__ | head -5
+  └ 5 lines...
+
+● Read vocab upgrade test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '1627,1670p'
+  │ tests/integration/test_pronunciation_api.py
+  └ 39 lines...
+
+● Check file length (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ tests/integration/test_pronunciation_api.py
+  └ 2 lines...
+
+● Check end of test file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -3
+  │ tests/integration/test_pronunciation_api.py
+  └ 4 lines...
+
+● Edit test_pronunciation_api.py +39
+  └ tests/integration/test_pronunciation_api.py
+
+Now commit and test:
+

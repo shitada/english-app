@@ -2372,3 +2372,79 @@ async def get_vocab_upgrade_suggestions(
             ))
 
     return VocabUpgradeResponse(upgrades=upgrades)
+
+
+class GrammarCheckRequest(BaseModel):
+    transcript: str = Field(min_length=1, max_length=5000)
+
+
+class GrammarCorrection(BaseModel):
+    original: str
+    corrected: str
+    explanation: str
+
+
+class GrammarCheckResponse(BaseModel):
+    grammar_score: float
+    corrections: list[GrammarCorrection]
+    overall_feedback: str
+
+
+@router.post("/speaking-journal/grammar-check", response_model=GrammarCheckResponse)
+async def get_grammar_check(
+    req: GrammarCheckRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Analyze a speaking journal transcript for grammar errors."""
+    copilot = get_copilot_service()
+
+    prompt = (
+        "Analyze this English speech transcript for grammar errors. "
+        "Find any grammatical mistakes, awkward phrasing, or incorrect word usage.\n\n"
+        f"Transcript: \"{req.transcript}\"\n\n"
+        "Return JSON with this exact structure:\n"
+        '{"grammar_score": 8.5, '
+        '"corrections": [{"original": "phrase with error", '
+        '"corrected": "corrected phrase", '
+        '"explanation": "why this is wrong"}], '
+        '"overall_feedback": "brief overall assessment"}\n\n'
+        "Rules:\n"
+        "- grammar_score is 0-10 (10 = perfect grammar)\n"
+        "- Only flag genuine grammar errors, not stylistic preferences\n"
+        "- Keep explanations concise (one sentence)\n"
+        "- If the transcript has perfect grammar, return score 10 with empty corrections\n"
+        "- Return at most 5 corrections, prioritizing the most important ones"
+    )
+
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(
+            "You are an English grammar teacher. Return ONLY valid JSON.",
+            prompt,
+        ),
+        context="grammar_check",
+    )
+
+    if not result or "grammar_score" not in result:
+        return GrammarCheckResponse(
+            grammar_score=0.0,
+            corrections=[],
+            overall_feedback="Unable to analyze grammar at this time.",
+        )
+
+    corrections = []
+    for item in result.get("corrections", [])[:5]:
+        if all(k in item for k in ("original", "corrected", "explanation")):
+            corrections.append(GrammarCorrection(
+                original=str(item["original"]),
+                corrected=str(item["corrected"]),
+                explanation=str(item["explanation"]),
+            ))
+
+    score = float(result.get("grammar_score", 0))
+    score = max(0.0, min(10.0, score))
+
+    return GrammarCheckResponse(
+        grammar_score=score,
+        corrections=corrections,
+        overall_feedback=str(result.get("overall_feedback", "")),
+    )
