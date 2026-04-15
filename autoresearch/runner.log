@@ -1035,3 +1035,229 @@ Now replace the single reset button with two buttons:
 
 Now commit and test:
 
+● Commit iteration 479 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #479: Add retry-same-prompt with improvement comparison to Speaking Journal"
+  └ 15 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1402 tests pass, TypeScript check passes. Now check if smoke test is needed and if frontend UI changed:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check smoke test and UI change need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" ; echo "---" ; git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+T2 = 1776235741. No smoke test needed (no backend changes). Frontend UI changed → **tester is mandatory**.
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+T3 = 1776235745, test_sec = 4 (tests ran earlier). Let me start the server and run the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 479
+  │ Read translations.ts
+  │   │ frontend/src/i18n/translations.ts
+  │   └ L270:310 (31 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L44:80 (37 lines read)
+
+QA passed with ux_score 8. Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 77 lines...
+
+● Get diff with no pager (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff HEAD~1 --
+  │ frontend/src/components/SpeakingJournal.tsx 2>&1 | head -100
+  └ 101 lines...
+
+Good. Now call the evaluator:
+
+● Evaluator Evaluate iteration 479
+  │ List directory frontend/src/i18n
+  │   └ 2 files found
+  └ List directory tests/e2e
+      └ 5 files found
+
+Evaluator score: 6.70, verdict: keep. Now record results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 479 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T0=1776235459; T1=1776235585; T2=1776235741; T3=1776235745; T4=1776236081; \
+  │ PROPOSE=$((T1-T0)); IMPL=$((T2-T1)); TEST=$((T3-T2)); EVAL=$((T4-T3)); TOTAL=$((T4-T0)); \
+  │ HASH=$(git rev-parse --short HEAD); \
+  │ DATE=$(date +%Y-%m-%d); \…
+  └ 8 lines...
+
+Row verified with pipes. Kill server and start iteration 480.
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+---
+
+## Iteration 480
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read uncompleted backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  │ 2>/dev/null; echo "EXIT:$?"
+  └ 2 lines...
+
+● Recent commits and T0 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5 && echo "---" && date
+  │ +%s
+  └ 8 lines...
+
+
+
+T0 = 1776236101. Backlog empty. Calling proposer for iteration 480.
+
+● Proposer Propose iteration 480
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1800:2100 (162 lines read)
+  └ Read Dashboard.tsx
+      │ frontend/src/pages/Dashboard.tsx
+      └ L80:200 (121 lines read)
+
+● Record T1 for iteration 480 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1 = 1776236370, propose_sec = 269. Implementing the Speaking Journal Progress dashboard card. Let me explore the existing code structure:
+
+● Check if API function exists (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'speaking-journal/progress\|SpeakingJournalProgress\|speaking_journal.*progress'
+  │ frontend/src/api.ts | head -10
+  └ 1 line...
+
+● Check dashboard components (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls frontend/src/components/dashboard/
+  └ 8 lines...
+
+● Find where to add the new card (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'SpeakingConfidence\|FluencyProgression\|ListeningProgress\|PronunciationProgress'
+  │ frontend/src/pages/Dashboard.tsx | head -20
+  └ 6 lines...
+
+● Find the backend endpoint (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'speaking-journal/progress'
+  │ app/routers/*.py
+  └ 2 lines...
+
+Good. Let me check the response model and the Dashboard.tsx area where I need to insert the new card:
+
+● Read Dashboard.tsx
+  │ frontend/src/pages/Dashboard.tsx
+  └ L120:160 (41 lines read)
+
+● Check response model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -A 20
+  │ 'SpeakingJournalProgressResponse' app/routers/pronunciation.py | head -25
+  └ 26 lines...
+
+● Check dashboard index exports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/dashboard/index.ts
+  └ 20 lines...
+
+Let me also check the SpeakingJournalDateStats and EntrySummary types, and look at an existing dashboard component for style reference:
+
+● Check sub-types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -B 2 -A 8
+  │ 'SpeakingJournalDateStats\|SpeakingJournalEntrySummary' app/routers/pronunciation.py | head -30
+  └ 29 lines...
+
+● Reference component style (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -60
+  │ frontend/src/components/dashboard/ListeningProgress.tsx
+  └ 61 lines...
+
+Now I have a clear picture. Let me create the component, add the API function, and wire it up:
+
+● Find API pattern to follow (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'getListeningProgress\|ListeningProgressResponse' frontend/src/api.ts | head -5
+  └ 4 lines...
+
+● Find end of api.ts for adding new types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 frontend/src/api.ts
+  └ 20 lines...
+
+Now let me implement all the changes:
+
+● Edit api.ts +32
+  └ frontend/src/api.ts
+
+Now create the component:
+
+● Create SpeakingJournalProgress.tsx +114
+  └ frontend/src/components/dashboard/SpeakingJournalProgress.tsx
+
+Now update the dashboard index and Dashboard.tsx:
+
+● Edit index.ts +1
+  └ frontend/src/components/dashboard/index.ts
+
+Now update Dashboard.tsx import and add the component:
+
+● Read Dashboard.tsx
+  │ frontend/src/pages/Dashboard.tsx
+  └ L5:5 (1 line read)
+
+● Edit Dashboard.tsx +1 -1
+  └ frontend/src/pages/Dashboard.tsx
+
+● Edit Dashboard.tsx +3
+  └ frontend/src/pages/Dashboard.tsx
+
+Now commit and test:
+

@@ -1959,3 +1959,35 @@ export function getSpeakingJournalModelAnswer(prompt: string, transcript: string
     body: JSON.stringify({ prompt, user_transcript: transcript }),
   });
 }
+
+export interface SpeakingJournalEntrySummary {
+  id: number;
+  word_count: number;
+  wpm: number;
+  duration_seconds: number;
+  vocabulary_diversity: number;
+  created_at: string;
+}
+
+export interface SpeakingJournalDateStats {
+  date: string;
+  count: number;
+  avg_wpm: number;
+  avg_vocabulary_diversity: number;
+}
+
+export interface SpeakingJournalProgressResponse {
+  total_entries: number;
+  total_speaking_time_seconds: number;
+  avg_wpm: number;
+  avg_vocabulary_diversity: number;
+  wpm_trend: string;
+  entries_by_date: SpeakingJournalDateStats[];
+  longest_entry: SpeakingJournalEntrySummary | null;
+  highest_wpm: SpeakingJournalEntrySummary | null;
+  best_vocabulary_diversity: SpeakingJournalEntrySummary | null;
+}
+
+export function getSpeakingJournalProgress(): Promise<SpeakingJournalProgressResponse> {
+  return request<SpeakingJournalProgressResponse>('/api/pronunciation/speaking-journal/progress');
+}
