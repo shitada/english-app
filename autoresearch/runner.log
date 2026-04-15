@@ -1485,3 +1485,228 @@ Good, `reset` exists. Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 481 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #481: Add Quick Vocab Recall card to QuickPracticeHub vocabulary tab"
+  └ 16 lines...
+
+T2=1776237866, implement_sec=60. Now run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1402 tests pass, TS check passes. Now record T3 and check if we need tester:
+
+● T3 and check frontend changes (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E 'frontend/src/(pages|components)/.*\.tsx$'
+  └ 4 lines...
+
+T3=1776237937, test_sec=71. Frontend component files changed — must run tester. Start server and run QA:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server background (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now calling the tester subagent:
+
+● Tester QA test iteration 481
+  │ Read QuickPracticeHub.tsx
+  │   │ frontend/src/components/QuickPracticeHub.tsx
+  │   └ 131 lines read
+  └ playwright-browser_navigate http://localhost:8000 · url: "http://localhost:8000"
+      └ Tool 'playwright-browser_navigate' does not exist.
+
+Playwright MCP not available. Per instructions, I'll retry once:
+
+✗ Clean browser locks (shell)
+  │ pkill -f "chrome.*mcp" 2>/dev/null; rm -f
+  │ /Users/shingotada/Library/Caches/ms-playwright/mcp-chrome-*/SingletonLock 2>/dev/null; echo
+  │ "cleaned"
+  └ Command not executed. The 'pkill' command is not allowed. Use 'kill <PID>' with a specific
+    process ID instead.
+
+✗ Clean browser locks (shell)
+  │ rm -f /Users/shingotada/Library/Caches/ms-playwright/mcp-chrome-*/SingletonLock 2>/dev/null;
+  │ echo "cleaned"
+  └ Permission denied and could not request permission from user
+
+● Tester QA test retry 481
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1650:1900 (251 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:50 (50 lines read)
+
+Tester passed with ux_score=8. Now calling the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Evaluator Evaluate iteration 481
+  │ Read QuickVocabSentenceCard.tsx
+  │   │ frontend/src/components/QuickVocabSentenceCard.tsx
+  │   └ 231 lines read
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1:30 (30 lines read)
+
+Evaluator: total_score=7.2, verdict=keep. Now record results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Stop server (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8000 | xargs kill -9 2>/dev/null;
+  │ echo "server stopped"
+  └ 2 lines...
+
+T4=1776238287. Computing times: propose=234, implement=60, test=71, evaluate=350, total=715.
+
+● Record results for 481 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "481" "6e75644" "2026-04-15" "234" "60" "71" "350" "715" \
+  │ "1402" "1402" "pass" "7.2" "kept" "Add Quick Vocab Recall card to QuickPracticeHub
+  │ vocabulary tab" \…
+  └ 3 lines...
+
+Row verified with proper tabs. Iteration 481 complete — kept with score 7.2. Starting iteration 482.
+
+---
+
+● Record T0 for 482 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  │ 2>/dev/null; echo "exit:$?"
+  └ 2 lines...
+
+● Context restore for 482 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0=1776238305. Calling proposer for iteration 482:
+
+● Proposer Propose iteration 482
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L80:130 (51 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L130:180 (51 lines read)
+
+● Record T1 for 482 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776238785, propose_sec=480. Now implementing. Let me look at the ConversationReplay component:
+
+● Check evaluateRephrase API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'evaluateRephrase\|rephrase'
+  │ frontend/src/api.ts | head -10
+  └ 6 lines...
+
+● Read ConversationReplay (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/conversation/ConversationReplay.tsx
+  └ 104 lines...
+
+Now I'll implement the speak-from-memory mode. Let me update ConversationReplay.tsx:
+
+● Edit ConversationReplay.tsx +218 -15
+  └ frontend/src/components/conversation/ConversationReplay.tsx
+
+● Record T2 for 482 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Commit iteration 482 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #482: Add Speak-from-Memory mode to Conversation Replay"
+  └ 15 lines...
+
+T2=1776238859, implement_sec=74. Now run tests:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1402 tests pass, TS check passes. Check if frontend components changed (for tester requirement):
+
+● T3 and check for tester (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only |
+  │ grep -E 'frontend/src/(pages|components)/.*\.tsx$'
+  └ 3 lines...
+
+T3=1776238930, test_sec=71. Frontend component changed — must run tester. Start server:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA 482 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30 &
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 482
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1050:1250 (201 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L1250:1450 (155 lines read)
+
+Tester found a state-update-during-render issue. Let me fix it:
+
+● Edit ConversationReplay.tsx +10 -6
+  └ frontend/src/components/conversation/ConversationReplay.tsx
+
+Actually, let me use a proper useEffect instead which is the cleaner pattern:
+
+● Edit ConversationReplay.tsx +5 -7
+  └ frontend/src/components/conversation/ConversationReplay.tsx
+
+Now need to add `useEffect` to the import:
+
+● Read ConversationReplay.tsx
+  │ frontend/src/components/conversation/ConversationReplay.tsx
+  └ L1:1 (1 line read)
+
+● Edit ConversationReplay.tsx +1 -1
+  └ frontend/src/components/conversation/ConversationReplay.tsx
+

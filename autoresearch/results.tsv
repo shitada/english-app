@@ -473,3 +473,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 478	ce0bcfb	2026-04-15	175	89	490	207	961	1402	1402	pass	7.05	kept	Add model answer with TTS playback to Speaking Journal results
 479	6b38346	2026-04-15	126	156	4	336	622	1402	1402	pass	6.7	kept	Add retry-same-prompt with improvement comparison to Speaking Journal
 480	1174208	2026-04-15	269	155	0	389	813	1402	1402	pass	7.0	kept	Add Speaking Journal Progress card to Dashboard
+481	6e75644	2026-04-15	234	60	71	350	715	1402	1402	pass	7.2	kept	Add Quick Vocab Recall card to QuickPracticeHub vocabulary tab
