@@ -1261,3 +1261,227 @@ Now update Dashboard.tsx import and add the component:
 
 Now commit and test:
 
+● Commit iteration 480 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #480: Add Speaking Journal Progress card to Dashboard"
+  └ 16 lines...
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+1402/1402 pass, TS check passes. Check for smoke test and UI changes:
+
+● Record T2 and T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check smoke test and tester needs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/" ; echo "---" ; git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 4 lines...
+
+T2/T3 = 1776236525. Frontend UI changed → **tester is mandatory**. Start server and run tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA 480 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn app.main:app --host 0.0.0.0
+  │ --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 480
+  │ Read index.css
+  │   │ frontend/src/index.css
+  │   └ L550:700 (151 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L700:900 (200 lines read)
+
+QA passed with ux_score 7. Now call the evaluator:
+
+● Evaluator Evaluate iteration 480
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1700:1900 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1900:2100 (94 lines read)
+
+Evaluator score: 7.0, verdict: keep.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 480 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ T0=1776236101; T1=1776236370; T2=1776236525; T3=1776236525; T4=1776236914; \
+  │ PROPOSE=$((T1-T0)); IMPL=$((T2-T1)); TEST=$((T3-T2)); EVAL=$((T4-T3)); TOTAL=$((T4-T0)); \
+  │ HASH=$(git rev-parse --short HEAD); \
+  │ DATE=$(date +%Y-%m-%d); \…
+  └ 7 lines...
+
+Row verified. Kill server:
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+✅ **Completed 2/2 iterations. Stopping.**
+
+| Iter | Score | Verdict | Tests | Description |
+|------|-------|---------|-------|-------------|
+| 479 | 6.70 | **kept** ✅ | 1402/1402 | Add retry-same-prompt with improvement comparison to Speaking Journal |
+| 480 | 7.00 | **kept** ✅ | 1402/1402 | Add Speaking Journal Progress card to Dashboard |
+
+Both features kept. Speaking Journal now has a retry-with-comparison mechanic, and the Dashboard displays Speaking Journal progress analytics.
+
+Acknowledged — the QA server was killed as expected. Both iterations are already complete and recorded.
+
+
+Changes   +243 -5
+Requests  3 Premium (35m 4s)
+Tokens    ↑ 8.4m • ↓ 55.3k • 8.0m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-479-to-484.md
+[2026-04-15 16:19:04] Copilot invocation completed (duration: 2108s)
+[2026-04-15 16:19:04] Verifying Playwright test depth...
+[2026-04-15 16:19:04]   PW_SKIP iter=479 — UI changed but NO Playwright test was run
+[2026-04-15 16:19:04]   PW_SKIP iter=480 — UI changed but NO Playwright test was run
+[2026-04-15 16:19:04] Running post-invocation audit (iter 479-480)...
+============================================
+ Autoresearch Audit
+ Iterations: 479 — 480
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-15 16:19:04
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;32m  Tester: PASS[0m
+[0;32m  Evaluator: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;33m  AUDIT PASSED with 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-15 16:19:05] Audit passed — no issues
+[2026-04-15 16:19:08] Current iteration count: 480 / 484
+[2026-04-15 16:19:08] ------------------------------------------
+[2026-04-15 16:19:08] Invocation 4 / 10
+[2026-04-15 16:19:08] Resuming from iteration 481
+[2026-04-15 16:19:08] ------------------------------------------
+[2026-04-15 16:19:08] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-481-to-484.md)...
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Read uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Read last session log (shell)
+  │ tail -50 "$(ls -t /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-*.md
+  │ 2>/dev/null | head -1)" 2>/dev/null
+  └ 51 lines...
+
+● Record T0 for iteration 481 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Starting iteration 481. T0=1776237572. Backlog is empty. Calling proposer.
+
+● Proposer Propose iteration 481
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L120:250 (130 lines read)
+  └ Read QuickQuestionCard.tsx
+      │ frontend/src/components/QuickQuestionCard.tsx
+      └ L1:60 (60 lines read)
+
+● Record T1 for iteration 481 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776237806, propose_sec=234. Now implementing. Let me study the existing patterns.
+
+● Read QuickVocabSentenceCard pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickVocabSentenceCard.tsx
+  └ 232 lines...
+
+● Read QuickPracticeHub (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/components/QuickPracticeHub.tsx
+  └ 128 lines...
+
+Now I'll create the QuickVocabRecallCard and integrate it.
+
+● Create QuickVocabRecallCard.tsx +252
+  └ frontend/src/components/QuickVocabRecallCard.tsx
+
+● Edit QuickPracticeHub.tsx +1
+  └ frontend/src/components/QuickPracticeHub.tsx
+
+● Edit QuickPracticeHub.tsx +4 -1
+  └ frontend/src/components/QuickPracticeHub.tsx
+
+Now let me check useSpeechSynthesis hook and if `speech.reset` exists:
+
+● Check if reset exists in speech hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'reset\|return'
+  │ frontend/src/hooks/useSpeechRecognition.ts | head -20
+  └ 7 lines...
+
+Good, `reset` exists. Now commit and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

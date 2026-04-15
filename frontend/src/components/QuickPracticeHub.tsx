@@ -7,6 +7,7 @@ import QuickGrammarCard from './QuickGrammarCard';
 import QuickRephraseCard from './QuickRephraseCard';
 import QuickTransformCard from './QuickTransformCard';
 import QuickVocabSentenceCard from './QuickVocabSentenceCard';
+import QuickVocabRecallCard from './QuickVocabRecallCard';
 import QuickOpinionCard from './QuickOpinionCard';
 import QuickQuestionCard from './QuickQuestionCard';
 import QuickStoryCard from './QuickStoryCard';
@@ -119,7 +120,10 @@ export default function QuickPracticeHub() {
           </>
         )}
         {activeTab === 'vocabulary' && (
-          <QuickVocabSentenceCard />
+          <>
+            <QuickVocabSentenceCard />
+            <QuickVocabRecallCard />
+          </>
         )}
       </div>
     </div>
