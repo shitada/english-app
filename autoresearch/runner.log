@@ -864,3 +864,177 @@ Simple — the test expects 3 modules, now we have 5. Let me fix it.
 ● Edit test_dashboard_dal.py +1 -1
   └ tests/unit/test_dashboard_dal.py
 
+● Amend commit with test fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit --amend -m
+  │ "autoresearch #469: Include listening quiz and speaking journal in Session Analytics
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" --no-edit 2>&1 | tail -3
+  └ 4 lines...
+
+● Re-run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1394 tests pass, TS check passed. Now run smoke test since we changed `app/dal/dashboard.py`.
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1 | tail -15
+  └ 16 lines...
+
+All passed. Record T3 and call evaluator.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -200
+  └ 201 lines...
+
+● Evaluator Evaluate iteration 469
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1100:1250 (151 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+Evaluator: 7.5, keep. Let me record T4 and the results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record results for iteration 469 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "469" "$HASH" "2026-04-15" "183" "47" "169" "130" "529" \
+  │ "1394" "1394" "pass" "7.5" "kept" "Include listening quiz and speaking journal in Session
+  │ Analytics" \…
+  └ 3 lines...
+
+Good, row is well-formed. Now iteration 470.
+
+● Record T0 for iteration 470 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read last 20 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv
+  └ 21 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]' autoresearch/backlog.md
+  └ 1 line...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 470
+  │ Read translations.ts
+  │   │ frontend/src/i18n/translations.ts
+  │   └ L1:50 (50 lines read)
+  └ Read translations.ts
+      │ frontend/src/i18n/translations.ts
+      └ L50:200 (151 lines read)
+
+Good proposal. Let me record T1 and implement.
+
+● Record T1 for iteration 470 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Read _get_weekly_comparison (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '570,650p' app/dal/dashboard.py
+  └ 82 lines...
+
+● Find WeeklyComparison in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "WeeklyComparison\|WeeklyModule"
+  │ frontend/src/api.ts | head -10
+  └ 7 lines...
+
+● Find weekly progress in Home.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "WeeklyProgress\|weekly_comparison\|weeklyConv\|weeklyVocab\|weeklyPron"
+  │ frontend/src/pages/Home.tsx | head -20
+  └ 4 lines...
+
+● Read WeeklyComparison interface (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '698,710p' frontend/src/api.ts
+  └ 14 lines...
+
+● Read WeeklyProgressSection (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '68,100p'
+  │ frontend/src/pages/Home.tsx
+  └ 34 lines...
+
+● Find translation keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "weeklyConversations\|weeklyVocabReviews\|weeklyPronunciation\|weeklyListening\|weeklySpeaking"
+  │ frontend/src/i18n/translations.ts | head -10
+  └ 10 lines...
+
+Now I have the full picture. Let me implement all changes.
+
+● Edit Home.tsx +3 -3
+  └ frontend/src/pages/Home.tsx
+
+● Edit api.ts +2
+  └ frontend/src/api.ts
+
+● Edit dashboard.py +14
+  └ app/dal/dashboard.py
+
+Now update the card width to handle 5 modules and update translations.
+
+● Check card style (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '82,84p' frontend/src/pages/Home.tsx
+  └ 4 lines...
+
+● Check card container (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '78,81p' frontend/src/pages/Home.tsx
+  └ 5 lines...
+
+The flex:1 + flexWrap approach needs a minWidth so cards wrap properly:
+
+● Edit Home.tsx +1 -1
+  └ frontend/src/pages/Home.tsx
+
+Now add translations:
+
+● Check translation interface area (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '29,32p'
+  │ frontend/src/i18n/translations.ts
+  └ 5 lines...
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+Now check if there's a test for weekly comparison:
+
+● Check for existing weekly comparison tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "weekly_comparison\|_get_weekly_comparison" tests/unit/test_dashboard_dal.py | head -10
+  └ 11 lines...
+
+● Check existing assertions for defaults (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '429,435p'
+  │ tests/unit/test_dashboard_dal.py
+  └ 8 lines...
+
+I should add assertions for the new modules:
+
+● Edit test_dashboard_dal.py +2
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+

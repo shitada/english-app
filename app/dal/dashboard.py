@@ -591,6 +591,20 @@ async def _get_weekly_comparison(db: aiosqlite.Connection) -> dict[str, Any]:
             FROM pronunciation_attempts
             WHERE created_at >= date('now', '-13 days')
         """),
+        ("listening", """
+            SELECT
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(created_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM listening_quiz_results
+            WHERE created_at >= date('now', '-13 days')
+        """),
+        ("speaking_journal", """
+            SELECT
+                COALESCE(SUM(CASE WHEN date(created_at) >= date('now', '-6 days') THEN 1 ELSE 0 END), 0) as this_week,
+                COALESCE(SUM(CASE WHEN date(created_at) < date('now', '-6 days') THEN 1 ELSE 0 END), 0) as last_week
+            FROM speaking_journal
+            WHERE created_at >= date('now', '-13 days')
+        """),
     ]
     result = {}
     for module, query in queries:

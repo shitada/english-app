@@ -704,6 +704,8 @@ export interface WeeklyComparison {
   conversations: WeeklyModuleComparison;
   vocabulary: WeeklyModuleComparison;
   pronunciation: WeeklyModuleComparison;
+  listening: WeeklyModuleComparison;
+  speaking_journal: WeeklyModuleComparison;
 }
 
 export interface LearningInsights {

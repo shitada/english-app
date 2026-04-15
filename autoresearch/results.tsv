@@ -462,3 +462,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 466	484c0a4	2026-04-15	202	37	67	202	508	1390	1390	pass	6.2	kept	Add expandable Speaking Journal history with transcript review
 467	bc5ebd4	2026-04-15	394	70	57	73	594	1392	1392	pass	7.55	kept	Include speaking journal in skill radar Speaking score and fix broken route
 468	2297f5e	2026-04-15	249	93	76	109	527	1394	1394	pass	7.55	kept	Include speaking journal and listening quiz data in weekly report
+469	dced2a4	2026-04-15	183	47	169	130	529	1394	1394	pass	7.5	kept	Include listening quiz and speaking journal in Session Analytics

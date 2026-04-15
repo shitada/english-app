@@ -67,17 +67,17 @@ function ModuleStrengthsSection({ strengths }: { strengths: { conversation: numb
 
 function WeeklyProgressSection({ comparison }: { comparison: LearningInsights['weekly_comparison'] }) {
   const { t } = useI18n();
-  const modules = (['conversations', 'vocabulary', 'pronunciation'] as const);
-  const labelKeys: Record<string, 'weeklyConversations' | 'weeklyVocabReviews' | 'weeklyPronunciation'> = { conversations: 'weeklyConversations', vocabulary: 'weeklyVocabReviews', pronunciation: 'weeklyPronunciation' };
+  const modules = (['conversations', 'vocabulary', 'pronunciation', 'listening', 'speaking_journal'] as const);
+  const labelKeys: Record<string, 'weeklyConversations' | 'weeklyVocabReviews' | 'weeklyPronunciation' | 'weeklyListening' | 'weeklySpeakingJournal'> = { conversations: 'weeklyConversations', vocabulary: 'weeklyVocabReviews', pronunciation: 'weeklyPronunciation', listening: 'weeklyListening', speaking_journal: 'weeklySpeakingJournal' };
   return (
     <div style={{ marginBottom: '1rem' }}>
       <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary, #6b7280)' }}>{t('weeklyProgress')}</h4>
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
         {modules.map(mod => {
           const data = comparison[mod];
           const diff = data.this_week - data.last_week;
           return (
-            <div key={mod} style={{ flex: 1, background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, padding: '0.5rem', textAlign: 'center' }}>
+            <div key={mod} style={{ flex: '1 1 30%', minWidth: '100px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, padding: '0.5rem', textAlign: 'center' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #6b7280)', marginBottom: 4 }}>{t(labelKeys[mod])}</div>
               <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{data.this_week}</div>
               <div style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>

@@ -29,6 +29,8 @@ export interface Translations {
   weeklyConversations: string;
   weeklyVocabReviews: string;
   weeklyPronunciation: string;
+  weeklyListening: string;
+  weeklySpeakingJournal: string;
   vsLastWeek: string;
   focusOnWeakest: string;
   setDailyGoal: string;
@@ -124,6 +126,8 @@ export const en: Translations = {
   weeklyConversations: 'Conversations',
   weeklyVocabReviews: 'Vocab Reviews',
   weeklyPronunciation: 'Pronunciation',
+  weeklyListening: 'Listening',
+  weeklySpeakingJournal: 'Speaking',
   vsLastWeek: 'vs last wk',
   focusOnWeakest: 'Focus on {label} — your weakest area →',
   setDailyGoal: 'Set a Daily Goal',
@@ -219,6 +223,8 @@ export const ja: Translations = {
   weeklyConversations: '会話',
   weeklyVocabReviews: '語彙復習',
   weeklyPronunciation: '発音',
+  weeklyListening: 'リスニング',
+  weeklySpeakingJournal: 'スピーキング',
   vsLastWeek: '先週比',
   focusOnWeakest: '{label}に集中 — 一番弱い分野 →',
   setDailyGoal: '日課の目標を設定',

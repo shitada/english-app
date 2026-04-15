@@ -431,6 +431,8 @@ class TestGetLearningInsights:
         assert result["weekly_comparison"]["conversations"]["this_week"] == 0
         assert result["weekly_comparison"]["vocabulary"]["this_week"] == 0
         assert result["weekly_comparison"]["pronunciation"]["this_week"] == 0
+        assert result["weekly_comparison"]["listening"]["this_week"] == 0
+        assert result["weekly_comparison"]["speaking_journal"]["this_week"] == 0
 
     async def test_strongest_weakest_identification(self, test_db):
         """Correctly identifies strongest and weakest areas."""
