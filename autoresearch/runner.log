@@ -1247,3 +1247,196 @@ Now record T2, commit, and run tests:
   │ date +%s
   └ 2 lines...
 
+● Commit changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #473: Add listening & speaking journal to Home page today activity and recent icons"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1396 tests passed, TypeScript check passed. Let me record T3 and check if frontend UI files changed (for tester requirement):
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "frontend/src/(pages|components)/.*\.tsx$"
+  └ 2 lines...
+
+Proposal type is "bugfix" and frontend page changed. Per the decision matrix: proposal is `bugfix` → tester skip is OK. But let me be safe and check — the proposal was actually labeled as "bugfix". Let me proceed with the evaluator. The tester is optional for bugfix type.
+
+Now I need to start the server for smoke test (since we didn't change dal/routers/database). Let me check:
+
+● Check if smoke test needed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --name-only | grep -E
+  │ "database\.py|app/routers/|app/dal/"
+  └ 1 line...
+
+No backend changes — smoke test not needed. Now call the evaluator:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  └ 72 lines...
+
+● Get code-only diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 -- frontend/src/ app/
+  └ 71 lines...
+
+● Get diff piped to cat (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 -- frontend/src/ app/ | cat
+  └ 84 lines...
+
+Good. Now call the evaluator:
+
+● Evaluator Evaluate iteration 473
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L64:140 (77 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L540:640 (101 lines read)
+
+Evaluator returned total_score 7.5, verdict keep. Let me record T4 and write results:
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T0=1776215710, T1=1776215883, T2=1776215936, T3=1776216004, T4=1776216182
+
+propose_sec=173, implement_sec=53, test_sec=68, evaluate_sec=178, total_sec=472
+
+● Record iteration 473 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse --short HEAD) &&
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "473" "$HASH" "2026-04-15" "173" "53" "68" "178" "472" \
+  │ "1396" "1396" "pass" "7.5" "kept" "Add listening and speaking journal to Home page today
+  │ activity and recent icons" \…
+  └ 3 lines...
+
+✅ Iteration 473 complete. Checklist:
+- ✅ Called proposer → received JSON
+- ✅ Called evaluator → total_score 7.5
+- ✅ Tester check: bugfix type → skip OK
+
+Now starting iteration 474.
+
+● Record T0 for iteration 474 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore for iteration 474 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20 autoresearch/results.tsv && echo
+  │ "---" && grep '^- \[ \]' autoresearch/backlog.md 2>/dev/null; echo "---" && git log --oneline -5
+  └ 28 lines...
+
+T0=1776216195. Backlog empty. Calling proposer for iteration 474:
+
+● Proposer Propose iteration 474
+  │ List directory tests/integration
+  │   └ 13 files found
+  └ List directory tests/unit
+      └ 16 files found
+
+Good proposal. Let me record T1 and investigate the code:
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find router model (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'DailyActivityItem\|activity.history\|activity-history' app/routers/dashboard.py | head -20
+  └ 5 lines...
+
+● Find frontend type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'ActivityHistory\|activity-history\|activityHistory' frontend/src/api.ts | head -10
+  └ 4 lines...
+
+● Find daily activity function (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'get_daily_activity\|daily_activity\|activity.history\|activity-history' app/dal/dashboard.py |
+  │ head -20
+  └ 3 lines...
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L84:110 (27 lines read)
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L538:555 (18 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L199:265 (67 lines read)
+
+Now I can see the issues clearly. Let me implement all three fixes:
+
+✗ Edit dashboard.py
+  │ app/dal/dashboard.py
+  └ No match found
+
+● Edit dashboard.py
+  └ app/dal/dashboard.py
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L241:260 (20 lines read)
+
+● Edit dashboard.py +2 -1
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +2
+  └ app/routers/dashboard.py
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+● Edit dashboard.py +7 -1
+  └ app/dal/dashboard.py
+
+● Edit dashboard.py +1
+  └ app/dal/dashboard.py
+
+Now let me also check if the heatmap component uses this data and needs updating:
+
+● Check Dashboard heatmap usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'activityHistory\|activity_history\
+  │ |ActivityHistory\|heatmap\|conversations.*pronunciation\|vocabulary_reviews'
+  │ frontend/src/pages/Dashboard.tsx | head -20
+  └ 1 line...
+
+● Find heatmap usage (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ 'getActivityHistory\|ActivityHistoryResponse\|activity-history' frontend/src/ | grep -v
+  │ node_modules | head -20
+  └ 4 lines...
+
+● Find where activity history is consumed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ 'getActivityHistory\|activityHistory\|activity_history' frontend/src/pages/
+  │ frontend/src/components/ | head -20
+  └ 1 line...
+
+● Search broader (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ 'ActivityHistory\|activity.history\|heatmap' frontend/src/ | grep -v node_modules | head -20
+  └ 4 lines...
+
+The API endpoint exists but isn't currently consumed by any frontend component. The fix is backend-only + type alignment. Let me record T2, commit, and test:
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+

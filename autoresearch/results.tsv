@@ -465,3 +465,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 469	dced2a4	2026-04-15	183	47	169	130	529	1394	1394	pass	7.5	kept	Include listening quiz and speaking journal in Session Analytics
 471	none	2026-04-15	239	59	68	337	703	1394	1394	pass	6.2	discarded	Add filler word highlighting in Speaking Journal transcript views
 472	f92d57f	2026-04-15	211	58	213	246	728	1396	1396	pass	7.5	kept	Fix achievements total_activities missing listening and speaking_journal counts
+473	8015327	2026-04-15	173	53	68	178	472	1396	1396	pass	7.5	kept	Add listening and speaking journal to Home page today activity and recent icons

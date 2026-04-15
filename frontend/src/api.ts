@@ -537,7 +537,7 @@ export interface TopicAccuracyResponse {
 
 export interface ActivityHistoryResponse {
   days: number;
-  history: { date: string; conversations: number; messages: number; pronunciation_attempts: number; vocabulary_reviews: number }[];
+  history: { date: string; conversations: number; messages: number; pronunciation_attempts: number; vocabulary_reviews: number; speaking_journal_entries: number; listening_quizzes: number }[];
 }
 
 export interface StreakMilestonesResponse {

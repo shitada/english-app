@@ -87,6 +87,8 @@ class DailyActivityItem(BaseModel):
     messages: int
     pronunciation_attempts: int
     vocabulary_reviews: int
+    speaking_journal_entries: int = 0
+    listening_quizzes: int = 0
 
 
 class ActivityHistoryResponse(BaseModel):

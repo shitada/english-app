@@ -212,7 +212,8 @@ async def get_daily_activity(
                COALESCE(msg.cnt, 0) AS messages,
                COALESCE(pron.cnt, 0) AS pronunciation_attempts,
                COALESCE(vocab.cnt, 0) AS vocabulary_reviews,
-               COALESCE(sj.cnt, 0) AS speaking_journal_entries
+               COALESCE(sj.cnt, 0) AS speaking_journal_entries,
+               COALESCE(lq.cnt, 0) AS listening_quizzes
            FROM dates
            LEFT JOIN (
                SELECT date(started_at) AS d, COUNT(*) AS cnt
@@ -244,8 +245,14 @@ async def get_daily_activity(
                WHERE created_at >= date('now', '-' || (? - 1) || ' days')
                GROUP BY date(created_at)
            ) sj ON dates.d = sj.d
+           LEFT JOIN (
+               SELECT date(created_at) AS d, COUNT(*) AS cnt
+               FROM listening_quiz_results
+               WHERE created_at >= date('now', '-' || (? - 1) || ' days')
+               GROUP BY date(created_at)
+           ) lq ON dates.d = lq.d
            ORDER BY dates.d ASC""",
-        (days, days, days, days, days, days),
+        (days, days, days, days, days, days, days),
     )
     return [
         {
@@ -255,6 +262,7 @@ async def get_daily_activity(
             "pronunciation_attempts": r["pronunciation_attempts"],
             "vocabulary_reviews": r["vocabulary_reviews"],
             "speaking_journal_entries": r["speaking_journal_entries"],
+            "listening_quizzes": r["listening_quizzes"],
         }
         for r in rows
     ]
