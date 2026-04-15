@@ -867,6 +867,22 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
     pronunciation_attempts = rows[0]["cnt"] if rows else 0
     avg_pronunciation_score = round(rows[0]["avg_score"] or 0, 1)
 
+    # Speaking journal entries this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt, AVG(wpm) as avg_wpm FROM speaking_journal "
+        "WHERE created_at >= date('now', '-6 days')"
+    )
+    speaking_journal_entries = rows[0]["cnt"] if rows else 0
+    speaking_journal_avg_wpm = round(rows[0]["avg_wpm"] or 0, 1)
+
+    # Listening quizzes this week
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt, AVG(score) as avg_score FROM listening_quiz_results "
+        "WHERE created_at >= date('now', '-6 days')"
+    )
+    listening_quizzes = rows[0]["cnt"] if rows else 0
+    listening_avg_score = round(rows[0]["avg_score"] or 0, 1)
+
     # Grammar accuracy from feedback this week (weekly-scoped, not all-time)
     rows = await db.execute_fetchall(
         """SELECT COUNT(*) as total_checked,
@@ -905,6 +921,12 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
     if quiz_accuracy >= 90 and quiz_total >= 5:
         highlights.append(f"Quiz accuracy at {quiz_accuracy}% — excellent!")
 
+    if speaking_journal_entries >= 3:
+        highlights.append(f"Completed {speaking_journal_entries} speaking journal entries this week!")
+
+    if listening_quizzes >= 3:
+        highlights.append(f"Completed {listening_quizzes} listening quizzes this week!")
+
     # Build week date range string
     from datetime import timedelta
     week_start_date = today - timedelta(days=6)
@@ -920,6 +942,8 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
         f"📚 Vocabulary Reviewed: {vocabulary_reviewed} words ({quiz_accuracy}% accuracy)",
         f"🎙️ Pronunciation: {pronunciation_attempts} attempts (avg {avg_pronunciation_score}/10)",
         f"📝 Grammar Accuracy: {grammar_accuracy}%",
+        f"🗣️ Speaking Journal: {speaking_journal_entries} entries (avg {speaking_journal_avg_wpm} WPM)",
+        f"👂 Listening Quizzes: {listening_quizzes} (avg {listening_avg_score}%)",
     ]
     if highlights:
         lines.append("")
@@ -939,6 +963,10 @@ async def get_weekly_report(db: aiosqlite.Connection) -> dict[str, Any]:
         "pronunciation_attempts": pronunciation_attempts,
         "avg_pronunciation_score": avg_pronunciation_score,
         "grammar_accuracy": grammar_accuracy,
+        "speaking_journal_entries": speaking_journal_entries,
+        "speaking_journal_avg_wpm": speaking_journal_avg_wpm,
+        "listening_quizzes": listening_quizzes,
+        "listening_avg_score": listening_avg_score,
         "streak": streak,
         "highlights": highlights,
         "text_summary": text_summary,

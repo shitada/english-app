@@ -339,6 +339,10 @@ class WeeklyReportResponse(BaseModel):
     pronunciation_attempts: int
     avg_pronunciation_score: float
     grammar_accuracy: float
+    speaking_journal_entries: int = 0
+    speaking_journal_avg_wpm: float = 0
+    listening_quizzes: int = 0
+    listening_avg_score: float = 0
     streak: int
     highlights: list[str]
     text_summary: str

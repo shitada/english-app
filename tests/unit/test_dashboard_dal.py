@@ -1376,6 +1376,10 @@ class TestGetWeeklyReport:
         assert result["vocabulary_reviewed"] == 0
         assert result["quiz_accuracy"] == 0
         assert result["pronunciation_attempts"] == 0
+        assert result["speaking_journal_entries"] == 0
+        assert result["speaking_journal_avg_wpm"] == 0
+        assert result["listening_quizzes"] == 0
+        assert result["listening_avg_score"] == 0
         assert "text_summary" in result
         assert len(result["text_summary"]) > 0
         assert "week_start" in result
@@ -1462,6 +1466,38 @@ class TestGetWeeklyReport:
         result = await get_weekly_report(test_db)
         # Weekly grammar accuracy: 3/4 = 75.0% (NOT 3/9 = 33.3% which would be all-time)
         assert result["grammar_accuracy"] == 75.0
+
+    async def test_includes_speaking_journal_entries(self, test_db):
+        """Weekly report should count speaking journal entries from the past 7 days."""
+        for i in range(4):
+            await test_db.execute(
+                "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, duration_seconds, wpm, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+                (f"Prompt {i}", f"Transcript {i}", 10, 8, 60, 12.0),
+            )
+        await test_db.commit()
+        result = await get_weekly_report(test_db)
+        assert result["speaking_journal_entries"] == 4
+        assert result["speaking_journal_avg_wpm"] == 12.0
+        assert "Speaking Journal" in result["text_summary"]
+        highlight = [h for h in result["highlights"] if "speaking journal" in h.lower()]
+        assert len(highlight) > 0
+
+    async def test_includes_listening_quizzes(self, test_db):
+        """Weekly report should count listening quizzes from the past 7 days."""
+        for i in range(3):
+            await test_db.execute(
+                "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, questions_json, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+                (f"Quiz {i}", "beginner", 10, 8, 80.0, "[]"),
+            )
+        await test_db.commit()
+        result = await get_weekly_report(test_db)
+        assert result["listening_quizzes"] == 3
+        assert result["listening_avg_score"] == 80.0
+        assert "Listening Quizzes" in result["text_summary"]
+        highlight = [h for h in result["highlights"] if "listening quiz" in h.lower()]
+        assert len(highlight) > 0
 
 
 @pytest.mark.unit

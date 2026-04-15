@@ -69,6 +69,8 @@ export function WeeklyReport({ report }: Props) {
         <MiniStat label="Quiz Accuracy" value={`${report.quiz_accuracy}%`} />
         <MiniStat label="Pronunciation" value={String(report.pronunciation_attempts)} />
         <MiniStat label="Avg Score" value={`${report.avg_pronunciation_score}/10`} />
+        <MiniStat label="Journal Entries" value={String(report.speaking_journal_entries ?? 0)} />
+        <MiniStat label="Listening Quizzes" value={String(report.listening_quizzes ?? 0)} />
       </div>
 
       {report.highlights.length > 0 && (

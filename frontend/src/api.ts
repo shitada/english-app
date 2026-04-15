@@ -1065,6 +1065,10 @@ export interface WeeklyReport {
   pronunciation_attempts: number;
   avg_pronunciation_score: number;
   grammar_accuracy: number;
+  speaking_journal_entries?: number;
+  speaking_journal_avg_wpm?: number;
+  listening_quizzes?: number;
+  listening_avg_score?: number;
   streak: number;
   highlights: string[];
   text_summary: string;

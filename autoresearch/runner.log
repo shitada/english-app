@@ -394,3 +394,182 @@ Now update the existing test comment that references the old formula:
 
 Now commit and test:
 
+● Commit iteration 467 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git commit -m "autoresearch
+  │ #467: Include speaking journal in skill radar Speaking score and fix broken route"
+  └ 15 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest tests/unit tests/integration
+  │ -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1392 tests pass. Now TypeScript check:
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc --noEmit 2>&1
+  └ 2 lines...
+
+TS passes. Now smoke test since we changed `app/dal/dashboard.py`:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs kill -9 2>/dev/null;
+  │ uv run python tests/smoke_test.py 2>&1
+  └ 23 lines...
+
+All tests pass. Record T3 and call evaluator:
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 | head -100
+  └ 101 lines...
+
+Bugfix, backend-only — no tester needed. Now call evaluator:
+
+● Evaluator Evaluate iteration 467
+  │ Read test_dashboard_dal.py
+  │   │ tests/unit/test_dashboard_dal.py
+  │   └ L1150:1300 (151 lines read)
+  └ Read test_dashboard_dal.py
+      │ tests/unit/test_dashboard_dal.py
+      └ L1300:1450 (151 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Evaluator score: 7.55, verdict: keep. All checks pass — keeping this change.
+
+Now record results. Computing timings: T0=1776211934, T1=1776212328, T3=1776212455, T4=1776212528.
+
+● Record results for 467 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "467" "bc5ebd4" "2026-04-15" "394" "70" "57" "73" "594" \
+  │ "1392" "1392" "pass" "7.55" "kept" "Include speaking journal in skill radar Speaking score
+  │ and fix broken route" \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 /Users/shingotada/Documents/vscode/english-app/autoresearch/results.tsv | tr '\t' '|' |
+  │ head -1
+  └ 2 lines...
+
+Row verified. Now starting iteration 468.
+
+---
+
+## Iteration 468
+
+● Record T0 for 468 and recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git log --oneline -3
+  └ 5 lines...
+
+T0=1776212558. Calling proposer:
+
+● Proposer Propose iteration 468
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L829:945 (117 lines read)
+  └ Read WeeklyReport.tsx
+      │ frontend/src/components/dashboard/WeeklyReport.tsx
+      └ 93 lines read
+
+● Record T1 for 468 (shell)
+  │ date +%s
+  └ 2 lines...
+
+T1=1776212807. propose_sec=249. Now implement. Let me look at the relevant code:
+
+● Find weekly report code locations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'get_weekly_report\|weekly_report\|WeeklyReport' app/dal/dashboard.py app/routers/dashboard.py
+  │ frontend/src/api.ts | head -30
+  └ 9 lines...
+
+● Read dashboard.py
+  │ app/routers/dashboard.py
+  └ L332:360 (29 lines read)
+
+● Read api.ts
+  │ frontend/src/api.ts
+  └ L1058:1080 (23 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L829:930 (102 lines read)
+
+● Read dashboard.py
+  │ app/dal/dashboard.py
+  └ L930:960 (31 lines read)
+
+● Find WeeklyReport component structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'WeeklyReport\|weeklyReport\|weekly-report\|weekly_report'
+  │ frontend/src/components/dashboard/WeeklyReport.tsx | head -20
+  └ 4 lines...
+
+● Read WeeklyReport component (shell)
+  │ cat /Users/shingotada/Documents/vscode/english-app/frontend/src/components/dashboard/WeeklyRepor
+  │ t.tsx
+  └ 94 lines...
+
+Now let me implement all the changes:
+
+● Edit dashboard.py +16
+  └ app/dal/dashboard.py
+
+Now update the text_summary and highlights:
+
+● Edit dashboard.py +2
+  └ app/dal/dashboard.py
+
+Now add highlights for these new modules:
+
+● Edit dashboard.py +6
+  └ app/dal/dashboard.py
+
+Now update the return dict:
+
+● Edit dashboard.py +4
+  └ app/dal/dashboard.py
+
+Now update the Pydantic model, TypeScript interface, and React component:
+
+● Edit dashboard.py +4
+  └ app/routers/dashboard.py
+
+● Edit api.ts +4
+  └ frontend/src/api.ts
+
+Now update the React component to show the new stats:
+
+● Edit WeeklyReport.tsx +2
+  └ frontend/src/components/dashboard/WeeklyReport.tsx
+
+Now add tests. Let me check existing weekly report tests:
+
+● Find weekly report test class (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'class
+  │ TestGetWeeklyReport\|test_.*weekly' tests/unit/test_dashboard_dal.py | head -15
+  └ 6 lines...
+
+● Read test_dashboard_dal.py
+  │ tests/unit/test_dashboard_dal.py
+  └ L1369:1470 (101 lines read)
+
+Now add tests for the new fields:
+
+● Edit test_dashboard_dal.py +32
+  └ tests/unit/test_dashboard_dal.py
+
+Also update the empty DB test to check new fields:
+
+● Edit test_dashboard_dal.py +4
+  └ tests/unit/test_dashboard_dal.py
+
+Now commit and test:
+
