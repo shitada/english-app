@@ -2308,3 +2308,67 @@ async def get_speaking_journal_progress(
 ):
     """Get speaking journal progress analytics."""
     return await pron_dal.get_speaking_journal_progress(db)
+
+
+class VocabUpgradeRequest(BaseModel):
+    transcript: str = Field(min_length=1, max_length=5000)
+
+
+class VocabUpgradeItem(BaseModel):
+    original: str
+    upgraded: str
+    explanation: str
+    example: str
+
+
+class VocabUpgradeResponse(BaseModel):
+    upgrades: list[VocabUpgradeItem]
+
+
+@router.post("/speaking-journal/vocab-upgrade", response_model=VocabUpgradeResponse)
+async def get_vocab_upgrade_suggestions(
+    req: VocabUpgradeRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Analyze a speaking journal transcript and suggest vocabulary upgrades."""
+    copilot = get_copilot_service()
+
+    prompt = (
+        "Analyze this English speech transcript and find 3-5 basic or common words "
+        "that the speaker used. For each word, suggest a more advanced or sophisticated "
+        "alternative that would make their speech sound more natural and fluent.\n\n"
+        f"Transcript: \"{req.transcript}\"\n\n"
+        "Return JSON with this exact structure:\n"
+        '{"upgrades": [{"original": "basic word from transcript", '
+        '"upgraded": "better alternative", '
+        '"explanation": "why the upgrade is better", '
+        '"example": "example sentence using the upgraded word"}]}\n\n'
+        "Rules:\n"
+        "- Only pick words that actually appear in the transcript\n"
+        "- Suggest natural, commonly-used alternatives (not obscure words)\n"
+        "- Keep explanations concise (one sentence)\n"
+        "- Return 3-5 upgrades. If the transcript is too short, return fewer."
+    )
+
+    result = await safe_llm_call(
+        lambda: copilot.ask_json(
+            "You are an English vocabulary coach. Return ONLY valid JSON.",
+            prompt,
+        ),
+        context="vocab_upgrade",
+    )
+
+    if not result or "upgrades" not in result:
+        return VocabUpgradeResponse(upgrades=[])
+
+    upgrades = []
+    for item in result.get("upgrades", [])[:5]:
+        if all(k in item for k in ("original", "upgraded", "explanation", "example")):
+            upgrades.append(VocabUpgradeItem(
+                original=str(item["original"]),
+                upgraded=str(item["upgraded"]),
+                explanation=str(item["explanation"]),
+                example=str(item["example"]),
+            ))
+
+    return VocabUpgradeResponse(upgrades=upgrades)

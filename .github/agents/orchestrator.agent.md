@@ -49,7 +49,7 @@ You are an **ORCHESTRATOR**. You dispatch work to 3 subagents — you do NOT do 
 - ✅ Did I call `proposer` subagent? → Must have received JSON proposal
 - ✅ Did I call `evaluator` subagent? → Must have received JSON with total_score
 - ✅ Does the score in results.tsv match evaluator's total_score exactly?
-- ✅ **TESTER CHECK**: Is proposal type `feature`/`ux` AND did `frontend/src/pages/` or `frontend/src/components/` change? → If YES, I **MUST** have called `tester` subagent. If I didn't, STOP and call it NOW before recording.
+- ✅ **TESTER CHECK**: Did `frontend/src/pages/` or `frontend/src/components/` .tsx files change? (Check with `git diff HEAD~1 --name-only | grep -E 'frontend/src/(pages|components)/.*\.tsx$'`) → If YES, I **MUST** have called `tester` subagent — regardless of proposal type. If I didn't, STOP and call it NOW before recording.
 
 ## The Experiment Loop
 
@@ -177,9 +177,7 @@ If smoke test fails → treat as test failure (discard the change).
 
 ### Step 5c — QA Test (Playwright MCP)
 
-**Run condition**: The tester MUST run when BOTH conditions are true:
-1. The proposer's `type` is `"feature"` or `"ux"`, AND
-2. `changed_files` includes any file matching `frontend/src/pages/*.tsx` or `frontend/src/components/*.tsx`
+**Run condition**: The tester MUST run when `changed_files` includes ANY file matching `frontend/src/pages/*.tsx` or `frontend/src/components/*.tsx` — **regardless of proposal type** (feature, bugfix, perf, etc.).
 
 Check the condition:
 ```bash
@@ -187,11 +185,10 @@ FRONTEND_UI_CHANGED=$(git diff HEAD~1 --name-only | grep -E "frontend/src/(pages
 ```
 
 Decision matrix:
-- Proposal is `feature`/`ux` AND `$FRONTEND_UI_CHANGED` is non-empty → **MUST run tester**
-- Proposal is `feature`/`ux` but NO frontend UI files changed → skip OK, log reason
-- Proposal is `bugfix`/`perf`/`test` → skip OK regardless of files changed
+- `$FRONTEND_UI_CHANGED` is non-empty → **MUST run tester** (even if type is bugfix/perf)
+- `$FRONTEND_UI_CHANGED` is empty (no page/component .tsx files changed) → skip OK, log reason
 
-If skipping, set `qa_passed=true, ux_score=7.0` (neutral defaults) for the evaluator. Log: "QA skipped — [reason]." where reason is one of: "backend-only feature", "bugfix", "perf", "test-only".
+If skipping, set `qa_passed=true, ux_score=7.0` (neutral defaults) for the evaluator. Log: "QA skipped — no frontend page/component .tsx files changed."
 
 **When running the QA test:**
 

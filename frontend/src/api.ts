@@ -1913,3 +1913,17 @@ export function saveSpeakingJournalEntry(prompt: string, transcript: string, dur
 export function getSpeakingJournalEntries(limit: number = 10): Promise<{ entries: SpeakingJournalEntry[] }> {
   return request<{ entries: SpeakingJournalEntry[] }>(`/api/pronunciation/speaking-journal/entries?limit=${limit}`);
 }
+
+export interface VocabUpgradeItem {
+  original: string;
+  upgraded: string;
+  explanation: string;
+  example: string;
+}
+
+export function getSpeakingJournalVocabUpgrade(transcript: string): Promise<{ upgrades: VocabUpgradeItem[] }> {
+  return request<{ upgrades: VocabUpgradeItem[] }>('/api/pronunciation/speaking-journal/vocab-upgrade', {
+    method: 'POST',
+    body: JSON.stringify({ transcript }),
+  });
+}

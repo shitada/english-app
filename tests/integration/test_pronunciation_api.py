@@ -1621,3 +1621,44 @@ async def test_speaking_journal_progress_with_entries(client):
     assert data["longest_entry"] is not None
     assert "wpm" in data["longest_entry"]
     assert "vocabulary_diversity" in data["longest_entry"]
+
+
+@pytest.mark.integration
+async def test_speaking_journal_vocab_upgrade(client, mock_copilot):
+    """Vocab upgrade endpoint returns upgrade suggestions from LLM."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "upgrades": [
+            {
+                "original": "good",
+                "upgraded": "excellent",
+                "explanation": "More specific and impactful",
+                "example": "The presentation was excellent.",
+            },
+            {
+                "original": "big",
+                "upgraded": "substantial",
+                "explanation": "More formal and precise",
+                "example": "There was a substantial increase in revenue.",
+            },
+        ]
+    })
+    res = await client.post("/api/pronunciation/speaking-journal/vocab-upgrade", json={
+        "transcript": "I think it was a good day and we had a big meeting about the project.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["upgrades"]) == 2
+    assert data["upgrades"][0]["original"] == "good"
+    assert data["upgrades"][0]["upgraded"] == "excellent"
+
+
+@pytest.mark.integration
+async def test_speaking_journal_vocab_upgrade_empty_result(client, mock_copilot):
+    """Vocab upgrade handles empty LLM response gracefully."""
+    mock_copilot.ask_json = AsyncMock(return_value={})
+    res = await client.post("/api/pronunciation/speaking-journal/vocab-upgrade", json={
+        "transcript": "Hello world.",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["upgrades"] == []

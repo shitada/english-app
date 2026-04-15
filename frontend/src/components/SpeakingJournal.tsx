@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, type SpeakingJournalEntry } from '../api';
+import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, type SpeakingJournalEntry, type VocabUpgradeItem } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -14,6 +14,9 @@ export default function SpeakingJournal() {
   const [history, setHistory] = useState<SpeakingJournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedEntryId, setExpandedEntryId] = useState<number | null>(null);
+  const [vocabUpgrades, setVocabUpgrades] = useState<VocabUpgradeItem[]>([]);
+  const [vocabLoading, setVocabLoading] = useState(false);
+  const [vocabExpanded, setVocabExpanded] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -69,11 +72,14 @@ export default function SpeakingJournal() {
     }
   }, [stop, prompt, transcript]);
 
-  const handleReset = useCallback(() => {
+    const handleReset = useCallback(() => {
     reset();
     setSavedEntry(null);
     setPhase('idle');
     setTimeLeft(60);
+    setVocabUpgrades([]);
+    setVocabLoading(false);
+    setVocabExpanded(false);
     getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)).catch(() => {});
   }, [reset]);
 
@@ -256,6 +262,70 @@ export default function SpeakingJournal() {
                 </div>
               </div>
             </div>
+
+            {/* Vocab Upgrade Panel */}
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button
+                onClick={() => {
+                  if (vocabUpgrades.length > 0) {
+                    setVocabExpanded(!vocabExpanded);
+                    return;
+                  }
+                  setVocabLoading(true);
+                  setVocabExpanded(true);
+                  getSpeakingJournalVocabUpgrade(savedEntry.transcript)
+                    .then((r) => setVocabUpgrades(r.upgrades))
+                    .catch(() => setVocabUpgrades([]))
+                    .finally(() => setVocabLoading(false));
+                }}
+                disabled={vocabLoading}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  background: vocabExpanded ? 'var(--primary, #6366f1)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: vocabLoading ? 'wait' : 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  opacity: vocabLoading ? 0.7 : 1,
+                }}
+              >
+                {vocabLoading ? '⏳ Analyzing...' : `💡 Level Up Your Words ${vocabExpanded ? '▲' : '▼'}`}
+              </button>
+              {vocabExpanded && vocabUpgrades.length > 0 && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  {vocabUpgrades.map((u, i) => (
+                    <div key={i} style={{
+                      padding: '0.5rem',
+                      marginBottom: '0.35rem',
+                      background: 'var(--bg-secondary, #f3f4f6)',
+                      borderRadius: 8,
+                      fontSize: '0.8rem',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem' }}>
+                        <span style={{ color: 'var(--text-secondary, #6b7280)', textDecoration: 'line-through' }}>{u.original}</span>
+                        <span>→</span>
+                        <span style={{ color: 'var(--primary, #6366f1)', fontWeight: 700 }}>{u.upgraded}</span>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary, #6b7280)', fontSize: '0.75rem', marginBottom: '0.15rem' }}>
+                        {u.explanation}
+                      </div>
+                      <div style={{ color: 'var(--text-primary, #1f2937)', fontStyle: 'italic', fontSize: '0.75rem' }}>
+                        "{u.example}"
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {vocabExpanded && !vocabLoading && vocabUpgrades.length === 0 && (
+                <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary, #6b7280)', textAlign: 'center' }}>
+                  Great vocabulary! No upgrades suggested.
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleReset}
               style={{

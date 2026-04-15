@@ -153,10 +153,10 @@ build_prompt() {
 ## MANDATORY RULES — read before doing ANYTHING:
 1. You MUST call the **proposer** subagent via runSubagent for EVERY iteration. Do NOT propose changes yourself.
 2. You MUST call the **evaluator** subagent via runSubagent for EVERY iteration. Do NOT assign scores yourself.
-3. You MUST call the **tester** subagent via runSubagent when the proposal type is "feature" or "ux" AND any frontend .tsx file in pages/ or components/ was changed. Check with: \`git diff HEAD~1 --name-only | grep -E 'frontend/src/(pages|components)/.*\\.tsx$'\`
+3. You MUST call the **tester** subagent via runSubagent when ANY frontend .tsx file in pages/ or components/ was changed — regardless of proposal type (feature, bugfix, perf, etc.). Check with: \`git diff HEAD~1 --name-only | grep -E 'frontend/src/(pages|components)/.*\\.tsx$'\`
 4. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
 5. Read only the last 20 rows of results.tsv (use \`tail -20\`), not the full file.
-6. Before recording results, verify: Did I call proposer? Did I call evaluator? If frontend .tsx changed and type is feature/ux, did I call tester? If NO → STOP and call them NOW.
+6. Before recording results, verify: Did I call proposer? Did I call evaluator? If frontend .tsx files in pages/ or components/ changed, did I call tester? If NO → STOP and call them NOW.
 ${feature_instruction}
 
 ## Task:
