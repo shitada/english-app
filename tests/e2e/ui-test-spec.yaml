@@ -603,3 +603,27 @@ pages:
         type: state
         priority: medium
         added_in: 499
+
+      - id: speaking-journal-001
+        target: '[data-testid="speaking-journal-error"]'
+        action: Stop recording when no speech was detected (empty transcript)
+        expect: Error banner appears with "No speech detected" message and dismiss button
+        type: functional
+        priority: high
+        added_in: 501
+
+      - id: speaking-journal-002
+        target: '[data-testid="dismiss-error"]'
+        action: Click dismiss button on the error banner
+        expect: Error banner is removed from the DOM
+        type: functional
+        priority: medium
+        added_in: 501
+
+      - id: speaking-journal-003
+        target: '[data-testid="speaking-journal-error"]'
+        action: Trigger a save failure (API returns error)
+        expect: Error banner appears with "Failed to save" message, phase returns to idle
+        type: functional
+        priority: high
+        added_in: 501

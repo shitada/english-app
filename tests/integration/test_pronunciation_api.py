@@ -1910,3 +1910,48 @@ async def test_quick_listening_comp_defaults_to_intermediate(client, mock_copilo
     assert res.status_code == 200
     data = res.json()
     assert data["difficulty"] == "intermediate"
+
+
+# ---------------------------------------------------------------------------
+# Speaking journal – empty transcript / prompt validation
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_speaking_journal_rejects_empty_transcript(client):
+    """POST /speaking-journal should return 422 when transcript is empty."""
+    res = await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "Tell me about your favourite hobby.",
+        "transcript": "",
+        "duration_seconds": 30,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_speaking_journal_rejects_empty_prompt(client):
+    """POST /speaking-journal should return 422 when prompt is empty."""
+    res = await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "",
+        "transcript": "I like reading books.",
+        "duration_seconds": 30,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_speaking_journal_accepts_valid_entry(client):
+    """POST /speaking-journal should succeed with valid prompt, transcript, and duration."""
+    res = await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "What did you do last weekend?",
+        "transcript": "Last weekend I went hiking in the mountains.",
+        "duration_seconds": 30,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["word_count"] == 8
+    assert data["transcript"] == "Last weekend I went hiking in the mountains."
+    assert data["prompt"] == "What did you do last weekend?"

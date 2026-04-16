@@ -135,3 +135,4 @@ Improvement ideas for the English Learning App, prioritized by importance.
 ## [NEW] Iterations 499–500
 
 - [x] Add global difficulty selector to QuickPracticeHub for all cards (kept — score 6.45, iteration 499)
+- [x] Fix stale closure in timer-expired speech evaluation across Quick Practice cards (kept — score 7.45, iteration 500)

@@ -2253,8 +2253,8 @@ _SPEAKING_JOURNAL_PROMPTS = [
 
 
 class SpeakingJournalEntry(BaseModel):
-    prompt: str
-    transcript: str
+    prompt: str = Field(min_length=1)
+    transcript: str = Field(min_length=1)
     duration_seconds: int = Field(ge=1)
 
 

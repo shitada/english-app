@@ -38,6 +38,7 @@ export default function SpeakingJournal() {
   const [modelAnswerExpanded, setModelAnswerExpanded] = useState(false);
   const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   const [previousEntry, setPreviousEntry] = useState<SpeakingJournalEntry | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -63,6 +64,7 @@ export default function SpeakingJournal() {
 
   const handleStart = useCallback(async () => {
     reset();
+    setError(null);
     setPhase('speaking');
     setTimeLeft(duration);
     startTimeRef.current = Date.now();
@@ -81,8 +83,14 @@ export default function SpeakingJournal() {
   const handleStop = useCallback(async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     stop();
-    setPhase('saving');
+    setError(null);
     const duration = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000));
+    if (!transcript.trim()) {
+      setPhase('idle');
+      setError('No speech detected. Please try again and speak clearly into your microphone.');
+      return;
+    }
+    setPhase('saving');
     try {
       const entry = await saveSpeakingJournalEntry(prompt, transcript, duration);
       setSavedEntry(entry);
@@ -90,6 +98,7 @@ export default function SpeakingJournal() {
       setPhase('done');
     } catch {
       setPhase('idle');
+      setError('Failed to save your entry. Please try again.');
     }
   }, [stop, prompt, transcript]);
 
@@ -97,6 +106,7 @@ export default function SpeakingJournal() {
     reset();
     setSavedEntry(null);
     setPreviousEntry(null);
+    setError(null);
     setPhase('idle');
     setTimeLeft(duration);
     setVocabUpgrades([]);
@@ -154,6 +164,44 @@ export default function SpeakingJournal() {
         }}>
           "{prompt}"
         </div>
+
+        {/* Error message */}
+        {error && (
+          <div
+            data-testid="speaking-journal-error"
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: 8,
+              padding: '0.6rem 0.75rem',
+              marginBottom: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.5rem',
+              fontSize: '0.85rem',
+              color: '#991b1b',
+            }}
+          >
+            <span>⚠️ {error}</span>
+            <button
+              onClick={() => setError(null)}
+              data-testid="dismiss-error"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                color: '#991b1b',
+                padding: '0 0.25rem',
+                lineHeight: 1,
+              }}
+              aria-label="Dismiss error"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Phase: idle */}
         {phase === 'idle' && (
