@@ -1991,3 +1991,27 @@ export interface SpeakingJournalProgressResponse {
 export function getSpeakingJournalProgress(): Promise<SpeakingJournalProgressResponse> {
   return request<SpeakingJournalProgressResponse>('/api/pronunciation/speaking-journal/progress');
 }
+
+export interface FillerWordItem {
+  word: string;
+  count: number;
+}
+
+export interface FillerDailyTrend {
+  date: string;
+  filler_count: number;
+  density_per_min: number;
+  entries: number;
+}
+
+export interface FillerAnalysisResponse {
+  total_entries: number;
+  filler_breakdown: FillerWordItem[];
+  daily_trend: FillerDailyTrend[];
+  trend_direction: string;
+  fluency_cleanliness_score: number;
+}
+
+export function getFillerWordAnalysis(): Promise<FillerAnalysisResponse> {
+  return request<FillerAnalysisResponse>('/api/pronunciation/speaking-journal/filler-analysis');
+}
