@@ -9,6 +9,13 @@ export default function SpeakingJournal() {
   const { t } = useI18n();
   const [prompt, setPrompt] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
+  const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>(() => {
+    return (localStorage.getItem('sj_difficulty') as 'beginner' | 'intermediate' | 'advanced') || 'intermediate';
+  });
+  const [duration, setDuration] = useState<number>(() => {
+    const saved = localStorage.getItem('sj_duration');
+    return saved ? parseInt(saved, 10) : 60;
+  });
   const [timeLeft, setTimeLeft] = useState(60);
   const [savedEntry, setSavedEntry] = useState<SpeakingJournalEntry | null>(null);
   const [history, setHistory] = useState<SpeakingJournalEntry[]>([]);
@@ -34,7 +41,7 @@ export default function SpeakingJournal() {
 
   useEffect(() => {
     Promise.all([
-      getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)),
+      getSpeakingJournalPrompt(difficulty).then((r) => setPrompt(r.prompt)),
       getSpeakingJournalEntries(5).then((r) => setHistory(r.entries)),
     ])
       .catch(() => {})
@@ -50,7 +57,7 @@ export default function SpeakingJournal() {
   const handleStart = useCallback(async () => {
     reset();
     setPhase('speaking');
-    setTimeLeft(60);
+    setTimeLeft(duration);
     startTimeRef.current = Date.now();
     await start();
     timerRef.current = setInterval(() => {
@@ -62,7 +69,7 @@ export default function SpeakingJournal() {
         return prev - 1;
       });
     }, 1000);
-  }, [start, reset]);
+  }, [start, reset, duration]);
 
   const handleStop = useCallback(async () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -84,7 +91,7 @@ export default function SpeakingJournal() {
     setSavedEntry(null);
     setPreviousEntry(null);
     setPhase('idle');
-    setTimeLeft(60);
+    setTimeLeft(duration);
     setVocabUpgrades([]);
     setVocabLoading(false);
     setVocabExpanded(false);
@@ -94,15 +101,15 @@ export default function SpeakingJournal() {
     setModelAnswer(null);
     setModelAnswerLoading(false);
     setModelAnswerExpanded(false);
-    getSpeakingJournalPrompt().then((r) => setPrompt(r.prompt)).catch(() => {});
-  }, [reset]);
+    getSpeakingJournalPrompt(difficulty).then((r) => setPrompt(r.prompt)).catch(() => {});
+  }, [reset, duration, difficulty]);
 
   const handleRetry = useCallback(() => {
     setPreviousEntry(savedEntry);
     reset();
     setSavedEntry(null);
     setPhase('idle');
-    setTimeLeft(60);
+    setTimeLeft(duration);
     setVocabUpgrades([]);
     setVocabLoading(false);
     setVocabExpanded(false);
@@ -112,7 +119,7 @@ export default function SpeakingJournal() {
     setModelAnswer(null);
     setModelAnswerLoading(false);
     setModelAnswerExpanded(false);
-  }, [reset, savedEntry]);
+  }, [reset, savedEntry, duration]);
 
   if (loading || !prompt) return null;
 
@@ -141,23 +148,81 @@ export default function SpeakingJournal() {
 
         {/* Phase: idle */}
         {phase === 'idle' && (
-          <button
-            onClick={handleStart}
-            disabled={!isSupported}
-            style={{
-              width: '100%',
-              padding: '0.6rem',
-              background: 'var(--primary, #6366f1)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              cursor: isSupported ? 'pointer' : 'not-allowed',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-            }}
-          >
-            🎙️ {t('startSpeaking')} (60s)
-          </button>
+          <div>
+            {/* Difficulty & Duration selectors */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '0.25rem', flex: 1 }}>
+                {(['beginner', 'intermediate', 'advanced'] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => {
+                      setDifficulty(d);
+                      localStorage.setItem('sj_difficulty', d);
+                      getSpeakingJournalPrompt(d).then((r) => setPrompt(r.prompt)).catch(() => {});
+                    }}
+                    data-testid={`difficulty-${d}`}
+                    style={{
+                      flex: 1,
+                      padding: '0.35rem 0.25rem',
+                      border: '1px solid',
+                      borderColor: difficulty === d ? 'var(--primary, #6366f1)' : 'var(--border, #d1d5db)',
+                      background: difficulty === d ? 'var(--primary, #6366f1)' : 'transparent',
+                      color: difficulty === d ? '#fff' : 'var(--text-secondary, #6b7280)',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: difficulty === d ? 600 : 400,
+                    }}
+                  >
+                    {d === 'beginner' ? '🌱' : d === 'intermediate' ? '📗' : '🚀'} {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                {[30, 60, 90].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setDuration(s);
+                      setTimeLeft(s);
+                      localStorage.setItem('sj_duration', String(s));
+                    }}
+                    data-testid={`duration-${s}`}
+                    style={{
+                      padding: '0.35rem 0.5rem',
+                      border: '1px solid',
+                      borderColor: duration === s ? 'var(--primary, #6366f1)' : 'var(--border, #d1d5db)',
+                      background: duration === s ? 'var(--primary, #6366f1)' : 'transparent',
+                      color: duration === s ? '#fff' : 'var(--text-secondary, #6b7280)',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: duration === s ? 600 : 400,
+                    }}
+                  >
+                    {s}s
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={handleStart}
+              disabled={!isSupported}
+              style={{
+                width: '100%',
+                padding: '0.6rem',
+                background: 'var(--primary, #6366f1)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: isSupported ? 'pointer' : 'not-allowed',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+              }}
+            >
+              🎙️ {t('startSpeaking')} ({duration}s)
+            </button>
+          </div>
         )}
 
         {/* Phase: speaking */}
@@ -200,7 +265,7 @@ export default function SpeakingJournal() {
             }}>
               <div style={{
                 height: '100%',
-                width: `${((60 - timeLeft) / 60) * 100}%`,
+                width: `${((duration - timeLeft) / duration) * 100}%`,
                 background: 'var(--primary, #6366f1)',
                 borderRadius: 2,
                 transition: 'width 1s linear',

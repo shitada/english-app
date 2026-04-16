@@ -1812,3 +1812,36 @@ async def test_filler_analysis_no_fillers(client):
     data = res.json()
     assert data["fluency_cleanliness_score"] == 100
     assert data["filler_breakdown"] == []
+
+
+@pytest.mark.integration
+async def test_speaking_journal_prompt_default(client):
+    """Default prompt returns a valid prompt string."""
+    res = await client.get("/api/pronunciation/speaking-journal/prompt")
+    assert res.status_code == 200
+    data = res.json()
+    assert "prompt" in data
+    assert len(data["prompt"]) > 0
+
+
+@pytest.mark.integration
+async def test_speaking_journal_prompt_with_difficulty(client):
+    """Difficulty parameter filters prompts to the correct pool."""
+    from app.routers.pronunciation import _SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY
+
+    for difficulty in ("beginner", "intermediate", "advanced"):
+        res = await client.get(f"/api/pronunciation/speaking-journal/prompt?difficulty={difficulty}")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["prompt"] in _SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY[difficulty], (
+            f"Prompt '{data['prompt']}' not in {difficulty} pool"
+        )
+
+
+@pytest.mark.integration
+async def test_speaking_journal_prompt_invalid_difficulty_falls_back(client):
+    """Invalid difficulty value falls back to full prompt pool."""
+    res = await client.get("/api/pronunciation/speaking-journal/prompt?difficulty=expert")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["prompt"]) > 0

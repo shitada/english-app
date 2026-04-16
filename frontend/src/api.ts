@@ -1899,8 +1899,9 @@ export interface SpeakingJournalEntry {
   created_at: string;
 }
 
-export function getSpeakingJournalPrompt(): Promise<{ prompt: string }> {
-  return request<{ prompt: string }>('/api/pronunciation/speaking-journal/prompt');
+export function getSpeakingJournalPrompt(difficulty?: string): Promise<{ prompt: string }> {
+  const params = difficulty ? `?difficulty=${encodeURIComponent(difficulty)}` : '';
+  return request<{ prompt: string }>(`/api/pronunciation/speaking-journal/prompt${params}`);
 }
 
 export function saveSpeakingJournalEntry(prompt: string, transcript: string, duration_seconds: number): Promise<SpeakingJournalEntry> {

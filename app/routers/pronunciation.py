@@ -2153,37 +2153,47 @@ async def evaluate_follow_up(
 # Speaking Journal
 # ---------------------------------------------------------------------------
 
+_SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY: dict[str, list[str]] = {
+    "beginner": [
+        "Describe your morning routine.",
+        "Talk about your favorite food.",
+        "What do you do on weekends?",
+        "Describe your best friend.",
+        "Talk about your family.",
+        "What is your favorite animal and why?",
+        "Describe the weather today.",
+        "What do you like to do after work or school?",
+        "Talk about your favorite place in your city.",
+        "Describe what you had for breakfast.",
+    ],
+    "intermediate": [
+        "Describe your ideal weekend.",
+        "Talk about a skill you want to learn.",
+        "Describe your favorite place to relax.",
+        "What would you do with an extra hour each day?",
+        "Talk about a book or movie that changed your perspective.",
+        "Describe a memorable meal you've had.",
+        "What advice would you give your younger self?",
+        "Talk about a hobby you enjoy.",
+        "What does a perfect vacation look like for you?",
+        "Talk about someone who inspires you.",
+    ],
+    "advanced": [
+        "Describe a challenge you've overcome.",
+        "Talk about a cultural difference you find interesting.",
+        "What would your dream job look like?",
+        "Talk about a lesson you learned the hard way.",
+        "What makes a good friend?",
+        "Talk about a technology that amazes you.",
+        "Describe a tradition you enjoy and its significance.",
+        "What societal change would you like to see in the next decade?",
+        "Talk about a time when failure taught you more than success.",
+        "Describe how your perspective on life has changed over the years.",
+    ],
+}
+
 _SPEAKING_JOURNAL_PROMPTS = [
-    "Describe your ideal weekend.",
-    "Talk about a skill you want to learn.",
-    "Describe your favorite place to relax.",
-    "What would you do with an extra hour each day?",
-    "Talk about a book or movie that changed your perspective.",
-    "Describe a memorable meal you've had.",
-    "What advice would you give your younger self?",
-    "Talk about a hobby you enjoy.",
-    "Describe your morning routine.",
-    "What does a perfect vacation look like for you?",
-    "Talk about someone who inspires you.",
-    "Describe a challenge you've overcome.",
-    "What's your favorite season and why?",
-    "Talk about a goal you're working toward.",
-    "Describe a tradition you enjoy.",
-    "What would you do if you could travel anywhere?",
-    "Talk about a technology that amazes you.",
-    "Describe your favorite way to spend a rainy day.",
-    "What makes a good friend?",
-    "Talk about something new you tried recently.",
-    "Describe a place you'd like to visit.",
-    "What do you enjoy most about your daily life?",
-    "Talk about a lesson you learned the hard way.",
-    "Describe your favorite celebration or holiday.",
-    "What would your dream job look like?",
-    "Talk about a time you helped someone.",
-    "Describe an outdoor activity you enjoy.",
-    "What's the best gift you've ever received?",
-    "Talk about a cultural difference you find interesting.",
-    "Describe what makes you happy.",
+    p for prompts in _SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY.values() for p in prompts
 ]
 
 
@@ -2213,18 +2223,23 @@ class SpeakingJournalEntriesResponse(BaseModel):
 async def get_speaking_journal_prompt(
     db: aiosqlite.Connection = Depends(get_db_session),
     exclude: str | None = Query(None, description="Current prompt to exclude"),
+    difficulty: str | None = Query(None, description="Difficulty level: beginner, intermediate, advanced"),
 ):
     """Get a speaking journal prompt, avoiding today's already-used prompts."""
     import random
 
+    pool = _SPEAKING_JOURNAL_PROMPTS
+    if difficulty and difficulty in _SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY:
+        pool = _SPEAKING_JOURNAL_PROMPTS_BY_DIFFICULTY[difficulty]
+
     used = await pron_dal.get_today_used_journal_prompts(db)
     if exclude and exclude not in used:
         used.append(exclude)
-    available = [p for p in _SPEAKING_JOURNAL_PROMPTS if p not in used]
+    available = [p for p in pool if p not in used]
     if not available:
-        available = [p for p in _SPEAKING_JOURNAL_PROMPTS if p != exclude]
+        available = [p for p in pool if p != exclude]
     if not available:
-        available = list(_SPEAKING_JOURNAL_PROMPTS)
+        available = list(pool)
     prompt = random.choice(available)
     return {"prompt": prompt}
 
