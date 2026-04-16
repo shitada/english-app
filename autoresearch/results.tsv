@@ -503,3 +503,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 511	e8edb82	2026-04-17	268	394	321	138	1121	1530	1530	pass	7.25	kept	Add Smart Study Plan card with personalized daily micro-task sequence
 512	7d7a2be	2026-04-17	323	269	95	121	808	1530	1530	pass	6.75	kept	Add Conversation Replay Speaking Walkthrough mode
 513	7904c2c	2026-04-17	270	313	108	108	799	1530	1530	pass	6.15	kept	Add retry button for failed message sends in conversation chat
+514	f7763da	2026-04-17	458	152	97	154	861	1530	1530	pass	6.60	kept	Fix hardcoded light-mode colors breaking dark mode in Vocabulary components
