@@ -65,6 +65,9 @@ export default function QuickFollowUpCard() {
     }
   }, [prompt, speech, stopTimer]);
 
+  const handleFinishRef = useRef(handleFinish);
+  handleFinishRef.current = handleFinish;
+
   const handleStart = useCallback(async () => {
     if (!prompt) return;
     speech.reset();
@@ -77,13 +80,13 @@ export default function QuickFollowUpCard() {
     timerRef.current = setInterval(() => {
       setSecondsLeft(prev => {
         if (prev <= 1) {
-          handleFinish();
+          handleFinishRef.current();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [prompt, speech, handleFinish]);
+  }, [prompt, speech]);
 
   const handleNewPrompt = useCallback(() => {
     setPhase('idle');

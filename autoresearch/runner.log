@@ -729,3 +729,97 @@ No uncompleted backlog items. I'll proceed with iterations 499 and 500, letting 
 
 **Iteration 499 — Step 3: Implement**
 
+● Coder Implement iteration 499
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "feat(iter-499): Add global difficulty selector to
+  │   │ QuickPracticeHub for all cards
+  │   │
+  │   │ Add a 3-button difficulty selector (beginner/intermediate/advanced) to…
+  │   └ 25 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log -1
+      │ --format="%H %s"
+      └ 2 lines...
+
+● Record T2 timestamp (shell)
+  │ echo "T2=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 499 — Step 4: Test**
+
+● Tester Test iteration 499
+  │ Run TypeScript type check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1
+  │   └ 2 lines...
+  └ Check for E2E results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1
+      └ 2 lines...
+
+● Record T3 timestamp (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 499 — Step 5: Evaluate**
+
+● Evaluator Evaluate iteration 499
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1800:2000 (201 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L2000:2200 (100 lines read)
+
+● Record T4 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo
+  │ "T4=$T4"
+  └ 2 lines...
+
+**Iteration 499 — Step 6: Keep or Discard**
+
+Tests pass (1459/1459), score 6.45 >= 6.0, verdict "keep" → **KEEP**.
+
+**Iteration 499 — Step 7: Record Results**
+
+● Record iteration 499 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "499" "$HASH" "$(date +%Y-%m-%d)" "$((1776348417-1776348111))"
+  │ "$((1776348655-1776348417))" "$((1776348748-1776348655))" …
+  └ 7 lines...
+
+**Iteration 499 — Step 8: Update Backlog**
+
+● Update backlog for iter 499 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ printf '\n## [NEW] Iterations 499–500\n\n- [x] Add global difficulty
+  │ selector to QuickPracticeHub for all cards (kept — score 6.45, iteration
+  │ 499)\n' >> autoresearch/backlog.md
+  └ 1 line...
+
+Now starting **Iteration 500**.
+
+● Context restore for iter 500 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && git log --oneline -3
+  └ 5 lines...
+
+**Iteration 500 — Step 2: Propose**
+
+● Proposer Propose iteration 500
+  │ Read QuickFollowUpCard.tsx
+  │   │ frontend/src/components/QuickFollowUpCard.tsx
+  │   └ L20:30 (11 lines read)
+  └ Read QuickQuestionCard.tsx
+      │ frontend/src/components/QuickQuestionCard.tsx
+      └ L20:30 (11 lines read)
+
+● Record T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 500 — Step 3: Implement**
+

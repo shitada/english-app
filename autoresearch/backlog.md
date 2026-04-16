@@ -131,3 +131,7 @@ Improvement ideas for the English Learning App, prioritized by importance.
 
 - [x] Add Quick Idiom Practice card with spoken usage evaluation (kept — score 6.1, iteration 497)
 - [x] Add Quick Write card with scenario-based short writing exercises (kept — score 6.9, iteration 498)
+
+## [NEW] Iterations 499–500
+
+- [x] Add global difficulty selector to QuickPracticeHub for all cards (kept — score 6.45, iteration 499)
