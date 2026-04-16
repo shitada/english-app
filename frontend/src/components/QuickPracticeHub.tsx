@@ -14,6 +14,7 @@ import QuickStoryCard from './QuickStoryCard';
 import QuickFollowUpCard from './QuickFollowUpCard';
 import QuickMinimalPairsCard from './QuickMinimalPairsCard';
 import QuickListeningCompCard from './QuickListeningCompCard';
+import QuickIdiomCard from './QuickIdiomCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 
@@ -103,6 +104,7 @@ export default function QuickPracticeHub() {
             <QuickOpinionCard />
             <QuickStoryCard />
             <QuickFollowUpCard />
+            <QuickIdiomCard />
             <QuickQuestionCard />
           </>
         )}

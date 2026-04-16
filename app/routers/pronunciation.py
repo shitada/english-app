@@ -2616,3 +2616,112 @@ async def get_model_answer(
         key_phrases=key_phrases,
         comparison_tip=str(result.get("comparison_tip", "")),
     )
+
+
+# ── Quick Idiom Practice ────────────────────────────────────
+
+
+class IdiomPromptResponse(BaseModel):
+    idiom: str
+    meaning: str
+    example_sentence: str
+    situation_prompt: str
+    difficulty: str
+
+
+@router.get("/idiom-prompt", response_model=IdiomPromptResponse)
+async def get_idiom_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a random English idiom with usage prompt for speaking practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a common English idiom or phrase for a {difficulty}-level English learner.\n"
+        "Return JSON with:\n"
+        "- idiom (string): the idiom/phrase (e.g. 'break the ice')\n"
+        "- meaning (string): a clear explanation of the idiom (1 sentence)\n"
+        "- example_sentence (string): a natural example sentence using the idiom\n"
+        "- situation_prompt (string): a short situational prompt asking the learner "
+        "to use the idiom in their own spoken sentence (1-2 sentences)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in idiomatic expressions. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="idiom_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Idiom prompt generation failed")
+
+    return {
+        "idiom": str(result.get("idiom", "break the ice")),
+        "meaning": str(result.get("meaning", "To initiate conversation in a social setting.")),
+        "example_sentence": str(result.get("example_sentence", "She told a joke to break the ice at the meeting.")),
+        "situation_prompt": str(result.get("situation_prompt", "Imagine you are at a networking event. Use this idiom to describe what you would do.")),
+        "difficulty": difficulty,
+    }
+
+
+class IdiomEvaluateRequest(BaseModel):
+    idiom: str = Field(min_length=1, max_length=200)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class IdiomEvaluateResponse(BaseModel):
+    idiom_usage_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    model_sentence: str
+
+
+@router.post("/idiom-prompt/evaluate", response_model=IdiomEvaluateResponse)
+async def evaluate_idiom_usage(
+    body: IdiomEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate whether the user correctly used the idiom in a spoken sentence."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Idiom: \"{body.idiom}\"\n"
+        f"User's spoken sentence ({body.duration_seconds}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate how well the user used this idiom. Return JSON with:\n"
+        "- idiom_usage_score (1-10): did they use the idiom correctly and in proper context?\n"
+        "- grammar_score (1-10): grammatical accuracy of the sentence\n"
+        "- naturalness_score (1-10): does the sentence sound natural and fluent?\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_sentence (string): a well-crafted example sentence using the idiom correctly"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in idiomatic expressions. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="idiom_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Idiom evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "idiom_usage_score": clamp(result.get("idiom_usage_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_sentence": str(result.get("model_sentence", "")),
+    }

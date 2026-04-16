@@ -1,2 +1,3 @@
 [
+  {"check":"agent_skip","severity":"error","iterations":" 495 496  495 496","root_cause":"self_implementation","confidence":"HIGH","evidence":"Found 1 'General-purpose Implement' entries — orchestrator bypassed subagents","action":"none"}
 ]

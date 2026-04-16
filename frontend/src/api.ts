@@ -2028,3 +2028,34 @@ export interface FillerAnalysisResponse {
 export function getFillerWordAnalysis(): Promise<FillerAnalysisResponse> {
   return request<FillerAnalysisResponse>('/api/pronunciation/speaking-journal/filler-analysis');
 }
+
+// ── Quick Idiom Practice ────────────────────────────────────
+
+export interface IdiomPromptResponse {
+  idiom: string;
+  meaning: string;
+  example_sentence: string;
+  situation_prompt: string;
+  difficulty: string;
+}
+
+export interface IdiomEvaluateResponse {
+  idiom_usage_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_sentence: string;
+}
+
+export function getIdiomPrompt(difficulty: string = 'intermediate'): Promise<IdiomPromptResponse> {
+  return request<IdiomPromptResponse>(`/api/pronunciation/idiom-prompt?difficulty=${difficulty}`);
+}
+
+export function evaluateIdiomUsage(idiom: string, transcript: string, duration_seconds: number): Promise<IdiomEvaluateResponse> {
+  return request<IdiomEvaluateResponse>('/api/pronunciation/idiom-prompt/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idiom, transcript, duration_seconds }),
+  });
+}

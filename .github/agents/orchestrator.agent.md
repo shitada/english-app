@@ -146,3 +146,17 @@ If implementation or tests crash:
 1. `git reset --hard HEAD~1`
 2. Record as "crash" with score 0.0
 3. Continue to next iteration
+
+<!-- AUDIT-FIX-20260416: agent_skip -->
+## AUDIT FIX: Agent Skip Prevention
+
+Previous audit detected that subagents were skipped. This is a HARD FAILURE.
+
+**MANDATORY CHECKLIST — verify BEFORE recording each iteration's results:**
+- Did I call `proposer` subagent? → Must have received JSON proposal
+- Did I call `tester` subagent? → Must have received JSON with ux_score
+- Did I call `evaluator` subagent? → Must have received JSON with total_score
+- Does the score in results.tsv match evaluator's total_score exactly?
+
+**If ANY answer is NO, STOP. Call the missing subagent NOW before proceeding.**
+You are an orchestrator — you dispatch work. You do NOT implement, score, or QA test.

@@ -499,3 +499,35 @@ pages:
         type: visual
         priority: medium
         added_in: 351
+
+      - id: quick-idiom-001
+        target: Quick Idiom card displays idiom prompt
+        action: Navigate to home page, open Speaking tab in Quick Practice
+        expect: QuickIdiomCard shows idiom, meaning, example sentence, situation prompt, and "Use the Idiom" button
+        type: functional
+        priority: medium
+        added_in: 497
+
+      - id: quick-idiom-002
+        target: Quick Idiom card TTS playback
+        action: Click Volume2 speaker icon next to example sentence
+        expect: Browser TTS reads the example sentence aloud
+        type: functional
+        priority: low
+        added_in: 497
+
+      - id: quick-idiom-003
+        target: Quick Idiom card speaking flow
+        action: Click "Use the Idiom" button, speak a sentence, click Done
+        expect: Timer counts down, transcript appears, evaluation scores display after Done
+        type: functional
+        priority: high
+        added_in: 497
+
+      - id: quick-idiom-004
+        target: Quick Idiom card new idiom
+        action: After evaluation, click "New Idiom" button
+        expect: Card resets and loads a new idiom prompt
+        type: functional
+        priority: medium
+        added_in: 497
