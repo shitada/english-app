@@ -239,6 +239,14 @@ pages:
         priority: medium
         added_in: 348
 
+      - id: conv-015a
+        target: Voice mode reconnecting indicator shown on speech recognition failure
+        action: Enable voice mode in chat, simulate speech recognition ending with no transcript (no-speech error)
+        expect: After ~2s delay, status indicator shows '🔄 Reconnecting…' with blue background, then listening resumes
+        type: functional
+        priority: high
+        added_in: 503
+
       - id: conv-016
         target: Grammar accuracy HUD shows in chat
         action: send a message in chat, check stats bar

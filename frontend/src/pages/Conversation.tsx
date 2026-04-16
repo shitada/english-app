@@ -90,7 +90,7 @@ export default function Conversation() {
   const [wpmValues, setWpmValues] = useState<number[]>([]);
   const [responseTimes, setResponseTimes] = useState<number[]>([]);
   const [voiceMode, setVoiceMode] = useState(false);
-  const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending'>('idle');
+  const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending' | 'reconnecting'>('idle');
   const [warmupTopicId, setWarmupTopicId] = useState<string>('');
   const [vocabTargets, setVocabTargets] = useState<string[]>([]);
   const [usedVocabWords, setUsedVocabWords] = useState<Set<string>>(new Set());
@@ -297,6 +297,17 @@ export default function Conversation() {
       return () => clearTimeout(timer);
     }
   }, [speech.isListening, voiceMode, phase, loading, input]);
+
+  // Voice Mode: auto-recover when speech recognition fails or times out
+  useEffect(() => {
+    if (!voiceMode || phase !== 'chat' || speech.isListening || tts.isSpeaking || loading || !speech.isSupported) return;
+    setVoiceStatus('reconnecting');
+    const timer = setTimeout(() => {
+      speech.reset();
+      speech.start();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [voiceMode, phase, speech.isListening, tts.isSpeaking, loading, speech.isSupported]);
 
   // Turn off voice mode when leaving chat
   useEffect(() => {
@@ -1183,13 +1194,14 @@ export default function Conversation() {
         <div style={{
           padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 8,
           fontSize: 13, fontWeight: 500,
-          background: voiceStatus === 'listening' ? 'rgba(34,197,94,0.1)' : voiceStatus === 'ai-speaking' ? 'rgba(99,102,241,0.1)' : 'rgba(234,179,8,0.1)',
-          color: voiceStatus === 'listening' ? 'var(--success, #22c55e)' : voiceStatus === 'ai-speaking' ? 'var(--primary, #6366f1)' : 'var(--warning, #eab308)',
+          background: voiceStatus === 'listening' ? 'rgba(34,197,94,0.1)' : voiceStatus === 'ai-speaking' ? 'rgba(99,102,241,0.1)' : voiceStatus === 'reconnecting' ? 'rgba(59,130,246,0.1)' : 'rgba(234,179,8,0.1)',
+          color: voiceStatus === 'listening' ? 'var(--success, #22c55e)' : voiceStatus === 'ai-speaking' ? 'var(--primary, #6366f1)' : voiceStatus === 'reconnecting' ? 'var(--info, #3b82f6)' : 'var(--warning, #eab308)',
           borderBottom: '1px solid var(--border, #e5e7eb)',
         }}>
           {voiceStatus === 'ai-speaking' && '🎧 AI speaking…'}
           {voiceStatus === 'listening' && '🎤 Listening…'}
           {voiceStatus === 'sending' && '⏳ Sending…'}
+          {voiceStatus === 'reconnecting' && '🔄 Reconnecting…'}
         </div>
       )}
 
