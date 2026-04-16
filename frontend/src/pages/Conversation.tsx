@@ -165,6 +165,8 @@ export default function Conversation() {
 
   const endConversation = useCallback(async () => {
     if (!conversationId) return;
+    speech.stop();
+    tts.stop();
     setLoading(true);
     try {
       const res = await api.endConversation(conversationId);
@@ -190,7 +192,7 @@ export default function Conversation() {
       setLoading(false);
       clearInterval(timerRef.current);
     }
-  }, [conversationId]);
+  }, [conversationId, speech, tts]);
 
   const startQuiz = useCallback(async () => {
     if (!conversationId) return;
