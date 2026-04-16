@@ -114,6 +114,22 @@ pages:
         priority: low
         added_in: 452
 
+      - id: home-013
+        target: Quick Listening Comprehension card renders in listening tab
+        action: click Listening tab in Quick Practice Hub, scroll to Listening Comprehension card
+        expect: Card with Headphones icon and "Listening Comprehension" title is visible
+        type: functional
+        priority: medium
+        added_in: 495
+
+      - id: home-014
+        target: Quick Listening Comprehension play and answer flow
+        action: click "Play Passage" button, wait for answering phase, select an option
+        expect: Result phase shows correct/incorrect feedback with explanation and "Next Question" button
+        type: functional
+        priority: medium
+        added_in: 495
+
   conversation:
     path: /conversation
     tests:

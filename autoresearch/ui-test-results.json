@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-04-16T19:50:24",
+  "port": 8001,
+  "overall": "PASS",
+  "pages_tested": 6,
+  "pages_passed": 6,
+  "pages_failed": 0,
+  "results": [
+    {
+      "page": "home",
+      "status": "PASS",
+      "checks_passed": 6,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/home.png",
+      "duration_ms": 1808
+    },
+    {
+      "page": "conversation",
+      "status": "PASS",
+      "checks_passed": 3,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/conversation.png",
+      "duration_ms": 1595
+    },
+    {
+      "page": "pronunciation",
+      "status": "PASS",
+      "checks_passed": 3,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/pronunciation.png",
+      "duration_ms": 1657
+    },
+    {
+      "page": "listening",
+      "status": "PASS",
+      "checks_passed": 3,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/listening.png",
+      "duration_ms": 1572
+    },
+    {
+      "page": "vocabulary",
+      "status": "PASS",
+      "checks_passed": 3,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/vocabulary.png",
+      "duration_ms": 1634
+    },
+    {
+      "page": "dashboard",
+      "status": "PASS",
+      "checks_passed": 2,
+      "checks_failed": 0,
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/dashboard.png",
+      "duration_ms": 1826
+    }
+  ]
+}

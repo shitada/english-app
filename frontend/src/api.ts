@@ -208,6 +208,9 @@ export const api = {
   getQuickRephrasePrompt: (difficulty: string = 'intermediate') =>
     request<QuickRephrasePromptResponse>(`/api/pronunciation/quick-rephrase?difficulty=${difficulty}`),
 
+  getQuickListeningComp: (difficulty: string = 'intermediate') =>
+    request<QuickListeningCompResponse>(`/api/pronunciation/quick-listening-comp?difficulty=${difficulty}`),
+
   evaluateListenRespond: (question: string, transcript: string, duration_seconds: number) =>
     request<ListenRespondEvaluateResponse>('/api/pronunciation/listen-respond/evaluate', {
       method: 'POST',
@@ -1694,6 +1697,15 @@ export interface ListenRespondEvaluateResponse {
 export interface QuickRephrasePromptResponse {
   original_sentence: string;
   instruction: string;
+  difficulty: string;
+}
+
+export interface QuickListeningCompResponse {
+  passage: string;
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
   difficulty: string;
 }
 

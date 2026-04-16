@@ -151,17 +151,33 @@ if [[ -f "$LOG_FILE" ]]; then
         [[ "$p" -eq 0 || "$t" -eq 0 || "$e" -eq 0 ]] && echo "AGENT_SKIP|${i}|proposer=${p} tester=${t} evaluator=${e}"
     done
 
-    # Count totals
-    total_p=0; total_t=0; total_e=0; total_skip_p=0; total_skip_t=0; total_skip_e=0
+    # Count totals (support both old 3-agent and new 4-agent formats)
+    total_p=0; total_c=0; total_t=0; total_e=0
+    total_skip_p=0; total_skip_c=0; total_skip_t=0; total_skip_e=0
     for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        p=$(grep -cE "Proposer.*(Propose |propose )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        t=$(grep -cE "Tester.*(QA |test )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        e=$(grep -cE "Evaluator.*(Evaluate |evaluate )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        [[ "$p" -gt 0 ]] && total_p=$((total_p + 1)) || total_skip_p=$((total_skip_p + 1))
-        [[ "$t" -gt 0 ]] && total_t=$((total_t + 1)) || total_skip_t=$((total_skip_t + 1))
-        [[ "$e" -gt 0 ]] && total_e=$((total_e + 1)) || total_skip_e=$((total_skip_e + 1))
+        # Check new AGENT_TRACE format first
+        trace=$(grep "AGENT_TRACE iter=$i " "$LOG_FILE" 2>/dev/null | head -1)
+        if [[ -n "$trace" ]]; then
+            p=$(echo "$trace" | grep -oP 'proposer=\K[0-9]+')
+            c=$(echo "$trace" | grep -oP 'coder=\K[0-9]+')
+            t=$(echo "$trace" | grep -oP 'tester=\K[0-9]+')
+            e=$(echo "$trace" | grep -oP 'evaluator=\K[0-9]+')
+        else
+            # Fallback to old grep format
+            p=$(grep -cE "Proposer.*(Propose |propose )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
+            c=$(grep -cE "Coder.*(Code |code |implement )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
+            t=$(grep -cE "Tester.*(QA |test )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
+            e=$(grep -cE "Evaluator.*(Evaluate |evaluate )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
+        fi
+        [[ "${p:-0}" -gt 0 ]] && total_p=$((total_p + 1)) || total_skip_p=$((total_skip_p + 1))
+        [[ "${c:-0}" -gt 0 ]] && total_c=$((total_c + 1)) || total_skip_c=$((total_skip_c + 1))
+        [[ "${t:-0}" -gt 0 ]] && total_t=$((total_t + 1)) || total_skip_t=$((total_skip_t + 1))
+        [[ "${e:-0}" -gt 0 ]] && total_e=$((total_e + 1)) || total_skip_e=$((total_skip_e + 1))
+        [[ "${p:-0}" -eq 0 || "${c:-0}" -eq 0 || "${t:-0}" -eq 0 || "${e:-0}" -eq 0 ]] && \
+            echo "AGENT_SKIP|${i}|proposer=${p:-0} coder=${c:-0} tester=${t:-0} evaluator=${e:-0}"
     done
     echo "Proposer: ${total_p}/${total_iters} called (${total_skip_p} skipped)"
+    echo "Coder: ${total_c}/${total_iters} called (${total_skip_c} skipped)"
     echo "Tester: ${total_t}/${total_iters} called (${total_skip_t} skipped)"
     echo "Evaluator: ${total_e}/${total_iters} called (${total_skip_e} skipped)"
 else
@@ -170,32 +186,18 @@ fi
 echo ""
 
 # ============================================================================
-# 5. Playwright / Tester details
+# 5. E2E Smoke UI Test Results
 # ============================================================================
-echo "=== PLAYWRIGHT TEST DETAILS ==="
+echo "=== E2E SMOKE UI ==="
 
 if [[ -f "$LOG_FILE" ]]; then
-    for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        next=$((i + 1))
-        pw_count=$(awk "/Tester.*iteration $i/,/iteration $next|Record iter|Record results/" \
-            "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser" || true)
-        if [[ "$pw_count" -gt 0 ]]; then
-            # Extract which playwright tools were used
-            pw_tools=$(awk "/Tester.*iteration $i/,/iteration $next|Record iter|Record results/" \
-                "$LOG_FILE" 2>/dev/null | grep -oE "playwright-browser_[a-z_]+" | sort -u | tr '\n' ',' | sed 's/,$//')
-            echo "PW|${i}|${pw_count} tools|${pw_tools}"
-        fi
-    done
+    grep "SMOKE_UI\|E2E_RESULT" "$LOG_FILE" 2>/dev/null | tail -20 || true
+fi
 
-    # Playwright verification summary from runner.log
-    echo ""
-    echo "=== PLAYWRIGHT VERIFICATION ==="
-    for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        pw_verdict=$(grep -oE "PW_(OK|SHALLOW|SKIP|NO_SNAPSHOT|NO_INTERACT|NA) iter=$i[^ ]*.*" "$LOG_FILE" 2>/dev/null | head -1)
-        if [[ -n "$pw_verdict" ]]; then
-            echo "PW_VERIFY|${i}|${pw_verdict}"
-        fi
-    done
+# E2E results file
+e2e_file="$PROJECT_DIR/autoresearch/ui-test-results.json"
+if [[ -f "$e2e_file" ]]; then
+    echo "E2E_FILE|$(cat "$e2e_file" | python3 -c 'import sys,json; d=json.load(sys.stdin); print(f"overall={d[\"overall\"]} pages={d[\"pages_tested\"]} passed={d[\"pages_passed\"]}")' 2>/dev/null || echo "parse error")"
 fi
 echo ""
 

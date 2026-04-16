@@ -1845,3 +1845,68 @@ async def test_speaking_journal_prompt_invalid_difficulty_falls_back(client):
     assert res.status_code == 200
     data = res.json()
     assert len(data["prompt"]) > 0
+
+
+# ── Quick Listening Comprehension ───────────────────────────────
+
+
+@pytest.mark.integration
+async def test_quick_listening_comp_success(client, mock_copilot):
+    """Quick listening comp generates a passage with question and options."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "passage": "The train to London departs at 9:15 every morning. It stops at three stations before arriving at the final destination. The journey takes approximately two hours.",
+        "question": "How long does the train journey take?",
+        "options": ["One hour", "Two hours", "Three hours", "Four hours"],
+        "correct_index": 1,
+        "explanation": "The passage states the journey takes approximately two hours.",
+    })
+    res = await client.get("/api/pronunciation/quick-listening-comp?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert "passage" in data
+    assert "question" in data
+    assert "options" in data
+    assert len(data["options"]) == 4
+    assert data["correct_index"] == 1
+    assert "explanation" in data
+    assert data["difficulty"] == "intermediate"
+
+
+@pytest.mark.integration
+async def test_quick_listening_comp_beginner(client, mock_copilot):
+    """Quick listening comp works with beginner difficulty."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "passage": "I like apples. They are red and sweet.",
+        "question": "What color are the apples?",
+        "options": ["Green", "Red", "Yellow", "Blue"],
+        "correct_index": 1,
+        "explanation": "The passage says the apples are red.",
+    })
+    res = await client.get("/api/pronunciation/quick-listening-comp?difficulty=beginner")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["difficulty"] == "beginner"
+    assert len(data["options"]) == 4
+
+
+@pytest.mark.integration
+async def test_quick_listening_comp_invalid_difficulty(client):
+    """Invalid difficulty is rejected with 422."""
+    res = await client.get("/api/pronunciation/quick-listening-comp?difficulty=invalid")
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
+async def test_quick_listening_comp_defaults_to_intermediate(client, mock_copilot):
+    """No difficulty parameter defaults to intermediate."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "passage": "A passage about something.",
+        "question": "A question?",
+        "options": ["A", "B", "C", "D"],
+        "correct_index": 0,
+        "explanation": "Because A.",
+    })
+    res = await client.get("/api/pronunciation/quick-listening-comp")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["difficulty"] == "intermediate"

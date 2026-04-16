@@ -151,12 +151,12 @@ build_prompt() {
 
     cat <<EOF
 ## MANDATORY RULES — read before doing ANYTHING:
-1. You MUST call the **proposer** subagent via runSubagent for EVERY iteration. Do NOT propose changes yourself.
-2. You MUST call the **evaluator** subagent via runSubagent for EVERY iteration. Do NOT assign scores yourself.
-3. You MUST call the **tester** subagent via runSubagent when ANY frontend .tsx file in pages/ or components/ was changed — regardless of proposal type (feature, bugfix, perf, etc.). Check with: \`git diff HEAD~1 --name-only | grep -E 'frontend/src/(pages|components)/.*\\.tsx$'\`
-4. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
-5. Read only the last 20 rows of results.tsv (use \`tail -20\`), not the full file.
-6. Before recording results, verify: Did I call proposer? Did I call evaluator? If frontend .tsx files in pages/ or components/ changed, did I call tester? If NO → STOP and call them NOW.
+1. You MUST call the **proposer** subagent for EVERY iteration.
+2. You MUST call the **coder** subagent for EVERY iteration. Do NOT implement code yourself.
+3. You MUST call the **tester** subagent for EVERY iteration. Do NOT run tests yourself.
+4. You MUST call the **evaluator** subagent for EVERY iteration. Do NOT assign scores yourself.
+5. Use \`printf\` with explicit \\t to write to results.tsv. NEVER use \`echo -e\`.
+6. Before recording results, verify: Did I call ALL 4 subagents (proposer, coder, tester, evaluator)? If NO → STOP and call them NOW.
 ${feature_instruction}
 
 ## Task:
@@ -165,7 +165,8 @@ Resume the autoresearch improvement loop starting from iteration ${next_iter}.
 Read ONLY uncompleted backlog items: \`grep '^- \\[ \\]' autoresearch/backlog.md\` — do NOT read completed items.
 Read \`tail -20 autoresearch/results.tsv\` to see recent results.
 If a session log exists in \`autoresearch/logs/\`, read ONLY the last 50 lines (\`tail -50 <file>\`). Do NOT read the full session log.
-Follow your orchestrator instructions for each iteration: propose → implement → test → evaluate → keep/discard.
+If \`autoresearch/ui-test-results.json\` exists and contains \`"overall": "FAIL"\`, read it and fix the failing pages BEFORE starting new features.
+Follow your orchestrator instructions: propose → code → test → evaluate → keep/discard.
 EOF
 }
 
@@ -298,48 +299,85 @@ main() {
         local new_iter
         new_iter=$(get_current_iteration)
         if [[ "$new_iter" -gt "$current" ]]; then
-            # Playwright test depth verification for UI-changing iterations
-            log "Verifying Playwright test depth..."
+            # Agent invocation trace logging
+            log "Recording agent traces..."
             for iter_num in $(seq $((current + 1)) "$new_iter"); do
-                local iter_commit
-                iter_commit=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n {print $2}' "$RESULTS_FILE")
-                if [[ -z "$iter_commit" || "$iter_commit" == "none" ]]; then
-                    continue
-                fi
+                local p_count t_count e_count c_count
+                p_count=$(grep -cE "● Proposer.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                c_count=$(grep -cE "● Coder.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                t_count=$(grep -cE "● Tester.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                e_count=$(grep -cE "● Evaluator.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                log "  AGENT_TRACE iter=$iter_num proposer=$p_count coder=$c_count tester=$t_count evaluator=$e_count"
+            done
 
-                local has_ui_change
-                has_ui_change=$(git diff --name-only "${iter_commit}~1..${iter_commit}" 2>/dev/null \
-                    | grep -cE "frontend/src/(pages|components)/.*\.tsx$" || true)
-
-                if [[ "$has_ui_change" -gt 0 ]]; then
-                    local next_iter=$((iter_num + 1))
-                    local pw_count
-                    pw_count=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
-                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser" || true)
-
-                    local pw_has_snapshot
-                    pw_has_snapshot=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
-                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser_snapshot\|playwright-browser_take_screenshot" || true)
-
-                    local pw_has_interaction
-                    pw_has_interaction=$(awk "/Tester.*iteration $iter_num/,/iteration $next_iter|Record iter|Record results/" \
-                        "$LOG_FILE" 2>/dev/null | grep -c "playwright-browser_click\|playwright-browser_type\|playwright-browser_evaluate" || true)
-
-                    if [[ "$pw_count" -eq 0 ]]; then
-                        log "  PW_SKIP iter=$iter_num — UI changed but NO Playwright test was run"
-                    elif [[ "$pw_count" -lt 5 ]]; then
-                        log "  PW_SHALLOW iter=$iter_num — only $pw_count tool calls (min 10 expected)"
-                    elif [[ "$pw_has_snapshot" -eq 0 ]]; then
-                        log "  PW_NO_SNAPSHOT iter=$iter_num — no snapshot taken, test quality suspect"
-                    elif [[ "$pw_has_interaction" -eq 0 ]]; then
-                        log "  PW_NO_INTERACT iter=$iter_num — no click/type/evaluate, test quality suspect"
-                    else
-                        log "  PW_OK iter=$iter_num — $pw_count tools, snapshot=$pw_has_snapshot, interact=$pw_has_interaction"
+            # ================================================================
+            # Smoke UI Test: run Playwright directly (not via agent)
+            # This is mechanical and cannot be skipped by the orchestrator.
+            # ================================================================
+            local any_ui_change=false
+            local ui_changed_pages=""
+            for iter_num in $(seq $((current + 1)) "$new_iter"); do
+                local ic
+                ic=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n {print $2}' "$RESULTS_FILE")
+                if [[ -n "$ic" && "$ic" != "none" ]]; then
+                    local ui_files
+                    ui_files=$(git diff --name-only "${ic}~1..${ic}" 2>/dev/null \
+                        | grep -E "frontend/src/(pages|components)/.*\.tsx$" || true)
+                    if [[ -n "$ui_files" ]]; then
+                        any_ui_change=true
+                        # Map files to page names
+                        for f in $ui_files; do
+                            case "$f" in
+                                *pages/Home.tsx*|*components/Quick*|*components/Smart*) ui_changed_pages="$ui_changed_pages home" ;;
+                                *pages/Conversation.tsx*|*components/conversation/*) ui_changed_pages="$ui_changed_pages conversation" ;;
+                                *pages/Pronunciation.tsx*|*components/pronunciation/*) ui_changed_pages="$ui_changed_pages pronunciation" ;;
+                                *pages/Listening.tsx*|*components/Listening*|*components/Echo*|*components/Cloze*) ui_changed_pages="$ui_changed_pages listening" ;;
+                                *pages/Vocabulary.tsx*|*components/vocabulary/*|*components/Vocab*) ui_changed_pages="$ui_changed_pages vocabulary" ;;
+                                *pages/Dashboard.tsx*|*components/dashboard/*) ui_changed_pages="$ui_changed_pages dashboard" ;;
+                                *App.tsx*|*index.css*) ui_changed_pages="$ui_changed_pages home" ;;
+                            esac
+                        done
                     fi
-                else
-                    log "  PW_NA iter=$iter_num — no UI file changes, Playwright test not required"
                 fi
             done
+
+            if $any_ui_change; then
+                # Deduplicate page names
+                local pages_csv
+                pages_csv=$(echo "$ui_changed_pages" | tr ' ' '\n' | sort -u | tr '\n' ',' | sed 's/^,//;s/,$//')
+                log "SMOKE_UI: UI changes detected in pages: $pages_csv"
+                log "SMOKE_UI: Starting Playwright smoke test..."
+
+                # Start server for UI test
+                lsof -ti:8098 | xargs kill -9 2>/dev/null || true
+                sleep 1
+                cd "$PROJECT_DIR"
+                uv run uvicorn app.main:app --host 0.0.0.0 --port 8098 --timeout-keep-alive 10 &
+                local srv_pid=$!
+                sleep 4
+
+                # Run smoke UI test
+                set +e
+                uv run python tests/e2e/smoke_ui.py --port 8098 --pages "$pages_csv" \
+                    2>&1 | tee -a "$LOG_FILE"
+                local ui_exit=$?
+                set -e
+
+                # Stop server
+                kill "$srv_pid" 2>/dev/null || true
+                lsof -ti:8098 | xargs kill -9 2>/dev/null || true
+
+                if [[ "$ui_exit" -eq 0 ]]; then
+                    log "SMOKE_UI_PASS: All UI pages passed smoke test"
+                    # Clean up old failure results
+                    rm -f "$PROJECT_DIR/autoresearch/ui-test-results.json" 2>/dev/null || true
+                else
+                    log "SMOKE_UI_FAIL: UI smoke test failed — results saved to autoresearch/ui-test-results.json"
+                    log "SMOKE_UI_FAIL: Next invocation will be instructed to fix the failures before adding new features."
+                fi
+            else
+                log "SMOKE_UI: No UI file changes — skipping Playwright smoke test"
+            fi
 
             log "Running post-invocation audit (iter $((current + 1))-$new_iter)..."
             set +e
