@@ -2207,3 +2207,18 @@ export function evaluateWordAssociation(
     body: JSON.stringify({ seed_word, transcript, duration_seconds }),
   });
 }
+
+// ── Quick Reading Comprehension ─────────────────────────────────
+
+export interface ReadingCompResponse {
+  passage: string;
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+  difficulty: string;
+}
+
+export function getReadingComp(difficulty: string = 'intermediate'): Promise<ReadingCompResponse> {
+  return request<ReadingCompResponse>(`/api/pronunciation/reading-comp?difficulty=${difficulty}`);
+}

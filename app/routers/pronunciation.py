@@ -3289,3 +3289,66 @@ async def evaluate_word_association(
         "feedback": str(result.get("feedback", "")),
         "missed_words": missed_words,
     }
+
+
+# ── Quick Reading Comprehension ─────────────────────────────────
+
+
+class ReadingCompResponse(BaseModel):
+    passage: str
+    question: str
+    options: list[str]
+    correct_index: int
+    explanation: str
+    difficulty: str
+
+
+@router.get("/reading-comp", response_model=ReadingCompResponse)
+async def get_reading_comp(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a short reading passage with a multiple-choice comprehension question."""
+    copilot = get_copilot_service()
+    sentence_map = {"beginner": "3", "intermediate": "4", "advanced": "5"}
+    sentence_count = sentence_map.get(difficulty, "4")
+    prompt_text = (
+        f"Generate a short reading comprehension exercise for a {difficulty}-level English learner.\n"
+        f"Create a short passage ({sentence_count} sentences) on an everyday topic, then a comprehension question "
+        "with 4 answer options where exactly one is correct.\n"
+        "Return JSON with:\n"
+        "- passage (string): a short passage on an everyday topic\n"
+        "- question (string): a comprehension question about the passage\n"
+        "- options (array of 4 strings): answer choices\n"
+        "- correct_index (integer 0-3): index of the correct option\n"
+        "- explanation (string): brief explanation of why the answer is correct (1-2 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English reading comprehension teacher. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="reading_comp",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Reading comprehension generation failed")
+
+    options = [str(o) for o in result.get("options", [])[:4]]
+    if len(options) < 4:
+        options.extend([""] * (4 - len(options)))
+
+    try:
+        correct_index = int(result.get("correct_index", 0))
+        correct_index = max(0, min(3, correct_index))
+    except (ValueError, TypeError):
+        correct_index = 0
+
+    return {
+        "passage": str(result.get("passage", "")),
+        "question": str(result.get("question", "")),
+        "options": options,
+        "correct_index": correct_index,
+        "explanation": str(result.get("explanation", "")),
+        "difficulty": difficulty,
+    }

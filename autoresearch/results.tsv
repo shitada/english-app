@@ -495,3 +495,6 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 502	eac4db4	2026-04-16	304	95	100	67	566	1462	1462	pass	7.25	kept	Stop TTS and speech recognition when ending conversation
 503	a673921	2026-04-17	257	151	100	149	657	1462	1462	pass	6.30	kept	Auto-recover voice mode loop when speech recognition fails or times out
 504	6537e94	2026-04-17	118	134	107	118	477	1462	1462	pass	6.45	kept	Fix Quick Practice cards ignoring global difficulty selector
+505	80adc3b	2026-04-17	366	279	152	133	930	1478	1478	pass	6.20	kept	Add Quick Explain Card with taboo-word circumlocution speaking drill
+506	d6e34a9	2026-04-17	250	213	218	122	803	1485	1485	pass	6.80	kept	Add Quick Role-Play Card with 2-exchange situational mini-dialogue
+507	2b8a3a6	2026-04-17	197	269	130	136	732	1496	1496	pass	7.15	kept	Add Quick Word Association Card with timed vocabulary retrieval practice

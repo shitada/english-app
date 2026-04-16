@@ -111,30 +111,16 @@ Improvement ideas for the English Learning App, prioritized by importance.
 
 ## [NEW] Iterations 407–408
 
-- [x] Add Quick Rephrase card to Home page (discarded — QA infra unavailable, score 5.9)
-- [x] Add fluency progression analytics endpoint (kept — score 7.3)
-- [x] Add frontend Fluency Progression chart to Dashboard (kept — score 7.2, iteration 409)
-- [x] Add Quick Rephrase card to Home page (kept — score 6.9, iteration 410)
 
 ## [NEW] Iterations 411–412
 
-- [x] Add Response Speed Analytics card to Dashboard (discarded — score 5.1, no tests, dashboard saturated)
-- [x] Add pronunciation sentence mastery overview endpoint with tests (kept — score 7.15, 11 new tests)
 
 
 ## [NEW] Iterations 415–416
 
-- [x] Add Quick Sentence Transform card to Home page (kept — score 6.7, grammar+speaking drill)
-- [x] Add topic selection to Listening Quiz (kept — score 6.9, scenario-focused listening)
 
 ## [NEW] Iterations 497–498
 
-- [x] Add Quick Idiom Practice card with spoken usage evaluation (kept — score 6.1, iteration 497)
-- [x] Add Quick Write card with scenario-based short writing exercises (kept — score 6.9, iteration 498)
 
 ## [NEW] Iterations 499–500
 
-- [x] Add global difficulty selector to QuickPracticeHub for all cards (kept — score 6.45, iteration 499)
-- [x] Fix stale closure in timer-expired speech evaluation across Quick Practice cards (kept — score 7.45, iteration 500)
-- [x] Auto-recover voice mode loop when speech recognition fails or times out (kept — score 6.30, iteration 503)
-- [x] Fix Quick Practice cards ignoring global difficulty selector (kept — score 6.45, iteration 504)

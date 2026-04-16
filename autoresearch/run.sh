@@ -165,7 +165,7 @@ Resume the autoresearch improvement loop starting from iteration ${next_iter}.
 Read ONLY uncompleted backlog items: \`grep '^- \\[ \\]' autoresearch/backlog.md\` — do NOT read completed items.
 Read \`tail -20 autoresearch/results.tsv\` to see recent results.
 If a session log exists in \`autoresearch/logs/\`, read ONLY the last 50 lines (\`tail -50 <file>\`). Do NOT read the full session log.
-If \`autoresearch/ui-test-results.json\` exists and contains \`"overall": "FAIL"\`, read it and fix the failing pages BEFORE starting new features.
+If \`autoresearch/ui-test-results.json\` exists and contains \`"overall": "FAIL"\`, you MUST read it and fix the failing tests FIRST before any new features. Tell the coder: "Fix these E2E test failures: [paste the spec_results with status=FAIL]. Either fix the code so the UI element exists, or fix the yaml test spec if the test expectation is wrong."
 Follow your orchestrator instructions: propose → code → test → evaluate → keep/discard.
 EOF
 }
@@ -346,7 +346,20 @@ main() {
                 local pages_csv
                 pages_csv=$(echo "$ui_changed_pages" | tr ' ' '\n' | sort -u | tr '\n' ',' | sed 's/^,//;s/,$//')
                 log "SMOKE_UI: UI changes detected in pages: $pages_csv"
-                log "SMOKE_UI: Starting Playwright smoke test..."
+
+                # Determine test level:
+                # - functional: run yaml critical+high tests on changed pages
+                # - full: every 5 iterations, run all tests on all pages
+                local ui_level="functional"
+                if [[ $((new_iter % 5)) -eq 0 ]]; then
+                    ui_level="full"
+                    pages_csv=""  # full level tests all pages
+                    log "SMOKE_UI: Level=full (iteration $new_iter is divisible by 5)"
+                else
+                    log "SMOKE_UI: Level=functional (changed pages only)"
+                fi
+
+                log "SMOKE_UI: Starting Playwright test (level=$ui_level)..."
 
                 # Start server for UI test
                 lsof -ti:8098 | xargs kill -9 2>/dev/null || true
@@ -356,10 +369,13 @@ main() {
                 local srv_pid=$!
                 sleep 4
 
-                # Run smoke UI test
+                # Run UI test
                 set +e
-                uv run python tests/e2e/smoke_ui.py --port 8098 --pages "$pages_csv" \
-                    2>&1 | tee -a "$LOG_FILE"
+                local ui_cmd="uv run python tests/e2e/smoke_ui.py --port 8098 --level $ui_level"
+                if [[ -n "$pages_csv" ]]; then
+                    ui_cmd="$ui_cmd --pages $pages_csv"
+                fi
+                eval "$ui_cmd" 2>&1 | tee -a "$LOG_FILE"
                 local ui_exit=$?
                 set -e
 
@@ -368,12 +384,40 @@ main() {
                 lsof -ti:8098 | xargs kill -9 2>/dev/null || true
 
                 if [[ "$ui_exit" -eq 0 ]]; then
-                    log "SMOKE_UI_PASS: All UI pages passed smoke test"
-                    # Clean up old failure results
+                    log "SMOKE_UI_PASS: All UI pages passed"
                     rm -f "$PROJECT_DIR/autoresearch/ui-test-results.json" 2>/dev/null || true
                 else
-                    log "SMOKE_UI_FAIL: UI smoke test failed — results saved to autoresearch/ui-test-results.json"
-                    log "SMOKE_UI_FAIL: Next invocation will be instructed to fix the failures before adding new features."
+                    log "SMOKE_UI_FAIL: UI test failed — reverting UI-changing iterations"
+                    # Find which iterations changed UI and revert them
+                    local ui_fail_iters=""
+                    for iter_num in $(seq $((current + 1)) "$new_iter"); do
+                        local ic
+                        ic=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n {print $2}' "$RESULTS_FILE")
+                        if [[ -n "$ic" && "$ic" != "none" ]]; then
+                            local has_ui
+                            has_ui=$(git diff --name-only "${ic}~1..${ic}" 2>/dev/null \
+                                | grep -cE "frontend/src/(pages|components)/.*\.tsx$" || true)
+                            if [[ "$has_ui" -gt 0 ]]; then
+                                ui_fail_iters="$ui_fail_iters $iter_num"
+                            fi
+                        fi
+                    done
+
+                    if [[ -n "$ui_fail_iters" ]]; then
+                        # Revert all commits from this invocation
+                        local total_commits=$((new_iter - current))
+                        log "SMOKE_UI_REVERT: Reverting $total_commits commit(s) (UI-fail iters:$ui_fail_iters)"
+                        set +e
+                        git reset --hard "HEAD~${total_commits}" 2>&1 | tee -a "$LOG_FILE"
+                        # Remove TSV rows for reverted iterations
+                        for iter_num in $(seq $((current + 1)) "$new_iter"); do
+                            sed -i '' "/^${iter_num}\t/d" "$RESULTS_FILE" 2>/dev/null || true
+                        done
+                        set -e
+                        new_iter=$current
+                        log "SMOKE_UI_REVERT: Reverted to iteration $current. E2E failures saved to ui-test-results.json"
+                        log "SMOKE_UI_REVERT: Next invocation will see the failure details and must fix them."
+                    fi
                 fi
             else
                 log "SMOKE_UI: No UI file changes — skipping Playwright smoke test"

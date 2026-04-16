@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-04-17T00:22:00",
+  "port": 8001,
+  "level": "functional",
+  "overall": "FAIL",
+  "pages_tested": 1,
+  "pages_passed": 0,
+  "pages_failed": 1,
+  "total_spec_tests": 4,
+  "total_spec_passed": 1,
+  "total_spec_failed": 3,
+  "results": [
+    {
+      "page": "home",
+      "status": "FAIL",
+      "smoke_passed": 4,
+      "smoke_failed": 0,
+      "spec_tests_run": 4,
+      "spec_tests_passed": 1,
+      "spec_tests_failed": 3,
+      "spec_results": [
+        {
+          "id": "home-001",
+          "target": "Navigation bar renders with all links",
+          "status": "PASS",
+          "notes": "Page stable, no crash detected",
+          "fix_hint": ""
+        },
+        {
+          "id": "home-004",
+          "target": "Daily streak card displays correctly",
+          "status": "FAIL",
+          "notes": "None of expected elements found: ['Streak count visible with flame icon', 'no text overflow']",
+          "fix_hint": "fix_yaml: update expect text to match actual UI, OR fix_code: add missing UI element"
+        },
+        {
+          "id": "home-005",
+          "target": "Word of the Day TTS button works",
+          "status": "FAIL",
+          "notes": "Button 'TTS' not found",
+          "fix_hint": "fix_yaml: update action button text to match actual button label, OR fix_code: add missing button"
+        },
+        {
+          "id": "home-008",
+          "target": "Mobile hamburger menu opens/closes",
+          "status": "FAIL",
+          "notes": "Button 'hamburger' not found",
+          "fix_hint": "fix_yaml: update action button text to match actual button label, OR fix_code: add missing button"
+        }
+      ],
+      "console_errors": [],
+      "issues": [
+        "[home-004] None of expected elements found: ['Streak count visible with flame icon', 'no text overflow']",
+        "[home-005] Button 'TTS' not found",
+        "[home-008] Button 'hamburger' not found"
+      ],
+      "screenshot": "autoresearch/screenshots/home.png",
+      "duration_ms": 2873
+    }
+  ]
+}
