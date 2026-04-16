@@ -2134,49 +2134,6 @@ export function evaluateExplainWord(
   });
 }
 
-// ── Quick Role-Play (2-Exchange Mini-Dialogue) ──────────────────
-
-export interface RolePlayExchangeOut {
-  partner_says: string;
-}
-
-export interface RolePlayScenarioResponse {
-  scenario: string;
-  your_role: string;
-  partner_role: string;
-  exchanges: RolePlayExchangeOut[];
-  key_phrases: string[];
-  difficulty: string;
-}
-
-export interface RolePlayEvaluateResponse {
-  appropriateness_score: number;
-  grammar_score: number;
-  fluency_score: number;
-  vocabulary_score: number;
-  overall_score: number;
-  feedback: string;
-  model_responses: string[];
-}
-
-export function getRolePlayScenario(difficulty: string = 'intermediate'): Promise<RolePlayScenarioResponse> {
-  return request<RolePlayScenarioResponse>(`/api/pronunciation/roleplay-scenario?difficulty=${difficulty}`);
-}
-
-export function evaluateRolePlay(
-  scenario: string,
-  your_role: string,
-  partner_role: string,
-  exchanges: { partner_says: string; user_says: string }[],
-  duration_seconds: number,
-): Promise<RolePlayEvaluateResponse> {
-  return request<RolePlayEvaluateResponse>('/api/pronunciation/roleplay/evaluate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ scenario, your_role, partner_role, exchanges, duration_seconds }),
-  });
-}
-
 // ── Quick Role-Play Practice ─────────────────────────────────
 
 export interface RolePlayScenarioResponse {

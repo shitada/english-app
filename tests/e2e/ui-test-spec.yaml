@@ -715,3 +715,43 @@ pages:
         type: functional
         priority: high
         added_in: 505
+
+      - id: quick-practice-hub-019
+        target: QuickRolePlayCard idle phase scenario display
+        action: View QuickRolePlayCard in idle phase on speaking tab
+        expect: Shows scenario description with 🎭 emoji, your_role and partner_role labels, key phrases chips with 💡 prefix, and "Start Role-Play (2 exchanges)" button
+        type: visual
+        priority: high
+        added_in: 506
+
+      - id: quick-practice-hub-020
+        target: QuickRolePlayCard listen phase with TTS
+        action: Click "Start Role-Play" button on QuickRolePlayCard
+        expect: Listen phase shows partner role name with "is speaking…" label, partner dialogue in styled box, exchange number (1/2), and "Listening… Your turn is next." text
+        type: functional
+        priority: high
+        added_in: 506
+
+      - id: quick-practice-hub-021
+        target: QuickRolePlayCard speaking phase with timer
+        action: Wait for TTS to finish in listen phase
+        expect: Speaking phase shows exchange number, partner's last line (dimmed), pulsing mic icon with 15s countdown, live transcript, and Done button
+        type: functional
+        priority: high
+        added_in: 506
+
+      - id: quick-practice-hub-022
+        target: QuickRolePlayCard evaluation results with model responses
+        action: Complete both exchanges in QuickRolePlayCard
+        expect: Shows 5 score bars (Appropriate/Grammar/Fluency/Vocab/Overall), feedback text, model responses section with numbered ideal responses, Try Again and New Scenario buttons
+        type: functional
+        priority: high
+        added_in: 506
+
+      - id: quick-practice-hub-023
+        target: QuickRolePlayCard difficulty selector integration
+        action: Change difficulty via Quick Practice Hub selector while QuickRolePlayCard is visible
+        expect: QuickRolePlayCard resets to idle phase, clears transcripts, and re-fetches scenario with new difficulty
+        type: functional
+        priority: medium
+        added_in: 506
