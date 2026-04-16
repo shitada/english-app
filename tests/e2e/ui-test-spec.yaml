@@ -579,3 +579,27 @@ pages:
         type: functional
         priority: medium
         added_in: 498
+
+      - id: quick-practice-hub-006
+        target: Quick Practice Hub difficulty selector renders
+        action: Navigate to home page and locate the Quick Practice Hub difficulty buttons
+        expect: Three buttons (Beginner, Intermediate, Advanced) visible below the tab bar, Intermediate selected by default
+        type: functional
+        priority: high
+        added_in: 499
+
+      - id: quick-practice-hub-007
+        target: Quick Practice Hub difficulty selector changes difficulty
+        action: Click the "Beginner" difficulty button in Quick Practice Hub
+        expect: Beginner button becomes active (filled primary color), localStorage 'quick-practice-difficulty' set to 'beginner'
+        type: functional
+        priority: high
+        added_in: 499
+
+      - id: quick-practice-hub-008
+        target: Quick Practice Hub difficulty persists across reload
+        action: Select "Advanced" difficulty, reload the page
+        expect: Advanced button is still selected after reload
+        type: state
+        priority: medium
+        added_in: 499

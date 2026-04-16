@@ -126,3 +126,8 @@ Improvement ideas for the English Learning App, prioritized by importance.
 
 - [x] Add Quick Sentence Transform card to Home page (kept — score 6.7, grammar+speaking drill)
 - [x] Add topic selection to Listening Quiz (kept — score 6.9, scenario-focused listening)
+
+## [NEW] Iterations 497–498
+
+- [x] Add Quick Idiom Practice card with spoken usage evaluation (kept — score 6.1, iteration 497)
+- [x] Add Quick Write card with scenario-based short writing exercises (kept — score 6.9, iteration 498)

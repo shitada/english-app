@@ -34,7 +34,8 @@ export default function QuickSpeakCard() {
   const fetchPrompt = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.getQuickSpeakPrompt('intermediate');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await api.getQuickSpeakPrompt(difficulty);
       setPrompt(res);
     } catch {
       // ignore
@@ -49,6 +50,18 @@ export default function QuickSpeakCard() {
       fetchPrompt();
     }
   }, [initialized, fetchPrompt]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        fetchPrompt();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchPrompt]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {

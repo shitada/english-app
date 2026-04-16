@@ -488,3 +488,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 494	1e98709	2026-04-16	196	43	71	349	659	1420	1420	pass	6.15	kept	Add transcript review panel with filler highlighting to Speaking Journal
 496	none	2026-04-16	199	110	96	171	576	1428	1428	pass	5.60	discarded	Enhance flashcard review with example sentences, audio, and reverse mode
 497	1bdb2e1	2026-04-16	130	211	108	95	544	1437	1437	pass	6.10	kept	Add Quick Idiom Practice card with spoken usage evaluation
+498	c2c3f99	2026-04-16	135	237	124	95	591	1451	1451	pass	6.90	kept	Add Quick Write card with scenario-based short writing exercises

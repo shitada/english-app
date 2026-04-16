@@ -39,7 +39,8 @@ export default function QuickListenRespondCard() {
   const fetchPrompt = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.getListenRespondPrompt('intermediate');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await api.getListenRespondPrompt(difficulty);
       setPrompt(res);
     } catch {
       // ignore
@@ -54,6 +55,19 @@ export default function QuickListenRespondCard() {
       fetchPrompt();
     }
   }, [initialized, fetchPrompt]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        setShowQuestion(false);
+        fetchPrompt();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchPrompt]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {

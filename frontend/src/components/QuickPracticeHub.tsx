@@ -18,6 +18,10 @@ import QuickIdiomCard from './QuickIdiomCard';
 import QuickWriteCard from './QuickWriteCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
+const DIFFICULTY_KEY = 'quick-practice-difficulty';
+
+type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
 
 interface TabDef {
   key: string;
@@ -42,9 +46,24 @@ export default function QuickPracticeHub() {
     return 'speaking';
   });
 
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => {
+    try {
+      const saved = localStorage.getItem(DIFFICULTY_KEY) as Difficulty;
+      if (saved && DIFFICULTIES.includes(saved)) return saved;
+    } catch { /* ignore */ }
+    return 'intermediate';
+  });
+
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, activeTab); } catch { /* ignore */ }
   }, [activeTab]);
+
+  const handleDifficultyChange = (d: Difficulty) => {
+    setDifficulty(d);
+    try { localStorage.setItem(DIFFICULTY_KEY, d); } catch { /* ignore */ }
+    // Dispatch storage event so child cards can react
+    window.dispatchEvent(new StorageEvent('storage', { key: DIFFICULTY_KEY, newValue: d }));
+  };
 
   return (
     <div style={{
@@ -95,6 +114,37 @@ export default function QuickPracticeHub() {
               </button>
             );
           })}
+        </div>
+
+        <div style={{
+          display: 'flex',
+          gap: 4,
+          padding: '10px 0 12px',
+        }}>
+          {DIFFICULTIES.map(d => (
+            <button
+              key={d}
+              onClick={() => handleDifficultyChange(d)}
+              data-testid={`qp-difficulty-${d}`}
+              aria-pressed={difficulty === d}
+              style={{
+                flex: 1,
+                padding: '6px 4px',
+                border: '1px solid',
+                borderColor: difficulty === d ? 'var(--primary, #3b82f6)' : 'var(--border, #d1d5db)',
+                background: difficulty === d ? 'var(--primary, #3b82f6)' : 'transparent',
+                color: difficulty === d ? '#fff' : 'var(--text-secondary, #6b7280)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+                fontWeight: difficulty === d ? 600 : 400,
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s',
+              }}
+            >
+              {d === 'beginner' ? '🌱' : d === 'intermediate' ? '📗' : '🚀'} {d.charAt(0).toUpperCase() + d.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 

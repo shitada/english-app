@@ -544,3 +544,188 @@ Good proposal — adding writing practice, a missing skill area. Now calling the
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
+● Coder Implement iteration 498
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #498: Add Quick Write card with scenario-based short
+  │   │ writing exercises
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 17 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log -1
+      │ --format="%H"
+      └ 2 lines...
+
+Now calling the **tester**.
+
+● Record T2, get changed files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git diff HEAD~1 --name-only && echo "---HASH---" && git rev-parse --short
+  │ HEAD
+  └ 12 lines...
+
+● Tester Test iteration 498
+  │ Check smoke test structure (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && cat tests/smoke_test.py
+  │   │ | grep -n "def \|class \|if __name__"
+  │   └ 3 lines...
+  └ Run smoke test as script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1; echo
+      │ "EXIT_CODE:$?"
+      └ 24 lines...
+
+All tests pass. Now calling the **evaluator**.
+
+● Record T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 498
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L550:700 (32 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L525:555 (31 lines read)
+
+● Record iteration 498 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ echo "T4=$T4" && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "498" "c2c3f99" "2026-04-16" "135" "237" "124" "95" "591" "1451" "1451"
+  │ "pass" "6.90" "kept" "Add Quick Write card with scenario-based short …
+  └ 6 lines...
+
+Both iterations complete. Let me update the backlog with the new items.
+
+● Update backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat >>
+  │ autoresearch/backlog.md << 'EOF'
+  │
+  │ ## [NEW] Iterations 497–498…
+  └ 9 lines...
+
+✅ **2 iterations completed. Stopping.**
+
+| Iter | Commit | Feature | Score | Verdict |
+|------|--------|---------|-------|---------|
+| 497 | `1bdb2e1` | Quick Idiom Practice card with spoken usage evaluation | 6.10 | ✅ kept |
+| 498 | `c2c3f99` | Quick Write card with scenario-based short writing exercises | 6.90 | ✅ kept |
+
+Both features kept. Tests: 1451/1451 passing, TSC clean, smoke + E2E all green. Two new skill areas added: idiom practice and writing exercises.
+
+
+Changes   +0 -0
+Requests  3 Premium (20m 21s)
+Tokens    ↑ 3.6m • ↓ 52.3k • 3.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-497-to-504.md
+[2026-04-16 23:01:22] Copilot invocation completed (duration: 1225s)
+[2026-04-16 23:01:22] Recording agent traces...
+[2026-04-16 23:01:22]   AGENT_TRACE iter=497 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-16 23:01:22]   AGENT_TRACE iter=498 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-16 23:01:22] SMOKE_UI: UI changes detected in pages: home
+[2026-04-16 23:01:22] SMOKE_UI: Starting Playwright smoke test...
+🎭 Smoke UI Test (port 8098)
+   Testing: home
+
+  ✅ home: 6 passed, 0 failed (1884ms)
+
+✅ SMOKE UI PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-16 23:01:30] SMOKE_UI_PASS: All UI pages passed smoke test
+[2026-04-16 23:01:30] Running post-invocation audit (iter 497-498)...
+============================================
+ Autoresearch Audit
+ Iterations: 497 — 498
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-16 23:01:31
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 497 498[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Orchestrator self-implemented (1 occurrences)[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-16 23:01:32] Audit found 1 error(s) — fixes applied where possible
+[2026-04-16 23:01:35] Current iteration count: 498 / 504
+[2026-04-16 23:01:35] ------------------------------------------
+[2026-04-16 23:01:35] Invocation 3 / 10
+[2026-04-16 23:01:35] Resuming from iteration 499
+[2026-04-16 23:01:35] ------------------------------------------
+[2026-04-16 23:01:35] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-499-to-504.md)...
+● Read current autoresearch state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---LAST SESSION---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 26 lines...
+
+● Check backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -20
+  └ 1 line...
+
+● Check backlog tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 30 lines...
+
+No uncompleted backlog items. I'll proceed with iterations 499 and 500, letting the proposer decide what to work on.
+
+**Iteration 499 — Step 2: Propose**
+
+● Proposer Propose iteration 499
+  │ Read QuickListenRespondCard.tsx
+  │   │ frontend/src/components/QuickListenRespondCard.tsx
+  │   └ L1:50 (49 lines read)
+  └ Read QuickGrammarCard.tsx
+      │ frontend/src/components/QuickGrammarCard.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 timestamp (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 499 — Step 3: Implement**
+
