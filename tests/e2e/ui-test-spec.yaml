@@ -369,6 +369,54 @@ pages:
         priority: medium
         added_in: 512
 
+      - id: conv-030
+        target: Start conversation error shows inline banner instead of alert
+        action: Attempt to start a conversation when backend is down (mock network failure)
+        expect: Red error banner with "⚠️ Failed to start conversation" text and ✕ dismiss button appears in select phase, no browser alert dialog
+        type: error
+        priority: high
+        added_in: 513
+
+      - id: conv-031
+        target: Start error banner dismiss button works
+        action: Click ✕ button on the start error banner
+        expect: Error banner disappears, topic cards remain interactive
+        type: functional
+        priority: medium
+        added_in: 513
+
+      - id: conv-032
+        target: Send message error shows inline error banner with retry button
+        action: Send a message when API returns 500 error (mock failure)
+        expect: Red error banner appears below last user message with error text and "🔄 Retry" button, no fake assistant message in chat
+        type: error
+        priority: high
+        added_in: 513
+
+      - id: conv-033
+        target: Retry button resends the failed message
+        action: Click "🔄 Retry" button on the send error banner
+        expect: Error banner disappears, loading spinner appears, message is resent without duplicating user message in chat
+        type: functional
+        priority: high
+        added_in: 513
+
+      - id: conv-034
+        target: Typing new message clears send error state
+        action: After a send error, type a new character in the message input
+        expect: Error banner and retry button disappear
+        type: functional
+        priority: medium
+        added_in: 513
+
+      - id: conv-035
+        target: Rate limit (429) error shows retry banner
+        action: Send a message when API returns 429 error (mock rate limit)
+        expect: Error banner shows "Too many requests" text with retry button, user message remains in chat history
+        type: error
+        priority: high
+        added_in: 513
+
   pronunciation:
     path: /pronunciation
     tests:

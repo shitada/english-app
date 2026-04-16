@@ -95,6 +95,9 @@ export default function Conversation() {
   const [warmupTopicId, setWarmupTopicId] = useState<string>('');
   const [vocabTargets, setVocabTargets] = useState<string[]>([]);
   const [usedVocabWords, setUsedVocabWords] = useState<Set<string>>(new Set());
+  const [failedMessage, setFailedMessage] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [startError, setStartError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -478,6 +481,7 @@ export default function Conversation() {
 
   const startConversation = async (topicId: string) => {
     setLoading(true);
+    setStartError(null);
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setConversationId(res.conversation_id);
@@ -512,23 +516,30 @@ export default function Conversation() {
         setUsedVocabWords(new Set());
       }
     } catch (err) {
-      alert('Failed to start conversation. Make sure the backend is running.');
+      setStartError('Failed to start conversation. Make sure the backend is running.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || !conversationId || loading) return;
+  const sendMessage = async (retryContent?: string) => {
+    const messageContent = retryContent || input.trim();
+    if (!messageContent || !conversationId || loading) return;
 
     // Stop recognition and capture current text before resetting
     speech.stop();
-    const userMsg = input.trim();
+    const userMsg = messageContent;
     setInput('');
     speech.reset();
     setPhraseSuggestions([]);
-    setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    // Clear any previous error state
+    setFailedMessage(null);
+    setSendError(null);
+    // Only append user message if it's not a retry (retry message is already in the list)
+    if (!retryContent) {
+      setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
+    }
     // Check for target vocabulary words used
     if (vocabTargets.length > 0) {
       const lowerMsg = userMsg.toLowerCase();
@@ -573,21 +584,14 @@ export default function Conversation() {
           setSummary(sumRes.summary);
           setPhase('summary');
         } catch {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'This conversation has ended. Please start a new one.' },
-          ]);
+          setSendError('This conversation has ended. Please start a new one.');
         }
       } else if (err instanceof ApiError && err.status === 429) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: 'Too many requests. Please wait a moment before trying again.' },
-        ]);
+        setFailedMessage(userMsg);
+        setSendError('Too many requests. Please wait a moment before trying again.');
       } else {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' },
-        ]);
+        setFailedMessage(userMsg);
+        setSendError('Sorry, something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -609,6 +613,31 @@ export default function Conversation() {
           </div>
         ) : (
           <>
+            {startError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 16px',
+                borderRadius: 12,
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+              role="alert"
+              >
+                <span>⚠️ {startError}</span>
+                <button
+                  onClick={() => setStartError(null)}
+                  aria-label="Dismiss error"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontWeight: 600, fontSize: '1rem', marginLeft: 'auto' }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             {diffRec && diffRec.recommended_difficulty !== diffRec.current_difficulty && (
               <div style={{
                 marginBottom: 16,
@@ -1351,6 +1380,45 @@ export default function Conversation() {
             }} />}
           </div>
         ))}
+        {sendError && (
+          <div style={{
+            margin: '8px 16px',
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#b91c1c',
+            fontSize: '0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexWrap: 'wrap',
+          }}
+          role="alert"
+          >
+            <span style={{ flex: 1 }}>⚠️ {sendError}</span>
+            {failedMessage && (
+              <button
+                onClick={() => sendMessage(failedMessage)}
+                disabled={loading}
+                aria-label="Retry sending message"
+                style={{
+                  padding: '4px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #b91c1c',
+                  background: '#fff',
+                  color: '#b91c1c',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  flexShrink: 0,
+                }}
+              >
+                🔄 Retry
+              </button>
+            )}
+          </div>
+        )}
         {loading && (
           <div className="message message-assistant">
             <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, margin: 0 }} />
@@ -1404,7 +1472,7 @@ export default function Conversation() {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); if (failedMessage) { setFailedMessage(null); setSendError(null); } }}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && input.trim() && !loading) sendMessage(); }}
             placeholder={speech.isListening ? 'Listening...' : 'Type your message or use the mic'}
             disabled={loading}
