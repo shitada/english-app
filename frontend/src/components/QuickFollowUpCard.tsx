@@ -20,7 +20,8 @@ export default function QuickFollowUpCard() {
   const fetchPrompt = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getFollowUpPrompt('intermediate');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await getFollowUpPrompt(difficulty);
       setPrompt(res);
     } catch {
       // ignore
@@ -35,6 +36,18 @@ export default function QuickFollowUpCard() {
       fetchPrompt();
     }
   }, [initialized, fetchPrompt]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        fetchPrompt();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchPrompt]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {

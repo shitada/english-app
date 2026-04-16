@@ -1257,3 +1257,85 @@ All backlog items are completed. Now let me run the iteration loop. Starting wit
 
 Now calling the coder to implement iteration 503.
 
+● Coder Implement iteration 503
+  │ Commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "Auto-recover voice mode loop when speech recognition fails or
+  │   │ times out
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 15 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log -1
+      │ --format="%H"
+      └ 2 lines...
+
+● Record T2 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+Now calling the tester.
+
+● Tester Test iteration 503
+  │ Run TypeScript check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1
+  │   └ 2 lines...
+  └ Check for E2E results (shell)
+      │ test -f /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-
+      │ results.json && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json || echo "NOT_FOUND"
+      └ 2 lines...
+
+● Record T3 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+Now calling the evaluator.
+
+● Evaluator Evaluate iteration 503
+  │ List directory tests
+  │   └ 8 files found
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L1183:1206 (24 lines read)
+
+● Record T4 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo
+  │ "T4=$T4"
+  └ 2 lines...
+
+Evaluator gave score 6.3, verdict "keep". Tests passed. Recording results and keeping the commit.
+
+● Record iteration 503 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "503" "$HASH" "$(date +%Y-%m-%d)" "$((1776351210-1776350953))"
+  │ "$((1776351361-1776351210))" "$((1776351461-1776351361))" …
+  └ 7 lines...
+
+Iteration 503 ✅ kept (score 6.30). Now starting iteration 504.
+
+● Start iteration 504 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && git log --oneline -3
+  └ 5 lines...
+
+● Proposer Propose iteration 504
+  │ Read QuickWriteCard.tsx
+  │   │ frontend/src/components/QuickWriteCard.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read QuickVocabRecallCard.tsx
+      │ frontend/src/components/QuickVocabRecallCard.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Good proposal — fixing cards that ignore the global difficulty selector. Calling coder.
+

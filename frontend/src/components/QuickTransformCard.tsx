@@ -20,7 +20,8 @@ export default function QuickTransformCard() {
     setLoading(true);
     setError(false);
     try {
-      const res = await getSentenceTransformExercises('intermediate', 1);
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await getSentenceTransformExercises(difficulty, 1);
       if (res.exercises.length > 0) {
         setExercise(res.exercises[0]);
       }
@@ -37,6 +38,24 @@ export default function QuickTransformCard() {
       fetchExercise();
     }
   }, [initialized, fetchExercise]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        setError(false);
+        setCountdown(15);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        fetchExercise();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchExercise]);
 
   const handleStartRecording = useCallback(async () => {
     if (!supported) return;

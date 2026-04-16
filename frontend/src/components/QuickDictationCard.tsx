@@ -18,7 +18,8 @@ export default function QuickDictationCard() {
   const fetchSentence = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.getPronunciationSentences('beginner');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await api.getPronunciationSentences(difficulty);
       const sentences = res.sentences;
       if (sentences.length > 0) {
         const pick = sentences[Math.floor(Math.random() * sentences.length)];
@@ -37,6 +38,19 @@ export default function QuickDictationCard() {
       fetchSentence();
     }
   }, [initialized, fetchSentence]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setInput('');
+        setResult(null);
+        fetchSentence();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchSentence]);
 
   const handlePlay = useCallback(() => {
     if (!sentence) return;

@@ -493,3 +493,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 500	c002c46	2026-04-16	177	129	100	224	630	1459	1459	pass	7.45	kept	Fix stale closure in timer-expired speech evaluation across Quick Practice cards
 501	f40c4f3	2026-04-16	177	181	105	187	650	1462	1462	pass	7.00	kept	Guard Speaking Journal against empty transcript save and add error feedback
 502	eac4db4	2026-04-16	304	95	100	67	566	1462	1462	pass	7.25	kept	Stop TTS and speech recognition when ending conversation
+503	a673921	2026-04-17	257	151	100	149	657	1462	1462	pass	6.30	kept	Auto-recover voice mode loop when speech recognition fails or times out

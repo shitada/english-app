@@ -20,7 +20,8 @@ export default function QuickQuestionCard() {
   const fetchPrompt = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getQuestionFormationPrompt('intermediate');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await getQuestionFormationPrompt(difficulty);
       setPrompt(res);
     } catch {
       // ignore
@@ -35,6 +36,18 @@ export default function QuickQuestionCard() {
       fetchPrompt();
     }
   }, [initialized, fetchPrompt]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        fetchPrompt();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchPrompt]);
 
   const handleFinish = useCallback(async () => {
     speech.stop();

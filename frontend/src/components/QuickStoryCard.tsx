@@ -20,7 +20,8 @@ export default function QuickStoryCard() {
   const fetchPrompt = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getStoryPrompt('intermediate');
+      const difficulty = localStorage.getItem('quick-practice-difficulty') || 'intermediate';
+      const res = await getStoryPrompt(difficulty);
       setPrompt(res);
     } catch {
       // ignore
@@ -35,6 +36,18 @@ export default function QuickStoryCard() {
       fetchPrompt();
     }
   }, [initialized, fetchPrompt]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'quick-practice-difficulty') {
+        setPhase('idle');
+        setResult(null);
+        fetchPrompt();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchPrompt]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
