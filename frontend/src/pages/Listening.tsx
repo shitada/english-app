@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play } from 'lucide-react';
+import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play, ArrowLeft } from 'lucide-react';
 import { EchoPractice } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
@@ -7,6 +7,7 @@ import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
 import { ListeningKeyVocab } from '../components/ListeningKeyVocab';
 import { ListeningDiscussion } from '../components/ListeningDiscussion';
 import { ListeningParaphrase } from '../components/ListeningParaphrase';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
@@ -183,6 +184,30 @@ export default function Listening() {
     setIsRetry(true);
     setPhase('quiz');
   }, [results, questions]);
+
+  const handleBackToSetup = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setPhase('setup');
+    setQuizIndex(0);
+    setSelectedOption(null);
+    setAnswered(false);
+    setResults([]);
+    setShowText(false);
+    setError('');
+  }, []);
+
+  // Keyboard shortcuts for quiz phase
+  const isQuizPhase = phase === 'quiz' && questions.length > 0;
+  useKeyboardShortcuts([
+    { key: '1', handler: () => !answered && setSelectedOption(0), enabled: isQuizPhase },
+    { key: '2', handler: () => !answered && questions[quizIndex]?.options.length > 1 && setSelectedOption(1), enabled: isQuizPhase },
+    { key: '3', handler: () => !answered && questions[quizIndex]?.options.length > 2 && setSelectedOption(2), enabled: isQuizPhase },
+    { key: '4', handler: () => !answered && questions[quizIndex]?.options.length > 3 && setSelectedOption(3), enabled: isQuizPhase },
+    { key: 'Enter', handler: () => { if (answered) { handleNext(); } else if (selectedOption !== null) { handleAnswer(); } }, enabled: isQuizPhase },
+    { key: ' ', handler: () => playAudio(), enabled: isQuizPhase },
+    { key: 'Escape', handler: handleBackToSetup, enabled: isQuizPhase },
+  ]);
 
   return (
     <div className="page-container">
@@ -389,19 +414,42 @@ export default function Listening() {
           <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
             Listen to the passage carefully, then start the questions. You can replay the audio anytime.
           </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setPhase('quiz'); }}
-          >
-            Start Questions ({questions.length})
-          </button>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setPhase('quiz'); }}
+            >
+              Start Questions ({questions.length})
+            </button>
+            <button
+              className="btn"
+              onClick={handleBackToSetup}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <ArrowLeft size={14} /> Back to Setup
+            </button>
+          </div>
         </div>
       )}
 
       {phase === 'quiz' && (
         <div className="card" style={{ maxWidth: 600, margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h3 style={{ margin: 0 }}>Question {quizIndex + 1}/{questions.length}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={handleBackToSetup}
+                title="Back to setup (Esc)"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '0.3rem 0.6rem', borderRadius: 6,
+                  border: '1px solid var(--border)', background: 'transparent',
+                  color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 12,
+                }}
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
+              <h3 style={{ margin: 0 }}>Question {quizIndex + 1}/{questions.length}</h3>
+            </div>
             <button
               onClick={playAudio}
               style={{
@@ -434,7 +482,7 @@ export default function Listening() {
           <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 16 }}>
             {questions[quizIndex].question}
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
             {questions[quizIndex].options.map((opt, i) => {
               const isCorrect = answered && i === questions[quizIndex].correct_index;
               const isWrong = answered && i === selectedOption && i !== questions[quizIndex].correct_index;
@@ -452,6 +500,13 @@ export default function Listening() {
                     display: 'flex', alignItems: 'center', gap: 8,
                   }}
                 >
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: 22, height: 22, borderRadius: 4, flexShrink: 0,
+                    fontSize: 11, fontWeight: 700,
+                    background: selectedOption === i ? 'var(--primary, #6366f1)' : 'var(--bg-secondary, #f0f0f0)',
+                    color: selectedOption === i ? '#fff' : 'var(--text-secondary)',
+                  }}>{i + 1}</span>
                   {isCorrect && <CheckCircle size={16} color="var(--success, #22c55e)" />}
                   {isWrong && <XCircle size={16} color="var(--danger, #ef4444)" />}
                   {opt}
@@ -459,6 +514,9 @@ export default function Listening() {
               );
             })}
           </div>
+          <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 16, opacity: 0.7 }}>
+            ⌨️ Press 1–{questions[quizIndex].options.length} to select · Enter to submit · Space to replay · Esc to go back
+          </p>
           {answered && (
             <div style={{
               padding: 12, borderRadius: 6, marginBottom: 12,

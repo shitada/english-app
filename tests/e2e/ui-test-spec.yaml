@@ -543,6 +543,46 @@ pages:
         priority: medium
         added_in: 324
 
+      - id: list-006
+        target: Back to Setup button in listen phase returns to setup
+        action: generate a quiz, then click "Back to Setup" button in the listen phase
+        expect: Phase returns to setup, audio stops, setup form is visible again
+        type: functional
+        priority: high
+        added_in: 519
+
+      - id: list-007
+        target: Back button in quiz phase returns to setup
+        action: start a quiz, proceed to quiz phase, click "Back" button in quiz header
+        expect: Phase returns to setup, audio stops, quiz state is reset
+        type: functional
+        priority: high
+        added_in: 519
+
+      - id: list-008
+        target: Keyboard shortcut number keys select answer options
+        action: in quiz phase, press keys 1-4 on keyboard
+        expect: Corresponding answer option becomes selected (highlighted with primary border)
+        type: functional
+        priority: medium
+        added_in: 519
+
+      - id: list-009
+        target: Keyboard shortcut Enter submits answer or proceeds
+        action: in quiz phase, select an option then press Enter
+        expect: Answer is submitted showing correct/incorrect feedback; pressing Enter again goes to next question
+        type: functional
+        priority: medium
+        added_in: 519
+
+      - id: list-010
+        target: Keyboard hint text is visible in quiz phase
+        action: snapshot quiz phase below answer options
+        expect: Keyboard hint text showing "Press 1-N to select · Enter to submit · Space to replay · Esc to go back" is visible
+        type: visual
+        priority: low
+        added_in: 519
+
   vocabulary:
     path: /vocabulary
     tests:
