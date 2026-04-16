@@ -2720,3 +2720,82 @@ I need to change the approach - use `executescript` for multi-statement migratio
 
 Now amend the commit and re-test:
 
+● Amend commit with DB migration fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit --amend --no-edit
+  └ 16 lines...
+
+● Re-run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -15
+  └ 16 lines...
+
+All 1417 tests pass. Now run smoke test (since database.py and router changed) and record T3:
+
+● Run smoke test and record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │ kill -9 2>/dev/null; uv run python tests/smoke_test.py && date +%s
+  └ 24 lines...
+
+T3=1776310872. Now check if frontend UI files changed for tester:
+
+● Check if frontend UI changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E 'frontend/src/(pages|components)/.*\.tsx$'
+  └ 2 lines...
+
+Frontend UI changed — must run tester. Let me start the server and call the tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA testing (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn
+  │ app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now call the tester:
+
+● Tester QA test iteration 492
+  │ Read QuickPracticeHub.tsx
+  │   │ frontend/src/components/QuickPracticeHub.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read index.css
+      │ frontend/src/index.css
+      └ L1:50 (50 lines read)
+
+Good, tester passed with ux_score=8. Now stop the server and call the evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 492
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L500:650 (151 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L650:850 (201 lines read)
+
+● Record T4 for iteration 492 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Timings: propose=203, implement=36, test=200, evaluate=281, total=720. Score 7.75 → KEEP.
+
+● Record results for iter 492 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "492" "1c22af6" "2026-04-16" "203" "36" "200" "281" "720" \
+  │ "1417" "1417" "pass" "7.75" "kept" "Add speaking journal and listening
+  │ quiz daily goal types" \…
+  └ 4 lines...
+
+Row verified. Now commit the results:
+
