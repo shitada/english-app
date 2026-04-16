@@ -336,6 +336,39 @@ pages:
         priority: high
         added_in: 510
 
+      # --- Replay Speak Through walkthrough ---
+      - id: conv-026
+        target: Speak Through button visible in replay phase
+        action: Navigate to replay phase for a past conversation
+        expect: A "🗣️ Speak Through" button is visible above the replay stepper
+        type: visual
+        priority: high
+        added_in: 512
+
+      - id: conv-027
+        target: Speak Through button opens walkthrough view
+        action: Click "🗣️ Speak Through" button in replay phase
+        expect: Walkthrough component renders with progress bar, AI message, and Start Speaking button; replay stepper is hidden
+        type: functional
+        priority: high
+        added_in: 512
+
+      - id: conv-028
+        target: Speak Through close button returns to normal replay
+        action: Click X close button in Speak Through walkthrough header
+        expect: Walkthrough closes, normal ConversationReplay stepper is visible again
+        type: functional
+        priority: high
+        added_in: 512
+
+      - id: conv-029
+        target: Speak Through shows no-user-turns message when no user turns
+        action: Open Speak Through for a conversation with only AI messages
+        expect: Message "No user turns found" with a Close button is displayed
+        type: functional
+        priority: medium
+        added_in: 512
+
   pronunciation:
     path: /pronunciation
     tests:

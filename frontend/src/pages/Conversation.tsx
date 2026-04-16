@@ -6,7 +6,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 
 interface Message {
@@ -72,6 +72,7 @@ export default function Conversation() {
   const [replayTurns, setReplayTurns] = useState<import('../api').ReplayTurn[]>([]);
   const [replayIndex, setReplayIndex] = useState(0);
   const [replayLoading, setReplayLoading] = useState(false);
+  const [speakWalkthrough, setSpeakWalkthrough] = useState(false);
   const [listenMode, setListenMode] = useState(false);
   const [revealedMessages, setRevealedMessages] = useState<Set<number>>(new Set());
   const [quizQuestions, setQuizQuestions] = useState<ConversationQuizQuestion[]>([]);
@@ -999,13 +1000,36 @@ export default function Conversation() {
   if (phase === 'replay') {
     return (
       <PhaseTransition phase={phase}>
-      <ConversationReplay
-        turns={replayTurns}
-        replayIndex={replayIndex}
-        setReplayIndex={setReplayIndex}
-        onBack={() => setPhase('history')}
-        tts={tts}
-      />
+      {speakWalkthrough ? (
+        <ReplaySpeakWalkthrough
+          turns={replayTurns}
+          ttsSpeak={tts.speak}
+          onClose={() => setSpeakWalkthrough(false)}
+        />
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 0, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setSpeakWalkthrough(true)}
+              style={{
+                padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: 'var(--card-bg, #f3f4f6)', color: 'var(--text)',
+                fontWeight: 600, fontSize: '0.85rem',
+              }}
+              aria-label="Start speak through walkthrough"
+            >
+              🗣️ Speak Through
+            </button>
+          </div>
+          <ConversationReplay
+            turns={replayTurns}
+            replayIndex={replayIndex}
+            setReplayIndex={setReplayIndex}
+            onBack={() => setPhase('history')}
+            tts={tts}
+          />
+        </>
+      )}
       </PhaseTransition>
     );
   }
