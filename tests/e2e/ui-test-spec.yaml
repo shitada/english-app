@@ -819,3 +819,67 @@ pages:
         type: functional
         priority: medium
         added_in: 508
+
+      - id: quick-practice-hub-032
+        target: QuickTongueTwisterCard renders in speaking tab
+        action: Click Speaking tab in QuickPracticeHub and scroll to find Tongue Twister card
+        expect: Card with heading "Tongue Twister" and 👅 emoji is visible with Listen, Slow, and Speak buttons
+        type: functional
+        priority: high
+        added_in: 509
+
+      - id: quick-practice-hub-033
+        target: QuickTongueTwisterCard Listen button plays TTS
+        action: Click "Listen" button on the Tongue Twister card
+        expect: TTS reads the tongue twister text aloud
+        type: functional
+        priority: medium
+        added_in: 509
+
+      - id: quick-practice-hub-034
+        target: QuickTongueTwisterCard Slow button plays TTS slowly
+        action: Click "Slow" button on the Tongue Twister card
+        expect: TTS reads the tongue twister at reduced speed
+        type: functional
+        priority: medium
+        added_in: 509
+
+      - id: quick-practice-hub-035
+        target: QuickTongueTwisterCard Speak button starts speech recognition
+        action: Click "Speak" button on the Tongue Twister card
+        expect: Microphone icon pulses, "Listening…" indicator appears, Done button is visible
+        type: functional
+        priority: high
+        added_in: 509
+
+      - id: quick-practice-hub-036
+        target: QuickTongueTwisterCard shows word-by-word results after speaking
+        action: Complete speaking phase on the Tongue Twister card (click Speak then Done)
+        expect: Clarity percentage shown, each word highlighted green (matched) or red (missed), Retry and New Twister buttons visible
+        type: functional
+        priority: high
+        added_in: 509
+
+      - id: quick-practice-hub-037
+        target: QuickTongueTwisterCard Retry resets for same twister
+        action: Click "Retry" button after completing a tongue twister attempt
+        expect: Card resets to idle phase with same twister text, score cleared
+        type: functional
+        priority: medium
+        added_in: 509
+
+      - id: quick-practice-hub-038
+        target: QuickTongueTwisterCard New Twister fetches new content
+        action: Click "New Twister" button after completing a tongue twister attempt
+        expect: Card resets and loads a new tongue twister from the API
+        type: functional
+        priority: medium
+        added_in: 509
+
+      - id: quick-practice-hub-039
+        target: QuickTongueTwisterCard difficulty selector integration
+        action: Change difficulty via Quick Practice Hub selector while QuickTongueTwisterCard is visible
+        expect: QuickTongueTwisterCard resets and re-fetches twister with new difficulty
+        type: functional
+        priority: medium
+        added_in: 509

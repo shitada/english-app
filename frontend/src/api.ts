@@ -211,6 +211,9 @@ export const api = {
   getQuickListeningComp: (difficulty: string = 'intermediate') =>
     request<QuickListeningCompResponse>(`/api/pronunciation/quick-listening-comp?difficulty=${difficulty}`),
 
+  getTongueTwister: (difficulty: string = 'intermediate') =>
+    request<{ text: string; target_sounds: string[]; slow_hint: string; difficulty: string }>(`/api/pronunciation/tongue-twister?difficulty=${difficulty}`),
+
   evaluateListenRespond: (question: string, transcript: string, duration_seconds: number) =>
     request<ListenRespondEvaluateResponse>('/api/pronunciation/listen-respond/evaluate', {
       method: 'POST',

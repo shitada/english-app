@@ -3352,3 +3352,59 @@ async def get_reading_comp(
         "explanation": str(result.get("explanation", "")),
         "difficulty": difficulty,
     }
+
+
+# ---------------------------------------------------------------------------
+# Tongue Twister
+# ---------------------------------------------------------------------------
+
+
+class TongueTwisterResponse(BaseModel):
+    text: str
+    target_sounds: list[str]
+    slow_hint: str
+    difficulty: str
+
+
+@router.get("/tongue-twister", response_model=TongueTwisterResponse)
+async def get_tongue_twister(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a tongue twister appropriate to the difficulty level."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a tongue twister for a {difficulty}-level English learner.\n"
+        "Difficulty guidelines:\n"
+        "- beginner: simple alliteration, short (5-8 words)\n"
+        "- intermediate: medium complexity, moderate length (8-15 words)\n"
+        "- advanced: famous hard twisters or complex phoneme combinations (10-20 words)\n\n"
+        "Return JSON with:\n"
+        "- text (string): the tongue twister\n"
+        "- target_sounds (array of strings): the key sounds being practiced (e.g. ['sh', 'ch'])\n"
+        "- slow_hint (string): the twister broken into slower chunks with dashes "
+        "(e.g. 'She sells — sea shells — by the sea shore')\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English pronunciation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="tongue_twister",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Tongue twister generation failed")
+
+    target_sounds = result.get("target_sounds", [])
+    if not isinstance(target_sounds, list):
+        target_sounds = []
+    target_sounds = [str(s) for s in target_sounds[:5]]
+
+    return {
+        "text": str(result.get("text", "She sells seashells by the seashore.")),
+        "target_sounds": target_sounds,
+        "slow_hint": str(result.get("slow_hint", "")),
+        "difficulty": difficulty,
+    }
