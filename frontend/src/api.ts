@@ -147,6 +147,12 @@ export const api = {
   getTopicProgress: (conversation_id: number) =>
     request<{ has_previous: boolean; current: Record<string, number>; previous: Record<string, number> | null; deltas: Record<string, number> | null }>(`/api/conversation/${conversation_id}/topic-progress`),
 
+  saveConversationVocabulary: (conversationId: number, words: string[]) =>
+    request<{ saved_count: number; words: { word: string; meaning: string }[] }>(`/api/conversation/${conversationId}/save-vocabulary`, {
+      method: 'POST',
+      body: JSON.stringify({ words }),
+    }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';

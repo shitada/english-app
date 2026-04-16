@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff, FileSpreadsheet } from 'lucide-react';
+import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff, FileSpreadsheet, BookmarkPlus, Check } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
 import { api, getSessionAverages } from '../../api';
 import { generateStudyCardsCSV, hasStudyCards } from '../../utils/csvExport';
@@ -70,6 +70,9 @@ export function ConversationSummary({
   const [copied, setCopied] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
   const [averages, setAverages] = useState<SessionAveragesResponse | null>(null);
+  const [savedWords, setSavedWords] = useState<Set<string>>(new Set());
+  const [savingWords, setSavingWords] = useState<Set<string>>(new Set());
+  const [saveAllLoading, setSaveAllLoading] = useState(false);
   const [topicProgress, setTopicProgress] = useState<{
     has_previous: boolean;
     current: Record<string, number>;
@@ -154,6 +157,36 @@ export function ConversationSummary({
 
   const showStudyCardsBtn = hasStudyCards(messages, summary);
 
+  async function handleSaveWord(word: string) {
+    if (!conversationId || savedWords.has(word) || savingWords.has(word)) return;
+    setSavingWords(prev => new Set(prev).add(word));
+    try {
+      await api.saveConversationVocabulary(conversationId, [word]);
+      setSavedWords(prev => new Set(prev).add(word));
+    } catch { /* save failed */ }
+    setSavingWords(prev => { const next = new Set(prev); next.delete(word); return next; });
+  }
+
+  async function handleSaveAllWords() {
+    if (!conversationId || saveAllLoading) return;
+    const unsaved = (summary.key_vocabulary as string[]).filter((w: string) => !savedWords.has(w));
+    if (unsaved.length === 0) return;
+    setSaveAllLoading(true);
+    try {
+      await api.saveConversationVocabulary(conversationId, unsaved);
+      setSavedWords(prev => {
+        const next = new Set(prev);
+        unsaved.forEach((w: string) => next.add(w));
+        return next;
+      });
+    } catch { /* save failed */ }
+    setSaveAllLoading(false);
+  }
+
+  const allVocabSaved = (summary.key_vocabulary as string[] | undefined)?.length
+    ? (summary.key_vocabulary as string[]).every((w: string) => savedWords.has(w))
+    : false;
+
   return (
     <div className="card summary-card">
       <h2 style={{ marginBottom: 16 }}>Conversation Complete!</h2>
@@ -163,10 +196,74 @@ export function ConversationSummary({
         <>
           <h4>Key Vocabulary</h4>
           <div className="vocab-tags">
-            {summary.key_vocabulary.map((w: string) => (
-              <span key={w}>{w}</span>
-            ))}
+            {summary.key_vocabulary.map((w: string) => {
+              const isSaved = savedWords.has(w);
+              const isSaving = savingWords.has(w);
+              return (
+                <span
+                  key={w}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    opacity: isSaved ? 0.7 : 1,
+                  }}
+                >
+                  {w}
+                  {isSaved ? (
+                    <Check size={14} style={{ color: 'var(--success, #22c55e)' }} aria-label={`${w} saved`} />
+                  ) : (
+                    <button
+                      onClick={() => handleSaveWord(w)}
+                      disabled={isSaving || !conversationId}
+                      aria-label={`Save ${w} to vocab bank`}
+                      title="Save to Vocab Bank"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: isSaving ? 'wait' : 'pointer',
+                        padding: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        color: 'var(--primary)',
+                        opacity: isSaving ? 0.5 : 1,
+                      }}
+                    >
+                      <BookmarkPlus size={14} />
+                    </button>
+                  )}
+                </span>
+              );
+            })}
           </div>
+          {conversationId && !allVocabSaved && (
+            <button
+              onClick={handleSaveAllWords}
+              disabled={saveAllLoading}
+              style={{
+                marginTop: 8,
+                padding: '6px 14px',
+                fontSize: 13,
+                background: 'var(--primary)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: saveAllLoading ? 'wait' : 'pointer',
+                opacity: saveAllLoading ? 0.7 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <BookmarkPlus size={14} />
+              {saveAllLoading ? 'Saving…' : 'Save All to Vocab Bank'}
+            </button>
+          )}
+          {allVocabSaved && (
+            <p style={{ marginTop: 8, fontSize: 13, color: 'var(--success, #22c55e)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Check size={14} /> All vocabulary saved to bank
+            </p>
+          )}
         </>
       )}
 

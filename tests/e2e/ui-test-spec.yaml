@@ -280,6 +280,30 @@ pages:
         priority: critical
         added_in: 0
 
+      - id: conv-023
+        target: Vocab tag save buttons appear in summary
+        action: end conversation, check key vocabulary section in summary
+        expect: Each vocab tag has a BookmarkPlus save icon button next to the word
+        type: functional
+        priority: high
+        added_in: 510
+
+      - id: conv-024
+        target: Individual vocab save shows checkmark after saving
+        action: click BookmarkPlus icon on a vocab tag
+        expect: Icon changes to Check (checkmark), word appears saved with reduced opacity
+        type: functional
+        priority: high
+        added_in: 510
+
+      - id: conv-025
+        target: Save All to Vocab Bank button saves all words
+        action: click "Save All to Vocab Bank" button
+        expect: All vocab tags show checkmarks, button replaced with "All vocabulary saved to bank" message
+        type: functional
+        priority: high
+        added_in: 510
+
   pronunciation:
     path: /pronunciation
     tests:

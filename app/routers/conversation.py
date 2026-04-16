@@ -17,6 +17,7 @@ from app.config import get_conversation_topics, get_prompt, get_vocabulary_topic
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
 from app.dal import preferences as pref_dal
+from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
 from app.utils import coerce_bool, extract_role, get_topic_label, safe_llm_call, validate_topic
@@ -1082,3 +1083,112 @@ async def get_topic_progress(
     if result is None:
         raise HTTPException(status_code=404, detail="Conversation not found or no performance data")
     return result
+
+
+# ---------------------------------------------------------------------------
+# Save conversation vocabulary to SRS bank
+# ---------------------------------------------------------------------------
+
+class SaveVocabularyRequest(BaseModel):
+    words: list[str] = Field(min_length=1, max_length=50)
+
+
+class SavedWordItem(BaseModel):
+    word: str
+    meaning: str
+
+
+class SaveVocabularyResponse(BaseModel):
+    saved_count: int
+    words: list[SavedWordItem]
+
+
+@router.post("/{conversation_id}/save-vocabulary", response_model=SaveVocabularyResponse)
+async def save_conversation_vocabulary(
+    req: SaveVocabularyRequest,
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Save key vocabulary from a conversation to the SRS vocabulary bank."""
+    # Verify conversation exists
+    exists = await conv_dal.conversation_exists(db, conversation_id)
+    if not exists:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    # Load conversation history for context
+    history = await conv_dal.format_history_text(db, conversation_id)
+
+    # Deduplicate and clean words
+    seen: set[str] = set()
+    unique_words: list[str] = []
+    for w in req.words:
+        w_clean = w.strip()
+        if w_clean and w_clean.lower() not in seen:
+            seen.add(w_clean.lower())
+            unique_words.append(w_clean)
+
+    if not unique_words:
+        raise HTTPException(status_code=400, detail="No valid words provided")
+
+    # Use LLM to generate definitions and examples based on conversation context
+    copilot = get_copilot_service()
+    words_list = ", ".join(unique_words)
+    prompt = (
+        f"Given this English conversation:\n{history}\n\n"
+        f"For each of these vocabulary words/phrases: [{words_list}]\n\n"
+        "Provide a definition and an example sentence for each, based on how "
+        "they were used in the conversation above.\n\n"
+        "Return JSON: {\"words\": [{\"word\": \"...\", \"meaning\": \"...\", "
+        "\"example_sentence\": \"...\"}]}"
+    )
+    try:
+        result = await copilot.ask_json(
+            "You are an English vocabulary assistant. Return ONLY valid JSON.",
+            prompt,
+        )
+        llm_words = result.get("words") or result.get("items") or []
+    except Exception as e:
+        logger.warning("LLM vocab generation failed for conversation %s: %s", conversation_id, e)
+        # Fallback: save words with basic definitions
+        llm_words = [{"word": w, "meaning": f"Vocabulary from conversation", "example_sentence": ""} for w in unique_words]
+
+    # Build questions list for save_words (matches expected format)
+    questions: list[dict[str, Any]] = []
+    for w in unique_words:
+        w_lower = w.lower()
+        # Find matching LLM entry
+        llm_entry = next(
+            (lw for lw in llm_words if isinstance(lw, dict) and (lw.get("word") or "").lower() == w_lower),
+            None,
+        )
+        questions.append({
+            "word": w,
+            "meaning": (llm_entry or {}).get("meaning") or f"Vocabulary from conversation",
+            "example_sentence": (llm_entry or {}).get("example_sentence") or "",
+            "difficulty": 1,
+        })
+
+    # Save via vocab DAL with topic 'conversation'
+    saved = await vocab_dal.save_words(db, "conversation", questions)
+
+    # Initialize SRS progress for each saved word
+    for word_entry in saved:
+        word_id = word_entry["id"]
+        # Check if progress already exists
+        progress_rows = await db.execute_fetchall(
+            "SELECT word_id FROM vocabulary_progress WHERE word_id = ?", (word_id,)
+        )
+        if not progress_rows:
+            await db.execute(
+                """INSERT INTO vocabulary_progress
+                   (word_id, correct_count, incorrect_count, level, last_reviewed, next_review_at)
+                   VALUES (?, 0, 0, 0, NULL, datetime('now'))""",
+                (word_id,),
+            )
+    await db.commit()
+
+    return SaveVocabularyResponse(
+        saved_count=len(saved),
+        words=[SavedWordItem(word=s["word"], meaning=s["meaning"]) for s in saved],
+    )
