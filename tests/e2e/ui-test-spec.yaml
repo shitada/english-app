@@ -417,6 +417,46 @@ pages:
         priority: high
         added_in: 513
 
+      - id: conv-036
+        target: Delete single conversation shows inline confirm dialog
+        action: Click trash icon on a past conversation row
+        expect: Inline ConfirmDialog appears below the past conversations list with "Delete this conversation?" message, Cancel and Delete buttons; no browser confirm() dialog
+        type: functional
+        priority: high
+        added_in: 520
+
+      - id: conv-037
+        target: Clear All shows inline confirm dialog
+        action: Click "Clear All" link above past conversations list
+        expect: Inline ConfirmDialog appears with "Delete all past conversations?" message, Cancel and Delete buttons; no browser confirm() dialog
+        type: functional
+        priority: high
+        added_in: 520
+
+      - id: conv-038
+        target: Confirm dialog Cancel dismisses without deleting
+        action: Click trash icon on a conversation, then click Cancel in the ConfirmDialog
+        expect: ConfirmDialog disappears, conversation list unchanged
+        type: functional
+        priority: medium
+        added_in: 520
+
+      - id: conv-039
+        target: Confirm dialog Delete removes conversation
+        action: Click trash icon on a conversation, then click Delete in the ConfirmDialog
+        expect: ConfirmDialog disappears, conversation removed from list
+        type: functional
+        priority: high
+        added_in: 520
+
+      - id: conv-040
+        target: Delete error shows inline error banner
+        action: Click Delete in ConfirmDialog when API returns error (mock network failure)
+        expect: Error banner with message appears in the select phase, no silent failure
+        type: error
+        priority: medium
+        added_in: 520
+
   pronunciation:
     path: /pronunciation
     tests:

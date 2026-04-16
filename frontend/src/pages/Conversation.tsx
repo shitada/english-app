@@ -8,6 +8,7 @@ import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
 import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -98,6 +99,8 @@ export default function Conversation() {
   const [failedMessage, setFailedMessage] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => Promise<void> } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -458,25 +461,33 @@ export default function Conversation() {
     }
   };
 
-  const handleDeleteConversation = async (e: React.MouseEvent, id: number) => {
+  const handleDeleteConversation = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this conversation?')) return;
-    try {
-      await api.deleteConversation(id);
-      setPastConversations((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+    setConfirmAction({
+      message: 'Delete this conversation?',
+      onConfirm: async () => {
+        try {
+          await api.deleteConversation(id);
+          setPastConversations((prev) => prev.filter((c) => c.id !== id));
+        } catch (err) {
+          setStartError(err instanceof Error ? err.message : 'Failed to delete conversation');
+        }
+      },
+    });
   };
 
-  const handleClearEnded = async () => {
-    if (!window.confirm('Delete all past conversations?')) return;
-    try {
-      await api.clearEndedConversations();
-      setPastConversations([]);
-    } catch (err) {
-      console.error(err);
-    }
+  const handleClearEnded = () => {
+    setConfirmAction({
+      message: 'Delete all past conversations?',
+      onConfirm: async () => {
+        try {
+          await api.clearEndedConversations();
+          setPastConversations([]);
+        } catch (err) {
+          setStartError(err instanceof Error ? err.message : 'Failed to clear conversations');
+        }
+      },
+    });
   };
 
   const startConversation = async (topicId: string) => {
@@ -974,6 +985,24 @@ export default function Conversation() {
                 );
               })}
             </div>
+            {confirmAction && (
+              <div style={{ marginTop: 12 }}>
+                <ConfirmDialog
+                  message={confirmAction.message}
+                  loading={confirmLoading}
+                  onConfirm={async () => {
+                    setConfirmLoading(true);
+                    try {
+                      await confirmAction.onConfirm();
+                    } finally {
+                      setConfirmLoading(false);
+                      setConfirmAction(null);
+                    }
+                  }}
+                  onCancel={() => setConfirmAction(null)}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
