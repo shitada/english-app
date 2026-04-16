@@ -477,3 +477,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 483	none	2026-04-15	315	102	89	309	815	1402	1402	pass	5.1	discarded	Add Quick Word Explain circumlocution drill to Speaking tab
 484	537932f	2026-04-15	161	50	67	70	348	1402	1402	pass	8.05	kept	Fix WeeklyComparison Pydantic model missing listening/speaking_journal fields
 485	none	2026-04-16	364	54	76	148	642	1401	1402	pass	5.4	discarded	Add Grammar Speak Fix card to QuickPracticeHub grammar tab
+486	bbc6506	2026-04-16	218	313	0	69	600	1408	1408	pass	7.55	kept	Add vocabulary active-use analysis endpoint across all speaking activities
