@@ -2310,6 +2310,34 @@ async def get_speaking_journal_progress(
     return await pron_dal.get_speaking_journal_progress(db)
 
 
+class FillerWordItem(BaseModel):
+    word: str
+    count: int
+
+
+class FillerDailyTrend(BaseModel):
+    date: str
+    filler_count: int
+    density_per_min: float
+    entries: int
+
+
+class FillerAnalysisResponse(BaseModel):
+    total_entries: int
+    filler_breakdown: list[FillerWordItem]
+    daily_trend: list[FillerDailyTrend]
+    trend_direction: str
+    fluency_cleanliness_score: int
+
+
+@router.get("/speaking-journal/filler-analysis", response_model=FillerAnalysisResponse)
+async def get_filler_analysis(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Analyze filler word patterns across speaking journal entries."""
+    return await pron_dal.get_filler_word_analysis(db)
+
+
 class VocabUpgradeRequest(BaseModel):
     transcript: str = Field(min_length=1, max_length=5000)
 

@@ -1172,3 +1172,94 @@ async def get_sentences_from_corrections(
         if len(sentences) >= limit:
             break
     return sentences
+
+
+_FILLER_PATTERN = re.compile(
+    r"\b(um|uh|erm|er|ah|like|you know|basically|i mean|sort of|kind of|actually|literally|right|okay so|well)\b",
+    re.IGNORECASE,
+)
+
+
+async def get_filler_word_analysis(db: aiosqlite.Connection) -> dict:
+    """Analyze filler word usage across all speaking journal entries."""
+    cursor = await db.execute(
+        """SELECT id, transcript, duration_seconds, created_at, DATE(created_at) as entry_date
+           FROM speaking_journal ORDER BY created_at ASC"""
+    )
+    rows = await cursor.fetchall()
+
+    if not rows:
+        return {
+            "total_entries": 0,
+            "filler_breakdown": [],
+            "daily_trend": [],
+            "trend_direction": "insufficient_data",
+            "fluency_cleanliness_score": 100,
+        }
+
+    # Aggregate filler words by type
+    filler_counts: dict[str, int] = {}
+    daily_data: dict[str, dict] = {}
+    total_filler_count = 0
+    total_duration = 0
+
+    for row in rows:
+        entry_id, transcript, duration, created_at, entry_date = row
+        matches = _FILLER_PATTERN.findall(transcript)
+        entry_fillers = len(matches)
+        total_filler_count += entry_fillers
+        total_duration += duration or 0
+
+        for m in matches:
+            word = m.lower()
+            filler_counts[word] = filler_counts.get(word, 0) + 1
+
+        if entry_date not in daily_data:
+            daily_data[entry_date] = {"total_fillers": 0, "total_duration": 0, "entries": 0}
+        daily_data[entry_date]["total_fillers"] += entry_fillers
+        daily_data[entry_date]["total_duration"] += duration or 0
+        daily_data[entry_date]["entries"] += 1
+
+    # Ranked breakdown
+    filler_breakdown = sorted(
+        [{"word": w, "count": c} for w, c in filler_counts.items()],
+        key=lambda x: x["count"],
+        reverse=True,
+    )
+
+    # Daily trend with density (fillers per minute)
+    daily_trend = []
+    for date, data in daily_data.items():
+        density = round(data["total_fillers"] / (data["total_duration"] / 60), 2) if data["total_duration"] > 0 else 0.0
+        daily_trend.append({
+            "date": date,
+            "filler_count": data["total_fillers"],
+            "density_per_min": density,
+            "entries": data["entries"],
+        })
+
+    # Determine trend by comparing first half vs second half
+    trend_direction = "stable"
+    if len(daily_trend) >= 4:
+        mid = len(daily_trend) // 2
+        first_half = daily_trend[:mid]
+        second_half = daily_trend[mid:]
+        avg_first = sum(d["density_per_min"] for d in first_half) / len(first_half) if first_half else 0
+        avg_second = sum(d["density_per_min"] for d in second_half) / len(second_half) if second_half else 0
+        if avg_second < avg_first * 0.8:
+            trend_direction = "improving"
+        elif avg_second > avg_first * 1.2:
+            trend_direction = "declining"
+
+    # Fluency cleanliness score (0-100)
+    # Based on filler density: 0 fillers/min = 100, 10+ fillers/min = 0
+    overall_density = (total_filler_count / (total_duration / 60)) if total_duration > 0 else 0
+    cleanliness = max(0, min(100, round(100 - overall_density * 10)))
+
+    return {
+        "total_entries": len(rows),
+        "filler_breakdown": filler_breakdown,
+        "daily_trend": daily_trend,
+        "trend_direction": trend_direction,
+        "fluency_cleanliness_score": cleanliness,
+    }

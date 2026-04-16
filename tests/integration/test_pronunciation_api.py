@@ -1734,3 +1734,81 @@ async def test_speaking_journal_model_answer_empty(client, mock_copilot):
     data = res.json()
     assert data["model_answer"] == ""
     assert data["key_phrases"] == []
+
+
+# ── Filler Word Analysis Tests ──────────────────────────
+
+
+@pytest.mark.integration
+async def test_filler_analysis_empty(client):
+    """Filler analysis returns defaults with no entries."""
+    res = await client.get("/api/pronunciation/speaking-journal/filler-analysis")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_entries"] == 0
+    assert data["filler_breakdown"] == []
+    assert data["daily_trend"] == []
+    assert data["trend_direction"] == "insufficient_data"
+    assert data["fluency_cleanliness_score"] == 100
+
+
+@pytest.mark.integration
+async def test_filler_analysis_with_entries(client):
+    """Filler analysis correctly counts and ranks filler words."""
+    # Entry with known filler words: "um" x2, "like" x1, "you know" x1
+    await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "Describe your day",
+        "transcript": "Um I went to the store and um like bought some groceries you know",
+        "duration_seconds": 30,
+    })
+    # Entry with different fillers: "basically" x1, "actually" x1
+    await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "Talk about work",
+        "transcript": "Basically I work in software and actually I really enjoy coding every day",
+        "duration_seconds": 30,
+    })
+    res = await client.get("/api/pronunciation/speaking-journal/filler-analysis")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_entries"] == 2
+    assert len(data["filler_breakdown"]) > 0
+    # "um" should be the most frequent (2 times)
+    assert data["filler_breakdown"][0]["word"] == "um"
+    assert data["filler_breakdown"][0]["count"] == 2
+    assert data["fluency_cleanliness_score"] <= 100
+    assert data["fluency_cleanliness_score"] >= 0
+
+
+@pytest.mark.integration
+async def test_filler_analysis_daily_trend(client):
+    """Filler analysis includes daily density trend."""
+    await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "Test",
+        "transcript": "Um uh I think um this is uh a good day",
+        "duration_seconds": 60,
+    })
+    res = await client.get("/api/pronunciation/speaking-journal/filler-analysis")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data["daily_trend"]) >= 1
+    trend = data["daily_trend"][0]
+    assert "date" in trend
+    assert "filler_count" in trend
+    assert "density_per_min" in trend
+    assert trend["filler_count"] >= 4  # um, uh, um, uh
+    assert trend["density_per_min"] > 0
+
+
+@pytest.mark.integration
+async def test_filler_analysis_no_fillers(client):
+    """Clean transcript results in high cleanliness score."""
+    await client.post("/api/pronunciation/speaking-journal", json={
+        "prompt": "Test clean speech",
+        "transcript": "I went to the store and bought groceries for dinner tonight",
+        "duration_seconds": 30,
+    })
+    res = await client.get("/api/pronunciation/speaking-journal/filler-analysis")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["fluency_cleanliness_score"] == 100
+    assert data["filler_breakdown"] == []
