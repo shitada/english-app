@@ -18,6 +18,7 @@ import QuickIdiomCard from './QuickIdiomCard';
 import QuickWriteCard from './QuickWriteCard';
 import QuickExplainCard from './QuickExplainCard';
 import QuickRolePlayCard from './QuickRolePlayCard';
+import QuickWordAssociationCard from './QuickWordAssociationCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -183,6 +184,7 @@ export default function QuickPracticeHub() {
           <>
             <QuickVocabSentenceCard />
             <QuickVocabRecallCard />
+            <QuickWordAssociationCard />
           </>
         )}
         {activeTab === 'writing' && (

@@ -2172,3 +2172,38 @@ export function evaluateRolePlay(
     body: JSON.stringify({ scenario, your_role, partner_role, exchanges, duration_seconds }),
   });
 }
+
+// ── Quick Word Association Practice ─────────────────────────────
+
+export interface WordAssociationPromptResponse {
+  seed_word: string;
+  category: string;
+  hint: string;
+  target_count: number;
+  difficulty: string;
+}
+
+export interface WordAssociationEvaluateResponse {
+  valid_count: number;
+  sophistication_score: number;
+  relevance_score: number;
+  overall_score: number;
+  feedback: string;
+  missed_words: string[];
+}
+
+export function getWordAssociation(difficulty: string = 'intermediate'): Promise<WordAssociationPromptResponse> {
+  return request<WordAssociationPromptResponse>(`/api/pronunciation/word-association?difficulty=${difficulty}`);
+}
+
+export function evaluateWordAssociation(
+  seed_word: string,
+  transcript: string,
+  duration_seconds: number,
+): Promise<WordAssociationEvaluateResponse> {
+  return request<WordAssociationEvaluateResponse>('/api/pronunciation/word-association/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ seed_word, transcript, duration_seconds }),
+  });
+}

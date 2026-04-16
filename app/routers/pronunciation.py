@@ -3157,3 +3157,135 @@ async def evaluate_roleplay(
         "feedback": str(result.get("feedback", "")),
         "model_responses": model_responses,
     }
+
+
+# ── Quick Word Association Practice ─────────────────────────────
+
+
+class WordAssociationPromptResponse(BaseModel):
+    seed_word: str
+    category: str
+    hint: str
+    target_count: int
+    difficulty: str
+
+
+@router.get("/word-association", response_model=WordAssociationPromptResponse)
+async def get_word_association(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a seed word/category for timed word association practice."""
+    copilot = get_copilot_service()
+    target_map = {"beginner": 5, "intermediate": 8, "advanced": 12}
+    target = target_map.get(difficulty, 8)
+    prompt_text = (
+        f"Generate a word association exercise for a {difficulty}-level English learner.\n"
+        f"The learner will have 30 seconds to say as many English words related to a category/seed word as possible.\n"
+        f"Target count: {target} words.\n"
+        "Return JSON with:\n"
+        "- seed_word (string): a single seed word or short category name (e.g., 'Travel', 'Emotions', 'Kitchen')\n"
+        "- category (string): a brief description of the category (1 short sentence)\n"
+        "- hint (string): a helpful hint to get started (1 sentence)\n"
+        "- target_count (integer): the target number of words to aim for\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="word_association_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Word association prompt generation failed")
+
+    try:
+        raw_target = int(result.get("target_count", target))
+        raw_target = min(20, max(3, raw_target))
+    except (ValueError, TypeError):
+        raw_target = target
+
+    return {
+        "seed_word": str(result.get("seed_word", "Travel")),
+        "category": str(result.get("category", "Words related to this topic")),
+        "hint": str(result.get("hint", "Think about things you see, do, or feel.")),
+        "target_count": raw_target,
+        "difficulty": difficulty,
+    }
+
+
+class WordAssociationEvaluateRequest(BaseModel):
+    seed_word: str = Field(min_length=1, max_length=200)
+    transcript: str = Field(min_length=1, max_length=5000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class WordAssociationEvaluateResponse(BaseModel):
+    valid_count: int
+    sophistication_score: float
+    relevance_score: float
+    overall_score: float
+    feedback: str
+    missed_words: list[str]
+
+
+@router.post("/word-association/evaluate", response_model=WordAssociationEvaluateResponse)
+async def evaluate_word_association(
+    body: WordAssociationEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a timed word association attempt."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Seed word / category: \"{body.seed_word}\"\n"
+        f"User's spoken words ({body.duration_seconds}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this word association attempt. The user was asked to say as many "
+        "English words related to the seed word/category as possible in the time limit.\n"
+        "Return JSON with:\n"
+        "- valid_count (integer): number of valid, on-topic unique words the user said\n"
+        "- sophistication_score (1-10): vocabulary sophistication "
+        "(1 = only very common/basic words, 10 = impressive range including advanced vocabulary)\n"
+        "- relevance_score (1-10): how relevant/on-topic the words were\n"
+        "- overall_score (1-10): overall performance\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)\n"
+        "- missed_words (array of 3-5 strings): related words the user didn't mention "
+        "that would expand their vocabulary network"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach specializing in lexical retrieval and word association skills. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="word_association_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Word association evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    try:
+        valid_count = max(0, int(result.get("valid_count", 0)))
+    except (ValueError, TypeError):
+        valid_count = 0
+
+    raw_missed = result.get("missed_words", [])
+    if not isinstance(raw_missed, list):
+        raw_missed = []
+    missed_words = [str(w) for w in raw_missed if w][:5]
+
+    return {
+        "valid_count": valid_count,
+        "sophistication_score": clamp(result.get("sophistication_score", 5)),
+        "relevance_score": clamp(result.get("relevance_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "missed_words": missed_words,
+    }

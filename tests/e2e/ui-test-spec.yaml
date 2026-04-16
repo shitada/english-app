@@ -755,3 +755,35 @@ pages:
         type: functional
         priority: medium
         added_in: 506
+
+      - id: quick-practice-hub-024
+        target: QuickWordAssociationCard renders in vocabulary tab
+        action: Navigate to home page, select Vocabulary tab in Quick Practice Hub, scroll to QuickWordAssociationCard
+        expect: QuickWordAssociationCard is visible with Zap icon, "Word Association" heading, seed word with tag emoji, category description, hint text, target count badge, timer badge, and "Start Speaking" button
+        type: functional
+        priority: high
+        added_in: 507
+
+      - id: quick-practice-hub-025
+        target: QuickWordAssociationCard speaking phase with timer and word count
+        action: Click "Start Speaking" button on QuickWordAssociationCard
+        expect: Shows seed word, pulsing mic icon, countdown timer (30s), live word count display (Words: N / target), transcript text, and Done button
+        type: functional
+        priority: high
+        added_in: 507
+
+      - id: quick-practice-hub-026
+        target: QuickWordAssociationCard evaluation results with missed words
+        action: Complete a speaking attempt in QuickWordAssociationCard and view results
+        expect: Shows 4 score items (Valid count, Sophistication, Relevance, Overall), feedback text, "Words you could also try" section with word chips, Try Again and New Category buttons
+        type: functional
+        priority: high
+        added_in: 507
+
+      - id: quick-practice-hub-027
+        target: QuickWordAssociationCard difficulty selector integration
+        action: Change difficulty via Quick Practice Hub selector while QuickWordAssociationCard is visible
+        expect: QuickWordAssociationCard resets to idle phase and re-fetches prompt with new difficulty
+        type: functional
+        priority: medium
+        added_in: 507
