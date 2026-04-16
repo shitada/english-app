@@ -505,6 +505,46 @@ pages:
         priority: medium
         added_in: 521
 
+      - id: conv-047
+        target: Say It Better button appears next to each suggestion when speech is supported
+        action: Send a correct message with improvement suggestions, check FeedbackPanel suggestions
+        expect: Each suggestion shows a "🗣️ Say It Better" outlined button next to the speaker icon
+        type: functional
+        priority: high
+        added_in: 522
+
+      - id: conv-048
+        target: Say It Better triggers TTS and opens suggestion speak drill panel
+        action: Click "🗣️ Say It Better" on a suggestion
+        expect: Drill panel opens below the suggestion with "Say the better expression aloud" prompt and "Start Speaking" button; better text is spoken via TTS
+        type: functional
+        priority: high
+        added_in: 522
+
+      - id: conv-049
+        target: Say It Better drill shows success on accurate speech
+        action: Speak the better expression accurately (≥90% match) and stop recording
+        expect: Drill panel shows "✅ Nice! You said it better!" success message and closes
+        type: functional
+        priority: high
+        added_in: 522
+
+      - id: conv-050
+        target: Say It Better drill shows retry with word diff on mismatch
+        action: Speak an inaccurate version of the better expression and stop recording
+        expect: "Almost!" label with InlineCorrectionDiff color-coded words and "Try Again" button with mic icon
+        type: functional
+        priority: high
+        added_in: 522
+
+      - id: conv-051
+        target: Only one Say It Better drill active at a time
+        action: Click "🗣️ Say It Better" on one suggestion while another drill is already open
+        expect: Other suggestions hide their "Say It Better" buttons while a drill is active; only active drill shown
+        type: functional
+        priority: medium
+        added_in: 522
+
   pronunciation:
     path: /pronunciation
     tests:

@@ -510,3 +510,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 518	none	2026-04-17	127	410	102	325	964	1530	1530	pass	5.15	discarded	Fix hardcoded light-mode colors in Quick Practice cards and SpeakingJournal
 519	901a6a4	2026-04-17	280	163	101	155	699	1530	1530	pass	6.00	kept	Add back button and keyboard shortcuts to Listening quiz phases
 520	af7ee8e	2026-04-17	318	156	106	137	717	1530	1530	pass	6.20	kept	Replace window.confirm() with inline confirmation UI in Conversation
+521	f236d28	2026-04-17	271	210	103	131	715	1530	1530	pass	6.45	kept	Add spoken Say It correction drill to in-chat FeedbackPanel
