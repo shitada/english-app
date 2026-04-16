@@ -484,3 +484,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 490	79404ba	2026-04-16	1326	107	71	2692	4196	1412	1412	pass	6.1	kept	Add echo practice for Speaking Journal model answer
 491	0a27479	2026-04-16	1826	405	352	808	3391	1415	1415	pass	7.8	kept	Fix Speaking Journal returning same prompt on repeated requests same day
 492	1c22af6	2026-04-16	203	36	200	281	720	1417	1417	pass	7.75	kept	Add speaking journal and listening quiz daily goal types
+493	3b10591	2026-04-16	334	132	69	408	943	1420	1420	pass	6.8	kept	Add difficulty selector and duration options to Speaking Journal

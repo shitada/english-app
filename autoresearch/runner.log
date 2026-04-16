@@ -3130,3 +3130,110 @@ Good catch from the tester — stale closure bug in `handleStart`. Let me fix it
   │ --noEmit 2>&1
   └ 2 lines...
 
+● Amend commit with fix (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit --amend -m "autoresearch #493: Add difficulty selector and duration
+  │ options to Speaking Journal
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 16 lines...
+
+Now call the evaluator:
+
+● Get diff stats for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 8 lines...
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "server stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 493
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1400:1700 (301 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1700:1950 (250 lines read)
+
+Evaluator score: 6.8, verdict: keep. Recording results.
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 493 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ DATE=$(date +%Y-%m-%d) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "493" "$HASH" "$DATE" "334" "132" "69" "408" "943" \…
+  └ 6 lines...
+
+Good, properly tab-separated. Now starting iteration 494.
+
+## Iteration 494
+
+● Record T0 for iteration 494 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md
+  └ 1 line...
+
+● Read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+Backlog empty. Calling proposer for iteration 494:
+
+● Proposer Propose iteration 494
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L2300:2500 (201 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L310:400 (90 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+Propose time: 196s. Now implementing. Let me see the done phase section:
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L280:420 (141 lines read)
+
+I see the structure. I'll add the transcript review panel right after the stats grid (line 360) and before the Retry Comparison Card (line 362):
+
+● Edit SpeakingJournal.tsx +69
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add the state and helper function. First, add `transcriptExpanded` state:
+
+● Edit SpeakingJournal.tsx +1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Add the highlightFillers helper function before the component:
+
+● Edit SpeakingJournal.tsx +6
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now reset the transcriptExpanded state in handleReset and handleRetry:
+
+● Edit SpeakingJournal.tsx +1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+● Edit SpeakingJournal.tsx +1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now commit and test:
+

@@ -5,6 +5,12 @@ import { useI18n } from '../i18n/I18nContext';
 
 type Phase = 'idle' | 'speaking' | 'saving' | 'done';
 
+const FILLER_REGEX = /\b(um|uh|erm|er|ah|like|you know|basically|i mean|sort of|kind of|actually|literally|right|okay so|well)\b/gi;
+
+function highlightFillers(text: string): string {
+  return text.replace(FILLER_REGEX, '<mark style="background:#fecaca;border-radius:3px;padding:0 2px">$1</mark>');
+}
+
 export default function SpeakingJournal() {
   const { t } = useI18n();
   const [prompt, setPrompt] = useState('');
@@ -30,6 +36,7 @@ export default function SpeakingJournal() {
   const [modelAnswer, setModelAnswer] = useState<ModelAnswerResult | null>(null);
   const [modelAnswerLoading, setModelAnswerLoading] = useState(false);
   const [modelAnswerExpanded, setModelAnswerExpanded] = useState(false);
+  const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   const [previousEntry, setPreviousEntry] = useState<SpeakingJournalEntry | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
@@ -101,6 +108,7 @@ export default function SpeakingJournal() {
     setModelAnswer(null);
     setModelAnswerLoading(false);
     setModelAnswerExpanded(false);
+    setTranscriptExpanded(false);
     getSpeakingJournalPrompt(difficulty).then((r) => setPrompt(r.prompt)).catch(() => {});
   }, [reset, duration, difficulty]);
 
@@ -119,6 +127,7 @@ export default function SpeakingJournal() {
     setModelAnswer(null);
     setModelAnswerLoading(false);
     setModelAnswerExpanded(false);
+    setTranscriptExpanded(false);
   }, [reset, savedEntry, duration]);
 
   if (loading || !prompt) return null;
@@ -357,6 +366,75 @@ export default function SpeakingJournal() {
                   {t('fillersLabel')}
                 </div>
               </div>
+            </div>
+
+            {/* Transcript Review Panel */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <button
+                onClick={() => setTranscriptExpanded(!transcriptExpanded)}
+                data-testid="transcript-review-toggle"
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  background: transcriptExpanded ? 'var(--primary, #6366f1)' : 'var(--bg-secondary, #f3f4f6)',
+                  color: transcriptExpanded ? '#fff' : 'var(--text-primary, #1f2937)',
+                  border: '1px solid var(--border, #d1d5db)',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                📝 Review My Response {transcriptExpanded ? '▲' : '▼'}
+              </button>
+              {transcriptExpanded && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem',
+                  background: 'var(--bg-secondary, #f9fafb)',
+                  borderRadius: 8,
+                  border: '1px solid var(--border, #e5e7eb)',
+                }}>
+                  <p style={{
+                    margin: '0 0 0.5rem',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.6,
+                    color: 'var(--text-primary, #1f2937)',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                    dangerouslySetInnerHTML={{ __html: highlightFillers(savedEntry.transcript) }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                        return;
+                      }
+                      const utter = new SpeechSynthesisUtterance(savedEntry.transcript);
+                      utter.lang = 'en-US';
+                      utter.rate = 0.9;
+                      window.speechSynthesis.speak(utter);
+                    }}
+                    data-testid="tts-my-response"
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      background: 'var(--primary, #6366f1)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    🔊 Hear My Response
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Retry Comparison Card */}
