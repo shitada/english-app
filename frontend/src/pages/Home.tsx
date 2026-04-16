@@ -115,10 +115,12 @@ function FocusAreaCTA({ area }: { area: string }) {
   );
 }
 
-const QUICK_GOALS: { goalType: string; target: number; labelKey: 'goal3Conv' | 'goal10Vocab' | 'goal5Pron' }[] = [
+const QUICK_GOALS: { goalType: string; target: number; labelKey: 'goal3Conv' | 'goal10Vocab' | 'goal5Pron' | 'goal2Speaking' | 'goal2Listening' }[] = [
   { goalType: 'conversations', target: 3, labelKey: 'goal3Conv' },
   { goalType: 'vocabulary_reviews', target: 10, labelKey: 'goal10Vocab' },
   { goalType: 'pronunciation_attempts', target: 5, labelKey: 'goal5Pron' },
+  { goalType: 'speaking_journal_entries', target: 2, labelKey: 'goal2Speaking' },
+  { goalType: 'listening_quizzes', target: 2, labelKey: 'goal2Listening' },
 ];
 
 function GoalSetupPrompt({ onGoalCreated }: { onGoalCreated: (goal: LearningGoal) => void }) {

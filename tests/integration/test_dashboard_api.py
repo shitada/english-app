@@ -273,6 +273,20 @@ async def test_set_goal_invalid_type(client):
 
 
 @pytest.mark.integration
+async def test_set_goal_speaking_journal(client):
+    res = await client.post("/api/dashboard/goals", json={"goal_type": "speaking_journal_entries", "daily_target": 2})
+    assert res.status_code == 200
+    assert res.json()["goal_type"] == "speaking_journal_entries"
+
+
+@pytest.mark.integration
+async def test_set_goal_listening_quizzes(client):
+    res = await client.post("/api/dashboard/goals", json={"goal_type": "listening_quizzes", "daily_target": 2})
+    assert res.status_code == 200
+    assert res.json()["goal_type"] == "listening_quizzes"
+
+
+@pytest.mark.integration
 async def test_delete_goal(client):
     await client.post("/api/dashboard/goals", json={"goal_type": "conversations", "daily_target": 3})
     res = await client.delete("/api/dashboard/goals/conversations")

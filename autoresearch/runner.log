@@ -2412,3 +2412,311 @@ Now commit and record T2:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 491 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit -m "autoresearch #491: Fix Speaking Journal returning same prompt on
+  │ repeated requests
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+T2=1776309254. Now run tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -30
+  └ 1 line...
+
+TS check passes. Let me wait for pytest:
+
+✗ Wait for pytest output (shell)
+  │ read_bash 18
+  └ <command with shellId: 18 is already running, wait for output with
+    read_bash, stop it with stop_bash tool>
+
+● placeholder (shell)
+  │ echo "waiting"
+  └ 2 lines...
+
+<system_notification>Shell 18 exited with return code 0, output:
+tests/unit/test_vocabulary_dal.py::TestGetWeeklyComparison::test_both_weeks_data PASSED
+tests/unit/test_vocabulary_dal.py::TestGetWeeklyComparison::test_all_activity_types PASSED
+tests/unit/test_vocabulary_dal.py::TestGetWeeklyComparison::test_includes_listening_data PASSED
+tests/unit/test_vocabulary_dal.py::TestGetWeeklyComparison::test_includes_speaking_journal_data PASSED
+tests/unit/test_vocabulary_dal.py::TestGetActivityHistory::test_empty_history PASSED
+tests/unit/test_vocabulary_dal.py::TestGetActivityHistory::test_multiple_activity_types PASSED
+tests/unit/test_vocabulary_dal.py::TestGetActivityHistory::test_respects_limit PASSED
+tests/unit/test_vocabulary_dal.py::TestGetActivityHistory::test_includes_listening_quiz_activities PASSED
+tests/unit/test_vocabulary_dal.py::TestGetActivityHistory::test_includes_speaking_journal_activities PASSED
+tests/unit/test_vocabulary_dal.py::TestGetVocabActiveUseAnalysis::test_empty_analysis PASSED
+tests/unit/test_vocabulary_dal.py::TestGetVocabActiveUseAnalysis::test_with_conversation_usage PASSED
+tests/unit/test_vocabulary_dal.py::TestGetVocabActiveUseAnalysis::test_with_speaking_journal_usage PASSED
+tests/unit/test_vocabulary_dal.py::TestGetVocabActiveUseAnalysis::test_top_active_words PASSED
+tests/unit/test_vocabulary_dal.py::TestGetFillerWordTrends::test_empty PASSED
+tests/unit/test_vocabulary_dal.py::TestGetFillerWordTrends::test_single_entry PASSED
+tests/unit/test_vocabulary_dal.py::TestGetFillerWordTrends::test_multiple_entries PASSED
+tests/unit/test_vocabulary_dal.py::TestGetFillerWordTrends::test_trend_direction_improving PASSED
+
+=========================================================================================================================================================================================================================================== slowest 5 durations ===========================================================================================================================================================================================================================================
+3.49s call     tests/integration/test_full_flow.py::TestConversationFullFlow::test_full_conversation_flow
+1.95s call     tests/integration/test_full_flow.py::TestConversationFullFlow::test_conversation_summary_flow
+0.54s call     tests/integration/test_full_flow.py::TestConversationFullFlow::test_pronunciation_flow
+0.40s call     tests/integration/test_full_flow.py::TestConversationFullFlow::test_speaking_journal_flow
+0.12s call     tests/unit/test_pronunciation_dal.py::TestSaveAttempt::test_save_attempt_inserts_row
+============================================================================================================================================================================================================================================= short test summary info =============================================================================================================================================================================================================================================
+
+===== 1415 passed in 180.88s (3:00) =====</parameter>
+
+All 1415 tests pass, TS check passes. Let me check for smoke test need and record T3:
+
+● Record T3 and check smoke test need (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff
+  │ HEAD~1 --name-only | grep -E "database\.py|app/routers/|app/dal/"
+  └ 4 lines...
+
+T3=1776309606. Smoke test needed since router/DAL changed:
+
+● Run smoke test (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │ kill -9 2>/dev/null; uv run python tests/smoke_test.py
+  └ 23 lines...
+
+Smoke test passes. Now check if frontend UI files changed (for tester):
+
+● Check if frontend UI changed (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E 'frontend/src/(pages|components)/.*\.tsx$'
+  └ 1 line...
+
+No frontend .tsx files changed — tester skip is OK. Now call the evaluator:
+
+● Get diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 2>&1 |
+  │ head -120
+  └ 121 lines...
+
+● Evaluator Evaluate iteration 491
+  │ Read pronunciation.py
+  │   │ app/routers/pronunciation.py
+  │   └ L2140:2195 (54 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Timings: propose=1826, implement=405, test=352, evaluate=808, total=3391. Score 7.8 → KEEP.
+
+● Record results for iter 491 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "491" "0a27479" "2026-04-16" "1826" "405" "352" "808" "3391" \
+  │ "1415" "1415" "pass" "7.8" "kept" "Fix Speaking Journal returning same
+  │ prompt on repeated requests same day" \…
+  └ 4 lines...
+
+Row verified with tab separators. Now starting **iteration 492**.
+
+● Record T0 for iteration 492 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md
+  └ 1 line...
+
+● Re-read recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv
+  └ 21 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+T0=1776310433. Backlog empty. Calling proposer for iteration 492:
+
+● Proposer Propose iteration 492
+  │ Read translations.ts
+  │   │ frontend/src/i18n/translations.ts
+  │   └ L1:50 (50 lines read)
+  └ Read translations.ts
+      │ frontend/src/i18n/translations.ts
+      └ L50:150 (101 lines read)
+
+Good proposal. Let me record T1 and implement:
+
+● Record T1 for iteration 492 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find valid_types in dashboard router (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'valid_types\|goal_type' app/routers/dashboard.py | head -10
+  └ 9 lines...
+
+● Find QUICK_GOALS in Home.tsx (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'QUICK_GOALS\|goalType\|goal_type.*LearningGoal\|LearningGoal'
+  │ frontend/src/pages/Home.tsx | head -20
+  └ 21 lines...
+
+● Find goal translations (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n 'goal2\|goal_'
+  │ frontend/src/i18n/translations.ts | head -10
+  └ 1 line...
+
+● Find LearningGoal type in api.ts (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'goal_type\|LearningGoal' frontend/src/api.ts | head -10
+  └ 9 lines...
+
+● Find goal translation keys (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'goal3Conv\|goal10Vocab\|goal5Pron' frontend/src/i18n/translations.ts
+  └ 10 lines...
+
+Now let me implement all four changes:
+
+● Edit api.ts +1 -1
+  └ frontend/src/api.ts
+
+● Edit dashboard.py +1 -1
+  └ app/routers/dashboard.py
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit Home.tsx +3 -1
+  └ frontend/src/pages/Home.tsx
+
+Now add the English and Japanese translations:
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+● Edit translations.ts +2
+  └ frontend/src/i18n/translations.ts
+
+Now add a test for the new valid_types. Let me find the existing goal test:
+
+● Find goal tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -rn
+  │ 'valid_types\|set_learning_goal\|goal_type.*invalid\|invalid.*goal' tests/ |
+  │ head -10
+  └ 8 lines...
+
+● Read test_dashboard_api.py
+  │ tests/integration/test_dashboard_api.py
+  └ L260:290 (31 lines read)
+
+Let me add a test for the new goal types:
+
+● Edit test_dashboard_api.py +14
+  └ tests/integration/test_dashboard_api.py
+
+Now commit and run tests:
+
+● Commit iteration 492 and record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit -m "autoresearch #492: Add speaking journal and listening quiz
+  │ daily goal types
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" && …
+  └ 17 lines...
+
+T2=1776310672. Run tests:
+
+● Run TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -30
+  └ 31 lines...
+
+2 tests failed. Let me check what the errors are:
+
+● Check test failure details (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_set_goal_speaking_journal -v
+  │ 2>&1 | tail -30
+  └ 30 lines...
+
+There's a CHECK constraint in the DB schema. Let me find and fix it:
+
+● Find learning_goals schema (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'learning_goals\|goal_type.*IN' app/database.py | head -10
+  └ 3 lines...
+
+● Read database.py
+  │ app/database.py
+  └ L96:106 (11 lines read)
+
+● Find migrations list (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '_MIGRATIONS'
+  │ app/database.py | head -5
+  └ 3 lines...
+
+● Find last migration index (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '_MIGRATIONS'
+  │ app/database.py && tail -20 <(grep -A1 '# Migration' app/database.py)
+  │ 2>/dev/null; awk '/_MIGRATIONS/,/^\]/' app/database.py | tail -10
+  └ 14 lines...
+
+● Read database.py
+  │ app/database.py
+  └ L300:330 (31 lines read)
+
+● Read database.py
+  │ app/database.py
+  └ L280:300 (20 lines read)
+
+I need to: 1) Update the SCHEMA CHECK constraint, 2) Add a migration to recreate the constraint. In SQLite you can't alter CHECK constraints directly, but we can work around this by recreating the table. Actually, a simpler approach: SQLite doesn't support ALTER TABLE to drop/modify constraints. The cleanest approach is to drop the CHECK constraint entirely and rely on the application-level validation (which already exists in the router).
+
+Let me update the schema for new databases and add a migration for existing ones:
+
+● Edit database.py +1 -1
+  └ app/database.py
+
+Now add a migration to recreate the table with the new constraint:
+
+● Edit database.py +17
+  └ app/database.py
+
+Wait, SQLite `execute` can't handle multiple statements in one call. Let me check how previous migrations handle multi-statement:
+
+● Check migration execution method (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ 'executescript\|execute_many\|execute(' app/database.py | grep -i migrat |
+  │ head -5
+  └ 1 line...
+
+● Read database.py
+  │ app/database.py
+  └ L318:340 (23 lines read)
+
+It uses `db.execute(sql)` which only handles one statement. I need to use `executescript` or split into multiple migrations. Let me use `executescript`:
+
+● Read database.py
+  │ app/database.py
+  └ L335:350 (16 lines read)
+
+I need to change the approach - use `executescript` for multi-statement migrations. Let me update the migration runner to handle this, or better yet, split into multiple migrations:
+
+● Edit database.py +14 -8
+  └ app/database.py
+
+Now amend the commit and re-test:
+

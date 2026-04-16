@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_answered ON quiz_attempts(answered_
 
 CREATE TABLE IF NOT EXISTS learning_goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    goal_type TEXT NOT NULL CHECK (goal_type IN ('conversations', 'vocabulary_reviews', 'pronunciation_attempts')),
+    goal_type TEXT NOT NULL CHECK (goal_type IN ('conversations', 'vocabulary_reviews', 'pronunciation_attempts', 'speaking_journal_entries', 'listening_quizzes')),
     daily_target INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -291,6 +291,29 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add filler_word_count column to speaking_journal",
         "ALTER TABLE speaking_journal ADD COLUMN filler_word_count INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "expand learning_goals goal_type CHECK constraint to include speaking_journal_entries and listening_quizzes",
+        """CREATE TABLE IF NOT EXISTS learning_goals_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            goal_type TEXT NOT NULL CHECK (goal_type IN ('conversations', 'vocabulary_reviews', 'pronunciation_attempts', 'speaking_journal_entries', 'listening_quizzes')),
+            daily_target INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(goal_type)
+        )""",
+    ),
+    (
+        "migrate learning_goals data to new table",
+        "INSERT OR IGNORE INTO learning_goals_new (id, goal_type, daily_target, created_at, updated_at) SELECT id, goal_type, daily_target, created_at, updated_at FROM learning_goals",
+    ),
+    (
+        "drop old learning_goals table",
+        "DROP TABLE IF EXISTS learning_goals",
+    ),
+    (
+        "rename learning_goals_new to learning_goals",
+        "ALTER TABLE learning_goals_new RENAME TO learning_goals",
     ),
 ]
 

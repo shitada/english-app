@@ -245,7 +245,7 @@ async def get_goals(db: aiosqlite.Connection = Depends(get_db_session)):
 @router.post("/goals")
 async def set_goal(req: SetGoalRequest, db: aiosqlite.Connection = Depends(get_db_session)):
     """Set or update a daily learning goal."""
-    valid_types = {"conversations", "vocabulary_reviews", "pronunciation_attempts"}
+    valid_types = {"conversations", "vocabulary_reviews", "pronunciation_attempts", "speaking_journal_entries", "listening_quizzes"}
     if req.goal_type not in valid_types:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail=f"Invalid goal_type. Must be one of: {valid_types}")

@@ -725,7 +725,7 @@ export async function getLearningInsights(): Promise<LearningInsights> {
 // Learning goals (from iteration 92)
 export interface LearningGoal {
   id: number;
-  goal_type: "conversations" | "vocabulary_reviews" | "pronunciation_attempts";
+  goal_type: "conversations" | "vocabulary_reviews" | "pronunciation_attempts" | "speaking_journal_entries" | "listening_quizzes";
   daily_target: number;
   created_at: string;
   updated_at: string;

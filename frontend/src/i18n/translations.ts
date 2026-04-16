@@ -38,6 +38,8 @@ export interface Translations {
   goal3Conv: string;
   goal10Vocab: string;
   goal5Pron: string;
+  goal2Speaking: string;
+  goal2Listening: string;
   clickToEditTarget: string;
   removeGoal: string;
   allGoalsComplete: string;
@@ -137,6 +139,8 @@ export const en: Translations = {
   goal3Conv: '3 conversations/day',
   goal10Vocab: '10 vocab reviews/day',
   goal5Pron: '5 pronunciations/day',
+  goal2Speaking: '2 speaking entries/day',
+  goal2Listening: '2 listening quizzes/day',
   clickToEditTarget: 'Click to edit target',
   removeGoal: 'Remove goal',
   allGoalsComplete: '🎉 All daily goals complete!',
@@ -236,6 +240,8 @@ export const ja: Translations = {
   goal3Conv: '1日3会話',
   goal10Vocab: '1日10語彙復習',
   goal5Pron: '1日5発音',
+  goal2Speaking: '1日2スピーキング',
+  goal2Listening: '1日2リスニング',
   clickToEditTarget: 'クリックして目標を変更',
   removeGoal: '目標を削除',
   allGoalsComplete: '🎉 全ての日課達成！',
