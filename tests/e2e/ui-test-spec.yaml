@@ -476,6 +476,30 @@ pages:
         priority: medium
         added_in: 329
 
+      - id: pron-008
+        target: InlineErrorBanner displays on pronunciation check failure
+        action: trigger a pronunciation check with backend offline, snapshot the practice view
+        expect: A role="alert" banner appears with error message, dismiss button (×), and auto-dismisses after 8 seconds
+        type: error
+        priority: high
+        added_in: 517
+
+      - id: pron-009
+        target: InlineErrorBanner dismiss button works in Pronunciation
+        action: trigger an error banner, then click the × dismiss button
+        expect: The error banner is removed from the DOM immediately
+        type: functional
+        priority: medium
+        added_in: 517
+
+      - id: pron-010
+        target: InlineErrorBanner displays on dictation check failure
+        action: trigger a dictation submission with backend offline, snapshot the dictation view
+        expect: A role="alert" banner appears with dictation error message and uses --danger-bg/--danger-border/--danger-text CSS variables
+        type: error
+        priority: high
+        added_in: 517
+
   listening:
     path: /listening
     tests:
@@ -617,6 +641,38 @@ pages:
         type: visual
         priority: medium
         added_in: 514
+
+      - id: vocab-013
+        target: InlineErrorBanner displays on quiz generation failure
+        action: trigger a quiz start with backend offline, snapshot the select view
+        expect: A role="alert" banner appears with error message, dismiss button (×), and uses --danger-bg/--danger-border/--danger-text CSS variables
+        type: error
+        priority: high
+        added_in: 517
+
+      - id: vocab-014
+        target: InlineErrorBanner dismiss button works in Vocabulary
+        action: trigger an error banner on the vocabulary select page, then click the × dismiss button
+        expect: The error banner is removed from the DOM immediately
+        type: functional
+        priority: medium
+        added_in: 517
+
+      - id: vocab-015
+        target: InlineErrorBanner displays in sentence-build phase on check failure
+        action: trigger a sentence build check with backend offline, snapshot the sentence-build view
+        expect: A role="alert" banner appears inside the sentence build card with the error message
+        type: error
+        priority: high
+        added_in: 517
+
+      - id: vocab-016
+        target: InlineErrorBanner displays in sentence-craft phase on evaluation failure
+        action: trigger a sentence craft evaluation with backend offline, snapshot the sentence-craft view
+        expect: A role="alert" banner appears inside the sentence craft card with the evaluation error message
+        type: error
+        priority: high
+        added_in: 517
 
   dashboard:
     path: /dashboard

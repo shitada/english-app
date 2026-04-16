@@ -7,6 +7,7 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
 import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory } from '../components/pronunciation';
 import { useRecordingStorage } from '../hooks/useRecordingStorage';
+import InlineErrorBanner from '../components/InlineErrorBanner';
 
 const SAMPLE_SENTENCES = [
   { text: "I'd like to check in, please. I have a reservation under Smith.", topic: 'hotel', difficulty: 'intermediate' },
@@ -33,6 +34,7 @@ export default function Pronunciation() {
   const [dictationText, setDictationText] = useState('');
   const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [dictationPlayed, setDictationPlayed] = useState(false);
+  const [inlineError, setInlineError] = useState<string | null>(null);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -103,7 +105,7 @@ export default function Pronunciation() {
       setPhase('result');
     } catch (err) {
       console.error(err);
-      alert('Failed to check pronunciation. Make sure the backend is running.');
+      setInlineError('Failed to check pronunciation. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -130,7 +132,7 @@ export default function Pronunciation() {
       setPhase('result');
     } catch (err) {
       console.error(err);
-      alert('Failed to check dictation. Make sure the backend is running.');
+      setInlineError('Failed to check dictation. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -352,6 +354,7 @@ export default function Pronunciation() {
     if (practiceMode === 'dictation') {
       return (
         <div className="card">
+          <InlineErrorBanner error={inlineError} onDismiss={() => setInlineError(null)} />
           <h3 style={{ marginBottom: 16, textAlign: 'center' }}>Dictation Practice</h3>
 
           <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
@@ -439,6 +442,7 @@ export default function Pronunciation() {
 
     return (
       <div className="card">
+        <InlineErrorBanner error={inlineError} onDismiss={() => setInlineError(null)} />
         <h3 style={{ marginBottom: 16, textAlign: 'center' }}>Shadowing Practice</h3>
 
         <div className="sentence-display">{selectedSentence}</div>

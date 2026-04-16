@@ -9,6 +9,7 @@ import VocabFlashcardMode from '../components/VocabFlashcardMode';
 import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
 import VocabSpellingBee from '../components/VocabSpellingBee';
+import InlineErrorBanner from '../components/InlineErrorBanner';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -35,6 +36,7 @@ export default function Vocabulary() {
   const [srsChanges, setSrsChanges] = useState<SRSChange[]>([]);
   const [etymologyMap, setEtymologyMap] = useState<Record<number, EtymologyInfo | 'loading'>>({});
   const [expandedEtymology, setExpandedEtymology] = useState<number | null>(null);
+  const [inlineError, setInlineError] = useState<string | null>(null);
 
   // Drill mode state
   const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -91,7 +93,7 @@ export default function Vocabulary() {
       if (quizMode === 'sentence-build') {
         const res = await getSentenceBuildExercises(topicId, 8);
         if (!res.exercises || res.exercises.length === 0) {
-          alert('No sentence exercises available for this topic. Try another topic.');
+          setInlineError('No sentence exercises available for this topic. Try another topic.');
           return;
         }
         setSbExercises(res.exercises);
@@ -107,7 +109,7 @@ export default function Vocabulary() {
       if (quizMode === 'sentence-craft') {
         const res = await getSentenceCraftWords(topicId, 3);
         if (!res.words || res.words.length === 0) {
-          alert('No vocabulary words available for this topic. Try another topic.');
+          setInlineError('No vocabulary words available for this topic. Try another topic.');
           return;
         }
         setCraftWords(res.words);
@@ -119,7 +121,7 @@ export default function Vocabulary() {
       const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
       const res = await api.generateQuiz(topicId, 10, apiMode);
       if (!res.questions || res.questions.length === 0) {
-        alert('No questions generated. Try again.');
+        setInlineError('No questions generated. Try again.');
         return;
       }
       // Cache for offline use
@@ -155,7 +157,7 @@ export default function Vocabulary() {
           }
         } catch { /* invalid cache */ }
       }
-      alert('Failed to generate quiz. Make sure the backend is running.');
+      setInlineError('Failed to generate quiz. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -233,7 +235,7 @@ export default function Vocabulary() {
     try {
       const res = await api.getDrillWords(10);
       if (!res.words || res.words.length === 0) {
-        alert('No vocabulary words available for drill. Add words via a topic quiz first.');
+        setInlineError('No vocabulary words available for drill. Add words via a topic quiz first.');
         return;
       }
       setDrillWords(res.words);
@@ -241,7 +243,7 @@ export default function Vocabulary() {
       tts.speak(res.words[0].word);
     } catch (err) {
       console.error(err);
-      alert('Failed to start drill. Make sure the backend is running.');
+      setInlineError('Failed to start drill. Make sure the backend is running.');
     } finally {
       setLoading(false);
     }
@@ -255,7 +257,7 @@ export default function Vocabulary() {
       setPhase('tiers');
     } catch (err) {
       console.error(err);
-      alert('Failed to load word tiers.');
+      setInlineError('Failed to load word tiers.');
     } finally {
       setTiersLoading(false);
     }
@@ -315,6 +317,7 @@ export default function Vocabulary() {
   if (phase === 'select') {
     return (
       <div>
+        <InlineErrorBanner error={inlineError} onDismiss={() => setInlineError(null)} />
         <h2 style={{ marginBottom: 8 }}>Vocabulary</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
@@ -340,13 +343,13 @@ export default function Vocabulary() {
             try {
               const data = await api.getDrillWords(10);
               if (!data.words || data.words.length === 0) {
-                alert('No vocabulary words available for flashcard review. Add words via a topic quiz first.');
+                setInlineError('No vocabulary words available for flashcard review. Add words via a topic quiz first.');
                 return;
               }
               setFcWords(data.words.slice(0, 10));
               setPhase('flashcard');
             } catch {
-              alert('Failed to load words for flashcard review.');
+              setInlineError('Failed to load words for flashcard review.');
             } finally {
               setLoading(false);
             }
@@ -383,7 +386,7 @@ export default function Vocabulary() {
             try {
               const data = await api.getDrillWords(10);
               if (!data.words || data.words.length === 0) {
-                alert('No vocabulary words available for pronunciation practice. Add words via a topic quiz first.');
+                setInlineError('No vocabulary words available for pronunciation practice. Add words via a topic quiz first.');
                 return;
               }
               setPronWords(data.words.slice(0, 10));
@@ -393,7 +396,7 @@ export default function Vocabulary() {
               speech.reset();
               setPhase('word-pronunciation');
             } catch {
-              alert('Failed to load words for pronunciation practice.');
+              setInlineError('Failed to load words for pronunciation practice.');
             } finally {
               setLoading(false);
             }
@@ -416,14 +419,14 @@ export default function Vocabulary() {
             try {
               const data = await api.getDrillWords(10);
               if (!data.words || data.words.length === 0) {
-                alert('No vocabulary words available for speak recall. Add words via a topic quiz first.');
+                setInlineError('No vocabulary words available for speak recall. Add words via a topic quiz first.');
                 return;
               }
               setSrWords(data.words.slice(0, 10));
               speech.reset();
               setPhase('speak-recall');
             } catch {
-              alert('Failed to load words for speak recall.');
+              setInlineError('Failed to load words for speak recall.');
             } finally {
               setLoading(false);
             }
@@ -447,13 +450,13 @@ export default function Vocabulary() {
               const data = await api.getDrillWords(10);
               const withSentence = data.words.filter(w => w.example_sentence && w.example_sentence.trim());
               if (withSentence.length === 0) {
-                alert('No vocabulary words with example sentences available. Try a topic quiz first.');
+                setInlineError('No vocabulary words with example sentences available. Try a topic quiz first.');
                 return;
               }
               setClWords(withSentence.slice(0, 10));
               setPhase('context-listen');
             } catch {
-              alert('Failed to load words for context listening.');
+              setInlineError('Failed to load words for context listening.');
             } finally {
               setLoading(false);
             }
@@ -476,13 +479,13 @@ export default function Vocabulary() {
             try {
               const data = await api.getDrillWords(10);
               if (!data.words || data.words.length === 0) {
-                alert('No vocabulary words available for spelling bee. Add words via a topic quiz first.');
+                setInlineError('No vocabulary words available for spelling bee. Add words via a topic quiz first.');
                 return;
               }
               setSbWords(data.words.slice(0, 10));
               setPhase('spelling-bee');
             } catch {
-              alert('Failed to load words for spelling bee.');
+              setInlineError('Failed to load words for spelling bee.');
             } finally {
               setLoading(false);
             }
@@ -759,7 +762,7 @@ export default function Vocabulary() {
         setSbRevealed(true);
         setSbResults(prev => [...prev, { correct: res.is_correct, correctSentence: res.correct_sentence }]);
       } catch {
-        alert('Failed to check sentence.');
+        setInlineError('Failed to check sentence.');
       }
     };
 
@@ -778,6 +781,7 @@ export default function Vocabulary() {
 
     return (
       <div className="card">
+        <InlineErrorBanner error={inlineError} onDismiss={() => setInlineError(null)} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h3>🧩 Sentence Build</h3>
           <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{progress}</span>
@@ -883,6 +887,7 @@ export default function Vocabulary() {
   if (phase === 'sentence-craft' && craftWords.length > 0) {
     return (
       <div className="card">
+        <InlineErrorBanner error={inlineError} onDismiss={() => setInlineError(null)} />
         <h3 style={{ marginBottom: 8, textAlign: 'center' }}>✍️ Sentence Craft</h3>
         <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: 16 }}>
           Write a sentence using all of these words:
@@ -912,7 +917,7 @@ export default function Vocabulary() {
                 const res = await evaluateSentenceCraft(craftWords.map(w => w.id), craftSentence);
                 setCraftResult(res);
                 setPhase('sentence-craft-result');
-              } catch (err) { console.error('Evaluation failed:', err); alert('Evaluation failed. Please try again.'); }
+              } catch (err) { console.error('Evaluation failed:', err); setInlineError('Evaluation failed. Please try again.'); }
               finally { setCraftLoading(false); }
             }}
           >
