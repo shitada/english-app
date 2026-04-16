@@ -545,6 +545,62 @@ pages:
         priority: medium
         added_in: 522
 
+      - id: conv-052
+        target: Shadow Phrase mic icon appears next to key phrase speaker icon
+        action: Start a conversation, receive an AI message with key phrases highlighted
+        expect: Each highlighted key phrase shows both 🔊 and 🎤 icons; 🎤 has data-testid="shadow-drill-mic"
+        type: functional
+        priority: high
+        added_in: 523
+
+      - id: conv-053
+        target: Clicking shadow mic opens inline drill panel
+        action: Click 🎤 icon next to a highlighted key phrase
+        expect: Inline shadow drill panel appears below the phrase with data-testid="shadow-drill-panel", shows "🔊 Listen..." then transitions to "🎤 Your turn!" with Record button
+        type: functional
+        priority: high
+        added_in: 523
+
+      - id: conv-054
+        target: Shadow drill close button dismisses panel
+        action: Click ✕ button (data-testid="shadow-drill-close") on an open shadow drill panel
+        expect: Shadow drill panel disappears, key phrase returns to normal display
+        type: functional
+        priority: medium
+        added_in: 523
+
+      - id: conv-055
+        target: Shadow drill record and submit shows word-level diff result
+        action: Click Record in shadow drill, speak the phrase, click Stop, then click Check
+        expect: Result phase shows accuracy percentage, word-level color-coded diff (green=match, red=miss), and Retry button if accuracy < 80%
+        type: functional
+        priority: high
+        added_in: 523
+
+      - id: conv-056
+        target: Shadow drill auto-dismisses on successful match
+        action: Complete a shadow drill with >= 80% accuracy
+        expect: "✅ Great!" message shown briefly, then drill panel auto-closes after ~2 seconds
+        type: functional
+        priority: medium
+        added_in: 523
+
+      - id: conv-057
+        target: Shadow drill retry resets to listening phase
+        action: Complete a shadow drill with < 80% accuracy, then click 🔄 Retry button
+        expect: Drill resets to listening phase, TTS replays the phrase, then recording phase appears
+        type: functional
+        priority: medium
+        added_in: 523
+
+      - id: conv-058
+        target: Only one shadow drill active at a time across key phrases
+        action: Open shadow drill on one key phrase, then click 🎤 on a different key phrase
+        expect: First drill closes, second drill opens; only one shadow-drill-panel visible
+        type: functional
+        priority: medium
+        added_in: 523
+
   pronunciation:
     path: /pronunciation
     tests:

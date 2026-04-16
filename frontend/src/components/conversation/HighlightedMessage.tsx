@@ -1,5 +1,195 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { GrammarNote } from '../../api';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+
+function normalizeText(text: string): string {
+  return text.trim().toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ');
+}
+
+/** Word-level diff: returns array of { word, match } */
+function wordDiff(expected: string, spoken: string): { word: string; match: boolean }[] {
+  const expectedWords = normalizeText(expected).split(' ').filter(Boolean);
+  const spokenWords = normalizeText(spoken).split(' ').filter(Boolean);
+  const maxLen = Math.max(expectedWords.length, spokenWords.length);
+  return Array.from({ length: maxLen }, (_, i) => {
+    const eWord = expectedWords[i] || '';
+    const sWord = spokenWords[i] || '';
+    return { word: sWord || '___', match: eWord === sWord };
+  });
+}
+
+function computeAccuracy(expected: string, spoken: string): number {
+  const expectedWords = normalizeText(expected).split(' ').filter(Boolean);
+  const spokenWords = normalizeText(spoken).split(' ').filter(Boolean);
+  if (expectedWords.length === 0) return 0;
+  let matches = 0;
+  expectedWords.forEach((w, i) => { if (spokenWords[i] === w) matches++; });
+  return Math.round((matches / expectedWords.length) * 100);
+}
+
+interface ShadowDrillState {
+  phase: 'listening' | 'recording' | 'result';
+  accuracy?: number;
+  diff?: { word: string; match: boolean }[];
+  spokenText?: string;
+}
+
+function InlineShadowDrill({ phrase, onSpeak, onClose }: {
+  phrase: string;
+  onSpeak: (text: string) => void;
+  onClose: () => void;
+}) {
+  const { transcript, isListening, isSupported, start, stop, reset } = useSpeechRecognition();
+  const [phase, setPhase] = useState<ShadowDrillState['phase']>('listening');
+  const [result, setResult] = useState<{ accuracy: number; diff: { word: string; match: boolean }[]; spokenText: string } | null>(null);
+  const hasPlayedRef = useRef(false);
+
+  // Auto-play TTS on mount
+  useEffect(() => {
+    if (!hasPlayedRef.current) {
+      hasPlayedRef.current = true;
+      onSpeak(phrase);
+      // Give TTS a moment, then transition to recording phase
+      const timer = setTimeout(() => setPhase('recording'), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [phrase, onSpeak]);
+
+  const handleRecord = useCallback(() => {
+    if (isListening) {
+      stop();
+    } else {
+      reset();
+      start();
+    }
+  }, [isListening, start, stop, reset]);
+
+  const handleSubmit = useCallback(() => {
+    const accuracy = computeAccuracy(phrase, transcript);
+    const diff = wordDiff(phrase, transcript);
+    setResult({ accuracy, diff, spokenText: transcript });
+    setPhase('result');
+    // Auto-dismiss on success after a short delay
+    if (accuracy >= 80) {
+      setTimeout(() => onClose(), 2000);
+    }
+  }, [phrase, transcript, onClose]);
+
+  const handleRetry = useCallback(() => {
+    reset();
+    setResult(null);
+    setPhase('listening');
+    hasPlayedRef.current = false;
+  }, [reset]);
+
+  return (
+    <div
+      data-testid="shadow-drill-panel"
+      style={{
+        display: 'block', marginTop: 6, padding: '8px 10px',
+        background: 'var(--bg-secondary, #f0f4ff)', borderRadius: 6,
+        border: '1px solid var(--border, #e2e8f0)', fontSize: 13,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ fontWeight: 600, color: 'var(--primary, #6366f1)' }}>
+          {phase === 'listening' ? '🔊 Listen...' : phase === 'recording' ? '🎤 Your turn!' : '📊 Result'}
+        </span>
+        <button
+          onClick={onClose}
+          data-testid="shadow-drill-close"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 14, color: 'var(--text-secondary, #6b7280)', padding: '0 2px',
+          }}
+          aria-label="Close shadow drill"
+        >
+          ✕
+        </button>
+      </div>
+
+      {phase === 'recording' && (
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          {isSupported ? (
+            <>
+              <button
+                onClick={handleRecord}
+                data-testid="shadow-drill-record"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 10px', borderRadius: 5, border: 'none',
+                  background: isListening ? 'var(--danger, #ef4444)' : 'var(--primary, #6366f1)',
+                  color: '#fff', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                }}
+              >
+                🎤 {isListening ? 'Stop' : 'Record'}
+              </button>
+              {!isListening && transcript && (
+                <button
+                  onClick={handleSubmit}
+                  data-testid="shadow-drill-submit"
+                  style={{
+                    padding: '4px 10px', borderRadius: 5, border: 'none',
+                    background: 'var(--success, #22c55e)', color: '#fff',
+                    cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                  }}
+                >
+                  Check
+                </button>
+              )}
+              {transcript && (
+                <span style={{ fontSize: 12, color: 'var(--text-secondary, #6b7280)' }}>
+                  "{transcript}"
+                </span>
+              )}
+            </>
+          ) : (
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              Speech recognition not supported in this browser.
+            </span>
+          )}
+        </div>
+      )}
+
+      {phase === 'result' && result && (
+        <div>
+          <div style={{ marginBottom: 4 }}>
+            <span style={{
+              fontWeight: 700, fontSize: 14,
+              color: result.accuracy >= 80 ? 'var(--success, #22c55e)' : result.accuracy >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)',
+            }}>
+              {result.accuracy >= 80 ? '✅ Great!' : result.accuracy >= 50 ? '🔶 Almost!' : '❌ Try again'}
+              {' '}{result.accuracy}%
+            </span>
+          </div>
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>
+            {result.diff.map((d, i) => (
+              <span key={i} style={{
+                color: d.match ? 'var(--success, #22c55e)' : 'var(--danger, #ef4444)',
+                fontWeight: d.match ? 400 : 600,
+              }}>
+                {d.word}{i < result.diff.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </div>
+          {result.accuracy < 80 && (
+            <button
+              onClick={handleRetry}
+              data-testid="shadow-drill-retry"
+              style={{
+                marginTop: 6, padding: '4px 10px', borderRadius: 5,
+                border: '1px solid var(--border, #e2e8f0)', background: 'var(--card-bg, #fff)',
+                color: 'var(--text, #111)', cursor: 'pointer', fontSize: 12,
+              }}
+            >
+              🔄 Retry
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak }: {
   content: string;
@@ -8,6 +198,7 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
   onSpeak: (text: string) => void;
 }) {
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
+  const [activeDrill, setActiveDrill] = useState<number | null>(null);
 
   const hasKey = keyPhrases && keyPhrases.length > 0;
   const hasGrammar = grammarNotes && grammarNotes.length > 0;
@@ -49,22 +240,41 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
 
         if (isKey && !grammarNote) {
           return (
-            <span
-              key={i}
-              onClick={() => onSpeak(part)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter') onSpeak(part); }}
-              title="Click to hear pronunciation"
-              style={{
-                background: '#dbeafe',
-                borderRadius: 3,
-                padding: '1px 2px',
-                cursor: 'pointer',
-                borderBottom: '2px solid #3b82f6',
-              }}
-            >
-              {part} <span style={{ fontSize: 10 }}>🔊</span>
+            <span key={i} style={{ display: 'inline' }}>
+              <span
+                onClick={() => onSpeak(part)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') onSpeak(part); }}
+                title="Click to hear pronunciation"
+                style={{
+                  background: '#dbeafe',
+                  borderRadius: 3,
+                  padding: '1px 2px',
+                  cursor: 'pointer',
+                  borderBottom: '2px solid #3b82f6',
+                }}
+              >
+                {part} <span style={{ fontSize: 10 }}>🔊</span>
+              </span>
+              <span
+                onClick={(e) => { e.stopPropagation(); setActiveDrill(activeDrill === i ? null : i); }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') setActiveDrill(activeDrill === i ? null : i); }}
+                title="Shadow this phrase"
+                data-testid="shadow-drill-mic"
+                style={{ fontSize: 10, cursor: 'pointer', marginLeft: 2 }}
+              >
+                🎤
+              </span>
+              {activeDrill === i && (
+                <InlineShadowDrill
+                  phrase={part}
+                  onSpeak={onSpeak}
+                  onClose={() => setActiveDrill(null)}
+                />
+              )}
             </span>
           );
         }
@@ -92,6 +302,19 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
             >
               {part}
               {isKey && <span style={{ fontSize: 10 }}> 🔊</span>}
+              {isKey && (
+                <span
+                  onClick={(e) => { e.stopPropagation(); setActiveDrill(activeDrill === i ? null : i); }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setActiveDrill(activeDrill === i ? null : i); } }}
+                  title="Shadow this phrase"
+                  data-testid="shadow-drill-mic"
+                  style={{ fontSize: 10, cursor: 'pointer', marginLeft: 2 }}
+                >
+                  🎤
+                </span>
+              )}
               <span style={{ fontSize: 10 }}> 📖</span>
             </span>
             {activeTooltip === i && grammarNote && (
@@ -106,9 +329,18 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
                 <div style={{ whiteSpace: 'normal', lineHeight: 1.4 }}>{grammarNote.explanation}</div>
               </span>
             )}
+            {isKey && activeDrill === i && (
+              <InlineShadowDrill
+                phrase={part}
+                onSpeak={onSpeak}
+                onClose={() => setActiveDrill(null)}
+              />
+            )}
           </span>
         );
       })}
     </>
   );
 }
+
+export { normalizeText as _normalizeText, wordDiff as _wordDiff, computeAccuracy as _computeAccuracy };
