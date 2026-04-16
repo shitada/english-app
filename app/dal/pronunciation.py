@@ -1263,3 +1263,12 @@ async def get_filler_word_analysis(db: aiosqlite.Connection) -> dict:
         "trend_direction": trend_direction,
         "fluency_cleanliness_score": cleanliness,
     }
+
+
+async def get_today_used_journal_prompts(db: aiosqlite.Connection) -> list[str]:
+    """Return distinct prompts already used in today's speaking journal entries."""
+    cursor = await db.execute(
+        "SELECT DISTINCT prompt FROM speaking_journal WHERE DATE(created_at) = DATE('now')"
+    )
+    rows = await cursor.fetchall()
+    return [row[0] for row in rows]

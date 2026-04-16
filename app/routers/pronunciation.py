@@ -2210,11 +2210,22 @@ class SpeakingJournalEntriesResponse(BaseModel):
 
 
 @router.get("/speaking-journal/prompt")
-async def get_speaking_journal_prompt():
-    """Get today's speaking journal prompt."""
-    import datetime
-    day_of_year = datetime.date.today().timetuple().tm_yday
-    prompt = _SPEAKING_JOURNAL_PROMPTS[day_of_year % len(_SPEAKING_JOURNAL_PROMPTS)]
+async def get_speaking_journal_prompt(
+    db: aiosqlite.Connection = Depends(get_db_session),
+    exclude: str | None = Query(None, description="Current prompt to exclude"),
+):
+    """Get a speaking journal prompt, avoiding today's already-used prompts."""
+    import random
+
+    used = await pron_dal.get_today_used_journal_prompts(db)
+    if exclude and exclude not in used:
+        used.append(exclude)
+    available = [p for p in _SPEAKING_JOURNAL_PROMPTS if p not in used]
+    if not available:
+        available = [p for p in _SPEAKING_JOURNAL_PROMPTS if p != exclude]
+    if not available:
+        available = list(_SPEAKING_JOURNAL_PROMPTS)
+    prompt = random.choice(available)
     return {"prompt": prompt}
 
 

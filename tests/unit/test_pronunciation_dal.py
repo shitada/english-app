@@ -36,6 +36,7 @@ from app.dal.pronunciation import (
     save_listening_quiz_result,
     save_minimal_pairs_results,
     get_speaking_journal_progress,
+    get_today_used_journal_prompts,
     save_speaking_journal_entry,
 )
 
@@ -1737,3 +1738,32 @@ class TestFillerWordDetection:
             filler_word_count=3,
         )
         assert result["id"] is not None
+
+
+@pytest.mark.unit
+class TestGetTodayUsedJournalPrompts:
+    async def test_no_entries_returns_empty(self, test_db):
+        result = await get_today_used_journal_prompts(test_db)
+        assert result == []
+
+    async def test_returns_todays_prompts(self, test_db):
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count) VALUES (?, ?, ?, ?)",
+            ("Describe your morning", "I wake up early", 4, 4),
+        )
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count) VALUES (?, ?, ?, ?)",
+            ("Talk about food", "I like pizza", 3, 3),
+        )
+        await test_db.commit()
+        result = await get_today_used_journal_prompts(test_db)
+        assert set(result) == {"Describe your morning", "Talk about food"}
+
+    async def test_excludes_old_entries(self, test_db):
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count, created_at) VALUES (?, ?, ?, ?, datetime('now', '-2 days'))",
+            ("Old prompt", "old text", 2, 2),
+        )
+        await test_db.commit()
+        result = await get_today_used_journal_prompts(test_db)
+        assert result == []
