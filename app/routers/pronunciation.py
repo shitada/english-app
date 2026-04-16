@@ -2998,3 +2998,323 @@ async def evaluate_explain_word(
         "feedback": str(result.get("feedback", "")),
         "model_explanation": str(result.get("model_explanation", "")),
     }
+
+
+# ── Quick Role-Play (2-Exchange Mini-Dialogue) ──────────────────
+
+
+class RolePlayExchangeOut(BaseModel):
+    partner_says: str
+
+
+class RolePlayScenarioResponse(BaseModel):
+    scenario: str
+    your_role: str
+    partner_role: str
+    exchanges: list[RolePlayExchangeOut]
+    key_phrases: list[str]
+    difficulty: str
+
+
+@router.get("/roleplay-scenario", response_model=RolePlayScenarioResponse)
+async def get_roleplay_scenario(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a 2-exchange situational role-play scenario."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a 2-exchange situational role-play scenario for a {difficulty}-level English learner.\n"
+        "The scenario is a mini-dialogue between the learner and an AI partner.\n"
+        "The AI partner speaks first, then the learner responds, then the partner speaks again, "
+        "and the learner responds again.\n"
+        "Return JSON with:\n"
+        "- scenario (string): a brief description of the situation (1-2 sentences)\n"
+        "- your_role (string): the learner's role (e.g. 'Customer', 'Tourist')\n"
+        "- partner_role (string): the AI partner's role (e.g. 'Waiter', 'Hotel Receptionist')\n"
+        "- exchanges (array of 2 objects): each with 'partner_says' (string) – what the AI partner says\n"
+        "- key_phrases (array of 3-5 strings): useful phrases the learner could use\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach creating role-play exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="roleplay_scenario",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Role-play scenario generation failed")
+
+    raw_exchanges = result.get("exchanges", [])
+    if not isinstance(raw_exchanges, list):
+        raw_exchanges = []
+    exchanges = []
+    for ex in raw_exchanges[:2]:
+        if isinstance(ex, dict):
+            exchanges.append({"partner_says": str(ex.get("partner_says", "Hello!"))})
+    while len(exchanges) < 2:
+        exchanges.append({"partner_says": "Could you tell me more?"})
+
+    raw_key = result.get("key_phrases", [])
+    if not isinstance(raw_key, list):
+        raw_key = []
+    key_phrases = [str(k) for k in raw_key if k][:5]
+    while len(key_phrases) < 3:
+        key_phrases.append("(useful phrase)")
+
+    return {
+        "scenario": str(result.get("scenario", "You are at a shop buying a gift.")),
+        "your_role": str(result.get("your_role", "Customer")),
+        "partner_role": str(result.get("partner_role", "Shop Assistant")),
+        "exchanges": exchanges,
+        "key_phrases": key_phrases,
+        "difficulty": difficulty,
+    }
+
+
+class RolePlayExchangeIn(BaseModel):
+    partner_says: str
+    user_says: str = Field(min_length=1, max_length=2000)
+
+
+class RolePlayEvaluateRequest(BaseModel):
+    scenario: str = Field(min_length=1, max_length=500)
+    your_role: str = Field(min_length=1, max_length=200)
+    partner_role: str = Field(min_length=1, max_length=200)
+    exchanges: list[RolePlayExchangeIn] = Field(min_length=1, max_length=4)
+    duration_seconds: int = Field(ge=1, le=300)
+
+
+class RolePlayEvaluateResponse(BaseModel):
+    appropriateness_score: float
+    grammar_score: float
+    fluency_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_responses: list[str]
+
+
+@router.post("/roleplay/evaluate", response_model=RolePlayEvaluateResponse)
+async def evaluate_roleplay(
+    body: RolePlayEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's role-play responses."""
+    copilot = get_copilot_service()
+    exchange_lines = []
+    for i, ex in enumerate(body.exchanges):
+        exchange_lines.append(f"Exchange {i + 1}:")
+        exchange_lines.append(f"  {body.partner_role}: \"{ex.partner_says}\"")
+        exchange_lines.append(f"  {body.your_role}: \"{ex.user_says}\"")
+    exchanges_text = "\n".join(exchange_lines)
+
+    eval_prompt = (
+        f"Role-play scenario: \"{body.scenario}\"\n"
+        f"Learner's role: {body.your_role}\n"
+        f"Partner's role: {body.partner_role}\n"
+        f"Duration: {body.duration_seconds}s\n\n"
+        f"Dialogue:\n{exchanges_text}\n\n"
+        "Evaluate the learner's responses in this role-play. Return JSON with:\n"
+        "- appropriateness_score (1-10): how appropriate and contextually fitting the responses are\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- fluency_score (1-10): how natural and fluent the responses sound\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary used\n"
+        "- overall_score (1-10): overall quality of the role-play performance\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)\n"
+        f"- model_responses (array of {len(body.exchanges)} strings): ideal responses the learner could have given"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in situational role-play practice. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="roleplay_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Role-play evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    raw_model = result.get("model_responses", [])
+    if not isinstance(raw_model, list):
+        raw_model = []
+    model_responses = [str(m) for m in raw_model if m][:len(body.exchanges)]
+    while len(model_responses) < len(body.exchanges):
+        model_responses.append("(model response)")
+
+    return {
+        "appropriateness_score": clamp(result.get("appropriateness_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "fluency_score": clamp(result.get("fluency_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_responses": model_responses,
+    }
+
+
+# ── Quick Role-Play Practice ────────────────────────────────────
+
+
+class RolePlayExchange(BaseModel):
+    partner_says: str
+
+
+class RolePlayScenarioResponse(BaseModel):
+    scenario: str
+    your_role: str
+    partner_role: str
+    exchanges: list[RolePlayExchange]
+    key_phrases: list[str]
+    difficulty: str
+
+
+@router.get("/roleplay-scenario", response_model=RolePlayScenarioResponse)
+async def get_roleplay_scenario(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a 2-exchange role-play scenario for conversational practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a short 2-exchange role-play scenario for a {difficulty}-level English learner.\n"
+        "Pick a real-world situation (e.g., ordering food, checking into a hotel, asking for directions, "
+        "job interview, doctor visit, shopping).\n"
+        "The partner speaks first in each exchange, then the learner responds.\n"
+        "Return JSON with:\n"
+        "- scenario (string): brief description of the situation (1 sentence)\n"
+        "- your_role (string): the learner's role (e.g., 'customer', 'patient')\n"
+        "- partner_role (string): the partner's role (e.g., 'waiter', 'receptionist')\n"
+        "- exchanges (array of 2 objects): each with partner_says (string) — what the partner says\n"
+        "- key_phrases (array of 3 strings): useful phrases the learner could use\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="roleplay_scenario",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Role-play scenario generation failed")
+
+    raw_exchanges = result.get("exchanges", [])
+    if not isinstance(raw_exchanges, list):
+        raw_exchanges = []
+    exchanges = []
+    for i in range(2):
+        if i < len(raw_exchanges) and isinstance(raw_exchanges[i], dict):
+            exchanges.append({"partner_says": str(raw_exchanges[i].get("partner_says", "Hello, how can I help you?"))})
+        else:
+            exchanges.append({"partner_says": "Could you repeat that?" if i == 1 else "Hello, how can I help you?"})
+
+    raw_phrases = result.get("key_phrases", [])
+    if not isinstance(raw_phrases, list):
+        raw_phrases = []
+    key_phrases = [str(p) for p in raw_phrases[:3]]
+    while len(key_phrases) < 3:
+        key_phrases.append("Could you help me with...")
+
+    return {
+        "scenario": str(result.get("scenario", "A conversation at a service counter.")),
+        "your_role": str(result.get("your_role", "customer")),
+        "partner_role": str(result.get("partner_role", "staff")),
+        "exchanges": exchanges,
+        "key_phrases": key_phrases,
+        "difficulty": difficulty,
+    }
+
+
+class RolePlayExchangeWithUser(BaseModel):
+    partner_says: str = Field(min_length=1, max_length=500)
+    user_says: str = Field(min_length=1, max_length=2000)
+
+
+class RolePlayEvaluateRequest(BaseModel):
+    scenario: str = Field(min_length=1, max_length=500)
+    your_role: str = Field(min_length=1, max_length=100)
+    partner_role: str = Field(min_length=1, max_length=100)
+    exchanges: list[RolePlayExchangeWithUser]
+    duration_seconds: int = Field(ge=1, le=300)
+
+
+class RolePlayEvaluateResponse(BaseModel):
+    appropriateness_score: float
+    grammar_score: float
+    fluency_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_responses: list[str]
+
+
+@router.post("/roleplay/evaluate", response_model=RolePlayEvaluateResponse)
+async def evaluate_roleplay(
+    body: RolePlayEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a 2-exchange role-play attempt."""
+    copilot = get_copilot_service()
+
+    dialogue_text = ""
+    for i, ex in enumerate(body.exchanges):
+        dialogue_text += f"Exchange {i+1}:\n"
+        dialogue_text += f"  {body.partner_role}: \"{ex.partner_says}\"\n"
+        dialogue_text += f"  {body.your_role}: \"{ex.user_says}\"\n"
+
+    eval_prompt = (
+        f"Scenario: {body.scenario}\n"
+        f"Learner's role: {body.your_role}, Partner's role: {body.partner_role}\n"
+        f"Dialogue ({body.duration_seconds}s total):\n{dialogue_text}\n"
+        "Evaluate both of the learner's responses together. Return JSON with:\n"
+        "- appropriateness_score (1-10): were responses situationally appropriate?\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- fluency_score (1-10): natural flow and expression\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary\n"
+        "- overall_score (1-10): overall conversational quality\n"
+        "- feedback (string): encouraging feedback on both responses (2-3 sentences)\n"
+        "- model_responses (array of 2 strings): ideal responses for each exchange"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="roleplay_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Role-play evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    raw_model = result.get("model_responses", [])
+    if not isinstance(raw_model, list):
+        raw_model = []
+    model_responses = [str(r) for r in raw_model[:2]]
+    while len(model_responses) < 2:
+        model_responses.append("I'd be happy to help with that.")
+
+    return {
+        "appropriateness_score": clamp(result.get("appropriateness_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "fluency_score": clamp(result.get("fluency_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_responses": model_responses,
+    }

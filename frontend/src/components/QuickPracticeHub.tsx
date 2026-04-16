@@ -17,6 +17,7 @@ import QuickListeningCompCard from './QuickListeningCompCard';
 import QuickIdiomCard from './QuickIdiomCard';
 import QuickWriteCard from './QuickWriteCard';
 import QuickExplainCard from './QuickExplainCard';
+import QuickRolePlayCard from './QuickRolePlayCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -160,6 +161,7 @@ export default function QuickPracticeHub() {
             <QuickIdiomCard />
             <QuickQuestionCard />
             <QuickExplainCard />
+            <QuickRolePlayCard />
           </>
         )}
         {activeTab === 'listening' && (
