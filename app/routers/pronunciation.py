@@ -2725,3 +2725,140 @@ async def evaluate_idiom_usage(
         "feedback": str(result.get("feedback", "")),
         "model_sentence": str(result.get("model_sentence", "")),
     }
+
+
+# ── Quick Write Practice ────────────────────────────────────────
+
+
+class QuickWritePromptResponse(BaseModel):
+    scenario: str
+    instruction: str
+    word_limit: int
+    difficulty: str
+
+
+@router.get("/quick-write", response_model=QuickWritePromptResponse)
+async def get_quick_write_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a real-world writing scenario for short writing practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a {difficulty}-level real-world writing scenario for an English learner.\n"
+        "The scenario should require writing 2-4 sentences (e.g. a short email, message, review, or note).\n"
+        "Return JSON with:\n"
+        "- scenario (string): a brief real-world context (1-2 sentences, e.g. 'You stayed at a hotel and want to leave a review.')\n"
+        "- instruction (string): what the learner should write (1 sentence, e.g. 'Write a short hotel review mentioning the room and breakfast.')\n"
+        "- word_limit (integer): suggested maximum word count (30-80 depending on difficulty)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach creating short writing exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="quick_write_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    try:
+        word_limit = int(result.get("word_limit", 50))
+        word_limit = max(20, min(100, word_limit))
+    except (TypeError, ValueError):
+        word_limit = 50
+
+    return {
+        "scenario": str(result.get("scenario", "You want to send a short message to a friend about your weekend plans.")),
+        "instruction": str(result.get("instruction", "Write 2-3 sentences describing your plans.")),
+        "word_limit": word_limit,
+        "difficulty": difficulty,
+    }
+
+
+class CorrectionItem(BaseModel):
+    original: str
+    corrected: str
+    explanation: str
+
+
+class QuickWriteEvaluateRequest(BaseModel):
+    scenario: str = Field(min_length=1, max_length=500)
+    instruction: str = Field(min_length=1, max_length=500)
+    user_text: str = Field(min_length=1, max_length=2000)
+
+
+class QuickWriteEvaluateResponse(BaseModel):
+    grammar_score: float
+    vocabulary_score: float
+    naturalness_score: float
+    register_score: float
+    overall_score: float
+    feedback: str
+    corrections: list[CorrectionItem]
+    model_response: str
+
+
+@router.post("/quick-write/evaluate", response_model=QuickWriteEvaluateResponse)
+async def evaluate_quick_write(
+    body: QuickWriteEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's short writing for grammar, vocabulary, naturalness, and register."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Writing scenario: \"{body.scenario}\"\n"
+        f"Instruction: \"{body.instruction}\"\n"
+        f"User's text:\n\"{body.user_text}\"\n\n"
+        "Evaluate this short writing. Return JSON with:\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary\n"
+        "- naturalness_score (1-10): does the text sound natural and fluent?\n"
+        "- register_score (1-10): is the tone/register appropriate for the scenario?\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback with suggestions (2-3 sentences)\n"
+        "- corrections (array of objects): each with 'original' (the user's phrase), "
+        "'corrected' (the improved version), 'explanation' (why it was corrected). "
+        "Empty array if no corrections needed.\n"
+        "- model_response (string): a well-written model answer for the same scenario (2-4 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach. Evaluate the learner's writing. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="quick_write_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Writing evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    raw_corrections = result.get("corrections", [])
+    if not isinstance(raw_corrections, list):
+        raw_corrections = []
+    corrections = []
+    for c in raw_corrections:
+        if isinstance(c, dict):
+            corrections.append({
+                "original": str(c.get("original", "")),
+                "corrected": str(c.get("corrected", "")),
+                "explanation": str(c.get("explanation", "")),
+            })
+
+    return {
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "register_score": clamp(result.get("register_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "corrections": corrections,
+        "model_response": str(result.get("model_response", "")),
+    }

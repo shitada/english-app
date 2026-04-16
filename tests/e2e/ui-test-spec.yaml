@@ -531,3 +531,51 @@ pages:
         type: functional
         priority: medium
         added_in: 497
+
+      - id: quick-practice-hub-005
+        target: Quick Practice Hub Writing tab
+        action: Click the "✏️ Writing" tab in Quick Practice Hub
+        expect: Writing tab becomes active and QuickWriteCard is displayed
+        type: functional
+        priority: high
+        added_in: 498
+
+      - id: quick-write-001
+        target: Quick Write card initial load
+        action: Navigate to Quick Practice Hub and select Writing tab
+        expect: Card shows scenario, instruction, word limit, and an empty textarea
+        type: functional
+        priority: high
+        added_in: 498
+
+      - id: quick-write-002
+        target: Quick Write card submit
+        action: Type text in the textarea and click Submit button
+        expect: Card transitions to evaluating state, then shows scores, corrections, and model response
+        type: functional
+        priority: high
+        added_in: 498
+
+      - id: quick-write-003
+        target: Quick Write card score display
+        action: After evaluation, review the scores panel
+        expect: Grammar, Vocabulary, Naturalness, and Register scores are displayed with overall score
+        type: functional
+        priority: medium
+        added_in: 498
+
+      - id: quick-write-004
+        target: Quick Write card corrections display
+        action: After evaluation with corrections, review corrections section
+        expect: Corrections show original text (strikethrough), corrected text, and explanations
+        type: functional
+        priority: medium
+        added_in: 498
+
+      - id: quick-write-005
+        target: Quick Write card next button
+        action: After evaluation, click "Next" button
+        expect: Card resets and loads a new writing prompt
+        type: functional
+        priority: medium
+        added_in: 498

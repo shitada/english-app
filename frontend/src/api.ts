@@ -2059,3 +2059,41 @@ export function evaluateIdiomUsage(idiom: string, transcript: string, duration_s
     body: JSON.stringify({ idiom, transcript, duration_seconds }),
   });
 }
+
+// ── Quick Write Practice ────────────────────────────────────────
+
+export interface QuickWritePromptResponse {
+  scenario: string;
+  instruction: string;
+  word_limit: number;
+  difficulty: string;
+}
+
+export interface QuickWriteCorrectionItem {
+  original: string;
+  corrected: string;
+  explanation: string;
+}
+
+export interface QuickWriteEvaluateResponse {
+  grammar_score: number;
+  vocabulary_score: number;
+  naturalness_score: number;
+  register_score: number;
+  overall_score: number;
+  feedback: string;
+  corrections: QuickWriteCorrectionItem[];
+  model_response: string;
+}
+
+export function getQuickWritePrompt(difficulty: string = 'intermediate'): Promise<QuickWritePromptResponse> {
+  return request<QuickWritePromptResponse>(`/api/pronunciation/quick-write?difficulty=${difficulty}`);
+}
+
+export function evaluateQuickWrite(scenario: string, instruction: string, user_text: string): Promise<QuickWriteEvaluateResponse> {
+  return request<QuickWriteEvaluateResponse>('/api/pronunciation/quick-write/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scenario, instruction, user_text }),
+  });
+}

@@ -464,3 +464,83 @@ Good, got the proposal. Now calling the **coder**.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
+● Coder Implement iteration 497
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #497: Add Quick Idiom Practice card with spoken
+  │   │ usage evaluation
+  │   │
+  │   │ Add QuickIdiomCard to the Quick Practice Hub speaking tab for idiom …
+  │   └ 27 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+Coder committed. Now calling the **tester**.
+
+● Record T2 and get changed files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git diff HEAD~1 --name-only && echo "---HASH---" && git rev-parse --short
+  │ HEAD
+  └ 13 lines...
+
+● Tester Test iteration 497
+  │ Check smoke test file contents (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && head -30
+  │   │ tests/smoke_test.py
+  │   └ 31 lines...
+  └ Run smoke test as script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run python
+      │ tests/smoke_test.py 2>&1
+      └ 23 lines...
+
+Tests pass. Now calling the **evaluator**.
+
+● Record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T3=$(date +%s)"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 497
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:30 (30 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L496:534 (38 lines read)
+
+● Record T4 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo
+  │ "T4=$T4"
+  └ 2 lines...
+
+Evaluator returned score 6.1, verdict "keep". Tests pass. All criteria met — **KEEP**.
+
+● Record iteration 497 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "497" "1bdb2e1" "2026-04-16" "130" "211" "108" "95" "544" "1437" "1437"
+  │ "pass" "6.10" "kept" "Add Quick Idiom Practice card with spoken usage
+  │ evaluation" \…
+  └ 4 lines...
+
+Iteration 497 recorded. Now starting **Iteration 498**.
+
+● Context for iteration 498 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T0=$(date +%s)"
+  │ && git log --oneline -3
+  └ 5 lines...
+
+● Proposer Propose iteration 498
+  │ List directory tests/unit
+  │   └ 17 files found
+  └ Read test_idiom_prompt_api.py
+      │ tests/integration/test_idiom_prompt_api.py
+      └ L1:60 (60 lines read)
+
+Good proposal — adding writing practice, a missing skill area. Now calling the **coder**.
+
+● Record T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+

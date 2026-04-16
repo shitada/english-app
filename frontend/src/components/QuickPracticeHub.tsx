@@ -15,6 +15,7 @@ import QuickFollowUpCard from './QuickFollowUpCard';
 import QuickMinimalPairsCard from './QuickMinimalPairsCard';
 import QuickListeningCompCard from './QuickListeningCompCard';
 import QuickIdiomCard from './QuickIdiomCard';
+import QuickWriteCard from './QuickWriteCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 
@@ -29,6 +30,7 @@ const TABS: TabDef[] = [
   { key: 'listening', emoji: '👂', label: 'Listening' },
   { key: 'grammar', emoji: '✍️', label: 'Grammar' },
   { key: 'vocabulary', emoji: '📚', label: 'Vocabulary' },
+  { key: 'writing', emoji: '✏️', label: 'Writing' },
 ];
 
 export default function QuickPracticeHub() {
@@ -127,6 +129,11 @@ export default function QuickPracticeHub() {
           <>
             <QuickVocabSentenceCard />
             <QuickVocabRecallCard />
+          </>
+        )}
+        {activeTab === 'writing' && (
+          <>
+            <QuickWriteCard />
           </>
         )}
       </div>
