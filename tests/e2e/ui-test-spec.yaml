@@ -457,6 +457,54 @@ pages:
         priority: medium
         added_in: 520
 
+      - id: conv-041
+        target: Say It button appears alongside Try Again for grammar corrections
+        action: Send a message with grammar errors, check the FeedbackPanel correction area
+        expect: Both "✏️ Try Again" and "🎤 Say It" buttons visible in a row below the corrected text
+        type: functional
+        priority: high
+        added_in: 521
+
+      - id: conv-042
+        target: Say It button triggers TTS and opens speak drill panel
+        action: Click "🎤 Say It" button in FeedbackPanel
+        expect: Speak drill panel opens with "Say the corrected sentence aloud" prompt and "Start Speaking" button; corrected text is spoken via TTS
+        type: functional
+        priority: high
+        added_in: 521
+
+      - id: conv-043
+        target: Start Speaking begins recording with stop button
+        action: Click "Start Speaking" in the speak drill panel
+        expect: Recording indicator "● Recording…" appears with MicOff Stop button; live transcript shown as user speaks
+        type: functional
+        priority: high
+        added_in: 521
+
+      - id: conv-044
+        target: Speak drill shows word-by-word color-coded result on mismatch
+        action: Speak an incorrect version and click Stop in the speak drill
+        expect: "Almost!" label appears with InlineCorrectionDiff showing green (match) and red (mismatch) words; "Try Again" button with mic icon visible
+        type: functional
+        priority: high
+        added_in: 521
+
+      - id: conv-045
+        target: Speak drill shows success message on accurate speech
+        action: Speak the corrected sentence accurately (≥90% match) and stop recording
+        expect: Speak panel closes, "✅ Excellent! You got it right!" success banner appears
+        type: functional
+        priority: high
+        added_in: 521
+
+      - id: conv-046
+        target: InlineCorrectionDiff uses CSS variables for dark mode
+        action: Enable dark mode, trigger a "retry" result in Try Again or Say It drill
+        expect: Word colors use var(--success) and var(--danger) CSS variables, no hardcoded hex colors visible
+        type: visual
+        priority: medium
+        added_in: 521
+
   pronunciation:
     path: /pronunciation
     tests:

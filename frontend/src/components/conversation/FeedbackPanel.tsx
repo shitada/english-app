@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
-import { Volume2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Volume2, Mic, MicOff } from 'lucide-react';
 import type { GrammarFeedback } from '../../api';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 function normalizeText(text: string): string {
   return text.trim().toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ');
@@ -17,7 +18,7 @@ function InlineCorrectionDiff({ userInput, correct }: { userInput: string; corre
         const cWord = correctWords[i] || '';
         const match = normalizeText(uWord) === normalizeText(cWord);
         return (
-          <span key={i} style={{ color: match ? '#22c55e' : '#ef4444', fontWeight: match ? 400 : 600 }}>
+          <span key={i} style={{ color: match ? 'var(--success, #22c55e)' : 'var(--danger, #ef4444)', fontWeight: match ? 400 : 600 }}>
             {uWord || '___'}{i < maxLen - 1 ? ' ' : ''}
           </span>
         );
@@ -35,7 +36,33 @@ export function FeedbackPanel({ feedback, onSpeak, onCorrectionAttempt }: {
   const [tryAgainMode, setTryAgainMode] = useState(false);
   const [tryAgainInput, setTryAgainInput] = useState('');
   const [tryAgainResult, setTryAgainResult] = useState<'success' | 'retry' | null>(null);
+  const [speakMode, setSpeakMode] = useState(false);
+  const [speakResult, setSpeakResult] = useState<'success' | 'retry' | null>(null);
+  const [spokenText, setSpokenText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingStopRef = useRef(false);
+  const { transcript, isListening, isSupported: speechSupported, start: startListening, stop: stopListening, reset: resetSpeech } = useSpeechRecognition();
+
+  // Capture transcript when speech recognition stops during speak mode
+  useEffect(() => {
+    if (pendingStopRef.current && !isListening && speakMode && feedback.corrected_text) {
+      pendingStopRef.current = false;
+      const spoken = transcript;
+      setSpokenText(spoken);
+      const userWords = normalizeText(spoken).split(/\s+/);
+      const correctWords = normalizeText(feedback.corrected_text).split(/\s+/);
+      const maxLen = Math.max(userWords.length, correctWords.length);
+      let matches = 0;
+      for (let i = 0; i < maxLen; i++) {
+        if (userWords[i] === correctWords[i]) matches++;
+      }
+      const similarity = maxLen > 0 ? matches / maxLen : 1;
+      const success = similarity >= 0.9;
+      setSpeakResult(success ? 'success' : 'retry');
+      if (success) setSpeakMode(false);
+      onCorrectionAttempt?.(success);
+    }
+  }, [isListening, transcript, speakMode, feedback.corrected_text, onCorrectionAttempt]);
 
   if (feedback.is_correct && (feedback.suggestions ?? []).length === 0) {
     return (
@@ -44,6 +71,8 @@ export function FeedbackPanel({ feedback, onSpeak, onCorrectionAttempt }: {
       </div>
     );
   }
+
+  const showDrillButtons = feedback.corrected_text && !feedback.is_correct && !tryAgainMode && !speakMode && tryAgainResult !== 'success' && speakResult !== 'success';
 
   return (
     <div className="feedback-panel" onClick={() => setExpanded(!expanded)}>
@@ -99,22 +128,44 @@ export function FeedbackPanel({ feedback, onSpeak, onCorrectionAttempt }: {
               )}
             </div>
           )}
-          {feedback.corrected_text && !feedback.is_correct && !tryAgainMode && tryAgainResult !== 'success' && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setTryAgainMode(true);
-                setTryAgainResult(null);
-                setTryAgainInput('');
-                setTimeout(() => inputRef.current?.focus(), 50);
-              }}
-              style={{
-                marginTop: 8, padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
-                background: 'var(--primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer',
-              }}
-            >
-              ✏️ Try Again
-            </button>
+          {showDrillButtons && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTryAgainMode(true);
+                  setTryAgainResult(null);
+                  setTryAgainInput('');
+                  setTimeout(() => inputRef.current?.focus(), 50);
+                }}
+                style={{
+                  padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
+                  background: 'var(--primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer',
+                }}
+              >
+                ✏️ Try Again
+              </button>
+              {speechSupported && onSpeak && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSpeakMode(true);
+                    setSpeakResult(null);
+                    setSpokenText('');
+                    resetSpeech();
+                    onSpeak(feedback.corrected_text!);
+                  }}
+                  aria-label="Say it — speak the correction"
+                  style={{
+                    padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
+                    background: 'var(--success, #22c55e)', color: 'white', border: 'none', cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <Mic size={13} /> Say It
+                </button>
+              )}
+            </div>
           )}
           {tryAgainMode && feedback.corrected_text && (
             <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8, padding: '10px 12px', background: 'var(--card-bg, #f8f9fa)', borderRadius: 8, border: '1px solid var(--border)' }}>
@@ -175,8 +226,79 @@ export function FeedbackPanel({ feedback, onSpeak, onCorrectionAttempt }: {
               )}
             </div>
           )}
-          {tryAgainResult === 'success' && (
-            <div style={{ marginTop: 8, padding: '6px 10px', background: '#dcfce7', borderRadius: 6, fontSize: '0.8rem', fontWeight: 600, color: '#16a34a' }}>
+          {speakMode && feedback.corrected_text && (
+            <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8, padding: '10px 12px', background: 'var(--card-bg, #f8f9fa)', borderRadius: 8, border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>Say the corrected sentence aloud:</div>
+              {!isListening && !speakResult && (
+                <button
+                  onClick={() => {
+                    resetSpeech();
+                    pendingStopRef.current = false;
+                    startListening();
+                  }}
+                  aria-label="Start recording your correction"
+                  style={{
+                    padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
+                    background: 'var(--primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <Mic size={13} /> Start Speaking
+                </button>
+              )}
+              {isListening && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <button
+                      onClick={() => {
+                        pendingStopRef.current = true;
+                        stopListening();
+                      }}
+                      aria-label="Stop recording"
+                      style={{
+                        padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
+                        background: 'var(--danger, #ef4444)', color: 'white', border: 'none', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                      }}
+                    >
+                      <MicOff size={13} /> Stop
+                    </button>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--danger, #ef4444)', fontWeight: 500 }}>● Recording…</span>
+                  </div>
+                  {transcript && (
+                    <div style={{ padding: 6, background: 'var(--bg, #fff)', borderRadius: 6, fontSize: '0.85rem', color: 'var(--text)' }}>
+                      {transcript}
+                    </div>
+                  )}
+                </div>
+              )}
+              {speakResult === 'retry' && spokenText && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ fontSize: '0.8rem', marginBottom: 4 }}>
+                    <span style={{ color: 'var(--warning, #f59e0b)', fontWeight: 600 }}>Almost!</span>{' '}
+                    <InlineCorrectionDiff userInput={spokenText} correct={feedback.corrected_text!} />
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSpeakResult(null);
+                      setSpokenText('');
+                      resetSpeech();
+                      onSpeak?.(feedback.corrected_text!);
+                    }}
+                    style={{
+                      marginTop: 4, padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600,
+                      background: 'var(--primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}
+                  >
+                    <Mic size={13} /> Try Again
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {(tryAgainResult === 'success' || speakResult === 'success') && (
+            <div style={{ marginTop: 8, padding: '6px 10px', background: 'var(--success-bg, #dcfce7)', borderRadius: 6, fontSize: '0.8rem', fontWeight: 600, color: 'var(--success, #16a34a)' }}>
               ✅ Excellent! You got it right!
             </div>
           )}
