@@ -5,11 +5,7 @@ import { useI18n } from '../i18n/I18nContext';
 
 type Phase = 'idle' | 'speaking' | 'saving' | 'done';
 
-const FILLER_REGEX = /\b(um|uh|erm|er|ah|like|you know|basically|i mean|sort of|kind of|actually|literally|right|okay so|well)\b/gi;
-
-function highlightFillers(text: string): string {
-  return text.replace(FILLER_REGEX, '<mark style="background:#fecaca;border-radius:3px;padding:0 2px">$1</mark>');
-}
+import { highlightFillers } from '../utils/fillerWords';
 
 export default function SpeakingJournal() {
   const { t } = useI18n();

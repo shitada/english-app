@@ -601,6 +601,30 @@ pages:
         priority: medium
         added_in: 523
 
+      - id: conv-059
+        target: FillerWordBadge appears in stats bar after sending message with fillers
+        action: Start a conversation, type a message containing filler words (e.g. "um I like basically went there") and send it
+        expect: Stats bar shows filler word badge with count > 0, badge has data-testid="filler-word-badge"
+        type: functional
+        priority: medium
+        added_in: 524
+
+      - id: conv-060
+        target: FillerWordBadge color coding reflects filler count severity
+        action: Send multiple messages with filler words to accumulate 6+ fillers
+        expect: Badge color changes from green (0-2) to yellow (3-5) to red (6+)
+        type: visual
+        priority: low
+        added_in: 524
+
+      - id: conv-061
+        target: FillerWordBadge popover shows per-word breakdown on hover
+        action: Hover over the filler word badge in the stats bar
+        expect: Popover appears with data-testid="filler-word-popover" listing each filler word and its count
+        type: functional
+        priority: medium
+        added_in: 524
+
   pronunciation:
     path: /pronunciation
     tests:

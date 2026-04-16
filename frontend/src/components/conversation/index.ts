@@ -23,3 +23,4 @@ export { ConversationCoach } from './ConversationCoach';
 export { ResponseTimer } from './ResponseTimer';
 export { GoalSelector, GoalTracker, GoalSummary } from './ConversationGoals';
 export { ReplaySpeakWalkthrough } from './ReplaySpeakWalkthrough';
+export { FillerWordBadge } from './FillerWordBadge';

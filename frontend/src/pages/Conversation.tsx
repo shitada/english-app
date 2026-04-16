@@ -6,9 +6,10 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { countFillers } from '../utils/fillerWords';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -98,6 +99,8 @@ export default function Conversation() {
   const [usedVocabWords, setUsedVocabWords] = useState<Set<string>>(new Set());
   const [failedMessage, setFailedMessage] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [fillerCount, setFillerCount] = useState(0);
+  const [fillerDetails, setFillerDetails] = useState<Record<string, number>>({});
   const [startError, setStartError] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => Promise<void> } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -569,10 +572,19 @@ export default function Conversation() {
         setWpmValues((prev) => [...prev, Math.round((wordCount / elapsed) * 60)]);
       }
     }
+    // Count filler words in user message
+    const { total: msgFillers, words: msgFillerWords } = countFillers(userMsg);
+    if (msgFillers > 0) {
+      setFillerCount((prev) => prev + msgFillers);
+      setFillerDetails((prev) => {
+        const next = { ...prev };
+        msgFillerWords.forEach((count, word) => {
+          next[word] = (next[word] ?? 0) + count;
+        });
+        return next;
+      });
+    }
     setLoading(true);
-
-    try {
-      const res = await api.sendMessage(conversationId, userMsg);
       setMessages((prev) => {
         const updated = [...prev];
         // Add feedback to the last user message
@@ -1307,6 +1319,9 @@ export default function Conversation() {
                 const assistantCount = messages.filter((m) => m.role === 'assistant').length;
                 return assistantCount > 0 ? ` · 👁 ${revealedMessages.size}/${assistantCount} revealed` : '';
               })()}
+              {fillerCount > 0 && (
+                <> · <FillerWordBadge fillerCount={fillerCount} fillerDetails={fillerDetails} /></>
+              )}
             </span>
           </div>
         );
