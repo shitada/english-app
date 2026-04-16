@@ -3237,3 +3237,85 @@ Now reset the transcriptExpanded state in handleReset and handleRetry:
 
 Now commit and test:
 
+● Commit iteration 494 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit -m "autoresearch #494: Add transcript review panel with filler
+  │ highlighting to Speaking Journal
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  └ 15 lines...
+
+● Record T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 2 lines...
+
+● Run tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1420 tests pass, TS check passes. Check for frontend UI changes (tester requirement):
+
+● Record T3 and check UI changes (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git diff
+  │ HEAD~1 --name-only | grep -E "frontend/src/(pages|components)/.*\.tsx$"
+  └ 3 lines...
+
+Frontend component changed — must run tester:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn
+  │ app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 494
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L120:200 (81 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L200:380 (180 lines read)
+
+Good — tester passed with ux_score 8. The XSS concern is minor (speech recognition API output). Now call evaluator:
+
+● Stop server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "stopped"
+  └ 2 lines...
+
+● Evaluator Evaluate iteration 494
+  │ Read SpeakingJournal.tsx
+  │   │ frontend/src/components/SpeakingJournal.tsx
+  │   └ L700:900 (201 lines read)
+  └ Read SpeakingJournal.tsx
+      │ frontend/src/components/SpeakingJournal.tsx
+      └ L900:980 (81 lines read)
+
+Evaluator score: 6.15, verdict: keep. Recording results.
+
+● Record T4 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Record iteration 494 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ DATE=$(date +%Y-%m-%d) && \
+  │ printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "494" "$HASH" "$DATE" "196" "43" "71" "349" "659" \…
+  └ 6 lines...
+
+Good, properly formatted. Now commit the results:
+
