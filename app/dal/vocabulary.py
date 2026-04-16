@@ -1075,3 +1075,87 @@ async def save_etymology(db: aiosqlite.Connection, word_id: int, etymology_json:
         "UPDATE vocabulary_words SET etymology = ? WHERE id = ?", (etymology_json, word_id)
     )
     await db.commit()
+
+
+async def get_vocabulary_usage_analysis(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Cross-reference studied vocabulary with actual usage in conversations and speaking journal."""
+
+    # Get all studied vocabulary words
+    rows = await db.execute_fetchall(
+        "SELECT id, word, topic FROM vocabulary_words ORDER BY word"
+    )
+    if not rows:
+        return {
+            "actively_used": [],
+            "never_used": [],
+            "summary": {
+                "total_studied": 0,
+                "total_actively_used": 0,
+                "usage_rate": 0.0,
+                "most_used_word": None,
+            },
+        }
+
+    words = [{"id": r[0], "word": r[1], "topic": r[2]} for r in rows]
+
+    # Gather user messages from last 180 days
+    conv_rows = await db.execute_fetchall(
+        "SELECT content FROM messages WHERE role = 'user' AND created_at >= datetime('now', '-180 days')"
+    )
+    conv_texts = [r[0].lower() for r in conv_rows]
+
+    # Gather speaking journal transcripts from last 180 days
+    journal_rows = await db.execute_fetchall(
+        "SELECT transcript FROM speaking_journal WHERE created_at >= datetime('now', '-180 days')"
+    )
+    journal_texts = [r[0].lower() for r in journal_rows]
+
+    actively_used: list[dict[str, Any]] = []
+    never_used: list[dict[str, Any]] = []
+    max_count = 0
+    most_used_word: str | None = None
+
+    for w in words:
+        word_lower = w["word"].lower()
+        conv_count = sum(
+            1 for text in conv_texts
+            if re.search(r'\b' + re.escape(word_lower) + r'\b', text)
+        )
+        journal_count = sum(
+            1 for text in journal_texts
+            if re.search(r'\b' + re.escape(word_lower) + r'\b', text)
+        )
+        total = conv_count + journal_count
+        if total > 0:
+            actively_used.append({
+                "word_id": w["id"],
+                "word": w["word"],
+                "topic": w["topic"],
+                "conversation_count": conv_count,
+                "journal_count": journal_count,
+                "total_count": total,
+            })
+            if total > max_count:
+                max_count = total
+                most_used_word = w["word"]
+        else:
+            never_used.append({
+                "word_id": w["id"],
+                "word": w["word"],
+                "topic": w["topic"],
+            })
+
+    total_studied = len(words)
+    total_actively_used = len(actively_used)
+    usage_rate = round((total_actively_used / total_studied) * 100, 1) if total_studied else 0.0
+
+    return {
+        "actively_used": sorted(actively_used, key=lambda x: x["total_count"], reverse=True),
+        "never_used": never_used,
+        "summary": {
+            "total_studied": total_studied,
+            "total_actively_used": total_actively_used,
+            "usage_rate": usage_rate,
+            "most_used_word": most_used_word,
+        },
+    }

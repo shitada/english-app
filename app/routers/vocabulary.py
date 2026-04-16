@@ -965,3 +965,41 @@ async def evaluate_sentence_use(
         feedback=str(result.get("feedback", "")),
         model_sentence=str(result.get("model_sentence", "")),
     )
+
+
+# --- Vocabulary Usage Analysis ---
+
+
+class UsageWordItem(BaseModel):
+    word_id: int
+    word: str
+    topic: str
+    conversation_count: int
+    journal_count: int
+    total_count: int
+
+
+class NeverUsedWordItem(BaseModel):
+    word_id: int
+    word: str
+    topic: str
+
+
+class UsageSummary(BaseModel):
+    total_studied: int
+    total_actively_used: int
+    usage_rate: float
+    most_used_word: str | None
+
+
+class VocabularyUsageAnalysisResponse(BaseModel):
+    actively_used: list[UsageWordItem]
+    never_used: list[NeverUsedWordItem]
+    summary: UsageSummary
+
+
+@router.get("/usage-analysis", response_model=VocabularyUsageAnalysisResponse)
+async def get_usage_analysis(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Analyse which studied vocabulary words the user actually uses in speaking activities."""
+    data = await vocab_dal.get_vocabulary_usage_analysis(db)
+    return VocabularyUsageAnalysisResponse(**data)

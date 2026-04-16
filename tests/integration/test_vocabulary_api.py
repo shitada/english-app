@@ -1115,3 +1115,16 @@ async def test_evaluate_sentence_use_empty_word(client):
         "user_sentence": "test sentence",
     })
     assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_usage_analysis_empty(client):
+    """Test usage analysis endpoint returns valid response with no data."""
+    res = await client.get("/api/vocabulary/usage-analysis")
+    assert res.status_code == 200
+    data = res.json()
+    assert "actively_used" in data
+    assert "never_used" in data
+    assert "summary" in data
+    assert data["summary"]["total_studied"] == 0
+    assert data["summary"]["usage_rate"] == 0.0

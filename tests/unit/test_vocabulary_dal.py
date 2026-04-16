@@ -26,6 +26,7 @@ from app.dal.vocabulary import (
     get_topic_accuracy,
     get_topic_summary,
     get_vocabulary_stats,
+    get_vocabulary_usage_analysis,
     get_weak_words,
     get_word,
     get_word_detail,
@@ -1812,3 +1813,77 @@ class TestGetAttemptHistory:
         result = await get_attempt_history(test_db, limit=2, offset=0)
         assert result["total_count"] == 5
         assert len(result["attempts"]) == 2
+
+
+@pytest.mark.unit
+class TestGetVocabularyUsageAnalysis:
+    """Tests for get_vocabulary_usage_analysis."""
+
+    async def test_empty_database(self, test_db):
+        result = await get_vocabulary_usage_analysis(test_db)
+        assert result["summary"]["total_studied"] == 0
+        assert result["summary"]["total_actively_used"] == 0
+        assert result["summary"]["usage_rate"] == 0.0
+        assert result["summary"]["most_used_word"] is None
+        assert result["actively_used"] == []
+        assert result["never_used"] == []
+
+    async def test_words_never_used(self, test_db):
+        questions = [
+            {"word": "agenda", "meaning": "a list of items", "example_sentence": "Check the agenda.", "difficulty": 1},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        result = await get_vocabulary_usage_analysis(test_db)
+        assert result["summary"]["total_studied"] == 1
+        assert result["summary"]["total_actively_used"] == 0
+        assert result["summary"]["usage_rate"] == 0.0
+        assert len(result["never_used"]) == 1
+        assert result["never_used"][0]["word"] == "agenda"
+
+    async def test_word_in_conversation(self, test_db):
+        questions = [
+            {"word": "negotiate", "meaning": "to discuss", "example_sentence": "We negotiate.", "difficulty": 1},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        # Insert a conversation and user message containing the word
+        await test_db.execute("INSERT INTO conversations (topic, difficulty) VALUES ('hotel_checkin', 'beginner')")
+        await test_db.execute("INSERT INTO messages (conversation_id, role, content) VALUES (1, 'user', 'I want to negotiate the price.')")
+        await test_db.commit()
+        result = await get_vocabulary_usage_analysis(test_db)
+        assert result["summary"]["total_actively_used"] == 1
+        assert result["summary"]["usage_rate"] == 100.0
+        assert result["actively_used"][0]["word"] == "negotiate"
+        assert result["actively_used"][0]["conversation_count"] == 1
+        assert result["actively_used"][0]["journal_count"] == 0
+
+    async def test_word_in_journal(self, test_db):
+        questions = [
+            {"word": "practice", "meaning": "to do repeatedly", "example_sentence": "I practice.", "difficulty": 1},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count) VALUES ('test prompt', 'I practice speaking every day', 5, 5)"
+        )
+        await test_db.commit()
+        result = await get_vocabulary_usage_analysis(test_db)
+        assert result["summary"]["total_actively_used"] == 1
+        assert result["actively_used"][0]["journal_count"] == 1
+        assert result["actively_used"][0]["conversation_count"] == 0
+
+    async def test_word_in_both_sources(self, test_db):
+        questions = [
+            {"word": "confirm", "meaning": "to verify", "example_sentence": "Confirm booking.", "difficulty": 1},
+        ]
+        await save_words(test_db, "hotel_checkin", questions)
+        await test_db.execute("INSERT INTO conversations (topic, difficulty) VALUES ('hotel_checkin', 'beginner')")
+        await test_db.execute("INSERT INTO messages (conversation_id, role, content) VALUES (1, 'user', 'I need to confirm my reservation.')")
+        await test_db.execute(
+            "INSERT INTO speaking_journal (prompt, transcript, word_count, unique_word_count) VALUES ('test', 'Please confirm the time', 4, 4)"
+        )
+        await test_db.commit()
+        result = await get_vocabulary_usage_analysis(test_db)
+        assert result["summary"]["total_actively_used"] == 1
+        assert result["actively_used"][0]["conversation_count"] == 1
+        assert result["actively_used"][0]["journal_count"] == 1
+        assert result["actively_used"][0]["total_count"] == 2
+        assert result["summary"]["most_used_word"] == "confirm"
