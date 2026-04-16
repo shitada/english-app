@@ -2511,3 +2511,184 @@ async def get_review_queue(
     # Sort by priority descending, return top `limit`
     items.sort(key=lambda x: x["priority"], reverse=True)
     return items[:limit]
+
+
+async def get_study_plan(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Generate a personalized daily study plan with 3-5 micro-tasks.
+
+    Queries user data to build an ordered task sequence:
+    1. Due SRS vocabulary review
+    2. Pronunciation weak spots practice
+    3. Grammar correction drill
+    4. Least-recently-practiced module
+    5. Conversation topic recommendation
+    """
+    steps: list[dict[str, Any]] = []
+
+    # 1. Due SRS vocabulary count
+    now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    rows = await db.execute_fetchall(
+        "SELECT COUNT(*) as cnt FROM vocabulary_words vw "
+        "LEFT JOIN vocabulary_progress vp ON vw.id = vp.word_id "
+        "WHERE vp.next_review_at IS NULL OR vp.next_review_at <= ?",
+        (now_ts,),
+    )
+    vocab_due = rows[0]["cnt"] if rows else 0
+    if vocab_due > 0:
+        steps.append({
+            "type": "vocabulary_review",
+            "icon": "📚",
+            "title": f"Review {vocab_due} due word{'s' if vocab_due != 1 else ''}",
+            "description": "Reinforce your memory with spaced-repetition flashcards.",
+            "estimated_minutes": max(2, min(15, vocab_due)),
+            "route": "/vocabulary",
+        })
+
+    # 2. Pronunciation weak spots — recent low-scoring attempts
+    pron_rows = await db.execute_fetchall(
+        """SELECT reference_text, score
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL AND score < 7.0
+           ORDER BY created_at DESC
+           LIMIT 5"""
+    )
+    if pron_rows:
+        worst = min(pron_rows, key=lambda r: r["score"])
+        phrase = (worst["reference_text"] or "")[:50]
+        steps.append({
+            "type": "pronunciation_practice",
+            "icon": "🎙️",
+            "title": "Practice pronunciation",
+            "description": f'Improve on: "{phrase}"' if phrase else "Work on your weak pronunciation areas.",
+            "estimated_minutes": 5,
+            "route": "/pronunciation",
+        })
+
+    # 3. Recent grammar mistakes — correction drill
+    grammar_rows = await db.execute_fetchall(
+        """SELECT m.feedback_json
+           FROM messages m
+           WHERE m.role = 'user' AND m.feedback_json IS NOT NULL
+           ORDER BY m.created_at DESC
+           LIMIT 50"""
+    )
+    import json as _json
+    grammar_error_count = 0
+    for row in grammar_rows:
+        try:
+            fb = _json.loads(row["feedback_json"]) if isinstance(row["feedback_json"], str) else row["feedback_json"]
+        except (TypeError, _json.JSONDecodeError):
+            continue
+        if isinstance(fb, dict):
+            errors = fb.get("errors", [])
+            if isinstance(errors, list):
+                grammar_error_count += len(errors)
+    if grammar_error_count > 0:
+        steps.append({
+            "type": "grammar_drill",
+            "icon": "✏️",
+            "title": "Grammar correction drill",
+            "description": f"Review {grammar_error_count} recent grammar mistake{'s' if grammar_error_count != 1 else ''}.",
+            "estimated_minutes": 5,
+            "route": "/conversation",
+        })
+
+    # 4. Least-recently-practiced module
+    module_timestamps: dict[str, str | None] = {}
+    for module, query in [
+        ("conversation", "SELECT MAX(started_at) as ts FROM conversations"),
+        ("vocabulary", "SELECT MAX(answered_at) as ts FROM quiz_attempts"),
+        ("pronunciation", "SELECT MAX(created_at) as ts FROM pronunciation_attempts"),
+        ("listening", "SELECT MAX(created_at) as ts FROM listening_quiz_results"),
+        ("speaking_journal", "SELECT MAX(created_at) as ts FROM speaking_journal"),
+    ]:
+        rows = await db.execute_fetchall(query)
+        module_timestamps[module] = rows[0]["ts"] if rows and rows[0]["ts"] else None
+
+    # Find the module with the oldest (or null) timestamp
+    module_routes = {
+        "conversation": "/conversation",
+        "vocabulary": "/vocabulary",
+        "pronunciation": "/pronunciation",
+        "listening": "/pronunciation",
+        "speaking_journal": "/pronunciation",
+    }
+    module_icons = {
+        "conversation": "💬",
+        "vocabulary": "📖",
+        "pronunciation": "🎤",
+        "listening": "🎧",
+        "speaking_journal": "📝",
+    }
+    module_labels = {
+        "conversation": "Conversation",
+        "vocabulary": "Vocabulary",
+        "pronunciation": "Pronunciation",
+        "listening": "Listening",
+        "speaking_journal": "Speaking Journal",
+    }
+
+    # Only suggest if there's at least some prior usage
+    practiced_modules = {k: v for k, v in module_timestamps.items() if v is not None}
+    unpracticed = [k for k, v in module_timestamps.items() if v is None]
+
+    least_recent_module: str | None = None
+    if unpracticed:
+        # Suggest the first unpracticed module
+        least_recent_module = unpracticed[0]
+    elif practiced_modules:
+        least_recent_module = min(practiced_modules, key=lambda k: practiced_modules[k])  # type: ignore[arg-type]
+
+    if least_recent_module:
+        # Don't duplicate a step that already targets this route
+        existing_routes = {s["route"] for s in steps}
+        target_route = module_routes.get(least_recent_module, "/conversation")
+        if target_route not in existing_routes:
+            label = module_labels.get(least_recent_module, least_recent_module)
+            steps.append({
+                "type": "balanced_practice",
+                "icon": module_icons.get(least_recent_module, "📋"),
+                "title": f"Practice {label}",
+                "description": f"Balance your study routine — {label} needs attention.",
+                "estimated_minutes": 5,
+                "route": target_route,
+            })
+
+    # 5. Conversation topic recommendation (fresh topic)
+    from app.config import load_config
+
+    config = load_config()
+    conv_topics = config.get("conversation_topics", [])
+    if conv_topics:
+        # Find practiced topics
+        topic_rows = await db.execute_fetchall(
+            "SELECT DISTINCT topic FROM conversations"
+        )
+        practiced_topics = {r["topic"] for r in topic_rows}
+        # Prefer unpracticed topics
+        fresh_topics = [t for t in conv_topics if t["id"] not in practiced_topics]
+        if not fresh_topics:
+            fresh_topics = conv_topics
+
+        # Pick deterministically based on today's date
+        from hashlib import md5
+
+        today = date.today().isoformat()
+        day_hash = int(md5(today.encode()).hexdigest(), 16)
+        chosen_topic = fresh_topics[day_hash % len(fresh_topics)]
+        topic_label = chosen_topic.get("label", chosen_topic["id"])
+
+        # Don't add if we already have conversation route AND we have >= 4 steps
+        conv_routes = [s for s in steps if s["route"] == "/conversation"]
+        if len(steps) < 5 and len(conv_routes) < 2:
+            steps.append({
+                "type": "conversation_topic",
+                "icon": "💬",
+                "title": f"Try: {topic_label}",
+                "description": f"Have a conversation about {topic_label} to expand your range.",
+                "estimated_minutes": 10,
+                "route": "/conversation",
+            })
+
+    # Ensure 3-5 steps
+    return steps[:5]

@@ -25,6 +25,7 @@ from app.dal.dashboard import (
     get_session_analytics,
     get_skill_radar,
     get_stats,
+    get_study_plan,
     get_today_activity,
     get_phrase_of_the_day,
     get_vocabulary_activation,
@@ -2545,3 +2546,113 @@ class TestStreakAtRiskFalsePositive:
         await test_db.commit()
         result = await get_learning_insights(test_db)
         assert result["streak_at_risk"] is False
+
+
+@pytest.mark.unit
+class TestGetStudyPlan:
+    async def test_empty_database_returns_some_steps(self, test_db):
+        """Even with no data, the plan should return steps (e.g. conversation topic)."""
+        result = await get_study_plan(test_db)
+        assert isinstance(result, list)
+        # Should have at most 5 steps
+        assert len(result) <= 5
+        for step in result:
+            assert "type" in step
+            assert "icon" in step
+            assert "title" in step
+            assert "description" in step
+            assert "estimated_minutes" in step
+            assert "route" in step
+            assert isinstance(step["estimated_minutes"], int)
+            assert step["estimated_minutes"] > 0
+
+    async def test_includes_vocab_review_when_due(self, test_db):
+        """Plan should include a vocabulary review step when words are due."""
+        words = [
+            {"word": "hello", "correct_meaning": "greeting"},
+            {"word": "goodbye", "correct_meaning": "farewell"},
+        ]
+        await save_words(test_db, "hotel_checkin", words)
+        # Set next_review_at to the past so they're due
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 day')"
+        )
+        await test_db.commit()
+
+        result = await get_study_plan(test_db)
+        vocab_steps = [s for s in result if s["type"] == "vocabulary_review"]
+        assert len(vocab_steps) == 1
+        assert "/vocabulary" in vocab_steps[0]["route"]
+        assert "2" in vocab_steps[0]["title"]  # "Review 2 due words"
+
+    async def test_includes_pronunciation_practice_when_low_scores(self, test_db):
+        """Plan should suggest pronunciation practice when recent scores are low."""
+        feedback = {"overall_score": 4}
+        await save_attempt(test_db, "The quick brown fox.", "The quick brown fox.", feedback, 4.0)
+        await save_attempt(test_db, "Hello world.", "Hello world.", feedback, 5.0)
+
+        result = await get_study_plan(test_db)
+        pron_steps = [s for s in result if s["type"] == "pronunciation_practice"]
+        assert len(pron_steps) == 1
+        assert "/pronunciation" in pron_steps[0]["route"]
+
+    async def test_includes_grammar_drill_when_errors_exist(self, test_db):
+        """Plan should suggest grammar drill when recent messages have errors."""
+        import json
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I go to store yesterday")
+        feedback = {
+            "corrected_text": "I went to the store yesterday",
+            "is_correct": False,
+            "errors": [
+                {"original": "go", "correction": "went", "explanation": "Past tense required"},
+            ],
+            "suggestions": [],
+        }
+        await update_message_feedback(test_db, mid, feedback)
+
+        result = await get_study_plan(test_db)
+        grammar_steps = [s for s in result if s["type"] == "grammar_drill"]
+        assert len(grammar_steps) == 1
+        assert "1" in grammar_steps[0]["description"]
+
+    async def test_max_five_steps(self, test_db):
+        """Plan should never return more than 5 steps."""
+        # Add data across all areas
+        import json
+        words = [{"word": f"word{i}", "correct_meaning": f"meaning{i}"} for i in range(5)]
+        await save_words(test_db, "hotel_checkin", words)
+        await test_db.execute(
+            "UPDATE vocabulary_progress SET next_review_at = datetime('now', '-1 day')"
+        )
+        feedback = {"overall_score": 3}
+        await save_attempt(test_db, "Test sentence.", "Test sentence.", feedback, 3.0)
+        cid = await create_conversation(test_db, "hotel_checkin")
+        mid = await add_message(test_db, cid, "user", "I go store")
+        fb = {
+            "corrected_text": "I go to the store",
+            "is_correct": False,
+            "errors": [{"original": "go store", "correction": "go to the store", "explanation": "Missing preposition"}],
+            "suggestions": [],
+        }
+        await update_message_feedback(test_db, mid, fb)
+        await test_db.commit()
+
+        result = await get_study_plan(test_db)
+        assert len(result) <= 5
+
+    async def test_step_fields_are_valid(self, test_db):
+        """Each step should have all required fields with correct types."""
+        # Add some data to generate steps
+        feedback = {"overall_score": 5}
+        await save_attempt(test_db, "Hello.", "Hello.", feedback, 5.0)
+
+        result = await get_study_plan(test_db)
+        for step in result:
+            assert isinstance(step["type"], str)
+            assert isinstance(step["icon"], str)
+            assert isinstance(step["title"], str)
+            assert isinstance(step["description"], str)
+            assert isinstance(step["estimated_minutes"], int)
+            assert isinstance(step["route"], str)
+            assert step["route"].startswith("/")

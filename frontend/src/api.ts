@@ -2231,3 +2231,23 @@ export interface ReadingCompResponse {
 export function getReadingComp(difficulty: string = 'intermediate'): Promise<ReadingCompResponse> {
   return request<ReadingCompResponse>(`/api/pronunciation/reading-comp?difficulty=${difficulty}`);
 }
+
+// ── Study Plan ──────────────────────────────────────────────────
+
+export interface StudyPlanStep {
+  type: string;
+  icon: string;
+  title: string;
+  description: string;
+  estimated_minutes: number;
+  route: string;
+}
+
+export interface StudyPlanResponse {
+  steps: StudyPlanStep[];
+  total_minutes: number;
+}
+
+export async function getStudyPlan(): Promise<StudyPlanResponse> {
+  return request<StudyPlanResponse>('/api/dashboard/study-plan');
+}

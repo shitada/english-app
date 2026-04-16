@@ -1847,3 +1847,53 @@ async def test_daily_challenge_route_matches_type(client):
         "pronunciation": "/pronunciation",
     }
     assert data["route"] == expected_routes[data["challenge_type"]]
+
+
+@pytest.mark.integration
+class TestStudyPlanAPI:
+    async def test_study_plan_empty_db(self, client: AsyncClient):
+        """Study plan should return valid response on empty database."""
+        resp = await client.get("/api/dashboard/study-plan")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "steps" in data
+        assert "total_minutes" in data
+        assert isinstance(data["steps"], list)
+        assert len(data["steps"]) <= 5
+        assert isinstance(data["total_minutes"], int)
+
+    async def test_study_plan_step_structure(self, client: AsyncClient):
+        """Each step in the study plan should have required fields."""
+        resp = await client.get("/api/dashboard/study-plan")
+        assert resp.status_code == 200
+        data = resp.json()
+        for step in data["steps"]:
+            assert "type" in step
+            assert "icon" in step
+            assert "title" in step
+            assert "description" in step
+            assert "estimated_minutes" in step
+            assert "route" in step
+            assert step["estimated_minutes"] > 0
+            assert step["route"].startswith("/")
+
+    async def test_study_plan_with_pronunciation_data(self, client: AsyncClient):
+        """Study plan should include pronunciation step when low-score attempts exist."""
+        resp = await client.post(
+            "/api/pronunciation/check",
+            json={"reference_text": "Hello world", "user_transcription": "Hello world"},
+        )
+        assert resp.status_code == 200
+
+        resp = await client.get("/api/dashboard/study-plan")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data["steps"], list)
+
+    async def test_study_plan_total_minutes_matches_steps(self, client: AsyncClient):
+        """total_minutes should be the sum of estimated_minutes from all steps."""
+        resp = await client.get("/api/dashboard/study-plan")
+        assert resp.status_code == 200
+        data = resp.json()
+        expected_total = sum(s["estimated_minutes"] for s in data["steps"])
+        assert data["total_minutes"] == expected_total

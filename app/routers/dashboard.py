@@ -824,3 +824,27 @@ async def get_review_queue(
     """Get a prioritized review queue of items to practice across all modules."""
     items = await dash_dal.get_review_queue(db, limit=limit)
     return {"items": items, "total_count": len(items)}
+
+
+class StudyPlanStep(BaseModel):
+    type: str
+    icon: str
+    title: str
+    description: str
+    estimated_minutes: int
+    route: str
+
+
+class StudyPlanResponse(BaseModel):
+    steps: list[StudyPlanStep]
+    total_minutes: int
+
+
+@router.get("/study-plan", response_model=StudyPlanResponse)
+async def get_study_plan(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get a personalized daily study plan with 3-5 ordered micro-tasks."""
+    steps = await dash_dal.get_study_plan(db)
+    total_minutes = sum(s["estimated_minutes"] for s in steps)
+    return {"steps": steps, "total_minutes": total_minutes}

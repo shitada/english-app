@@ -130,6 +130,38 @@ pages:
         priority: medium
         added_in: 495
 
+      - id: home-015
+        target: Study Plan card renders with steps
+        action: navigate to home page, scroll to "Today's Study Plan" card
+        expect: Card with 📋 icon and "Today's Study Plan" heading is visible with numbered steps and progress bar
+        type: functional
+        priority: high
+        added_in: 511
+
+      - id: home-016
+        target: Study Plan step completion toggle
+        action: click the step number circle button on the first study plan step
+        expect: Step shows checkmark, background changes to green, progress bar updates, step title gets strikethrough
+        type: state
+        priority: high
+        added_in: 511
+
+      - id: home-017
+        target: Study Plan step navigation button
+        action: click the blue arrow/chevron button on a study plan step
+        expect: Navigates to the route indicated by the step (e.g. /vocabulary, /pronunciation, /conversation)
+        type: navigation
+        priority: medium
+        added_in: 511
+
+      - id: home-018
+        target: Study Plan celebration when all steps complete
+        action: mark all study plan steps as complete by clicking each step circle
+        expect: Celebration message "All done for today! 🎉" appears with green background
+        type: state
+        priority: medium
+        added_in: 511
+
   conversation:
     path: /conversation
     tests:
