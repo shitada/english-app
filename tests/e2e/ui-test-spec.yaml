@@ -586,6 +586,38 @@ pages:
         priority: low
         added_in: 335
 
+      - id: vocab-009
+        target: Drill result cards use theme-aware colors in dark mode
+        action: switch to dark mode, complete a drill, snapshot result cards
+        expect: Known/Need Practice cards use dark green/red backgrounds (not light #f0fdf4/#fef2f2) with readable text
+        type: visual
+        priority: high
+        added_in: 514
+
+      - id: vocab-010
+        target: Flashcard answer buttons use theme-aware colors in dark mode
+        action: switch to dark mode, start flashcard review, flip a card, snapshot answer buttons
+        expect: Again/Got It buttons use dark-themed backgrounds and borders, not light-mode hardcoded colors
+        type: visual
+        priority: high
+        added_in: 514
+
+      - id: vocab-011
+        target: Quiz result word tags use theme-aware colors in dark mode
+        action: switch to dark mode, complete a vocabulary quiz, snapshot word tags
+        expect: Correct/incorrect word tags use var(--success-bg)/var(--danger-bg) with readable text contrast
+        type: visual
+        priority: high
+        added_in: 514
+
+      - id: vocab-012
+        target: Offline banner uses theme-aware warning colors in dark mode
+        action: switch to dark mode, trigger offline mode, snapshot offline banner
+        expect: Banner uses dark warning background (#422006) with light warning text, not light yellow #fef9c3
+        type: visual
+        priority: medium
+        added_in: 514
+
   dashboard:
     path: /dashboard
     tests:

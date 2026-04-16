@@ -681,8 +681,8 @@ export default function Vocabulary() {
                 key={i}
                 style={{
                   cursor: 'pointer',
-                  background: answers[i] ? '#f0fdf4' : '#fef2f2',
-                  color: answers[i] ? '#15803d' : '#b91c1c',
+                  background: answers[i] ? 'var(--success-bg)' : 'var(--danger-bg)',
+                  color: answers[i] ? 'var(--success-text-vivid)' : 'var(--danger-text-vivid)',
                 }}
                 onClick={() => {
                   if (expandedEtymology === wordId) {
@@ -1183,7 +1183,7 @@ export default function Vocabulary() {
   if (!currentQ) return null;
 
   const offlineBanner = isOfflineMode ? (
-    <div style={{ padding: '8px 12px', background: '#fef9c3', borderRadius: 8, marginBottom: 12, fontSize: '0.85rem', color: '#a16207', textAlign: 'center' }}>
+    <div style={{ padding: '8px 12px', background: 'var(--warning-bg)', borderRadius: 8, marginBottom: 12, fontSize: '0.85rem', color: 'var(--warning-text-strong)', textAlign: 'center' }}>
       📴 Offline — practicing with cached questions
     </div>
   ) : null;

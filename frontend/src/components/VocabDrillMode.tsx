@@ -88,13 +88,13 @@ export default function VocabDrillMode({ initialWords, tts, onBack }: VocabDrill
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-          <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
-            <div style={{ fontSize: 32, fontWeight: 700, color: '#16a34a' }}>{known}</div>
-            <div style={{ fontSize: 14, color: '#166534' }}>Known</div>
+          <div style={{ padding: 16, background: 'var(--success-bg)', borderRadius: 12, border: '1px solid var(--success-border)' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--success-text)' }}>{known}</div>
+            <div style={{ fontSize: 14, color: 'var(--success-text-strong)' }}>Known</div>
           </div>
-          <div style={{ padding: 16, background: '#fef2f2', borderRadius: 12, border: '1px solid #fecaca' }}>
-            <div style={{ fontSize: 32, fontWeight: 700, color: '#dc2626' }}>{answered - known}</div>
-            <div style={{ fontSize: 14, color: '#991b1b' }}>Need Practice</div>
+          <div style={{ padding: 16, background: 'var(--danger-bg)', borderRadius: 12, border: '1px solid var(--danger-border)' }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--danger-text)' }}>{answered - known}</div>
+            <div style={{ fontSize: 14, color: 'var(--danger-text-strong)' }}>Need Practice</div>
           </div>
         </div>
 
@@ -141,8 +141,8 @@ export default function VocabDrillMode({ initialWords, tts, onBack }: VocabDrill
           className="btn"
           onClick={() => handleAnswer(false)}
           style={{
-            flex: 1, background: '#fef2f2', border: '2px solid #fca5a5',
-            color: '#991b1b', fontWeight: 600, fontSize: '1.1rem', padding: '14px 0',
+            flex: 1, background: 'var(--danger-bg)', border: '2px solid var(--danger-accent)',
+            color: 'var(--danger-text-strong)', fontWeight: 600, fontSize: '1.1rem', padding: '14px 0',
           }}
         >
           Don&apos;t Know
@@ -151,8 +151,8 @@ export default function VocabDrillMode({ initialWords, tts, onBack }: VocabDrill
           className="btn"
           onClick={() => handleAnswer(true)}
           style={{
-            flex: 1, background: '#f0fdf4', border: '2px solid #86efac',
-            color: '#166534', fontWeight: 600, fontSize: '1.1rem', padding: '14px 0',
+            flex: 1, background: 'var(--success-bg)', border: '2px solid var(--success-accent)',
+            color: 'var(--success-text-strong)', fontWeight: 600, fontSize: '1.1rem', padding: '14px 0',
           }}
         >
           Know ✓
