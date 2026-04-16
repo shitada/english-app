@@ -481,3 +481,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 487	none	2026-04-16	399	60	182	193	834	1413	1413	pass	6.2	discarded	Add Quick Dialogue card with 2-turn micro-conversation to speaking tab
 488	1edff75	2026-04-16	244	80	97	111	532	1412	1412	pass	7.0	kept	Add filler word analysis endpoint for speaking journal entries
 489	851f677	2026-04-16	156	57	71	351	635	1412	1412	pass	6.7	kept	Add Filler Word Trends panel to Speaking Journal Progress dashboard
+490	79404ba	2026-04-16	1326	107	71	2692	4196	1412	1412	pass	6.1	kept	Add echo practice for Speaking Journal model answer

@@ -2103,3 +2103,85 @@ Now add the component at the end of the file:
 
 Now commit and test:
 
+● Commit iteration 490 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit -m "autoresearch #490: Add echo practice for Speaking Journal model
+  │ answer"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -10
+  └ 11 lines...
+
+All 1412 tests pass, TS check passes. Now check for frontend component changes and run tester:
+
+● Check UI changes and record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E 'frontend/src/(pages|components)/.*\.tsx$' && date +%s
+  └ 3 lines...
+
+Frontend component changed — must run tester. Start server and run QA:
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn
+  │ app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+● Tester QA test iteration 490
+  │ Read App.tsx
+  │   │ frontend/src/App.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read App.tsx
+      │ frontend/src/App.tsx
+      └ L50:100 (48 lines read)
+
+Tester passed with ux_score 7. Now invoke the evaluator:
+
+● Evaluator Evaluate iteration 490
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1:40 (40 lines read)
+  └ Read useSpeechRecognition.ts
+      │ frontend/src/hooks/useSpeechRecognition.ts
+      └ 167 lines read
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+● Request failed due to a transient API error. Retrying...
+
+Score 6.1, verdict keep. All criteria met (tests pass, TS pass, QA passed with ux_score 7.0 ≥ 5.0, score ≥ 6.0). Recording results.
+
+● Record iteration 490 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "490" "79404ba" "2026-04-16" "1326" "107" "71" "2692" "4196" \
+  │ "1412" "1412" "pass" "6.1" "kept" "Add echo practice for Speaking
+  │ Journal model answer" \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Row verified. Let me commit the results:
+
