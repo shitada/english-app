@@ -2862,3 +2862,139 @@ async def evaluate_quick_write(
         "corrections": corrections,
         "model_response": str(result.get("model_response", "")),
     }
+
+
+# ── Quick Explain (Circumlocution) Practice ─────────────────────
+
+
+class ExplainWordPromptResponse(BaseModel):
+    word: str
+    forbidden_words: list[str]
+    hint: str
+    difficulty: str
+
+
+@router.get("/explain-word", response_model=ExplainWordPromptResponse)
+async def get_explain_word(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a target word with forbidden words for circumlocution practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a circumlocution speaking exercise for a {difficulty}-level English learner.\n"
+        "The learner must explain a concept/word WITHOUT using certain forbidden words.\n"
+        "Return JSON with:\n"
+        "- word (string): the target word or concept to explain (a common noun, verb, or concept)\n"
+        "- forbidden_words (array of 4 strings): words closely related to the target that the learner CANNOT use\n"
+        "- hint (string): a short hint to help them get started (1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="explain_word_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Explain word prompt generation failed")
+
+    forbidden = result.get("forbidden_words", [])
+    if not isinstance(forbidden, list):
+        forbidden = []
+    forbidden = [str(w) for w in forbidden if w][:4]
+    # Pad to 4 if LLM returned fewer
+    while len(forbidden) < 4:
+        forbidden.append("(related word)")
+
+    return {
+        "word": str(result.get("word", "telephone")),
+        "forbidden_words": forbidden,
+        "hint": str(result.get("hint", "Think about what you use it for.")),
+        "difficulty": difficulty,
+    }
+
+
+class ExplainWordEvaluateRequest(BaseModel):
+    word: str = Field(min_length=1, max_length=200)
+    forbidden_words: list[str] = Field(min_length=1, max_length=10)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class ExplainWordEvaluateResponse(BaseModel):
+    clarity_score: float
+    creativity_score: float
+    grammar_score: float
+    overall_score: float
+    used_forbidden: list[bool]
+    feedback: str
+    model_explanation: str
+
+
+@router.post("/explain-word/evaluate", response_model=ExplainWordEvaluateResponse)
+async def evaluate_explain_word(
+    body: ExplainWordEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a circumlocution explanation attempt."""
+    copilot = get_copilot_service()
+    forbidden_list = ", ".join(f'"{w}"' for w in body.forbidden_words)
+    eval_prompt = (
+        f"Target word to explain: \"{body.word}\"\n"
+        f"Forbidden words: [{forbidden_list}]\n"
+        f"User's spoken explanation ({body.duration_seconds}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this circumlocution attempt. Check if the user used any forbidden words "
+        "(case-insensitive, including close morphological variants like plurals or verb forms). "
+        "Return JSON with:\n"
+        "- clarity_score (1-10): how clearly the concept was communicated\n"
+        "- creativity_score (1-10): how creative/inventive the explanation was\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- overall_score (1-10): overall quality\n"
+        f"- used_forbidden (array of {len(body.forbidden_words)} booleans): for each forbidden word in order, "
+        "true if the user used it (or a close variant), false otherwise\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)\n"
+        "- model_explanation (string): a well-crafted example explanation that avoids all forbidden words"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in circumlocution and paraphrasing skills. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="explain_word_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Explain word evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    raw_used = result.get("used_forbidden", [])
+    if not isinstance(raw_used, list):
+        raw_used = []
+    used_forbidden = []
+    for i in range(len(body.forbidden_words)):
+        if i < len(raw_used):
+            used_forbidden.append(bool(raw_used[i]))
+        else:
+            # Fallback: check transcript for the forbidden word
+            used_forbidden.append(
+                body.forbidden_words[i].lower() in body.transcript.lower()
+            )
+
+    return {
+        "clarity_score": clamp(result.get("clarity_score", 5)),
+        "creativity_score": clamp(result.get("creativity_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "used_forbidden": used_forbidden,
+        "feedback": str(result.get("feedback", "")),
+        "model_explanation": str(result.get("model_explanation", "")),
+    }

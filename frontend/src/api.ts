@@ -2097,3 +2097,39 @@ export function evaluateQuickWrite(scenario: string, instruction: string, user_t
     body: JSON.stringify({ scenario, instruction, user_text }),
   });
 }
+
+// ── Quick Explain (Circumlocution) Practice ─────────────────────
+
+export interface ExplainWordPromptResponse {
+  word: string;
+  forbidden_words: string[];
+  hint: string;
+  difficulty: string;
+}
+
+export interface ExplainWordEvaluateResponse {
+  clarity_score: number;
+  creativity_score: number;
+  grammar_score: number;
+  overall_score: number;
+  used_forbidden: boolean[];
+  feedback: string;
+  model_explanation: string;
+}
+
+export function getExplainWord(difficulty: string = 'intermediate'): Promise<ExplainWordPromptResponse> {
+  return request<ExplainWordPromptResponse>(`/api/pronunciation/explain-word?difficulty=${difficulty}`);
+}
+
+export function evaluateExplainWord(
+  word: string,
+  forbidden_words: string[],
+  transcript: string,
+  duration_seconds: number,
+): Promise<ExplainWordEvaluateResponse> {
+  return request<ExplainWordEvaluateResponse>('/api/pronunciation/explain-word/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ word, forbidden_words, transcript, duration_seconds }),
+  });
+}
