@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, getSpeakingJournalGrammarCheck, getSpeakingJournalModelAnswer, type SpeakingJournalEntry, type VocabUpgradeItem, type GrammarCorrection, type GrammarCheckResult, type ModelAnswerResult } from '../api';
+import { getSpeakingJournalPrompt, saveSpeakingJournalEntry, getSpeakingJournalEntries, getSpeakingJournalVocabUpgrade, getSpeakingJournalGrammarCheck, getSpeakingJournalModelAnswer, api, type SpeakingJournalEntry, type VocabUpgradeItem, type GrammarCorrection, type GrammarCheckResult, type ModelAnswerResult, type PronunciationFeedback } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -553,6 +553,8 @@ export default function SpeakingJournal() {
                   >
                     🔊 Listen to Model Answer
                   </button>
+                  {/* Echo Practice */}
+                  <ModelAnswerEchoPractice modelAnswer={modelAnswer.model_answer} />
                   {modelAnswer.key_phrases.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.4rem' }}>
                       {modelAnswer.key_phrases.map((phrase, i) => (
@@ -721,6 +723,173 @@ export default function SpeakingJournal() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+type EchoPhase = 'idle' | 'listening' | 'recording' | 'evaluating' | 'result';
+
+function ModelAnswerEchoPractice({ modelAnswer }: { modelAnswer: string }) {
+  const [echoPhase, setEchoPhase] = useState<EchoPhase>('idle');
+  const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
+  const { transcript, isSupported, start, stop, reset } = useSpeechRecognition({
+    continuous: true,
+    interimResults: true,
+  });
+
+  const handleEchoPractice = useCallback(() => {
+    setFeedback(null);
+    reset();
+    setEchoPhase('listening');
+    const u = new SpeechSynthesisUtterance(modelAnswer);
+    u.lang = 'en-US';
+    u.rate = 0.85;
+    u.onend = () => {
+      setEchoPhase('recording');
+      start();
+    };
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }, [modelAnswer, start, reset]);
+
+  const handleStopEcho = useCallback(async () => {
+    stop();
+    if (!transcript.trim()) {
+      setEchoPhase('idle');
+      return;
+    }
+    setEchoPhase('evaluating');
+    try {
+      const result = await api.checkPronunciation(modelAnswer, transcript.trim());
+      setFeedback(result);
+      setEchoPhase('result');
+    } catch {
+      setEchoPhase('idle');
+    }
+  }, [stop, transcript, modelAnswer]);
+
+  if (!isSupported) return null;
+
+  return (
+    <div style={{ marginTop: '0.4rem' }}>
+      {echoPhase === 'idle' && (
+        <button
+          onClick={handleEchoPractice}
+          style={{
+            padding: '0.35rem 0.7rem',
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: '0.78rem',
+          }}
+        >
+          🎙️ Practice Speaking This
+        </button>
+      )}
+
+      {echoPhase === 'listening' && (
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '0.3rem 0' }}>
+          🔊 Listening to model... Speak after it finishes.
+        </div>
+      )}
+
+      {echoPhase === 'recording' && (
+        <div>
+          <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 600, marginBottom: '0.3rem' }}>
+            🔴 Recording... Repeat the model answer now!
+          </div>
+          {transcript && (
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic', marginBottom: '0.3rem' }}>
+              {transcript}
+            </div>
+          )}
+          <button
+            onClick={handleStopEcho}
+            style={{
+              padding: '0.3rem 0.6rem',
+              background: '#ef4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.75rem',
+            }}
+          >
+            ⏹ Stop &amp; Evaluate
+          </button>
+        </div>
+      )}
+
+      {echoPhase === 'evaluating' && (
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '0.3rem 0' }}>
+          ⏳ Evaluating your pronunciation...
+        </div>
+      )}
+
+      {echoPhase === 'result' && feedback && (
+        <div style={{ marginTop: '0.3rem', padding: '0.5rem', background: 'var(--bg-secondary, #f3f4f6)', borderRadius: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.4rem' }}>
+            <span style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: (feedback.overall_score ?? 0) >= 80 ? '#22c55e' : (feedback.overall_score ?? 0) >= 50 ? '#eab308' : '#ef4444',
+            }}>
+              {feedback.overall_score ?? '–'}%
+            </span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+              {feedback.overall_feedback}
+            </span>
+          </div>
+
+          {feedback.word_feedback.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: '0.3rem' }}>
+              {feedback.word_feedback.map((w, i) => (
+                <span
+                  key={i}
+                  title={w.tip}
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    background: w.is_correct ? '#dcfce7' : '#fee2e2',
+                    color: w.is_correct ? '#166534' : '#991b1b',
+                    fontWeight: 500,
+                  }}
+                >
+                  {w.expected}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {feedback.focus_areas.length > 0 && (
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+              Focus: {feedback.focus_areas.join(', ')}
+            </div>
+          )}
+
+          <button
+            onClick={() => { setEchoPhase('idle'); setFeedback(null); reset(); }}
+            style={{
+              marginTop: '0.3rem',
+              padding: '0.25rem 0.5rem',
+              background: 'var(--primary, #6366f1)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 5,
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.72rem',
+            }}
+          >
+            🔄 Try Again
+          </button>
+        </div>
+      )}
     </div>
   );
 }

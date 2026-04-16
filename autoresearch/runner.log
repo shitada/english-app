@@ -1869,3 +1869,237 @@ Now commit and test:
   │ date +%s
   └ 2 lines...
 
+● Commit iteration 489 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │ commit -m "autoresearch #489: Add Filler Word Trends panel to Speaking
+  │ Journal Progress dashboard"
+  └ 15 lines...
+
+● TypeScript check (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │ --noEmit 2>&1
+  └ 2 lines...
+
+● Run backend tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/unit tests/integration -v 2>&1 | tail -30
+  └ 31 lines...
+
+All 1412 tests pass, TS check passes. Now check if frontend UI files changed (they did) and run the tester:
+
+● Record T3 after tests (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Check frontend UI changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | grep -E 'frontend/src/(pages|components)/.*\.tsx$'
+  └ 2 lines...
+
+Frontend component changed — must run tester. Let me start the server and invoke the tester.
+
+● Kill old server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; sleep 1; echo "killed"
+  └ 2 lines...
+
+● Start server for QA (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run uvicorn
+  │ app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30
+  └ 1 line...
+
+● Verify server is up (shell)
+  │ sleep 4 && curl -s http://localhost:8000/api/health
+  └ 2 lines...
+
+Server is up. Now invoke the tester:
+
+● Tester QA test iteration 489
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L1:60 (60 lines read)
+  └ Read SpeakingJournalProgress.tsx
+      │ frontend/src/components/dashboard/SpeakingJournalProgress.tsx
+      └ L18:31 (13 lines read)
+
+Tester passed with ux_score 8. Now invoke the evaluator:
+
+● Get diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --stat
+  └ 6 lines...
+
+● Get code diff for evaluator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/api.ts
+  │ frontend/src/components/dashboard/SpeakingJournalProgress.tsx
+  └ 79 lines...
+
+● Get diff (piped to cat) (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1 --
+  │ frontend/src/api.ts
+  │ frontend/src/components/dashboard/SpeakingJournalProgress.tsx | cat
+  └ 196 lines...
+
+● Evaluator Evaluate iteration 489
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L1700:1950 (251 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1950:2200 (68 lines read)
+
+● Record T4 after evaluation (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Kill server (shell)
+  │ lsof -ti:8000 | xargs kill -9 2>/dev/null; echo "done"
+  └ 2 lines...
+
+Score 6.70, verdict keep. All criteria met. Let me record the results.
+
+● Record iteration 489 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && printf
+  │ '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  │ "489" "851f677" "2026-04-16" "156" "57" "71" "351" "635" \
+  │ "1412" "1412" "pass" "6.7" "kept" "Add Filler Word Trends panel to
+  │ Speaking Journal Progress dashboard" \…
+  └ 2 lines...
+
+● Verify results row (shell)
+  │ tail -1 autoresearch/results.tsv | tr '\t' '|' | head -1
+  └ 2 lines...
+
+Good, row is properly tab-separated. Now starting iteration 490.
+
+● Record T0 for iteration 490 (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Context restore: recent results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv
+  └ 21 lines...
+
+● Check backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md 2>/dev/null; echo "EXIT:$?"
+  └ 2 lines...
+
+● Recent commits (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -5
+  └ 6 lines...
+
+● Proposer Propose iteration 490
+  │ Read SpeakingJournal.tsx
+  │   │ frontend/src/components/SpeakingJournal.tsx
+  │   └ L490:600 (111 lines read)
+  └ Read EchoPractice.tsx
+      │ frontend/src/components/EchoPractice.tsx
+      └ L56:180 (125 lines read)
+
+● Record T1 after proposal (shell)
+  │ date +%s
+  └ 2 lines...
+
+● Find SpeakingJournal files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls
+  │ frontend/src/components/SpeakingJournal* 2>/dev/null; ls
+  │ frontend/src/pages/SpeakingJournal* 2>/dev/null; find frontend/src -name
+  │ "*SpeakingJournal*" -o -name "*speaking*journal*" 2>/dev/null | head -10
+  └ 4 lines...
+
+● Check file size (shell)
+  │ wc -l /Users/shingotada/Documents/vscode/english-app/frontend/src/components
+  │ /SpeakingJournal.tsx
+  └ 2 lines...
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L1:50 (50 lines read)
+
+● Find relevant patterns (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "model.*answer\|modelAnswer\|model_answer\|Listen.*Model\|checkPronunciation
+  │ \|useSpeechRecognition\|EchoPractice\|echoPhase"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 23 lines...
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L490:600 (111 lines read)
+
+● Find checkPronunciation API (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "checkPronunciation\|pronunciation/check" frontend/src/api.ts | head -5
+  └ 3 lines...
+
+● Check pronunciation API types (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '150,170p'
+  │ frontend/src/api.ts
+  └ 21 lines...
+
+● Find PronunciationFeedback type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "PronunciationFeedback" frontend/src/api.ts | head -5
+  └ 4 lines...
+
+● Read PronunciationFeedback type (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && sed -n '414,440p'
+  │ frontend/src/api.ts
+  └ 28 lines...
+
+Now let me check how useSpeechRecognition is used and what `api` imports look like:
+
+● Check API imports (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n "^import.*api"
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ 2 lines...
+
+● Find api export pattern (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n
+  │ "^export.*checkPronunciation\|^export.*api\b\|^export const api\|^const api"
+  │ frontend/src/api.ts | head -5
+  └ 2 lines...
+
+So `checkPronunciation` is accessed via `api.checkPronunciation`. I need to import `api` and `PronunciationFeedback` type. Now let me implement the echo practice feature:
+
+● Edit SpeakingJournal.tsx +1 -1
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now I need to add the echo practice state and the UI. But I realize the component uses a single `useSpeechRecognition` hook which is already used for the main recording. I can't use it for both. Let me check if there's a way to use a second instance or if I should use the Web Speech API directly:
+
+● Check speech recognition hook (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ frontend/src/hooks/useSpeechRecognition.ts
+  └ 168 lines...
+
+I'll create the echo practice as a separate child component to avoid conflicting with the main speech recognition hook. Let me add it after the Listen button in the model answer section:
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L720:726 (7 lines read)
+
+Now I'll add the ModelAnswerEchoPractice component at the end of the file, and integrate it into the model answer section:
+
+● Edit SpeakingJournal.tsx +2
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now add the component at the end of the file:
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L725:728 (4 lines read)
+
+✗ Edit SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ Multiple matches found
+
+● Read SpeakingJournal.tsx
+  │ frontend/src/components/SpeakingJournal.tsx
+  └ L722:728 (7 lines read)
+
+● Edit SpeakingJournal.tsx +167
+  └ frontend/src/components/SpeakingJournal.tsx
+
+Now commit and test:
+
