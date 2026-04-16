@@ -501,3 +501,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 508	a3f0a34	2026-04-17	241	176	105	116	638	1507	1507	pass	6.25	kept	Add Quick Reading Comprehension Card with passage and multiple-choice questions
 509	b16a6e7	2026-04-17	193	246	110	156	705	1514	1514	pass	6.20	kept	Add Quick Tongue Twister Card with pronunciation clarity scoring
 511	e8edb82	2026-04-17	268	394	321	138	1121	1530	1530	pass	7.25	kept	Add Smart Study Plan card with personalized daily micro-task sequence
+512	7d7a2be	2026-04-17	323	269	95	121	808	1530	1530	pass	6.75	kept	Add Conversation Replay Speaking Walkthrough mode
