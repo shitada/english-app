@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-04-18T03:26:06",
+  "port": 8098,
+  "level": "functional",
+  "overall": "FAIL",
+  "pages_tested": 3,
+  "pages_passed": 2,
+  "pages_failed": 1,
+  "total_spec_tests": 0,
+  "total_spec_passed": 0,
+  "total_spec_failed": 0,
+  "results": [
+    {
+      "page": "dashboard",
+      "status": "FAIL",
+      "smoke_passed": 3,
+      "smoke_failed": 1,
+      "spec_tests_run": 0,
+      "spec_tests_passed": 0,
+      "spec_tests_failed": 0,
+      "spec_results": [],
+      "console_errors": [
+        "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+      ],
+      "issues": [
+        "Console: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+      ],
+      "screenshot": "autoresearch/screenshots/dashboard.png",
+      "duration_ms": 1976
+    },
+    {
+      "page": "listening",
+      "status": "PASS",
+      "smoke_passed": 4,
+      "smoke_failed": 0,
+      "spec_tests_run": 0,
+      "spec_tests_passed": 0,
+      "spec_tests_failed": 0,
+      "spec_results": [],
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/listening.png",
+      "duration_ms": 1568
+    },
+    {
+      "page": "vocabulary",
+      "status": "PASS",
+      "smoke_passed": 4,
+      "smoke_failed": 0,
+      "spec_tests_run": 0,
+      "spec_tests_passed": 0,
+      "spec_tests_failed": 0,
+      "spec_results": [],
+      "console_errors": [],
+      "issues": [],
+      "screenshot": "autoresearch/screenshots/vocabulary.png",
+      "duration_ms": 1608
+    }
+  ]
+}

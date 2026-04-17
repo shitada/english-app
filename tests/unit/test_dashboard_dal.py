@@ -7,6 +7,7 @@ import pytest
 from app.dal.conversation import add_message, create_conversation, end_conversation, update_message_feedback
 from app.dal.dashboard import (
     _categorize_error,
+    _get_recent_activity,
     delete_learning_goal,
     get_achievements,
     get_confidence_trend,
@@ -1289,6 +1290,37 @@ class TestGetRecentActivity:
         sj_items = [r for r in result if r["type"] == "speaking_journal"]
         assert len(sj_items) >= 1
         assert sj_items[0]["route"] == "/"
+
+    async def test_null_detail_does_not_crash(self, test_db):
+        """_get_recent_activity handles NULL detail without crashing.
+
+        All detail columns currently have NOT NULL constraints, but this
+        guards against corrupt/migrated data.  We temporarily drop the
+        constraint by re-creating the pronunciation_attempts table.
+        """
+        # Drop and recreate pronunciation_attempts without NOT NULL on reference_text
+        await test_db.execute("DROP TABLE IF EXISTS pronunciation_attempts")
+        await test_db.execute(
+            "CREATE TABLE pronunciation_attempts ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  reference_text TEXT,"  # deliberately nullable
+            "  user_transcription TEXT NOT NULL,"
+            "  feedback_json TEXT,"
+            "  score REAL,"
+            "  difficulty TEXT,"
+            "  created_at TEXT NOT NULL DEFAULT (datetime('now'))"
+            ")"
+        )
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (NULL, 'hello', 80, datetime('now'))"
+        )
+        await test_db.commit()
+        result = await _get_recent_activity(test_db)
+        assert len(result) == 1
+        # The NULL detail should fall back to the type name
+        assert result[0]["detail"] == "pronunciation"
+        assert result[0]["type"] == "pronunciation"
 
 
 @pytest.mark.unit

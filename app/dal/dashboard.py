@@ -147,7 +147,7 @@ async def _get_recent_activity(db: aiosqlite.Connection, limit: int = 7) -> list
         ORDER BY ts DESC LIMIT ?
     """, (limit, limit, limit, limit, limit, limit))
     return [
-        {"type": r["type"], "detail": r["detail"][:60], "timestamp": r["ts"]}
+        {"type": r["type"], "detail": r["detail"][:60] if r["detail"] else r["type"], "timestamp": r["ts"]}
         for r in rows
     ]
 

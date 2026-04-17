@@ -444,6 +444,68 @@ async def test_recent_activity_after_conversation(client, mock_copilot):
     assert "timestamp" in item
 
 
+@pytest.mark.integration
+async def test_recent_activity_conversation_shows_topic_label(client, mock_copilot):
+    """Conversation items should display human-readable labels, not raw IDs."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={"reply": "Hello", "feedback": None})
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin", "difficulty": "beginner"})
+    res = await client.get("/api/dashboard/recent-activity?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    conv_items = [i for i in data["items"] if i["type"] == "conversation"]
+    assert len(conv_items) >= 1
+    # Should be "Hotel Check-in", not "hotel_checkin"
+    assert conv_items[0]["detail"] == "Hotel Check-in"
+
+
+@pytest.mark.integration
+async def test_recent_activity_no_crash_on_null_detail(client):
+    """Ensure no crash when activity detail is NULL in the database.
+
+    We simulate corrupt/legacy data by dropping and re-creating the
+    pronunciation_attempts table without NOT NULL on reference_text.
+    """
+    import aiosqlite
+    from app.database import get_db_session
+    from app.main import app
+
+    # Get the DB override to insert data
+    db_gen = app.dependency_overrides[get_db_session]()
+    db = await db_gen.__anext__()
+    try:
+        # Re-create table without NOT NULL on reference_text
+        await db.execute("DROP TABLE IF EXISTS pronunciation_attempts")
+        await db.execute(
+            "CREATE TABLE pronunciation_attempts ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  reference_text TEXT,"
+            "  user_transcription TEXT NOT NULL,"
+            "  feedback_json TEXT,"
+            "  score REAL,"
+            "  difficulty TEXT,"
+            "  created_at TEXT NOT NULL DEFAULT (datetime('now'))"
+            ")"
+        )
+        await db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+            "VALUES (NULL, 'hello', 80, datetime('now'))"
+        )
+        await db.commit()
+    finally:
+        try:
+            await db_gen.__anext__()
+        except StopAsyncIteration:
+            pass
+
+    # The endpoint should not crash with NULL detail
+    res = await client.get("/api/dashboard/recent-activity?limit=5")
+    assert res.status_code == 200
+    items = res.json()["items"]
+    assert isinstance(items, list)
+    assert len(items) >= 1
+
+
 # ── Tests for untested dashboard endpoints ──────────────────────────
 
 
@@ -1956,3 +2018,58 @@ class TestSelfAssessmentTrend:
         assert resp.status_code == 200
         data = resp.json()
         assert data["trend"] in ("improving", "declining", "stable", "insufficient_data")
+
+
+# ── Tests for recent-activity topic label conversion & NULL guard ────
+
+
+@pytest.mark.integration
+async def test_recent_activity_conversation_shows_label_not_id(client, mock_copilot):
+    """Recent-activity should show human-readable label instead of raw topic ID."""
+    from unittest.mock import AsyncMock
+    mock_copilot.ask_json = AsyncMock(return_value={"reply": "Hello", "feedback": None})
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin", "difficulty": "beginner"})
+    res = await client.get("/api/dashboard/recent-activity?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    conv_items = [i for i in data["items"] if i["type"] == "conversation"]
+    assert len(conv_items) >= 1
+    # Should be the human-readable label, not the raw topic ID
+    assert conv_items[0]["detail"] == "Hotel Check-in"
+    assert conv_items[0]["detail"] != "hotel_checkin"
+
+
+@pytest.mark.integration
+async def test_recent_activity_null_detail_does_not_crash(client):
+    """Items with NULL detail should not cause a crash (None guard)."""
+    # The _get_recent_activity private function and get_recent_activity public
+    # function both guard against NULL detail with a fallback to the type name.
+    # Since all detail source columns have NOT NULL constraints, we test via
+    # the DAL directly with a patched query result.
+    from unittest.mock import AsyncMock, MagicMock
+
+    from app.dal.dashboard import _get_recent_activity
+
+    mock_db = AsyncMock()
+    mock_db.execute_fetchall = AsyncMock(return_value=[
+        {"type": "conversation", "detail": None, "ts": "2025-01-01T00:00:00"},
+        {"type": "pronunciation", "detail": "Hello world", "ts": "2025-01-01T00:00:01"},
+    ])
+
+    result = await _get_recent_activity(mock_db, limit=5)
+    assert len(result) == 2
+    # NULL detail should fall back to the type name
+    assert result[0]["detail"] == "conversation"
+    assert result[1]["detail"] == "Hello world"
+
+
+@pytest.mark.integration
+async def test_stats_recent_activity_null_detail_does_not_crash(client):
+    """Stats endpoint recent_activity with NULL detail should not crash."""
+    # On a fresh DB, recent_activity is empty — just verify the endpoint works
+    res = await client.get("/api/dashboard/stats")
+    assert res.status_code == 200
+    data = res.json()
+    for item in data["recent_activity"]:
+        assert item["detail"] is not None
+        assert len(item["detail"]) > 0

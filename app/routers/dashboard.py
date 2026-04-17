@@ -536,6 +536,16 @@ async def get_recent_activity(
 ):
     """Get recent learning activity feed for the Home page."""
     items = await dash_dal.get_recent_activity(db, limit=limit)
+
+    # Convert raw topic IDs to human-readable labels for conversation items
+    topics = get_conversation_topics()
+    items = [
+        {**item, "detail": get_topic_label(topics, item["detail"])}
+        if item["type"] == "conversation"
+        else item
+        for item in items
+    ]
+
     return {"items": items}
 
 
