@@ -218,3 +218,67 @@ class TestStreakFreezeDALViaDB:
         streak = await _calculate_streak(test_db)
         # today + frozen yesterday + day_before = 3
         assert streak == 3
+
+    async def test_auto_apply_freezes_fills_internal_gap(self, test_db):
+        """auto_apply_freezes should fill an internal gap between activity days.
+
+        Scenario: activity today + activity from day-2 through day-8 (7 days),
+        leaving day-1 (yesterday) as an internal gap.  8 real activity days
+        give a longest streak of 7 (the contiguous block), earning 1 freeze
+        token.  After auto_apply_freezes, yesterday should be frozen and the
+        streak should be 9 (today + frozen yesterday + 7 contiguous days).
+        """
+        from app.dal.dashboard import (
+            auto_apply_freezes,
+            _calculate_streak,
+            get_freeze_info,
+        )
+
+        today = datetime.now(timezone.utc).date()
+
+        # Activity today
+        ts_today = f"{today.isoformat()} 12:00:00"
+        await test_db.execute(
+            "INSERT INTO pronunciation_attempts (reference_text, user_transcription, created_at) VALUES (?, ?, ?)",
+            ("test", "test", ts_today),
+        )
+
+        # Activity from day-2 through day-8 (7 consecutive days)
+        for i in range(2, 9):
+            day = today - timedelta(days=i)
+            ts = f"{day.isoformat()} 12:00:00"
+            await test_db.execute(
+                "INSERT INTO pronunciation_attempts (reference_text, user_transcription, created_at) VALUES (?, ?, ?)",
+                ("test", "test", ts),
+            )
+        await test_db.commit()
+
+        # Before auto-apply: streak should be just 1 (only today; yesterday is a gap)
+        streak_before = await _calculate_streak(test_db)
+        assert streak_before == 1
+
+        # Freeze info: longest contiguous block is 7 → 1 freeze earned
+        info_before = await get_freeze_info(test_db)
+        assert info_before["earned"] == 1
+        assert info_before["available"] == 1
+
+        # Apply freezes — should fill yesterday (internal gap)
+        applied = await auto_apply_freezes(test_db)
+        assert applied == 1
+
+        # Verify freeze was applied to yesterday
+        rows = await test_db.execute_fetchall(
+            "SELECT freeze_date FROM streak_freezes"
+        )
+        yesterday = today - timedelta(days=1)
+        freeze_dates = {r["freeze_date"] for r in rows}
+        assert yesterday.isoformat() in freeze_dates
+
+        # After auto-apply: streak = today + frozen yesterday + 7 days = 9
+        streak_after = await _calculate_streak(test_db)
+        assert streak_after == 9
+
+        # Freeze info after: used=1, available=0
+        info_after = await get_freeze_info(test_db)
+        assert info_after["used"] == 1
+        assert info_after["available"] == 0

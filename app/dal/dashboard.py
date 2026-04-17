@@ -303,12 +303,17 @@ async def get_freeze_info(db: aiosqlite.Connection) -> dict[str, int]:
 
 
 async def auto_apply_freezes(db: aiosqlite.Connection) -> int:
-    """Detect recent gap days between last activity and today, consume freezes.
+    """Walk backward from yesterday filling gap days with freeze tokens.
+
+    Examines each day from yesterday going back up to 366 days.  If a day
+    is already covered (real activity or existing freeze) we continue; if
+    it is uncovered and freeze tokens remain we insert a freeze; if it is
+    uncovered with no tokens left we stop (the streak breaks there).
 
     Returns the number of freezes applied.
     """
-    # Get activity dates (without existing freeze dates) in descending order
-    rows = await db.execute_fetchall("""
+    # 1. Collect all real-activity dates (last 366 days)
+    activity_rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
             SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-366 days')
             UNION ALL
@@ -319,49 +324,59 @@ async def auto_apply_freezes(db: aiosqlite.Connection) -> int:
             SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-366 days')
             UNION ALL
             SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-366 days')
-        ) ORDER BY d DESC
+        )
     """)
 
-    if not rows:
+    if not activity_rows:
         return 0
 
-    today = datetime.now(timezone.utc).date()
+    # Build a set of covered date-strings (activity dates)
+    covered: set[str] = set()
+    for r in activity_rows:
+        try:
+            covered.add(date.fromisoformat(r["d"]).isoformat())
+        except (ValueError, TypeError):
+            continue
 
-    try:
-        most_recent = date.fromisoformat(rows[0]["d"])
-    except (ValueError, TypeError):
+    if not covered:
         return 0
 
-    # Only look for gaps between today and the most recent activity
-    gap_start_ordinal = most_recent.toordinal() + 1
-    gap_end_ordinal = today.toordinal()  # exclusive of today
-
-    if gap_start_ordinal >= gap_end_ordinal:
-        return 0  # No gap days
-
-    # Get already-frozen dates to avoid duplicates
+    # 2. Add already-frozen dates into the covered set
     existing = await db.execute_fetchall(
         "SELECT freeze_date FROM streak_freezes"
     )
-    frozen_dates = {r["freeze_date"] for r in existing}
+    frozen_dates: set[str] = set()
+    for r in existing:
+        frozen_dates.add(r["freeze_date"])
+        covered.add(r["freeze_date"])
 
-    # Get available freeze count
+    # 3. Determine available freeze tokens
     info = await get_freeze_info(db)
     available = info["available"]
 
+    # 4. Walk backward from yesterday through up to 366 days
+    today = datetime.now(timezone.utc).date()
+    yesterday_ordinal = today.toordinal() - 1
+
     applied = 0
-    for ordinal in range(gap_start_ordinal, gap_end_ordinal):
-        if available <= 0:
-            break
-        gap_date = date.fromordinal(ordinal)
-        gap_str = gap_date.isoformat()
-        if gap_str in frozen_dates:
+    for ordinal in range(yesterday_ordinal, yesterday_ordinal - 366, -1):
+        day = date.fromordinal(ordinal)
+        day_str = day.isoformat()
+
+        if day_str in covered:
+            # Day already has activity or a freeze — keep going
             continue
+
+        # Uncovered day — try to apply a freeze
+        if available <= 0:
+            break  # No tokens left; streak breaks here
+
         await db.execute(
             "INSERT OR IGNORE INTO streak_freezes (freeze_date) VALUES (?)",
-            (gap_str,),
+            (day_str,),
         )
-        frozen_dates.add(gap_str)
+        covered.add(day_str)
+        frozen_dates.add(day_str)
         available -= 1
         applied += 1
 
