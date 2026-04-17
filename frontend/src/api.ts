@@ -2757,6 +2757,43 @@ export function evaluatePredictNext(data: {
   });
 }
 
+// ── Quick Dictogloss ─────────────────────────────────────────────
+
+export interface DictoglossPassageResponse {
+  title: string;
+  passage_text: string;
+  topic: string;
+  difficulty: string;
+  sentence_count: number;
+}
+
+export interface DictoglossEvaluateResponse {
+  content_coverage_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  reconstruction_quality_score: number;
+  overall_score: number;
+  feedback: string;
+  model_reconstruction: string;
+}
+
+export function getDictoglossPassage(difficulty: string = 'intermediate'): Promise<DictoglossPassageResponse> {
+  return request<DictoglossPassageResponse>(`/api/pronunciation/dictogloss?difficulty=${difficulty}`);
+}
+
+export function evaluateDictogloss(data: {
+  passage_text: string;
+  user_reconstruction: string;
+  replay_used: boolean;
+  duration_seconds: number;
+}): Promise<DictoglossEvaluateResponse> {
+  return request<DictoglossEvaluateResponse>('/api/pronunciation/dictogloss/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

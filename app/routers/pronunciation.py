@@ -4762,3 +4762,113 @@ async def evaluate_predict_next(
         "feedback": str(result.get("feedback", "")),
         "actual_continuation": body.continuation,
     }
+
+
+# ── Quick Dictogloss ───────────────────────────────────────────────
+
+
+class DictoglossPassageResponse(BaseModel):
+    title: str
+    passage_text: str
+    topic: str
+    difficulty: str
+    sentence_count: int
+
+
+@router.get("/dictogloss", response_model=DictoglossPassageResponse)
+async def get_dictogloss_passage(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a short passage for dictogloss (listen-then-reconstruct) exercise."""
+    copilot = get_copilot_service()
+    sentence_target = {"beginner": 3, "intermediate": 3, "advanced": 4}.get(difficulty, 3)
+    prompt_text = (
+        f"Generate a short passage ({sentence_target} sentences) for a {difficulty}-level English learner.\n"
+        "The passage should be coherent, interesting, and suitable for a dictogloss exercise "
+        "where the learner listens and then reconstructs from memory.\n"
+        "Return JSON with:\n"
+        "- title (string): a short title for the passage (2-5 words)\n"
+        "- passage_text (string): the full passage text\n"
+        "- topic (string): the general topic of the passage (1-2 words)\n"
+        "- difficulty (string): the difficulty level\n"
+        f"- sentence_count (number): the number of sentences (should be {sentence_target})"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English listening and writing coach specializing in dictogloss exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="dictogloss_passage",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Dictogloss passage generation failed")
+
+    return {
+        "title": str(result.get("title", "A Short Passage")),
+        "passage_text": str(result.get("passage_text", "The weather was beautiful today. People were walking in the park. Children were playing with their dogs.")),
+        "topic": str(result.get("topic", "General")),
+        "difficulty": difficulty,
+        "sentence_count": int(result.get("sentence_count", sentence_target)) if str(result.get("sentence_count", "")).strip().isdigit() else sentence_target,
+    }
+
+
+class DictoglossEvaluateRequest(BaseModel):
+    passage_text: str = Field(min_length=1, max_length=2000)
+    user_reconstruction: str = Field(min_length=1, max_length=3000)
+    replay_used: bool = Field(default=False)
+    duration_seconds: int = Field(ge=1, le=300)
+
+
+class DictoglossEvaluateResponse(BaseModel):
+    content_coverage_score: float
+    grammar_score: float
+    vocabulary_score: float
+    reconstruction_quality_score: float
+    overall_score: float
+    feedback: str
+    model_reconstruction: str
+
+
+@router.post("/dictogloss/evaluate", response_model=DictoglossEvaluateResponse)
+async def evaluate_dictogloss(
+    body: DictoglossEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's reconstruction of a dictogloss passage."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original passage:\n\"{body.passage_text}\"\n\n"
+        f"User's spoken reconstruction ({body.duration_seconds}s, replay {'used' if body.replay_used else 'not used'}):\n"
+        f"\"{body.user_reconstruction}\"\n\n"
+        "Evaluate the user's reconstruction of the passage. Return JSON with:\n"
+        "- content_coverage_score (1-10): how much of the original content was captured?\n"
+        "- grammar_score (1-10): grammatical accuracy of the reconstruction\n"
+        "- vocabulary_score (1-10): range and richness of vocabulary used\n"
+        "- reconstruction_quality_score (1-10): overall quality of the reconstruction "
+        "(paraphrasing is fine as long as meaning is preserved)\n"
+        "- overall_score (1-10): overall performance\n"
+        "- feedback (string): encouraging feedback about the reconstruction (2-3 sentences)\n"
+        "- model_reconstruction (string): a well-crafted example reconstruction of the passage"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English listening and writing coach specializing in dictogloss exercises. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="dictogloss_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Dictogloss evaluation failed")
+
+    return {
+        "content_coverage_score": clamp_score(result.get("content_coverage_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "reconstruction_quality_score": clamp_score(result.get("reconstruction_quality_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_reconstruction": str(result.get("model_reconstruction", "")),
+    }

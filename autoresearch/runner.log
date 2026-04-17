@@ -5197,4 +5197,203 @@ Good, proposer returned a feature proposal. Now calling the coder.
   │ date +%s
   └ 2 lines...
 
-Now let me see the end of the pronunciation.py file and the api.ts types for these features:Now let me check the end of the api.ts file and the e2e spec:Now I have a thorough understanding of the patterns. Let me implement all the changes:Good, now I have all the context. Let me implement all the changes:Now add the API types and functions to api.ts:Now create the QuickPredictNextCard component:Now register it in QuickPracticeHub.tsx:Now create the integration test:Now update the UI test spec:Now let me commit:
+Now let me see the end of the pronunciation.py file and the api.ts types for these features:Now let me check the end of the api.ts file and the e2e spec:Now I have a thorough understanding of the patterns. Let me implement all the changes:Good, now I have all the context. Let me implement all the changes:Now add the API types and functions to api.ts:Now create the QuickPredictNextCard component:Now register it in QuickPracticeHub.tsx:Now create the integration test:Now update the UI test spec:Now let me commit:```json
+{
+  "committed": true,
+  "commit_hash": "0ea0ec4",
+  "files_changed": [
+    "app/routers/pronunciation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickPredictNextCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/integration/test_pronunciation_predict_next.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 9,
+  "ui_spec_updated": true,
+  "description": "Added QuickPredictNextCard with GET /predict-next and POST /predict-next/evaluate endpoints, frontend component with idle→listening→recording→evaluating→done phases, registered in listening tab, with 9 integration tests and 6 UI spec entries"
+}
+```● Coder Implement iter 561 feature
+  │ Commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git commit -m "Add
+  │   │ Quick Predict-What-Happens-Next listening-speaking card for predictive
+  │   │ comprehension
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 17 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+Coder committed. Now calling tester.
+
+● Get changed files and hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git diff HEAD~1 --name-only && echo "HASH=$(git rev-parse --short HEAD)"
+  └ 12 lines...
+
+I'll run all the test checks now. Let me start the independent checks in parallel.Tests and TS check passed. Now let me run the smoke test — it's required because `app/routers/pronunciation.py` was changed.The smoke test file collected 0 items. Let me check the smoke test file to understand its structure.All checks complete. Here are the results:
+
+```json
+{
+  "tests_passed": 1766,
+  "tests_total": 1766,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "tests/integration/test_vocabulary_api.py::test_usage_analysis_empty PASSED [100%]\n\n======================= 1766 passed in 78.91s (0:01:18) ========================",
+  "failure_summary": ""
+}
+```
+
+### Summary — Iteration 561 ✅ ALL PASS
+
+| Check | Result |
+|---|---|
+| **Unit + Integration** | ✅ **1766/1766** passed (78.91s) |
+| **TypeScript** | ✅ pass (`tsc --noEmit` clean) |
+| **Smoke API** | ✅ pass (21/21 endpoints returned 200) |
+| **E2E UI** | ⏭️ not_run (no `ui-test-results.json` found) |
+
+**`overall_pass: true`** — All checks passed. Commit `0ea0ec4` is green.● Tester Test iteration 561
+  │ Check smoke test file (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && ls tests/smoke_test.py
+  │   │ 2>&1 && head -30 tests/smoke_test.py 2>&1
+  │   └ 32 lines...
+  └ Run smoke test as script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run python
+      │ tests/smoke_test.py 2>&1
+      └ 23 lines...
+
+All tests pass. Now calling evaluator.
+
+● Get T3 and diff stats (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T3=$(date +%s)"
+  │ && git diff HEAD~1 --stat
+  └ 12 lines...
+
+Let me find the new endpoints in the pronunciation router:Now let me find the actual predict-next endpoints in this large file:Let me search for the predict-next endpoints specifically:Let me find the predict-next endpoint now - let me check the file size and search toward the end:Now let me find the predict-next API types and functions in api.ts:Now let me check the QuickPracticeHub registration:Now let me check the e2e test specs for the predict-next:Let me search for the predict-next tests in the yaml file:Let me find the predict-next test specs specifically. Let me search the home page tests:Let me search for "predict" in the yaml:Let me search for home-024 or predict-next in the yaml:Now let me check whether the database.py schema was modified:Good - no database schema changes needed for this feature since it's stateless (no data is persisted). The endpoints just use the LLM service.
+
+Now I have a comprehensive understanding of the changes. Let me also check the QA test results (there was no `qa_passed` provided explicitly, so let me check the proposal info again).I now have a comprehensive view of all the changes. Let me evaluate.
+
+## Evaluation Summary
+
+### Code Quality (7/10)
+**Backend** (`pronunciation.py`):
+- Clean Pydantic models with proper `Field` validation (`min_length`, `max_length`, `ge`, `le`)
+- Follows exact same pattern as dozens of existing quick practice endpoints (consistency)
+- Uses project utilities correctly: `safe_llm_call`, `clamp_score`, `require_rate_limit`
+- Proper fallback values for unreliable LLM responses (e.g., `result.get("setup_text", "Sarah looked at...")`)
+- Difficulty validation via regex pattern `^(beginner|intermediate|advanced)$`
+- Correct error handling: `HTTPException(502)` on LLM failure
+
+**Frontend** (`QuickPredictNextCard.tsx`):
+- Clean phase state machine: `idle → listening → recording → evaluating → done`
+- Proper cleanup of timers (`useEffect` return + `stopTimer`)
+- Uses existing hooks (`useSpeechRecognition`, `useSpeechSynthesis`)
+- Responsive to difficulty changes via `StorageEvent` listener (project convention)
+- Minor issue: bare `catch` blocks silently swallow errors — but this is consistent with other cards in the project
+
+**No database changes needed** — endpoints are stateless (LLM-only), which is correct.
+
+### Feature Value (7/10)
+- Predictive comprehension is a legitimate listening/speaking skill in language pedagogy
+- Combines listening (TTS for story setup) and speaking (prediction) in a single exercise
+- Multi-dimensional AI scoring: plausibility, grammar, vocabulary, fluency — provides targeted feedback
+- "Show actual continuation" after evaluation adds real learning value
+- Show/hide setup text during recording is a nice scaffolding option
+- Well-placed in the Listening tab of Quick Practice Hub
+
+### Maintainability (8/10)
+- **9 integration tests** covering success paths, difficulty levels, input validation (422), score clamping (out-of-range and non-numeric), empty LLM response fallbacks, and actual_continuation passthrough
+- **6 UI test specs** added with proper structure (presence, functional, medium/high priority)
+- Follows the exact established pattern of all other Quick Practice cards — minimal cognitive overhead for future developers
+- No new dependencies, no new DB tables/columns, no migrations needed
+- Clean TypeScript types matching the API contract
+
+### UX Quality (3/10)
+Frontend `.tsx` files were changed but no QA tester report was provided (no `qa_passed`, `qa_issues`, `qa_ux_score`, or `qa_overall_impression`). Per evaluation rules: if frontend files changed but spec tests weren't run by a QA tester, ux_quality ≤ 3.
+
+### Score Calculation
+```
+total = (7 × 0.25) + (7 × 0.25) + (8 × 0.3) + (3 × 0.2)
+      = 1.75 + 1.75 + 2.4 + 0.6
+      = 6.50
+```
+
+All 1766 tests pass, TypeScript check passes, smoke test passes, and QA was not run (acceptable per verdict rules).
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 3,
+  "total_score": 6.5,
+  "verdict": "keep",
+  "reason": "Well-structured predict-what-happens-next card following established patterns with 9 integration tests and proper validation, though UX is unverified since no QA tester ran against the new frontend component"
+}
+```● Evaluator Evaluate iteration 561
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L1950:2100 (151 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:30 (30 lines read)
+
+Evaluator returned score 6.50, verdict "keep". All 4 subagents called ✅. Let me record the results.
+
+● Record iteration 561 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ echo "T4=$T4" && \
+  │ T0=1776442742 && T1=1776443105 && T2=1776443335 && T3=1776443466 && \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "561" "0ea0ec4" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" …
+  └ 8 lines...
+
+Iteration 561 recorded. Now starting iteration 562.
+
+● Record T0 for iteration 562 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T0=$(date +%s)"
+  └ 2 lines...
+
+Now I have a thorough understanding of the codebase and all existing features. Let me look at one more thing to finalize my proposal:Based on my thorough analysis of the entire codebase, I can see:
+
+- **Speaking tab**: 15 card types (speak, shadow, opinion, story, follow-up, idiom, question, explain, role-play, tongue twister, rapid fire, sentence stress, register switch, debate, scene description)
+- **Listening tab**: 7 card types (dictation, listen-respond, listen-paraphrase, minimal pairs, listening comp, spot-error, predict-next)
+- **Dictation**: word-for-word transcription of single sentences (typing)
+- **Shadow**: repeat single sentences immediately
+- **ListenAndSummarize**: summarize a passage (Listening page post-quiz only)
+- **Echo Practice**: sentence-by-sentence repetition (Listening page post-quiz only)
+
+The clear gap: **No dictogloss-style exercise** — a proven SLA technique where learners listen to a multi-sentence passage at normal speed, then reconstruct the content from memory by speaking. This is fundamentally different from dictation (word-for-word typing), shadowing (immediate repetition), and summarization (condensing). Dictogloss forces deep meaning processing and grammatically accurate production from memory.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Quick Dictogloss Card for listen-then-reconstruct speaking drill",
+  "description": "Add a 'Dictogloss' card to the Listening tab in QuickPracticeHub. This proven SLA technique works as follows: (1) LLM generates a 3-4 sentence passage on a topic at the selected difficulty. (2) The passage plays via TTS at normal speed — the user listens carefully but CANNOT see the text. (3) After playback, the user reconstructs the passage from memory by speaking (using speech recognition). They can optionally replay ONCE. (4) The LLM evaluates content coverage, grammar accuracy, vocabulary richness, and paraphrasing quality, returning scores and a model reconstruction. This is distinct from dictation (word-for-word typing), shadowing (immediate repetition), and summarization (condensing). Backend: Add GET /api/pronunciation/dictogloss?difficulty= endpoint to generate a passage with title/text/topic, and POST /api/pronunciation/dictogloss/evaluate endpoint accepting {passage, user_reconstruction, replay_used} returning {content_coverage_score, grammar_score, vocabulary_score, reconstruction_quality_score, overall_score, feedback, model_reconstruction}. Frontend: Create QuickDictoglossCard.tsx with phases idle→listening→reconstructing→evaluating→done. Add it to the listening tab in QuickPracticeHub. Add API types/functions in api.ts.",
+  "files_to_modify": ["app/routers/pronunciation.py", "frontend/src/api.ts", "frontend/src/components/QuickPracticeHub.tsx"],
+  "files_to_create": ["frontend/src/components/QuickDictoglossCard.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose feature iter 562
+  │ Read QuickShadowCard.tsx
+  │   │ frontend/src/components/QuickShadowCard.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read QuickDictationCard.tsx
+      │ frontend/src/components/QuickDictationCard.tsx
+      └ L1:60 (60 lines read)
+
+Good proposal. Calling the coder.
+
+● Record T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Let me read more files to understand the existing patterns:Now let me view the rest of the QuickListenRespondCard and the QuickPredictNextCard to see the full pattern:Now let me look at an existing integration test to understand the pattern:Now let me check the end of the ui-test-spec.yaml file and also look at where the QuickPracticeHub has components listed:Now I have a thorough understanding of all the patterns. Let me implement everything:Now let me implement all the changes. Let me start with the backend and frontend:Now add the API functions to `api.ts`:Now create the `QuickDictoglossCard.tsx` component:Now update `QuickPracticeHub.tsx` to import and register the card:Now create the integration tests:Now update the UI test spec:Now let me commit:

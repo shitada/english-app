@@ -2300,3 +2300,70 @@ pages:
         type: functional
         priority: high
         added_in: 558
+
+  quick_practice_dictogloss:
+    path: /
+    tests:
+      - id: qp-dictogloss-001
+        target: Quick Dictogloss card renders in Listening tab
+        action: Click Listening tab in Quick Practice Hub, scroll to Dictogloss card
+        expect: Card with "Quick Dictogloss" heading and headphone icon is visible
+        type: functional
+        priority: high
+        added_in: 562
+
+      - id: qp-dictogloss-002
+        target: Quick Dictogloss Listen & Reconstruct button starts TTS playback
+        action: Click "Listen & Reconstruct" button on the Dictogloss card
+        expect: Phase transitions to listening with pulse animation and "Listening to passage…" text
+        type: functional
+        priority: high
+        added_in: 562
+
+      - id: qp-dictogloss-003
+        target: Quick Dictogloss transitions to reconstructing phase after TTS ends
+        action: Wait for TTS playback to complete
+        expect: Phase transitions to reconstructing with microphone icon, countdown timer, and "Done" button
+        type: functional
+        priority: high
+        added_in: 562
+
+      - id: qp-dictogloss-004
+        target: Quick Dictogloss replay button allows one replay
+        action: During reconstructing phase, click "Replay Once" button
+        expect: Button disappears and "✓ Replay used" text appears; passage plays again via TTS
+        type: functional
+        priority: medium
+        added_in: 562
+
+      - id: qp-dictogloss-005
+        target: Quick Dictogloss Done button triggers evaluation
+        action: Speak a reconstruction and click "Done" button
+        expect: Phase transitions to evaluating then done with scores (Overall, Coverage, Grammar, Vocabulary, Quality)
+        type: functional
+        priority: high
+        added_in: 562
+
+      - id: qp-dictogloss-006
+        target: Quick Dictogloss results show original passage and model reconstruction
+        action: Complete a dictogloss exercise
+        expect: Results show model reconstruction and original passage in styled boxes
+        type: functional
+        priority: medium
+        added_in: 562
+
+      - id: qp-dictogloss-007
+        target: Quick Dictogloss New Passage button fetches a new passage
+        action: Click "New Passage" button in results view
+        expect: Card resets to idle phase with a new passage loaded
+        type: functional
+        priority: medium
+        added_in: 562
+
+      - id: qp-dictogloss-008
+        target: Quick Dictogloss Try Again button resets current passage
+        action: Click "Try Again" button in results view
+        expect: Card resets to idle phase with same passage
+        type: functional
+        priority: medium
+        added_in: 562

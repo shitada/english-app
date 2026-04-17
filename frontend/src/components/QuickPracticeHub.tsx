@@ -32,6 +32,7 @@ import QuickRegisterSwitchCard from './QuickRegisterSwitchCard';
 import QuickDebateCard from './QuickDebateCard';
 import QuickSceneDescriptionCard from './QuickSceneDescriptionCard';
 import QuickPredictNextCard from './QuickPredictNextCard';
+import QuickDictoglossCard from './QuickDictoglossCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -193,6 +194,7 @@ export default function QuickPracticeHub() {
             <QuickListeningCompCard />
             <QuickSpotErrorCard />
             <QuickPredictNextCard />
+            <QuickDictoglossCard />
           </>
         )}
         {activeTab === 'grammar' && (
