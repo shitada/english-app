@@ -1620,3 +1620,43 @@ pages:
         type: functional
         priority: medium
         added_in: 531
+
+      - id: quick-practice-hub-064
+        target: QuickPhrasalVerbCard renders in Grammar tab with phrasal verb prompt
+        action: Navigate to Quick Practice Hub, select Grammar tab, scroll to QuickPhrasalVerbCard
+        expect: Card shows ArrowRightLeft icon, "Quick Phrasal Verb" title, phrasal verb in quotes, meaning, example sentence with listen button, situation prompt, and "Use the Phrasal Verb (30s)" start button
+        type: functional
+        priority: high
+        added_in: 532
+
+      - id: quick-practice-hub-065
+        target: QuickPhrasalVerbCard recording phase with timer and transcript
+        action: Click "Use the Phrasal Verb" button on QuickPhrasalVerbCard
+        expect: Recording phase shows pulsing mic icon with purple background, countdown timer starting at 30s, situation prompt, live transcript, and "Done" stop button
+        type: functional
+        priority: high
+        added_in: 532
+
+      - id: quick-practice-hub-066
+        target: QuickPhrasalVerbCard evaluation results with scores and model sentence
+        action: Complete a speaking attempt in QuickPhrasalVerbCard and view results
+        expect: Shows Phrasal Verb/Grammar/Natural/Overall score columns, feedback text, model sentence with purple left border, "Try Again" and "New Phrasal Verb" buttons
+        type: functional
+        priority: high
+        added_in: 532
+
+      - id: quick-practice-hub-067
+        target: QuickPhrasalVerbCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickPhrasalVerbCard is visible
+        expect: QuickPhrasalVerbCard resets to idle phase and re-fetches prompt with new difficulty
+        type: functional
+        priority: medium
+        added_in: 532
+
+      - id: quick-practice-hub-068
+        target: QuickPhrasalVerbCard play example button speaks example sentence
+        action: Click the Volume2 listen button next to the example sentence in QuickPhrasalVerbCard
+        expect: Browser TTS reads the example sentence aloud in English
+        type: functional
+        priority: medium
+        added_in: 532

@@ -4040,3 +4040,112 @@ async def evaluate_spot_error(
         "feedback": str(result.get("feedback", "")),
         "model_correction": str(result.get("model_correction", req.correct_sentence)),
     }
+
+
+# ── Quick Phrasal Verb Practice ────────────────────────────────────
+
+
+class PhrasalVerbPromptResponse(BaseModel):
+    phrasal_verb: str
+    meaning: str
+    example_sentence: str
+    situation_prompt: str
+    difficulty: str
+
+
+@router.get("/phrasal-verb", response_model=PhrasalVerbPromptResponse)
+async def get_phrasal_verb_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a phrasal verb exercise for speaking practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a common English phrasal verb for a {difficulty}-level English learner.\n"
+        "Return JSON with:\n"
+        "- phrasal_verb (string): the phrasal verb (e.g. 'put off', 'look into')\n"
+        "- meaning (string): a clear explanation of the phrasal verb (1 sentence)\n"
+        "- example_sentence (string): a natural example sentence using the phrasal verb\n"
+        "- situation_prompt (string): a short situational prompt asking the learner "
+        "to use the phrasal verb in their own spoken sentence (1-2 sentences)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in phrasal verbs. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="phrasal_verb_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Phrasal verb prompt generation failed")
+
+    return {
+        "phrasal_verb": str(result.get("phrasal_verb", "put off")),
+        "meaning": str(result.get("meaning", "To postpone or delay something.")),
+        "example_sentence": str(result.get("example_sentence", "I decided to put off the meeting until next week.")),
+        "situation_prompt": str(result.get("situation_prompt", "Describe a time when you had to delay doing something important.")),
+        "difficulty": difficulty,
+    }
+
+
+class PhrasalVerbEvaluateRequest(BaseModel):
+    phrasal_verb: str = Field(min_length=1, max_length=200)
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class PhrasalVerbEvaluateResponse(BaseModel):
+    phrasal_verb_accuracy_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    model_sentence: str
+
+
+@router.post("/phrasal-verb/evaluate", response_model=PhrasalVerbEvaluateResponse)
+async def evaluate_phrasal_verb_usage(
+    body: PhrasalVerbEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate whether the user correctly used the phrasal verb in a spoken sentence."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Phrasal verb: \"{body.phrasal_verb}\"\n"
+        f"User's spoken sentence ({body.duration_seconds}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate how well the user used this phrasal verb. Return JSON with:\n"
+        "- phrasal_verb_accuracy_score (1-10): did they use the phrasal verb correctly and in proper context?\n"
+        "- grammar_score (1-10): grammatical accuracy of the sentence\n"
+        "- naturalness_score (1-10): does the sentence sound natural and fluent?\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback (2-3 sentences)\n"
+        "- model_sentence (string): a well-crafted example sentence using the phrasal verb correctly"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in phrasal verbs. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="phrasal_verb_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Phrasal verb evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "phrasal_verb_accuracy_score": clamp(result.get("phrasal_verb_accuracy_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_sentence": str(result.get("model_sentence", "")),
+    }

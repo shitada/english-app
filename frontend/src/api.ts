@@ -2464,3 +2464,34 @@ export function evaluateSpotError(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Phrasal Verb Practice ────────────────────────────────────
+
+export interface PhrasalVerbPromptResponse {
+  phrasal_verb: string;
+  meaning: string;
+  example_sentence: string;
+  situation_prompt: string;
+  difficulty: string;
+}
+
+export interface PhrasalVerbEvaluateResponse {
+  phrasal_verb_accuracy_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_sentence: string;
+}
+
+export function getPhrasalVerbPrompt(difficulty: string = 'intermediate'): Promise<PhrasalVerbPromptResponse> {
+  return request<PhrasalVerbPromptResponse>(`/api/pronunciation/phrasal-verb?difficulty=${difficulty}`);
+}
+
+export function evaluatePhrasalVerbUsage(phrasal_verb: string, transcript: string, duration_seconds: number): Promise<PhrasalVerbEvaluateResponse> {
+  return request<PhrasalVerbEvaluateResponse>('/api/pronunciation/phrasal-verb/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phrasal_verb, transcript, duration_seconds }),
+  });
+}
