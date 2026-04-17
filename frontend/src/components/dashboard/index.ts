@@ -18,4 +18,5 @@ export { VocabularyProgress } from './VocabularyProgress';
 export { TopicCoverageMap } from './TopicCoverageMap';
 export { WeeklyReport } from './WeeklyReport';
 export { FluencyProgressionChart } from './FluencyProgressionChart';
+export { SelfAssessmentTrendChart } from './SelfAssessmentTrendChart';
 export { SpeakingJournalProgress } from './SpeakingJournalProgress';

@@ -1897,3 +1897,62 @@ class TestStudyPlanAPI:
         data = resp.json()
         expected_total = sum(s["estimated_minutes"] for s in data["steps"])
         assert data["total_minutes"] == expected_total
+
+
+@pytest.mark.integration
+class TestSelfAssessmentTrend:
+    """Integration tests for GET /api/dashboard/self-assessment-trend."""
+
+    async def test_empty_database_returns_no_entries(self, client: AsyncClient):
+        """An empty DB should return no entries and insufficient_data trend."""
+        resp = await client.get("/api/dashboard/self-assessment-trend")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["entries"] == []
+        assert data["trend"] == "insufficient_data"
+
+    async def test_returns_entries_after_assessment(self, client: AsyncClient):
+        """After saving a self-assessment, the trend endpoint returns it."""
+        # Start and end a conversation to get a conversation_id
+        resp = await client.post(
+            "/api/conversation/start",
+            json={"topic": "hotel_checkin", "difficulty": "beginner"},
+        )
+        assert resp.status_code == 200
+        conv_id = resp.json()["conversation_id"]
+
+        # Save a self-assessment
+        resp = await client.post(
+            f"/api/conversation/{conv_id}/self-assessment",
+            json={"confidence_rating": 4, "fluency_rating": 3, "comprehension_rating": 5},
+        )
+        assert resp.status_code == 200
+
+        # Fetch trend
+        resp = await client.get("/api/dashboard/self-assessment-trend")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["entries"]) >= 1
+        entry = data["entries"][0]
+        assert entry["confidence_rating"] == 4
+        assert entry["fluency_rating"] == 3
+        assert entry["comprehension_rating"] == 5
+        assert "rolling_confidence" in entry
+        assert "rolling_fluency" in entry
+        assert "rolling_comprehension" in entry
+        assert "overall_rating" in entry
+
+    async def test_limit_parameter(self, client: AsyncClient):
+        """The limit query parameter restricts result count."""
+        resp = await client.get("/api/dashboard/self-assessment-trend?limit=5")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data["entries"], list)
+        assert len(data["entries"]) <= 5
+
+    async def test_trend_field_is_valid_value(self, client: AsyncClient):
+        """The trend field should be one of the expected values."""
+        resp = await client.get("/api/dashboard/self-assessment-trend")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["trend"] in ("improving", "declining", "stable", "insufficient_data")

@@ -1181,6 +1181,30 @@ pages:
         priority: medium
         added_in: 538
 
+      - id: dash-024
+        target: Self-Assessment Trend Chart renders with data
+        action: Navigate to /dashboard, scroll to Self-Assessment Trend section
+        expect: Card shows trend emoji/label header, CSS line chart with blue/green/purple lines, and latest ratings grid below
+        type: visual
+        priority: medium
+        added_in: 549
+
+      - id: dash-025
+        target: Self-Assessment Trend Chart empty state
+        action: Navigate to /dashboard with no self-assessments completed
+        expect: Card shows "Self-Assessment Trend" heading with message to complete self-assessments
+        type: state
+        priority: medium
+        added_in: 549
+
+      - id: dash-026
+        target: Self-Assessment Trend Chart hover tooltip
+        action: Hover over a data point on the self-assessment trend chart
+        expect: Tooltip shows date and rolling averages for confidence, fluency, and comprehension
+        type: functional
+        priority: low
+        added_in: 549
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

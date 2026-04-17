@@ -313,6 +313,9 @@ export const api = {
   getDashboardFluencyProgression: (limit = 30) =>
     request<FluencyProgressionResponse>(`/api/dashboard/fluency-progression?limit=${limit}`),
 
+  getDashboardSelfAssessmentTrend: (limit = 20) =>
+    request<SelfAssessmentTrendResponse>(`/api/dashboard/self-assessment-trend?limit=${limit}`),
+
   // Pronunciation weak spots
   getPronunciationWeaknesses: (limit = 10) =>
     request<PronunciationWeaknessesResponse>(`/api/pronunciation/weaknesses?limit=${limit}`),
@@ -947,6 +950,32 @@ export interface ConfidenceTrendResponse {
 
 export async function getConfidenceTrend(limit = 20): Promise<ConfidenceTrendResponse> {
   return request<ConfidenceTrendResponse>(`/api/dashboard/confidence-trend?limit=${limit}`);
+}
+
+// Self-Assessment Trend (from iteration 549)
+export interface SelfAssessmentTrendEntry {
+  id: number;
+  conversation_id: number;
+  topic: string;
+  difficulty: string;
+  confidence_rating: number;
+  fluency_rating: number;
+  comprehension_rating: number;
+  overall_rating: number;
+  rolling_confidence: number;
+  rolling_fluency: number;
+  rolling_comprehension: number;
+  rolling_overall: number;
+  created_at: string;
+}
+
+export interface SelfAssessmentTrendResponse {
+  entries: SelfAssessmentTrendEntry[];
+  trend: string;
+}
+
+export async function getSelfAssessmentTrend(limit = 20): Promise<SelfAssessmentTrendResponse> {
+  return request<SelfAssessmentTrendResponse>(`/api/dashboard/self-assessment-trend?limit=${limit}`);
 }
 
 // Daily Challenge (from iteration 312)
