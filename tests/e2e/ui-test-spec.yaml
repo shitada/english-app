@@ -1460,3 +1460,59 @@ pages:
         type: functional
         priority: medium
         added_in: 526
+
+      - id: quick-practice-hub-047
+        target: QuickListenParaphraseCard visible under Listening tab
+        action: Switch to Listening tab in Quick Practice Hub
+        expect: QuickListenParaphraseCard is visible with "Quick Listen & Paraphrase" heading, topic hint, and "Listen & Paraphrase" button
+        type: presence
+        priority: high
+        added_in: 528
+
+      - id: quick-practice-hub-048
+        target: QuickListenParaphraseCard listen button starts TTS playback
+        action: Click "Listen & Paraphrase" button
+        expect: Phase transitions to listening, pulsing headphones icon shown, "Listening to sentence…" text visible, sentence text hidden
+        type: functional
+        priority: high
+        added_in: 528
+
+      - id: quick-practice-hub-049
+        target: QuickListenParaphraseCard recording phase after TTS finishes
+        action: Wait for TTS to finish speaking
+        expect: Phase transitions to recording, mic icon with countdown timer visible, "Now say it in your own words!" text, Done and Show Sentence buttons
+        type: functional
+        priority: high
+        added_in: 528
+
+      - id: quick-practice-hub-050
+        target: QuickListenParaphraseCard show/hide sentence during recording
+        action: Click "Show Sentence" button during recording phase
+        expect: Original sentence displayed in a highlight box; clicking "Hide Sentence" hides it again
+        type: functional
+        priority: medium
+        added_in: 528
+
+      - id: quick-practice-hub-051
+        target: QuickListenParaphraseCard done shows evaluation scores
+        action: Click "Done" button after speaking a paraphrase
+        expect: Evaluating message shown, then scores (Overall, Meaning, Grammar, Vocabulary) displayed with feedback, original sentence, model paraphrase, Try Again and New Sentence buttons
+        type: functional
+        priority: high
+        added_in: 528
+
+      - id: quick-practice-hub-052
+        target: QuickListenParaphraseCard New Sentence fetches new prompt
+        action: Click "New Sentence" button on results view
+        expect: Card resets to idle phase with a new sentence and topic hint
+        type: functional
+        priority: medium
+        added_in: 528
+
+      - id: quick-practice-hub-053
+        target: QuickListenParaphraseCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickListenParaphraseCard is visible
+        expect: QuickListenParaphraseCard resets and re-fetches with new difficulty
+        type: functional
+        priority: medium
+        added_in: 528

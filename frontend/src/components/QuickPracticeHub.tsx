@@ -22,6 +22,7 @@ import QuickWordAssociationCard from './QuickWordAssociationCard';
 import QuickReadingCard from './QuickReadingCard';
 import QuickTongueTwisterCard from './QuickTongueTwisterCard';
 import QuickCollocationCard from './QuickCollocationCard';
+import QuickListenParaphraseCard from './QuickListenParaphraseCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -173,6 +174,7 @@ export default function QuickPracticeHub() {
           <>
             <QuickDictationCard />
             <QuickListenRespondCard />
+            <QuickListenParaphraseCard />
             <QuickMinimalPairsCard />
             <QuickListeningCompCard />
           </>

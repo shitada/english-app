@@ -2021,7 +2021,7 @@ async def get_vocabulary_forecast(
         days_overdue = (now - next_dt).days
         if days_overdue > 0:
             overdue_count += 1
-        overdue_ratio = max(days_overdue, 0) / expected_interval
+        overdue_ratio = min(max(days_overdue, 0) / expected_interval, 1.0)
 
         # Error rate from quiz attempts
         quiz_data = quiz_map.get(word_id)

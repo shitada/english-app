@@ -3542,3 +3542,107 @@ async def evaluate_collocation(
         "explanation": str(result.get("explanation", "")),
         "example_sentence": str(result.get("example_sentence", "")),
     }
+
+
+# --- Quick Listen & Paraphrase ---
+
+class ListenParaphrasePromptResponse(BaseModel):
+    sentence: str
+    difficulty: str
+    topic_hint: str
+
+
+@router.get("/listen-paraphrase", response_model=ListenParaphrasePromptResponse)
+async def get_listen_paraphrase_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence for the listen-then-paraphrase exercise."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a single English sentence for a {difficulty}-level learner.\n"
+        "The sentence should be interesting and have enough content to paraphrase "
+        "(not too short, not too long).\n"
+        "Return JSON with:\n"
+        "- sentence (string): a natural English sentence (8-20 words)\n"
+        "- topic_hint (string): the topic area (e.g. 'daily life', 'travel', 'technology')\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English language coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="listen_paraphrase_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prompt generation failed")
+
+    return {
+        "sentence": str(result.get("sentence", "Learning a new language opens many doors.")),
+        "difficulty": difficulty,
+        "topic_hint": str(result.get("topic_hint", "language learning")),
+    }
+
+
+class ListenParaphraseEvaluateRequest(BaseModel):
+    original_sentence: str = Field(min_length=1, max_length=500)
+    user_paraphrase: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class ListenParaphraseEvaluateResponse(BaseModel):
+    meaning_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_paraphrase: str
+
+
+@router.post("/listen-paraphrase/evaluate", response_model=ListenParaphraseEvaluateResponse)
+async def evaluate_listen_paraphrase(
+    body: ListenParaphraseEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a listen-and-paraphrase attempt."""
+    word_count = len(body.user_paraphrase.split())
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original sentence (played via audio, user could not see it): \"{body.original_sentence}\"\n"
+        f"User's spoken paraphrase ({body.duration_seconds}s, {word_count} words):\n"
+        f"\"{body.user_paraphrase}\"\n\n"
+        "Evaluate whether the user successfully paraphrased the original sentence.\n"
+        "Return JSON with:\n"
+        "- meaning_score (1-10): how well the meaning is preserved\n"
+        "- grammar_score (1-10): grammatical accuracy of the paraphrase\n"
+        "- vocabulary_score (1-10): variety and appropriateness of vocabulary\n"
+        "- overall_score (1-10): overall paraphrase quality\n"
+        "- feedback (string): encouraging feedback with specific tips (2-3 sentences)\n"
+        "- model_paraphrase (string): an example good paraphrase of the original sentence"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking and paraphrasing coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="listen_paraphrase_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "meaning_score": clamp(result.get("meaning_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_paraphrase": str(result.get("model_paraphrase", "")),
+    }

@@ -226,6 +226,15 @@ export const api = {
       body: JSON.stringify({ question, transcript, duration_seconds }),
     }),
 
+  getListenParaphrasePrompt: (difficulty: string = 'intermediate') =>
+    request<ListenParaphrasePromptResponse>(`/api/pronunciation/listen-paraphrase?difficulty=${difficulty}`),
+
+  evaluateListenParaphrase: (original_sentence: string, user_paraphrase: string, duration_seconds: number) =>
+    request<ListenParaphraseEvaluateResponse>('/api/pronunciation/listen-paraphrase/evaluate', {
+      method: 'POST',
+      body: JSON.stringify({ original_sentence, user_paraphrase, duration_seconds }),
+    }),
+
   // Vocabulary
   getVocabularyTopics: () =>
     request<{ id: string; label: string; description: string }[]>('/api/vocabulary/topics'),
@@ -1701,6 +1710,21 @@ export interface ListenRespondEvaluateResponse {
   overall_score: number;
   feedback: string;
   model_answer: string;
+}
+
+export interface ListenParaphrasePromptResponse {
+  sentence: string;
+  difficulty: string;
+  topic_hint: string;
+}
+
+export interface ListenParaphraseEvaluateResponse {
+  meaning_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  overall_score: number;
+  feedback: string;
+  model_paraphrase: string;
 }
 
 export interface QuickRephrasePromptResponse {

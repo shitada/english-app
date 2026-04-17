@@ -1955,3 +1955,138 @@ async def test_speaking_journal_accepts_valid_entry(client):
     assert data["word_count"] == 8
     assert data["transcript"] == "Last weekend I went hiking in the mountains."
     assert data["prompt"] == "What did you do last weekend?"
+
+
+# ---------------------------------------------------------------------------
+# Listen & Paraphrase
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_prompt_success(client, mock_copilot):
+    """GET /listen-paraphrase returns a sentence with topic hint."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "sentence": "The weather has been unusually warm this winter.",
+        "topic_hint": "weather",
+    })
+    res = await client.get("/api/pronunciation/listen-paraphrase?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert "sentence" in data
+    assert data["sentence"] == "The weather has been unusually warm this winter."
+    assert data["difficulty"] == "intermediate"
+    assert data["topic_hint"] == "weather"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_prompt_beginner(client, mock_copilot):
+    """GET /listen-paraphrase works with beginner difficulty."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "sentence": "I like to read books.",
+        "topic_hint": "hobbies",
+    })
+    res = await client.get("/api/pronunciation/listen-paraphrase?difficulty=beginner")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["difficulty"] == "beginner"
+    assert data["topic_hint"] == "hobbies"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_prompt_invalid_difficulty(client):
+    """Invalid difficulty is rejected with 422."""
+    res = await client.get("/api/pronunciation/listen-paraphrase?difficulty=invalid")
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_prompt_defaults_to_intermediate(client, mock_copilot):
+    """No difficulty parameter defaults to intermediate."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "sentence": "A sentence about something.",
+        "topic_hint": "general",
+    })
+    res = await client.get("/api/pronunciation/listen-paraphrase")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["difficulty"] == "intermediate"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_evaluate_success(client, mock_copilot):
+    """POST /listen-paraphrase/evaluate returns scores and model paraphrase."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "meaning_score": 8,
+        "grammar_score": 7,
+        "vocabulary_score": 9,
+        "overall_score": 8,
+        "feedback": "Good job! You captured the main meaning well.",
+        "model_paraphrase": "This winter, the temperatures have been higher than normal.",
+    })
+    res = await client.post("/api/pronunciation/listen-paraphrase/evaluate", json={
+        "original_sentence": "The weather has been unusually warm this winter.",
+        "user_paraphrase": "This winter the temperature is much warmer than usual.",
+        "duration_seconds": 10,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["meaning_score"] == 8
+    assert data["grammar_score"] == 7
+    assert data["vocabulary_score"] == 9
+    assert data["overall_score"] == 8
+    assert "feedback" in data
+    assert "model_paraphrase" in data
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_evaluate_score_clamping(client, mock_copilot):
+    """Scores are clamped to 1-10 range."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "meaning_score": 15,
+        "grammar_score": -2,
+        "vocabulary_score": "abc",
+        "overall_score": 0,
+        "feedback": "Some feedback.",
+        "model_paraphrase": "A paraphrase.",
+    })
+    res = await client.post("/api/pronunciation/listen-paraphrase/evaluate", json={
+        "original_sentence": "The cat sat on the mat.",
+        "user_paraphrase": "A cat was sitting on a mat.",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["meaning_score"] == 10  # clamped from 15
+    assert data["grammar_score"] == 1   # clamped from -2
+    assert data["vocabulary_score"] == 5.0  # fallback for non-numeric
+    assert data["overall_score"] == 1   # clamped from 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_evaluate_empty_paraphrase(client):
+    """Empty paraphrase is rejected with 422."""
+    res = await client.post("/api/pronunciation/listen-paraphrase/evaluate", json={
+        "original_sentence": "The cat sat on the mat.",
+        "user_paraphrase": "",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_listen_paraphrase_evaluate_empty_original(client):
+    """Empty original sentence is rejected with 422."""
+    res = await client.post("/api/pronunciation/listen-paraphrase/evaluate", json={
+        "original_sentence": "",
+        "user_paraphrase": "A cat was sitting on a mat.",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 422
