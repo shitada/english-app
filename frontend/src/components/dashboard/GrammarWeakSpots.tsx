@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api, type GrammarWeakSpotsResponse, type GrammarCategoryItem } from '../../api';
+import { GrammarPatternDrill } from './GrammarPatternDrill';
 
 function trendBadge(trend: string): string {
   switch (trend) {
@@ -31,6 +32,7 @@ function barColor(trend: string): string {
 export function GrammarWeakSpots() {
   const [data, setData] = useState<GrammarWeakSpotsResponse | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [drillCategory, setDrillCategory] = useState<string | null>(null);
 
   useEffect(() => {
     api.getDashboardGrammarWeakSpots().then(setData).catch(() => {});
@@ -77,8 +79,24 @@ export function GrammarWeakSpots() {
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
                 {trendBadge(cat.trend)} {cat.name}
               </span>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 {cat.total_count} errors · {trendLabel(cat.trend)}
+                <button
+                  onClick={() => setDrillCategory(drillCategory === cat.name ? null : cat.name)}
+                  style={{
+                    background: drillCategory === cat.name ? 'var(--accent, #6366f1)' : 'none',
+                    color: drillCategory === cat.name ? '#fff' : 'var(--accent, #6366f1)',
+                    border: '1px solid var(--accent, #6366f1)',
+                    borderRadius: 4,
+                    padding: '2px 8px',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {drillCategory === cat.name ? 'Close ✕' : 'Practice ▶'}
+                </button>
               </span>
             </div>
             <div style={{ width: '100%', height: 20, background: 'var(--bg-secondary)', borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
@@ -128,6 +146,14 @@ export function GrammarWeakSpots() {
               <span>Recent: {cat.recent_count}</span>
               <span>Older: {cat.older_count}</span>
             </div>
+
+            {/* Inline drill */}
+            {drillCategory === cat.name && (
+              <GrammarPatternDrill
+                category={cat.name}
+                onClose={() => setDrillCategory(null)}
+              />
+            )}
           </div>
         ))}
       </div>

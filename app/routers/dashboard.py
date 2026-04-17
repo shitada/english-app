@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Literal
 
 import aiosqlite
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics
+from app.copilot_client import get_copilot_service
 from app.dal import dashboard as dash_dal
 from app.database import get_db_session
 from app.utils import get_topic_label
@@ -848,3 +849,69 @@ async def get_study_plan(
     steps = await dash_dal.get_study_plan(db)
     total_minutes = sum(s["estimated_minutes"] for s in steps)
     return {"steps": steps, "total_minutes": total_minutes}
+
+
+# --- Grammar Pattern Drill ---
+
+
+class GrammarPatternDrillRequest(BaseModel):
+    category: str = Field(min_length=1, max_length=200)
+    difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
+
+
+class GrammarPatternExercise(BaseModel):
+    incorrect: str
+    correct: str
+    explanation: str
+
+
+class GrammarPatternDrillResponse(BaseModel):
+    category: str
+    difficulty: str
+    exercises: list[GrammarPatternExercise]
+
+
+@router.post("/grammar-pattern-drill", response_model=GrammarPatternDrillResponse)
+async def get_grammar_pattern_drill(req: GrammarPatternDrillRequest):
+    """Generate targeted grammar exercises for a specific error category using LLM."""
+    copilot = get_copilot_service()
+
+    system_prompt = (
+        "You are an English grammar teacher. Generate exactly 5 grammar correction exercises "
+        "targeting a specific grammar pattern. Each exercise must contain an incorrect sentence, "
+        "the corrected sentence, and a brief explanation of the error. "
+        "Return a JSON object with key 'exercises' containing an array of 5 objects, "
+        "each with keys: 'incorrect', 'correct', 'explanation'. "
+        "Keep sentences natural and appropriate for the specified difficulty level."
+    )
+
+    user_prompt = (
+        f"Generate 5 grammar exercises targeting the pattern: '{req.category}'. "
+        f"Difficulty level: {req.difficulty}. "
+        f"Each exercise should have a sentence with a '{req.category}' error, "
+        f"the corrected version, and a short explanation."
+    )
+
+    try:
+        result = await copilot.ask_json(system_prompt, user_prompt)
+    except Exception as exc:
+        logger.error("Copilot grammar-pattern-drill failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Failed to generate grammar exercises")
+
+    exercises_raw = result.get("exercises") or result.get("items", [])
+    if not exercises_raw:
+        raise HTTPException(status_code=502, detail="No exercises generated")
+
+    exercises = []
+    for ex in exercises_raw[:5]:
+        exercises.append(GrammarPatternExercise(
+            incorrect=ex.get("incorrect", ""),
+            correct=ex.get("correct", ""),
+            explanation=ex.get("explanation", ""),
+        ))
+
+    return GrammarPatternDrillResponse(
+        category=req.category,
+        difficulty=req.difficulty,
+        exercises=exercises,
+    )

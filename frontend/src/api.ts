@@ -2251,3 +2251,27 @@ export interface StudyPlanResponse {
 export async function getStudyPlan(): Promise<StudyPlanResponse> {
   return request<StudyPlanResponse>('/api/dashboard/study-plan');
 }
+
+// ── Grammar Pattern Drill ───────────────────────────────────────
+
+export interface GrammarPatternExercise {
+  incorrect: string;
+  correct: string;
+  explanation: string;
+}
+
+export interface GrammarPatternDrillResponse {
+  category: string;
+  difficulty: string;
+  exercises: GrammarPatternExercise[];
+}
+
+export async function getGrammarPatternDrill(
+  category: string,
+  difficulty: string = 'intermediate',
+): Promise<GrammarPatternDrillResponse> {
+  return request<GrammarPatternDrillResponse>('/api/dashboard/grammar-pattern-drill', {
+    method: 'POST',
+    body: JSON.stringify({ category, difficulty }),
+  });
+}

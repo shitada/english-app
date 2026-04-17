@@ -981,6 +981,54 @@ pages:
         priority: medium
         added_in: 351
 
+      - id: dash-008
+        target: GrammarWeakSpots Practice button is visible for each category
+        action: Navigate to /dashboard, scroll to Grammar Weak Spots section
+        expect: Each grammar category row has a 'Practice ▶' button next to the error count
+        type: visual
+        priority: high
+        added_in: 525
+
+      - id: dash-009
+        target: GrammarPatternDrill opens inline when Practice button clicked
+        action: Click 'Practice ▶' button on a grammar category in Grammar Weak Spots
+        expect: GrammarPatternDrill card appears below the category with difficulty selector and Start Practice button
+        type: functional
+        priority: high
+        added_in: 525
+
+      - id: dash-010
+        target: GrammarPatternDrill difficulty selector works
+        action: Click each difficulty button (beginner/intermediate/advanced) in the drill setup
+        expect: Selected difficulty button is highlighted with primary style, others are secondary
+        type: functional
+        priority: medium
+        added_in: 525
+
+      - id: dash-011
+        target: GrammarPatternDrill exercise flow and results
+        action: Start a grammar pattern drill, type corrections for all 5 exercises, advance through each
+        expect: Word-level diff shown for incorrect answers, green feedback for correct, summary shows score X/5
+        type: functional
+        priority: high
+        added_in: 525
+
+      - id: dash-012
+        target: GrammarPatternDrill Say It button with speech recognition
+        action: Complete a correction in a grammar drill, then click 'Say It' button
+        expect: Microphone activates, spoken text compared to correct sentence with word-level diff
+        type: functional
+        priority: medium
+        added_in: 525
+
+      - id: dash-013
+        target: GrammarPatternDrill close button returns to weak spots view
+        action: Click back arrow or 'Close ✕' button on the grammar drill
+        expect: Drill panel closes, Grammar Weak Spots category list is fully visible again
+        type: functional
+        priority: medium
+        added_in: 525
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice
