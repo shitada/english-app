@@ -831,6 +831,54 @@ pages:
         priority: low
         added_in: 519
 
+      - id: list-011
+        target: Sentence Breakdown toggle button appears in listen phase
+        action: Generate a quiz to enter listen phase, look for "Sentence Breakdown" button
+        expect: A collapsible toggle button labeled "Sentence Breakdown (N sentences)" is visible below speed controls
+        type: functional
+        priority: medium
+        added_in: 566
+
+      - id: list-012
+        target: Sentence Breakdown panel expands and shows numbered sentences
+        action: In listen phase, click the "Sentence Breakdown" toggle button
+        expect: Panel expands showing numbered sentences with individual play buttons next to each
+        type: functional
+        priority: medium
+        added_in: 566
+
+      - id: list-013
+        target: Individual sentence play button plays that sentence via TTS
+        action: Expand Sentence Breakdown panel, click play button next to a sentence
+        expect: That sentence is spoken via TTS at current playback rate, sentence row is highlighted
+        type: functional
+        priority: high
+        added_in: 566
+
+      - id: list-014
+        target: Currently playing sentence is visually highlighted
+        action: Click play on a sentence in the breakdown panel
+        expect: The playing sentence row has a highlighted background, bold text in primary color, and highlighted number badge
+        type: visual
+        priority: medium
+        added_in: 566
+
+      - id: list-015
+        target: Sentence Breakdown panel is available in quiz phase
+        action: Proceed to quiz phase, look for "Sentence Breakdown" toggle below speed controls
+        expect: Toggle button is visible; clicking it expands the panel with sentence play buttons
+        type: functional
+        priority: medium
+        added_in: 566
+
+      - id: list-016
+        target: Sentence Breakdown panel is collapsed by default
+        action: Enter listen or quiz phase without clicking the breakdown toggle
+        expect: Only the toggle button is visible; sentence list is not shown until clicked
+        type: visual
+        priority: low
+        added_in: 566
+
   vocabulary:
     path: /vocabulary
     tests:

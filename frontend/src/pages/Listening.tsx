@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play, ArrowLeft } from 'lucide-react';
-import { EchoPractice } from '../components/EchoPractice';
+import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play, ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
+import { EchoPractice, extractSentences } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
 import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
@@ -44,6 +44,22 @@ export default function Listening() {
   const [saved, setSaved] = useState(false);
   const [recommendation, setRecommendation] = useState<ListeningDifficultyRecommendation | null>(null);
   const [isRetry, setIsRetry] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [playingSentenceIdx, setPlayingSentenceIdx] = useState<number | null>(null);
+
+  const sentences = passage ? extractSentences(passage) : [];
+
+  const playSentence = useCallback((text: string, idx: number) => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = playbackRate;
+    utterance.onend = () => setPlayingSentenceIdx(null);
+    utterance.onerror = () => setPlayingSentenceIdx(null);
+    setPlayingSentenceIdx(idx);
+    window.speechSynthesis.speak(utterance);
+  }, [playbackRate]);
 
   useEffect(() => {
     getListeningQuizHistory(10).then(setHistory).catch(() => {});
@@ -141,6 +157,8 @@ export default function Listening() {
     setError('');
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    setShowBreakdown(false);
+    setPlayingSentenceIdx(null);
   }, []);
 
   const handleReplay = useCallback(async (quizId: number) => {
@@ -195,6 +213,8 @@ export default function Listening() {
     setResults([]);
     setShowText(false);
     setError('');
+    setShowBreakdown(false);
+    setPlayingSentenceIdx(null);
   }, []);
 
   // Keyboard shortcuts for quiz phase
@@ -402,6 +422,68 @@ export default function Listening() {
               </button>
             ))}
           </div>
+          {/* Sentence Breakdown Panel - Listen Phase */}
+          {sentences.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <button
+                onClick={() => setShowBreakdown(v => !v)}
+                data-testid="sentence-breakdown-toggle"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px',
+                  borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-secondary, #f9fafb)',
+                  color: 'var(--text)', cursor: 'pointer', fontWeight: 600, fontSize: 13, width: '100%',
+                }}
+              >
+                {showBreakdown ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                Sentence Breakdown ({sentences.length} sentences)
+              </button>
+              {showBreakdown && (
+                <div style={{
+                  marginTop: 8, borderRadius: 8, border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary, #f9fafb)', overflow: 'hidden',
+                }}>
+                  {sentences.map((s, i) => (
+                    <div
+                      key={i}
+                      data-testid={`sentence-${i}`}
+                      style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px',
+                        borderBottom: i < sentences.length - 1 ? '1px solid var(--border)' : 'none',
+                        background: playingSentenceIdx === i ? 'rgba(99,102,241,0.08)' : 'transparent',
+                        transition: 'background 0.2s',
+                      }}
+                    >
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        width: 22, height: 22, borderRadius: 4, flexShrink: 0, fontSize: 11, fontWeight: 700,
+                        background: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'var(--bg-primary, #e5e7eb)',
+                        color: playingSentenceIdx === i ? '#fff' : 'var(--text-secondary)',
+                      }}>{i + 1}</span>
+                      <span style={{
+                        flex: 1, fontSize: 14, lineHeight: 1.5,
+                        color: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'var(--text)',
+                        fontWeight: playingSentenceIdx === i ? 600 : 400,
+                      }}>{s}</span>
+                      <button
+                        onClick={() => playSentence(s, i)}
+                        data-testid={`play-sentence-${i}`}
+                        title={`Play sentence ${i + 1}`}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+                          border: '1px solid var(--border)', cursor: 'pointer',
+                          background: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'transparent',
+                          color: playingSentenceIdx === i ? '#fff' : 'var(--text-secondary)',
+                        }}
+                      >
+                        <Volume2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {showText && (
             <div style={{
               padding: 16, borderRadius: 8, marginBottom: 16,
@@ -479,6 +561,68 @@ export default function Listening() {
               </button>
             ))}
           </div>
+          {/* Sentence Breakdown Panel - Quiz Phase */}
+          {sentences.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <button
+                onClick={() => setShowBreakdown(v => !v)}
+                data-testid="sentence-breakdown-toggle-quiz"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
+                  borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-secondary, #f9fafb)',
+                  color: 'var(--text)', cursor: 'pointer', fontWeight: 600, fontSize: 12, width: '100%',
+                }}
+              >
+                {showBreakdown ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                Sentence Breakdown ({sentences.length})
+              </button>
+              {showBreakdown && (
+                <div style={{
+                  marginTop: 6, borderRadius: 6, border: '1px solid var(--border)',
+                  background: 'var(--bg-secondary, #f9fafb)', overflow: 'hidden',
+                }}>
+                  {sentences.map((s, i) => (
+                    <div
+                      key={i}
+                      data-testid={`quiz-sentence-${i}`}
+                      style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 6, padding: '8px 10px',
+                        borderBottom: i < sentences.length - 1 ? '1px solid var(--border)' : 'none',
+                        background: playingSentenceIdx === i ? 'rgba(99,102,241,0.08)' : 'transparent',
+                        transition: 'background 0.2s',
+                      }}
+                    >
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        width: 20, height: 20, borderRadius: 4, flexShrink: 0, fontSize: 10, fontWeight: 700,
+                        background: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'var(--bg-primary, #e5e7eb)',
+                        color: playingSentenceIdx === i ? '#fff' : 'var(--text-secondary)',
+                      }}>{i + 1}</span>
+                      <span style={{
+                        flex: 1, fontSize: 13, lineHeight: 1.4,
+                        color: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'var(--text)',
+                        fontWeight: playingSentenceIdx === i ? 600 : 400,
+                      }}>{s}</span>
+                      <button
+                        onClick={() => playSentence(s, i)}
+                        data-testid={`quiz-play-sentence-${i}`}
+                        title={`Play sentence ${i + 1}`}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+                          border: '1px solid var(--border)', cursor: 'pointer',
+                          background: playingSentenceIdx === i ? 'var(--primary, #6366f1)' : 'transparent',
+                          color: playingSentenceIdx === i ? '#fff' : 'var(--text-secondary)',
+                        }}
+                      >
+                        <Volume2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <p style={{ fontSize: 15, fontWeight: 500, marginBottom: 16 }}>
             {questions[quizIndex].question}
           </p>

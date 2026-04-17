@@ -5854,4 +5854,175 @@ Now calling the coder to implement this proposal.
 Now let me look at how VocabDrillMode handles SRS progress and the api.submitAnswer response:Now let me find the relevant section in ui-test-spec.yaml for flashcard/vocabulary tests:Let me also check what comes after the last vocab test:Now I have a clear picture of what needs to be done. Let me implement the changes:
 
 1. **VocabFlashcardMode.tsx**: Add `reverse` prop, capture SRS response, render VocabSRSProgress on result screen
-2. **Vocabulary.tsx**: Add flashcard direction toggle state and UI, pass `reverse` propNow update the result phase to include VocabSRSProgress and show direction label:Now update the review (active card) phase to support reverse mode:Now update Vocabulary.tsx — add the flashcard direction state and modify the flashcard button area:Now replace the flashcard button with a button + direction toggle:Now update the flashcard rendering to pass the `reverse` prop:Now let me verify the final file looks correct:Good. Now run TypeScript check:TypeScript compiles cleanly. Now update the UI test spec:Now commit:
+2. **Vocabulary.tsx**: Add flashcard direction toggle state and UI, pass `reverse` propNow update the result phase to include VocabSRSProgress and show direction label:Now update the review (active card) phase to support reverse mode:Now update Vocabulary.tsx — add the flashcard direction state and modify the flashcard button area:Now replace the flashcard button with a button + direction toggle:Now update the flashcard rendering to pass the `reverse` prop:Now let me verify the final file looks correct:Good. Now run TypeScript check:TypeScript compiles cleanly. Now update the UI test spec:Now commit:```json
+{
+  "committed": true,
+  "commit_hash": "80dd6e8",
+  "files_changed": [
+    "frontend/src/components/VocabFlashcardMode.tsx",
+    "frontend/src/pages/Vocabulary.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 0,
+  "ui_spec_updated": true,
+  "description": "Added reverse flashcard mode (Meaning→Word) with direction toggle and SRS progress tracking on result screen"
+}
+```● Coder Implement iteration 565
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "Add Reverse Flashcard mode with SRS progress tracking
+  │   │
+  │   │ - VocabFlashcardMode: Add 'reverse' prop that shows meaning on front /
+  │   │ word on back…
+  │   └ 22 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log
+      │ --oneline -1
+      └ 2 lines...
+
+● Record T2 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+Now calling the tester.
+
+All tests completed. Here are the results:
+
+**Commit:** `80dd6e8`
+
+**Changed files:**
+- `autoresearch/audit-report.json`
+- `autoresearch/results.tsv`
+- `autoresearch/runner.log`
+- `frontend/src/components/VocabFlashcardMode.tsx`
+- `frontend/src/pages/Vocabulary.tsx`
+- `tests/e2e/ui-test-spec.yaml`
+
+No backend files (`database.py`, `app/routers/`, `app/dal/`) were changed — **smoke test skipped**.
+
+```json
+{
+  "tests_passed": 1784,
+  "tests_total": 1784,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 1784 passed in 80.30s (0:01:20) ========================",
+  "failure_summary": ""
+}
+```
+
+✅ **OVERALL: PASS** — All 1784 backend tests passed, TypeScript compiles cleanly, smoke test skipped (no backend changes), no E2E results file present.● Tester Test iteration 565
+  │ TypeScript check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ Check E2E results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "No E2E results"
+      └ 2 lines...
+
+● Record T3 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+Now calling the evaluator.
+
+Let me look at the actual diff and relevant sections of the large files.Let me search for the vocabulary flashcard tests in the spec file.Now let me look at how the `reverse` prop is passed to the flashcard component:Now let me find where the flashcard component is rendered in Vocabulary.tsx to confirm the `reverse` prop is passed:Now let me check if there are any backend changes or database schema changes:Based on my thorough review, here is my evaluation:
+
+**Summary of Changes:**
+
+1. **`VocabFlashcardMode.tsx`** — Added a `reverse` prop (defaults to `false`). In reverse mode, the card front shows the meaning and the back shows the English word with TTS. The result screen now displays the chosen direction mode and includes the `VocabSRSProgress` component showing per-word SRS level changes.
+
+2. **`Vocabulary.tsx`** — Added `fcReverse` state and a direction toggle UI (two buttons: "Word → Meaning" / "Meaning → Word") below the flashcard launch button. The `reverse` prop is properly passed to `VocabFlashcardMode`.
+
+3. **`ui-test-spec.yaml`** — Added 6 new E2E test specs (`vocab-023` through `vocab-028`) covering: toggle rendering, toggle switching, reverse mode front/back content, SRS progress display, and mode label on results.
+
+**Key observations:**
+- All 1,784 tests pass, TypeScript check passes
+- No backend or database schema changes needed (the existing `api.submitAnswer` and `api.getDrillWords` are reused)
+- Good accessibility: `aria-label`, `aria-pressed`, `role="group"` on the toggle
+- Minor issue: `handleAnswer` is declared `async` but uses `.then()` instead of `await` — inconsistent but works
+- Silent `.catch(() => {})` for SRS submission — matches existing codebase patterns, though not ideal
+- `reviewAgain` fetches new words but correctly retains the `reverse` prop from parent
+- Clean front/back logic: `frontContent = reverse ? meaning : word`, `backContent = reverse ? word : meaning`
+- TTS is correctly only placed on the word side (front in normal mode, back in reverse mode)
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Clean implementation of reverse flashcard mode with proper direction toggle, SRS progress tracking on results, good accessibility attributes, and 6 new E2E test specs — all tests pass with no backend changes needed."
+}
+```● Evaluator Evaluate iteration 565
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L670:720 (51 lines read)
+  └ Read api.ts
+      │ frontend/src/api.ts
+      └ L1:30 (30 lines read)
+
+● Record T4 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo
+  │ "T4=$T4"
+  └ 2 lines...
+
+Evaluator says **keep** (score 7.0). All tests pass. Recording results for iteration 565.
+
+● Record iteration 565 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short HEAD) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "565" "$HASH" "$(date +%Y-%m-%d)" "$((1776447274-1776447027))"
+  │ "$((1776447476-1776447274))" "$((1776447600-1776447476))" …
+  └ 7 lines...
+
+✅ Iteration 565 complete — **kept** (score 7.00). Now starting iteration 566.
+
+● Context for iteration 566 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && git log --oneline -3
+  └ 5 lines...
+
+Now let me look at the Mistake Journal in more detail - especially the backend, and see what export/analytics features exist:Now let me look at the Mistake Journal API endpoints and the MistakeReviewDrill component to understand the current state:Now let me check what Listening review mode / difficulty progression look like, and the API for mistakes export:Let me look for the mistakes-related API and the export functionality:Now let me check the current state of one more thing - whether there's any sentence-level playback already in the listening page:Now I have a thorough understanding of the codebase. Let me formulate my proposal:
+
+The Listening Quiz page currently plays the entire passage as a single audio block. During both the `listen` and `quiz` phases, users can only replay the whole passage. For lower-level learners and for targeting specific parts related to a question, this is limiting. The `EchoPractice` component already has an `extractSentences()` utility that splits passages into sentences.
+
+The most impactful, underserved improvement would be adding **sentence-by-sentence playback** to the Listening Quiz's listen and quiz phases.
+
+```json
+{
+  "type": "feature",
+  "title": "Add sentence-by-sentence playback panel to Listening Quiz",
+  "description": "During the Listening Quiz listen and quiz phases, users can only play the entire passage at once, making it hard for beginners to catch specific details. Add a collapsible 'Sentence Breakdown' panel that splits the passage into numbered sentences (reusing extractSentences from EchoPractice.tsx) with individual play buttons next to each sentence. During the quiz phase, this lets users replay specific parts relevant to the current question. The panel should be collapsed by default to preserve the current flow, with a toggle button labeled '📝 Sentences (N)'. Each sentence gets a small Volume2 play button that uses SpeechSynthesisUtterance at the current playbackRate. Highlight the currently playing sentence. This is a frontend-only change to Listening.tsx, importing the existing extractSentences utility.",
+  "files_to_modify": ["frontend/src/pages/Listening.tsx", "frontend/src/components/EchoPractice.tsx"],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 566
+  │ Read EchoPractice.tsx
+  │   │ frontend/src/components/EchoPractice.tsx
+  │   └ L1:50 (50 lines read)
+  └ List directory frontend/src/hooks
+      └ 10 files found
+
+● Record T1 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now let me check the UI test spec and look at it briefly:Now I have a complete understanding of the codebase. Let me implement the sentence breakdown panel. I'll add:
+
+1. Import `extractSentences` from EchoPractice
+2. Add state for `showBreakdown` (collapsed by default) and `playingSentenceIdx`
+3. Add a `playSentence` callback
+4. Add the collapsible Sentence Breakdown panel to both `listen` and `quiz` phasesNow add the new state variables after the existing state:Now I need to add a SentenceBreakdownPanel component inline. Let me create a reusable JSX block. I'll add it in the listen phase (after the speed controls, before the showText block) and in the quiz phase (after the speed controls). Let me build a helper function inside the component:I need to also reset the breakdown state in handleRestart and handleBackToSetup:Wait, that removed the `handleReplay` declaration start. Let me fix:I see the issue - the replacement ate the `const handleReplay`. Let me fix that:Now let me also reset breakdown state in handleBackToSetup:Now I need to add the sentence breakdown panel. Let me add a helper function inside the component, before the return statement. Let me find the exact location:Now let me add the breakdown panel JSX as a rendered element. I'll insert it into the listen phase and quiz phase. Let me first add the listen phase panel:Now I'll add the Sentence Breakdown panel in the listen phase, right after the speed controls and before the showText block:Now add the same panel to the quiz phase. Let me find the right spot:I'll add the breakdown panel in the quiz phase right after the speed controls (line 563) and before the question text:Now let me verify TypeScript compiles:TypeScript compiles cleanly. Now let me update the UI test spec:Now commit:
