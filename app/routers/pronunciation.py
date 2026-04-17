@@ -4658,3 +4658,107 @@ async def evaluate_scene_description(
         "feedback": str(result.get("feedback", "")),
         "model_description": str(result.get("model_description", "")),
     }
+
+
+# ── Quick Predict-What-Happens-Next ────────────────────────────────
+
+
+class PredictNextSetupResponse(BaseModel):
+    setup_text: str
+    continuation: str
+    context_hint: str
+    difficulty: str
+
+
+@router.get("/predict-next", response_model=PredictNextSetupResponse)
+async def get_predict_next_setup(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a short dialogue/story setup for predict-what-happens-next exercise."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a short dialogue or story setup (2-3 sentences) for a {difficulty}-level English learner.\n"
+        "The setup should clearly build toward an event or outcome that the learner can predict.\n"
+        "Return JSON with:\n"
+        "- setup_text (string): the 2-3 sentence setup of a dialogue or story\n"
+        "- continuation (string): the actual next part of the story (1-2 sentences)\n"
+        "- context_hint (string): a brief hint about what kind of prediction to make (1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English listening and speaking coach specializing in predictive comprehension. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="predict_next_setup",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Predict-next setup generation failed")
+
+    return {
+        "setup_text": str(result.get("setup_text", "Sarah looked at the dark clouds gathering overhead. She had left her umbrella at home this morning.")),
+        "continuation": str(result.get("continuation", "It started to rain heavily, and Sarah had to run to the nearest café to take shelter.")),
+        "context_hint": str(result.get("context_hint", "Think about what might happen because of the weather.")),
+        "difficulty": difficulty,
+    }
+
+
+class PredictNextEvaluateRequest(BaseModel):
+    setup_text: str = Field(min_length=1, max_length=1000)
+    continuation: str = Field(min_length=1, max_length=1000)
+    user_prediction: str = Field(min_length=1, max_length=3000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class PredictNextEvaluateResponse(BaseModel):
+    plausibility_score: float
+    grammar_score: float
+    vocabulary_score: float
+    fluency_score: float
+    overall_score: float
+    feedback: str
+    actual_continuation: str
+
+
+@router.post("/predict-next/evaluate", response_model=PredictNextEvaluateResponse)
+async def evaluate_predict_next(
+    body: PredictNextEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's spoken prediction of what happens next."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Story/dialogue setup: \"{body.setup_text}\"\n"
+        f"Actual continuation: \"{body.continuation}\"\n\n"
+        f"User's spoken prediction ({body.duration_seconds}s):\n"
+        f"\"{body.user_prediction}\"\n\n"
+        "Evaluate the user's prediction. Return JSON with:\n"
+        "- plausibility_score (1-10): how plausible and logical is the prediction given the setup?\n"
+        "- grammar_score (1-10): grammatical accuracy of the spoken prediction\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary used\n"
+        "- fluency_score (1-10): natural flow and coherence of spoken English\n"
+        "- overall_score (1-10): overall quality of the prediction\n"
+        "- feedback (string): encouraging feedback about their prediction and language use (2-3 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English listening and speaking coach specializing in predictive comprehension. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="predict_next_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Prediction evaluation failed")
+
+    return {
+        "plausibility_score": clamp_score(result.get("plausibility_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "fluency_score": clamp_score(result.get("fluency_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "actual_continuation": body.continuation,
+    }

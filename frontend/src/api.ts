@@ -2721,6 +2721,42 @@ export function evaluateSceneDescription(scene: string, transcript: string, dura
   });
 }
 
+// ── Quick Predict-What-Happens-Next ──────────────────────────────
+
+export interface PredictNextSetupResponse {
+  setup_text: string;
+  continuation: string;
+  context_hint: string;
+  difficulty: string;
+}
+
+export interface PredictNextEvaluateResponse {
+  plausibility_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  fluency_score: number;
+  overall_score: number;
+  feedback: string;
+  actual_continuation: string;
+}
+
+export function getPredictNextSetup(difficulty: string = 'intermediate'): Promise<PredictNextSetupResponse> {
+  return request<PredictNextSetupResponse>(`/api/pronunciation/predict-next?difficulty=${difficulty}`);
+}
+
+export function evaluatePredictNext(data: {
+  setup_text: string;
+  continuation: string;
+  user_prediction: string;
+  duration_seconds: number;
+}): Promise<PredictNextEvaluateResponse> {
+  return request<PredictNextEvaluateResponse>('/api/pronunciation/predict-next/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

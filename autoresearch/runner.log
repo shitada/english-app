@@ -4927,4 +4927,274 @@ Now I have a thorough understanding of the codebase. Let me check the existing s
 
 **Iteration 560 — Step 3: Implement**
 
-Now let me look at more patterns - specifically a simpler speaking card like QuickOpinionCard and the existing backend pattern for similar endpoints:Let me look at the opinion prompt backend pattern more closely to understand the exact structure:Now let me find where Opinion prompt API functions are exported in api.ts:Now let me check the e2e spec file:Now I have a comprehensive understanding of all the patterns. Let me implement the feature:Now let me implement all the changes:Now add the API types and functions to `api.ts`:Now create the `QuickSceneDescriptionCard.tsx` component:Now register it in `QuickPracticeHub.tsx`:Now create the integration tests:Now update the UI test spec:Now let's commit:
+Now let me look at more patterns - specifically a simpler speaking card like QuickOpinionCard and the existing backend pattern for similar endpoints:Let me look at the opinion prompt backend pattern more closely to understand the exact structure:Now let me find where Opinion prompt API functions are exported in api.ts:Now let me check the e2e spec file:Now I have a comprehensive understanding of all the patterns. Let me implement the feature:Now let me implement all the changes:Now add the API types and functions to `api.ts`:Now create the `QuickSceneDescriptionCard.tsx` component:Now register it in `QuickPracticeHub.tsx`:Now create the integration tests:Now update the UI test spec:Now let's commit:```json
+{
+  "committed": true,
+  "commit_hash": "7df901b",
+  "files_changed": [
+    "app/routers/pronunciation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickSceneDescriptionCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/integration/test_scene_description_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 13,
+  "ui_spec_updated": true,
+  "description": "Added Quick Scene Description speaking card with GET/POST endpoints, React component with 30s timer and speech recognition, score breakdown (vocabulary/spatial/grammar/fluency), and 13 integration tests"
+}
+```● Coder Implement Scene Description Card
+  │ Edit ui-test-spec.yaml +32
+  │   └ tests/e2e/ui-test-spec.yaml
+  └ Commit all changes (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "feat(iter-560): Add Quick Scene Description speaking card for
+      │ descriptive fluency
+      │
+      │ - Backend: GET /api/pronunciation/scene-description and POST …
+      └ 27 lines...
+
+● Record T2 timestamp (shell)
+  │ echo "T2=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 560 — Step 4: Test**
+
+I'll run all three test suites in parallel since they're independent.The `--timeout=60` flag isn't supported. Let me re-run without it, and also check for the E2E results file.The smoke test collected 0 items with pytest. Let me check if it's a script-style test (as indicated in the system instructions) and verify the file:All three test suites completed. Here are the consolidated results:
+
+```json
+{
+  "tests_passed": 1756,
+  "tests_total": 1756,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 1756 passed in 79.18s (0:01:19) ========================",
+  "failure_summary": ""
+}
+```
+
+### Summary
+
+| Check | Result |
+|---|---|
+| **Unit + Integration** | ✅ **1756 / 1756 passed** (79.18s) |
+| **TypeScript** | ✅ **pass** (no errors) |
+| **Smoke API** | ✅ **pass** — all 21 endpoints returned 200 OK |
+| **E2E UI** | ⏭️ **not_run** — `autoresearch/ui-test-results.json` not found |
+
+**`overall_pass: true`** — All checks passed. No failures detected.● Tester Test iteration 560 changes
+  │ Check for E2E UI test results file (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1
+  │   └ 2 lines...
+  └ Run smoke test as Python script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run python
+      │ tests/smoke_test.py 2>&1 | tail -40
+      └ 23 lines...
+
+● Record T3 timestamp (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 560 — Step 5: Evaluate**
+
+Let me look at the actual backend endpoint code and the API client additions.Now let me find the new scene description endpoints in the router file and the API functions:Now let me find the new scene description-related code in the pronunciation router and the api.ts file:Let me search for the scene description endpoints in the pronunciation router and the corresponding API client functions:Let me search for the scene description endpoints at the end of the pronunciation.py file and the corresponding api.ts functions:Now let me check the SceneDescriptionPromptResponse interface definition:Good, no database schema changes. Let me now check the e2e test spec for the scene description:The file might have gotten truncated. Let me check its size and the end of file:OK, so the e2e spec yaml ends at line 2255. Let me check if there are any scene-description-related spec tests at the end. It seems there are none added for the new feature. Let me also search the pronunciation-related section for quick practice tests:Now let me look at the home page section of the yaml for quick practice hub tests:Now I have a thorough understanding of the change. Let me compile my evaluation.
+
+## Summary of Changes
+
+**Backend** (`pronunciation.py`): Two new endpoints at the end of the file:
+- `GET /scene-description` — LLM generates a vivid scene with key vocabulary and suggested details
+- `POST /scene-description/evaluate` — Evaluates spoken description across 4 dimensions + WPM
+
+Both use Pydantic models, `safe_llm_call`, `clamp_score`, rate limiting — fully consistent with the ~30 existing Quick Practice endpoints.
+
+**Frontend** (`QuickSceneDescriptionCard.tsx`): 241-line component with 4 phases (idle → speaking → evaluating → done), 30s countdown timer, vocabulary hints, score display, model description reference. Uses `handleFinishRef` pattern to avoid stale closures — correct approach.
+
+**API client** (`api.ts`): Two typed interfaces + two fetch functions, matching existing patterns exactly.
+
+**Hub integration** (`QuickPracticeHub.tsx`): One-line import + one-line render under Speaking tab (now 15 cards).
+
+**Tests** (`test_scene_description_api.py`): 13 integration tests covering: default/custom/advanced difficulty, 422 validation (invalid difficulty, empty scene, empty transcript, zero duration), fallback values for missing LLM keys, vocabulary capping to 6, score clamping (out-of-range values), WPM calculation accuracy, non-numeric score fallbacks.
+
+**No database changes** — this is a stateless LLM feature, so no migration needed.
+
+**E2E spec**: No new spec tests added for the frontend card.
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Clean, pattern-consistent speaking practice card with 13 solid integration tests covering validation, clamping, fallbacks, and WPM calculation — no schema changes needed and all 1756 tests pass"
+}
+```● Evaluator Evaluate iteration 560
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L100:200 (101 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L200:280 (81 lines read)
+
+● Record iteration 560 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ echo "T4=$T4" && HASH=$(git rev-parse --short HEAD) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "560" "$HASH" "$(date +%Y-%m-%d)" "$((1776442173-1776441979))"
+  │ "$((1776442404-1776442173))" "$((1776442533-1776442404))" …
+  └ 8 lines...
+
+✅ **2 iterations complete. Stopping as requested.**
+
+| Iter | Hash | Tests | Score | Verdict | Description |
+|------|---------|-------|-------|---------|-------------|
+| 559 | `0927671` | 1743/1743 | 6.75 | ✅ kept | Add Quick Debate Card for argumentation speaking practice |
+| 560 | `7df901b` | 1756/1756 | 7.00 | ✅ kept | Add Quick Scene Description speaking card for descriptive fluency |
+
+Both features kept. Tests grew from 1730 → 1756 (+26). All passing, TypeScript clean.
+
+
+Changes   +0 -0
+Requests  3 Premium (31m 7s)
+Tokens    ↑ 6.8m • ↓ 81.3k • 6.0m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-559-to-584.md
+[2026-04-18 01:18:15] Copilot invocation completed (duration: 1873s)
+[2026-04-18 01:18:15] Recording agent traces...
+[2026-04-18 01:18:15]   AGENT_TRACE iter=559 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-18 01:18:15]   AGENT_TRACE iter=560 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-18 01:18:15] SMOKE_UI: UI changes detected in pages: home
+[2026-04-18 01:18:15] SMOKE_UI: Level=full (iteration 560 is divisible by 5)
+[2026-04-18 01:18:15] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+
+  ✅ home: smoke 4✓ 0✗ (1841ms)
+  ✅ conversation: smoke 4✓ 0✗ (1612ms)
+  ✅ pronunciation: smoke 4✓ 0✗ (1658ms)
+  ✅ listening: smoke 4✓ 0✗ (1572ms)
+  ✅ vocabulary: smoke 4✓ 0✗ (1621ms)
+  ✅ dashboard: smoke 4✓ 0✗ (1811ms)
+
+✅ UI TEST PASS (6/6 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-18 01:18:41] SMOKE_UI_PASS: All UI pages passed
+[2026-04-18 01:18:41] Running post-invocation audit (iter 559-560)...
+============================================
+ Autoresearch Audit
+ Iterations: 559 — 560
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-18 01:18:42
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 559 560[0m
+[0;31m  Tester: FAIL — missing: 559 560[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-18 01:18:43] Audit found 2 error(s) — fixes applied where possible
+[2026-04-18 01:18:46] Current iteration count: 560 / 584
+[2026-04-18 01:18:46] ------------------------------------------
+[2026-04-18 01:18:46] Invocation 5 / 10
+[2026-04-18 01:18:46] Resuming from iteration 561
+[2026-04-18 01:18:46] ------------------------------------------
+[2026-04-18 01:18:46] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-561-to-584.md)...
+● Read current state for iteration 561 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---UI TEST RESULTS---" && cat
+  │ autoresearch/ui-test-results.json 2>/dev/null || echo "no …
+  └ 78 lines...
+
+● Get uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]'
+  │ autoresearch/backlog.md | head -20
+  └ 1 line...
+
+● Check backlog tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 28 lines...
+
+● Count backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '\[x\]'
+  │ autoresearch/backlog.md && grep -c '\[ \]' autoresearch/backlog.md
+  └ 2 lines...
+
+OK, backlog is empty. Starting iteration 561. Let me call the proposer subagent.
+
+Now let me look at the pronunciation router to understand where new endpoints would be added:Now I have a comprehensive understanding of the entire codebase. Let me verify what's in the listening tab and check for any "predict" or "dialogue completion" features:Based on my thorough analysis of the codebase, I've identified that while the app has an incredibly comprehensive set of drills (speaking, listening, grammar, vocabulary, writing), there's a gap in **active listening + prediction + speaking** exercises. All existing listening cards are reactive (listen → respond/paraphrase/type). None train the crucial skill of **predictive comprehension** — anticipating what comes next in a dialogue, which is fundamental to real-world fluency.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Quick Predict-What-Happens-Next listening-speaking card",
+  "description": "Add a new Quick Practice card 'QuickPredictNextCard' in the Listening tab that trains predictive comprehension — a key fluency skill. The flow: (1) User listens to a short 2-3 sentence dialogue/story setup via TTS, (2) User speaks their prediction of what happens next, (3) The actual continuation is revealed, (4) AI evaluates prediction plausibility, grammar, vocabulary, and fluency. Backend: add GET /api/pronunciation/predict-next?difficulty=X endpoint that uses LLM to generate {setup_text, continuation, context_hint, difficulty} and POST /api/pronunciation/predict-next/evaluate that accepts {setup_text, continuation, user_prediction, duration_seconds} and returns {plausibility_score, grammar_score, vocabulary_score, fluency_score, overall_score, feedback, actual_continuation} in app/routers/pronunciation.py. Frontend: create QuickPredictNextCard.tsx component with phases idle→listening→recording→evaluating→done, using useSpeechRecognition and useSpeechSynthesis hooks (same pattern as QuickListenRespondCard). Register the card in QuickPracticeHub.tsx under the 'listening' tab. Add API types and functions in api.ts. This trains active listening (must understand setup), prediction (engage with language logic), and spontaneous speaking in one 60-second exercise.",
+  "files_to_modify": ["app/routers/pronunciation.py", "frontend/src/api.ts", "frontend/src/components/QuickPredictNextCard.tsx", "frontend/src/components/QuickPracticeHub.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose feature iter 561
+  │ Read QuickListenParaphraseCard.tsx
+  │   │ frontend/src/components/QuickListenParaphraseCard.tsx
+  │   └ L1:30 (30 lines read)
+  └ Read QuickDictationCard.tsx
+      │ frontend/src/components/QuickDictationCard.tsx
+      └ L1:30 (30 lines read)
+
+Good, proposer returned a feature proposal. Now calling the coder.
+
+● Record T1 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me see the end of the pronunciation.py file and the api.ts types for these features:Now let me check the end of the api.ts file and the e2e spec:Now I have a thorough understanding of the patterns. Let me implement all the changes:Good, now I have all the context. Let me implement all the changes:Now add the API types and functions to api.ts:Now create the QuickPredictNextCard component:Now register it in QuickPracticeHub.tsx:Now create the integration test:Now update the UI test spec:Now let me commit:

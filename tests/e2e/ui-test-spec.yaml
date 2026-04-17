@@ -2037,6 +2037,54 @@ pages:
         priority: medium
         added_in: 560
 
+      - id: quick-practice-hub-095
+        target: QuickPredictNextCard appears in listening tab
+        action: Switch to the Listening tab in Quick Practice Hub
+        expect: The "Quick Predict What Happens Next" card is visible with a Headphones icon and "Listen & Predict" button
+        type: presence
+        priority: high
+        added_in: 561
+
+      - id: quick-practice-hub-096
+        target: QuickPredictNextCard listen phase
+        action: Click "Listen & Predict" button in the Predict Next card
+        expect: Card enters listening phase with pulsing headphone icon and "Listening to story setup…" text
+        type: functional
+        priority: high
+        added_in: 561
+
+      - id: quick-practice-hub-097
+        target: QuickPredictNextCard recording phase
+        action: After TTS finishes playing the story setup, wait for auto-transition
+        expect: Card enters recording phase with red pulsing mic, countdown timer, "Speak your prediction" prompt, and Done/Show Setup buttons
+        type: functional
+        priority: high
+        added_in: 561
+
+      - id: quick-practice-hub-098
+        target: QuickPredictNextCard show/hide setup text
+        action: Click "Show Setup" button during recording phase
+        expect: The original story setup text is revealed; button changes to "Hide Setup"
+        type: functional
+        priority: medium
+        added_in: 561
+
+      - id: quick-practice-hub-099
+        target: QuickPredictNextCard done phase with scores
+        action: Click "Done" after speaking a prediction
+        expect: Evaluation results show scores for Overall, Plausibility, Grammar, Vocabulary, Fluency with color coding, feedback text, and actual continuation
+        type: functional
+        priority: high
+        added_in: 561
+
+      - id: quick-practice-hub-100
+        target: QuickPredictNextCard new story
+        action: Click "New Story" button after evaluation in the Predict Next card
+        expect: Card resets to idle phase with a new story setup prompt
+        type: functional
+        priority: medium
+        added_in: 561
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase
