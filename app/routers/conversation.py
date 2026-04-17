@@ -425,6 +425,9 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     topics = get_conversation_topics()
     topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
+    if topic_data is None:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
     topic_label = topic_data["label"] if topic_data else conv["topic"]
 
     user_msg_id = await conv_dal.add_message(db, req.conversation_id, "user", req.content)

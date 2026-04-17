@@ -1754,3 +1754,52 @@ async def test_list_conversations_keyword_and_topic_filter(client, mock_copilot)
     ids = [c["id"] for c in data["conversations"]]
     assert hotel_id in ids
     assert shop_id not in ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_send_message_custom_topic_uses_scenario_in_prompt(client, mock_copilot):
+    """send_message should use the custom topic's scenario text, not the raw topic ID."""
+    custom_scenario = "You are a friendly librarian helping the user find a rare book."
+    custom_goal = "Help the user locate the book they need"
+
+    # Create a custom topic
+    res = await client.post("/api/conversation/custom-topics", json={
+        "label": "Library Visit",
+        "description": "Finding a rare book at the library",
+        "scenario": custom_scenario,
+        "goal": custom_goal,
+    })
+    assert res.status_code == 200
+    topic_id = res.json()["id"]
+
+    # Start a conversation with the custom topic
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the library! How can I help you?")
+    start_res = await client.post("/api/conversation/start", json={"topic": topic_id})
+    assert start_res.status_code == 200
+    conv_id = start_res.json()["conversation_id"]
+
+    # Send a message — capture the system prompt passed to copilot.ask
+    mock_copilot.ask = AsyncMock(return_value="Let me check the catalogue for that title.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Do you have any old maps?",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Do you have any old maps?",
+    })
+    assert res.status_code == 200
+
+    # Verify the system prompt contains the custom scenario, not the raw topic ID
+    ask_call_args = mock_copilot.ask.call_args
+    system_prompt = ask_call_args[0][0]
+    assert custom_scenario in system_prompt, (
+        f"Expected custom scenario in system prompt but got: {system_prompt!r}"
+    )
+    assert custom_goal in system_prompt, (
+        f"Expected custom goal in system prompt but got: {system_prompt!r}"
+    )
