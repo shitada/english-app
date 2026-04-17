@@ -585,6 +585,8 @@ export default function Conversation() {
       });
     }
     setLoading(true);
+    try {
+      const res = await api.sendMessage(conversationId, userMsg);
       setMessages((prev) => {
         const updated = [...prev];
         // Add feedback to the last user message
