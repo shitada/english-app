@@ -117,6 +117,7 @@ export default function Conversation() {
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const conversationIdRef = useRef<number | null>(null);
   const phaseRef = useRef(phase);
+  const autoEndAttempted = useRef(false);
 
   // Keep refs in sync with state
   useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
@@ -271,9 +272,10 @@ export default function Conversation() {
     return () => clearInterval(timerRef.current);
   }, [phase, duration]);
 
-  // Auto-end conversation when timer expires
+  // Auto-end conversation when timer expires (only once per timer expiry)
   useEffect(() => {
-    if (phase === 'chat' && duration > 0 && timeLeft === 0 && !loading) {
+    if (phase === 'chat' && duration > 0 && timeLeft === 0 && !loading && !autoEndAttempted.current) {
+      autoEndAttempted.current = true;
       endConversation();
     }
   }, [timeLeft, phase, loading, endConversation]);
@@ -507,6 +509,7 @@ export default function Conversation() {
   const startConversation = async (topicId: string) => {
     setLoading(true);
     setStartError(null);
+    autoEndAttempted.current = false;
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setCurrentTopicId(topicId);
