@@ -1868,3 +1868,35 @@ pages:
         type: functional
         priority: high
         added_in: 539
+
+      - id: conv-067
+        target: Hint button visible in chat input bar
+        action: Start a conversation, observe the chat input bar
+        expect: A lightbulb hint button is visible between the mic button and text input
+        type: visual
+        priority: high
+        added_in: 543
+
+      - id: conv-068
+        target: Hint button fetches and displays hint banner
+        action: Click the hint (lightbulb) button during an active conversation
+        expect: Loading spinner appears on button, then a dismissible hint banner shows above the input with hint text
+        type: functional
+        priority: high
+        added_in: 543
+
+      - id: conv-069
+        target: Hint button disabled after use until next AI response
+        action: Click the hint button, then check its disabled state
+        expect: After hint is shown, button becomes disabled. After sending a message and receiving AI response, button re-enables
+        type: state
+        priority: high
+        added_in: 543
+
+      - id: conv-070
+        target: Hint banner dismisses on X click
+        action: Click the hint button to show hint, then click the X dismiss button
+        expect: Hint banner disappears, button remains disabled for this turn
+        type: functional
+        priority: medium
+        added_in: 543

@@ -527,3 +527,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 538	afeb401	2026-04-17	145	113	108	102	468	1635	1635	pass	6.50	kept	Lazy-load Dashboard sections with IntersectionObserver
 539	7bb1e3d	2026-04-17	510	234	106	83	933	1638	1638	pass	7.45	kept	Add SPA navigation guard to prevent losing active Conversation chat
 541	none	2026-04-17	281	106	106	148	641	1650	1650	pass	5.90	discarded	Auto-advance to next sentence in Pronunciation practice flow
+542	3624fad	2026-04-17	238	165	125	70	598	1651	1651	pass	7.80	kept	Fix send_message losing custom topic scenario/goal context

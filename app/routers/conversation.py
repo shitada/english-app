@@ -1089,6 +1089,70 @@ async def get_topic_progress(
 
 
 # ---------------------------------------------------------------------------
+# Conversation hint — directional guidance for stuck learners
+# ---------------------------------------------------------------------------
+
+class ConversationHintResponse(BaseModel):
+    hint: str
+
+
+@router.post("/{conversation_id}/hint", response_model=ConversationHintResponse)
+async def get_conversation_hint(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a directional hint for a stuck learner during an active conversation."""
+    conv = await conv_dal.get_active_conversation(db, conversation_id)
+    if not conv:
+        status = await conv_dal.get_conversation_status(db, conversation_id)
+        if status is not None:
+            raise HTTPException(status_code=409, detail="Conversation is already ended")
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    topics = get_conversation_topics()
+    topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
+    if topic_data is None:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
+    topic_label = topic_data["label"] if topic_data else conv["topic"]
+
+    history = await conv_dal.format_history_text(db, conversation_id)
+    if not history.strip():
+        return ConversationHintResponse(hint="Try introducing yourself or asking a question to get started!")
+
+    copilot = get_copilot_service()
+
+    system_prompt = (
+        "You are an English conversation coach. The learner is stuck and needs a "
+        "brief directional hint about WHAT to say next — NOT the actual reply. "
+        "Give guidance like 'Try asking about the room price' or 'You could mention "
+        "your symptoms'. Keep it to one short sentence. Do NOT provide a ready-made "
+        "reply the learner can copy."
+    )
+    user_prompt = (
+        f"Scenario: {topic_label} (difficulty: {conv.get('difficulty', 'intermediate')})\n\n"
+        f"Conversation so far:\n{history}\n\n"
+        "The learner is stuck. Give a brief hint about what they could say next."
+    )
+
+    try:
+        hint_text = await safe_llm_call(
+            lambda: copilot.ask(system_prompt, user_prompt),
+            context="conversation_hint",
+        )
+    except Exception:
+        raise HTTPException(status_code=502, detail="Failed to generate hint")
+
+    # Clean up the hint text — remove quotes or surrounding whitespace
+    hint_text = hint_text.strip().strip('"').strip("'")
+    if not hint_text:
+        hint_text = "Try asking a follow-up question about what was just said."
+
+    return ConversationHintResponse(hint=hint_text)
+
+
+# ---------------------------------------------------------------------------
 # Save conversation vocabulary to SRS bank
 # ---------------------------------------------------------------------------
 

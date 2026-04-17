@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useBlocker } from 'react-router-dom';
-import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark, BookOpen } from 'lucide-react';
+import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark, BookOpen, Lightbulb, X } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
@@ -107,6 +107,10 @@ export default function Conversation() {
   const [startError, setStartError] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => Promise<void> } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [hintText, setHintText] = useState<string | null>(null);
+  const [hintLoading, setHintLoading] = useState(false);
+  const [hintUsedThisTurn, setHintUsedThisTurn] = useState(false);
+  const [hintCount, setHintCount] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -609,6 +613,8 @@ export default function Conversation() {
       });
       setLastAssistantAt(Date.now());
       setPhraseSuggestions(res.phrase_suggestions || []);
+      setHintUsedThisTurn(false);
+      setHintText(null);
       tts.speak(res.message);
     } catch (err) {
       console.error(err);
@@ -631,6 +637,22 @@ export default function Conversation() {
       setLoading(false);
     }
   };
+
+  const fetchHint = useCallback(async () => {
+    if (!conversationId || hintLoading || hintUsedThisTurn) return;
+    setHintLoading(true);
+    try {
+      const res = await api.getConversationHint(conversationId);
+      setHintText(res.hint);
+      setHintUsedThisTurn(true);
+      setHintCount((c) => c + 1);
+    } catch {
+      setHintText('Could not load hint. Try again later.');
+      setHintUsedThisTurn(true);
+    } finally {
+      setHintLoading(false);
+    }
+  }, [conversationId, hintLoading, hintUsedThisTurn]);
 
   // Topic selection
   if (phase === 'select') {
@@ -1527,6 +1549,39 @@ export default function Conversation() {
           ))}
         </div>
       )}
+      {hintText && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 16px',
+            background: 'var(--hint-bg, #fefce8)',
+            borderTop: '1px solid var(--hint-border, #fde68a)',
+            fontSize: 13,
+            color: 'var(--hint-text, #92400e)',
+          }}
+          role="status"
+          aria-label="Conversation hint"
+        >
+          <Lightbulb size={16} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>{hintText}</span>
+          <button
+            onClick={() => setHintText(null)}
+            aria-label="Dismiss hint"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 2,
+              color: 'var(--hint-text, #92400e)',
+              flexShrink: 0,
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
       <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>
         <button
           className={`btn btn-icon ${speech.isListening ? 'mic-active' : 'btn-secondary'}`}
@@ -1537,6 +1592,21 @@ export default function Conversation() {
           style={{ width: 48, height: 48, flexShrink: 0 }}
         >
           {speech.isListening ? <MicOff size={22} color="white" /> : <Mic size={22} />}
+        </button>
+
+        <button
+          className="btn btn-icon btn-secondary"
+          onClick={fetchHint}
+          disabled={loading || hintLoading || hintUsedThisTurn}
+          title={hintUsedThisTurn ? 'Hint already used this turn' : 'Get a hint'}
+          aria-label="Get a hint"
+          style={{ width: 48, height: 48, flexShrink: 0, position: 'relative' }}
+        >
+          {hintLoading ? (
+            <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, margin: 0 }} />
+          ) : (
+            <Lightbulb size={22} />
+          )}
         </button>
 
         <div style={{ flex: 1, position: 'relative' }}>

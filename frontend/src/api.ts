@@ -153,6 +153,9 @@ export const api = {
       body: JSON.stringify({ words }),
     }),
 
+  getConversationHint: (conversationId: number) =>
+    request<{ hint: string }>(`/api/conversation/${conversationId}/hint`, { method: 'POST' }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';
