@@ -1674,12 +1674,12 @@ async def test_grammar_trend_with_conversations(client, test_db):
     assert len(convs) == 2
 
     # Chronological order (oldest first)
-    assert convs[0]["topic"] == "hotel_checkin"
+    assert convs[0]["topic"] == "Hotel Check-in"
     assert convs[0]["checked_count"] == 2
     assert convs[0]["correct_count"] == 1
     assert convs[0]["accuracy_rate"] == 50.0
 
-    assert convs[1]["topic"] == "restaurant"
+    assert convs[1]["topic"] == "restaurant"  # not in config → raw ID returned
     assert convs[1]["checked_count"] == 3
     assert convs[1]["correct_count"] == 3
     assert convs[1]["accuracy_rate"] == 100.0

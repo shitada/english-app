@@ -587,7 +587,7 @@ async def list_conversations(
     """List past conversations with message counts."""
     conversations = await conv_dal.list_conversations(db, topic=topic, keyword=keyword, limit=limit, offset=offset)
     total_count = await conv_dal.count_conversations(db, topic=topic, keyword=keyword)
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     conversations = [
         {**c, "topic_id": c["topic"], "topic": get_topic_label(topics, c["topic"])} for c in conversations
     ]
@@ -663,7 +663,7 @@ async def export_conversation(
     data = await conv_dal.get_conversation_export(db, conversation_id)
     if data is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     data["topic"] = get_topic_label(topics, data["topic"])
     return data
 
@@ -672,7 +672,7 @@ async def export_conversation(
 async def grammar_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get grammar accuracy statistics across all conversations."""
     result = await conv_dal.get_grammar_accuracy(db)
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     result["by_topic"] = [
         {**item, "topic": get_topic_label(topics, item["topic"])}
         for item in result["by_topic"]
@@ -684,10 +684,12 @@ async def grammar_accuracy(db: aiosqlite.Connection = Depends(get_db_session)):
 async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_session)):
     """Get conversation topic recommendations based on practice history and grammar accuracy."""
     topics = get_conversation_topics()
-    all_topic_keys = [t["id"] for t in topics]
+    custom_topics = await conv_dal.list_custom_topics(db)
+    all_topics = topics + custom_topics
+    all_topic_keys = [t["id"] for t in all_topics]
     recs = await conv_dal.get_topic_recommendations(db, all_topic_keys)
     return [
-        {**r, "topic_id": r["topic"], "topic": get_topic_label(topics, r["topic"])} for r in recs
+        {**r, "topic_id": r["topic"], "topic": get_topic_label(all_topics, r["topic"])} for r in recs
     ]
 
 

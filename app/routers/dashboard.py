@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from app.config import get_conversation_topics
 from app.copilot_client import get_copilot_service
 from app.dal import dashboard as dash_dal
+from app.dal import conversation as conv_dal
 from app.database import get_db_session
 from app.utils import get_topic_label
 
@@ -63,7 +64,7 @@ async def get_stats(db: aiosqlite.Connection = Depends(get_db_session)):
     stats = await dash_dal.get_stats(db)
 
     # Convert raw topic keys to human-readable labels for conversation activities
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     stats["recent_activity"] = [
         {
             **item,
@@ -389,7 +390,13 @@ async def get_grammar_trend(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get per-conversation grammar accuracy trend for progress visualization."""
-    return await dash_dal.get_grammar_trend(db, limit=limit)
+    result = await dash_dal.get_grammar_trend(db, limit=limit)
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
+    result["conversations"] = [
+        {**c, "topic": get_topic_label(topics, c["topic"])}
+        for c in result["conversations"]
+    ]
+    return result
 
 
 class MistakeReviewItem(BaseModel):
@@ -438,7 +445,13 @@ async def get_confidence_trend(
     db: aiosqlite.Connection = Depends(get_db_session),
 ):
     """Get speaking confidence scores and trend across recent conversations."""
-    return await dash_dal.get_confidence_trend(db, limit=limit)
+    result = await dash_dal.get_confidence_trend(db, limit=limit)
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
+    result["sessions"] = [
+        {**s, "topic": get_topic_label(topics, s["topic"])}
+        for s in result["sessions"]
+    ]
+    return result
 
 
 class DailyChallengeResponse(BaseModel):

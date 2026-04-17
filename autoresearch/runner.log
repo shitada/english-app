@@ -6834,4 +6834,299 @@ I can see the problem clearly. The article rule's patterns `/\bthe\b/` and `/\b(
 
 The fix: remove those overly broad patterns and keep only `/\barticles?\b/` and `/\bdeterminer\b/` which match the grammar concept terms. The ordering can stay the same since the priority test (line 141) expects article before tense.
 
-Let me verify my analysis against each failing test, then apply the fix:Now let me verify the file looks correct:Good. Now let me run the tests to verify:One more issue: the subject-verb agreement pattern `/\bsubject.{0,10}verb\b/` is too narrow — in the text "The subject is plural, so the verb should match", the gap between "subject" and "verb" is ~20 characters. I need to widen the range:Now run the tests again:All 52 tests pass. Now let me commit:
+Let me verify my analysis against each failing test, then apply the fix:Now let me verify the file looks correct:Good. Now let me run the tests to verify:One more issue: the subject-verb agreement pattern `/\bsubject.{0,10}verb\b/` is too narrow — in the text "The subject is plural, so the verb should match", the gap between "subject" and "verb" is ~20 characters. I need to widen the range:Now run the tests again:All 52 tests pass. Now let me commit:Let me verify the final state of the file:```json
+{
+  "committed": true,
+  "commit_hash": "d7ccde1",
+  "files_changed": ["frontend/src/utils/grammarPatterns.ts"],
+  "tests_added": 0,
+  "ui_spec_updated": false,
+  "description": "Fix categorizeGrammarError greedy article matching by removing overly broad /\\bthe\\b/ and /\\b(a|an)\\b/ patterns, keeping only /\\barticles?\\b/ and /\\bdeterminer\\b/; also widened subject-verb agreement proximity range from 10 to 30 chars"
+}
+```● Coder Fix grammar pattern bug
+  │ Amend commit with the fix (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit --amend --no-edit 2>&1
+  │   └ 19 lines...
+  └ Read grammarPatterns.ts
+      │ frontend/src/utils/grammarPatterns.ts
+      └ L29:54 (26 lines read)
+
+● Update T2 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+Now re-run tests:
+
+I'll run all three test suites in parallel since they're independent.Now let me check for the e2e results file:All tests complete. Here are the results:
+
+```json
+{
+  "tests_passed": 1842,
+  "tests_total": 1842,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "1790 passed in 82.68s | vitest: 52 passed (3 files) | tsc: clean",
+  "failure_summary": "",
+  "breakdown": {
+    "backend_pytest": {
+      "passed": 1790,
+      "total": 1790,
+      "duration": "82.68s",
+      "status": "pass"
+    },
+    "frontend_vitest": {
+      "passed": 52,
+      "total": 52,
+      "files": 3,
+      "duration": "173ms",
+      "status": "pass",
+      "details": [
+        "src/__tests__/fillerWords.test.ts — 13 tests ✓",
+        "src/__tests__/fluencyScore.test.ts — 20 tests ✓",
+        "src/__tests__/grammarPatterns.test.ts — 19 tests ✓"
+      ]
+    },
+    "typescript_check": {
+      "status": "pass",
+      "errors": 0
+    },
+    "smoke_test": {
+      "status": "skip",
+      "reason": "No changes to database.py, app/routers/, or app/dal/"
+    },
+    "e2e_ui": {
+      "status": "not_run",
+      "reason": "ui-test-results.json not found"
+    }
+  }
+}
+```
+
+### ✅ All checks passed — Iteration 568
+
+| Check | Result | Details |
+|-------|--------|---------|
+| **Backend pytest** | ✅ 1790/1790 passed | 82.68s |
+| **Frontend vitest** | ✅ 52/52 passed | 3 files, 173ms |
+| **TypeScript check** | ✅ Clean | No type errors |
+| **Smoke API test** | ⏭️ Skipped | No backend changes |
+| **E2E UI test** | ⏭️ Not run | No results file |
+
+The `grammarPatterns.test.ts` file (19 tests) passed cleanly, confirming the greedy article matching bugfix is working correctly. All 1,842 tests across backend and frontend pass with zero failures.● Tester Re-test iteration 568
+  │ Run frontend vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -60
+  │   └ 11 lines...
+  └ Check for e2e UI test results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1
+      └ 2 lines...
+
+● Record T3 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+All tests pass. Now calling the evaluator:
+
+Now let me search for where `errorPatterns` is updated and how it's passed to ConversationCoach:Let me search for where errorPatterns are updated after receiving grammar feedback, and where ConversationCoach is rendered:Now let me find where ConversationCoach is used in the render:Now let me check the e2e test spec update:Let me check the conversation section of the test spec specifically for the newly added tests:Let me search for the newly added conversation test:I've now examined all the changed files. Let me also check the database.py to make sure no schema changes were made:Now I have a thorough understanding of the changes. Let me evaluate.
+
+## Evaluation Summary
+
+### Changed Files Analysis
+
+**1. `frontend/src/utils/grammarPatterns.ts` (new)**
+- Clean, well-documented utility with proper TypeScript types (`GrammarCategory`, `GrammarError`, `CategoryRule`)
+- Simple keyword-based categorization with RegExp patterns — appropriate for the use case
+- Pure function, easily testable, no side effects
+- `CATEGORY_ADVICE` record provides actionable learning tips for each category
+
+**2. `frontend/src/components/conversation/ConversationCoach.tsx` (modified)**
+- `errorPatterns` prop is optional (`Map<string, number>`), maintaining backward compatibility
+- Tip generation at priority 0 ensures grammar pattern tips surface first
+- Minor type concern: `category as GrammarCategory` cast on line 40, but safely handled with `?? CATEGORY_ADVICE.other` fallback
+- Could be `Map<GrammarCategory, number>` for stronger typing
+
+**3. `frontend/src/pages/Conversation.tsx` (modified)**
+- Minimal additions: one new state variable (line 116), one import (line 14), one tracking block (lines 625-634)
+- Error pattern tracking is correctly placed after receiving feedback in `sendMessage`
+- `errorPatterns` properly passed to `ConversationCoach` (lines 1435-1443)
+- File is already very large (70.5 KB) — this adds minimal complexity
+
+**4. `frontend/src/__tests__/grammarPatterns.test.ts` (new, 19 tests)**
+- Excellent coverage: all 6 named categories + "other" fallback
+- Edge cases: empty fields, case insensitivity, priority ordering
+- `CATEGORY_ADVICE` completeness check ensures all categories have advice
+- Specific content assertions (e.g., article advice mentions "the" and "a/an")
+
+**5. No backend changes, no database schema changes — no migration concerns.**
+
+### Scoring
+
+| Dimension | Score | Notes |
+|-----------|-------|-------|
+| Code Quality | 8 | Clean types, well-documented, proper separation. Minor `as` cast. |
+| Feature Value | 7 | Directly enhances learning by surfacing recurring grammar weaknesses with actionable tips. |
+| Maintainability | 8 | 19 new tests, pure utility function, backward-compatible optional prop, no schema changes. |
+| UX Quality | 7 | No QA tester data provided; change is minimal UI (text tips in existing coach component). |
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.55,
+  "verdict": "keep",
+  "reason": "Well-structured grammar pattern detection utility with 19 tests, clean integration into existing ConversationCoach, and directly valuable for helping learners identify recurring grammar weaknesses — all tests pass, no backend/schema changes, backward-compatible."
+}
+```● Evaluator Evaluate iteration 568
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L650:800 (151 lines read)
+  └ List directory app
+      └ 11 files found
+
+● Record T4 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) && echo
+  │ "T4=$T4"
+  └ 2 lines...
+
+Evaluator says **keep** (7.55). All tests pass. Recording results:
+
+● Record iteration 568 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && \
+  │ HASH=$(git rev-parse --short HEAD) && \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "568" "$HASH" "$(date +%Y-%m-%d)" "$((1776452713-1776452470))"
+  │ "$((1776453162-1776452713))" "$((1776453282-1776453162))" …
+  └ 7 lines...
+
+Iteration 568 complete — **kept** (7.55). Now starting iteration 569.
+
+● Start iteration 569 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && git log --oneline -5
+  └ 7 lines...
+
+Let me look at the conversation metrics, the summary generation, and particularly investigate any potential data integrity issues or bugs in conversation-related code.Now let me look at some specific areas for potential bugs - let me check the vocabulary SRS update flow and conversation end flow for race conditions or data issues:Now let me look more carefully at potential data integrity issues. I noticed the `_calculate_streak` and `_calculate_longest_streak` functions have very similar but slightly different queries. Let me also check if there are orphan records issues with vocabulary:Now let me look for a specific bug or data integrity issue. Let me check the streak freeze auto-apply more closely and also look at the `get_today_activity` and how it interacts with timezone:I've found a clear, pervasive data integrity bug. Let me verify the scope by checking a few more specific locations:I've confirmed the bug. Now I have a clear picture. Here's my proposal:
+
+```json
+{
+  "type": "bugfix",
+  "title": "Fix custom topic labels showing raw IDs across all endpoints",
+  "description": "When users create custom conversation topics, the label is stored in the custom_topics DB table. However, all topic-label resolution in routers only queries get_conversation_topics() (config.yaml), never the custom_topics table. This causes raw IDs like 'custom_restaurant_roleplay' to appear instead of proper labels in:\n\n1. app/routers/conversation.py:\n   - list_conversations (line 590): conversation history shows raw custom topic IDs\n   - export_conversation (line 666): exports raw topic ID\n   - grammar_accuracy (line 675): accuracy breakdown shows raw IDs\n   - topic_recommendations (line 686-688): custom topics are completely excluded from recommendations since all_topic_keys only contains config topics\n\n2. app/routers/dashboard.py:\n   - get_stats (line 66-80): dashboard conversations_by_topic and recent_activity show raw IDs\n   - get_grammar_trend (line 392): returns raw topic IDs with no label resolution at all\n   - get_confidence_trend (line 441): returns raw topic IDs with no label resolution\n\nFix: In each affected endpoint, after fetching config topics, also fetch custom topics via conv_dal.list_custom_topics(db) and merge them into the topics list before calling get_topic_label(). For topic_recommendations, also include custom topic IDs in all_topic_keys. For grammar_trend and confidence_trend, add topic label resolution that was completely missing. Add an integration test that creates a custom topic, runs a conversation, and verifies the label appears correctly in list/stats/trend endpoints.",
+  "files_to_modify": ["app/routers/conversation.py", "app/routers/dashboard.py", "tests/integration/test_custom_topic_labels.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 569
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L683:692 (9 lines read)
+  └ Read dashboard.py
+      │ app/routers/dashboard.py
+      └ L60:83 (23 lines read)
+
+● Record T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now let me look at the dashboard DAL functions that return raw topic IDs:Now I have a clear understanding of the codebase. Let me implement the fixes:
+
+1. **conversation.py**: Add custom topics merge in `list_conversations`, `export_conversation`, `grammar_accuracy`, and `topic_recommendations`
+2. **dashboard.py**: Add custom topics merge in `get_stats`, `get_grammar_trend`, and `get_confidence_trend`
+3. Write integration testsNow fix dashboard.py. First, I need to add the import for `conv_dal`:Now fix the `get_stats` endpoint:Now fix `get_grammar_trend` - it currently returns the DAL result directly with no label resolution:Now fix `get_confidence_trend`:Let me verify the changes look correct:All fixes look correct. Now let me write the integration test:Now let me check how conversations are started to understand what data we need for the test:Now I have all the context I need. Let me look at existing integration tests for patterns:Now let me create the integration test:Now let me commit the changes:```json
+{
+  "committed": true,
+  "commit_hash": "098d4d9",
+  "files_changed": [
+    "app/routers/conversation.py",
+    "app/routers/dashboard.py",
+    "tests/integration/test_custom_topic_labels.py"
+  ],
+  "tests_added": 7,
+  "ui_spec_updated": false,
+  "description": "Fix custom topic labels showing raw IDs by merging custom_topics from DB into topic list before label resolution in all 7 affected endpoints (list, export, grammar-accuracy, topic-recommendations, stats, grammar-trend, confidence-trend)"
+}
+```● Coder Implement iteration 569
+  │ Check staged changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git diff
+  │   │ --cached --stat
+  │   └ 7 lines...
+  └ Commit changes (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git commit -m "Fix
+      │ custom topic labels showing raw IDs across all endpoints
+      │
+      │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+      └ 16 lines...
+
+● Record T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+I'll run all three test suites in parallel since they're independent.Now let me check for the E2E test results file:Here are the complete test results:
+
+```json
+{
+  "tests_passed": 1796,
+  "tests_total": 1797,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_grammar_trend_with_conversations\n================== 1 failed, 1796 passed in 81.43s (0:01:21) ==================",
+  "failure_summary": "1 test failed: test_grammar_trend_with_conversations — assert convs[0]['topic'] == 'hotel_checkin' but got 'Hotel Check-in' (dashboard now returns display labels instead of raw topic keys)"
+}
+```
+
+### Summary
+
+| Check | Result |
+|---|---|
+| **Unit + Integration** | ❌ **1796 / 1797** passed |
+| **TypeScript** | ✅ pass |
+| **Smoke API** | ✅ pass (21/21 endpoints OK) |
+| **E2E** | ⏭️ not run |
+| **Overall** | ❌ **FAIL** |
+
+### Failure Detail
+
+**`tests/integration/test_dashboard_api.py::test_grammar_trend_with_conversations`**
+
+```
+>       assert convs[0]["topic"] == "hotel_checkin"
+E       AssertionError: assert 'Hotel Check-in' == 'hotel_checkin'
+```
+
+**Root cause:** The change in `app/routers/dashboard.py` now returns **human-readable display labels** (e.g. `"Hotel Check-in"`) for the `topic` field in the grammar-trend endpoint, but the existing test still expects the **raw topic key** (`"hotel_checkin"`). The test assertion needs to be updated to match the new label format, or the test data needs to use the label that the code now produces.● Tester Test iteration 569
+  │ Smoke API test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+  │   └ 23 lines...
+  └ Check E2E results file (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1
+      └ 2 lines...
+
+One pre-existing test expects raw IDs but our fix now returns labels. Need the coder to fix that test.
+
+Now let me check the topic label mapping to know the expected display labels:Now I can see the dashboard endpoint applies `get_topic_label` to both grammar-trend conversations and confidence-trend sessions. Let me check what labels the topics have:So "restaurant" is NOT a valid topic in config. According to `get_topic_label`, if the topic_id is not found, it returns the raw ID. So "restaurant" would stay as "restaurant". Let me also check how the topics list is loaded in the dashboard router:Now I understand the situation clearly. The grammar-trend and confidence-trend endpoints both apply `get_topic_label()`. For grammar-trend:
+- `hotel_checkin` → `"Hotel Check-in"` 
+- `restaurant` → `"restaurant"` (not found in config, returns raw ID)
+
+For confidence-trend, both tests use `hotel_checkin` which maps to `"Hotel Check-in"`.
+
+Now let me check the confidence_trend test more carefully for topic assertions:The failing assertions are at lines 1677 and 1682. Let me also look at the grammar_trend_improving test for similar issues:Good - the `test_grammar_trend_improving` test doesn't assert on topic names, just on trend and count. Now let me check the confidence_trend tests for any topic assertions:The confidence_trend tests don't have direct topic assertions - they only assert on scores and trend. The only assertions I need to fix are at lines 1677 and 1682 in `test_grammar_trend_with_conversations`.
+
+Now let me apply the fix:Now let's run the specific tests to verify:All 7 tests pass. Now let me commit:
