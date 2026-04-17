@@ -5727,3 +5727,131 @@ Coder is working in the background. Waiting for completion...
   │ head -20
   └ 4 lines...
 
+[2026-04-18 02:29:58] Copilot invocation completed (duration: 2529s)
+[2026-04-18 02:29:58] Recording agent traces...
+[2026-04-18 02:29:58]   AGENT_TRACE iter=563 proposer=1 coder=1 tester=0 evaluator=0
+[2026-04-18 02:29:58]   AGENT_TRACE iter=564 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-18 02:29:58] SMOKE_UI: UI changes detected in pages: dashboard
+[2026-04-18 02:29:58] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-18 02:29:58] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: dashboard
+
+  ✅ dashboard: smoke 4✓ 0✗ (2024ms)
+
+✅ UI TEST PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-18 02:30:07] SMOKE_UI_PASS: All UI pages passed
+[2026-04-18 02:30:07] Running post-invocation audit (iter 563-564)...
+============================================
+ Autoresearch Audit
+ Iterations: 563 — 564
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-18 02:30:07
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 564[0m
+[0;31m  Tester: FAIL — missing: 563 564[0m
+[0;31m  Evaluator: FAIL — missing: 563 564[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-18 02:30:08] Audit found 3 error(s) — fixes applied where possible
+[2026-04-18 02:30:11] Current iteration count: 564 / 584
+[2026-04-18 02:30:11] ------------------------------------------
+[2026-04-18 02:30:11] Invocation 7 / 10
+[2026-04-18 02:30:11] Resuming from iteration 565
+[2026-04-18 02:30:11] ------------------------------------------
+[2026-04-18 02:30:11] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-565-to-584.md)...
+● Gather current state for iteration 565 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---LAST SESSION---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 26 lines...
+
+● Get uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -30
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]'
+  │ autoresearch/backlog.md | head -20
+  └ 1 line...
+
+● Check backlog tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 28 lines...
+
+All backlog items are completed. No UI test failures. Let me proceed with iteration 565 by calling the proposer.
+
+Now let me look at the Listening page more closely to understand its results section and identify where a "listening mistake review" feature could help, and also check the weekly report feature:Now let me look at the Listening page's post-exercise features. The Listening quiz currently has results, replay, and retry-wrong — but it doesn't have a way to practice the vocabulary from the listening passage. Let me check what listening post-exercise components exist:Now let me look at the weekly report backend implementation to see what data it already provides:Based on my analysis, I've identified a clear gap in the Vocabulary flashcard system. Let me verify the current state of the flashcard component and the drill mode's SRS tracking for comparison:Now let me find where flashcard mode is launched from in the Vocabulary page:Now let me find where flashcard mode is launched:Now I have a clear picture. The `VocabFlashcardMode` component has two significant gaps compared to the drill mode: (1) no reverse mode (meaning→word) for active word recall, and (2) it discards SRS level responses from the API instead of displaying progress.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Reverse Flashcard mode with SRS progress tracking",
+  "description": "VocabFlashcardMode (frontend/src/components/VocabFlashcardMode.tsx) currently only shows word→meaning cards and silently discards the SRS level response from api.submitAnswer(). Two improvements: (1) Add a 'reverse' prop that shows the meaning/definition on the front and the English word on the back, training the meaning→word active recall direction that is critical for speaking fluency (going from concept to English word). (2) Capture SRS response data (new_level, next_review) in state and render the existing VocabSRSProgress component on the result screen — matching what VocabDrillMode already does (line 33-34). In Vocabulary.tsx, add a small toggle/button near the existing flashcard launch button (around line 354-381) to let users choose 'Word → Meaning' vs 'Meaning → Word' flashcard direction before starting. No backend changes needed.",
+  "files_to_modify": ["frontend/src/components/VocabFlashcardMode.tsx", "frontend/src/pages/Vocabulary.tsx"],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 565
+  │ Read Vocabulary.tsx
+  │   │ frontend/src/pages/Vocabulary.tsx
+  │   └ L80:200 (121 lines read)
+  └ Read Vocabulary.tsx
+      │ frontend/src/pages/Vocabulary.tsx
+      └ L250:450 (201 lines read)
+
+● Record T1 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now calling the coder to implement this proposal.
+
+Now let me look at how VocabDrillMode handles SRS progress and the api.submitAnswer response:Now let me find the relevant section in ui-test-spec.yaml for flashcard/vocabulary tests:Let me also check what comes after the last vocab test:Now I have a clear picture of what needs to be done. Let me implement the changes:
+
+1. **VocabFlashcardMode.tsx**: Add `reverse` prop, capture SRS response, render VocabSRSProgress on result screen
+2. **Vocabulary.tsx**: Add flashcard direction toggle state and UI, pass `reverse` propNow update the result phase to include VocabSRSProgress and show direction label:Now update the review (active card) phase to support reverse mode:Now update Vocabulary.tsx — add the flashcard direction state and modify the flashcard button area:Now replace the flashcard button with a button + direction toggle:Now update the flashcard rendering to pass the `reverse` prop:Now let me verify the final file looks correct:Good. Now run TypeScript check:TypeScript compiles cleanly. Now update the UI test spec:Now commit:

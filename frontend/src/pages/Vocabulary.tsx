@@ -44,6 +44,7 @@ export default function Vocabulary() {
 
   // Flashcard review state
   const [fcWords, setFcWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
+  const [fcReverse, setFcReverse] = useState(false);
 
   // Sentence build state
   const [sbExercises, setSbExercises] = useState<SentenceBuildExercise[]>([]);
@@ -351,34 +352,76 @@ export default function Vocabulary() {
           <Zap size={20} /> ⚡ Quick Drill — 10 words in 60 seconds
         </button>
 
-        <button
-          onClick={async () => {
-            setLoading(true);
-            try {
-              const data = await api.getDrillWords(10);
-              if (!data.words || data.words.length === 0) {
-                setInlineError('No vocabulary words available for flashcard review. Add words via a topic quiz first.');
-                return;
+        <div style={{ marginBottom: 20 }}>
+          <button
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const data = await api.getDrillWords(10);
+                if (!data.words || data.words.length === 0) {
+                  setInlineError('No vocabulary words available for flashcard review. Add words via a topic quiz first.');
+                  return;
+                }
+                setFcWords(data.words.slice(0, 10));
+                setPhase('flashcard');
+              } catch {
+                setInlineError('Failed to load words for flashcard review.');
+              } finally {
+                setLoading(false);
               }
-              setFcWords(data.words.slice(0, 10));
-              setPhase('flashcard');
-            } catch {
-              setInlineError('Failed to load words for flashcard review.');
-            } finally {
-              setLoading(false);
-            }
-          }}
-          disabled={loading || topicsLoading}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
-            border: '2px solid #06b6d4', background: 'linear-gradient(135deg, #ecfeff, #cffafe)',
-            color: '#155e75', fontWeight: 600, fontSize: '1rem',
-          }}
-          aria-label="Start flashcard review"
-        >
-          🃏 Flashcard Review — self-paced active recall
-        </button>
+            }}
+            disabled={loading || topicsLoading}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+              padding: '14px 20px', borderRadius: '12px 12px 0 0', cursor: 'pointer',
+              border: '2px solid #06b6d4', borderBottom: '1px solid #06b6d4',
+              background: 'linear-gradient(135deg, #ecfeff, #cffafe)',
+              color: '#155e75', fontWeight: 600, fontSize: '1rem',
+            }}
+            aria-label="Start flashcard review"
+          >
+            🃏 Flashcard Review — self-paced active recall
+          </button>
+          <div
+            style={{
+              display: 'flex', borderRadius: '0 0 12px 12px',
+              border: '2px solid #06b6d4', borderTop: 'none',
+              overflow: 'hidden',
+            }}
+            role="group"
+            aria-label="Flashcard direction"
+          >
+            <button
+              onClick={() => setFcReverse(false)}
+              style={{
+                flex: 1, padding: '8px 12px', cursor: 'pointer', border: 'none',
+                background: !fcReverse ? '#06b6d4' : 'var(--surface)',
+                color: !fcReverse ? '#fff' : 'var(--text-secondary)',
+                fontWeight: 600, fontSize: '0.85rem',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+              aria-label="Word to Meaning direction"
+              aria-pressed={!fcReverse}
+            >
+              Word → Meaning
+            </button>
+            <button
+              onClick={() => setFcReverse(true)}
+              style={{
+                flex: 1, padding: '8px 12px', cursor: 'pointer',
+                border: 'none', borderLeft: '1px solid #06b6d4',
+                background: fcReverse ? '#06b6d4' : 'var(--surface)',
+                color: fcReverse ? '#fff' : 'var(--text-secondary)',
+                fontWeight: 600, fontSize: '0.85rem',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+              aria-label="Meaning to Word direction"
+              aria-pressed={fcReverse}
+            >
+              Meaning → Word
+            </button>
+          </div>
+        </div>
 
         <button
           onClick={openTiers}
@@ -633,6 +676,7 @@ export default function Vocabulary() {
         initialWords={fcWords}
         tts={tts}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+        reverse={fcReverse}
       />
     );
   }

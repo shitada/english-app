@@ -1010,6 +1010,54 @@ pages:
         priority: medium
         added_in: 544
 
+      - id: vocab-023
+        target: Flashcard direction toggle renders with two options
+        action: snapshot vocabulary select page, look at flashcard section
+        expect: Two toggle buttons visible below flashcard launch button — "Word → Meaning" (selected by default) and "Meaning → Word"
+        type: visual
+        priority: high
+        added_in: 565
+
+      - id: vocab-024
+        target: Flashcard direction toggle switches selection
+        action: click "Meaning → Word" toggle button
+        expect: "Meaning → Word" button becomes active (cyan background), "Word → Meaning" becomes inactive
+        type: functional
+        priority: high
+        added_in: 565
+
+      - id: vocab-025
+        target: Reverse flashcard mode shows meaning on front
+        action: select "Meaning → Word" direction, start flashcard review
+        expect: Card front shows the meaning/definition text (not the English word), no speaker icon on front
+        type: functional
+        priority: high
+        added_in: 565
+
+      - id: vocab-026
+        target: Reverse flashcard mode shows word with TTS on back
+        action: in reverse mode, click "Show Answer" to flip card
+        expect: Back of card shows the English word with 🔊 speaker icon, clickable for TTS
+        type: functional
+        priority: high
+        added_in: 565
+
+      - id: vocab-027
+        target: Flashcard result screen shows SRS Progress section
+        action: complete a flashcard review session (answer all cards)
+        expect: Result screen includes "SRS Progress" section with leveled-up/leveled-down counts and per-word level bars
+        type: functional
+        priority: high
+        added_in: 565
+
+      - id: vocab-028
+        target: Flashcard result screen shows mode label
+        action: complete a flashcard review in either direction
+        expect: Result screen displays "Mode: Word → Meaning" or "Mode: Meaning → Word" matching the chosen direction
+        type: visual
+        priority: medium
+        added_in: 565
+
   dashboard:
     path: /dashboard
     tests:

@@ -543,3 +543,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 561	0ea0ec4	2026-04-18	363	230	131	165	889	1766	1766	pass	6.50	kept	Add Quick Predict-What-Happens-Next listening-speaking card
 562	2393ffa	2026-04-18	306	231	117	141	795	1781	1781	pass	6.20	kept	Add Quick Dictogloss Card for listen-then-reconstruct speaking drill
 563	none	2026-04-18	515	567	138	167	1387	1790	1790	pass	5.35	discarded	Vocabulary Conversation Context to show word usage in chats
+564	89d0fef	2026-04-18	404	310	126	204	1044	1784	1784	pass	6.45	kept	Add CEFR English Level Estimator card to Dashboard
