@@ -516,3 +516,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 527	none	2026-04-17	286	209	117	202	814	1577	1578	pass	6.20	discarded	Add Quick Listen-Paraphrase Card for listen-then-rephrase speaking drill
 528	7858e1c	2026-04-17	199	228	190	323	940	1575	1575	pass	6.20	kept	Add Quick Listen-Paraphrase Card for listen-then-rephrase speaking drill
 529	98171ea	2026-04-17	417	252	109	119	897	1585	1585	pass	7.80	kept	Add 4-3-2 Fluency Sprint speaking drill on Home page
+530	ed459ae	2026-04-17	284	189	121	125	719	1593	1593	pass	6.80	kept	Add Quick Connector Drill Card for discourse linker speaking practice

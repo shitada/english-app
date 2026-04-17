@@ -1580,3 +1580,43 @@ pages:
         type: functional
         priority: medium
         added_in: 530
+
+      - id: quick-practice-hub-059
+        target: QuickSpotErrorCard renders in Listening tab with hint and listen button
+        action: Switch to Listening tab and wait for QuickSpotErrorCard to load
+        expect: Card displays title "Quick Spot the Error", a hint with error type, and a "Listen & Correct" button
+        type: functional
+        priority: high
+        added_in: 531
+
+      - id: quick-practice-hub-060
+        target: QuickSpotErrorCard listening phase shows pulsing headphones icon
+        action: Click "Listen & Correct" button on QuickSpotErrorCard
+        expect: Card enters listening phase with animated headphones icon and "Listening for the error…" text
+        type: functional
+        priority: medium
+        added_in: 531
+
+      - id: quick-practice-hub-061
+        target: QuickSpotErrorCard recording phase shows countdown and stop button
+        action: Wait for TTS to finish in QuickSpotErrorCard listening phase
+        expect: Card transitions to recording phase with countdown timer, live transcript, and "Done" stop button
+        type: functional
+        priority: medium
+        added_in: 531
+
+      - id: quick-practice-hub-062
+        target: QuickSpotErrorCard results show scores, error sentence, and corrected version
+        action: Complete a recording in QuickSpotErrorCard
+        expect: Card shows overall, accuracy, grammar, naturalness scores, feedback, error sentence with strikethrough, correct version, "Try Again" and "New Sentence" buttons
+        type: functional
+        priority: high
+        added_in: 531
+
+      - id: quick-practice-hub-063
+        target: QuickSpotErrorCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickSpotErrorCard is visible
+        expect: QuickSpotErrorCard resets to idle phase and re-fetches exercise with new difficulty
+        type: functional
+        priority: medium
+        added_in: 531

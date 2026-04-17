@@ -3924,3 +3924,119 @@ async def evaluate_fluency_sprint(
         "strengths": [str(s) for s in raw_strengths[:5]] if isinstance(raw_strengths, list) else [],
         "tips": [str(t) for t in raw_tips[:5]] if isinstance(raw_tips, list) else [],
     }
+
+
+# ── Spot-the-Error Listening Drill ──────────────────────────────
+
+
+class SpotErrorPromptResponse(BaseModel):
+    error_sentence: str
+    correct_sentence: str
+    error_type: str
+    hint: str
+    difficulty: str
+
+
+@router.get("/spot-error", response_model=SpotErrorPromptResponse)
+async def get_spot_error_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence with a deliberate grammar error for spot-the-error drill."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a single English sentence that contains exactly ONE deliberate grammatical error "
+        f"for a {difficulty}-level English learner to identify and correct.\n"
+        "The error should be realistic (the kind a learner might make), such as:\n"
+        "- subject-verb agreement ('She go to the store')\n"
+        "- tense errors ('I eat dinner yesterday')\n"
+        "- article errors ('I saw a elephant')\n"
+        "- preposition errors ('I'm good in English')\n"
+        "- plural/singular errors ('There are many child')\n"
+        "Return JSON with:\n"
+        "- error_sentence (string): the sentence WITH the grammar error (8-15 words)\n"
+        "- correct_sentence (string): the corrected version of the sentence\n"
+        "- error_type (string): short label for the error type (e.g. 'subject-verb agreement', 'tense', 'article')\n"
+        "- hint (string): a brief hint about what kind of error to look for (without giving the answer)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="spot_error_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Spot-error prompt generation failed")
+
+    return {
+        "error_sentence": str(result.get("error_sentence", "She go to the store yesterday.")),
+        "correct_sentence": str(result.get("correct_sentence", "She went to the store yesterday.")),
+        "error_type": str(result.get("error_type", "tense")),
+        "hint": str(result.get("hint", "Look at the verb tense.")),
+        "difficulty": difficulty,
+    }
+
+
+class SpotErrorEvaluateRequest(BaseModel):
+    error_sentence: str = Field(min_length=1, max_length=500)
+    correct_sentence: str = Field(min_length=1, max_length=500)
+    user_correction: str = Field(min_length=1, max_length=2000)
+
+
+class SpotErrorEvaluateResponse(BaseModel):
+    correction_accuracy_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    feedback: str
+    model_correction: str
+
+
+@router.post("/spot-error/evaluate", response_model=SpotErrorEvaluateResponse)
+async def evaluate_spot_error(
+    req: SpotErrorEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's spoken correction of a sentence with a grammar error."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original sentence (with grammar error): \"{req.error_sentence}\"\n"
+        f"Correct version: \"{req.correct_sentence}\"\n"
+        f"User's spoken correction: \"{req.user_correction}\"\n\n"
+        "The learner listened to the error sentence and tried to speak the corrected version.\n"
+        "Evaluate how well they identified and corrected the error.\n"
+        "Return JSON with:\n"
+        "- correction_accuracy_score (number 1-10): how accurately they identified and fixed the error\n"
+        "- grammar_score (number 1-10): grammatical correctness of their spoken correction\n"
+        "- naturalness_score (number 1-10): how natural their correction sounds\n"
+        "- overall_score (number 1-10): overall quality of the correction\n"
+        "- feedback (string): encouraging feedback with specific tips (2-3 sentences)\n"
+        "- model_correction (string): the ideal corrected sentence\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar and pronunciation coach. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="spot_error_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Spot-error evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "correction_accuracy_score": clamp(result.get("correction_accuracy_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_correction": str(result.get("model_correction", req.correct_sentence)),
+    }

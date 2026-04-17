@@ -2425,3 +2425,42 @@ export function evaluateFluencySprint(
     body: JSON.stringify({ topic, transcripts, durations }),
   });
 }
+
+// ── Spot-the-Error Listening Drill ─────────────────────────────
+
+export interface SpotErrorPrompt {
+  error_sentence: string;
+  correct_sentence: string;
+  error_type: string;
+  hint: string;
+  difficulty: string;
+}
+
+export interface SpotErrorEvaluation {
+  correction_accuracy_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_correction: string;
+}
+
+export function getSpotErrorPrompt(
+  difficulty: string = 'intermediate',
+): Promise<SpotErrorPrompt> {
+  return request<SpotErrorPrompt>(
+    `/api/pronunciation/spot-error?difficulty=${difficulty}`,
+  );
+}
+
+export function evaluateSpotError(data: {
+  error_sentence: string;
+  correct_sentence: string;
+  user_correction: string;
+}): Promise<SpotErrorEvaluation> {
+  return request<SpotErrorEvaluation>('/api/pronunciation/spot-error/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
