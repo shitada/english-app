@@ -1667,3 +1667,90 @@ async def test_custom_topic_duplicate_returns_409(client):
     await client.post("/api/conversation/custom-topics", json=payload)
     res = await client.post("/api/conversation/custom-topics", json=payload)
     assert res.status_code == 409
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_list_conversations_keyword_search(client, mock_copilot):
+    """Search conversations by keyword that appears in user messages."""
+    # Start conversation and send a user message containing 'breakfast'
+    mock_copilot.ask = AsyncMock(return_value="Good morning! How can I help?")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Breakfast is from 7 to 10 AM.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Is breakfast included?",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+    await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Is breakfast included?",
+    })
+
+    # Search by keyword — should find the conversation
+    res = await client.get("/api/conversation/list?keyword=breakfast")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] >= 1
+    ids = [c["id"] for c in data["conversations"]]
+    assert conv_id in ids
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_list_conversations_keyword_search_no_match(client, mock_copilot):
+    """Search with a keyword that doesn't appear in any conversation returns empty."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+
+    res = await client.get("/api/conversation/list?keyword=xylophone_nonexistent_word")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_count"] == 0
+    assert data["conversations"] == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_list_conversations_keyword_and_topic_filter(client, mock_copilot):
+    """Combine keyword and topic filter parameters."""
+    # Create hotel conversation with the word "reservation"
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the hotel!")
+    start_hotel = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    hotel_id = start_hotel.json()["conversation_id"]
+    mock_copilot.ask = AsyncMock(return_value="Your reservation is confirmed.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "I have a reservation.", "is_correct": True, "errors": [], "suggestions": [],
+    })
+    await client.post("/api/conversation/message", json={
+        "conversation_id": hotel_id, "content": "I have a reservation.",
+    })
+
+    # Create shopping conversation with the word "reservation" (unusual but testable)
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the shop!")
+    start_shop = await client.post("/api/conversation/start", json={"topic": "shopping"})
+    shop_id = start_shop.json()["conversation_id"]
+    mock_copilot.ask = AsyncMock(return_value="We don't take reservations here.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Do you accept reservation?", "is_correct": True, "errors": [], "suggestions": [],
+    })
+    await client.post("/api/conversation/message", json={
+        "conversation_id": shop_id, "content": "Do you accept reservation?",
+    })
+
+    # Keyword only — should find both
+    res_kw = await client.get("/api/conversation/list?keyword=reservation")
+    assert res_kw.status_code == 200
+    assert res_kw.json()["total_count"] >= 2
+
+    # Keyword + topic filter — should only find hotel conversation
+    res_both = await client.get("/api/conversation/list?keyword=reservation&topic=hotel_checkin")
+    assert res_both.status_code == 200
+    data = res_both.json()
+    assert data["total_count"] >= 1
+    ids = [c["id"] for c in data["conversations"]]
+    assert hotel_id in ids
+    assert shop_id not in ids

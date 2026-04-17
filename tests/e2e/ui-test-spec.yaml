@@ -1844,3 +1844,27 @@ pages:
         type: functional
         priority: high
         added_in: 537
+
+      - id: conv-064
+        target: Navigation guard dialog appears when leaving active chat
+        action: Start a conversation (enter chat phase), then click a navigation link (e.g. Home or Dashboard)
+        expect: A ConfirmDialog overlay appears with message 'You have an active conversation. Leaving will end it.' and buttons 'End & Leave' and 'Stay in Chat'
+        type: functional
+        priority: critical
+        added_in: 539
+
+      - id: conv-065
+        target: Navigation guard 'Stay in Chat' cancels navigation
+        action: Trigger the navigation guard dialog, then click 'Stay in Chat'
+        expect: Dialog closes, user remains on the conversation page in the chat phase, conversation continues
+        type: functional
+        priority: high
+        added_in: 539
+
+      - id: conv-066
+        target: Navigation guard 'End & Leave' ends conversation and navigates away
+        action: Trigger the navigation guard dialog, then click 'End & Leave'
+        expect: Conversation ends, dialog closes, page navigates to the target route
+        type: functional
+        priority: high
+        added_in: 539

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useBlocker } from 'react-router-dom';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark, BookOpen } from 'lucide-react';
 import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
@@ -141,6 +142,9 @@ export default function Conversation() {
       }
     };
   }, []);
+
+  // Block SPA navigation while chat is active
+  const blocker = useBlocker(phase === 'chat');
 
   const speech = useSpeechRecognition({ continuous: true });
   const tts = useSpeechSynthesis();
@@ -1571,6 +1575,36 @@ export default function Conversation() {
           <Send size={22} />
         </button>
       </div>
+
+      {/* Navigation guard dialog */}
+      {blocker.state === 'blocked' && (
+        <div
+          role="alertdialog"
+          aria-label="Navigation blocked"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.5)',
+          }}
+        >
+          <div style={{ maxWidth: 420, width: '90%' }}>
+            <ConfirmDialog
+              message="You have an active conversation. Leaving will end it."
+              confirmLabel="End & Leave"
+              cancelLabel="Stay in Chat"
+              onConfirm={async () => {
+                await endConversation();
+                blocker.proceed?.();
+              }}
+              onCancel={() => blocker.reset?.()}
+            />
+          </div>
+        </div>
+      )}
     </div>
     </PhaseTransition>
   );
