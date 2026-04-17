@@ -156,6 +156,7 @@ export default function StudyPlanCard() {
             >
               {/* Step number / check button */}
               <button
+                data-testid={`study-plan-step-${index}`}
                 onClick={() => toggleStep(index)}
                 aria-label={isDone ? `Mark step ${index + 1} incomplete` : `Mark step ${index + 1} complete`}
                 style={{

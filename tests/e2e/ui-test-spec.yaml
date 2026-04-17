@@ -56,7 +56,7 @@ pages:
 
       - id: home-005
         target: Word of the Day TTS button works
-        action: click TTS button on Word of the Day card
+        action: click button[data-testid="wotd-tts"]
         expect: Button responds (not stuck disabled), no console errors
         type: functional
         priority: high
@@ -80,7 +80,7 @@ pages:
 
       - id: home-008
         target: Mobile hamburger menu opens/closes
-        action: resize to 375px width, click hamburger button
+        action: resize to 375px width, click button[data-testid="nav-hamburger"]
         expect: Nav menu expands, shows all links; click again to close
         type: functional
         priority: high
@@ -140,7 +140,7 @@ pages:
 
       - id: home-016
         target: Study Plan step completion toggle
-        action: click the step number circle button on the first study plan step
+        action: click button[data-testid="study-plan-step-0"]
         expect: Step shows checkmark, background changes to green, progress bar updates, step title gets strikethrough
         type: state
         priority: high
@@ -180,7 +180,7 @@ pages:
 
       - id: home-021
         target: Fluency Sprint start button begins drill
-        action: click [data-testid="fluency-sprint-start"] button
+        action: click "Start Sprint" button
         expect: Round indicators appear with timer countdown and microphone icon
         type: functional
         priority: high

@@ -19,11 +19,12 @@ class TestHomePage:
     def test_navigation_links(self, page: Page, server: str):
         page.goto(server)
         nav = page.locator("nav")
-        expect(nav.locator("a")).to_have_count(4)
+        expect(nav.locator("a")).to_have_count(5)
         expect(nav.locator("a").nth(0)).to_contain_text("Conversation")
         expect(nav.locator("a").nth(1)).to_contain_text("Pronunciation")
-        expect(nav.locator("a").nth(2)).to_contain_text("Vocabulary")
-        expect(nav.locator("a").nth(3)).to_contain_text("Dashboard")
+        expect(nav.locator("a").nth(2)).to_contain_text("Listening")
+        expect(nav.locator("a").nth(3)).to_contain_text("Vocabulary")
+        expect(nav.locator("a").nth(4)).to_contain_text("Dashboard")
 
 
 @pytest.mark.e2e

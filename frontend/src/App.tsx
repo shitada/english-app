@@ -60,6 +60,7 @@ function Header() {
       </button>
       <button
         className="nav-toggle"
+        data-testid="nav-hamburger"
         onClick={() => setNavOpen(!navOpen)}
         aria-label="Toggle navigation menu"
         aria-expanded={navOpen}

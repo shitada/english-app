@@ -399,6 +399,7 @@ function WordOfTheDayCard() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
         <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>{word.word}</span>
         <button
+          data-testid="wotd-tts"
           onClick={() => speak(word.word)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-secondary)' }}
           title={t('listen')}
