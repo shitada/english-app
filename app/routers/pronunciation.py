@@ -3408,3 +3408,137 @@ async def get_tongue_twister(
         "slow_hint": str(result.get("slow_hint", "")),
         "difficulty": difficulty,
     }
+
+
+# ── Collocation Match Drill ─────────────────────────────────────
+
+
+class CollocationExercise(BaseModel):
+    base_word: str
+    correct_collocation: str
+    wrong_collocations: list[str]
+    category: str
+    explanation: str
+
+
+class CollocationDrillResponse(BaseModel):
+    exercises: list[CollocationExercise]
+    difficulty: str
+
+
+@router.get("/collocation-drill", response_model=CollocationDrillResponse)
+async def get_collocation_drill(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=5, ge=1, le=10),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate collocation match exercises."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate {count} collocation exercises for a {difficulty}-level English learner.\n"
+        "Collocations are natural word combinations (e.g. 'make a decision' not 'do a decision').\n"
+        "Each exercise should test whether the learner knows which word naturally pairs with a given base word.\n\n"
+        "Return JSON with:\n"
+        "- exercises (array of objects), each with:\n"
+        "  - base_word (string): the word the learner must find a collocation for "
+        "(e.g. 'make' or 'heavy')\n"
+        "  - correct_collocation (string): the correct natural pairing "
+        "(e.g. 'make a decision' or 'heavy rain')\n"
+        "  - wrong_collocations (array of 3 strings): plausible but incorrect pairings "
+        "(e.g. ['make a choice', 'do a decision', 'take a decision'] — note: only include "
+        "truly wrong collocations)\n"
+        "  - category (string): the collocation type, one of 'verb+noun', 'adjective+noun', "
+        "'adverb+adjective', 'verb+preposition'\n"
+        "  - explanation (string): a brief explanation of why the correct collocation is natural "
+        "(1-2 sentences)\n"
+        f"- difficulty (string): '{difficulty}'"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach specializing in collocations "
+                "and natural word combinations. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="collocation_drill",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Collocation drill generation failed")
+
+    raw_exercises = result.get("exercises", [])
+    if not isinstance(raw_exercises, list):
+        raw_exercises = []
+
+    exercises = []
+    for ex in raw_exercises:
+        if not isinstance(ex, dict):
+            continue
+        wrong = ex.get("wrong_collocations", [])
+        if not isinstance(wrong, list):
+            wrong = []
+        wrong = [str(w) for w in wrong if w][:3]
+        # Pad to 3 distractors if needed
+        while len(wrong) < 3:
+            wrong.append(f"incorrect option {len(wrong) + 1}")
+        exercises.append({
+            "base_word": str(ex.get("base_word", "")),
+            "correct_collocation": str(ex.get("correct_collocation", "")),
+            "wrong_collocations": wrong,
+            "category": str(ex.get("category", "verb+noun")),
+            "explanation": str(ex.get("explanation", "")),
+        })
+
+    return {
+        "exercises": exercises,
+        "difficulty": difficulty,
+    }
+
+
+class CollocationEvaluateRequest(BaseModel):
+    base_word: str = Field(min_length=1, max_length=200)
+    correct_collocation: str = Field(min_length=1, max_length=200)
+    user_choice: str = Field(min_length=1, max_length=200)
+
+
+class CollocationEvaluateResponse(BaseModel):
+    is_correct: bool
+    explanation: str
+    example_sentence: str
+
+
+@router.post("/collocation-drill/evaluate", response_model=CollocationEvaluateResponse)
+async def evaluate_collocation(
+    body: CollocationEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's collocation choice."""
+    copilot = get_copilot_service()
+    is_correct = body.user_choice.strip().lower() == body.correct_collocation.strip().lower()
+    eval_prompt = (
+        f"The base word is: \"{body.base_word}\"\n"
+        f"The correct collocation is: \"{body.correct_collocation}\"\n"
+        f"The user chose: \"{body.user_choice}\"\n"
+        f"The user's choice is {'correct' if is_correct else 'incorrect'}.\n\n"
+        "Return JSON with:\n"
+        "- is_correct (boolean): whether the user's choice matches the correct collocation\n"
+        "- explanation (string): explain why the correct collocation is natural and "
+        "why the wrong choice (if applicable) doesn't work (2-3 sentences)\n"
+        "- example_sentence (string): a natural example sentence using the correct collocation"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach specializing in collocations. "
+                "Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="collocation_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Collocation evaluation failed")
+
+    return {
+        "is_correct": is_correct,
+        "explanation": str(result.get("explanation", "")),
+        "example_sentence": str(result.get("example_sentence", "")),
+    }

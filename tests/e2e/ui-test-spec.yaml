@@ -1404,3 +1404,59 @@ pages:
         type: functional
         priority: medium
         added_in: 509
+
+      - id: quick-practice-hub-040
+        target: QuickCollocationCard renders in vocabulary tab
+        action: Click the Vocabulary tab in Quick Practice Hub
+        expect: Collocation Match card is visible with title, Link2 icon, and refresh button
+        type: functional
+        priority: high
+        added_in: 526
+
+      - id: quick-practice-hub-041
+        target: QuickCollocationCard displays base word and 4 tappable options
+        action: Wait for collocation drill to load in the Vocabulary tab
+        expect: Base word shown prominently, 4 option buttons rendered, question progress indicator visible (e.g. "Question 1 of 5")
+        type: functional
+        priority: high
+        added_in: 526
+
+      - id: quick-practice-hub-042
+        target: QuickCollocationCard correct answer shows green feedback
+        action: Tap the correct collocation option
+        expect: Selected option highlighted green, "Correct!" label shown, explanation text visible, Next button appears
+        type: functional
+        priority: high
+        added_in: 526
+
+      - id: quick-practice-hub-043
+        target: QuickCollocationCard wrong answer shows red feedback
+        action: Tap an incorrect collocation option
+        expect: Selected option highlighted red, correct option highlighted green, "Not quite" label shown, explanation visible, Next button appears
+        type: functional
+        priority: high
+        added_in: 526
+
+      - id: quick-practice-hub-044
+        target: QuickCollocationCard summary shown after all questions
+        action: Complete all collocation questions by selecting options and clicking Next
+        expect: Summary view with score (e.g. "3 / 5 correct"), missed collocations listed, New Round button visible
+        type: functional
+        priority: high
+        added_in: 526
+
+      - id: quick-practice-hub-045
+        target: QuickCollocationCard New Round resets drill
+        action: Click "New Round" button on the summary view
+        expect: Card reloads with fresh exercises, returns to question 1
+        type: functional
+        priority: medium
+        added_in: 526
+
+      - id: quick-practice-hub-046
+        target: QuickCollocationCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickCollocationCard is visible
+        expect: QuickCollocationCard resets and re-fetches exercises with new difficulty
+        type: functional
+        priority: medium
+        added_in: 526

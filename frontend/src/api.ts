@@ -2275,3 +2275,45 @@ export async function getGrammarPatternDrill(
     body: JSON.stringify({ category, difficulty }),
   });
 }
+
+// ── Collocation Match Drill ─────────────────────────────────────
+
+export interface CollocationExercise {
+  base_word: string;
+  correct_collocation: string;
+  wrong_collocations: string[];
+  category: string;
+  explanation: string;
+}
+
+export interface CollocationDrillResponse {
+  exercises: CollocationExercise[];
+  difficulty: string;
+}
+
+export interface CollocationEvaluateResponse {
+  is_correct: boolean;
+  explanation: string;
+  example_sentence: string;
+}
+
+export function getCollocationDrill(
+  difficulty: string = 'intermediate',
+  count: number = 5,
+): Promise<CollocationDrillResponse> {
+  return request<CollocationDrillResponse>(
+    `/api/pronunciation/collocation-drill?difficulty=${difficulty}&count=${count}`,
+  );
+}
+
+export function evaluateCollocation(
+  base_word: string,
+  correct_collocation: string,
+  user_choice: string,
+): Promise<CollocationEvaluateResponse> {
+  return request<CollocationEvaluateResponse>('/api/pronunciation/collocation-drill/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base_word, correct_collocation, user_choice }),
+  });
+}
