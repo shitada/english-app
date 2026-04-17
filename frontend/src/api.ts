@@ -581,6 +581,9 @@ export interface StreakMilestonesResponse {
   longest_streak: number;
   milestones: { days: number; label: string; achieved: boolean }[];
   next_milestone: { days: number; label: string; days_remaining: number } | null;
+  freeze_earned: number;
+  freeze_used: number;
+  freeze_available: number;
 }
 
 export interface ConversationDurationResponse {

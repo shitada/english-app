@@ -625,7 +625,7 @@ function StreakMilestonesCard() {
 
   if (!data) return null;
 
-  const { current_streak, longest_streak, milestones, next_milestone } = data;
+  const { current_streak, longest_streak, milestones, next_milestone, freeze_available } = data;
   const isHot = current_streak >= 7;
 
   return (
@@ -645,6 +645,20 @@ function StreakMilestonesCard() {
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{t('currentStreak')}</div>
         </div>
+        {freeze_available > 0 && (
+          <div
+            data-testid="streak-freeze-badge"
+            title={`${freeze_available} streak freeze${freeze_available !== 1 ? 's' : ''} available`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              padding: '4px 10px', borderRadius: 12,
+              background: 'var(--info-bg, #eff6ff)', border: '1px solid var(--info, #3b82f6)',
+              fontSize: 12, fontWeight: 600, color: 'var(--info, #3b82f6)',
+            }}
+          >
+            🛡️ {freeze_available}
+          </div>
+        )}
         {longest_streak > 0 && (
           <div style={{
             marginLeft: 'auto', padding: '4px 10px', borderRadius: 12,

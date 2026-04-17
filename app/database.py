@@ -150,6 +150,14 @@ CREATE TABLE IF NOT EXISTS conversation_self_assessments (
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS streak_freezes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    freeze_date TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_streak_freezes_date ON streak_freezes(freeze_date);
 """
 
 # ---------------------------------------------------------------------------
@@ -336,6 +344,18 @@ _MIGRATIONS: list[tuple[str, str]] = [
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
         )""",
+    ),
+    (
+        "create streak_freezes table for streak freeze protection",
+        """CREATE TABLE IF NOT EXISTS streak_freezes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            freeze_date TEXT NOT NULL UNIQUE,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on streak_freezes freeze_date",
+        "CREATE INDEX IF NOT EXISTS idx_streak_freezes_date ON streak_freezes(freeze_date)",
     ),
 ]
 

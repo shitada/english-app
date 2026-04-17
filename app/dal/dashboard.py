@@ -70,7 +70,10 @@ async def get_stats(db: aiosqlite.Connection) -> dict[str, Any]:
 
 
 async def _calculate_streak(db: aiosqlite.Connection) -> int:
-    """Count consecutive days with learning activity ending at today or yesterday."""
+    """Count consecutive days with learning activity ending at today or yesterday.
+
+    Frozen days (from streak_freezes) count as activity days.
+    """
     rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
             SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-366 days')
@@ -82,6 +85,8 @@ async def _calculate_streak(db: aiosqlite.Connection) -> int:
             SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-366 days')
             UNION ALL
             SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT freeze_date AS created_at FROM streak_freezes WHERE freeze_date >= date('now', '-366 days')
         ) ORDER BY d DESC
     """)
 
@@ -277,10 +282,103 @@ _MILESTONES = [
 ]
 
 
+async def get_freeze_info(db: aiosqlite.Connection) -> dict[str, int]:
+    """Return streak freeze counts: earned, used, available.
+
+    Earned = longest_streak // 7 (1 freeze token per 7 consecutive days).
+    Used = number of records in streak_freezes table.
+    Available = max(0, earned - used).
+    """
+    longest = await _calculate_longest_streak(db)
+    earned = longest // 7
+
+    rows = await db.execute_fetchall("SELECT COUNT(*) AS cnt FROM streak_freezes")
+    used = rows[0]["cnt"] if rows else 0
+
+    return {
+        "earned": earned,
+        "used": used,
+        "available": max(0, earned - used),
+    }
+
+
+async def auto_apply_freezes(db: aiosqlite.Connection) -> int:
+    """Detect recent gap days between last activity and today, consume freezes.
+
+    Returns the number of freezes applied.
+    """
+    # Get activity dates (without existing freeze dates) in descending order
+    rows = await db.execute_fetchall("""
+        SELECT DISTINCT date(created_at) as d FROM (
+            SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT created_at FROM pronunciation_attempts WHERE created_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT answered_at AS created_at FROM quiz_attempts WHERE answered_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-366 days')
+            UNION ALL
+            SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-366 days')
+        ) ORDER BY d DESC
+    """)
+
+    if not rows:
+        return 0
+
+    today = datetime.now(timezone.utc).date()
+
+    try:
+        most_recent = date.fromisoformat(rows[0]["d"])
+    except (ValueError, TypeError):
+        return 0
+
+    # Only look for gaps between today and the most recent activity
+    gap_start_ordinal = most_recent.toordinal() + 1
+    gap_end_ordinal = today.toordinal()  # exclusive of today
+
+    if gap_start_ordinal >= gap_end_ordinal:
+        return 0  # No gap days
+
+    # Get already-frozen dates to avoid duplicates
+    existing = await db.execute_fetchall(
+        "SELECT freeze_date FROM streak_freezes"
+    )
+    frozen_dates = {r["freeze_date"] for r in existing}
+
+    # Get available freeze count
+    info = await get_freeze_info(db)
+    available = info["available"]
+
+    applied = 0
+    for ordinal in range(gap_start_ordinal, gap_end_ordinal):
+        if available <= 0:
+            break
+        gap_date = date.fromordinal(ordinal)
+        gap_str = gap_date.isoformat()
+        if gap_str in frozen_dates:
+            continue
+        await db.execute(
+            "INSERT OR IGNORE INTO streak_freezes (freeze_date) VALUES (?)",
+            (gap_str,),
+        )
+        frozen_dates.add(gap_str)
+        available -= 1
+        applied += 1
+
+    if applied > 0:
+        await db.commit()
+
+    return applied
+
+
 async def get_streak_milestones(db: aiosqlite.Connection) -> dict[str, Any]:
     """Get current streak with milestone achievements."""
+    # Auto-apply freezes before computing streak
+    await auto_apply_freezes(db)
+
     current_streak = await _calculate_streak(db)
     longest_streak = await _calculate_longest_streak(db)
+    freeze_info = await get_freeze_info(db)
 
     milestones = [
         {"days": days, "label": label, "achieved": current_streak >= days}
@@ -302,11 +400,17 @@ async def get_streak_milestones(db: aiosqlite.Connection) -> dict[str, Any]:
         "longest_streak": longest_streak,
         "milestones": milestones,
         "next_milestone": next_milestone,
+        "freeze_earned": freeze_info["earned"],
+        "freeze_used": freeze_info["used"],
+        "freeze_available": freeze_info["available"],
     }
 
 
 async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
-    """Find the longest consecutive streak in all activity history."""
+    """Find the longest consecutive streak in all activity history.
+
+    Frozen days (from streak_freezes) count as activity days.
+    """
     rows = await db.execute_fetchall("""
         SELECT DISTINCT date(created_at) as d FROM (
             SELECT created_at FROM messages WHERE role = 'user' AND created_at >= date('now', '-1095 days')
@@ -318,6 +422,8 @@ async def _calculate_longest_streak(db: aiosqlite.Connection) -> int:
             SELECT created_at FROM listening_quiz_results WHERE created_at >= date('now', '-1095 days')
             UNION ALL
             SELECT created_at FROM speaking_journal WHERE created_at >= date('now', '-1095 days')
+            UNION ALL
+            SELECT freeze_date AS created_at FROM streak_freezes WHERE freeze_date >= date('now', '-1095 days')
         ) ORDER BY d ASC
     """)
     if not rows:

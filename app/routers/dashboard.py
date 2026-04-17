@@ -124,6 +124,9 @@ class StreakMilestonesResponse(BaseModel):
     longest_streak: int
     milestones: list[MilestoneItem]
     next_milestone: NextMilestone | None
+    freeze_earned: int = 0
+    freeze_used: int = 0
+    freeze_available: int = 0
 
 
 @router.get("/streak-milestones", response_model=StreakMilestonesResponse)

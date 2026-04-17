@@ -186,6 +186,22 @@ pages:
         priority: high
         added_in: 529
 
+      - id: home-022
+        target: Streak freeze badge displays available freeze count
+        action: snapshot [data-testid="streak-freeze-badge"] inside StreakMilestonesCard
+        expect: Shield icon (🛡️) with freeze count is visible when freeze_available > 0
+        type: functional
+        priority: medium
+        added_in: 550
+
+      - id: home-023
+        target: Streak freeze badge tooltip shows freeze count
+        action: hover over [data-testid="streak-freeze-badge"]
+        expect: Tooltip text includes number of available streak freezes
+        type: functional
+        priority: low
+        added_in: 550
+
   conversation:
     path: /conversation
     tests:
