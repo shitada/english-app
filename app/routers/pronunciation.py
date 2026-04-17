@@ -4317,3 +4317,146 @@ async def evaluate_rapid_fire(
         "overall_score": clamp(result.get("overall_score", 5)),
         "summary_feedback": str(result.get("summary_feedback", "")),
     }
+
+
+# ── Sentence Stress ────────────────────────────────────────────────
+
+
+class SentenceStressResponse(BaseModel):
+    sentence: str
+    stressed_words: list[str]
+    explanation: str
+    difficulty: str
+
+
+class SentenceStressEvaluateRequest(BaseModel):
+    sentence: str = Field(min_length=1, max_length=1000)
+    stressed_words: list[str] = Field(min_length=1, max_length=50)
+    transcript: str = Field(max_length=2000)
+
+
+class SentenceStressEvaluateResponse(BaseModel):
+    stress_accuracy_score: float
+    rhythm_score: float
+    pronunciation_score: float
+    overall_score: float
+    feedback: str
+    stress_tip: str
+
+
+@router.get("/sentence-stress", response_model=SentenceStressResponse)
+async def get_sentence_stress(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence with stressed words marked for prosody practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a single English sentence appropriate for a {difficulty}-level learner.\n"
+        "The sentence should be natural, 8-15 words long.\n"
+        "Identify which words should be stressed (content words: nouns, verbs, adjectives, adverbs).\n"
+        "Explain the stress pattern briefly.\n\n"
+        "Return JSON with:\n"
+        "- sentence (string): the full sentence\n"
+        "- stressed_words (array of strings): the words that should be stressed\n"
+        "- explanation (string): brief explanation of why these words are stressed (1-2 sentences)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English pronunciation and prosody coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_stress",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Sentence stress generation failed")
+
+    sentence = str(result.get("sentence", "")) if result.get("sentence") else ""
+    raw_stressed = result.get("stressed_words", [])
+    if not isinstance(raw_stressed, list):
+        raw_stressed = []
+    stressed_words = [str(w) for w in raw_stressed if isinstance(w, str) and w.strip()]
+    explanation = str(result.get("explanation", "")) if result.get("explanation") else ""
+
+    # Fallback if LLM returned invalid data
+    if not sentence or not stressed_words:
+        fallback_sentences = {
+            "beginner": {
+                "sentence": "The big dog runs in the park every morning.",
+                "stressed_words": ["big", "dog", "runs", "park", "morning"],
+                "explanation": "Content words like nouns, verbs, and adjectives are stressed in English.",
+            },
+            "intermediate": {
+                "sentence": "She quickly finished her important presentation before the deadline.",
+                "stressed_words": ["quickly", "finished", "important", "presentation", "deadline"],
+                "explanation": "Adverbs, main verbs, adjectives, and nouns carry the stress in this sentence.",
+            },
+            "advanced": {
+                "sentence": "The unprecedented economic downturn significantly impacted global markets.",
+                "stressed_words": ["unprecedented", "economic", "downturn", "significantly", "impacted", "global", "markets"],
+                "explanation": "In complex sentences, content words receive primary stress while function words are reduced.",
+            },
+        }
+        fb = fallback_sentences.get(difficulty, fallback_sentences["intermediate"])
+        sentence = fb["sentence"]
+        stressed_words = fb["stressed_words"]
+        explanation = fb["explanation"]
+
+    return {
+        "sentence": sentence,
+        "stressed_words": stressed_words,
+        "explanation": explanation,
+        "difficulty": difficulty,
+    }
+
+
+@router.post("/sentence-stress/evaluate", response_model=SentenceStressEvaluateResponse)
+async def evaluate_sentence_stress(
+    body: SentenceStressEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's attempt at matching sentence stress patterns."""
+    copilot = get_copilot_service()
+
+    transcript_text = body.transcript.strip() if body.transcript else "(no response)"
+    stressed_list = ", ".join(body.stressed_words)
+
+    eval_prompt = (
+        f"The user practiced sentence stress on this sentence:\n"
+        f"Reference: \"{body.sentence}\"\n"
+        f"Stressed words: [{stressed_list}]\n"
+        f"User's spoken transcript: \"{transcript_text}\"\n\n"
+        "Evaluate how well the user matched the stress pattern. Return JSON with:\n"
+        "- stress_accuracy_score (1-10): how well they stressed the correct words\n"
+        "- rhythm_score (1-10): overall rhythm and flow\n"
+        "- pronunciation_score (1-10): general pronunciation quality\n"
+        "- overall_score (1-10): combined assessment\n"
+        "- feedback (string): specific feedback on their stress patterns (2-3 sentences)\n"
+        "- stress_tip (string): one actionable tip for improving sentence stress\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English prosody and pronunciation expert. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="sentence_stress_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "stress_accuracy_score": clamp(result.get("stress_accuracy_score", 5)),
+        "rhythm_score": clamp(result.get("rhythm_score", 5)),
+        "pronunciation_score": clamp(result.get("pronunciation_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "stress_tip": str(result.get("stress_tip", "")),
+    }

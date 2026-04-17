@@ -1708,3 +1708,43 @@ pages:
         type: functional
         priority: medium
         added_in: 533
+
+      - id: quick-practice-hub-075
+        target: QuickSentenceStressCard idle state with stressed words highlighted
+        action: View QuickSentenceStressCard in Speaking tab
+        expect: Card shows sentence with stressed words in bold blue with underline, explanation text, and Listen/Speak/New buttons
+        type: visual
+        priority: high
+        added_in: 534
+
+      - id: quick-practice-hub-076
+        target: QuickSentenceStressCard Listen button plays TTS
+        action: Click Listen button on QuickSentenceStressCard
+        expect: Button text changes to "Playing…", TTS reads the sentence aloud, buttons disabled during playback
+        type: functional
+        priority: high
+        added_in: 534
+
+      - id: quick-practice-hub-077
+        target: QuickSentenceStressCard recording phase
+        action: Click Speak button on QuickSentenceStressCard
+        expect: Phase changes to recording, Stop button appears, live transcript displayed as user speaks
+        type: functional
+        priority: high
+        added_in: 534
+
+      - id: quick-practice-hub-078
+        target: QuickSentenceStressCard done phase with scores
+        action: Complete recording and view evaluation results
+        expect: Shows Overall/Stress/Rhythm/Pronun scores, feedback text, stress tip in blue info box, Try Again and New Sentence buttons
+        type: functional
+        priority: high
+        added_in: 534
+
+      - id: quick-practice-hub-079
+        target: QuickSentenceStressCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickSentenceStressCard is visible
+        expect: QuickSentenceStressCard resets to idle phase and fetches new sentence with updated difficulty
+        type: functional
+        priority: medium
+        added_in: 534

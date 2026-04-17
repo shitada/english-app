@@ -2541,3 +2541,32 @@ export function evaluateRapidFire(questions: string[], responses: RapidFireRespo
     body: JSON.stringify({ questions, responses }),
   });
 }
+
+// Sentence Stress (iteration 534)
+export interface SentenceStressResponse {
+  sentence: string;
+  stressed_words: string[];
+  explanation: string;
+  difficulty: string;
+}
+
+export interface SentenceStressEvaluateResponse {
+  stress_accuracy_score: number;
+  rhythm_score: number;
+  pronunciation_score: number;
+  overall_score: number;
+  feedback: string;
+  stress_tip: string;
+}
+
+export function getSentenceStress(difficulty: string = 'intermediate'): Promise<SentenceStressResponse> {
+  return request<SentenceStressResponse>(`/api/pronunciation/sentence-stress?difficulty=${difficulty}`);
+}
+
+export function evaluateSentenceStress(sentence: string, stressed_words: string[], transcript: string): Promise<SentenceStressEvaluateResponse> {
+  return request<SentenceStressEvaluateResponse>('/api/pronunciation/sentence-stress/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sentence, stressed_words, transcript }),
+  });
+}
