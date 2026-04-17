@@ -1053,6 +1053,62 @@ pages:
         priority: medium
         added_in: 525
 
+      - id: dash-014
+        target: PronunciationWeakSpots Practice 🎤 button visible for each mispronounced word
+        action: Navigate to /dashboard, scroll to Pronunciation Weak Spots section
+        expect: Each mispronounced word row has a 'Practice 🎤' button next to the occurrence count
+        type: visual
+        priority: high
+        added_in: 535
+
+      - id: dash-015
+        target: PronunciationWordDrill opens inline when Practice 🎤 button clicked
+        action: Click 'Practice 🎤' button on a mispronounced word in Pronunciation Weak Spots
+        expect: PronunciationWordDrill card appears below the word with Listen and Record buttons
+        type: functional
+        priority: high
+        added_in: 535
+
+      - id: dash-016
+        target: PronunciationWordDrill Listen button plays TTS
+        action: Click 'Listen 🔊' button in the pronunciation drill
+        expect: Button text changes to 'Playing…' while TTS is active, then returns to 'Listen 🔊'
+        type: functional
+        priority: medium
+        added_in: 535
+
+      - id: dash-017
+        target: PronunciationWordDrill shows result after recording
+        action: Click Record button, speak the word, wait for recognition to finish
+        expect: Result feedback shows ✅ or ❌ with the spoken transcript compared to target word, tips shown if available
+        type: functional
+        priority: high
+        added_in: 535
+
+      - id: dash-018
+        target: PronunciationWordDrill summary shows cumulative score
+        action: Complete all words in a pronunciation drill by clicking Next Word through each
+        expect: Summary screen shows correct count out of total, per-word results with ✅/❌, Try Again and Done buttons
+        type: functional
+        priority: high
+        added_in: 535
+
+      - id: dash-019
+        target: PronunciationWordDrill close button returns to weak spots view
+        action: Click back arrow or 'Close ✕' button on the pronunciation drill
+        expect: Drill panel closes, Pronunciation Weak Spots word list is fully visible again
+        type: functional
+        priority: medium
+        added_in: 535
+
+      - id: dash-020
+        target: Sound confusion pattern Practice button navigates to pronunciation page
+        action: Click 'Practice' link on a sound confusion pattern in Pronunciation Weak Spots
+        expect: Navigates to /pronunciation with phoneme query parameter in the URL
+        type: navigation
+        priority: medium
+        added_in: 535
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

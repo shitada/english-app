@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type PronunciationWeaknessItem, type MistakePatternItem } from '../../api';
+import { PronunciationWordDrill } from './PronunciationWordDrill';
 
 export function PronunciationWeakSpots() {
   const [weaknesses, setWeaknesses] = useState<PronunciationWeaknessItem[]>([]);
   const [patterns, setPatterns] = useState<MistakePatternItem[]>([]);
   const [expanded, setExpanded] = useState(false);
+  const [drillWord, setDrillWord] = useState<string | null>(null);
 
   useEffect(() => {
     api.getPronunciationWeaknesses().then(r => setWeaknesses(r.weaknesses)).catch(() => {});
@@ -54,6 +56,24 @@ export function PronunciationWeakSpots() {
                     ({p.example_words.slice(0, 2).join(', ')})
                   </span>
                 )}
+                <Link
+                  to={`/pronunciation?phoneme=${encodeURIComponent(p.target_sound)}`}
+                  style={{
+                    background: 'none',
+                    color: 'var(--accent, #6366f1)',
+                    border: '1px solid var(--accent, #6366f1)',
+                    borderRadius: 4,
+                    padding: '1px 6px',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    marginLeft: 4,
+                  }}
+                >
+                  Practice
+                </Link>
               </div>
             ))}
           </div>
@@ -73,11 +93,27 @@ export function PronunciationWeakSpots() {
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
                     {w.word}
                   </span>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                     {w.occurrence_count} {w.occurrence_count === 1 ? 'time' : 'times'}
                     {w.common_heard_as.length > 0 && (
                       <> · heard as: {w.common_heard_as.slice(0, 2).map(h => h[0]).join(', ')}</>
                     )}
+                    <button
+                      onClick={() => setDrillWord(drillWord === w.word ? null : w.word)}
+                      style={{
+                        background: drillWord === w.word ? 'var(--accent, #6366f1)' : 'none',
+                        color: drillWord === w.word ? '#fff' : 'var(--accent, #6366f1)',
+                        border: '1px solid var(--accent, #6366f1)',
+                        borderRadius: 4,
+                        padding: '2px 8px',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {drillWord === w.word ? 'Close ✕' : 'Practice 🎤'}
+                    </button>
                   </span>
                 </div>
                 <div style={{ width: '100%', height: 16, background: 'var(--bg-secondary)', borderRadius: 6, overflow: 'hidden' }}>
@@ -96,6 +132,14 @@ export function PronunciationWeakSpots() {
                   <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, fontStyle: 'italic' }}>
                     💡 {w.tips[0]}
                   </div>
+                )}
+
+                {/* Inline pronunciation drill */}
+                {drillWord === w.word && (
+                  <PronunciationWordDrill
+                    words={[w]}
+                    onClose={() => setDrillWord(null)}
+                  />
                 )}
               </div>
             ))}
