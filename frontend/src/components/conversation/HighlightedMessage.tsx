@@ -191,14 +191,28 @@ function InlineShadowDrill({ phrase, onSpeak, onClose }: {
   );
 }
 
-export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak }: {
+export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak, onSavePhrase, savedPhrases }: {
   content: string;
   keyPhrases?: string[];
   grammarNotes?: GrammarNote[];
   onSpeak: (text: string) => void;
+  onSavePhrase?: (phrase: string) => Promise<void>;
+  savedPhrases?: Set<string>;
 }) {
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
   const [activeDrill, setActiveDrill] = useState<number | null>(null);
+  const [savingPhrases, setSavingPhrases] = useState<Set<string>>(new Set());
+
+  const handleSave = useCallback(async (phrase: string, e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    if (!onSavePhrase || savedPhrases?.has(phrase.toLowerCase()) || savingPhrases.has(phrase.toLowerCase())) return;
+    setSavingPhrases((prev) => new Set(prev).add(phrase.toLowerCase()));
+    try {
+      await onSavePhrase(phrase);
+    } finally {
+      setSavingPhrases((prev) => { const next = new Set(prev); next.delete(phrase.toLowerCase()); return next; });
+    }
+  }, [onSavePhrase, savedPhrases, savingPhrases]);
 
   const hasKey = keyPhrases && keyPhrases.length > 0;
   const hasGrammar = grammarNotes && grammarNotes.length > 0;
@@ -268,6 +282,19 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
               >
                 🎤
               </span>
+              {onSavePhrase && (
+                <span
+                  onClick={(e) => { if (!savedPhrases?.has(part.toLowerCase()) && !savingPhrases.has(part.toLowerCase())) handleSave(part, e); else e.stopPropagation(); }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSave(part, e); }}
+                  title={savedPhrases?.has(part.toLowerCase()) ? 'Saved to vocabulary bank' : 'Save to vocabulary bank'}
+                  data-testid="save-phrase-btn"
+                  style={{ fontSize: 10, cursor: savedPhrases?.has(part.toLowerCase()) ? 'default' : 'pointer', marginLeft: 2 }}
+                >
+                  {savedPhrases?.has(part.toLowerCase()) ? '✅' : savingPhrases.has(part.toLowerCase()) ? '⏳' : '📌'}
+                </span>
+              )}
               {activeDrill === i && (
                 <InlineShadowDrill
                   phrase={part}
@@ -313,6 +340,19 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak 
                   style={{ fontSize: 10, cursor: 'pointer', marginLeft: 2 }}
                 >
                   🎤
+                </span>
+              )}
+              {isKey && onSavePhrase && (
+                <span
+                  onClick={(e) => { if (!savedPhrases?.has(part.toLowerCase()) && !savingPhrases.has(part.toLowerCase())) handleSave(part, e); else e.stopPropagation(); }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSave(part, e); }}
+                  title={savedPhrases?.has(part.toLowerCase()) ? 'Saved to vocabulary bank' : 'Save to vocabulary bank'}
+                  data-testid="save-phrase-btn"
+                  style={{ fontSize: 10, cursor: savedPhrases?.has(part.toLowerCase()) ? 'default' : 'pointer', marginLeft: 2 }}
+                >
+                  {savedPhrases?.has(part.toLowerCase()) ? '✅' : savingPhrases.has(part.toLowerCase()) ? '⏳' : '📌'}
                 </span>
               )}
               <span style={{ fontSize: 10 }}> 📖</span>

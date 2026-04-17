@@ -2068,3 +2068,27 @@ pages:
         type: state
         priority: high
         added_in: 546
+
+      - id: conv-076
+        target: Save phrase button (📌) appears next to highlighted key phrases
+        action: Start a conversation and wait for an AI message with key phrases
+        expect: Each highlighted key phrase shows 🔊, 🎤, and 📌 buttons
+        type: visual
+        priority: high
+        added_in: 551
+
+      - id: conv-077
+        target: Clicking 📌 save button saves phrase to vocabulary bank
+        action: Click the 📌 button next to a highlighted key phrase
+        expect: Button shows ⏳ spinner while saving, then ✅ on success
+        type: functional
+        priority: high
+        added_in: 551
+
+      - id: conv-078
+        target: Saved phrase button prevents duplicate saves
+        action: Click the 📌 button on a phrase that is already saved (showing ✅)
+        expect: No additional API call is made; the ✅ icon remains
+        type: state
+        priority: medium
+        added_in: 551

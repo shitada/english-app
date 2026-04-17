@@ -3986,3 +3986,190 @@ Got the proposal. Calling the coder.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
+● Coder Implement iter 550 feature
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git commit -m
+  │   │ "feat(iter-550): Add Streak Freeze protection system to preserve learning
+  │   │ streaks
+  │   │
+  │   │ - Add streak_freezes table to SCHEMA and _MIGRATIONS…
+  │   └ 23 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log
+      │ --oneline -1
+      └ 2 lines...
+
+Coder committed. Now calling the tester.
+
+● Record T2 and get changed files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git diff HEAD~1 --name-only && echo "---HASH---" && git rev-parse --short
+  │ HEAD
+  └ 13 lines...
+
+● Tester Test iteration 550 changes
+  │ Check E2E test results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1
+  │   └ 2 lines...
+  └ Smoke test as Python script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+      └ 23 lines...
+
+All tests pass. Calling the evaluator.
+
+● Record T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T3=$(date +%s)"
+  │ && git diff HEAD~1 --stat
+  └ 12 lines...
+
+● Evaluator Evaluate iteration 550
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L130:200 (71 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L200:220 (21 lines read)
+
+Score 7.25 → **keep**. Recording results.
+
+● Record iteration 550 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "550" "39dbd4a" "$(date +%Y-%m-%d)" "$((1776407010-1776406612))"
+  │ "$((1776407245-1776407010))" "$((1776407389-1776407245))"
+  │ "$(($T4-1776407389))" "$(($T4-1776406612))" \…
+  └ 8 lines...
+
+## ✅ 2 iterations complete — stopping.
+
+| Iter | Title | Score | Tests | Verdict |
+|------|-------|-------|-------|---------|
+| **549** | Add Self-Assessment Trend Chart to Dashboard | 7.00 | 1708/1708 ✅ | kept |
+| **550** | Add Streak Freeze protection system | 7.25 | 1719/1719 ✅ | kept |
+
+Both features kept. **549** completed the self-assessment frontend visualization (CSS line chart for confidence/fluency/comprehension). **550** added a streak freeze gamification system (earn freezes every 7 days, auto-applied on gap days).
+
+
+Changes   +0 -0
+Requests  3 Premium (27m 34s)
+Tokens    ↑ 6.3m • ↓ 68.0k • 5.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-549-to-554.md
+[2026-04-17 15:31:54] Copilot invocation completed (duration: 1657s)
+[2026-04-17 15:31:54] Recording agent traces...
+[2026-04-17 15:31:54]   AGENT_TRACE iter=549 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-17 15:31:54]   AGENT_TRACE iter=550 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-17 15:31:54] SMOKE_UI: UI changes detected in pages: dashboard,home
+[2026-04-17 15:31:54] SMOKE_UI: Level=full (iteration 550 is divisible by 5)
+[2026-04-17 15:31:54] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+
+  ✅ home: smoke 4✓ 0✗ (1887ms)
+  ✅ conversation: smoke 4✓ 0✗ (1588ms)
+  ✅ pronunciation: smoke 4✓ 0✗ (1665ms)
+  ✅ listening: smoke 4✓ 0✗ (1565ms)
+  ✅ vocabulary: smoke 4✓ 0✗ (1618ms)
+  ✅ dashboard: smoke 4✓ 0✗ (1844ms)
+
+✅ UI TEST PASS (6/6 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-17 15:32:19] SMOKE_UI_PASS: All UI pages passed
+[2026-04-17 15:32:19] Running post-invocation audit (iter 549-550)...
+============================================
+ Autoresearch Audit
+ Iterations: 549 — 550
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-17 15:32:19
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 549 550[0m
+[0;31m  Tester: FAIL — missing: 549 550[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-17 15:32:20] Audit found 2 error(s) — fixes applied where possible
+[2026-04-17 15:32:23] Current iteration count: 550 / 554
+[2026-04-17 15:32:23] ------------------------------------------
+[2026-04-17 15:32:23] Invocation 4 / 10
+[2026-04-17 15:32:23] Resuming from iteration 551
+[2026-04-17 15:32:23] ------------------------------------------
+[2026-04-17 15:32:23] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-551-to-554.md)...
+● Read current autoresearch state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---LAST SESSION---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 26 lines...
+
+● Check backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -30
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '^\- \['
+  │ autoresearch/backlog.md && echo "---" && tail -5 autoresearch/backlog.md
+  └ 2 lines...
+
+● View backlog file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ autoresearch/backlog.md && tail -20 autoresearch/backlog.md
+  └ 21 lines...
+
+No uncompleted backlog items remain. Now let me start **Iteration 551** by calling the proposer.
+
+● Proposer Propose iteration 551
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L900:1100 (201 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L1100:1300 (201 lines read)
+
+Good, got the proposal. Now calling the **coder**.
+
+● Record T1 timestamp (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+

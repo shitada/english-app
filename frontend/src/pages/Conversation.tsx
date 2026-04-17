@@ -111,6 +111,7 @@ export default function Conversation() {
   const [hintLoading, setHintLoading] = useState(false);
   const [hintUsedThisTurn, setHintUsedThisTurn] = useState(false);
   const [hintCount, setHintCount] = useState(0);
+  const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -653,6 +654,14 @@ export default function Conversation() {
       setHintLoading(false);
     }
   }, [conversationId, hintLoading, hintUsedThisTurn]);
+
+  const handleSavePhrase = useCallback(async (phrase: string) => {
+    if (!conversationId) return;
+    const key = phrase.toLowerCase();
+    if (savedChatPhrases.has(key)) return;
+    await api.saveConversationVocabulary(conversationId, [phrase]);
+    setSavedChatPhrases((prev) => new Set(prev).add(key));
+  }, [conversationId, savedChatPhrases]);
 
   // Topic selection
   if (phase === 'select') {
@@ -1442,7 +1451,7 @@ export default function Conversation() {
                     🎧 Tap to reveal text
                   </div>
                 ) : (
-                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} />
+                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} />
                 )
               ) : (
                 msg.content
