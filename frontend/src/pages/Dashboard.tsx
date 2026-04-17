@@ -3,6 +3,7 @@ import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
 import { AchievementsPanel, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
+import { LazySection } from '../hooks/useLazyLoad';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -112,13 +113,19 @@ export default function Dashboard() {
       <WeeklyReport report={weeklyReport} />
 
       {/* Session Analytics */}
-      <SessionAnalytics />
+      <LazySection>
+        <SessionAnalytics />
+      </LazySection>
 
       {/* Learning Velocity */}
-      <LearningVelocityCard />
+      <LazySection>
+        <LearningVelocityCard />
+      </LazySection>
 
       {/* Module Streaks */}
-      <ModuleStreaksCard />
+      <LazySection>
+        <ModuleStreaksCard />
+      </LazySection>
 
       {/* Speaking Confidence */}
       {confidenceTrend && (
@@ -126,31 +133,49 @@ export default function Dashboard() {
       )}
 
       {/* Speaking Journal Progress */}
-      <SpeakingJournalProgress />
+      <LazySection>
+        <SpeakingJournalProgress />
+      </LazySection>
 
       {/* Fluency Progression */}
-      <FluencyProgressionChart />
+      <LazySection>
+        <FluencyProgressionChart />
+      </LazySection>
 
       {/* Vocabulary Progress */}
-      <VocabularyProgress />
+      <LazySection>
+        <VocabularyProgress />
+      </LazySection>
 
       {/* Vocabulary Retention Forecast */}
-      <VocabForecastCard />
+      <LazySection>
+        <VocabForecastCard />
+      </LazySection>
 
       {/* Vocabulary Activation */}
-      <VocabActivationCard />
+      <LazySection>
+        <VocabActivationCard />
+      </LazySection>
 
       {/* Topic Coverage Map */}
-      <TopicCoverageMap />
+      <LazySection>
+        <TopicCoverageMap />
+      </LazySection>
 
       {/* Pronunciation Progress */}
-      <PronunciationProgress />
+      <LazySection>
+        <PronunciationProgress />
+      </LazySection>
 
       {/* Pronunciation Weak Spots */}
-      <PronunciationWeakSpots />
+      <LazySection>
+        <PronunciationWeakSpots />
+      </LazySection>
 
       {/* Listening Progress */}
-      <ListeningProgress />
+      <LazySection>
+        <ListeningProgress />
+      </LazySection>
 
       {/* Grammar Trend */}
       {grammarTrend && (
@@ -158,10 +183,14 @@ export default function Dashboard() {
       )}
 
       {/* Grammar Weak Spots */}
-      <GrammarWeakSpots />
+      <LazySection>
+        <GrammarWeakSpots />
+      </LazySection>
 
       {/* Achievements */}
-      <AchievementsPanel achievements={achievements} unlocked={achievementsUnlocked} total={achievementsTotal} />
+      <LazySection>
+        <AchievementsPanel achievements={achievements} unlocked={achievementsUnlocked} total={achievementsTotal} />
+      </LazySection>
 
       {/* Recent activity */}
       {stats.recent_activity.length > 0 && (
@@ -182,19 +211,21 @@ export default function Dashboard() {
       )}
 
       {/* Mistake Journal */}
-      {reviewMode ? (
-        <MistakeReviewDrill items={reviewItems} onClose={() => setReviewMode(false)} />
-      ) : (
-        <MistakeJournal
-          mistakes={mistakes}
-          filter={mistakeFilter}
-          setFilter={setMistakeFilter}
-          total={mistakeTotal}
-          onLoadMore={loadMoreMistakes}
-          onStartReview={startMistakeReview}
-          hasGrammarMistakes={hasGrammarMistakes}
-        />
-      )}
+      <LazySection>
+        {reviewMode ? (
+          <MistakeReviewDrill items={reviewItems} onClose={() => setReviewMode(false)} />
+        ) : (
+          <MistakeJournal
+            mistakes={mistakes}
+            filter={mistakeFilter}
+            setFilter={setMistakeFilter}
+            total={mistakeTotal}
+            onLoadMore={loadMoreMistakes}
+            onStartReview={startMistakeReview}
+            hasGrammarMistakes={hasGrammarMistakes}
+          />
+        )}
+      </LazySection>
     </div>
   );
 }

@@ -1109,6 +1109,30 @@ pages:
         priority: medium
         added_in: 535
 
+      - id: dash-021
+        target: Below-fold sections show skeleton placeholders before scrolling
+        action: Navigate to /dashboard, snapshot the page without scrolling
+        expect: Sections below the fold (e.g. SessionAnalytics, VocabularyProgress) render as skeleton-card placeholders (height 200px) instead of full components
+        type: visual
+        priority: high
+        added_in: 538
+
+      - id: dash-022
+        target: Lazy-loaded sections render after scrolling into view
+        action: Navigate to /dashboard, scroll down to the Session Analytics area
+        expect: Skeleton placeholder is replaced by the actual SessionAnalytics component content
+        type: functional
+        priority: high
+        added_in: 538
+
+      - id: dash-023
+        target: Above-fold sections remain eagerly loaded
+        action: Navigate to /dashboard, snapshot top of page
+        expect: Streak card, stats grid, SkillsRadarChart, and WeeklyReport render immediately without skeleton wrappers
+        type: functional
+        priority: medium
+        added_in: 538
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice
