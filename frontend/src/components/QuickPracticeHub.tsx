@@ -28,6 +28,7 @@ import QuickSpotErrorCard from './QuickSpotErrorCard';
 import QuickPhrasalVerbCard from './QuickPhrasalVerbCard';
 import QuickRapidFireCard from './QuickRapidFireCard';
 import QuickSentenceStressCard from './QuickSentenceStressCard';
+import QuickRegisterSwitchCard from './QuickRegisterSwitchCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -175,6 +176,7 @@ export default function QuickPracticeHub() {
             <QuickTongueTwisterCard />
             <QuickRapidFireCard />
             <QuickSentenceStressCard />
+            <QuickRegisterSwitchCard />
           </>
         )}
         {activeTab === 'listening' && (

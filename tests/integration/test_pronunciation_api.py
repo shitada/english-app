@@ -2090,3 +2090,147 @@ async def test_listen_paraphrase_evaluate_empty_original(client):
         "duration_seconds": 5,
     })
     assert res.status_code == 422
+
+
+# ── Quick Register Switch ──────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_prompt_success(client, mock_copilot):
+    """GET /register-switch returns a valid prompt with situation and target_register."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "situation": "Ask your professor for a deadline extension.",
+        "target_register": "formal",
+        "context_hint": "You are emailing your university professor.",
+        "difficulty": "intermediate",
+    })
+    res = await client.get("/api/pronunciation/register-switch?difficulty=intermediate")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["situation"] == "Ask your professor for a deadline extension."
+    assert data["target_register"] == "formal"
+    assert data["context_hint"] == "You are emailing your university professor."
+    assert data["difficulty"] == "intermediate"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_prompt_invalid_difficulty(client):
+    """Invalid difficulty is rejected with 422."""
+    res = await client.get("/api/pronunciation/register-switch?difficulty=expert")
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_prompt_defaults_to_intermediate(client, mock_copilot):
+    """No difficulty param defaults to intermediate."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "situation": "Chat with a neighbor.",
+        "target_register": "casual",
+        "context_hint": "You are chatting with your next-door neighbor.",
+    })
+    res = await client.get("/api/pronunciation/register-switch")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["difficulty"] == "intermediate"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_prompt_normalizes_register(client, mock_copilot):
+    """If LLM returns unexpected register value, it defaults to neutral."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "situation": "Order coffee.",
+        "target_register": "SUPER_FORMAL",
+        "context_hint": "At a coffee shop.",
+    })
+    res = await client.get("/api/pronunciation/register-switch")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["target_register"] == "neutral"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_evaluate_success(client, mock_copilot):
+    """POST /register-switch/evaluate returns scores and feedback."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "register_accuracy_score": 8,
+        "vocabulary_score": 7,
+        "grammar_score": 9,
+        "politeness_score": 8,
+        "overall_score": 8,
+        "feedback": "Great use of formal language.",
+        "model_response": "I would be grateful if you could extend the deadline.",
+    })
+    res = await client.post("/api/pronunciation/register-switch/evaluate", json={
+        "situation": "Ask for a deadline extension.",
+        "target_register": "formal",
+        "transcript": "I was wondering if it would be possible to extend the deadline.",
+        "duration_seconds": 10,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["register_accuracy_score"] == 8
+    assert data["vocabulary_score"] == 7
+    assert data["grammar_score"] == 9
+    assert data["politeness_score"] == 8
+    assert data["overall_score"] == 8
+    assert data["feedback"] == "Great use of formal language."
+    assert data["model_response"] == "I would be grateful if you could extend the deadline."
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_evaluate_score_clamping(client, mock_copilot):
+    """Scores are clamped to 1-10 range."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "register_accuracy_score": 15,
+        "vocabulary_score": -3,
+        "grammar_score": "abc",
+        "politeness_score": 0,
+        "overall_score": 12,
+        "feedback": "Some feedback.",
+        "model_response": "A model response.",
+    })
+    res = await client.post("/api/pronunciation/register-switch/evaluate", json={
+        "situation": "Decline an invitation.",
+        "target_register": "casual",
+        "transcript": "Nah I can't make it sorry.",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["register_accuracy_score"] == 10  # clamped from 15
+    assert data["vocabulary_score"] == 1           # clamped from -3
+    assert data["grammar_score"] == 5.0            # fallback for non-numeric
+    assert data["politeness_score"] == 1           # clamped from 0
+    assert data["overall_score"] == 10             # clamped from 12
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_evaluate_empty_transcript(client):
+    """Empty transcript is rejected with 422."""
+    res = await client.post("/api/pronunciation/register-switch/evaluate", json={
+        "situation": "Ask for help.",
+        "target_register": "neutral",
+        "transcript": "",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_register_switch_evaluate_invalid_register(client):
+    """Invalid target_register is rejected with 422."""
+    res = await client.post("/api/pronunciation/register-switch/evaluate", json={
+        "situation": "Ask for help.",
+        "target_register": "super_formal",
+        "transcript": "Could you help me?",
+        "duration_seconds": 5,
+    })
+    assert res.status_code == 422

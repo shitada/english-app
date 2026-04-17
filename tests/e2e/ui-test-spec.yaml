@@ -1877,6 +1877,46 @@ pages:
         priority: medium
         added_in: 534
 
+      - id: quick-practice-hub-080
+        target: QuickRegisterSwitchCard renders in Speaking tab
+        action: Navigate to home page, open Speaking tab in Quick Practice Hub, scroll to Register Switch card
+        expect: Card shows with "Quick Register Switch" header, a situation, a register badge (🎩 Formal / 💬 Neutral / 😎 Casual), context hint, and a start button
+        type: visual
+        priority: high
+        added_in: 545
+
+      - id: quick-practice-hub-081
+        target: QuickRegisterSwitchCard start recording
+        action: Click "Respond in [Register] Register" button on the Register Switch card
+        expect: Card transitions to recording phase with pulsing mic, countdown timer from 20s, and live transcript
+        type: functional
+        priority: high
+        added_in: 545
+
+      - id: quick-practice-hub-082
+        target: QuickRegisterSwitchCard stop and evaluate
+        action: Click "Done" button while recording in the Register Switch card
+        expect: Card shows "Evaluating your register…" then displays scores (Register, Vocabulary, Grammar, Politeness, Overall), feedback text, and a model response
+        type: functional
+        priority: high
+        added_in: 545
+
+      - id: quick-practice-hub-083
+        target: QuickRegisterSwitchCard new situation
+        action: Click "New Situation" button after evaluation in the Register Switch card
+        expect: Card resets to idle phase with a new situation and possibly different target register
+        type: functional
+        priority: medium
+        added_in: 545
+
+      - id: quick-practice-hub-084
+        target: QuickRegisterSwitchCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickRegisterSwitchCard is visible
+        expect: QuickRegisterSwitchCard resets to idle phase and fetches new situation with updated difficulty
+        type: functional
+        priority: medium
+        added_in: 545
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase

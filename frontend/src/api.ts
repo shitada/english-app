@@ -2573,3 +2573,34 @@ export function evaluateSentenceStress(sentence: string, stressed_words: string[
     body: JSON.stringify({ sentence, stressed_words, transcript }),
   });
 }
+
+// ── Quick Register Switch Practice ────────────────────────────────
+
+export interface RegisterSwitchPromptResponse {
+  situation: string;
+  target_register: string;
+  context_hint: string;
+  difficulty: string;
+}
+
+export interface RegisterSwitchEvaluateResponse {
+  register_accuracy_score: number;
+  vocabulary_score: number;
+  grammar_score: number;
+  politeness_score: number;
+  overall_score: number;
+  feedback: string;
+  model_response: string;
+}
+
+export function getRegisterSwitchPrompt(difficulty: string = 'intermediate'): Promise<RegisterSwitchPromptResponse> {
+  return request<RegisterSwitchPromptResponse>(`/api/pronunciation/register-switch?difficulty=${difficulty}`);
+}
+
+export function evaluateRegisterSwitch(data: { situation: string; target_register: string; transcript: string; duration_seconds: number }): Promise<RegisterSwitchEvaluateResponse> {
+  return request<RegisterSwitchEvaluateResponse>('/api/pronunciation/register-switch/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

@@ -4322,3 +4322,114 @@ async def evaluate_sentence_stress(
         "feedback": str(result.get("feedback", "")),
         "stress_tip": str(result.get("stress_tip", "")),
     }
+
+
+# ── Quick Register Switch Practice ─────────────────────────────────
+
+
+class RegisterSwitchPromptResponse(BaseModel):
+    situation: str
+    target_register: str
+    context_hint: str
+    difficulty: str
+
+
+@router.get("/register-switch", response_model=RegisterSwitchPromptResponse)
+async def get_register_switch_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a communication situation with a target formality register."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a communication situation for a {difficulty}-level English learner "
+        "that requires a specific formality register.\n"
+        "Return JSON with:\n"
+        "- situation (string): a short description of a real-world situation "
+        "(e.g. 'You are writing to your professor to ask for a deadline extension')\n"
+        "- target_register (string): one of 'formal', 'neutral', or 'casual'\n"
+        "- context_hint (string): a brief hint about the expected tone and vocabulary "
+        "(1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in register and formality levels. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="register_switch_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Register switch prompt generation failed")
+
+    target = str(result.get("target_register", "neutral")).lower()
+    if target not in ("formal", "neutral", "casual"):
+        target = "neutral"
+
+    return {
+        "situation": str(result.get("situation", "You are asking a colleague to help you with a project.")),
+        "target_register": target,
+        "context_hint": str(result.get("context_hint", "Use an appropriate level of formality for this situation.")),
+        "difficulty": difficulty,
+    }
+
+
+class RegisterSwitchEvaluateRequest(BaseModel):
+    situation: str = Field(min_length=1, max_length=1000)
+    target_register: str = Field(pattern="^(formal|neutral|casual)$")
+    transcript: str = Field(min_length=1, max_length=2000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class RegisterSwitchEvaluateResponse(BaseModel):
+    register_accuracy_score: float
+    vocabulary_score: float
+    grammar_score: float
+    politeness_score: float
+    overall_score: float
+    feedback: str
+    model_response: str
+
+
+@router.post("/register-switch/evaluate", response_model=RegisterSwitchEvaluateResponse)
+async def evaluate_register_switch(
+    body: RegisterSwitchEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate whether the user matched the target formality register."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Situation: \"{body.situation}\"\n"
+        f"Target register: {body.target_register}\n"
+        f"User's spoken response ({body.duration_seconds}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate how well the user matched the target formality register. Return JSON with:\n"
+        "- register_accuracy_score (1-10): did they use the right level of formality?\n"
+        "- vocabulary_score (1-10): did they use vocabulary appropriate for this register?\n"
+        "- grammar_score (1-10): grammatical accuracy of the response\n"
+        "- politeness_score (1-10): appropriate level of politeness for the register\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback about register usage (2-3 sentences)\n"
+        "- model_response (string): a well-crafted example response in the target register"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in register and formality levels. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="register_switch_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Register switch evaluation failed")
+
+    return {
+        "register_accuracy_score": clamp_score(result.get("register_accuracy_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "politeness_score": clamp_score(result.get("politeness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_response": str(result.get("model_response", "")),
+    }
