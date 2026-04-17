@@ -529,3 +529,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 541	none	2026-04-17	281	106	106	148	641	1650	1650	pass	5.90	discarded	Auto-advance to next sentence in Pronunciation practice flow
 542	3624fad	2026-04-17	238	165	125	70	598	1651	1651	pass	7.80	kept	Fix send_message losing custom topic scenario/goal context
 543	fd53970	2026-04-17	233	231	123	138	725	1655	1655	pass	7.50	kept	Add on-demand Hint button for stuck moments during Conversation chat
+547	none	2026-04-17	430	240	116	225	1011	1693	1693	pass	5.35	discarded	Convert Conversation chat input to auto-expanding textarea with word count

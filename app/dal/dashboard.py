@@ -2692,3 +2692,89 @@ async def get_study_plan(db: aiosqlite.Connection) -> list[dict[str, Any]]:
 
     # Ensure 3-5 steps
     return steps[:5]
+
+
+async def get_self_assessment_trend(
+    db: aiosqlite.Connection,
+    *,
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Return per-session self-assessment entries with rolling averages and trend.
+
+    Joins ``conversation_self_assessments`` with ``conversations`` to include
+    topic/difficulty context. Computes rolling averages for confidence, fluency,
+    comprehension and an overall average. Determines a trend direction by
+    comparing the mean of the latest 3 assessments vs the oldest 3.
+    """
+    rows = await db.execute_fetchall(
+        """
+        SELECT
+            csa.id,
+            csa.conversation_id,
+            csa.confidence_rating,
+            csa.fluency_rating,
+            csa.comprehension_rating,
+            csa.created_at,
+            c.topic,
+            c.difficulty
+        FROM conversation_self_assessments csa
+        JOIN conversations c ON c.id = csa.conversation_id
+        ORDER BY csa.created_at ASC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+
+    entries: list[dict[str, Any]] = []
+    running_conf: list[float] = []
+    running_flu: list[float] = []
+    running_comp: list[float] = []
+
+    for row in rows:
+        conf = float(row["confidence_rating"])
+        flu = float(row["fluency_rating"])
+        comp = float(row["comprehension_rating"])
+        overall = round((conf + flu + comp) / 3, 2)
+
+        running_conf.append(conf)
+        running_flu.append(flu)
+        running_comp.append(comp)
+
+        rolling_conf = round(sum(running_conf) / len(running_conf), 2)
+        rolling_flu = round(sum(running_flu) / len(running_flu), 2)
+        rolling_comp = round(sum(running_comp) / len(running_comp), 2)
+        rolling_overall = round((rolling_conf + rolling_flu + rolling_comp) / 3, 2)
+
+        entries.append({
+            "id": row["id"],
+            "conversation_id": row["conversation_id"],
+            "topic": row["topic"],
+            "difficulty": row["difficulty"],
+            "confidence_rating": row["confidence_rating"],
+            "fluency_rating": row["fluency_rating"],
+            "comprehension_rating": row["comprehension_rating"],
+            "overall_rating": overall,
+            "rolling_confidence": rolling_conf,
+            "rolling_fluency": rolling_flu,
+            "rolling_comprehension": rolling_comp,
+            "rolling_overall": rolling_overall,
+            "created_at": row["created_at"],
+        })
+
+    # Determine trend direction
+    if len(entries) < 3:
+        trend = "insufficient_data"
+    else:
+        oldest_3 = entries[:3]
+        latest_3 = entries[-3:]
+        oldest_avg = sum(e["overall_rating"] for e in oldest_3) / 3
+        latest_avg = sum(e["overall_rating"] for e in latest_3) / 3
+        diff = latest_avg - oldest_avg
+        if diff > 0.3:
+            trend = "improving"
+        elif diff < -0.3:
+            trend = "declining"
+        else:
+            trend = "stable"
+
+    return {"entries": entries, "trend": trend}

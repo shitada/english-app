@@ -22,6 +22,7 @@ from app.dal.dashboard import (
     get_mistake_review_items,
     get_module_streaks,
     get_recent_activity,
+    get_self_assessment_trend,
     get_session_analytics,
     get_skill_radar,
     get_stats,
@@ -2656,3 +2657,139 @@ class TestGetStudyPlan:
             assert isinstance(step["estimated_minutes"], int)
             assert isinstance(step["route"], str)
             assert step["route"].startswith("/")
+
+
+@pytest.mark.unit
+class TestGetSelfAssessmentTrend:
+    """Tests for get_self_assessment_trend()."""
+
+    async def _insert_conv_and_assessment(self, db, topic, difficulty, conf, flu, comp, created_at=None):
+        """Helper: insert a conversation + self-assessment and return conversation_id."""
+        cursor = await db.execute(
+            "INSERT INTO conversations (topic, difficulty) VALUES (?, ?)",
+            (topic, difficulty),
+        )
+        cid = cursor.lastrowid
+        if created_at:
+            await db.execute(
+                """INSERT INTO conversation_self_assessments
+                   (conversation_id, confidence_rating, fluency_rating, comprehension_rating, created_at)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (cid, conf, flu, comp, created_at),
+            )
+        else:
+            await db.execute(
+                """INSERT INTO conversation_self_assessments
+                   (conversation_id, confidence_rating, fluency_rating, comprehension_rating)
+                   VALUES (?, ?, ?, ?)""",
+                (cid, conf, flu, comp),
+            )
+        await db.commit()
+        return cid
+
+    async def test_empty_database(self, test_db):
+        """No assessments should return empty entries and insufficient_data trend."""
+        result = await get_self_assessment_trend(test_db)
+        assert result["entries"] == []
+        assert result["trend"] == "insufficient_data"
+
+    async def test_single_entry(self, test_db):
+        """A single assessment returns one entry with insufficient_data trend."""
+        await self._insert_conv_and_assessment(
+            test_db, "hotel_checkin", "intermediate", 4, 3, 5,
+        )
+        result = await get_self_assessment_trend(test_db)
+        assert len(result["entries"]) == 1
+        assert result["trend"] == "insufficient_data"
+        entry = result["entries"][0]
+        assert entry["confidence_rating"] == 4
+        assert entry["fluency_rating"] == 3
+        assert entry["comprehension_rating"] == 5
+        assert entry["topic"] == "hotel_checkin"
+        assert entry["difficulty"] == "intermediate"
+        assert entry["overall_rating"] == round((4 + 3 + 5) / 3, 2)
+
+    async def test_rolling_averages(self, test_db):
+        """Rolling averages accumulate correctly across entries."""
+        await self._insert_conv_and_assessment(
+            test_db, "hotel_checkin", "beginner", 2, 2, 2, "2024-01-01 10:00:00",
+        )
+        await self._insert_conv_and_assessment(
+            test_db, "shopping", "intermediate", 4, 4, 4, "2024-01-02 10:00:00",
+        )
+        result = await get_self_assessment_trend(test_db)
+        entries = result["entries"]
+        assert len(entries) == 2
+        # First entry: rolling = itself
+        assert entries[0]["rolling_confidence"] == 2.0
+        # Second entry: avg of (2,4) = 3.0
+        assert entries[1]["rolling_confidence"] == 3.0
+        assert entries[1]["rolling_fluency"] == 3.0
+        assert entries[1]["rolling_comprehension"] == 3.0
+
+    async def test_trend_improving(self, test_db):
+        """Trend is 'improving' when latest 3 > oldest 3."""
+        # Oldest 3: low ratings
+        for i, rating in enumerate([1, 1, 2]):
+            await self._insert_conv_and_assessment(
+                test_db, "hotel_checkin", "beginner", rating, rating, rating,
+                f"2024-01-0{i+1} 10:00:00",
+            )
+        # Latest 3: high ratings
+        for i, rating in enumerate([4, 5, 5]):
+            await self._insert_conv_and_assessment(
+                test_db, "shopping", "advanced", rating, rating, rating,
+                f"2024-01-0{i+4} 10:00:00",
+            )
+        result = await get_self_assessment_trend(test_db)
+        assert result["trend"] == "improving"
+
+    async def test_trend_declining(self, test_db):
+        """Trend is 'declining' when latest 3 < oldest 3."""
+        for i, rating in enumerate([5, 5, 4]):
+            await self._insert_conv_and_assessment(
+                test_db, "hotel_checkin", "advanced", rating, rating, rating,
+                f"2024-01-0{i+1} 10:00:00",
+            )
+        for i, rating in enumerate([1, 1, 2]):
+            await self._insert_conv_and_assessment(
+                test_db, "shopping", "beginner", rating, rating, rating,
+                f"2024-01-0{i+4} 10:00:00",
+            )
+        result = await get_self_assessment_trend(test_db)
+        assert result["trend"] == "declining"
+
+    async def test_trend_stable(self, test_db):
+        """Trend is 'stable' when latest 3 ≈ oldest 3."""
+        for i in range(6):
+            await self._insert_conv_and_assessment(
+                test_db, "hotel_checkin", "intermediate", 3, 3, 3,
+                f"2024-01-0{i+1} 10:00:00",
+            )
+        result = await get_self_assessment_trend(test_db)
+        assert result["trend"] == "stable"
+
+    async def test_limit_parameter(self, test_db):
+        """The limit parameter caps the number of returned entries."""
+        for i in range(5):
+            await self._insert_conv_and_assessment(
+                test_db, "hotel_checkin", "intermediate", 3, 3, 3,
+                f"2024-01-0{i+1} 10:00:00",
+            )
+        result = await get_self_assessment_trend(test_db, limit=3)
+        assert len(result["entries"]) == 3
+
+    async def test_entry_fields_present(self, test_db):
+        """All expected fields are present in each entry."""
+        await self._insert_conv_and_assessment(
+            test_db, "shopping", "advanced", 5, 4, 3,
+        )
+        result = await get_self_assessment_trend(test_db)
+        entry = result["entries"][0]
+        expected_keys = {
+            "id", "conversation_id", "topic", "difficulty",
+            "confidence_rating", "fluency_rating", "comprehension_rating",
+            "overall_rating", "rolling_confidence", "rolling_fluency",
+            "rolling_comprehension", "rolling_overall", "created_at",
+        }
+        assert set(entry.keys()) == expected_keys

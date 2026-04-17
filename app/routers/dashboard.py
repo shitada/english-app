@@ -915,3 +915,40 @@ async def get_grammar_pattern_drill(req: GrammarPatternDrillRequest):
         difficulty=req.difficulty,
         exercises=exercises,
     )
+
+
+# ---------------------------------------------------------------------------
+# Self-Assessment Trend
+# ---------------------------------------------------------------------------
+
+
+class SelfAssessmentTrendEntry(BaseModel):
+    id: int
+    conversation_id: int
+    topic: str
+    difficulty: str
+    confidence_rating: int
+    fluency_rating: int
+    comprehension_rating: int
+    overall_rating: float
+    rolling_confidence: float
+    rolling_fluency: float
+    rolling_comprehension: float
+    rolling_overall: float
+    created_at: str
+
+
+class SelfAssessmentTrendResponse(BaseModel):
+    entries: list[SelfAssessmentTrendEntry]
+    trend: str = Field(
+        description="One of: improving, declining, stable, insufficient_data"
+    )
+
+
+@router.get("/self-assessment-trend", response_model=SelfAssessmentTrendResponse)
+async def get_self_assessment_trend(
+    limit: int = Query(default=20, ge=1, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get self-assessment trend with rolling averages and direction."""
+    return await dash_dal.get_self_assessment_trend(db, limit=limit)
