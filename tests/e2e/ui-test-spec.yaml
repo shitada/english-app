@@ -2132,3 +2132,43 @@ pages:
         type: visual
         priority: medium
         added_in: 553
+
+      - id: conv-084
+        target: Express It Better button appears in conversation summary
+        action: End a conversation and scroll to the drill section
+        expect: A button labeled "Express It Better" with a sparkle icon is visible between Shadowing and Dictation drills
+        type: functional
+        priority: high
+        added_in: 558
+
+      - id: conv-085
+        target: Express It Better expands and loads upgraded expressions
+        action: Click the "Express It Better" button in the summary
+        expect: A loading state appears, then cards showing original (dimmed) and upgraded (highlighted) expressions with explanations
+        type: functional
+        priority: high
+        added_in: 558
+
+      - id: conv-086
+        target: Express It Better Listen button plays TTS of upgraded expression
+        action: Click the "Listen" button on an Express It Better card
+        expect: The upgraded expression is read aloud via TTS; button shows "Playing..." while speaking
+        type: functional
+        priority: medium
+        added_in: 558
+
+      - id: conv-087
+        target: Express It Better Shadow button starts speech recognition
+        action: After listening, click the "Shadow" button
+        expect: Speech recognition starts; button turns red with "Stop" label; transcript appears below
+        type: functional
+        priority: medium
+        added_in: 558
+
+      - id: conv-088
+        target: Express It Better shows accuracy summary after all pairs
+        action: Complete all Express It Better pairs by listening, shadowing, and submitting
+        expect: Summary view with average accuracy percentage, individual results for each pair, and a "Try Again" button
+        type: functional
+        priority: high
+        added_in: 558

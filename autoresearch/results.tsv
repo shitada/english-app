@@ -536,3 +536,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 551	6e0b0e0	2026-04-17	639	279	130	169	1217	1719	1719	pass	6.70	kept	Add in-conversation key phrase save to vocabulary bank
 552	bdba8a4	2026-04-17	557	306	132	77	1072	1720	1720	pass	7.75	kept	Fix auto_apply_freezes ignoring internal gaps between activity days
 553	ff23866	2026-04-17	470	365	121	155	1111	1720	1720	pass	6.90	kept	Add Fluency Score gauge with sub-score breakdown to Conversation Summary
+557	47b59c5	2026-04-18	303	361	117	148	929	1720	1720	pass	6.20	kept	Fix 5 failing Home page E2E test specs to match actual UI elements

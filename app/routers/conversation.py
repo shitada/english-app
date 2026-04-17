@@ -1311,3 +1311,74 @@ async def get_self_assessment(
         raise HTTPException(status_code=404, detail="Self-assessment not found")
 
     return SelfAssessmentResponse(**assessment)
+
+
+# ---------------------------------------------------------------------------
+# Express It Better drill
+# ---------------------------------------------------------------------------
+
+
+class ExpressBetterPair(BaseModel):
+    original: str
+    upgraded: str
+    explanation: str
+
+
+class ExpressBetterResponse(BaseModel):
+    conversation_id: int
+    pairs: list[ExpressBetterPair]
+
+
+@router.post("/{conversation_id}/express-better", response_model=ExpressBetterResponse)
+async def get_express_better(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate upgraded versions of user messages showing how a fluent speaker would express them."""
+    status = await conv_dal.get_conversation_status(db, conversation_id)
+    if status is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if status != "ended":
+        raise HTTPException(status_code=400, detail="Conversation must be ended first")
+
+    user_messages = await conv_dal.get_user_messages(db, conversation_id, limit=4)
+    if not user_messages:
+        return ExpressBetterResponse(conversation_id=conversation_id, pairs=[])
+
+    numbered = "\n".join(f"{i+1}. \"{m}\"" for i, m in enumerate(user_messages))
+    prompt = (
+        "A language learner wrote these messages during a conversation:\n"
+        f"{numbered}\n\n"
+        "For each message, show how a fluent English speaker would express the same idea "
+        "more naturally and with richer vocabulary. Provide:\n"
+        "- original: the learner's exact message\n"
+        "- upgraded: a more natural/advanced version\n"
+        "- explanation: brief note (1-2 sentences) on what changed and why it sounds better\n\n"
+        'Return JSON: {"pairs": [{"original": "...", "upgraded": "...", "explanation": "..."}]}'
+    )
+
+    copilot = get_copilot_service()
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="express_better",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Express It Better generation failed")
+
+    raw_pairs = result.get("pairs", [])
+    pairs: list[dict[str, str]] = []
+    for p in raw_pairs:
+        if not isinstance(p, dict):
+            continue
+        original = str(p.get("original", "")).strip()
+        upgraded = str(p.get("upgraded", "")).strip()
+        explanation = str(p.get("explanation", "")).strip()
+        if original and upgraded:
+            pairs.append({"original": original, "upgraded": upgraded, "explanation": explanation})
+
+    return ExpressBetterResponse(conversation_id=conversation_id, pairs=pairs)

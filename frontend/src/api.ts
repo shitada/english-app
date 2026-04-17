@@ -165,6 +165,9 @@ export const api = {
   getConversationSelfAssessment: (conversationId: number) =>
     request<{ conversation_id: number; confidence_rating: number; fluency_rating: number; comprehension_rating: number; created_at: string | null }>(`/api/conversation/${conversationId}/self-assessment`),
 
+  getExpressBetter: (conversationId: number) =>
+    request<ExpressBetterResponse>(`/api/conversation/${conversationId}/express-better`, { method: 'POST' }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';
@@ -2644,4 +2647,16 @@ export function evaluateRegisterSwitch(data: { situation: string; target_registe
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+}
+
+// Express It Better types
+export interface ExpressBetterPair {
+  original: string;
+  upgraded: string;
+  explanation: string;
+}
+
+export interface ExpressBetterResponse {
+  conversation_id: number;
+  pairs: ExpressBetterPair[];
 }

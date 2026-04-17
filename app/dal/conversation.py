@@ -1057,3 +1057,22 @@ async def get_self_assessment(
         (conversation_id,),
     )
     return dict(rows[0]) if rows else None
+
+
+async def get_user_messages(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    limit: int = 4,
+) -> list[str] | None:
+    """Return user message contents from a conversation, or None if conversation not found."""
+    row = await db.execute_fetchall(
+        "SELECT id FROM conversations WHERE id = ?", (conversation_id,)
+    )
+    if not row:
+        return None
+
+    rows = await db.execute_fetchall(
+        "SELECT content FROM messages WHERE conversation_id = ? AND role = 'user' ORDER BY id LIMIT ?",
+        (conversation_id, limit),
+    )
+    return [r[0] if isinstance(r, (tuple, list)) else r["content"] for r in rows]

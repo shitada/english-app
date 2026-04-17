@@ -36,6 +36,7 @@ from app.dal.conversation import (
     get_shadowing_phrases,
     get_historical_session_averages,
     get_topic_recommendations,
+    get_user_messages,
     list_conversations,
     list_custom_topics,
     toggle_message_bookmark,
@@ -1645,3 +1646,41 @@ class TestCustomTopics:
         await create_custom_topic(test_db, "custom_dup", "Topic 1", "", "Scenario 1.", "Goal")
         with pytest.raises(Exception):
             await create_custom_topic(test_db, "custom_dup", "Topic 2", "", "Scenario 2.", "Goal")
+
+
+@pytest.mark.unit
+class TestGetUserMessages:
+    async def test_nonexistent_conversation_returns_none(self, test_db):
+        result = await get_user_messages(test_db, 99999)
+        assert result is None
+
+    async def test_no_user_messages_returns_empty(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        result = await get_user_messages(test_db, cid)
+        assert result == []
+
+    async def test_returns_user_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await add_message(test_db, cid, "user", "I want to check in.")
+        await add_message(test_db, cid, "assistant", "Sure!")
+        await add_message(test_db, cid, "user", "My name is John.")
+        result = await get_user_messages(test_db, cid)
+        assert result == ["I want to check in.", "My name is John."]
+
+    async def test_respects_limit(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(6):
+            await add_message(test_db, cid, "user", f"Message {i}")
+        result = await get_user_messages(test_db, cid, limit=3)
+        assert len(result) == 3
+        assert result == ["Message 0", "Message 1", "Message 2"]
+
+    async def test_excludes_assistant_messages(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Hello!")
+        await add_message(test_db, cid, "user", "Hi there.")
+        await add_message(test_db, cid, "assistant", "How can I help?")
+        result = await get_user_messages(test_db, cid)
+        assert result == ["Hi there."]

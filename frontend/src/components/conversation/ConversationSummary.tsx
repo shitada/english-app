@@ -13,6 +13,7 @@ import { ShadowingExercise } from './ShadowingExercise';
 import { ClozeExercise } from './ClozeExercise';
 import { RephraseChallenge } from './RephraseChallenge';
 import { SpokenRetelling } from './SpokenRetelling';
+import { ExpressItBetter } from './ExpressItBetter';
 import { ShareCard } from './ShareCard';
 
 interface Message {
@@ -839,6 +840,15 @@ export function ConversationSummary({
       {/* Shadowing Exercise — listen and repeat practice */}
       {conversationId && speechRecognition && (
         <ShadowingExercise
+          conversationId={conversationId}
+          tts={tts}
+          speechRecognition={speechRecognition}
+        />
+      )}
+
+      {/* Express It Better — upgrade your expressions */}
+      {conversationId && speechRecognition && (
+        <ExpressItBetter
           conversationId={conversationId}
           tts={tts}
           speechRecognition={speechRecognition}
