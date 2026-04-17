@@ -518,3 +518,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 529	98171ea	2026-04-17	417	252	109	119	897	1585	1585	pass	7.80	kept	Add 4-3-2 Fluency Sprint speaking drill on Home page
 530	ed459ae	2026-04-17	284	189	121	125	719	1593	1593	pass	6.80	kept	Add Quick Connector Drill Card for discourse linker speaking practice
 531	185b7bf	2026-04-17	232	213	102	181	728	1601	1601	pass	6.50	kept	Add Quick Spot-the-Error Listening Card for grammar error detection drill
+532	815170c	2026-04-17	138	217	102	103	560	1612	1612	pass	7.25	kept	Add Quick Phrasal Verb Card for spoken phrasal verb practice
