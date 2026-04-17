@@ -6557,4 +6557,281 @@ The private `_get_recent_activity` queries specific tables with UNION ALL. To pr
 1. Use the `_get_recent_activity` with data that always works (verifying it returns properly)
 2. Write a standalone test that simulates what the function does with NULL data
 
-Actually, let me take a completely different approach. I'll write a focused unit test that tests the specific code path using a mock:Now let me verify all the changes look correct:The integration test for NULL is a bit complex. Actually, since the `pronunciation_attempts` has NOT NULL constraints, the INSERT with NULL will fail and fall through to the except block. That means we'll just have a valid row — not really testing the NULL guard. Let me simplify that integration test to be more focused:Now let me run the tests to verify:All new tests pass. Let me also run the full test suite to make sure nothing is broken:All 1789 tests pass. Now let me run the TypeScript check:TypeScript check passes. Now commit:
+Actually, let me take a completely different approach. I'll write a focused unit test that tests the specific code path using a mock:Now let me verify all the changes look correct:The integration test for NULL is a bit complex. Actually, since the `pronunciation_attempts` has NOT NULL constraints, the INSERT with NULL will fail and fall through to the except block. That means we'll just have a valid row — not really testing the NULL guard. Let me simplify that integration test to be more focused:Now let me run the tests to verify:All new tests pass. Let me also run the full test suite to make sure nothing is broken:All 1789 tests pass. Now let me run the TypeScript check:TypeScript check passes. Now commit:```json
+{
+  "committed": true,
+  "commit_hash": "34061cb",
+  "files_changed": ["app/dal/dashboard.py", "app/routers/dashboard.py", "tests/integration/test_dashboard_api.py"],
+  "tests_added": 3,
+  "ui_spec_updated": false,
+  "description": "Fix recent-activity endpoint to convert raw topic IDs to human-readable labels and add None guard on detail[:60] to prevent NULL crash"
+}
+```● Coder Implement iteration 567 bugfix
+  │ Git commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #567: Fix recent-activity raw topic IDs and NULL
+  │   │ detail crash" -m "- Add None guard on _get_recent_activity detail[:60] to
+  │   │ prevent crash on NULL values
+  │   │ - Add topic label conversion in /api/dashboard/recent-activity endpoint…
+  │   └ 19 lines...
+  └ Verify commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log --oneline -1
+      └ 2 lines...
+
+● Verify coder commit for 567 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T567_2=$(date +%s) &&
+  │ echo "T567_2=$T567_2" && git log --oneline -3 && echo "---" && git diff
+  │ HEAD~1 --name-only
+  └ 14 lines...
+
+Commit verified. Now calling tester for iteration 567:
+
+All 1790 tests pass. Now let me commit:[2026-04-18 04:00:42] Copilot invocation completed (duration: 2071s)
+[2026-04-18 04:00:42] Recording agent traces...
+[2026-04-18 04:00:42]   AGENT_TRACE iter=566 proposer=1 coder=0 tester=2 evaluator=2
+[2026-04-18 04:00:42]   AGENT_TRACE iter=567 proposer=2 coder=2 tester=0 evaluator=0
+[2026-04-18 04:00:42] SMOKE_UI: UI changes detected in pages: listening
+[2026-04-18 04:00:42] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-18 04:00:42] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: listening
+
+  ✅ listening: smoke 4✓ 0✗ (1686ms)
+
+✅ UI TEST PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-18 04:00:50] SMOKE_UI_PASS: All UI pages passed
+[2026-04-18 04:00:50] Running post-invocation audit (iter 566-567)...
+============================================
+ Autoresearch Audit
+ Iterations: 566 — 567
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-18 04:00:50
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 566 567[0m
+[0;31m  Evaluator: FAIL — missing: 567[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-18 04:00:51] Audit found 2 error(s) — fixes applied where possible
+[2026-04-18 04:00:55] Current iteration count: 567 / 584
+[2026-04-18 04:00:55] ------------------------------------------
+[2026-04-18 04:00:55] Invocation 10 / 10
+[2026-04-18 04:00:55] Resuming from iteration 568
+[2026-04-18 04:00:55] ------------------------------------------
+[2026-04-18 04:00:55] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-568-to-584.md)...
+● Read current state for iteration 568 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---LAST SESSION---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 26 lines...
+
+● Check backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -30
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '^\- \['
+  │ autoresearch/backlog.md && grep '^\- \[ \]' autoresearch/backlog.md | head
+  │ -20
+  └ 2 lines...
+
+● Check backlog file (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 28 lines...
+
+● Check recent changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git diff HEAD~1
+  │ --name-only | head -20
+  └ 8 lines...
+
+No uncompleted backlog items remain. Now let me run iteration 568. Starting with the proposer.
+
+Let me look at a few more areas to identify the most impactful improvement:Based on my thorough analysis of the codebase, I've identified a high-impact improvement opportunity. The `ConversationCoach` component (shown during active conversations) currently provides only generic tips based on message length, question variety, WPM, and response times — but it never analyzes the **content** of grammar errors. If a user repeatedly makes the same type of mistake (e.g., articles, tenses), the coach is blind to it.
+
+```json
+{
+  "type": "feature",
+  "title": "Add grammar error pattern detection to ConversationCoach",
+  "description": "The ConversationCoach component (frontend/src/components/conversation/ConversationCoach.tsx) shows generic fluency tips during conversations but never analyzes the actual grammar errors the user makes. When a user repeatedly makes the same category of mistake (articles, tenses, prepositions, subject-verb agreement, etc.), there's no targeted coaching.\n\nAdd a utility function `categorizeGrammarError(error)` in `frontend/src/utils/grammarPatterns.ts` that classifies errors into categories based on keywords in the error's `explanation`, `original`, and `correction` fields (e.g., 'article' if explanation mentions 'article/the/a/an', 'tense' if it mentions 'tense/past/present/future', 'preposition' for 'preposition/in/on/at', 'subject-verb agreement' for 'agreement/subject/verb', 'word order' for 'order/position', 'plural' for 'plural/singular'). Returns a category string.\n\nIn `Conversation.tsx`, track error categories in state (`errorPatterns: Map<string, number>`). After each `sendMessage` response with grammar errors, call `categorizeGrammarError` for each error and update counts.\n\nIn `ConversationCoach.tsx`, accept a new `errorPatterns` prop. When any category has count >= 2, generate a high-priority targeted tip like '📎 You\\'ve made {n} {category} errors — {specific advice}' with category-specific advice strings (e.g., articles: 'Use \"the\" for specific items, \"a/an\" for general ones', tenses: 'Match your verb tense to when the action happens'). These pattern tips should have priority 0 (highest) so they appear before generic tips.\n\nThis directly improves learning outcomes by making users aware of recurring mistake patterns during practice, not just after.",
+  "files_to_modify": ["frontend/src/utils/grammarPatterns.ts", "frontend/src/components/conversation/ConversationCoach.tsx", "frontend/src/pages/Conversation.tsx"],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 568
+  │ Read fillerWords.ts
+  │   │ frontend/src/utils/fillerWords.ts
+  │   └ 45 lines read
+  └ Read fluencyScore.ts
+      │ frontend/src/utils/fluencyScore.ts
+      └ 103 lines read
+
+● Record T1 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now calling the coder to implement:
+
+Now I have a complete understanding of the codebase. Let me implement the changes:
+
+1. Create `frontend/src/utils/grammarPatterns.ts` - the utility function
+2. Modify `ConversationCoach.tsx` - accept `errorPatterns` prop
+3. Modify `Conversation.tsx` - track error patterns in state
+4. Create test file for the utility
+
+Let me also check the e2e spec:Now I have all the context. Let me implement the changes:Now update `ConversationCoach.tsx` to accept and use the `errorPatterns` prop:Now update the `useMemo` dependency array to include `errorPatterns`:Now update `Conversation.tsx` to track error patterns and pass them to ConversationCoach:Now add the `errorPatterns` state. I'll add it after the `savedChatPhrases` state:Now, in the `sendMessage` function, after receiving the response with grammar errors, update the error patterns. Let me find the exact location:Now update the `ConversationCoach` usage to pass the `errorPatterns` prop:Now create the test file:Now let me verify the modified files look correct:Everything looks correct. Now update the UI test spec and commit:Now let me add the new test entries after conv-088:Now commit:```json
+{
+  "committed": true,
+  "commit_hash": "5529877",
+  "files_changed": [
+    "frontend/src/utils/grammarPatterns.ts",
+    "frontend/src/components/conversation/ConversationCoach.tsx",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/grammarPatterns.test.ts",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 16,
+  "ui_spec_updated": true,
+  "description": "Added categorizeGrammarError utility that classifies errors into 7 categories, tracked error patterns in Conversation state, and surfaced targeted coaching tips with priority 0 in ConversationCoach when any category has 2+ occurrences"
+}
+```● Coder Implement iteration 568
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "Add grammar error pattern detection to ConversationCoach
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 18 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log
+      │ --oneline -1
+      └ 2 lines...
+
+● Record T2 timestamp (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+Now calling the tester:
+
+I'll run all test suites in parallel to maximize efficiency.Let me get the full vitest failure output to capture all 8 failures:All tests have completed. Here is the full report:
+
+---
+
+```json
+{
+  "tests_passed": 1834,
+  "tests_total": 1842,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "frontend_tests": {
+    "passed": 44,
+    "failed": 8,
+    "total": 52,
+    "file": "src/__tests__/grammarPatterns.test.ts"
+  },
+  "backend_tests": {
+    "passed": 1790,
+    "failed": 0,
+    "total": 1790,
+    "duration": "82.13s"
+  },
+  "failures": [
+    "categorizeGrammarError > returns \"tense\" — expected 'tense', got 'article'",
+    "categorizeGrammarError > returns \"preposition\" — expected 'preposition', got 'article'",
+    "categorizeGrammarError > returns \"subject-verb agreement\" — expected 'subject-verb agreement', got 'article'",
+    "categorizeGrammarError > returns \"word order\" (mentions 'order') — expected 'word order', got 'article'",
+    "categorizeGrammarError > returns \"word order\" (mentions 'position') — expected 'word order', got 'article'",
+    "categorizeGrammarError > returns \"plural\" (mentions 'plural') — expected 'plural', got 'article'",
+    "categorizeGrammarError > returns \"plural\" (mentions 'singular') — expected 'plural', got 'article'",
+    "categorizeGrammarError > returns \"other\" (no match) — expected 'other', got 'article'"
+  ],
+  "failure_summary": "8 vitest failures in grammarPatterns.test.ts: categorizeGrammarError() always returns 'article' instead of matching the correct category — the 'article' check appears to be too greedy and short-circuits all other pattern branches."
+}
+```
+
+### Summary
+
+| Check | Result |
+|---|---|
+| Backend pytest (unit + integration) | ✅ **1790/1790 passed** (82s) |
+| TypeScript `tsc --noEmit` | ✅ **pass** |
+| Frontend vitest | ❌ **44/52 passed — 8 failed** |
+| Smoke API test | ⏭️ skip (no backend changes) |
+| E2E UI test | ⏭️ not_run (no results file) |
+| **Overall** | ❌ **FAIL** |
+
+### Root Cause
+
+All 8 failures are in **`src/__tests__/grammarPatterns.test.ts`**, specifically in the `categorizeGrammarError` function. Every test case returns `"article"` regardless of the input explanation text. The pattern:
+
+- Input: `"Use the past tense here"` → Expected `"tense"`, Got `"article"`
+- Input: `"Wrong preposition after 'arrive'"` → Expected `"preposition"`, Got `"article"`
+- Input: `"Use the gerund after 'enjoy'"` → Expected `"other"`, Got `"article"`
+- …and 5 more with the same symptom.
+
+**Diagnosis:** The `"article"` category check in `grammarPatterns.ts` is matching too broadly — likely checking for the substring `"a"` or `"the"` which appears in almost every English sentence — and it's evaluated before all other categories, so it short-circuits every match. The category priority/ordering or the regex pattern for "article" needs to be fixed.● Tester Test iteration 568
+  │ Check for E2E UI test results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1
+  │   └ 2 lines...
+  └ Get detailed vitest failure info (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ 2>&1 | grep -E "(FAIL|PASS|Tests|AssertionError|Expected|Received|❯ src)" |
+      │ head -40
+      └ 35 lines...
+
+Tests failed — the `categorizeGrammarError` function has a greedy article match. Let me have the coder fix this.
+
+I can see the problem clearly. The article rule's patterns `/\bthe\b/` and `/\b(a|an)\b/` match common English words "the", "a", "an" appearing in nearly every sentence. Since article is checked first, it greedily matches almost everything.
+
+The fix: remove those overly broad patterns and keep only `/\barticles?\b/` and `/\bdeterminer\b/` which match the grammar concept terms. The ordering can stay the same since the priority test (line 141) expects article before tense.
+
+Let me verify my analysis against each failing test, then apply the fix:Now let me verify the file looks correct:Good. Now let me run the tests to verify:One more issue: the subject-verb agreement pattern `/\bsubject.{0,10}verb\b/` is too narrow — in the text "The subject is plural, so the verb should match", the gap between "subject" and "verb" is ~20 characters. I need to widen the range:Now run the tests again:All 52 tests pass. Now let me commit:

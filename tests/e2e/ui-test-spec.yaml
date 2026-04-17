@@ -2429,6 +2429,22 @@ pages:
         priority: high
         added_in: 558
 
+      - id: conv-089
+        target: Fluency Coach shows grammar pattern tip when repeated errors detected
+        action: Send multiple messages that trigger the same grammar error category (e.g., article errors) at least twice during a conversation
+        expect: ConversationCoach displays a 📎 tip like "You've made 2 article errors — Use 'the' for specific items, 'a/an' for general ones." with highest priority before generic tips
+        type: functional
+        priority: high
+        added_in: 568
+
+      - id: conv-090
+        target: Grammar pattern tip is dismissible
+        action: When a grammar pattern tip is shown, click the ✕ dismiss button
+        expect: The pattern tip is dismissed and the next available tip (or no tip) is displayed
+        type: functional
+        priority: medium
+        added_in: 568
+
   quick_practice_dictogloss:
     path: /
     tests:

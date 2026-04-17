@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { CATEGORY_ADVICE, type GrammarCategory } from '../../utils/grammarPatterns';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -11,6 +12,7 @@ interface ConversationCoachProps {
   grammarTotal: number;
   wpmValues: number[];
   responseTimeValues?: number[];
+  errorPatterns?: Map<string, number>;
 }
 
 interface Tip {
@@ -20,7 +22,7 @@ interface Tip {
   priority: number;
 }
 
-export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues = [] }: ConversationCoachProps) {
+export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues = [], errorPatterns }: ConversationCoachProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState(false);
 
@@ -30,6 +32,21 @@ export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmV
     if (userMessages.length < 2) return null;
 
     const tips: Tip[] = [];
+
+    // Grammar error pattern tips (highest priority)
+    if (errorPatterns) {
+      for (const [category, count] of errorPatterns) {
+        if (count >= 2) {
+          const advice = CATEGORY_ADVICE[category as GrammarCategory] ?? CATEGORY_ADVICE.other;
+          tips.push({
+            id: `pattern-${category}`,
+            emoji: '📎',
+            text: `You've made ${count} ${category} errors — ${advice}`,
+            priority: 0,
+          });
+        }
+      }
+    }
 
     // Check question variety: no '?' in last 3+ user messages
     const recentUser = userMessages.slice(-3);
@@ -82,7 +99,7 @@ export function ConversationCoach({ messages, grammarCorrect, grammarTotal, wpmV
     if (available.length === 0) return null;
     available.sort((a, b) => a.priority - b.priority);
     return available[0];
-  }, [userMessages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues, dismissed]);
+  }, [userMessages, grammarCorrect, grammarTotal, wpmValues, responseTimeValues, dismissed, errorPatterns]);
 
   if (!tip) return null;
 

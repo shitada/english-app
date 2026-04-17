@@ -11,6 +11,7 @@ import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, 
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
+import { categorizeGrammarError } from '../utils/grammarPatterns';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -112,6 +113,7 @@ export default function Conversation() {
   const [hintUsedThisTurn, setHintUsedThisTurn] = useState(false);
   const [hintCount, setHintCount] = useState(0);
   const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
+  const [errorPatterns, setErrorPatterns] = useState<Map<string, number>>(new Map());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -619,6 +621,17 @@ export default function Conversation() {
       setPhraseSuggestions(res.phrase_suggestions || []);
       setHintUsedThisTurn(false);
       setHintText(null);
+      // Track grammar error patterns for coaching
+      if (res.feedback && !res.feedback.is_correct && res.feedback.errors.length > 0) {
+        setErrorPatterns((prev) => {
+          const next = new Map(prev);
+          for (const err of res.feedback.errors) {
+            const category = categorizeGrammarError(err);
+            next.set(category, (next.get(category) ?? 0) + 1);
+          }
+          return next;
+        });
+      }
       tts.speak(res.message);
     } catch (err) {
       console.error(err);
@@ -1425,6 +1438,7 @@ export default function Conversation() {
             grammarTotal={checked.length}
             wpmValues={wpmValues}
             responseTimeValues={responseTimes}
+            errorPatterns={errorPatterns}
           />
         );
       })()}
