@@ -23,6 +23,7 @@ import QuickReadingCard from './QuickReadingCard';
 import QuickTongueTwisterCard from './QuickTongueTwisterCard';
 import QuickCollocationCard from './QuickCollocationCard';
 import QuickListenParaphraseCard from './QuickListenParaphraseCard';
+import QuickConnectorDrillCard from './QuickConnectorDrillCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -184,6 +185,7 @@ export default function QuickPracticeHub() {
             <QuickGrammarCard />
             <QuickRephraseCard />
             <QuickTransformCard />
+            <QuickConnectorDrillCard />
           </>
         )}
         {activeTab === 'vocabulary' && (

@@ -3698,6 +3698,136 @@ async def get_fluency_sprint_topic(
     }
 
 
+# ── Connector Drill ──────────────────────────────────────────────
+
+
+class ConnectorDrillExercise(BaseModel):
+    sentence_a: str
+    sentence_b: str
+    connector: str
+    connector_type: str
+    hint: str
+
+
+class ConnectorDrillResponse(BaseModel):
+    exercises: list[ConnectorDrillExercise]
+    difficulty: str
+
+
+@router.get("/connector-drill", response_model=ConnectorDrillResponse)
+async def get_connector_drill_exercises(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    count: int = Query(default=5, ge=1, le=10),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate discourse connector drill exercises."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate {count} discourse connector exercises for a {difficulty}-level English learner.\n"
+        "Each exercise gives two separate sentences and a target connector/linking word.\n"
+        "The learner must combine them into one sentence using the connector.\n"
+        "Cover different connector categories: contrast (however, although), cause/effect (as a result, because), "
+        "addition (furthermore, moreover), concession (despite, even though), sequence (subsequently, meanwhile).\n"
+        "Return JSON with an 'exercises' array. Each item has:\n"
+        "- sentence_a (string): the first sentence\n"
+        "- sentence_b (string): the second sentence\n"
+        "- connector (string): the target connector to use\n"
+        "- connector_type (string): category label, e.g. 'contrast', 'cause_effect', 'addition', 'concession', 'sequence'\n"
+        "- hint (string): a brief hint on how to use the connector\n"
+        "Keep sentences natural and practical."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach specialising in discourse connectors. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="connector_drill",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Connector drill generation failed")
+
+    exercises = result.get("exercises", [])[:count]
+    return {
+        "exercises": [
+            {
+                "sentence_a": str(e.get("sentence_a", "It was raining heavily.")),
+                "sentence_b": str(e.get("sentence_b", "We went for a walk.")),
+                "connector": str(e.get("connector", "however")),
+                "connector_type": str(e.get("connector_type", "contrast")),
+                "hint": str(e.get("hint", "Use this connector to show contrast between the two ideas.")),
+            }
+            for e in exercises
+            if isinstance(e, dict)
+        ],
+        "difficulty": difficulty,
+    }
+
+
+class ConnectorDrillEvalRequest(BaseModel):
+    sentence_a: str = Field(min_length=1, max_length=500)
+    sentence_b: str = Field(min_length=1, max_length=500)
+    connector: str = Field(min_length=1, max_length=100)
+    user_response: str = Field(min_length=1, max_length=2000)
+
+
+class ConnectorDrillEvalResponse(BaseModel):
+    connector_usage_score: float
+    grammar_score: float
+    naturalness_score: float
+    overall_score: float
+    model_answer: str
+    feedback: str
+
+
+@router.post("/connector-drill/evaluate", response_model=ConnectorDrillEvalResponse)
+async def evaluate_connector_drill(
+    req: ConnectorDrillEvalRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's spoken connector drill response."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Sentence A: \"{req.sentence_a}\"\n"
+        f"Sentence B: \"{req.sentence_b}\"\n"
+        f"Target connector: \"{req.connector}\"\n"
+        f"User said: \"{req.user_response}\"\n\n"
+        "The learner was asked to combine both sentences into one using the connector.\n"
+        "Evaluate their response. Return JSON with:\n"
+        "- connector_usage_score (number 1-10): how correctly the connector was used\n"
+        "- grammar_score (number 1-10): grammatical integration of the combined sentence\n"
+        "- naturalness_score (number 1-10): how natural the result sounds\n"
+        "- overall_score (number 1-10): overall quality\n"
+        "- model_answer (string): a correct example of combining the sentences with the connector\n"
+        "- feedback (string): brief constructive feedback"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach evaluating discourse connector usage. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="connector_drill_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Connector drill evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    return {
+        "connector_usage_score": clamp(result.get("connector_usage_score", 5)),
+        "grammar_score": clamp(result.get("grammar_score", 5)),
+        "naturalness_score": clamp(result.get("naturalness_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "model_answer": str(result.get("model_answer", f"{req.sentence_a} {req.connector}, {req.sentence_b.lower()}")),
+        "feedback": str(result.get("feedback", "")),
+    }
+
+
 class FluencySprintRoundResult(BaseModel):
     wpm: float
     word_count: int

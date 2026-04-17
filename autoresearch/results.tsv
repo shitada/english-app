@@ -515,3 +515,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 523	a4f4af1	2026-04-17	387	216	99	142	844	1551	1551	pass	6.20	kept	Add Shadow Phrase micro-drill to HighlightedMessage key phrases
 527	none	2026-04-17	286	209	117	202	814	1577	1578	pass	6.20	discarded	Add Quick Listen-Paraphrase Card for listen-then-rephrase speaking drill
 528	7858e1c	2026-04-17	199	228	190	323	940	1575	1575	pass	6.20	kept	Add Quick Listen-Paraphrase Card for listen-then-rephrase speaking drill
+529	98171ea	2026-04-17	417	252	109	119	897	1585	1585	pass	7.80	kept	Add 4-3-2 Fluency Sprint speaking drill on Home page

@@ -2342,6 +2342,47 @@ export function evaluateCollocation(
   });
 }
 
+// ── Connector Drill ────────────────────────────────────────────
+
+export interface ConnectorDrillExercise {
+  sentence_a: string;
+  sentence_b: string;
+  connector: string;
+  connector_type: string;
+  hint: string;
+}
+
+export interface ConnectorDrillResponse {
+  exercises: ConnectorDrillExercise[];
+  difficulty: string;
+}
+
+export interface ConnectorDrillEvaluation {
+  connector_usage_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall_score: number;
+  model_answer: string;
+  feedback: string;
+}
+
+export async function getConnectorDrillExercises(difficulty = 'intermediate', count = 5): Promise<ConnectorDrillResponse> {
+  return request<ConnectorDrillResponse>('/api/pronunciation/connector-drill?difficulty=' + difficulty + '&count=' + count);
+}
+
+export async function evaluateConnectorDrill(data: {
+  sentence_a: string;
+  sentence_b: string;
+  connector: string;
+  user_response: string;
+}): Promise<ConnectorDrillEvaluation> {
+  return request<ConnectorDrillEvaluation>('/api/pronunciation/connector-drill/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // ── 4-3-2 Fluency Sprint ───────────────────────────────────────
 
 export interface FluencySprintTopic {

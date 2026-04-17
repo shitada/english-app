@@ -1540,3 +1540,43 @@ pages:
         type: functional
         priority: medium
         added_in: 528
+
+      - id: quick-practice-hub-054
+        target: QuickConnectorDrillCard renders in grammar tab
+        action: Click Grammar tab in Quick Practice Hub
+        expect: QuickConnectorDrillCard with Link2 icon and "Quick Connector Drill" heading is visible after QuickTransformCard
+        type: functional
+        priority: high
+        added_in: 530
+
+      - id: quick-practice-hub-055
+        target: QuickConnectorDrillCard shows two sentences and connector
+        action: Wait for QuickConnectorDrillCard to load on Grammar tab
+        expect: Card displays sentence A, sentence B, a highlighted connector word, connector type label, hint, and a "Speak Answer" button
+        type: functional
+        priority: high
+        added_in: 530
+
+      - id: quick-practice-hub-056
+        target: QuickConnectorDrillCard recording phase shows countdown and stop button
+        action: Click "Speak Answer" button on QuickConnectorDrillCard
+        expect: Card enters recording phase with Stop button, countdown timer starting at 15s, and live transcript
+        type: functional
+        priority: medium
+        added_in: 530
+
+      - id: quick-practice-hub-057
+        target: QuickConnectorDrillCard results show scores and model answer
+        action: Complete a recording in QuickConnectorDrillCard
+        expect: Card shows overall score, connector usage score, grammar score, naturalness score, model answer, feedback, and "Try Another" button
+        type: functional
+        priority: high
+        added_in: 530
+
+      - id: quick-practice-hub-058
+        target: QuickConnectorDrillCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickConnectorDrillCard is visible
+        expect: QuickConnectorDrillCard resets to idle phase, clears timer, and re-fetches exercise with new difficulty
+        type: functional
+        priority: medium
+        added_in: 530
