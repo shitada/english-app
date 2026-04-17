@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff, FileSpreadsheet, BookmarkPlus, Check } from 'lucide-react';
 import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
 import { api, getSessionAverages } from '../../api';
@@ -84,6 +84,16 @@ export function ConversationSummary({
     deltas: Record<string, number> | null;
   } | null>(null);
 
+  // Self-Assessment state
+  const [selfAssessment, setSelfAssessment] = useState<{
+    confidence_rating: number;
+    fluency_rating: number;
+    comprehension_rating: number;
+  } | null>(null);
+  const [saRatings, setSaRatings] = useState({ confidence: 0, fluency: 0, comprehension: 0 });
+  const [saSubmitting, setSaSubmitting] = useState(false);
+  const [saSubmitted, setSaSubmitted] = useState(false);
+
   useEffect(() => {
     getSessionAverages().then(setAverages).catch(() => {});
   }, []);
@@ -93,6 +103,39 @@ export function ConversationSummary({
       api.getTopicProgress(conversationId).then(setTopicProgress).catch(() => {});
     }
   }, [conversationId]);
+
+  // Load existing self-assessment on mount
+  useEffect(() => {
+    if (conversationId) {
+      api.getConversationSelfAssessment(conversationId)
+        .then((data) => {
+          setSelfAssessment(data);
+          setSaRatings({
+            confidence: data.confidence_rating,
+            fluency: data.fluency_rating,
+            comprehension: data.comprehension_rating,
+          });
+          setSaSubmitted(true);
+        })
+        .catch(() => {});
+    }
+  }, [conversationId]);
+
+  const handleSelfAssessmentSubmit = useCallback(async () => {
+    if (!conversationId || saSubmitting) return;
+    if (saRatings.confidence === 0 || saRatings.fluency === 0 || saRatings.comprehension === 0) return;
+    setSaSubmitting(true);
+    try {
+      const result = await api.saveConversationSelfAssessment(conversationId, {
+        confidence_rating: saRatings.confidence,
+        fluency_rating: saRatings.fluency,
+        comprehension_rating: saRatings.comprehension,
+      });
+      setSelfAssessment(result);
+      setSaSubmitted(true);
+    } catch { /* save failed */ }
+    setSaSubmitting(false);
+  }, [conversationId, saRatings, saSubmitting]);
 
   function formatSummaryText(): string {
     const lines: string[] = ['📝 English Practice Session', ''];
@@ -368,6 +411,84 @@ export function ConversationSummary({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Self-Assessment Reflection */}
+      {conversationId && (
+        <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }} data-testid="self-assessment-card">
+          <h4 style={{ marginBottom: 12 }}>How did you feel?</h4>
+          {saSubmitted && selfAssessment ? (
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              {([
+                { key: 'confidence', label: 'Confidence', emojis: ['😰', '😟', '😐', '😊', '😎'] },
+                { key: 'fluency', label: 'Fluency', emojis: ['🐢', '🚶', '🏃', '🏎️', '🚀'] },
+                { key: 'comprehension', label: 'Comprehension', emojis: ['😵', '🤔', '😐', '💡', '🧠'] },
+              ] as const).map(({ key, label, emojis }) => {
+                const rating = key === 'confidence' ? selfAssessment.confidence_rating
+                  : key === 'fluency' ? selfAssessment.fluency_rating
+                  : selfAssessment.comprehension_rating;
+                return (
+                  <div key={key} style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 24 }}>{emojis[rating - 1]}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{label}: {rating}/5</div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div>
+              {([
+                { key: 'confidence' as const, label: 'Confidence', emojis: ['😰', '😟', '😐', '😊', '😎'] },
+                { key: 'fluency' as const, label: 'Fluency', emojis: ['🐢', '🚶', '🏃', '🏎️', '🚀'] },
+                { key: 'comprehension' as const, label: 'Comprehension', emojis: ['😵', '🤔', '😐', '💡', '🧠'] },
+              ]).map(({ key, label, emojis }) => (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, minWidth: 110 }}>{label}</span>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {emojis.map((emoji, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSaRatings(prev => ({ ...prev, [key]: i + 1 }))}
+                        aria-label={`${label} rating ${i + 1}`}
+                        style={{
+                          fontSize: 22,
+                          background: saRatings[key] === i + 1 ? 'var(--primary-light, rgba(99,102,241,0.15))' : 'none',
+                          border: saRatings[key] === i + 1 ? '2px solid var(--primary, #6366f1)' : '2px solid transparent',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          padding: '4px 6px',
+                          transition: 'all 0.15s ease',
+                          opacity: saRatings[key] === 0 ? 0.7 : saRatings[key] === i + 1 ? 1 : 0.4,
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={handleSelfAssessmentSubmit}
+                disabled={saSubmitting || saRatings.confidence === 0 || saRatings.fluency === 0 || saRatings.comprehension === 0}
+                data-testid="self-assessment-submit"
+                style={{
+                  marginTop: 8,
+                  padding: '8px 20px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  background: (saRatings.confidence > 0 && saRatings.fluency > 0 && saRatings.comprehension > 0) ? 'var(--primary, #6366f1)' : 'var(--text-secondary, #9ca3af)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: saSubmitting ? 'wait' : (saRatings.confidence > 0 && saRatings.fluency > 0 && saRatings.comprehension > 0) ? 'pointer' : 'not-allowed',
+                  opacity: saSubmitting ? 0.7 : 1,
+                }}
+              >
+                {saSubmitting ? 'Saving…' : 'Submit Reflection'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

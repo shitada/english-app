@@ -140,6 +140,16 @@ CREATE TABLE IF NOT EXISTS speaking_journal (
     wpm REAL NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS conversation_self_assessments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL UNIQUE,
+    confidence_rating INTEGER NOT NULL CHECK (confidence_rating BETWEEN 1 AND 5),
+    fluency_rating INTEGER NOT NULL CHECK (fluency_rating BETWEEN 1 AND 5),
+    comprehension_rating INTEGER NOT NULL CHECK (comprehension_rating BETWEEN 1 AND 5),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+);
 """
 
 # ---------------------------------------------------------------------------
@@ -314,6 +324,18 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "rename learning_goals_new to learning_goals",
         "ALTER TABLE learning_goals_new RENAME TO learning_goals",
+    ),
+    (
+        "create conversation_self_assessments table",
+        """CREATE TABLE IF NOT EXISTS conversation_self_assessments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id INTEGER NOT NULL UNIQUE,
+            confidence_rating INTEGER NOT NULL CHECK (confidence_rating BETWEEN 1 AND 5),
+            fluency_rating INTEGER NOT NULL CHECK (fluency_rating BETWEEN 1 AND 5),
+            comprehension_rating INTEGER NOT NULL CHECK (comprehension_rating BETWEEN 1 AND 5),
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+        )""",
     ),
 ]
 

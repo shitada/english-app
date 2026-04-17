@@ -1259,3 +1259,55 @@ async def save_conversation_vocabulary(
         saved_count=len(saved),
         words=[SavedWordItem(word=s["word"], meaning=s["meaning"]) for s in saved],
     )
+
+
+# ---------------------------------------------------------------------------
+# Self-Assessment reflection card
+# ---------------------------------------------------------------------------
+
+class SelfAssessmentRequest(BaseModel):
+    confidence_rating: int = Field(ge=1, le=5)
+    fluency_rating: int = Field(ge=1, le=5)
+    comprehension_rating: int = Field(ge=1, le=5)
+
+
+class SelfAssessmentResponse(BaseModel):
+    conversation_id: int
+    confidence_rating: int
+    fluency_rating: int
+    comprehension_rating: int
+    created_at: str | None = None
+
+
+@router.post("/{conversation_id}/self-assessment", response_model=SelfAssessmentResponse)
+async def save_self_assessment(
+    req: SelfAssessmentRequest,
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Save or update a self-assessment for a conversation."""
+    exists = await conv_dal.conversation_exists(db, conversation_id)
+    if not exists:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    result = await conv_dal.save_self_assessment(
+        db, conversation_id, req.confidence_rating, req.fluency_rating, req.comprehension_rating
+    )
+    return SelfAssessmentResponse(**result)
+
+
+@router.get("/{conversation_id}/self-assessment", response_model=SelfAssessmentResponse)
+async def get_self_assessment(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Retrieve a self-assessment for a conversation."""
+    exists = await conv_dal.conversation_exists(db, conversation_id)
+    if not exists:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    assessment = await conv_dal.get_self_assessment(db, conversation_id)
+    if not assessment:
+        raise HTTPException(status_code=404, detail="Self-assessment not found")
+
+    return SelfAssessmentResponse(**assessment)

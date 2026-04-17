@@ -1022,3 +1022,38 @@ async def delete_custom_topic(db: aiosqlite.Connection, topic_id: str) -> bool:
     cursor = await db.execute("DELETE FROM custom_topics WHERE topic_id = ?", (topic_id,))
     await db.commit()
     return cursor.rowcount > 0
+
+
+async def save_self_assessment(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    confidence: int,
+    fluency: int,
+    comprehension: int,
+) -> dict:
+    """Save or update a self-assessment for a conversation."""
+    await db.execute(
+        """INSERT OR REPLACE INTO conversation_self_assessments
+           (conversation_id, confidence_rating, fluency_rating, comprehension_rating)
+           VALUES (?, ?, ?, ?)""",
+        (conversation_id, confidence, fluency, comprehension),
+    )
+    await db.commit()
+    return {
+        "conversation_id": conversation_id,
+        "confidence_rating": confidence,
+        "fluency_rating": fluency,
+        "comprehension_rating": comprehension,
+    }
+
+
+async def get_self_assessment(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+) -> dict | None:
+    """Retrieve a self-assessment for a conversation, or None if not found."""
+    rows = await db.execute_fetchall(
+        "SELECT conversation_id, confidence_rating, fluency_rating, comprehension_rating, created_at FROM conversation_self_assessments WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+    return dict(rows[0]) if rows else None
