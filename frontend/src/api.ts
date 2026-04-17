@@ -2341,3 +2341,46 @@ export function evaluateCollocation(
     body: JSON.stringify({ base_word, correct_collocation, user_choice }),
   });
 }
+
+// ── 4-3-2 Fluency Sprint ───────────────────────────────────────
+
+export interface FluencySprintTopic {
+  topic: string;
+  guiding_questions: string[];
+  difficulty: string;
+}
+
+export interface FluencySprintRoundResult {
+  wpm: number;
+  word_count: number;
+  unique_words: number;
+  vocabulary_richness: number;
+}
+
+export interface FluencySprintResult {
+  rounds: FluencySprintRoundResult[];
+  fluency_improvement_score: number;
+  feedback: string;
+  strengths: string[];
+  tips: string[];
+}
+
+export function getFluencySprintTopic(
+  difficulty: string = 'intermediate',
+): Promise<FluencySprintTopic> {
+  return request<FluencySprintTopic>(
+    `/api/pronunciation/fluency-sprint/topic?difficulty=${difficulty}`,
+  );
+}
+
+export function evaluateFluencySprint(
+  topic: string,
+  transcripts: string[],
+  durations: number[],
+): Promise<FluencySprintResult> {
+  return request<FluencySprintResult>('/api/pronunciation/fluency-sprint/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, transcripts, durations }),
+  });
+}

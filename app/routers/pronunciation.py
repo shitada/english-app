@@ -3646,3 +3646,151 @@ async def evaluate_listen_paraphrase(
         "feedback": str(result.get("feedback", "")),
         "model_paraphrase": str(result.get("model_paraphrase", "")),
     }
+
+
+# --- 4-3-2 Fluency Sprint ---
+
+class FluencySprintTopicResponse(BaseModel):
+    topic: str
+    guiding_questions: list[str]
+    difficulty: str
+
+
+@router.get("/fluency-sprint/topic", response_model=FluencySprintTopicResponse)
+async def get_fluency_sprint_topic(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a speaking topic for the 4-3-2 fluency sprint drill."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a speaking topic for a {difficulty}-level English learner.\n"
+        "The topic should be easy to talk about for 60 seconds and allow the speaker "
+        "to express opinions and personal experiences.\n"
+        "Return JSON with:\n"
+        "- topic (string): a clear, engaging topic statement (e.g. 'Describe your ideal weekend')\n"
+        "- guiding_questions (array of 3 strings): short questions to help structure the talk\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="fluency_sprint_topic",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Topic generation failed")
+
+    raw_questions = result.get("guiding_questions", [])
+    if not isinstance(raw_questions, list):
+        raw_questions = []
+    guiding_questions = [str(q) for q in raw_questions[:5]] or [
+        "What do you usually do?",
+        "Why do you enjoy it?",
+        "Would you recommend it to others?",
+    ]
+
+    return {
+        "topic": str(result.get("topic", "Describe a memorable experience from this year")),
+        "guiding_questions": guiding_questions,
+        "difficulty": difficulty,
+    }
+
+
+class FluencySprintRoundResult(BaseModel):
+    wpm: float
+    word_count: int
+    unique_words: int
+    vocabulary_richness: float
+
+
+class FluencySprintEvaluateRequest(BaseModel):
+    topic: str = Field(min_length=1, max_length=500)
+    transcripts: list[str] = Field(min_length=3, max_length=3)
+    durations: list[int] = Field(min_length=3, max_length=3)
+
+
+class FluencySprintEvaluateResponse(BaseModel):
+    rounds: list[FluencySprintRoundResult]
+    fluency_improvement_score: float
+    feedback: str
+    strengths: list[str]
+    tips: list[str]
+
+
+def _compute_round_stats(transcript: str, duration_seconds: int) -> dict:
+    """Compute WPM, word count, unique words and vocab richness for a round."""
+    words = transcript.split()
+    word_count = len(words)
+    unique_words = len(set(w.lower().strip(".,!?;:'\"") for w in words if w.strip(".,!?;:'\"") ))
+    wpm = round(word_count / max(duration_seconds, 1) * 60, 1) if word_count else 0.0
+    vocabulary_richness = round(unique_words / max(word_count, 1), 2)
+    return {
+        "wpm": wpm,
+        "word_count": word_count,
+        "unique_words": unique_words,
+        "vocabulary_richness": vocabulary_richness,
+    }
+
+
+@router.post("/fluency-sprint/evaluate", response_model=FluencySprintEvaluateResponse)
+async def evaluate_fluency_sprint(
+    req: FluencySprintEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a completed 4-3-2 fluency sprint session."""
+    # Validate all transcripts are non-empty
+    for i, t in enumerate(req.transcripts):
+        if not t.strip():
+            raise HTTPException(status_code=422, detail=f"Transcript for round {i + 1} is empty")
+
+    # Compute per-round statistics
+    rounds = []
+    for transcript, duration in zip(req.transcripts, req.durations):
+        rounds.append(_compute_round_stats(transcript, duration))
+
+    # Fluency improvement: compare WPM of round 3 vs round 1
+    wpm_1 = rounds[0]["wpm"]
+    wpm_3 = rounds[2]["wpm"]
+    if wpm_1 > 0:
+        fluency_improvement_score = round((wpm_3 - wpm_1) / wpm_1 * 100, 1)
+    else:
+        fluency_improvement_score = 0.0
+
+    # Get LLM feedback
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"A student did a 4-3-2 fluency sprint on the topic: '{req.topic}'.\n"
+        f"Round 1 (60s, {rounds[0]['wpm']} WPM): {req.transcripts[0][:300]}\n"
+        f"Round 2 (40s, {rounds[1]['wpm']} WPM): {req.transcripts[1][:300]}\n"
+        f"Round 3 (20s, {rounds[2]['wpm']} WPM): {req.transcripts[2][:300]}\n"
+        "The WPM improvement from round 1 to 3 is "
+        f"{fluency_improvement_score}%.\n"
+        "Provide feedback on their fluency development.\n"
+        "Return JSON with:\n"
+        "- feedback (string): 2-3 sentence overall feedback\n"
+        "- strengths (array of strings): 2-3 specific strengths\n"
+        "- tips (array of strings): 2-3 actionable tips for improvement\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="fluency_sprint_evaluate",
+        )
+    except HTTPException:
+        result = {}
+
+    raw_strengths = result.get("strengths", [])
+    raw_tips = result.get("tips", [])
+
+    return {
+        "rounds": rounds,
+        "fluency_improvement_score": fluency_improvement_score,
+        "feedback": str(result.get("feedback", "Good effort! Keep practicing the 4-3-2 technique to build automatization.")),
+        "strengths": [str(s) for s in raw_strengths[:5]] if isinstance(raw_strengths, list) else [],
+        "tips": [str(t) for t in raw_tips[:5]] if isinstance(raw_tips, list) else [],
+    }

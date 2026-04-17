@@ -162,6 +162,30 @@ pages:
         priority: medium
         added_in: 511
 
+      - id: home-019
+        target: Fluency Sprint card renders on Home page
+        action: scroll to [data-testid="fluency-sprint-card"]
+        expect: Card with title "4-3-2 Fluency Sprint" is visible with Start Sprint button
+        type: functional
+        priority: high
+        added_in: 529
+
+      - id: home-020
+        target: Fluency Sprint difficulty selector toggles
+        action: click each difficulty button (beginner, intermediate, advanced) in the fluency sprint card
+        expect: Clicked button gets primary background color, others reset
+        type: functional
+        priority: medium
+        added_in: 529
+
+      - id: home-021
+        target: Fluency Sprint start button begins drill
+        action: click [data-testid="fluency-sprint-start"] button
+        expect: Round indicators appear with timer countdown and microphone icon
+        type: functional
+        priority: high
+        added_in: 529
+
   conversation:
     path: /conversation
     tests:

@@ -10,6 +10,7 @@ import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickPracticeHub from '../components/QuickPracticeHub';
 import SmartReviewQueue from '../components/SmartReviewQueue';
 import SpeakingJournal from '../components/SpeakingJournal';
+import FluencySprintCard from '../components/FluencySprintCard';
 import StudyPlanCard from '../components/StudyPlanCard';
 import { useI18n } from '../i18n/I18nContext';
 
@@ -960,6 +961,8 @@ export default function Home() {
       <QuickPracticeHub />
 
       <SpeakingJournal />
+
+      <FluencySprintCard />
 
       <StreakMilestonesCard />
 
