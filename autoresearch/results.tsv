@@ -534,3 +534,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 549	67b5668	2026-04-17	208	211	127	176	722	1708	1708	pass	7.00	kept	Add Self-Assessment Trend Chart to Dashboard with API client
 550	39dbd4a	2026-04-17	398	235	144	118	895	1719	1719	pass	7.25	kept	Add Streak Freeze protection system to preserve learning streaks
 551	6e0b0e0	2026-04-17	639	279	130	169	1217	1719	1719	pass	6.70	kept	Add in-conversation key phrase save to vocabulary bank
+552	bdba8a4	2026-04-17	557	306	132	77	1072	1720	1720	pass	7.75	kept	Fix auto_apply_freezes ignoring internal gaps between activity days

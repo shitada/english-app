@@ -2092,3 +2092,43 @@ pages:
         type: state
         priority: medium
         added_in: 551
+
+      - id: conv-079
+        target: Fluency Score gauge displays when performance data exists
+        action: Complete a conversation and view the summary
+        expect: A circular SVG gauge with score 0-100, color-coded ring, and fluency level label is visible between the summary text and Key Vocabulary
+        type: visual
+        priority: high
+        added_in: 553
+
+      - id: conv-080
+        target: Fluency Score gauge animates on mount
+        action: Observe the gauge when the conversation summary loads
+        expect: The ring stroke animates from 0 to the actual score using a smooth CSS transition
+        type: visual
+        priority: medium
+        added_in: 553
+
+      - id: conv-081
+        target: Show/Hide breakdown toggle reveals sub-score bars
+        action: Click the "Show breakdown" button below the fluency gauge
+        expect: Four sub-score bars (Grammar 30%, Vocabulary 30%, Complexity 25%, Participation 15%) appear with raw 0-100 values and proportional fill
+        type: functional
+        priority: high
+        added_in: 553
+
+      - id: conv-082
+        target: Fluency gauge is hidden when no performance data
+        action: View a conversation summary where performance data is absent
+        expect: No fluency gauge section is rendered
+        type: state
+        priority: medium
+        added_in: 553
+
+      - id: conv-083
+        target: Fluency breakdown sub-scores display raw 0-100 integer values
+        action: Click "Show breakdown" and inspect the numeric values next to each bar
+        expect: Each sub-score shows a whole number (0-100) reflecting the raw metric, not a weighted fraction
+        type: visual
+        priority: medium
+        added_in: 553

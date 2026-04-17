@@ -3,6 +3,8 @@ import { Volume2, Copy, Download, Share2, TrendingUp, TrendingDown, Eye, EyeOff,
 import type { GrammarFeedback, ConversationQuizQuestion, SessionAveragesResponse } from '../../api';
 import { api, getSessionAverages } from '../../api';
 import { generateStudyCardsCSV, hasStudyCards } from '../../utils/csvExport';
+import { computeFluencyScore } from '../../utils/fluencyScore';
+import type { FluencyResult } from '../../utils/fluencyScore';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { SpeakCorrectionDrill } from './SpeakCorrectionDrill';
@@ -93,6 +95,22 @@ export function ConversationSummary({
   const [saRatings, setSaRatings] = useState({ confidence: 0, fluency: 0, comprehension: 0 });
   const [saSubmitting, setSaSubmitting] = useState(false);
   const [saSubmitted, setSaSubmitted] = useState(false);
+  const [gaugeAnimated, setGaugeAnimated] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+
+  // Compute fluency score when performance data exists
+  const fluencyResult: FluencyResult | null =
+    summary.performance && summary.performance.total_user_messages > 0
+      ? computeFluencyScore(summary.performance)
+      : null;
+
+  // Trigger gauge animation after mount
+  useEffect(() => {
+    if (fluencyResult) {
+      const timer = setTimeout(() => setGaugeAnimated(true), 80);
+      return () => clearTimeout(timer);
+    }
+  }, [fluencyResult !== null]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getSessionAverages().then(setAverages).catch(() => {});
@@ -238,6 +256,132 @@ export function ConversationSummary({
     <div className="card summary-card">
       <h2 style={{ marginBottom: 16 }}>Conversation Complete!</h2>
       <p style={{ marginBottom: 16 }}>{summary.summary}</p>
+
+      {/* Fluency Score Gauge */}
+      {fluencyResult && (() => {
+        const size = 140;
+        const strokeWidth = 10;
+        const radius = (size - strokeWidth) / 2;
+        const circumference = 2 * Math.PI * radius;
+        const progress = gaugeAnimated ? fluencyResult.score / 100 : 0;
+        const dashOffset = circumference * (1 - progress);
+        const subWeights = [
+          { key: 'Grammar', value: fluencyResult.breakdown.grammar, weight: '30%', max: 100 },
+          { key: 'Vocabulary', value: fluencyResult.breakdown.vocabulary, weight: '30%', max: 100 },
+          { key: 'Complexity', value: fluencyResult.breakdown.complexity, weight: '25%', max: 100 },
+          { key: 'Participation', value: fluencyResult.breakdown.participation, weight: '15%', max: 100 },
+        ];
+        return (
+          <div
+            data-testid="fluency-score-gauge"
+            style={{
+              marginBottom: 24,
+              padding: 20,
+              background: 'var(--bg-secondary, #f5f5f5)',
+              borderRadius: 12,
+              textAlign: 'center',
+            }}
+          >
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block', margin: '0 auto' }}>
+              {/* Background ring */}
+              <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke="var(--border, #e5e7eb)"
+                strokeWidth={strokeWidth}
+              />
+              {/* Score ring */}
+              <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke={fluencyResult.color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={dashOffset}
+                transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+              />
+              {/* Score text */}
+              <text
+                x={size / 2}
+                y={size / 2 - 6}
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={{ fontSize: 32, fontWeight: 700, fill: fluencyResult.color }}
+              >
+                {Math.round(fluencyResult.score)}
+              </text>
+              <text
+                x={size / 2}
+                y={size / 2 + 20}
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={{ fontSize: 11, fill: 'var(--text-secondary, #6b7280)' }}
+              >
+                / 100
+              </text>
+            </svg>
+
+            <div style={{ marginTop: 8, fontSize: 16, fontWeight: 600, color: fluencyResult.color }}>
+              {fluencyResult.label}
+            </div>
+            <div style={{ marginTop: 2, fontSize: 12, color: 'var(--text-secondary, #6b7280)' }}>
+              Fluency Score
+            </div>
+
+            <button
+              onClick={() => setShowBreakdown((prev) => !prev)}
+              data-testid="fluency-breakdown-toggle"
+              style={{
+                marginTop: 10,
+                padding: '4px 12px',
+                fontSize: 12,
+                background: 'none',
+                border: '1px solid var(--border, #e5e7eb)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                color: 'var(--text-secondary, #6b7280)',
+              }}
+            >
+              {showBreakdown ? 'Hide breakdown' : 'Show breakdown'}
+            </button>
+
+            {showBreakdown && (
+              <div
+                data-testid="fluency-breakdown"
+                style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'left' }}
+              >
+                {subWeights.map((s) => (
+                  <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, minWidth: 90, color: 'var(--text-secondary, #6b7280)' }}>
+                      {s.key} ({s.weight})
+                    </span>
+                    <div style={{ flex: 1, background: 'var(--border, #e5e7eb)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          width: `${s.max > 0 ? (s.value / s.max) * 100 : 0}%`,
+                          height: '100%',
+                          background: fluencyResult.color,
+                          borderRadius: 4,
+                          transition: 'width 0.6s ease',
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, minWidth: 32, textAlign: 'right' }}>
+                      {s.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {summary.key_vocabulary?.length > 0 && (
         <>
