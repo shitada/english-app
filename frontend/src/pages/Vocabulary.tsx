@@ -3,6 +3,7 @@ import { Volume2, Check, X, ArrowRight, Zap, Mic, SkipForward, RotateCcw } from 
 import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, type EtymologyInfo, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers, getWordEtymology } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import VocabSRSProgress, { type SRSChange } from '../components/VocabSRSProgress';
 import VocabDrillMode from '../components/VocabDrillMode';
 import VocabFlashcardMode from '../components/VocabFlashcardMode';
@@ -312,6 +313,19 @@ export default function Vocabulary() {
     : quizMode === 'word-to-meaning' || quizMode === 'audio-quiz'
     ? ((currentQ as QuizQuestion)?.correct_meaning || (currentQ as QuizQuestion)?.meaning || '')
     : ((currentQ as QuizQuestion)?.word || '');
+
+  // Keyboard shortcuts for multiple-choice quiz modes
+  const isMcQuiz = phase === 'quiz' && questions.length > 0 &&
+    (quizMode === 'word-to-meaning' || quizMode === 'meaning-to-word' || quizMode === 'audio-quiz');
+  useKeyboardShortcuts([
+    { key: '1', handler: () => { if (!revealed) { const opts = getOptions(); if (opts.length > 0) selectAnswer(opts[0]); } }, enabled: isMcQuiz },
+    { key: '2', handler: () => { if (!revealed) { const opts = getOptions(); if (opts.length > 1) selectAnswer(opts[1]); } }, enabled: isMcQuiz },
+    { key: '3', handler: () => { if (!revealed) { const opts = getOptions(); if (opts.length > 2) selectAnswer(opts[2]); } }, enabled: isMcQuiz },
+    { key: '4', handler: () => { if (!revealed) { const opts = getOptions(); if (opts.length > 3) selectAnswer(opts[3]); } }, enabled: isMcQuiz },
+    { key: 'Enter', handler: () => { if (revealed) nextQuestion(); }, enabled: isMcQuiz },
+    { key: ' ', handler: () => { if (currentQ) tts.speak((currentQ as QuizQuestion).word); }, enabled: isMcQuiz },
+    { key: 'Escape', handler: () => { setPhase('select'); setIsOfflineMode(false); }, enabled: isMcQuiz },
+  ]);
 
   // Topic selection
   if (phase === 'select') {
@@ -1400,6 +1414,9 @@ export default function Vocabulary() {
           );
         })}
       </div>
+      <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 16, opacity: 0.7 }}>
+        ⌨️ Press 1–{options.length} to select · Enter to advance · Space to replay · Esc to go back
+      </p>
 
       {revealed && (
         <div style={{ textAlign: 'center', marginTop: 16 }} role="status" aria-live="polite">

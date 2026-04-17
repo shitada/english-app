@@ -946,6 +946,54 @@ pages:
         priority: high
         added_in: 517
 
+      - id: vocab-017
+        target: Keyboard shortcut 1-4 selects answer option in multiple-choice quiz
+        action: start a word-to-meaning quiz, press keys 1 through 4
+        expect: Corresponding option is selected and answer is revealed with correct/incorrect feedback
+        type: functional
+        priority: high
+        added_in: 544
+
+      - id: vocab-018
+        target: Enter key advances to next question after answer revealed
+        action: select an answer in multiple-choice quiz, then press Enter
+        expect: Quiz advances to next question or shows results on last question
+        type: functional
+        priority: high
+        added_in: 544
+
+      - id: vocab-019
+        target: Space key replays TTS of current word in multiple-choice quiz
+        action: during quiz phase, press Space
+        expect: TTS speaks the current vocabulary word
+        type: functional
+        priority: medium
+        added_in: 544
+
+      - id: vocab-020
+        target: Escape key returns to topic selection from quiz
+        action: during multiple-choice quiz phase, press Escape
+        expect: Phase changes back to topic select view
+        type: functional
+        priority: medium
+        added_in: 544
+
+      - id: vocab-021
+        target: Keyboard hint text displays below quiz options
+        action: start a multiple-choice vocabulary quiz, snapshot options area
+        expect: Small hint text "⌨️ Press 1–N to select · Enter to advance · Space to replay · Esc to go back" visible below options
+        type: visual
+        priority: low
+        added_in: 544
+
+      - id: vocab-022
+        target: Keyboard shortcuts are disabled in fill-blank mode
+        action: start a fill-blank quiz, press keys 1-4
+        expect: No option selection occurs, keyboard input goes to text field normally
+        type: functional
+        priority: medium
+        added_in: 544
+
   dashboard:
     path: /dashboard
     tests:
