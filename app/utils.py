@@ -57,6 +57,17 @@ async def safe_llm_call(
     raise HTTPException(status_code=502, detail="AI service temporarily unavailable")
 
 
+def clamp_score(val: Any, lo: float = 1.0, hi: float = 10.0) -> float:
+    """Convert *val* to float clamped between *lo* and *hi*.
+
+    Falls back to 5.0 when the value cannot be converted to a number.
+    """
+    try:
+        return min(hi, max(lo, float(val)))
+    except (TypeError, ValueError):
+        return 5.0
+
+
 def get_topic_label(topics: list[dict[str, Any]], topic_id: str) -> str:
     """Look up a topic's display label by its ID. Returns the ID if not found."""
     for t in topics:

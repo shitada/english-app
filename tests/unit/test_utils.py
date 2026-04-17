@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.utils import escape_like, get_topic_label, safe_llm_call, validate_topic
+from app.utils import clamp_score, escape_like, get_topic_label, safe_llm_call, validate_topic
 
 
 @pytest.mark.unit
@@ -371,3 +371,47 @@ class TestComputeDictationScore:
         result = compute_dictation_score("one two", "one two three four")
         assert result["total_words"] == 2
         assert result["correct_words"] == 2
+
+
+@pytest.mark.unit
+class TestClampScore:
+    """Tests for clamp_score helper."""
+
+    def test_normal_float_input(self):
+        assert clamp_score(7.0) == 7.0
+
+    def test_string_number_input(self):
+        assert clamp_score("7.5") == 7.5
+
+    def test_int_input(self):
+        assert clamp_score(8) == 8.0
+
+    def test_value_below_lo_clamped(self):
+        assert clamp_score(-3) == 1.0
+
+    def test_value_above_hi_clamped(self):
+        assert clamp_score(15) == 10.0
+
+    def test_value_at_lo_boundary(self):
+        assert clamp_score(1.0) == 1.0
+
+    def test_value_at_hi_boundary(self):
+        assert clamp_score(10.0) == 10.0
+
+    def test_invalid_string_returns_default(self):
+        assert clamp_score("abc") == 5.0
+
+    def test_none_returns_default(self):
+        assert clamp_score(None) == 5.0
+
+    def test_empty_string_returns_default(self):
+        assert clamp_score("") == 5.0
+
+    def test_custom_lo_hi_bounds(self):
+        assert clamp_score(0.5, lo=0.0, hi=1.0) == 0.5
+        assert clamp_score(-1, lo=0.0, hi=1.0) == 0.0
+        assert clamp_score(2, lo=0.0, hi=1.0) == 1.0
+
+    def test_returns_float_type(self):
+        result = clamp_score(5)
+        assert isinstance(result, float)

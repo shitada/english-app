@@ -18,7 +18,7 @@ from app.dal import pronunciation as pron_dal
 from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
 from app.rate_limit import require_rate_limit
-from app.utils import coerce_bool, compute_dictation_score, get_topic_label, safe_llm_call
+from app.utils import clamp_score, coerce_bool, compute_dictation_score, get_topic_label, safe_llm_call
 
 logger = logging.getLogger(__name__)
 
@@ -855,18 +855,12 @@ async def evaluate_quick_speak(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "fluency_score": clamp(result.get("fluency_score", 5)),
-        "relevance_score": clamp(result.get("relevance_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "fluency_score": clamp_score(result.get("fluency_score", 5)),
+        "relevance_score": clamp_score(result.get("relevance_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "word_count": word_count,
         "wpm": wpm,
         "feedback": str(result.get("feedback", "")),
@@ -1121,17 +1115,11 @@ async def evaluate_response_drill(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "appropriateness_score": clamp(result.get("appropriateness_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "appropriateness_score": clamp_score(result.get("appropriateness_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_response": str(result.get("model_response", "")),
     }
@@ -1236,17 +1224,11 @@ async def evaluate_sentence_expand(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "creativity_score": clamp(result.get("creativity_score", 5)),
-        "complexity_score": clamp(result.get("complexity_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "creativity_score": clamp_score(result.get("creativity_score", 5)),
+        "complexity_score": clamp_score(result.get("complexity_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "word_count_added": max(0, expanded_words - seed_words),
         "feedback": str(result.get("feedback", "")),
         "model_expansion": str(result.get("model_expansion", "")),
@@ -1297,18 +1279,12 @@ async def evaluate_listening_summary(req: ListeningSummaryEvalRequest, _rl=Depen
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "content_coverage_score": clamp(result.get("content_coverage_score", 5)),
-        "accuracy_score": clamp(result.get("accuracy_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "conciseness_score": clamp(result.get("conciseness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "content_coverage_score": clamp_score(result.get("content_coverage_score", 5)),
+        "accuracy_score": clamp_score(result.get("accuracy_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "conciseness_score": clamp_score(result.get("conciseness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_summary": str(result.get("model_summary", "")),
     }
@@ -1405,18 +1381,12 @@ async def evaluate_listening_discussion(req: ListeningDiscussionEvalRequest, _rl
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "argument_score": clamp(result.get("argument_score", 5)),
-        "relevance_score": clamp(result.get("relevance_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "argument_score": clamp_score(result.get("argument_score", 5)),
+        "relevance_score": clamp_score(result.get("relevance_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
@@ -1528,17 +1498,11 @@ async def evaluate_sentence_transform(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "transformation_score": clamp(result.get("transformation_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "transformation_score": clamp_score(result.get("transformation_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "correct_version": str(result.get("correct_version", req.expected_answer)),
     }
@@ -1593,17 +1557,11 @@ async def evaluate_listening_qa(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "content_accuracy_score": clamp(result.get("content_accuracy_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "content_accuracy_score": clamp_score(result.get("content_accuracy_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
@@ -1698,18 +1656,12 @@ async def evaluate_listen_respond(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "comprehension_score": clamp(result.get("comprehension_score", 5)),
-        "relevance_score": clamp(result.get("relevance_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "fluency_score": clamp(result.get("fluency_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "comprehension_score": clamp_score(result.get("comprehension_score", 5)),
+        "relevance_score": clamp_score(result.get("relevance_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "fluency_score": clamp_score(result.get("fluency_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
@@ -1851,18 +1803,12 @@ async def evaluate_opinion(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "argument_structure_score": clamp(result.get("argument_structure_score", 5)),
-        "coherence_score": clamp(result.get("coherence_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "argument_structure_score": clamp_score(result.get("argument_structure_score", 5)),
+        "coherence_score": clamp_score(result.get("coherence_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "word_count": word_count,
         "wpm": wpm,
         "feedback": str(result.get("feedback", "")),
@@ -1960,17 +1906,11 @@ async def evaluate_question_formation(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "accuracy_score": clamp(result.get("accuracy_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "accuracy_score": clamp_score(result.get("accuracy_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "corrected_question": str(result.get("corrected_question", body.expected_question)),
     }
@@ -2071,18 +2011,12 @@ async def evaluate_story(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Story evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "coherence_score": clamp(result.get("coherence_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "narrative_flow_score": clamp(result.get("narrative_flow_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "coherence_score": clamp_score(result.get("coherence_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "narrative_flow_score": clamp_score(result.get("narrative_flow_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "word_count": word_count,
         "wpm": wpm,
         "feedback": str(result.get("feedback", "")),
@@ -2185,18 +2119,12 @@ async def evaluate_follow_up(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Follow-up evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "relevance_score": clamp(result.get("relevance_score", 5)),
-        "depth_score": clamp(result.get("depth_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "relevance_score": clamp_score(result.get("relevance_score", 5)),
+        "depth_score": clamp_score(result.get("depth_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "word_count": word_count,
         "wpm": wpm,
         "feedback": str(result.get("feedback", "")),
@@ -2711,17 +2639,11 @@ async def evaluate_idiom_usage(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Idiom evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "idiom_usage_score": clamp(result.get("idiom_usage_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "idiom_usage_score": clamp_score(result.get("idiom_usage_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_sentence": str(result.get("model_sentence", "")),
     }
@@ -2834,12 +2756,6 @@ async def evaluate_quick_write(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Writing evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     raw_corrections = result.get("corrections", [])
     if not isinstance(raw_corrections, list):
         raw_corrections = []
@@ -2853,11 +2769,11 @@ async def evaluate_quick_write(
             })
 
     return {
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "register_score": clamp(result.get("register_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "register_score": clamp_score(result.get("register_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "corrections": corrections,
         "model_response": str(result.get("model_response", "")),
@@ -2970,12 +2886,6 @@ async def evaluate_explain_word(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Explain word evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     raw_used = result.get("used_forbidden", [])
     if not isinstance(raw_used, list):
         raw_used = []
@@ -2990,10 +2900,10 @@ async def evaluate_explain_word(
             )
 
     return {
-        "clarity_score": clamp(result.get("clarity_score", 5)),
-        "creativity_score": clamp(result.get("creativity_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "clarity_score": clamp_score(result.get("clarity_score", 5)),
+        "creativity_score": clamp_score(result.get("creativity_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "used_forbidden": used_forbidden,
         "feedback": str(result.get("feedback", "")),
         "model_explanation": str(result.get("model_explanation", "")),
@@ -3135,12 +3045,6 @@ async def evaluate_roleplay(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Role-play evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     raw_model = result.get("model_responses", [])
     if not isinstance(raw_model, list):
         raw_model = []
@@ -3149,11 +3053,11 @@ async def evaluate_roleplay(
         model_responses.append("I'd be happy to help with that.")
 
     return {
-        "appropriateness_score": clamp(result.get("appropriateness_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "fluency_score": clamp(result.get("fluency_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "appropriateness_score": clamp_score(result.get("appropriateness_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "fluency_score": clamp_score(result.get("fluency_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_responses": model_responses,
     }
@@ -3265,12 +3169,6 @@ async def evaluate_word_association(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Word association evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     try:
         valid_count = max(0, int(result.get("valid_count", 0)))
     except (ValueError, TypeError):
@@ -3283,9 +3181,9 @@ async def evaluate_word_association(
 
     return {
         "valid_count": valid_count,
-        "sophistication_score": clamp(result.get("sophistication_score", 5)),
-        "relevance_score": clamp(result.get("relevance_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "sophistication_score": clamp_score(result.get("sophistication_score", 5)),
+        "relevance_score": clamp_score(result.get("relevance_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "missed_words": missed_words,
     }
@@ -3632,17 +3530,11 @@ async def evaluate_listen_paraphrase(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "meaning_score": clamp(result.get("meaning_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "vocabulary_score": clamp(result.get("vocabulary_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "meaning_score": clamp_score(result.get("meaning_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_paraphrase": str(result.get("model_paraphrase", "")),
     }
@@ -3812,17 +3704,11 @@ async def evaluate_connector_drill(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Connector drill evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "connector_usage_score": clamp(result.get("connector_usage_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "connector_usage_score": clamp_score(result.get("connector_usage_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "model_answer": str(result.get("model_answer", f"{req.sentence_a} {req.connector}, {req.sentence_b.lower()}")),
         "feedback": str(result.get("feedback", "")),
     }
@@ -4026,17 +3912,11 @@ async def evaluate_spot_error(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Spot-error evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "correction_accuracy_score": clamp(result.get("correction_accuracy_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "correction_accuracy_score": clamp_score(result.get("correction_accuracy_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_correction": str(result.get("model_correction", req.correct_sentence)),
     }
@@ -4135,17 +4015,11 @@ async def evaluate_phrasal_verb_usage(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Phrasal verb evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "phrasal_verb_accuracy_score": clamp(result.get("phrasal_verb_accuracy_score", 5)),
-        "grammar_score": clamp(result.get("grammar_score", 5)),
-        "naturalness_score": clamp(result.get("naturalness_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "phrasal_verb_accuracy_score": clamp_score(result.get("phrasal_verb_accuracy_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "model_sentence": str(result.get("model_sentence", "")),
     }
@@ -4289,12 +4163,6 @@ async def evaluate_rapid_fire(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     raw_per_question = result.get("per_question", [])
     if not isinstance(raw_per_question, list):
         raw_per_question = []
@@ -4303,18 +4171,18 @@ async def evaluate_rapid_fire(
     for i in range(len(body.responses)):
         pq = raw_per_question[i] if i < len(raw_per_question) and isinstance(raw_per_question[i], dict) else {}
         per_question.append({
-            "relevance_score": clamp(pq.get("relevance_score", 5)),
-            "grammar_score": clamp(pq.get("grammar_score", 5)),
-            "fluency_score": clamp(pq.get("fluency_score", 5)),
+            "relevance_score": clamp_score(pq.get("relevance_score", 5)),
+            "grammar_score": clamp_score(pq.get("grammar_score", 5)),
+            "fluency_score": clamp_score(pq.get("fluency_score", 5)),
             "feedback": str(pq.get("feedback", "")),
             "model_answer": str(pq.get("model_answer", "")),
         })
 
     return {
         "per_question": per_question,
-        "overall_response_speed_score": clamp(result.get("overall_response_speed_score", 5)),
-        "overall_fluency_score": clamp(result.get("overall_fluency_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "overall_response_speed_score": clamp_score(result.get("overall_response_speed_score", 5)),
+        "overall_fluency_score": clamp_score(result.get("overall_fluency_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "summary_feedback": str(result.get("summary_feedback", "")),
     }
 
@@ -4446,17 +4314,11 @@ async def evaluate_sentence_stress(
     except HTTPException:
         raise HTTPException(status_code=502, detail="Evaluation failed")
 
-    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
-        try:
-            return min(hi, max(lo, float(val)))
-        except (ValueError, TypeError):
-            return 5.0
-
     return {
-        "stress_accuracy_score": clamp(result.get("stress_accuracy_score", 5)),
-        "rhythm_score": clamp(result.get("rhythm_score", 5)),
-        "pronunciation_score": clamp(result.get("pronunciation_score", 5)),
-        "overall_score": clamp(result.get("overall_score", 5)),
+        "stress_accuracy_score": clamp_score(result.get("stress_accuracy_score", 5)),
+        "rhythm_score": clamp_score(result.get("rhythm_score", 5)),
+        "pronunciation_score": clamp_score(result.get("pronunciation_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
         "feedback": str(result.get("feedback", "")),
         "stress_tip": str(result.get("stress_tip", "")),
     }
