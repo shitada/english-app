@@ -5396,4 +5396,334 @@ Good proposal. Calling the coder.
   │ date +%s
   └ 2 lines...
 
-Let me read more files to understand the existing patterns:Now let me view the rest of the QuickListenRespondCard and the QuickPredictNextCard to see the full pattern:Now let me look at an existing integration test to understand the pattern:Now let me check the end of the ui-test-spec.yaml file and also look at where the QuickPracticeHub has components listed:Now I have a thorough understanding of all the patterns. Let me implement everything:Now let me implement all the changes. Let me start with the backend and frontend:Now add the API functions to `api.ts`:Now create the `QuickDictoglossCard.tsx` component:Now update `QuickPracticeHub.tsx` to import and register the card:Now create the integration tests:Now update the UI test spec:Now let me commit:
+Let me read more files to understand the existing patterns:Now let me view the rest of the QuickListenRespondCard and the QuickPredictNextCard to see the full pattern:Now let me look at an existing integration test to understand the pattern:Now let me check the end of the ui-test-spec.yaml file and also look at where the QuickPracticeHub has components listed:Now I have a thorough understanding of all the patterns. Let me implement everything:Now let me implement all the changes. Let me start with the backend and frontend:Now add the API functions to `api.ts`:Now create the `QuickDictoglossCard.tsx` component:Now update `QuickPracticeHub.tsx` to import and register the card:Now create the integration tests:Now update the UI test spec:Now let me commit:```json
+{
+  "committed": true,
+  "commit_hash": "2393ffa",
+  "files_changed": [
+    "app/routers/pronunciation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/components/QuickDictoglossCard.tsx",
+    "tests/integration/test_pronunciation_dictogloss.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 16,
+  "ui_spec_updated": true,
+  "description": "Added Quick Dictogloss card with GET /api/pronunciation/dictogloss and POST /api/pronunciation/dictogloss/evaluate endpoints, QuickDictoglossCard.tsx component with idle→listening→reconstructing→evaluating→done phases and optional single replay, registered in Listening tab, with 16 integration tests"
+}
+```● Coder Implement iter 562 feature
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "Add Quick Dictogloss Card for listen-then-reconstruct speaking
+  │   │ drill
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 17 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+Now calling the tester.
+
+● Record T2 and verify hash (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git rev-parse --short HEAD
+  └ 3 lines...
+
+I'll run all three test suites in parallel since they're independent of each other.All test suites have completed. Here are the results:
+
+```json
+{
+  "tests_passed": 1781,
+  "tests_total": 1781,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 1781 passed in 80.05s (0:01:20) ========================",
+  "failure_summary": ""
+}
+```
+
+### Summary
+
+| Check | Result |
+|---|---|
+| **Unit + Integration Tests** | ✅ **1781/1781 passed** (80.05s) |
+| **TypeScript Check** | ✅ **pass** (no type errors) |
+| **Smoke API Test** | ✅ **pass** (21/21 endpoints returned 200 OK) |
+| **E2E UI Test** | ⏭️ **not_run** (no `ui-test-results.json` found) |
+| **Overall** | ✅ **PASS** |
+
+All checks green. The changes to `app/routers/pronunciation.py`, `frontend/src/api.ts`, `QuickPracticeHub.tsx`, `QuickDictoglossCard.tsx`, and the new integration test `test_pronunciation_dictogloss.py` are all passing cleanly with no type errors or API regressions.● Tester Test iteration 562
+  │ Run smoke API test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+  │   └ 23 lines...
+  └ Check for E2E UI test results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1
+      └ 2 lines...
+
+All 1781 tests pass. Now calling the evaluator.
+
+● Record T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me find the dictogloss endpoints in the pronunciation router and the API types:Let me search for the actual dictogloss endpoints in the pronunciation router:Now let me check if there are QA results in the proposal info. Looking at the test specs for the dictogloss card:Now let me search specifically for the dictogloss test specs that were added:I notice the e2e test specs don't seem to have dictogloss-specific tests numbered 101+. Let me search further:Now I have a comprehensive picture of all the changes. Let me evaluate.
+
+**Summary of changes:**
+1. **Backend** (`pronunciation.py`): Two new endpoints - `GET /dictogloss` (passage generation) and `POST /dictogloss/evaluate` (reconstruction evaluation). Both use Pydantic models, rate limiting, `safe_llm_call`, and `clamp_score` — matching existing patterns exactly.
+2. **Frontend** (`api.ts`): Proper TypeScript types and API functions for both endpoints.
+3. **Frontend** (`QuickDictoglossCard.tsx`): New 287-line component with 5 phases (idle→listening→reconstructing→evaluating→done), timer, replay logic, and score display.
+4. **Frontend** (`QuickPracticeHub.tsx`): Card registered in listening tab.
+5. **Tests** (`test_pronunciation_dictogloss.py`): 16 integration tests covering happy paths, validation, score clamping, fallbacks, and edge cases.
+6. **E2E specs** (`ui-test-spec.yaml`): 8 UI test specs added.
+
+**Code Quality Assessment:**
+- Clean Pydantic request/response models with proper Field constraints (`min_length`, `ge`, `le`)
+- Proper validation (422 on empty input, invalid difficulty, missing fields, zero duration)
+- Rate limiting applied via `require_rate_limit`
+- LLM responses handled defensively with `safe_llm_call`, fallback values, and `clamp_score`
+- Sentence count fallback handles non-numeric LLM output
+- No database schema changes needed (stateless exercise)
+- Frontend: clean phase management, proper timer cleanup, storage event listener for difficulty changes
+- One minor concern: `handleFinish` has a closure dependency on `speech.transcript` which could be stale, but in practice the transcript is captured at call time
+
+**Feature Value Assessment:**
+- Dictogloss is a well-established language learning technique (listen-then-reconstruct)
+- Combines listening comprehension with speaking production and memory recall
+- Multi-dimensional AI evaluation (content coverage, grammar, vocabulary, reconstruction quality)
+- Optional single replay adds strategic element
+- Directly serves the app's core mission of English listening/speaking practice
+
+**Maintainability Assessment:**
+- 16 integration tests covering: default/beginner/advanced difficulty, invalid difficulty, empty LLM response, non-numeric values, score clamping, empty inputs, missing fields, invalid duration, feedback/model verification
+- 8 UI test specs added
+- Follows exact same patterns as ~30+ other Quick* cards
+- No new dependencies, no schema changes, no migrations needed
+
+**UX Quality Assessment:**
+- Frontend .tsx files were changed but no QA tester results were provided
+- Per evaluation rules, this means spec_tests_run == 0 with frontend changes → ux_quality ≤ 3
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 3,
+  "total_score": 6.2,
+  "verdict": "keep",
+  "reason": "Well-implemented dictogloss exercise following established patterns with 16 integration tests, clean Pydantic models, and proper LLM error handling; UX score limited by absence of QA testing despite frontend changes."
+}
+```● Evaluator Evaluate iteration 562
+  │ Read ui-test-spec.yaml
+  │   │ tests/e2e/ui-test-spec.yaml
+  │   └ L2080:2100 (21 lines read)
+  └ Read ui-test-spec.yaml
+      │ tests/e2e/ui-test-spec.yaml
+      └ L2300:2400 (70 lines read)
+
+Evaluator returned 6.20, verdict "keep". All 4 subagents called ✅. Recording results.
+
+● Record iteration 562 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ echo "T4=$T4" && \
+  │ T0=1776443652 && T1=1776443958 && T2=1776444189 && T3=1776444306 && \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "562" "2393ffa" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" …
+  └ 8 lines...
+
+✅ **2 iterations complete. Stopping as requested.**
+
+| Iter | Hash | Tests | Score | Verdict | Description |
+|------|---------|-------|-------|---------|-------------|
+| 561 | `0ea0ec4` | 1766/1766 | 6.50 | ✅ kept | Quick Predict-What-Happens-Next listening-speaking card |
+| 562 | `2393ffa` | 1781/1781 | 6.20 | ✅ kept | Quick Dictogloss Card for listen-then-reconstruct drill |
+
+Both features kept. Tests grew 1756 → 1781 (+25). All passing, TypeScript clean.
+
+
+Changes   +0 -0
+Requests  3 Premium (28m 45s)
+Tokens    ↑ 6.0m • ↓ 75.5k • 5.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-561-to-584.md
+[2026-04-18 01:47:34] Copilot invocation completed (duration: 1728s)
+[2026-04-18 01:47:34] Recording agent traces...
+[2026-04-18 01:47:34]   AGENT_TRACE iter=561 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-18 01:47:34]   AGENT_TRACE iter=562 proposer=0 coder=0 tester=1 evaluator=1
+[2026-04-18 01:47:34] SMOKE_UI: UI changes detected in pages: home
+[2026-04-18 01:47:34] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-18 01:47:34] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1850ms)
+
+✅ UI TEST PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-18 01:47:44] SMOKE_UI_PASS: All UI pages passed
+[2026-04-18 01:47:44] Running post-invocation audit (iter 561-562)...
+============================================
+ Autoresearch Audit
+ Iterations: 561 — 562
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-18 01:47:44
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 561 562[0m
+[0;31m  Tester: FAIL — missing: 561 562[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-18 01:47:46] Audit found 2 error(s) — fixes applied where possible
+[2026-04-18 01:47:49] Current iteration count: 562 / 584
+[2026-04-18 01:47:49] ------------------------------------------
+[2026-04-18 01:47:49] Invocation 6 / 10
+[2026-04-18 01:47:49] Resuming from iteration 563
+[2026-04-18 01:47:49] ------------------------------------------
+[2026-04-18 01:47:49] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-563-to-584.md)...
+● Gather current state for iteration 563 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---UI TEST RESULTS---" && cat
+  │ autoresearch/ui-test-results.json 2>/dev/null || echo "No …
+  └ 78 lines...
+
+● Get uncompleted backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]'
+  │ autoresearch/backlog.md | head -20
+  └ 1 line...
+
+● Check backlog tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 28 lines...
+
+● Count backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '\[x\]'
+  │ autoresearch/backlog.md && grep -c '\[ \]' autoresearch/backlog.md
+  └ 2 lines...
+
+● Check backlog item format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '^\- '
+  │ autoresearch/backlog.md | tail -30
+  └ 1 line...
+
+● Check backlog size (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ autoresearch/backlog.md && grep -c '^-' autoresearch/backlog.md || true
+  └ 3 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ 125 lines read
+
+Now I have full context. Backlog is empty, so the proposer will need to identify new features. Let me start iteration 563.
+
+**Iteration 563 — Step 1: Propose**
+
+● Record T0 for iteration 563 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0"
+  └ 2 lines...
+
+Let me explore more of the codebase to find a high-value feature opportunity.Let me check how difficulty recommendation is currently used in the conversation UI:Now I have a thorough understanding of the codebase. Let me search for the word detail view implementation to verify there's no existing conversation context feature:Based on my thorough analysis of the codebase, I can see there's no feature connecting vocabulary words to their actual usage in conversations. Here's my proposal:
+
+```json
+{
+  "type": "feature",
+  "title": "Vocabulary Conversation Context — show where words appeared in chats",
+  "description": "Add a feature that lets users see real conversation excerpts where their vocabulary words appeared. This bridges isolated vocabulary study with authentic conversational usage, reinforcing word knowledge through context.\n\nBackend:\n1. In `app/dal/vocabulary.py`, add `get_word_conversation_contexts(db, word_text, limit=5)` that queries: SELECT m.content, m.role, m.created_at, c.topic, c.id as conversation_id FROM messages m JOIN conversations c ON m.conversation_id = c.id WHERE c.status = 'ended' AND LOWER(m.content) LIKE '%' || LOWER(?) || '%' ORDER BY m.created_at DESC LIMIT ?. This finds messages containing the vocabulary word.\n2. In `app/routers/vocabulary.py`, add `GET /api/vocabulary/{word_id}/contexts` endpoint that fetches the word text via `get_word()`, then calls the new DAL function, and returns `{ word_id, word, contexts: [{ conversation_id, topic, role, snippet, created_at }] }`. The snippet should be the full message content (truncated to 200 chars if needed) with the word highlighted by returning its character position.\n\nFrontend:\n3. In `frontend/src/api.ts`, add `getWordConversationContexts(wordId)` API call and `VocabConversationContext` interface.\n4. In `frontend/src/pages/Vocabulary.tsx`, in the quiz result phase where words and scores are displayed, add an expandable '💬 Used in Conversations' button next to each word. When tapped, it fetches contexts and shows 1-3 real conversation excerpts with the word bolded, the topic label, and a speaker icon for TTS playback. Shows 'Not found in conversations yet — try using it next time!' when empty, which motivates active vocabulary use.",
+  "files_to_modify": [
+    "app/dal/vocabulary.py",
+    "app/routers/vocabulary.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Vocabulary.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 563
+  │ Read BookmarksReview.tsx
+  │   │ frontend/src/components/conversation/BookmarksReview.tsx
+  │   └ L1:80 (80 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L200:300 (101 lines read)
+
+Got proposal: **Vocabulary Conversation Context — show where words appeared in chats**. Now calling the coder.
+
+● Coder Implement iteration 563
+  └ Agent started in background with agent_id: coder-563. You can use read_a...
+
+● Record T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Coder is working in the background. Waiting for completion...
+
+<system_notification>Background agent `coder-563` has completed. Use `read_agent` with agent_id=coder-563 to retrieve results.</system_notification>
+
+● Record T2 and check coder results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git log --oneline -3 && echo "---CHANGED FILES---" && git diff
+  │ HEAD~1 --name-only
+  └ 15 lines...
+
+● Check git status (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git status --short |
+  │ head -20
+  └ 4 lines...
+

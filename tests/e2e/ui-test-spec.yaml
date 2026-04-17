@@ -1221,6 +1221,38 @@ pages:
         priority: low
         added_in: 549
 
+      - id: dash-027
+        target: CEFR Level Card renders with level badge
+        action: Scroll to CEFR English Level card on dashboard
+        expect: Card shows circular badge with CEFR level (A1-C2), level label, and overall score
+        type: visual
+        priority: high
+        added_in: 564
+
+      - id: dash-028
+        target: CEFR Level Card progress bar shows progress to next level
+        action: Inspect CEFR card progress bar section
+        expect: Progress bar visible with percentage label toward next level
+        type: visual
+        priority: medium
+        added_in: 564
+
+      - id: dash-029
+        target: CEFR Level Card sub-score breakdown displays 5 skills
+        action: Inspect sub-score bars in CEFR card
+        expect: Five horizontal bars for Grammar, Vocabulary, Pronunciation, Fluency, Listening with numeric scores
+        type: visual
+        priority: medium
+        added_in: 564
+
+      - id: dash-030
+        target: CEFR Level Card focus tip displays suggestion
+        action: Inspect focus tip at bottom of CEFR card
+        expect: Tip line visible suggesting area to focus on with lightbulb emoji
+        type: visual
+        priority: low
+        added_in: 564
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

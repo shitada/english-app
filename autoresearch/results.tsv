@@ -541,3 +541,5 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 559	0927671	2026-04-18	549	291	141	104	1085	1743	1743	pass	6.75	kept	Add Quick Debate Card for sustained argumentation speaking practice
 560	7df901b	2026-04-18	194	231	129	146	700	1756	1756	pass	7.00	kept	Add Quick Scene Description speaking card for descriptive fluency
 561	0ea0ec4	2026-04-18	363	230	131	165	889	1766	1766	pass	6.50	kept	Add Quick Predict-What-Happens-Next listening-speaking card
+562	2393ffa	2026-04-18	306	231	117	141	795	1781	1781	pass	6.20	kept	Add Quick Dictogloss Card for listen-then-reconstruct speaking drill
+563	none	2026-04-18	515	567	138	167	1387	1790	1790	pass	5.35	discarded	Vocabulary Conversation Context to show word usage in chats

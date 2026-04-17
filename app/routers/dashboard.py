@@ -955,3 +955,34 @@ async def get_self_assessment_trend(
 ):
     """Get self-assessment trend with rolling averages and direction."""
     return await dash_dal.get_self_assessment_trend(db, limit=limit)
+
+
+# ---------------------------------------------------------------------------
+# CEFR Level Estimate
+# ---------------------------------------------------------------------------
+
+
+class CEFRSubScores(BaseModel):
+    grammar: float
+    vocabulary: float
+    pronunciation: float
+    fluency: float
+    listening: float
+
+
+class CEFREstimateResponse(BaseModel):
+    level: str
+    level_label: str
+    overall_score: float
+    sub_scores: CEFRSubScores
+    progress_to_next: float
+    next_level: str
+    focus_tip: str
+
+
+@router.get("/cefr-estimate", response_model=CEFREstimateResponse)
+async def get_cefr_estimate(
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Estimate the user's CEFR English level based on all available data."""
+    return await dash_dal.get_cefr_estimate(db)

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, CEFRLevelCard, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
 import { LazySection } from '../hooks/useLazyLoad';
 
 export default function Dashboard() {
@@ -108,6 +108,11 @@ export default function Dashboard() {
 
       {/* Skills Radar Chart */}
       <SkillsRadarChart />
+
+      {/* CEFR English Level Estimate */}
+      <LazySection>
+        <CEFRLevelCard />
+      </LazySection>
 
       {/* Weekly Report */}
       <WeeklyReport report={weeklyReport} />

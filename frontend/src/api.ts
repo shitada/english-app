@@ -984,6 +984,29 @@ export async function getSelfAssessmentTrend(limit = 20): Promise<SelfAssessment
   return request<SelfAssessmentTrendResponse>(`/api/dashboard/self-assessment-trend?limit=${limit}`);
 }
 
+// CEFR Level Estimate
+export interface CEFRSubScores {
+  grammar: number;
+  vocabulary: number;
+  pronunciation: number;
+  fluency: number;
+  listening: number;
+}
+
+export interface CEFREstimateResponse {
+  level: string;
+  level_label: string;
+  overall_score: number;
+  sub_scores: CEFRSubScores;
+  progress_to_next: number;
+  next_level: string;
+  focus_tip: string;
+}
+
+export function getCEFREstimate(): Promise<CEFREstimateResponse> {
+  return request<CEFREstimateResponse>('/api/dashboard/cefr-estimate');
+}
+
 // Daily Challenge (from iteration 312)
 export interface DailyChallenge {
   challenge_type: string;

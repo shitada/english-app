@@ -1,4 +1,5 @@
 export { AchievementsPanel } from './AchievementsPanel';
+export { CEFRLevelCard } from './CEFRLevelCard';
 export { GrammarPatternDrill } from './GrammarPatternDrill';
 export { GrammarTrend } from './GrammarTrend';
 export { GrammarWeakSpots } from './GrammarWeakSpots';

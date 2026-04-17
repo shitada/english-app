@@ -2899,3 +2899,181 @@ async def get_self_assessment_trend(
             trend = "stable"
 
     return {"entries": entries, "trend": trend}
+
+
+async def get_cefr_estimate(db: aiosqlite.Connection) -> dict[str, Any]:
+    """Estimate the user's CEFR English level based on all available data.
+
+    Sub-scores (0-100 each):
+      - grammar: based on conversation grammar feedback accuracy
+      - vocabulary: based on mastered words / total words
+      - pronunciation: based on average pronunciation score
+      - fluency: based on conversation count and average message length
+      - listening: based on listening quiz results
+
+    Weights: Grammar 25%, Vocabulary 25%, Pronunciation 20%, Fluency 15%, Listening 15%
+    """
+
+    # --- Grammar sub-score ---
+    grammar_score = 0.0
+    try:
+        rows = await db.execute_fetchall(
+            "SELECT feedback_json FROM messages WHERE role = 'user' AND feedback_json IS NOT NULL"
+        )
+        if rows:
+            import json as _json
+            correct = 0
+            total = 0
+            for r in rows:
+                try:
+                    fb = _json.loads(r["feedback_json"])
+                    if isinstance(fb, dict):
+                        if fb.get("is_correct") is True:
+                            correct += 1
+                        total += 1
+                except (ValueError, TypeError):
+                    pass
+            if total > 0:
+                grammar_score = (correct / total) * 100
+    except Exception:
+        pass
+
+    # --- Vocabulary sub-score ---
+    vocab_score = 0.0
+    try:
+        rows = await db.execute_fetchall(
+            """SELECT
+                (SELECT COUNT(*) FROM vocabulary_progress) AS total,
+                (SELECT COUNT(*) FROM vocabulary_progress WHERE level >= 3) AS mastered
+            """
+        )
+        r = rows[0]
+        total_words = r["total"] or 0
+        mastered_words = r["mastered"] or 0
+        if total_words > 0:
+            # Mastery ratio weighted + bonus for volume
+            mastery_ratio = mastered_words / total_words
+            volume_bonus = min(total_words / 200, 1.0) * 20  # up to 20 pts for 200+ words
+            vocab_score = min(mastery_ratio * 80 + volume_bonus, 100)
+    except Exception:
+        pass
+
+    # --- Pronunciation sub-score ---
+    pron_score = 0.0
+    try:
+        rows = await db.execute_fetchall(
+            "SELECT AVG(score) AS avg_score, COUNT(*) AS cnt FROM pronunciation_attempts WHERE score IS NOT NULL"
+        )
+        r = rows[0]
+        avg = r["avg_score"] or 0
+        cnt = r["cnt"] or 0
+        if cnt > 0:
+            # score is 0-10, scale to 0-100
+            pron_score = min(avg * 10, 100)
+    except Exception:
+        pass
+
+    # --- Fluency sub-score ---
+    fluency_score = 0.0
+    try:
+        rows = await db.execute_fetchall(
+            """SELECT COUNT(*) AS conv_count FROM conversations"""
+        )
+        conv_count = (rows[0]["conv_count"] or 0) if rows else 0
+
+        rows2 = await db.execute_fetchall(
+            """SELECT AVG(LENGTH(content)) AS avg_len FROM messages WHERE role = 'user'"""
+        )
+        avg_msg_len = (rows2[0]["avg_len"] or 0) if rows2 else 0
+
+        # Conversations contribute up to 40 pts (10+ conversations = max)
+        conv_pts = min(conv_count / 10, 1.0) * 40
+        # Message length contributes up to 60 pts (100+ chars avg = max)
+        len_pts = min(avg_msg_len / 100, 1.0) * 60
+        fluency_score = min(conv_pts + len_pts, 100)
+    except Exception:
+        pass
+
+    # --- Listening sub-score ---
+    listening_score = 0.0
+    try:
+        rows = await db.execute_fetchall(
+            "SELECT AVG(score) AS avg_score, COUNT(*) AS cnt FROM listening_quiz_results"
+        )
+        r = rows[0]
+        avg = r["avg_score"] or 0
+        cnt = r["cnt"] or 0
+        if cnt > 0:
+            # score is 0-100 already
+            listening_score = min(avg, 100)
+    except Exception:
+        pass
+
+    # --- Weighted overall ---
+    overall = (
+        grammar_score * 0.25
+        + vocab_score * 0.25
+        + pron_score * 0.20
+        + fluency_score * 0.15
+        + listening_score * 0.15
+    )
+    overall = round(overall, 1)
+
+    # --- Map to CEFR level ---
+    cefr_map = [
+        (15, "A1", "Beginner"),
+        (30, "A2", "Elementary"),
+        (50, "B1", "Intermediate"),
+        (70, "B2", "Upper Intermediate"),
+        (85, "C1", "Advanced"),
+        (100, "C2", "Proficient"),
+    ]
+
+    level = "A1"
+    level_label = "Beginner"
+    next_level = "A2"
+    next_threshold = 16
+    progress_to_next = 0.0
+
+    for i, (threshold, lv, label) in enumerate(cefr_map):
+        if overall <= threshold:
+            level = lv
+            level_label = label
+            prev_threshold = cefr_map[i - 1][0] if i > 0 else 0
+            range_size = threshold - prev_threshold
+            progress_in_range = overall - prev_threshold
+            progress_to_next = round((progress_in_range / range_size) * 100, 1) if range_size > 0 else 0
+            if i < len(cefr_map) - 1:
+                next_level = cefr_map[i + 1][1]
+                next_threshold = cefr_map[i + 1][0]
+            else:
+                next_level = "C2"
+                next_threshold = 100
+            break
+
+    # Determine weakest area to suggest focus
+    sub_scores = {
+        "grammar": round(grammar_score, 1),
+        "vocabulary": round(vocab_score, 1),
+        "pronunciation": round(pron_score, 1),
+        "fluency": round(fluency_score, 1),
+        "listening": round(listening_score, 1),
+    }
+    weakest = min(sub_scores, key=lambda k: sub_scores[k])
+    focus_tips = {
+        "grammar": "Focus on grammar by having more conversations and reviewing feedback.",
+        "vocabulary": "Expand your vocabulary by learning and reviewing more words.",
+        "pronunciation": "Practice pronunciation with shadowing exercises.",
+        "fluency": "Improve fluency by having longer conversations regularly.",
+        "listening": "Boost listening skills with more listening quizzes.",
+    }
+
+    return {
+        "level": level,
+        "level_label": level_label,
+        "overall_score": overall,
+        "sub_scores": sub_scores,
+        "progress_to_next": progress_to_next,
+        "next_level": next_level,
+        "focus_tip": focus_tips[weakest],
+    }
