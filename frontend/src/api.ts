@@ -2688,6 +2688,39 @@ export function evaluateDebate(data: {
   });
 }
 
+// ── Quick Scene Description ──────────────────────────────────────
+
+export interface SceneDescriptionPromptResponse {
+  scene: string;
+  key_vocabulary: string[];
+  suggested_details: string[];
+  difficulty: string;
+}
+
+export interface SceneDescriptionEvaluateResponse {
+  descriptive_vocabulary_score: number;
+  spatial_language_score: number;
+  grammar_score: number;
+  fluency_score: number;
+  overall_score: number;
+  word_count: number;
+  wpm: number;
+  feedback: string;
+  model_description: string;
+}
+
+export function getSceneDescription(difficulty: string = 'intermediate'): Promise<SceneDescriptionPromptResponse> {
+  return request<SceneDescriptionPromptResponse>(`/api/pronunciation/scene-description?difficulty=${difficulty}`);
+}
+
+export function evaluateSceneDescription(scene: string, transcript: string, duration_seconds: number): Promise<SceneDescriptionEvaluateResponse> {
+  return request<SceneDescriptionEvaluateResponse>('/api/pronunciation/scene-description/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scene, transcript, duration_seconds }),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

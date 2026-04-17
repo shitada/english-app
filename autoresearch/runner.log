@@ -4748,4 +4748,183 @@ Based on my thorough analysis of the codebase, I can see the app has an extensiv
 
 **Iteration 559 — Step 3: Implement**
 
-Now let me look at a similar existing card and existing endpoint pattern for reference:Let me also check the existing integration test pattern and check for e2e spec:Now let me check the UI test spec for the last entries to get the right format and latest ID:Now let me check the `useSpeechRecognition` hook:Now I have a complete understanding of the patterns. Let me implement all the changes:Now let me implement all changes:Now add the frontend API types and functions:Now create the QuickDebateCard component:Now register the component in QuickPracticeHub.tsx:Now create the integration tests:Now update the UI test spec:Now let me find the home page section in the spec where the Quick Practice items are:Now append the debate card test items to the yaml:Now let's commit:
+Now let me look at a similar existing card and existing endpoint pattern for reference:Let me also check the existing integration test pattern and check for e2e spec:Now let me check the UI test spec for the last entries to get the right format and latest ID:Now let me check the `useSpeechRecognition` hook:Now I have a complete understanding of the patterns. Let me implement all the changes:Now let me implement all changes:Now add the frontend API types and functions:Now create the QuickDebateCard component:Now register the component in QuickPracticeHub.tsx:Now create the integration tests:Now update the UI test spec:Now let me find the home page section in the spec where the Quick Practice items are:Now append the debate card test items to the yaml:Now let's commit:```json
+{
+  "committed": true,
+  "commit_hash": "0927671",
+  "files_changed": [
+    "app/routers/pronunciation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickDebateCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/integration/test_debate_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 13,
+  "ui_spec_updated": true,
+  "description": "Added Quick Debate card with 2 backend endpoints (debate-topic GET, debate/evaluate POST), QuickDebateCard component with 6-phase flow (idle→round1→counter→round2→evaluating→done), registered in Speaking tab, plus 13 integration tests and 6 UI test spec items"
+}
+```● Coder Implement Quick Debate Card
+  │ Commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git commit -m
+  │   │ "feat(iter-559): Add Quick Debate Card for sustained argumentation speaking
+  │   │ practice
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+  │   └ 17 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+● Record T2 timestamp (shell)
+  │ echo $(date +%s)
+  └ 2 lines...
+
+**Iteration 559 — Step 4: Test**
+
+I'll run all four test checks in parallel since they're independent.The `--timeout=60` flag isn't recognized (pytest-timeout plugin not installed). Let me re-run the pytest commands without that flag.The smoke test collected 0 items. Let me check if the smoke test is a script rather than a pytest file.It's a script, not pytest tests. Let me run it properly.All four checks are complete. Here are the results:
+
+```json
+{
+  "tests_passed": 1743,
+  "tests_total": 1743,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 1743 passed in 79.91s (0:01:19) ========================",
+  "failure_summary": ""
+}
+```
+
+### Summary — Iteration 559 ✅ ALL PASS
+
+| Check | Result | Details |
+|---|---|---|
+| **Unit + Integration** | ✅ **1743/1743 passed** | 79.91s, zero failures |
+| **TypeScript** | ✅ **pass** | `tsc --noEmit` clean, exit code 0 |
+| **Smoke API** | ✅ **pass** | All 21 endpoints returned 200 OK (triggered by `app/routers/pronunciation.py` change) |
+| **E2E UI** | ⏭️ **not_run** | `autoresearch/ui-test-results.json` does not exist |
+
+**`overall_pass: true`** — All checks passed. The changes to `pronunciation.py`, `api.ts`, `QuickDebateCard.tsx`, `QuickPracticeHub.tsx`, and `test_debate_api.py` introduce no regressions.● Tester Test iteration 559 changes
+  │ Check smoke test file (shell)
+  │   │ ls /Users/shingotada/Documents/vscode/english-app/tests/smoke* 2>&1; head
+  │   │ -30 /Users/shingotada/Documents/vscode/english-app/tests/smoke_test.py 2>&1
+  │   └ 32 lines...
+  └ Run smoke test as script (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1
+      └ 23 lines...
+
+● Record T3 timestamp (shell)
+  │ echo $(date +%s)
+  └ 2 lines...
+
+**Iteration 559 — Step 5: Evaluate**
+
+Let me check the backend changes in the pronunciation router and the api.ts additions:Now let me see the specific test specs related to debate:Now let me check the database.py to see if there are any schema changes:Good, the database schema doesn't seem to be modified in this change. Now let me also verify the `playCounterArgument` function more closely, as the polling logic looks complex with potential issues:Now I have a complete picture of the change. Let me evaluate.
+
+## Evaluation Summary
+
+### Changes Overview
+1. **Backend** (`pronunciation.py`): Two new endpoints — `GET /debate-topic` and `POST /debate/evaluate` — following existing project patterns (Pydantic models, `safe_llm_call`, `clamp_score`, rate limiting)
+2. **Frontend** (`QuickDebateCard.tsx`): 407-line React component implementing a multi-phase debate flow (idle → round1 → counter TTS → round2 → evaluating → done)
+3. **Frontend** (`QuickPracticeHub.tsx`): Added `QuickDebateCard` to Speaking tab
+4. **API client** (`api.ts`): TypeScript interfaces and functions for both endpoints
+5. **Tests** (`test_debate_api.py`): 12 comprehensive integration tests
+6. **E2E spec** (`ui-test-spec.yaml`): 6 new UI test specifications
+
+### Code Quality Issues Found
+
+**`playCounterArgument` (lines 123-164)**: Contains dead code — `checkInterval` and `watchInterval` are created with empty callbacks (comment-only bodies) but never do anything. They're just cleared alongside the real `pollId`. This is messy and confusing.
+
+**Timer/interval leaks**: The `pollId`, `checkInterval`, `watchInterval`, and `setTimeout` created inside `playCounterArgument` are NOT tracked in refs. The cleanup effect (lines 215-220) only clears `timerRef`. If the component unmounts during counter-argument phase, these intervals and the 15s timeout will leak.
+
+**TTS polling fragility**: The `tts.isSpeaking` in the closure may not reflect state changes from the React hook reliably (stale closure risk), though the `wasPlaying` flag provides a reasonable mitigation.
+
+**Positives**:
+- Backend follows conventions exactly: Pydantic models, Field validation, regex pattern for difficulty, `safe_llm_call`, `clamp_score`, rate limiting
+- Robust fallback handling for missing/non-numeric LLM responses
+- No database schema changes (stateless feature, no migration concern)
+- TypeScript types are clean and well-matched to backend models
+- Test coverage is thorough: validation, clamping, fallbacks, difficulty levels
+
+### Feature Value
+Multi-round debate practice is a genuinely valuable higher-order speaking exercise — arguing, listening to counterpoints, then rebutting combines multiple language skills. The LLM evaluation across 5 dimensions plus model answers provides substantive learning feedback.
+
+### Test Quality
+12 integration tests covering: default/custom difficulty, validation (5 edge cases), score clamping, non-numeric fallbacks, and fallback topic generation. This is excellent coverage for the API surface.
+
+```json
+{
+  "code_quality": 6,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 6.75,
+  "verdict": "keep",
+  "reason": "Valuable multi-round debate speaking feature with comprehensive test coverage (12 integration tests) and proper backend patterns, slightly marred by dead code and timer leak risks in the TTS polling logic"
+}
+```● Evaluator Evaluate iteration 559
+  │ Read QuickDebateCard.tsx
+  │   │ frontend/src/components/QuickDebateCard.tsx
+  │   └ L123:164 (42 lines read)
+  └ Read utils.py
+      │ app/utils.py
+      └ L1:30 (30 lines read)
+
+● Record T4 timestamp (shell)
+  │ echo $(date +%s)
+  └ 2 lines...
+
+**Iteration 559 — Step 6 & 7: Keep and Record**
+
+Tests pass, score 6.75 ≥ 6.0, verdict "keep". Keeping.
+
+● Record iteration 559 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short HEAD) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "559" "$HASH" "$(date +%Y-%m-%d)" "$((1776441418-1776440869))"
+  │ "$((1776441709-1776441418))" "$((1776441850-1776441709))" …
+  └ 7 lines...
+
+✅ Iteration 559 recorded. Now starting iteration 560.
+
+---
+
+**Iteration 560 — Step 1: Context + Step 2: Propose**
+
+● Record T0 for iteration 560 (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+Now I have a thorough understanding of the codebase. Let me check the existing speaking cards more carefully to find a clear gap.Now I have a complete picture of the app. The Speaking tab has 14 card types covering opinions, stories, debates, role-play, explanations, questions, stress, register, rapid-fire, etc. But there's a notable gap: **no descriptive speaking exercise**. None of the existing cards ask users to describe a scene, person, process, or situation using rich descriptive language (spatial prepositions, adjectives, present continuous, sensory vocabulary). This is a cornerstone fluency exercise used in IELTS Part 2 and conversation classes worldwide.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Quick Scene Description speaking card for descriptive fluency",
+  "description": "Add a 'Scene Description' Quick Practice card to the Speaking tab. The LLM generates a vivid scene (e.g., 'A busy morning at a farmers market — vendors are setting up stalls, a street musician plays guitar near the entrance, a family examines fresh produce') and the user must describe the scene in their own words for 30 seconds. This uniquely targets descriptive language skills (spatial prepositions, adjective variety, present continuous, sensory vocabulary) that none of the existing 14 speaking cards address.\n\nBackend (app/routers/pronunciation.py): Add GET /api/pronunciation/scene-description?difficulty= to generate a scene with key vocabulary hints and suggested details. Add POST /api/pronunciation/scene-description/evaluate to assess the user's spoken description on: descriptive_vocabulary_score, spatial_language_score, grammar_score, fluency_score, overall_score, feedback, and model_description.\n\nFrontend: Create QuickSceneDescriptionCard.tsx following the established pattern (idle → speaking → evaluating → done phases, 30s timer, speech recognition, score breakdown display). Add it to the Speaking section of QuickPracticeHub.tsx.\n\nAPI: Add SceneDescriptionResponse and SceneDescriptionEvaluateResponse types plus fetch/evaluate functions in api.ts.\n\nNo database schema changes needed — this is a stateless drill like other Quick Practice cards.",
+  "files_to_modify": ["app/routers/pronunciation.py", "frontend/src/api.ts", "frontend/src/components/QuickSceneDescriptionCard.tsx", "frontend/src/components/QuickPracticeHub.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose feature for iter 560
+  │ Read QuickExplainCard.tsx
+  │   │ frontend/src/components/QuickExplainCard.tsx
+  │   └ L1:40 (40 lines read)
+  └ Read QuickRolePlayCard.tsx
+      │ frontend/src/components/QuickRolePlayCard.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 timestamp (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+**Iteration 560 — Step 3: Implement**
+
+Now let me look at more patterns - specifically a simpler speaking card like QuickOpinionCard and the existing backend pattern for similar endpoints:Let me look at the opinion prompt backend pattern more closely to understand the exact structure:Now let me find where Opinion prompt API functions are exported in api.ts:Now let me check the e2e spec file:Now I have a comprehensive understanding of all the patterns. Let me implement the feature:Now let me implement all the changes:Now add the API types and functions to `api.ts`:Now create the `QuickSceneDescriptionCard.tsx` component:Now register it in `QuickPracticeHub.tsx`:Now create the integration tests:Now update the UI test spec:Now let's commit:

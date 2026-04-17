@@ -2005,6 +2005,38 @@ pages:
         priority: medium
         added_in: 559
 
+      - id: quick-practice-hub-091
+        target: QuickSceneDescriptionCard visible in Speaking tab
+        action: Open Quick Practice Hub and select Speaking tab
+        expect: Scene Description card is displayed with a scene prompt, key vocabulary tags, suggested details list, and a "Describe Scene (30s)" button
+        type: functional
+        priority: high
+        added_in: 560
+
+      - id: quick-practice-hub-092
+        target: QuickSceneDescriptionCard starts recording
+        action: Click "Describe Scene (30s)" button in the Scene Description card
+        expect: Card transitions to speaking phase with pulsing mic icon, 30s countdown timer, and live transcript display
+        type: functional
+        priority: high
+        added_in: 560
+
+      - id: quick-practice-hub-093
+        target: QuickSceneDescriptionCard shows evaluation results
+        action: Speak a description then click "Done" or wait for timer to finish
+        expect: Card shows score breakdown (Vocabulary, Spatial, Grammar, Fluency, WPM), feedback text, model description, "Try Again" and "New Scene" buttons
+        type: functional
+        priority: high
+        added_in: 560
+
+      - id: quick-practice-hub-094
+        target: QuickSceneDescriptionCard new scene
+        action: Click "New Scene" button after evaluation in the Scene Description card
+        expect: Card resets to idle phase with a new scene prompt
+        type: functional
+        priority: medium
+        added_in: 560
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase

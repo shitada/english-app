@@ -4547,3 +4547,114 @@ async def evaluate_debate(
         "model_argument": str(result.get("model_argument", "")),
         "model_rebuttal": str(result.get("model_rebuttal", "")),
     }
+
+
+# ── Quick Scene Description ─────────────────────────────────────
+
+
+class SceneDescriptionPromptResponse(BaseModel):
+    scene: str
+    key_vocabulary: list[str]
+    suggested_details: list[str]
+    difficulty: str
+
+
+@router.get("/scene-description", response_model=SceneDescriptionPromptResponse)
+async def get_scene_description(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a vivid scene for the user to describe in their own words."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a vivid scene for a {difficulty}-level English learner to describe aloud.\n"
+        "The scene should be rich in visual detail and invite use of spatial prepositions, "
+        "adjectives, present continuous tense, and sensory vocabulary.\n"
+        "Return JSON with:\n"
+        "- scene (string): a vivid description of the scene in 2-3 sentences\n"
+        "- key_vocabulary (array of 5 strings): useful descriptive words/phrases for this scene\n"
+        "- suggested_details (array of 3 strings): aspects the learner should try to describe\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in descriptive language. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="scene_description_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Scene generation failed")
+
+    return {
+        "scene": str(result.get("scene", "A busy park on a sunny afternoon with children playing near a fountain.")),
+        "key_vocabulary": [str(v) for v in result.get("key_vocabulary", ["surrounded by", "in the distance", "brightly colored", "gently", "bustling"])[:6]],
+        "suggested_details": [str(d) for d in result.get("suggested_details", ["Describe the people and what they are doing", "Describe the colors and sounds", "Describe the spatial layout"])[:4]],
+        "difficulty": difficulty,
+    }
+
+
+class SceneDescriptionEvaluateRequest(BaseModel):
+    scene: str = Field(min_length=1, max_length=1000)
+    transcript: str = Field(min_length=1, max_length=3000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class SceneDescriptionEvaluateResponse(BaseModel):
+    descriptive_vocabulary_score: float
+    spatial_language_score: float
+    grammar_score: float
+    fluency_score: float
+    overall_score: float
+    word_count: int
+    wpm: float
+    feedback: str
+    model_description: str
+
+
+@router.post("/scene-description/evaluate", response_model=SceneDescriptionEvaluateResponse)
+async def evaluate_scene_description(
+    body: SceneDescriptionEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's spoken scene description."""
+    word_count = len(body.transcript.split())
+    wpm = round(word_count / (body.duration_seconds / 60), 1) if body.duration_seconds > 0 else 0
+
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Scene to describe: \"{body.scene}\"\n"
+        f"User's spoken description ({body.duration_seconds}s, {word_count} words, {wpm} WPM):\n"
+        f"\"{body.transcript}\"\n\n"
+        "Evaluate this scene description. Return JSON with:\n"
+        "- descriptive_vocabulary_score (1-10): variety and richness of adjectives, adverbs, and sensory words\n"
+        "- spatial_language_score (1-10): use of spatial prepositions and location descriptions\n"
+        "- grammar_score (1-10): grammatical accuracy, especially present continuous tense\n"
+        "- fluency_score (1-10): natural flow and coherence of the description\n"
+        "- overall_score (1-10): overall quality of the scene description\n"
+        "- feedback (string): encouraging feedback with specific improvement tips (2-3 sentences)\n"
+        "- model_description (string): a well-crafted model description of the scene (3-4 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in descriptive language and spatial vocabulary. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="scene_description_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    return {
+        "descriptive_vocabulary_score": clamp_score(result.get("descriptive_vocabulary_score", 5)),
+        "spatial_language_score": clamp_score(result.get("spatial_language_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "fluency_score": clamp_score(result.get("fluency_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "word_count": word_count,
+        "wpm": wpm,
+        "feedback": str(result.get("feedback", "")),
+        "model_description": str(result.get("model_description", "")),
+    }
