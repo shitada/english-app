@@ -2495,3 +2495,49 @@ export function evaluatePhrasalVerbUsage(phrasal_verb: string, transcript: strin
     body: JSON.stringify({ phrasal_verb, transcript, duration_seconds }),
   });
 }
+
+// ── Quick Rapid-Fire Q&A ──────────────────────────────────────────
+
+export interface RapidFireQuestionItem {
+  question: string;
+  topic_hint: string;
+}
+
+export interface RapidFireQuestionsResponse {
+  questions: RapidFireQuestionItem[];
+  difficulty: string;
+}
+
+export interface RapidFireResponseItem {
+  question: string;
+  transcript: string;
+  duration_seconds: number;
+}
+
+export interface RapidFirePerQuestionResult {
+  relevance_score: number;
+  grammar_score: number;
+  fluency_score: number;
+  feedback: string;
+  model_answer: string;
+}
+
+export interface RapidFireEvaluateResponse {
+  per_question: RapidFirePerQuestionResult[];
+  overall_response_speed_score: number;
+  overall_fluency_score: number;
+  overall_score: number;
+  summary_feedback: string;
+}
+
+export function getRapidFireQuestions(difficulty: string = 'intermediate'): Promise<RapidFireQuestionsResponse> {
+  return request<RapidFireQuestionsResponse>(`/api/pronunciation/rapid-fire?difficulty=${difficulty}`);
+}
+
+export function evaluateRapidFire(questions: string[], responses: RapidFireResponseItem[]): Promise<RapidFireEvaluateResponse> {
+  return request<RapidFireEvaluateResponse>('/api/pronunciation/rapid-fire/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions, responses }),
+  });
+}

@@ -1660,3 +1660,51 @@ pages:
         type: functional
         priority: medium
         added_in: 532
+
+      - id: quick-practice-hub-069
+        target: QuickRapidFireCard idle state with start button
+        action: Navigate to Speaking tab in Quick Practice Hub
+        expect: QuickRapidFireCard shows Zap icon, title "Rapid-Fire Q&A", description about 5 rapid questions with 8s each, and "Start Rapid-Fire" button
+        type: visual
+        priority: high
+        added_in: 533
+
+      - id: quick-practice-hub-070
+        target: QuickRapidFireCard listening phase reads question via TTS
+        action: Click "Start Rapid-Fire" button on QuickRapidFireCard
+        expect: Card enters listening phase showing progress bar (Q1/5), pulsing Zap icon, "Listening to question…" text, and topic hint
+        type: functional
+        priority: high
+        added_in: 533
+
+      - id: quick-practice-hub-071
+        target: QuickRapidFireCard answering phase with timer and transcript
+        action: After TTS finishes reading a question in QuickRapidFireCard
+        expect: Answering phase shows pulsing mic icon, countdown timer starting at 8s, live transcript, "Skip" and "Done" buttons
+        type: functional
+        priority: high
+        added_in: 533
+
+      - id: quick-practice-hub-072
+        target: QuickRapidFireCard auto-advances through 5 questions
+        action: Let timer expire or click Done/Skip on each question in QuickRapidFireCard
+        expect: Card progresses through Q1-Q5 with progress bar updating, then enters evaluating phase
+        type: functional
+        priority: high
+        added_in: 533
+
+      - id: quick-practice-hub-073
+        target: QuickRapidFireCard results grid with per-question and overall scores
+        action: Complete all 5 questions in QuickRapidFireCard and view results
+        expect: Shows Overall/Speed/Fluency score columns, summary feedback, per-question results with Rel/Gram/Flu scores, your answer, feedback, and model answer for each question, plus "Try Again" and "New Questions" buttons
+        type: functional
+        priority: high
+        added_in: 533
+
+      - id: quick-practice-hub-074
+        target: QuickRapidFireCard difficulty change resets card
+        action: Change difficulty via Quick Practice Hub selector while QuickRapidFireCard is visible
+        expect: QuickRapidFireCard resets to idle phase and re-fetches questions with new difficulty
+        type: functional
+        priority: medium
+        added_in: 533

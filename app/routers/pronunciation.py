@@ -4149,3 +4149,171 @@ async def evaluate_phrasal_verb_usage(
         "feedback": str(result.get("feedback", "")),
         "model_sentence": str(result.get("model_sentence", "")),
     }
+
+
+# ── Rapid-Fire Q&A ────────────────────────────────────────────────
+
+
+class RapidFireQuestionItem(BaseModel):
+    question: str
+    topic_hint: str
+
+
+class RapidFireQuestionsResponse(BaseModel):
+    questions: list[RapidFireQuestionItem]
+    difficulty: str
+
+
+@router.get("/rapid-fire", response_model=RapidFireQuestionsResponse)
+async def get_rapid_fire_questions(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate 5 rapid conversational questions for reflex training."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate 5 varied everyday conversational questions for a {difficulty}-level English learner.\n"
+        "The questions should be diverse (daily life, work, hobbies, travel, opinions).\n"
+        "Each question should require a quick spoken answer (not yes/no).\n"
+        "Return JSON with:\n"
+        "- questions (array of 5 objects): each with:\n"
+        "  - question (string): a natural conversational question (1 sentence)\n"
+        "  - topic_hint (string): topic area (e.g. 'food', 'work', 'travel')\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="rapid_fire_questions",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Question generation failed")
+
+    raw_questions = result.get("questions", [])
+    if not isinstance(raw_questions, list):
+        raw_questions = []
+
+    questions = []
+    for q in raw_questions[:5]:
+        if isinstance(q, dict) and q.get("question"):
+            questions.append({
+                "question": str(q["question"]),
+                "topic_hint": str(q.get("topic_hint", "general")),
+            })
+
+    # Pad to 5 if LLM returned fewer
+    fallback_questions = [
+        {"question": "What did you have for breakfast today?", "topic_hint": "food"},
+        {"question": "Where do you usually go on weekends?", "topic_hint": "leisure"},
+        {"question": "What is your favourite way to relax?", "topic_hint": "lifestyle"},
+        {"question": "Describe the weather outside right now.", "topic_hint": "weather"},
+        {"question": "What would you like to learn next?", "topic_hint": "goals"},
+    ]
+    while len(questions) < 5:
+        questions.append(fallback_questions[len(questions)])
+
+    return {"questions": questions[:5], "difficulty": difficulty}
+
+
+class RapidFireResponseItem(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    transcript: str = Field(max_length=2000)
+    duration_seconds: float = Field(ge=0, le=30)
+
+
+class RapidFireEvaluateRequest(BaseModel):
+    questions: list[str] = Field(min_length=1, max_length=10)
+    responses: list[RapidFireResponseItem] = Field(min_length=1, max_length=10)
+
+
+class RapidFirePerQuestionResult(BaseModel):
+    relevance_score: float
+    grammar_score: float
+    fluency_score: float
+    feedback: str
+    model_answer: str
+
+
+class RapidFireEvaluateResponse(BaseModel):
+    per_question: list[RapidFirePerQuestionResult]
+    overall_response_speed_score: float
+    overall_fluency_score: float
+    overall_score: float
+    summary_feedback: str
+
+
+@router.post("/rapid-fire/evaluate", response_model=RapidFireEvaluateResponse)
+async def evaluate_rapid_fire(
+    body: RapidFireEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a rapid-fire Q&A session."""
+    copilot = get_copilot_service()
+
+    # Build a summary of all Q&A pairs for the LLM
+    qa_lines = []
+    for i, resp in enumerate(body.responses):
+        transcript_text = resp.transcript.strip() if resp.transcript else "(no response)"
+        qa_lines.append(
+            f"Q{i+1}: \"{resp.question}\"\n"
+            f"A{i+1} ({resp.duration_seconds:.1f}s): \"{transcript_text}\""
+        )
+    qa_block = "\n".join(qa_lines)
+
+    eval_prompt = (
+        f"The user completed a rapid-fire Q&A drill with {len(body.responses)} questions.\n"
+        f"They had 8 seconds per question to answer quickly.\n\n"
+        f"{qa_block}\n\n"
+        "Evaluate each response. Return JSON with:\n"
+        "- per_question (array of objects, one per Q&A pair): each with:\n"
+        "  - relevance_score (1-10): how relevant is the answer?\n"
+        "  - grammar_score (1-10): grammatical accuracy\n"
+        "  - fluency_score (1-10): natural flow\n"
+        "  - feedback (string): brief feedback (1 sentence)\n"
+        "  - model_answer (string): a good example answer (1 sentence)\n"
+        "- overall_response_speed_score (1-10): how quickly did they respond overall?\n"
+        "- overall_fluency_score (1-10): overall fluency across all answers\n"
+        "- overall_score (1-10): overall performance\n"
+        "- summary_feedback (string): encouraging summary (2-3 sentences)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach evaluating rapid conversational responses. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="rapid_fire_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Evaluation failed")
+
+    def clamp(val: Any, lo: float = 1, hi: float = 10) -> float:
+        try:
+            return min(hi, max(lo, float(val)))
+        except (ValueError, TypeError):
+            return 5.0
+
+    raw_per_question = result.get("per_question", [])
+    if not isinstance(raw_per_question, list):
+        raw_per_question = []
+
+    per_question = []
+    for i in range(len(body.responses)):
+        pq = raw_per_question[i] if i < len(raw_per_question) and isinstance(raw_per_question[i], dict) else {}
+        per_question.append({
+            "relevance_score": clamp(pq.get("relevance_score", 5)),
+            "grammar_score": clamp(pq.get("grammar_score", 5)),
+            "fluency_score": clamp(pq.get("fluency_score", 5)),
+            "feedback": str(pq.get("feedback", "")),
+            "model_answer": str(pq.get("model_answer", "")),
+        })
+
+    return {
+        "per_question": per_question,
+        "overall_response_speed_score": clamp(result.get("overall_response_speed_score", 5)),
+        "overall_fluency_score": clamp(result.get("overall_fluency_score", 5)),
+        "overall_score": clamp(result.get("overall_score", 5)),
+        "summary_feedback": str(result.get("summary_feedback", "")),
+    }
