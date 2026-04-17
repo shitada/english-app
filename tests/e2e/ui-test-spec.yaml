@@ -1804,3 +1804,19 @@ pages:
         type: functional
         priority: medium
         added_in: 534
+
+      - id: conv-062
+        target: Same Topic Again button visible in conversation summary
+        action: Complete a conversation and view the summary phase
+        expect: A '🔄 Same Topic Again' button appears next to 'Start New Conversation', displaying the topic label (e.g. '— Hotel Check-in')
+        type: functional
+        priority: medium
+        added_in: 537
+
+      - id: conv-063
+        target: Same Topic Again button restarts conversation on same topic
+        action: Click '🔄 Same Topic Again' button in the conversation summary
+        expect: Summary resets, a new conversation starts on the same topic without returning to the topic selection grid, chat phase is active with an AI greeting
+        type: functional
+        priority: high
+        added_in: 537

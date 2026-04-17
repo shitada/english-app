@@ -34,6 +34,8 @@ interface ConversationSummaryProps {
   onNextQuiz: () => void;
   onStartQuiz: () => void;
   onNewConversation: () => void;
+  onPracticeAgain?: () => void;
+  topicLabel?: string;
   tts: { speak: (text: string) => void; isSpeaking: boolean };
   conversationId?: number;
   vocabTargetCount?: number;
@@ -61,6 +63,8 @@ export function ConversationSummary({
   onNextQuiz,
   onStartQuiz,
   onNewConversation,
+  onPracticeAgain,
+  topicLabel,
   tts,
   conversationId,
   vocabTargetCount,
@@ -619,6 +623,16 @@ export function ConversationSummary({
         <button className="btn btn-primary" onClick={onNewConversation}>
           Start New Conversation
         </button>
+        {onPracticeAgain && (
+          <button
+            className="btn btn-secondary"
+            onClick={onPracticeAgain}
+            aria-label={topicLabel ? `Practice ${topicLabel} again` : 'Same topic again'}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, borderColor: 'rgba(99,102,241,0.4)', background: 'rgba(99,102,241,0.08)' }}
+          >
+            🔄 Same Topic Again{topicLabel ? ` — ${topicLabel}` : ''}
+          </button>
+        )}
         <button
           className="btn btn-secondary"
           onClick={() => setShowShareCard(v => !v)}

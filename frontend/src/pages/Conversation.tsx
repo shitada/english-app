@@ -95,6 +95,8 @@ export default function Conversation() {
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<'idle' | 'ai-speaking' | 'listening' | 'sending' | 'reconnecting'>('idle');
   const [warmupTopicId, setWarmupTopicId] = useState<string>('');
+  const [currentTopicId, setCurrentTopicId] = useState<string>('');
+  const [currentTopicLabel, setCurrentTopicLabel] = useState<string>('');
   const [vocabTargets, setVocabTargets] = useState<string[]>([]);
   const [usedVocabWords, setUsedVocabWords] = useState<Set<string>>(new Set());
   const [failedMessage, setFailedMessage] = useState<string | null>(null);
@@ -498,6 +500,9 @@ export default function Conversation() {
     setStartError(null);
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
+      setCurrentTopicId(topicId);
+      const matchedTopic = topics.find(t => t.id === topicId);
+      setCurrentTopicLabel(matchedTopic?.label || topicId);
       setConversationId(res.conversation_id);
       setMessages([{ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] }]);
       setLastAssistantAt(Date.now());
@@ -1122,6 +1127,20 @@ export default function Conversation() {
       setResponseTimes([]);
       setSessionGoals([]);
     };
+    const handlePracticeAgain = () => {
+      setMessages([]);
+      setSummary(null);
+      setConversationId(null);
+      setQuizQuestions([]);
+      setQuizIndex(0);
+      setQuizAnswers([]);
+      setQuizRevealed(false);
+      setQuizFinished(false);
+      setQuizError('');
+      setResponseTimes([]);
+      setSessionGoals([]);
+      startConversation(currentTopicId);
+    };
     return (
       <PhaseTransition phase={phase}>
       {sessionGoals.length > 0 && (
@@ -1141,6 +1160,8 @@ export default function Conversation() {
         onNextQuiz={nextQuizQuestion}
         onStartQuiz={startQuiz}
         onNewConversation={handleNewConversation}
+        onPracticeAgain={currentTopicId ? handlePracticeAgain : undefined}
+        topicLabel={currentTopicLabel}
         tts={tts}
         conversationId={conversationId ?? undefined}
         vocabTargetCount={vocabTargets.length}
