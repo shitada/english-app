@@ -4433,3 +4433,117 @@ async def evaluate_register_switch(
         "feedback": str(result.get("feedback", "")),
         "model_response": str(result.get("model_response", "")),
     }
+
+
+# ── Quick Debate Practice ──────────────────────────────────────────
+
+
+class DebateTopicResponse(BaseModel):
+    statement: str
+    counter_argument: str
+    context_hint: str
+    difficulty: str
+
+
+@router.get("/debate-topic", response_model=DebateTopicResponse)
+async def get_debate_topic(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a debate statement with a pre-generated counter-argument."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a thought-provoking debate statement for a {difficulty}-level English learner.\n"
+        "The topic should be interesting but not overly sensitive. Return JSON with:\n"
+        "- statement (string): a clear, debatable statement (1 sentence)\n"
+        "- counter_argument (string): a concise counter-argument against the statement "
+        "(2-3 sentences, suitable for TTS playback)\n"
+        "- context_hint (string): a brief hint about what arguments to consider (1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in debate and argumentation skills. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="debate_topic",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Debate topic generation failed")
+
+    return {
+        "statement": str(result.get("statement", "Technology has made our lives better.")),
+        "counter_argument": str(result.get("counter_argument", "However, technology has also created new problems such as addiction and privacy concerns.")),
+        "context_hint": str(result.get("context_hint", "Think about both the benefits and drawbacks.")),
+        "difficulty": difficulty,
+    }
+
+
+class DebateEvaluateRequest(BaseModel):
+    statement: str = Field(min_length=1, max_length=1000)
+    counter_argument: str = Field(min_length=1, max_length=2000)
+    user_round1_transcript: str = Field(min_length=1, max_length=3000)
+    user_round2_transcript: str = Field(min_length=1, max_length=3000)
+    total_duration_seconds: int = Field(ge=1, le=120)
+
+
+class DebateEvaluateResponse(BaseModel):
+    argument_structure_score: float
+    rebuttal_quality_score: float
+    grammar_score: float
+    vocabulary_score: float
+    coherence_score: float
+    overall_score: float
+    feedback: str
+    model_argument: str
+    model_rebuttal: str
+
+
+@router.post("/debate/evaluate", response_model=DebateEvaluateResponse)
+async def evaluate_debate(
+    body: DebateEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's debate performance across both rounds."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Debate statement: \"{body.statement}\"\n"
+        f"Counter-argument presented: \"{body.counter_argument}\"\n\n"
+        f"User's Round 1 argument ({body.total_duration_seconds}s total):\n"
+        f"\"{body.user_round1_transcript}\"\n\n"
+        f"User's Round 2 rebuttal:\n"
+        f"\"{body.user_round2_transcript}\"\n\n"
+        "Evaluate the user's debate performance. Return JSON with:\n"
+        "- argument_structure_score (1-10): how well-structured was their initial argument?\n"
+        "- rebuttal_quality_score (1-10): how effectively did they counter the opposing view?\n"
+        "- grammar_score (1-10): grammatical accuracy across both rounds\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary\n"
+        "- coherence_score (1-10): logical flow and coherence of ideas\n"
+        "- overall_score (1-10): overall debate performance\n"
+        "- feedback (string): encouraging feedback about their argumentation (2-3 sentences)\n"
+        "- model_argument (string): a well-crafted example argument for the statement\n"
+        "- model_rebuttal (string): a well-crafted example rebuttal to the counter-argument"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in debate and argumentation skills. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="debate_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Debate evaluation failed")
+
+    return {
+        "argument_structure_score": clamp_score(result.get("argument_structure_score", 5)),
+        "rebuttal_quality_score": clamp_score(result.get("rebuttal_quality_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "coherence_score": clamp_score(result.get("coherence_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_argument": str(result.get("model_argument", "")),
+        "model_rebuttal": str(result.get("model_rebuttal", "")),
+    }

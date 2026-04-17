@@ -4597,3 +4597,155 @@ Good, coder committed. Two commits for this feature — let me squash them, then
 
 ## Iteration 554 — Step 3: Implement
 
+[2026-04-18 00:46:46] Copilot invocation completed (duration: 2075s)
+[2026-04-18 00:46:46] Recording agent traces...
+[2026-04-18 00:46:46]   AGENT_TRACE iter=557 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-18 00:46:46]   AGENT_TRACE iter=558 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-18 00:46:46] SMOKE_UI: UI changes detected in pages: conversation,home
+[2026-04-18 00:46:46] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-18 00:46:46] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation, home
+
+  ✅ conversation: smoke 4✓ 0✗ (1701ms)
+  ✅ home: smoke 4✓ 0✗ (1673ms)
+
+✅ UI TEST PASS (2/2 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-18 00:46:58] SMOKE_UI_PASS: All UI pages passed
+[2026-04-18 00:46:58] Running post-invocation audit (iter 557-558)...
+============================================
+ Autoresearch Audit
+ Iterations: 557 — 558
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-18 00:46:58
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 557 558[0m
+[0;31m  Tester: FAIL — missing: 557 558[0m
+[0;31m  Evaluator: FAIL — missing: 557 558[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-18 00:46:59] Audit found 3 error(s) — fixes applied where possible
+[2026-04-18 00:47:02] Current iteration count: 558 / 584
+[2026-04-18 00:47:02] ------------------------------------------
+[2026-04-18 00:47:02] Invocation 4 / 10
+[2026-04-18 00:47:02] Resuming from iteration 559
+[2026-04-18 00:47:02] ------------------------------------------
+[2026-04-18 00:47:02] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-559-to-584.md)...
+● Read current autoresearch state (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---UI TEST RESULTS---" && cat
+  │ autoresearch/ui-test-results.json 2>/dev/null || echo "No …
+  └ 78 lines...
+
+● Check backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]'
+  │ autoresearch/backlog.md | head -20
+  └ 1 line...
+
+● Check backlog tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -30
+  │ autoresearch/backlog.md
+  └ 28 lines...
+
+● Count backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c '\[x\]'
+  │ autoresearch/backlog.md && grep -c '\[ \]' autoresearch/backlog.md && wc -l
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● Examine backlog structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && wc -l
+  │ autoresearch/backlog.md && grep -c '^- ' autoresearch/backlog.md
+  └ 3 lines...
+
+● Read backlog header (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -40
+  │ autoresearch/backlog.md
+  └ 40 lines...
+
+Backlog is empty — the proposer will need to identify features from the codebase. Let me start the 2-iteration loop.
+
+**Iteration 559 — Step 2: Propose**
+
+● Record T0 timestamp (shell)
+  │ echo $(date +%s)
+  └ 2 lines...
+
+Based on my thorough analysis of the codebase, I can see the app has an extensive feature set with 30+ Quick Practice cards, rich conversation features, vocabulary SRS, and comprehensive dashboard analytics. Let me identify what's truly missing for fluency building.Now I have a clear picture. The app has 13 speaking cards in QuickPracticeHub but all are single-turn exercises. There's no multi-turn sustained discourse practice outside full conversations. Let me verify:Based on my comprehensive analysis of the codebase, I can now identify the most impactful missing feature. The QuickPracticeHub has 13 speaking cards, but all of them (except QuickRolePlayCard) are single-turn exercises. QuickRolePlayCard has multi-turn scripted exchanges, and QuickOpinionCard is single-turn opinion expression. What's clearly missing is a **multi-turn argumentation practice** where users must construct sustained, logical discourse and respond to counterpoints — a critical skill for fluency in professional and academic settings.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Quick Debate Card for sustained argumentation speaking practice",
+  "description": "Add a 'Quick Debate' card to the Speaking tab in QuickPracticeHub. This trains sustained discourse and argumentation — a high-value fluency skill not covered by existing cards. QuickOpinionCard is single-turn; QuickRolePlayCard is scripted exchanges. The debate card uniquely requires constructing logical arguments and responding to counterpoints.\n\nFlow: (1) GET /api/pronunciation/debate-topic?difficulty=X returns {statement, counter_argument, context_hint, difficulty}. The LLM generates a controversial statement and a pre-generated counter-argument. (2) User sees the statement, speaks their argument for 30s (Round 1). (3) TTS plays the counter-argument. (4) User responds to it for 30s (Round 2). (5) POST /api/pronunciation/debate/evaluate takes {statement, counter_argument, user_round1_transcript, user_round2_transcript, total_duration_seconds} and returns {argument_structure_score, rebuttal_quality_score, grammar_score, vocabulary_score, coherence_score, overall_score, feedback, model_argument, model_rebuttal}.\n\nBackend: Add 2 endpoints to app/routers/pronunciation.py — debate-topic (LLM generates statement + pre-made counter-argument) and debate/evaluate (LLM scores both rounds). Frontend: Create QuickDebateCard.tsx with phases: idle → round1_speaking → counter_playing → round2_speaking → evaluating → done. Register it in QuickPracticeHub.tsx under the speaking tab. Add API types and functions to api.ts.\n\nNo schema changes needed (no database persistence required for this drill type).",
+  "files_to_modify": [
+    "app/routers/pronunciation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickDebateCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose feature for iter 559
+  │ Read QuickRolePlayCard.tsx
+  │   │ frontend/src/components/QuickRolePlayCard.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read QuickFollowUpCard.tsx
+      │ frontend/src/components/QuickFollowUpCard.tsx
+      └ L1:50 (50 lines read)
+
+● Record T1 timestamp (shell)
+  │ echo $(date +%s)
+  └ 2 lines...
+
+**Iteration 559 — Step 3: Implement**
+
+Now let me look at a similar existing card and existing endpoint pattern for reference:Let me also check the existing integration test pattern and check for e2e spec:Now let me check the UI test spec for the last entries to get the right format and latest ID:Now let me check the `useSpeechRecognition` hook:Now I have a complete understanding of the patterns. Let me implement all the changes:Now let me implement all changes:Now add the frontend API types and functions:Now create the QuickDebateCard component:Now register the component in QuickPracticeHub.tsx:Now create the integration tests:Now update the UI test spec:Now let me find the home page section in the spec where the Quick Practice items are:Now append the debate card test items to the yaml:Now let's commit:

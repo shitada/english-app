@@ -1957,6 +1957,54 @@ pages:
         priority: medium
         added_in: 545
 
+      - id: quick-practice-hub-085
+        target: QuickDebateCard renders in Speaking tab
+        action: Navigate to home page, open Speaking tab in Quick Practice Hub, scroll to Quick Debate card
+        expect: Card shows with "Quick Debate" header (⚔️ icon), a debate statement in quotes, a context hint, a how-it-works explanation, and a "Start Debate" button
+        type: visual
+        priority: high
+        added_in: 559
+
+      - id: quick-practice-hub-086
+        target: QuickDebateCard Round 1 speaking phase
+        action: Click "Start Debate" button on the Quick Debate card
+        expect: Card transitions to Round 1 with "Round 1 — Your Argument" badge, pulsing blue mic, 30s countdown, live transcript, and "Done — Hear Counter" button
+        type: functional
+        priority: high
+        added_in: 559
+
+      - id: quick-practice-hub-087
+        target: QuickDebateCard counter-argument playback phase
+        action: Click "Done — Hear Counter" button during Round 1 speaking
+        expect: Card shows "Counter-Argument" badge with pulsing orange speaker icon, "Playing counter-argument…" text, and the counter-argument text in italics
+        type: functional
+        priority: high
+        added_in: 559
+
+      - id: quick-practice-hub-088
+        target: QuickDebateCard Round 2 rebuttal speaking phase
+        action: Wait for counter-argument TTS to finish playing
+        expect: Card auto-transitions to Round 2 with "Round 2 — Your Rebuttal" badge, pulsing red mic, 30s countdown, the opponent's argument shown, and a "Done" button
+        type: functional
+        priority: high
+        added_in: 559
+
+      - id: quick-practice-hub-089
+        target: QuickDebateCard evaluation results
+        action: Click "Done" button during Round 2 speaking
+        expect: Card shows "Evaluating your debate…" then displays 6 scores (Argument, Rebuttal, Grammar, Vocab, Coherence, Overall), feedback, model argument, model rebuttal, "Try Again" and "New Topic" buttons
+        type: functional
+        priority: high
+        added_in: 559
+
+      - id: quick-practice-hub-090
+        target: QuickDebateCard new topic
+        action: Click "New Topic" button after evaluation in the Quick Debate card
+        expect: Card resets to idle phase with a new debate statement
+        type: functional
+        priority: medium
+        added_in: 559
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase

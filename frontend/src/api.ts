@@ -2649,6 +2649,45 @@ export function evaluateRegisterSwitch(data: { situation: string; target_registe
   });
 }
 
+// ── Quick Debate Practice ─────────────────────────────────────────
+
+export interface DebateTopicResponse {
+  statement: string;
+  counter_argument: string;
+  context_hint: string;
+  difficulty: string;
+}
+
+export interface DebateEvaluateResponse {
+  argument_structure_score: number;
+  rebuttal_quality_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  coherence_score: number;
+  overall_score: number;
+  feedback: string;
+  model_argument: string;
+  model_rebuttal: string;
+}
+
+export function fetchDebateTopic(difficulty: string = 'intermediate'): Promise<DebateTopicResponse> {
+  return request<DebateTopicResponse>(`/api/pronunciation/debate-topic?difficulty=${difficulty}`);
+}
+
+export function evaluateDebate(data: {
+  statement: string;
+  counter_argument: string;
+  user_round1_transcript: string;
+  user_round2_transcript: string;
+  total_duration_seconds: number;
+}): Promise<DebateEvaluateResponse> {
+  return request<DebateEvaluateResponse>('/api/pronunciation/debate/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;
