@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Volume2, MicOff, RotateCcw, ChevronRight, History, Mic, Play, Keyboard } from 'lucide-react';
-import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress, type DictationResult, checkDictation } from '../api';
+import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress, type DictationResult, type SentenceStatsResponse, checkDictation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
@@ -35,6 +35,7 @@ export default function Pronunciation() {
   const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [dictationPlayed, setDictationPlayed] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(null);
+  const [sentenceStats, setSentenceStats] = useState<SentenceStatsResponse | null>(null);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -66,6 +67,15 @@ export default function Pronunciation() {
       // Use sample sentences if API fails
     });
   }, []);
+
+  // Fetch sentence stats when entering result phase
+  useEffect(() => {
+    if (phase === 'result' && selectedSentence) {
+      api.getSentenceStats(selectedSentence).then(setSentenceStats).catch(() => setSentenceStats(null));
+    } else {
+      setSentenceStats(null);
+    }
+  }, [phase, selectedSentence]);
 
   const filteredSentences = difficultyFilter === 'all'
     ? sentences
@@ -690,6 +700,49 @@ export default function Pronunciation() {
           <p style={{ textAlign: 'center', marginBottom: 24, color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: 14 }}>
             {feedback.fluency_feedback}
           </p>
+        )}
+
+        {/* Sentence Progress Panel */}
+        {sentenceStats && sentenceStats.attempt_count > 0 && (
+          <div data-testid="sentence-progress-panel" style={{ margin: '0 0 20px', padding: '12px 16px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8, border: '1px solid var(--border, #e5e7eb)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>📊 Sentence Progress</span>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Attempt #{sentenceStats.attempt_count}</span>
+            </div>
+            {feedback.overall_score != null && sentenceStats.best_score > 0 && feedback.overall_score > sentenceStats.best_score && sentenceStats.attempt_count > 1 && (
+              <div data-testid="new-personal-best-badge" style={{ textAlign: 'center', marginBottom: 8, padding: '4px 12px', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#fff', borderRadius: 12, fontSize: 13, fontWeight: 600 }}>
+                🏆 New Personal Best!
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: 8 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)' }}>{sentenceStats.best_score}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Best</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{sentenceStats.avg_score}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Average</div>
+              </div>
+            </div>
+            {sentenceStats.recent_scores.length > 1 && (
+              <div style={{ display: 'flex', alignItems: 'end', justifyContent: 'center', gap: 6, height: 32 }}>
+                {[...sentenceStats.recent_scores].reverse().map((score, i) => (
+                  <div
+                    key={i}
+                    title={`Score: ${score}`}
+                    style={{
+                      width: 8,
+                      height: `${Math.max(4, (score / 10) * 28)}px`,
+                      borderRadius: 4,
+                      background: score >= 8 ? '#22c55e' : score >= 5 ? '#f59e0b' : '#ef4444',
+                      opacity: i === sentenceStats.recent_scores.length - 1 ? 1 : 0.6,
+                    }}
+                  />
+                ))}
+                <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 4 }}>last {sentenceStats.recent_scores.length}</span>
+              </div>
+            )}
+          </div>
         )}
 
         {(() => {

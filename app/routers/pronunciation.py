@@ -462,6 +462,22 @@ async def get_sentence_history(
     return await pron_dal.get_sentence_attempts(db, reference_text=text, limit=limit)
 
 
+class SentenceStatsResponse(BaseModel):
+    attempt_count: int
+    best_score: float
+    avg_score: float
+    recent_scores: list[float]
+
+
+@router.get("/sentence-stats", response_model=SentenceStatsResponse)
+async def get_sentence_stats(
+    text: str = Query(..., min_length=1, max_length=1000),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get per-sentence statistics (attempt count, best/avg score, recent scores)."""
+    return await pron_dal.get_sentence_stats(db, reference_text=text)
+
+
 @router.get("/retry-suggestions", response_model=RetrySuggestionsResponse)
 async def get_retry_suggestions(
     threshold: float = Query(default=7.0, ge=0, le=10),

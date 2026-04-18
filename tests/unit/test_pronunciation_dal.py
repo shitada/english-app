@@ -28,6 +28,7 @@ from app.dal.pronunciation import (
     get_score_trend,
     get_sentence_attempts,
     get_sentence_mastery_overview,
+    get_sentence_stats,
     get_sentences_from_conversations,
     get_sentences_from_corrections,
     get_sentences_from_vocabulary,
@@ -1767,3 +1768,46 @@ class TestGetTodayUsedJournalPrompts:
         await test_db.commit()
         result = await get_today_used_journal_prompts(test_db)
         assert result == []
+
+
+@pytest.mark.unit
+class TestGetSentenceStats:
+    async def test_no_attempts_returns_zeros(self, test_db):
+        result = await get_sentence_stats(test_db, "Some sentence that was never attempted.")
+        assert result["attempt_count"] == 0
+        assert result["best_score"] == 0
+        assert result["avg_score"] == 0
+        assert result["recent_scores"] == []
+
+    async def test_single_attempt(self, test_db):
+        await save_attempt(test_db, "Hello world.", "Hello world.", {"overall_score": 8}, 8.0)
+        result = await get_sentence_stats(test_db, "Hello world.")
+        assert result["attempt_count"] == 1
+        assert result["best_score"] == 8.0
+        assert result["avg_score"] == 8.0
+        assert result["recent_scores"] == [8.0]
+
+    async def test_multiple_attempts(self, test_db):
+        for score in [5.0, 7.0, 9.0]:
+            await save_attempt(test_db, "Good morning.", "Good morning.", {"overall_score": score}, score)
+        result = await get_sentence_stats(test_db, "Good morning.")
+        assert result["attempt_count"] == 3
+        assert result["best_score"] == 9.0
+        assert result["avg_score"] == 7.0
+        assert len(result["recent_scores"]) == 3
+
+    async def test_recent_scores_limited_to_5(self, test_db):
+        for i in range(8):
+            await save_attempt(test_db, "Test sentence.", "Test sentence.", {"overall_score": i}, float(i))
+        result = await get_sentence_stats(test_db, "Test sentence.")
+        assert result["attempt_count"] == 8
+        assert len(result["recent_scores"]) == 5
+        # Most recent first (id DESC)
+        assert result["recent_scores"][0] == 7.0
+
+    async def test_only_counts_matching_sentence(self, test_db):
+        await save_attempt(test_db, "Sentence A.", "Sentence A.", {"overall_score": 6}, 6.0)
+        await save_attempt(test_db, "Sentence B.", "Sentence B.", {"overall_score": 9}, 9.0)
+        result = await get_sentence_stats(test_db, "Sentence A.")
+        assert result["attempt_count"] == 1
+        assert result["best_score"] == 6.0

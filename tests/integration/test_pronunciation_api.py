@@ -2234,3 +2234,73 @@ async def test_register_switch_evaluate_invalid_register(client):
         "duration_seconds": 5,
     })
     assert res.status_code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_sentence_stats_empty(client):
+    """Sentence stats for an unpracticed sentence returns zeros."""
+    res = await client.get("/api/pronunciation/sentence-stats", params={"text": "Never practiced."})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["attempt_count"] == 0
+    assert data["best_score"] == 0
+    assert data["avg_score"] == 0
+    assert data["recent_scores"] == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_sentence_stats_after_attempts(client, mock_copilot):
+    """Sentence stats should reflect pronunciation check results for that sentence."""
+    sentence = "Hello world."
+    for score in [5, 7, 9]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score,
+            "overall_feedback": "Feedback.",
+            "word_feedback": [],
+            "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": sentence,
+            "user_transcription": sentence,
+        })
+
+    res = await client.get("/api/pronunciation/sentence-stats", params={"text": sentence})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["attempt_count"] == 3
+    assert data["best_score"] == 9.0
+    assert data["avg_score"] == 7.0
+    assert len(data["recent_scores"]) == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_sentence_stats_isolates_sentences(client, mock_copilot):
+    """Stats for one sentence should not include attempts for another."""
+    for text, score in [("Sentence A.", 8), ("Sentence B.", 4)]:
+        mock_copilot.ask_json = AsyncMock(return_value={
+            "overall_score": score,
+            "overall_feedback": "Ok.",
+            "word_feedback": [],
+            "focus_areas": [],
+        })
+        await client.post("/api/pronunciation/check", json={
+            "reference_text": text,
+            "user_transcription": text,
+        })
+
+    res = await client.get("/api/pronunciation/sentence-stats", params={"text": "Sentence A."})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["attempt_count"] == 1
+    assert data["best_score"] == 8.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_sentence_stats_missing_text_param(client):
+    """Missing required text param should return 422."""
+    res = await client.get("/api/pronunciation/sentence-stats")
+    assert res.status_code == 422

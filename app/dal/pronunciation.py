@@ -176,6 +176,40 @@ async def get_progress(db: aiosqlite.Connection) -> dict[str, Any]:
     }
 
 
+async def get_sentence_stats(db: aiosqlite.Connection, reference_text: str) -> dict[str, Any]:
+    """Get per-sentence statistics for a given reference text.
+
+    Returns attempt_count, best_score, avg_score, and the last 5 scores.
+    """
+    agg_rows = await db.execute_fetchall(
+        """SELECT COUNT(*) as attempt_count,
+                  MAX(score) as best_score,
+                  ROUND(AVG(score), 1) as avg_score
+           FROM pronunciation_attempts
+           WHERE reference_text = ? AND score IS NOT NULL""",
+        (reference_text,),
+    )
+    row = agg_rows[0] if agg_rows else {}
+    attempt_count = row["attempt_count"] if row["attempt_count"] else 0
+    best_score = row["best_score"] if row["best_score"] is not None else 0
+    avg_score = row["avg_score"] if row["avg_score"] is not None else 0
+
+    recent_rows = await db.execute_fetchall(
+        """SELECT score FROM pronunciation_attempts
+           WHERE reference_text = ? AND score IS NOT NULL
+           ORDER BY id DESC LIMIT 5""",
+        (reference_text,),
+    )
+    recent_scores = [r["score"] for r in recent_rows]
+
+    return {
+        "attempt_count": attempt_count,
+        "best_score": best_score,
+        "avg_score": avg_score,
+        "recent_scores": recent_scores,
+    }
+
+
 async def clear_history(db: aiosqlite.Connection) -> int:
     """Delete all pronunciation attempts."""
     cursor = await db.execute("DELETE FROM pronunciation_attempts")

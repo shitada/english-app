@@ -764,6 +764,30 @@ pages:
         priority: high
         added_in: 517
 
+      - id: pron-011
+        target: Sentence Progress panel appears on shadowing result screen
+        action: complete a pronunciation check for a sentence that has prior attempts, view result phase
+        expect: Panel with data-testid="sentence-progress-panel" is visible showing attempt count, best score, and average score
+        type: functional
+        priority: high
+        added_in: 589
+
+      - id: pron-012
+        target: New Personal Best badge appears when score beats previous best
+        action: complete a pronunciation check with a score higher than all previous attempts for the same sentence
+        expect: Element with data-testid="new-personal-best-badge" is visible with text "New Personal Best"
+        type: functional
+        priority: medium
+        added_in: 589
+
+      - id: pron-013
+        target: Mini score chart shows recent attempt dots
+        action: complete multiple pronunciation checks for the same sentence, view result phase
+        expect: Small colored bar chart of recent scores is visible inside the sentence progress panel
+        type: visual
+        priority: medium
+        added_in: 589
+
   listening:
     path: /listening
     tests:
