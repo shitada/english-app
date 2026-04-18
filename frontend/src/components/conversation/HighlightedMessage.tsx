@@ -262,11 +262,12 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
                 onKeyDown={(e) => { if (e.key === 'Enter') onSpeak(part); }}
                 title="Click to hear pronunciation"
                 style={{
-                  background: '#dbeafe',
+                  background: 'var(--highlight-bg, #dbeafe)',
                   borderRadius: 3,
                   padding: '1px 2px',
                   cursor: 'pointer',
-                  borderBottom: '2px solid #3b82f6',
+                  borderBottom: '2px solid var(--highlight-border, #3b82f6)',
+                  color: 'var(--highlight-text, #1e3a5f)',
                 }}
               >
                 {part} <span style={{ fontSize: 10 }}>🔊</span>
@@ -324,7 +325,8 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
                 cursor: 'pointer',
                 padding: '1px 2px',
                 borderRadius: 3,
-                background: isKey ? '#dbeafe' : 'transparent',
+                background: isKey ? 'var(--highlight-bg, #dbeafe)' : 'transparent',
+                color: isKey ? 'var(--highlight-text, #1e3a5f)' : undefined,
               }}
             >
               {part}
