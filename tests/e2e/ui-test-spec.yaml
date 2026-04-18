@@ -3362,3 +3362,86 @@ pages:
         type: functional
         priority: medium
         added_in: 596
+
+  quick_practice_email:
+    path: /
+    tests:
+      - id: qp-email-001
+        target: QuickEmailCard renders under writing tab
+        action: Click Writing tab, scroll to Quick Email card
+        expect: Card visible with Mail icon and "Quick Email" heading
+        type: functional
+        priority: high
+        added_in: 598
+
+      - id: qp-email-002
+        target: Email scenario loads with required elements checklist
+        action: Navigate to Writing tab and observe Quick Email card
+        expect: Scenario text, email type badge, tone guidance, and checklist of required elements are displayed
+        type: functional
+        priority: high
+        added_in: 598
+
+      - id: qp-email-003
+        target: Subject and body inputs accept text
+        action: Type into subject input and body textarea
+        expect: Text appears in both inputs, phase transitions from idle to typing
+        type: functional
+        priority: high
+        added_in: 598
+
+      - id: qp-email-004
+        target: Submit button sends email for evaluation
+        action: Fill subject and body, click Submit
+        expect: Phase transitions to evaluating then done with score bars displayed
+        type: functional
+        priority: high
+        added_in: 598
+
+      - id: qp-email-005
+        target: Score bars display color-coded results
+        action: Complete an email evaluation
+        expect: Five score bars (Format, Tone, Grammar, Completeness, Overall) shown with color-coded values
+        type: functional
+        priority: high
+        added_in: 598
+
+      - id: qp-email-006
+        target: Missing elements shown when present
+        action: Submit email missing some required elements
+        expect: Missing Elements section displays with list of missing items
+        type: functional
+        priority: medium
+        added_in: 598
+
+      - id: qp-email-007
+        target: Corrections shown with inline highlights
+        action: Submit email with grammar errors
+        expect: Corrections section shows original text with strikethrough and corrected text in green
+        type: functional
+        priority: medium
+        added_in: 598
+
+      - id: qp-email-008
+        target: Model email displayed in results
+        action: Complete an email evaluation
+        expect: Model Email section shows subject and body of a model email
+        type: functional
+        priority: medium
+        added_in: 598
+
+      - id: qp-email-009
+        target: Next Email button resets the card
+        action: Click "Next Email" button in done phase
+        expect: Card resets to idle phase with a new scenario loaded
+        type: functional
+        priority: medium
+        added_in: 598
+
+      - id: qp-email-010
+        target: Submit disabled when subject or body empty
+        action: Try clicking Submit with empty subject or body
+        expect: Submit button appears disabled and does not trigger evaluation
+        type: functional
+        priority: medium
+        added_in: 598

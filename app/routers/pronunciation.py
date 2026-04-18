@@ -5587,3 +5587,161 @@ async def evaluate_instruction_prompt(
         "model_instructions": str(result.get("model_instructions", "")),
         "feedback": str(result.get("feedback", "")),
     }
+
+
+# ── Quick Email Writing Practice ────────────────────────────────
+
+
+class EmailScenarioResponse(BaseModel):
+    scenario: str
+    email_type: str
+    required_elements: list[str]
+    tone_guidance: str
+    difficulty: str
+
+
+@router.get("/email-scenario", response_model=EmailScenarioResponse)
+async def get_email_scenario(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate an email writing scenario with required elements and tone guidance."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate an email writing exercise for a {difficulty}-level English learner.\n"
+        "The scenario should describe a realistic situation requiring an email.\n"
+        "Return JSON with:\n"
+        "- scenario (string): a brief description of the situation (2-3 sentences)\n"
+        "- email_type (string): one of 'formal', 'semi-formal', or 'informal'\n"
+        "- required_elements (array of 3-5 strings): things the email must include "
+        "(e.g. 'greeting', 'reason for writing', 'specific request', 'closing')\n"
+        "- tone_guidance (string): a one-sentence tip about the expected tone\n"
+        "Use varied scenarios: workplace, customer service, friend invitation, complaint, "
+        "job application, thank-you note, booking confirmation, event RSVP."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach specializing in email communication. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="email_scenario",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Email scenario generation failed")
+
+    raw_elements = result.get("required_elements", [])
+    if not isinstance(raw_elements, list):
+        raw_elements = []
+    required_elements = [str(e) for e in raw_elements if e][:5]
+    if not required_elements:
+        required_elements = ["greeting", "reason for writing", "closing"]
+
+    email_type = str(result.get("email_type", "semi-formal")).lower()
+    if email_type not in ("formal", "semi-formal", "informal"):
+        email_type = "semi-formal"
+
+    return {
+        "scenario": str(result.get("scenario", "You need to write an email to a colleague about an upcoming meeting.")),
+        "email_type": email_type,
+        "required_elements": required_elements,
+        "tone_guidance": str(result.get("tone_guidance", "Keep a professional yet friendly tone.")),
+        "difficulty": difficulty,
+    }
+
+
+class EmailCorrectionItem(BaseModel):
+    original: str
+    corrected: str
+    explanation: str
+
+
+class EmailEvaluateRequest(BaseModel):
+    scenario: str = Field(min_length=1, max_length=1000)
+    email_type: str = Field(min_length=1, max_length=20)
+    required_elements: list[str] = Field(min_length=1, max_length=10)
+    user_subject: str = Field(min_length=1, max_length=500)
+    user_body: str = Field(min_length=1, max_length=5000)
+
+
+class EmailEvaluateResponse(BaseModel):
+    format_score: float
+    tone_score: float
+    grammar_score: float
+    completeness_score: float
+    overall_score: float
+    feedback: str
+    missing_elements: list[str]
+    corrections: list[EmailCorrectionItem]
+    model_email_subject: str
+    model_email_body: str
+
+
+@router.post("/email-evaluate", response_model=EmailEvaluateResponse)
+async def evaluate_email(
+    body: EmailEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's email for format, tone, grammar, and completeness."""
+    copilot = get_copilot_service()
+    elements_str = ", ".join(body.required_elements)
+    eval_prompt = (
+        f"Email scenario: \"{body.scenario}\"\n"
+        f"Expected email type: {body.email_type}\n"
+        f"Required elements: {elements_str}\n"
+        f"User's subject line: \"{body.user_subject}\"\n"
+        f"User's email body:\n\"{body.user_body}\"\n\n"
+        "Evaluate this email. Return JSON with:\n"
+        "- format_score (1-10): email format correctness (greeting, structure, sign-off)\n"
+        "- tone_score (1-10): appropriateness of tone for the email type\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- completeness_score (1-10): how well all required elements are addressed\n"
+        "- overall_score (1-10): overall email quality\n"
+        "- feedback (string): constructive feedback (2-3 sentences)\n"
+        "- missing_elements (array of strings): required elements the user missed. "
+        "Empty array if all elements are present.\n"
+        "- corrections (array of objects): each with 'original' (user's phrase), "
+        "'corrected' (improved version), 'explanation' (why). Empty array if none.\n"
+        "- model_email_subject (string): an ideal subject line\n"
+        "- model_email_body (string): a well-written model email body for comparison"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach specializing in email communication. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="email_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Email evaluation failed")
+
+    raw_corrections = result.get("corrections", [])
+    if not isinstance(raw_corrections, list):
+        raw_corrections = []
+    corrections = []
+    for c in raw_corrections:
+        if isinstance(c, dict):
+            corrections.append({
+                "original": str(c.get("original", "")),
+                "corrected": str(c.get("corrected", "")),
+                "explanation": str(c.get("explanation", "")),
+            })
+
+    raw_missing = result.get("missing_elements", [])
+    if not isinstance(raw_missing, list):
+        raw_missing = []
+    missing_elements = [str(m) for m in raw_missing if m]
+
+    return {
+        "format_score": clamp_score(result.get("format_score", 5)),
+        "tone_score": clamp_score(result.get("tone_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "completeness_score": clamp_score(result.get("completeness_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "missing_elements": missing_elements,
+        "corrections": corrections,
+        "model_email_subject": str(result.get("model_email_subject", "")),
+        "model_email_body": str(result.get("model_email_body", "")),
+    }

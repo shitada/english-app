@@ -3135,3 +3135,50 @@ export function evaluateInstruction(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Email Writing Practice ────────────────────────────────
+
+export interface EmailScenarioResponse {
+  scenario: string;
+  email_type: 'formal' | 'semi-formal' | 'informal';
+  required_elements: string[];
+  tone_guidance: string;
+  difficulty: string;
+}
+
+export interface EmailCorrectionItem {
+  original: string;
+  corrected: string;
+  explanation: string;
+}
+
+export interface EmailEvaluateResponse {
+  format_score: number;
+  tone_score: number;
+  grammar_score: number;
+  completeness_score: number;
+  overall_score: number;
+  feedback: string;
+  missing_elements: string[];
+  corrections: EmailCorrectionItem[];
+  model_email_subject: string;
+  model_email_body: string;
+}
+
+export function getEmailScenario(difficulty: string = 'intermediate'): Promise<EmailScenarioResponse> {
+  return request<EmailScenarioResponse>(`/api/pronunciation/email-scenario?difficulty=${difficulty}`);
+}
+
+export function evaluateEmail(data: {
+  scenario: string;
+  email_type: string;
+  required_elements: string[];
+  user_subject: string;
+  user_body: string;
+}): Promise<EmailEvaluateResponse> {
+  return request<EmailEvaluateResponse>('/api/pronunciation/email-evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
