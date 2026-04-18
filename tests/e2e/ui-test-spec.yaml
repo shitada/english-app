@@ -2736,3 +2736,19 @@ pages:
         type: functional
         priority: medium
         added_in: 572
+
+      - id: conv-097
+        target: Topic mastery badge displays on each topic card
+        action: Navigate to /conversation and wait for topic cards to render
+        expect: Each topic card shows a mastery badge (🆕 New, 🥉 Bronze, 🥈 Silver, 🥇 Gold, or 💎 Diamond) with data-testid="mastery-badge"
+        type: functional
+        priority: medium
+        added_in: 574
+
+      - id: conv-098
+        target: Topic mastery badge shows next-tier progress hint
+        action: Navigate to /conversation and inspect a topic card that has at least 1 session
+        expect: A progress hint text is visible below the mastery badge indicating what is needed for the next tier
+        type: functional
+        priority: low
+        added_in: 574

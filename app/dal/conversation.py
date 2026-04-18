@@ -472,6 +472,84 @@ async def get_topic_recommendations(
     return recommendations
 
 
+async def get_topic_mastery(db: aiosqlite.Connection) -> dict[str, dict[str, Any]]:
+    """Compute per-topic mastery tiers from ended conversations and their summary_json.
+
+    Tiers:
+        new       – 0 sessions
+        bronze    – 1+ session completed
+        silver    – 3+ sessions, avg grammar ≥60%
+        gold      – 5+ sessions, avg grammar ≥80%, intermediate+ attempted
+        diamond   – 8+ sessions, avg grammar ≥90%, advanced attempted
+    """
+    rows = await db.execute_fetchall(
+        "SELECT topic, difficulty, summary_json FROM conversations WHERE status = 'ended'"
+    )
+
+    # Accumulate per-topic stats
+    topic_data: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        topic = row["topic"]
+        if topic not in topic_data:
+            topic_data[topic] = {
+                "sessions": 0,
+                "grammar_sum": 0.0,
+                "grammar_count": 0,
+                "difficulties": set(),
+            }
+        td = topic_data[topic]
+        td["sessions"] += 1
+        td["difficulties"].add(row["difficulty"])
+
+        if row["summary_json"]:
+            try:
+                summary = json.loads(row["summary_json"])
+            except (json.JSONDecodeError, TypeError):
+                continue
+            perf = summary.get("performance", {})
+            grammar_rate = perf.get("grammar_accuracy_rate")
+            if grammar_rate is not None:
+                td["grammar_sum"] += float(grammar_rate)
+                td["grammar_count"] += 1
+
+    result: dict[str, dict[str, Any]] = {}
+    for topic, td in topic_data.items():
+        sessions = td["sessions"]
+        avg_grammar = round(td["grammar_sum"] / td["grammar_count"], 1) if td["grammar_count"] > 0 else 0.0
+        difficulties = td["difficulties"]
+
+        # Determine highest difficulty attempted
+        if "advanced" in difficulties:
+            highest_difficulty = "advanced"
+        elif "intermediate" in difficulties:
+            highest_difficulty = "intermediate"
+        elif "beginner" in difficulties:
+            highest_difficulty = "beginner"
+        else:
+            highest_difficulty = "unknown"
+
+        # Determine tier (check from highest to lowest)
+        if sessions >= 8 and avg_grammar >= 90 and "advanced" in difficulties:
+            tier = "diamond"
+        elif sessions >= 5 and avg_grammar >= 80 and highest_difficulty in ("intermediate", "advanced"):
+            tier = "gold"
+        elif sessions >= 3 and avg_grammar >= 60:
+            tier = "silver"
+        elif sessions >= 1:
+            tier = "bronze"
+        else:
+            tier = "new"
+
+        result[topic] = {
+            "tier": tier,
+            "sessions": sessions,
+            "avg_grammar": avg_grammar,
+            "highest_difficulty": highest_difficulty,
+        }
+
+    return result
+
+
 async def toggle_message_bookmark(db: aiosqlite.Connection, message_id: int) -> dict | None:
     """Toggle the is_bookmarked flag on a message. Returns updated message or None."""
     cursor = await db.execute(

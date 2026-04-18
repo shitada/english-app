@@ -693,6 +693,20 @@ async def topic_recommendations(db: aiosqlite.Connection = Depends(get_db_sessio
     ]
 
 
+class TopicMasteryItem(BaseModel):
+    tier: str
+    sessions: int
+    avg_grammar: float
+    highest_difficulty: str
+
+
+@router.get("/topic-mastery")
+async def get_topic_mastery(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Get per-topic mastery tiers computed from ended conversation summaries."""
+    mastery = await conv_dal.get_topic_mastery(db)
+    return mastery
+
+
 @router.put("/messages/{message_id}/bookmark")
 async def toggle_bookmark(
     message_id: int = Path(ge=1),

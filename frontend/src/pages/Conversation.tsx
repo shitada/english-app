@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { Mic, MicOff, Send, Square, Volume2, History, Trash2, Headphones, Star, Keyboard, ChevronDown, Bookmark, BookOpen, Lightbulb, X } from 'lucide-react';
-import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation } from '../api';
+import { api, ApiError, type GrammarFeedback, type ConversationListItem, type ConversationQuizQuestion, getDifficultyRecommendation, type DifficultyRecommendation, getTopicRecommendations, type TopicRecommendation, getTopicMastery, type TopicMasteryMap } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -116,6 +116,7 @@ export default function Conversation() {
   const [hintCount, setHintCount] = useState(0);
   const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
   const [errorPatterns, setErrorPatterns] = useState<Map<string, number>>(new Map());
+  const [topicMastery, setTopicMastery] = useState<TopicMasteryMap>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -430,6 +431,7 @@ export default function Conversation() {
         setDifficulty(rec.recommended_difficulty as Difficulty);
       }
     }).catch(() => {});
+    getTopicMastery().then(setTopicMastery).catch(() => {});
   }, [phase]);
 
   // Compute per-topic practice stats from past conversations
@@ -921,6 +923,56 @@ export default function Conversation() {
                           </span>
                         )}
                       </div>
+                      {(() => {
+                        const mastery = topicMastery[s.id];
+                        const TIER_INFO: Record<string, { icon: string; label: string; color: string }> = {
+                          new: { icon: '🆕', label: 'New', color: '#8b5cf6' },
+                          bronze: { icon: '🥉', label: 'Bronze', color: '#cd7f32' },
+                          silver: { icon: '🥈', label: 'Silver', color: '#9ca3af' },
+                          gold: { icon: '🥇', label: 'Gold', color: '#f59e0b' },
+                          diamond: { icon: '💎', label: 'Diamond', color: '#06b6d4' },
+                        };
+                        const tier = mastery ? TIER_INFO[mastery.tier] || TIER_INFO.new : TIER_INFO.new;
+                        // Compute next-tier hint
+                        let nextHint = '';
+                        if (!mastery || mastery.tier === 'new') {
+                          nextHint = '1 session to 🥉 Bronze';
+                        } else if (mastery.tier === 'bronze') {
+                          const sessionsNeeded = Math.max(0, 3 - mastery.sessions);
+                          const grammarNeeded = mastery.avg_grammar < 60;
+                          if (sessionsNeeded > 0) nextHint = `${sessionsNeeded} more session${sessionsNeeded > 1 ? 's' : ''} to 🥈 Silver`;
+                          else if (grammarNeeded) nextHint = `Reach 60% grammar for 🥈 Silver`;
+                          else nextHint = `Almost 🥈 Silver!`;
+                        } else if (mastery.tier === 'silver') {
+                          const sessionsNeeded = Math.max(0, 5 - mastery.sessions);
+                          const grammarNeeded = mastery.avg_grammar < 80;
+                          if (sessionsNeeded > 0) nextHint = `${sessionsNeeded} more session${sessionsNeeded > 1 ? 's' : ''} to 🥇 Gold`;
+                          else if (grammarNeeded) nextHint = `Reach 80% grammar for 🥇 Gold`;
+                          else nextHint = `Try intermediate+ for 🥇 Gold`;
+                        } else if (mastery.tier === 'gold') {
+                          const sessionsNeeded = Math.max(0, 8 - mastery.sessions);
+                          const grammarNeeded = mastery.avg_grammar < 90;
+                          if (sessionsNeeded > 0) nextHint = `${sessionsNeeded} more session${sessionsNeeded > 1 ? 's' : ''} to 💎 Diamond`;
+                          else if (grammarNeeded) nextHint = `Reach 90% grammar for 💎 Diamond`;
+                          else nextHint = `Try advanced for 💎 Diamond`;
+                        }
+                        return (
+                          <div data-testid="mastery-badge" style={{ marginTop: 4 }}>
+                            <span style={{
+                              fontSize: '0.7rem', padding: '2px 6px', borderRadius: 9999,
+                              background: `${tier.color}15`, color: tier.color, fontWeight: 600,
+                              border: `1px solid ${tier.color}30`,
+                            }}>
+                              {tier.icon} {tier.label}
+                            </span>
+                            {nextHint && (
+                              <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+                                {nextHint}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <div
                         role="button"
                         onClick={(e) => { e.stopPropagation(); setWarmupTopicId(s.id); setPhase('warmup'); }}

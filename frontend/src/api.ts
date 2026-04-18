@@ -873,6 +873,20 @@ export async function getDifficultyRecommendation(): Promise<DifficultyRecommend
   return request<DifficultyRecommendation>('/api/conversation/difficulty-recommendation');
 }
 
+// Topic mastery badges (from iteration 574)
+export interface TopicMasteryItem {
+  tier: string;
+  sessions: number;
+  avg_grammar: number;
+  highest_difficulty: string;
+}
+
+export type TopicMasteryMap = Record<string, TopicMasteryItem>;
+
+export async function getTopicMastery(): Promise<TopicMasteryMap> {
+  return request<TopicMasteryMap>('/api/conversation/topic-mastery');
+}
+
 // Dictation mode (from iteration 250)
 export interface DictationWordResult {
   expected: string;
