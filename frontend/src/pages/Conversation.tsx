@@ -1292,6 +1292,12 @@ export default function Conversation() {
           stopListening: speech.stop,
           reset: speech.reset,
         }}
+        fillerCount={fillerCount}
+        fillerDetails={fillerDetails}
+        responseTimes={responseTimes}
+        correctionAttempts={correctionAttempts}
+        correctionSuccesses={correctionSuccesses}
+        hintCount={hintCount}
       />
       </PhaseTransition>
     );

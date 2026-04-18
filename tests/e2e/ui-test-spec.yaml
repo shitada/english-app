@@ -2896,3 +2896,43 @@ pages:
         type: functional
         priority: high
         added_in: 580
+
+      - id: conv-108
+        target: Session Insights card renders when filler words were used
+        action: Complete a conversation where the user sends messages containing filler words (e.g., 'um', 'like'), then view the summary phase
+        expect: A card with data-testid="session-insights-card" is visible, showing a "Session Insights" heading with the filler word count and breakdown (e.g., "um ×3, like ×2")
+        type: functional
+        priority: high
+        added_in: 584
+
+      - id: conv-109
+        target: Session Insights card shows average response time with color coding
+        action: Complete a conversation and view the summary phase where response times are tracked
+        expect: The session-insights-card shows average response time in seconds; green if <10s, yellow if <20s, red if ≥20s
+        type: visual
+        priority: medium
+        added_in: 584
+
+      - id: conv-110
+        target: Session Insights card shows correction drill stats
+        action: Complete a conversation where correction drills were practiced, then view the summary
+        expect: The session-insights-card shows "✏️ Correction Drills" with successes/attempts (e.g., "2/3")
+        type: functional
+        priority: medium
+        added_in: 584
+
+      - id: conv-111
+        target: Session Insights card shows hint usage count
+        action: Complete a conversation where hints were requested, then view the summary
+        expect: The session-insights-card shows "💡 Hints Used" with the count
+        type: functional
+        priority: medium
+        added_in: 584
+
+      - id: conv-112
+        target: Session Insights card hidden when no insight metrics have data
+        action: Complete a conversation with zero fillers, no response times, no corrections, and no hints
+        expect: No element with data-testid="session-insights-card" is present in the DOM
+        type: state
+        priority: medium
+        added_in: 584

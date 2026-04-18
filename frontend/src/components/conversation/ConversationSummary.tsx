@@ -50,6 +50,12 @@ interface ConversationSummaryProps {
     stopListening: () => void;
     reset?: () => void;
   };
+  fillerCount?: number;
+  fillerDetails?: Record<string, number>;
+  responseTimes?: number[];
+  correctionAttempts?: number;
+  correctionSuccesses?: number;
+  hintCount?: number;
 }
 
 export function ConversationSummary({
@@ -73,6 +79,12 @@ export function ConversationSummary({
   vocabTargetCount,
   vocabUsedCount,
   speechRecognition,
+  fillerCount,
+  fillerDetails,
+  responseTimes,
+  correctionAttempts,
+  correctionSuccesses,
+  hintCount,
 }: ConversationSummaryProps) {
   const [copied, setCopied] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -558,6 +570,89 @@ export function ConversationSummary({
           </div>
         </div>
       )}
+
+      {/* Session Insights — filler words, response time, corrections, hints */}
+      {(() => {
+        const hasFillers = (fillerCount ?? 0) > 0;
+        const hasResponseTimes = (responseTimes ?? []).length > 0;
+        const hasCorrections = (correctionAttempts ?? 0) > 0;
+        const hasHints = (hintCount ?? 0) > 0;
+        if (!hasFillers && !hasResponseTimes && !hasCorrections && !hasHints) return null;
+
+        const avgResponseTime = hasResponseTimes
+          ? responseTimes!.reduce((a, b) => a + b, 0) / responseTimes!.length
+          : 0;
+        const responseTimeColor = avgResponseTime < 10
+          ? 'var(--success, #22c55e)'
+          : avgResponseTime < 20
+            ? 'var(--warning, #f59e0b)'
+            : 'var(--danger, #ef4444)';
+
+        // Top filler words sorted by count descending
+        const topFillers = fillerDetails
+          ? Object.entries(fillerDetails)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([word, count]) => `${word} ×${count}`)
+              .join(', ')
+          : '';
+
+        return (
+          <div
+            data-testid="session-insights-card"
+            style={{
+              marginBottom: 24,
+              padding: 16,
+              background: 'var(--bg-secondary, #f5f5f5)',
+              borderRadius: 8,
+            }}
+          >
+            <h4 style={{ marginBottom: 12 }}>Session Insights</h4>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              {hasFillers && (
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--warning, #f59e0b)' }}>
+                    {fillerCount}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>🗣️ Filler Words</div>
+                  {topFillers && (
+                    <div
+                      data-testid="filler-breakdown"
+                      style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}
+                    >
+                      {topFillers}
+                    </div>
+                  )}
+                </div>
+              )}
+              {hasResponseTimes && (
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: responseTimeColor }}>
+                    {avgResponseTime.toFixed(1)}s
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>⏱️ Avg Response Time</div>
+                </div>
+              )}
+              {hasCorrections && (
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>
+                    {correctionSuccesses}/{correctionAttempts}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>✏️ Correction Drills</div>
+                </div>
+              )}
+              {hasHints && (
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--primary, #6366f1)' }}>
+                    {hintCount}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>💡 Hints Used</div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Self-Assessment Reflection */}
       {conversationId && (
