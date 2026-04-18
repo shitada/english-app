@@ -1803,3 +1803,105 @@ async def test_send_message_custom_topic_uses_scenario_in_prompt(client, mock_co
     assert custom_goal in system_prompt, (
         f"Expected custom goal in system prompt but got: {system_prompt!r}"
     )
+
+
+@pytest.mark.integration
+async def test_bookmarks_custom_topic_shows_label(client, mock_copilot):
+    """Bookmarks from custom-topic conversations should show the human-readable label, not the raw topic ID."""
+    # Create a custom topic
+    res = await client.post("/api/conversation/custom-topics", json={
+        "label": "Pharmacy Visit",
+        "description": "Buying medicine at a pharmacy",
+        "scenario": "You are a pharmacist helping the user.",
+    })
+    assert res.status_code == 200
+    topic_id = res.json()["id"]
+
+    # Start a conversation with the custom topic
+    mock_copilot.ask = AsyncMock(return_value="Welcome to the pharmacy! How can I help?")
+    start_res = await client.post("/api/conversation/start", json={"topic": topic_id})
+    assert start_res.status_code == 200
+    conv_id = start_res.json()["conversation_id"]
+
+    # Send a user message
+    mock_copilot.ask = AsyncMock(return_value="Sure, I can help with that.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "I need some cough medicine.",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+    await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "I need some cough medicine.",
+    })
+
+    # Bookmark the user message
+    hist = await client.get(f"/api/conversation/{conv_id}/history")
+    user_msgs = [m for m in hist.json()["messages"] if m["role"] == "user"]
+    mid = user_msgs[0]["id"]
+    await client.put(f"/api/conversation/messages/{mid}/bookmark")
+
+    # Verify bookmarks show the label, not the raw topic ID
+    res = await client.get("/api/conversation/bookmarks")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total"] == 1
+    assert data["items"][0]["topic"] == "Pharmacy Visit"
+
+
+@pytest.mark.integration
+async def test_replay_custom_topic_shows_label(client, mock_copilot):
+    """Replay for custom-topic conversations should show the human-readable label."""
+    # Create a custom topic
+    res = await client.post("/api/conversation/custom-topics", json={
+        "label": "Bike Rental",
+        "description": "Renting a bicycle",
+        "scenario": "You are a bike rental shop owner.",
+    })
+    assert res.status_code == 200
+    topic_id = res.json()["id"]
+
+    # Start a conversation with the custom topic
+    mock_copilot.ask = AsyncMock(return_value="Hi! Looking to rent a bike?")
+    start_res = await client.post("/api/conversation/start", json={"topic": topic_id})
+    assert start_res.status_code == 200
+    conv_id = start_res.json()["conversation_id"]
+
+    # Verify replay shows the label
+    res = await client.get(f"/api/conversation/{conv_id}/replay")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["conversation"]["topic"] == "Bike Rental"
+
+
+@pytest.mark.integration
+async def test_topic_warmup_custom_topic(client, mock_copilot):
+    """Topic warmup should work for custom topics, not return 404."""
+    # Create a custom topic
+    res = await client.post("/api/conversation/custom-topics", json={
+        "label": "Pet Store",
+        "description": "Buying supplies at a pet store",
+        "scenario": "You are a pet store employee.",
+    })
+    assert res.status_code == 200
+    topic_id = res.json()["id"]
+
+    # Request warmup for the custom topic
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "phrases": [
+            {"phrase": "I'm looking for dog food.", "hint": "asking for products"},
+            {"phrase": "Do you have any treats?", "hint": "browsing"},
+            {"phrase": "How much is this leash?", "hint": "asking price"},
+            {"phrase": "Can you recommend a toy?", "hint": "getting advice"},
+        ]
+    })
+    res = await client.post(
+        "/api/conversation/topic-warmup",
+        json={"topic": topic_id, "difficulty": "beginner"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["topic"] == topic_id
+    assert data["topic_label"] == "Pet Store"
+    assert len(data["phrases"]) == 4

@@ -729,7 +729,7 @@ async def list_bookmarks(
     """List all bookmarked messages, optionally filtered by conversation."""
     items = await conv_dal.get_bookmarked_messages(db, conversation_id, limit, offset)
     total = await conv_dal.count_bookmarked_messages(db, conversation_id)
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     items = [{**item, "topic": get_topic_label(topics, item["topic"])} for item in items]
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
@@ -743,7 +743,7 @@ async def get_conversation_replay(
     result = await conv_dal.get_conversation_replay(db, conversation_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     result["conversation"]["topic"] = get_topic_label(topics, result["conversation"]["topic"])
     return result
 
@@ -1053,10 +1053,11 @@ class TopicWarmupResponse(BaseModel):
 @router.post("/topic-warmup", response_model=TopicWarmupResponse)
 async def get_topic_warmup(
     req: TopicWarmupRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
     _rl=Depends(require_rate_limit),
 ):
     """Generate warm-up phrases for a conversation topic."""
-    topics = get_conversation_topics()
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
     valid_ids = {t["id"] for t in topics}
     if req.topic not in valid_ids:
         raise HTTPException(status_code=404, detail=f"Topic '{req.topic}' not found")
