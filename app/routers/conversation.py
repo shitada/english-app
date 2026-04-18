@@ -31,6 +31,33 @@ class StartRequest(BaseModel):
     topic: str = Field(min_length=1, max_length=100)
     difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
     role_swap: bool = False
+    personality: Literal["patient_teacher", "chatty_friend", "professional", "challenging"] = "patient_teacher"
+
+
+PERSONALITY_INSTRUCTIONS: dict[str, str] = {
+    "patient_teacher": (
+        "\nCommunication style: You are a patient, encouraging teacher. "
+        "Use simple and clear language. Gently correct mistakes by rephrasing "
+        "what the user said correctly. Speak slowly and give positive reinforcement."
+    ),
+    "chatty_friend": (
+        "\nCommunication style: You are a casual, chatty friend. "
+        "Use informal language, slang, contractions, and common idioms. "
+        "Be enthusiastic and fun. React naturally like a real friend would."
+    ),
+    "professional": (
+        "\nCommunication style: You are a formal professional. "
+        "Use polished, business-appropriate language. Maintain a courteous and "
+        "respectful tone. Prefer formal register, complete sentences, and "
+        "professional vocabulary."
+    ),
+    "challenging": (
+        "\nCommunication style: You are intellectually challenging. "
+        "Use advanced vocabulary, complex sentence structures, and nuanced ideas. "
+        "Push the user to express themselves more precisely. Ask follow-up "
+        "questions that require deeper thinking."
+    ),
+}
 
 
 class MessageRequest(BaseModel):
@@ -247,7 +274,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         topic_data = custom_match
     topic_label = topic_data["label"]
 
-    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap)
+    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap, personality=req.personality)
 
     copilot = get_copilot_service()
 
@@ -270,7 +297,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         scenario=scenario,
         role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation"),
-    ) + difficulty_instructions[req.difficulty]
+    ) + difficulty_instructions[req.difficulty] + PERSONALITY_INSTRUCTIONS[req.personality]
     try:
         opening = await safe_llm_call(
             lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
@@ -446,6 +473,10 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
     )
+    # Append personality style if stored on the conversation
+    personality = conv.get("personality") or "patient_teacher"
+    if personality in PERSONALITY_INSTRUCTIONS:
+        system += PERSONALITY_INSTRUCTIONS[personality]
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."
 
     # Run grammar check and conversation response in PARALLEL

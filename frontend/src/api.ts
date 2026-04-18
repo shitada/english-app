@@ -79,10 +79,10 @@ export const api = {
     request<{ deleted: boolean }>(`/api/conversation/custom-topics/${topicId}`, { method: 'DELETE' }),
 
   // Conversation
-  startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false) =>
+  startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false, personality: 'patient_teacher' | 'chatty_friend' | 'professional' | 'challenging' = 'patient_teacher') =>
     request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; user_role: string; role_briefing: string[] }>('/api/conversation/start', {
       method: 'POST',
-      body: JSON.stringify({ topic, difficulty, role_swap: roleSwap }),
+      body: JSON.stringify({ topic, difficulty, role_swap: roleSwap, personality }),
     }),
 
   sendMessage: (conversation_id: number, content: string) =>

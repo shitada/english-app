@@ -12,10 +12,10 @@ import aiosqlite
 from app.utils import coerce_bool, escape_like
 
 
-async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate", role_swap: bool = False) -> int:
+async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate", role_swap: bool = False, personality: str = "patient_teacher") -> int:
     cursor = await db.execute(
-        "INSERT INTO conversations (topic, difficulty, role_swap) VALUES (?, ?, ?)",
-        (topic, difficulty, int(role_swap)),
+        "INSERT INTO conversations (topic, difficulty, role_swap, personality) VALUES (?, ?, ?, ?)",
+        (topic, difficulty, int(role_swap), personality),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]

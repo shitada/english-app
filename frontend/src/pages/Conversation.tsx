@@ -46,6 +46,15 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: strin
   { value: 'advanced', label: '🚀 Advanced', description: 'Idioms, complex grammar, nuanced' },
 ];
 
+type Personality = 'patient_teacher' | 'chatty_friend' | 'professional' | 'challenging';
+
+const PERSONALITY_OPTIONS: { value: Personality; label: string; emoji: string; description: string }[] = [
+  { value: 'patient_teacher', label: 'Patient Teacher', emoji: '🧑‍🏫', description: 'Speaks simply, gently corrects mistakes' },
+  { value: 'chatty_friend', label: 'Chatty Friend', emoji: '😄', description: 'Casual, uses slang and idioms' },
+  { value: 'professional', label: 'Professional', emoji: '👔', description: 'Formal register, business-like' },
+  { value: 'challenging', label: 'Challenging', emoji: '🧠', description: 'Complex vocab, pushes you to improve' },
+];
+
 export default function Conversation() {
   const [phase, setPhase] = useState<'select' | 'warmup' | 'chat' | 'summary' | 'history' | 'replay' | 'bookmarks'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -58,6 +67,7 @@ export default function Conversation() {
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [diffRec, setDiffRec] = useState<DifficultyRecommendation | null>(null);
   const [roleSwap, setRoleSwap] = useState(false);
+  const [personality, setPersonality] = useState<Personality>('patient_teacher');
   const [sessionGoals, setSessionGoals] = useState<string[]>([]);
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
@@ -555,7 +565,7 @@ export default function Conversation() {
     autoEndAttempted.current = false;
     resetSessionScopedState();
     try {
-      const res = await api.startConversation(topicId, difficulty, roleSwap);
+      const res = await api.startConversation(topicId, difficulty, roleSwap, personality);
       setCurrentTopicId(topicId);
       const matchedTopic = topics.find(t => t.id === topicId);
       setCurrentTopicLabel(matchedTopic?.label || topicId);
@@ -813,6 +823,29 @@ export default function Conversation() {
                     title={d.description}
                   >
                     {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Partner Style</h3>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {PERSONALITY_OPTIONS.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setPersonality(p.value)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      border: personality === p.value ? '2px solid var(--primary)' : '2px solid var(--border)',
+                      background: personality === p.value ? 'var(--primary)' : 'transparent',
+                      color: personality === p.value ? 'white' : 'var(--text)',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                    }}
+                    title={p.description}
+                  >
+                    {p.emoji} {p.label}
                   </button>
                 ))}
               </div>

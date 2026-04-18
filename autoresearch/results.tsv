@@ -548,3 +548,5 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 566	8a71e4b	2026-04-18	50	0	41	1216	1307	1784	1784	pass	7.25	kept	Add sentence-by-sentence playback panel to Listening Quiz
 567	34061cb	2026-04-18	6	309	140	269	724	1790	1790	pass	7.80	kept	Fix recent-activity raw topic IDs and NULL detail crash
 568	d7ccde1	2026-04-18	243	449	120	126	938	1842	1842	pass	7.55	kept	Add grammar error pattern detection to ConversationCoach
+590	550fc83	2026-04-18T23:52:48+09:00	0	0	0	0	0	0	0	pass	7.0	keep	minimal pairs listening discrimination drill
+591	ccdbbcb	2026-04-18	0	243	147	0	390	1939	1940	fail	6.75	discarded	Pin favorite Quick Practice cards (discarded: unrelated test failure)

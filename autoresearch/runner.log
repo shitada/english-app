@@ -7129,4 +7129,225 @@ For confidence-trend, both tests use `hotel_checkin` which maps to `"Hotel Check
 
 Now let me check the confidence_trend test more carefully for topic assertions:The failing assertions are at lines 1677 and 1682. Let me also look at the grammar_trend_improving test for similar issues:Good - the `test_grammar_trend_improving` test doesn't assert on topic names, just on trend and count. Now let me check the confidence_trend tests for any topic assertions:The confidence_trend tests don't have direct topic assertions - they only assert on scores and trend. The only assertions I need to fix are at lines 1677 and 1682 in `test_grammar_trend_with_conversations`.
 
-Now let me apply the fix:Now let's run the specific tests to verify:All 7 tests pass. Now let me commit:
+Now let me apply the fix:Now let's run the specific tests to verify:All 7 tests pass. Now let me commit:[2026-04-19 00:03:51] Copilot invocation completed (duration: 1118s)
+[2026-04-19 00:03:51] Recording agent traces...
+[2026-04-19 00:03:51]   AGENT_TRACE iter=590 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-19 00:03:52]   AGENT_TRACE iter=591 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-19 00:03:52] SMOKE_UI: UI changes detected in pages: home
+[2026-04-19 00:03:52] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-19 00:03:52] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1838ms)
+
+✅ UI TEST PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-19 00:04:02] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 00:04:02] Running post-invocation audit (iter 590-591)...
+============================================
+ Autoresearch Audit
+ Iterations: 590 — 591
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 00:04:02
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 590[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 590 591[0m
+[0;31m  Tester: FAIL — missing: 590 591[0m
+[0;31m  Evaluator: FAIL — missing: 590 591[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 590 (550fc83)[0m
+
+============================================
+[0;31m  AUDIT: 4 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 00:04:03] Audit found 4 error(s) — fixes applied where possible
+[2026-04-19 00:04:06] Current iteration count: 591 / 629
+[2026-04-19 00:04:06] ------------------------------------------
+[2026-04-19 00:04:06] Invocation 2 / 10
+[2026-04-19 00:04:06] Resuming from iteration 592
+[2026-04-19 00:04:06] ------------------------------------------
+[2026-04-19 00:04:06] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-592-to-629.md)...
+● Gather current state for iteration 592 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT LOG---" && git
+  │ log --oneline -5 && echo "---LAST SESSION---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 26 lines...
+
+● Check backlog items (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -30
+  └ 1 line...
+
+● Check backlog format (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -n '\[ \]'
+  │ autoresearch/backlog.md | head -30
+  └ 1 line...
+
+● View backlog end (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -40
+  │ autoresearch/backlog.md
+  └ 40 lines...
+
+● Understand backlog structure (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && grep -c
+  │ '\[x\]\|checked\|\[ \]' autoresearch/backlog.md && echo "---" && head -60
+  │ autoresearch/backlog.md
+  └ 2 lines...
+
+● View backlog top (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && head -80
+  │ autoresearch/backlog.md
+  └ 79 lines...
+
+Backlog is empty. I'll start iteration 592, instructing the proposer to propose new features.
+
+**Starting Iteration 592:**
+
+Now let me look at the topic selection UI in the Conversation page to understand where the personality selector would go:Now I have a thorough understanding of the codebase. Let me finalize my proposal for a genuinely novel feature.
+
+{
+  "type": "feature",
+  "title": "Add Conversation Partner Personality selector for varied speaking practice",
+  "description": "Currently all conversations use the same AI personality regardless of topic. Add a 'Partner Style' selector to the conversation setup phase that lets users choose the AI's communication style. Options: 🧑‍🏫 Patient Teacher (speaks simply, gently corrects, encourages elaboration), 🗣️ Chatty Friend (casual, uses slang/idioms, natural flow), 👔 Professional (formal register, business tone), 🎭 Challenging (pushes back, complex vocab, demands precision). This trains users across different social registers — a key fluency skill.\n\nBackend (app/routers/conversation.py): Add optional `personality` field (Literal['patient_teacher','chatty_friend','professional','challenging'], default='patient_teacher') to StartRequest. Define a PERSONALITY_INSTRUCTIONS dict mapping each personality to a prompt suffix that modifies the AI's tone, vocabulary level, and correction style. Append the selected personality instruction to the system prompt in start_conversation() and send_message() (where system prompt is reconstructed). No schema changes needed — personality is session-ephemeral.\n\nFrontend (frontend/src/pages/Conversation.tsx): Add `personality` state (default 'patient_teacher'). Render a 'Partner Style' selector section between the Role Swap toggle and the GoalSelector, using the same button style as difficulty/duration selectors. Each option shows emoji + label + short description tooltip. Pass personality to api.startConversation().\n\nFrontend (frontend/src/api.ts): Update startConversation signature to accept optional `personality` parameter, include it in the POST body.\n\nTest approach: Add integration test in tests/ verifying that /api/conversation/start accepts the personality field and returns a valid response for each personality type. Verify that invalid personality values are rejected with 422.",
+  "files_to_modify": ["app/routers/conversation.py", "frontend/src/pages/Conversation.tsx", "frontend/src/api.ts"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}● Proposer Propose feature iter 592
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L550:700 (151 lines read)
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L700:900 (201 lines read)
+
+Got proposal: **"Add Conversation Partner Personality selector"**. Now calling the coder.
+
+● Record T1 timestamp (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me check the DAL to understand how conversations are stored:Now let me check where the _MIGRATIONS list is in database.py, and the conversation table for adding the `personality` column:Now let me check the last migration entry to know where to append:Now I have a complete picture. Let me also check the last few entries in the ui-test-spec for conversation to know the highest ID:Now let me look at the send_message endpoint more closely to see the system prompt construction - I need to understand if personality should be appended there too:Now I have a complete understanding. Let me implement all the changes:Now update `start_conversation` to use personality and pass it to DAL:Now append personality instruction to system prompt in `start_conversation`:Now update `send_message` to also use the personality stored in the conversation:Now update the DAL `create_conversation` to accept and store personality:Now add the migration to `app/database.py`:Now update the frontend `api.ts`:Now update the frontend `Conversation.tsx`. First let me add the personality state and constants:Now add the state variable. Let me find the right spot after roleSwap:Now update the `startConversation` call to pass personality:Now add the Partner Style selector UI. Let me find the exact location — between the Difficulty Level section and the Session Duration section:I'll insert the Partner Style selector between Difficulty Level and Session Duration:Now create the integration test file:Now update the UI test spec. Let me see the end of the conversation section:Now let me verify the changes are consistent by checking the modified files:Now commit:```json
+{
+  "committed": true,
+  "commit_hash": "eeb7f42",
+  "files_changed": [
+    "app/routers/conversation.py",
+    "app/dal/conversation.py",
+    "app/database.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/integration/test_conversation_personality.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 7,
+  "ui_spec_updated": true,
+  "description": "Add Partner Style selector with 4 personality options (Patient Teacher, Chatty Friend, Professional, Challenging) to conversation setup, stored in DB and applied to both start and message system prompts"
+}
+```● Coder Implement iter 592 feature
+  │ Commit all changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "feat: add conversation partner personality selector
+  │   │
+  │   │ Adds Patient Teacher, Chatty Friend, Professional, and Challenging
+  │   │ personality options to conversation setup for varied register practice.…
+  │   └ 18 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager log -1
+      │ --format='%H'
+      └ 2 lines...
+
+Coder committed `eeb7f42`. Now calling the tester.
+
+● Record T2 and get changed files (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git diff
+  │ HEAD~1 --name-only && echo "---HASH---" && git rev-parse --short HEAD
+  └ 14 lines...
+
+I'll run all test checks now. Let me kick off the independent checks in parallel.Tests and TS check are done. Now I need to run the smoke test since `database.py`, `app/routers/conversation.py`, and `app/dal/conversation.py` were changed.All checks are complete. Here are the results:
+
+```json
+{
+  "tests_passed": 1941,
+  "tests_total": 1947,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_error_handling.py::TestConversationLLMErrors::test_start_returns_502_on_llm_failure\nFAILED tests/integration/test_rate_limiting.py::TestRateLimiting::test_requests_within_limit_succeed\nFAILED tests/integration/test_rate_limiting.py::TestRateLimiting::test_exceeding_limit_returns_429\nFAILED tests/integration/test_rate_limiting.py::TestRateLimiting::test_different_endpoints_share_limit\nFAILED tests/integration/test_rate_limiting.py::TestRateLimiting::test_non_limited_endpoints_still_work\n================== 6 failed, 1941 passed in 89.10s (0:01:29) ===================",
+  "failure_summary": "6 tests failed — root cause: sqlite3.OperationalError: table conversations has no column named personality. The `personality` parameter was added to conv_dal.create_conversation() in app/dal/conversation.py but the DB schema migration to add the `personality` column to the `conversations` table is missing in app/database.py."
+}
+```
+
+---
+
+### Failure Analysis
+
+**Root Cause:** `sqlite3.OperationalError: table conversations has no column named personality`
+
+The code in `app/dal/conversation.py:16` now passes a `personality` parameter in the `INSERT` statement for the `conversations` table, and `app/routers/conversation.py:277` passes `personality=req.personality` to that DAL function. However, `app/database.py` has **not been updated** to add the `personality` column to the `conversations` table schema (the `CREATE TABLE` or `ALTER TABLE` migration is missing).
+
+**6 Failed Tests:**
+
+| # | Test | Why it failed |
+|---|------|---------------|
+| 1 | `test_daily_challenge_current_count_with_activity` | Calls conversation start → hits missing column |
+| 2 | `test_start_returns_502_on_llm_failure` | Calls `/api/conversation/start` → DB error before LLM mock is reached |
+| 3–6 | `TestRateLimiting` (4 tests) | All call `/api/conversation/start` as part of rate-limit testing → same DB error |
+
+**Fix needed:** Add the `personality TEXT` column to the `conversations` table definition in `app/database.py` (either in the `CREATE TABLE` statement or via an `ALTER TABLE` migration step).● Tester Test iteration 592
+  │ Check for E2E test results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1; echo "EXIT_CODE:$?"
+  │   └ 3 lines...
+  └ Run smoke API test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1; echo
+      │ "EXIT_CODE:$?"
+      └ 24 lines...
+
+Tests failed — missing DB migration for `personality` column. Sending back to coder to fix.
+
+Now I see the issue. The `personality` column is in the `_MIGRATIONS` list (line 389-390) but is **missing** from the `CREATE TABLE IF NOT EXISTS conversations` statement in `SCHEMA` (lines 18-27). For test databases (and fresh DBs), the SCHEMA creates the table, and then migrations run. Let me add the column to the SCHEMA.Now let me verify the change looks correct:Good. The migration already exists at lines 389-390. Let me verify it's still there:Both the SCHEMA and migration are in place. Now let me amend the existing commit:

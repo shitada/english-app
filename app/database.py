@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     topic TEXT NOT NULL,
     difficulty TEXT NOT NULL DEFAULT 'intermediate',
     role_swap INTEGER NOT NULL DEFAULT 0,
+    personality TEXT DEFAULT 'patient_teacher',
     summary_json TEXT,
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
@@ -384,6 +385,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on minimal_pair_sessions created_at",
         "CREATE INDEX IF NOT EXISTS idx_mp_sessions_created ON minimal_pair_sessions(created_at DESC)",
+    ),
+    (
+        "add personality column to conversations",
+        "ALTER TABLE conversations ADD COLUMN personality TEXT NOT NULL DEFAULT 'patient_teacher'",
     ),
 ]
 
