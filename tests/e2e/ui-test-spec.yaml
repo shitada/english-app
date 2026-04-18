@@ -3233,3 +3233,59 @@ pages:
         type: functional
         priority: medium
         added_in: 594
+
+      - id: qp-sumresp-001
+        target: Summarize & Respond card renders in Speaking tab
+        action: Navigate to Quick Practice hub, ensure Speaking tab is active, scroll to Summarize & Respond card
+        expect: Card visible with BookOpen icon, "Summarize & Respond" title, passage text, topic label, and "Start Reading" button
+        type: functional
+        priority: high
+        added_in: 595
+
+      - id: qp-sumresp-002
+        target: Start Reading button transitions to reading phase
+        action: Click "Start Reading" button
+        expect: Phase transitions to reading with passage displayed prominently and "Summarize" button visible
+        type: functional
+        priority: high
+        added_in: 595
+
+      - id: qp-sumresp-003
+        target: Summarize button starts recording summary phase
+        action: Click "Summarize" button in reading phase
+        expect: Phase transitions to recording_summary with Mic icon, 15s countdown timer, and "Done — Now Respond" button
+        type: functional
+        priority: high
+        added_in: 595
+
+      - id: qp-sumresp-004
+        target: Done — Now Respond transitions to response recording
+        action: Click "Done — Now Respond" button during summary recording
+        expect: Phase transitions to recording_response with Mic icon, 30s countdown timer, and "Done" button
+        type: functional
+        priority: high
+        added_in: 595
+
+      - id: qp-sumresp-005
+        target: Done button in response phase shows evaluation results
+        action: Click "Done" button during response recording phase
+        expect: Phase transitions to evaluating, then shows scores (Summary, Coherence, Grammar, Vocab, Overall) and feedback
+        type: functional
+        priority: high
+        added_in: 595
+
+      - id: qp-sumresp-006
+        target: New Passage button loads a new passage
+        action: Click "New Passage" button in done phase
+        expect: Card resets to idle phase with a new passage and topic
+        type: functional
+        priority: medium
+        added_in: 595
+
+      - id: qp-sumresp-007
+        target: Model summary and response shown in results
+        action: Complete a summarize & respond exercise
+        expect: Results phase shows "Model Summary" and "Model Response" sections with example text
+        type: functional
+        priority: medium
+        added_in: 595

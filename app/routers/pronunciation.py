@@ -5363,3 +5363,117 @@ async def evaluate_synonym_swap(
         "feedback": str(result.get("feedback", "")),
         "suggested_synonyms": suggested_synonyms,
     }
+
+
+# ── Quick Summarize & Respond Speaking Drill ─────────────────────
+
+
+class SummarizeRespondPromptResponse(BaseModel):
+    passage: str
+    topic: str
+    key_argument: str
+    difficulty: str
+
+
+@router.get("/summarize-respond", response_model=SummarizeRespondPromptResponse)
+async def get_summarize_respond_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a short opinion paragraph for summarize & respond practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a short opinion paragraph for a {difficulty}-level English learner.\n"
+        "The paragraph should present a clear opinion on an everyday topic "
+        "in 3-4 sentences with one main argument.\n"
+        "Return JSON with:\n"
+        "- passage (string): the opinion paragraph (3-4 sentences)\n"
+        "- topic (string): the general topic of the passage (1-3 words)\n"
+        "- key_argument (string): the author's main argument in one sentence\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in reading comprehension and oral response skills. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="summarize_respond_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Summarize & respond prompt generation failed")
+
+    return {
+        "passage": str(result.get("passage", "Many people believe that learning a second language opens doors to new cultures and career opportunities. Studies show bilingual individuals tend to have better problem-solving skills. However, some argue the time investment could be spent on other valuable skills.")),
+        "topic": str(result.get("topic", "Language Learning")),
+        "key_argument": str(result.get("key_argument", "Learning a second language provides cultural and career benefits.")),
+        "difficulty": difficulty,
+    }
+
+
+class SummarizeRespondEvaluateRequest(BaseModel):
+    passage: str = Field(min_length=1, max_length=5000)
+    key_argument: str = Field(min_length=1, max_length=2000)
+    user_summary: str = Field(min_length=1, max_length=3000)
+    user_response: str = Field(min_length=1, max_length=5000)
+    duration_seconds: int = Field(ge=1, le=120)
+
+
+class SummarizeRespondEvaluateResponse(BaseModel):
+    summary_accuracy_score: float
+    response_coherence_score: float
+    grammar_score: float
+    vocabulary_score: float
+    overall_score: float
+    feedback: str
+    model_summary: str
+    model_response: str
+
+
+@router.post("/summarize-respond/evaluate", response_model=SummarizeRespondEvaluateResponse)
+async def evaluate_summarize_respond(
+    body: SummarizeRespondEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's summary and response to an opinion passage."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original passage:\n\"{body.passage}\"\n\n"
+        f"Key argument: \"{body.key_argument}\"\n\n"
+        f"User's summary ({body.duration_seconds}s total):\n"
+        f"\"{body.user_summary}\"\n\n"
+        f"User's response/reaction:\n"
+        f"\"{body.user_response}\"\n\n"
+        "The user was asked to: (1) summarize the author's main point in one sentence, "
+        "then (2) give their own response/reaction in 2-3 sentences.\n"
+        "Evaluate both phases. Return JSON with:\n"
+        "- summary_accuracy_score (1-10): how accurately the user captured the main point\n"
+        "- response_coherence_score (1-10): how coherent and well-structured the response is\n"
+        "- grammar_score (1-10): grammatical accuracy across both phases\n"
+        "- vocabulary_score (1-10): range and appropriateness of vocabulary\n"
+        "- overall_score (1-10): overall performance\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)\n"
+        "- model_summary (string): a well-crafted one-sentence summary of the passage\n"
+        "- model_response (string): a well-crafted 2-3 sentence response/reaction"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in reading comprehension and oral response skills. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="summarize_respond_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Summarize & respond evaluation failed")
+
+    return {
+        "summary_accuracy_score": clamp_score(result.get("summary_accuracy_score", 5)),
+        "response_coherence_score": clamp_score(result.get("response_coherence_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "vocabulary_score": clamp_score(result.get("vocabulary_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_summary": str(result.get("model_summary", "")),
+        "model_response": str(result.get("model_response", "")),
+    }

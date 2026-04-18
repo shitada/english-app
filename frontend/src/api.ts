@@ -3056,3 +3056,41 @@ export function evaluateSynonymSwap(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Summarize & Respond Speaking Drill ────────────────────
+
+export interface SummarizeRespondPromptResponse {
+  passage: string;
+  topic: string;
+  key_argument: string;
+  difficulty: string;
+}
+
+export interface SummarizeRespondEvaluateResponse {
+  summary_accuracy_score: number;
+  response_coherence_score: number;
+  grammar_score: number;
+  vocabulary_score: number;
+  overall_score: number;
+  feedback: string;
+  model_summary: string;
+  model_response: string;
+}
+
+export function getSummarizeRespondPrompt(difficulty: string = 'intermediate'): Promise<SummarizeRespondPromptResponse> {
+  return request<SummarizeRespondPromptResponse>(`/api/pronunciation/summarize-respond?difficulty=${difficulty}`);
+}
+
+export function evaluateSummarizeRespond(data: {
+  passage: string;
+  key_argument: string;
+  user_summary: string;
+  user_response: string;
+  duration_seconds: number;
+}): Promise<SummarizeRespondEvaluateResponse> {
+  return request<SummarizeRespondEvaluateResponse>('/api/pronunciation/summarize-respond/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
