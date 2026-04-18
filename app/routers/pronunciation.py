@@ -5907,3 +5907,275 @@ async def evaluate_proofread(
         "feedback": str(result.get("feedback", "")),
         "fully_corrected_version": str(result.get("fully_corrected_version", "")),
     }
+
+
+# ── Quick Connected Speech Practice ────────────────────────────────
+
+
+class ConnectedSpeechResponse(BaseModel):
+    phrase: str
+    pattern_type: str
+    formal_pronunciation: str
+    natural_pronunciation: str
+    explanation: str
+    difficulty: str
+
+
+class ConnectedSpeechEvaluateRequest(BaseModel):
+    phrase: str = Field(min_length=1, max_length=1000)
+    pattern_type: str = Field(min_length=1, max_length=50)
+    transcript: str = Field(max_length=2000)
+
+
+class ConnectedSpeechEvaluateResponse(BaseModel):
+    naturalness_score: float
+    accuracy_score: float
+    rhythm_score: float
+    overall_score: float
+    feedback: str
+    pronunciation_tip: str
+
+
+@router.get("/connected-speech", response_model=ConnectedSpeechResponse)
+async def get_connected_speech(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a phrase demonstrating a connected speech phenomenon."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a single English phrase or short sentence appropriate for a {difficulty}-level learner "
+        "that demonstrates one connected speech phenomenon.\n"
+        "Connected speech types:\n"
+        "- linking: consonant-to-vowel linking (e.g. 'turn off' → 'tur-noff')\n"
+        "- reduction: syllable/word reduction (e.g. 'want to' → 'wanna')\n"
+        "- elision: sound deletion (e.g. 'next day' → 'nex day')\n"
+        "- assimilation: sound change due to neighboring sounds (e.g. 'don't you' → 'donchoo')\n\n"
+        "Return JSON with:\n"
+        "- phrase (string): the full phrase (3-8 words)\n"
+        "- pattern_type (string): one of 'linking', 'reduction', 'elision', 'assimilation'\n"
+        "- formal_pronunciation (string): how each word is pronounced separately\n"
+        "- natural_pronunciation (string): how it sounds in natural connected speech\n"
+        "- explanation (string): brief explanation of the sound change (1-2 sentences)\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English pronunciation and connected speech expert. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="connected_speech",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Connected speech generation failed")
+
+    phrase = str(result.get("phrase", "")) if result.get("phrase") else ""
+    pattern_type = str(result.get("pattern_type", "")) if result.get("pattern_type") else ""
+    formal_pronunciation = str(result.get("formal_pronunciation", "")) if result.get("formal_pronunciation") else ""
+    natural_pronunciation = str(result.get("natural_pronunciation", "")) if result.get("natural_pronunciation") else ""
+    explanation = str(result.get("explanation", "")) if result.get("explanation") else ""
+
+    valid_patterns = {"linking", "reduction", "elision", "assimilation"}
+    if pattern_type not in valid_patterns:
+        pattern_type = "linking"
+
+    # Fallback if LLM returned invalid data
+    if not phrase or not formal_pronunciation or not natural_pronunciation:
+        fallback_data = {
+            "beginner": {
+                "phrase": "turn it off",
+                "pattern_type": "linking",
+                "formal_pronunciation": "turn / it / off",
+                "natural_pronunciation": "tur-ni-toff",
+                "explanation": "When a word ends in a consonant and the next begins with a vowel, the sounds link together smoothly.",
+            },
+            "intermediate": {
+                "phrase": "want to go",
+                "pattern_type": "reduction",
+                "formal_pronunciation": "want / to / go",
+                "natural_pronunciation": "wanna go",
+                "explanation": "In fast speech, 'want to' is commonly reduced to 'wanna'. This is natural and widely accepted.",
+            },
+            "advanced": {
+                "phrase": "don't you think",
+                "pattern_type": "assimilation",
+                "formal_pronunciation": "don't / you / think",
+                "natural_pronunciation": "donchoo think",
+                "explanation": "When /t/ meets /j/ (the 'y' sound), they merge into /tʃ/ ('ch'). This is called palatalization.",
+            },
+        }
+        fb = fallback_data.get(difficulty, fallback_data["intermediate"])
+        phrase = fb["phrase"]
+        pattern_type = fb["pattern_type"]
+        formal_pronunciation = fb["formal_pronunciation"]
+        natural_pronunciation = fb["natural_pronunciation"]
+        explanation = fb["explanation"]
+
+    return {
+        "phrase": phrase,
+        "pattern_type": pattern_type,
+        "formal_pronunciation": formal_pronunciation,
+        "natural_pronunciation": natural_pronunciation,
+        "explanation": explanation,
+        "difficulty": difficulty,
+    }
+
+
+@router.post("/connected-speech/evaluate", response_model=ConnectedSpeechEvaluateResponse)
+async def evaluate_connected_speech(
+    body: ConnectedSpeechEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's attempt at producing connected speech."""
+    copilot = get_copilot_service()
+
+    transcript_text = body.transcript.strip() if body.transcript else "(no response)"
+
+    eval_prompt = (
+        f"The user practiced connected speech on this phrase:\n"
+        f"Reference phrase: \"{body.phrase}\"\n"
+        f"Pattern type: {body.pattern_type}\n"
+        f"User's spoken transcript: \"{transcript_text}\"\n\n"
+        "Evaluate how well the user produced the natural connected speech form. Return JSON with:\n"
+        "- naturalness_score (1-10): how natural and fluent the connected speech sounded\n"
+        "- accuracy_score (1-10): how accurately they reproduced the connected speech pattern\n"
+        "- rhythm_score (1-10): overall rhythm and flow\n"
+        "- overall_score (1-10): combined assessment\n"
+        "- feedback (string): specific feedback on their connected speech (2-3 sentences)\n"
+        "- pronunciation_tip (string): one actionable tip for improving this connected speech pattern\n"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English pronunciation and connected speech expert. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="connected_speech_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Connected speech evaluation failed")
+
+    return {
+        "naturalness_score": clamp_score(result.get("naturalness_score", 5)),
+        "accuracy_score": clamp_score(result.get("accuracy_score", 5)),
+        "rhythm_score": clamp_score(result.get("rhythm_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "pronunciation_tip": str(result.get("pronunciation_tip", "")),
+    }
+
+
+# ── Quick Conversation Repair ───────────────────────────────────
+
+
+class ConversationRepairPromptResponse(BaseModel):
+    situation: str
+    speaker_statement: str
+    confusion_point: str
+    repair_type: str
+    difficulty: str
+
+
+@router.get("/conversation-repair", response_model=ConversationRepairPromptResponse)
+async def get_conversation_repair(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a conversation breakdown scenario for repair strategy practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a conversation breakdown scenario for a {difficulty}-level English learner "
+        "to practice communication repair strategies.\n"
+        "The scenario should present a realistic situation where someone says something confusing "
+        "or unclear, and the learner must use a repair strategy to handle the breakdown.\n"
+        "Return JSON with:\n"
+        "- situation (string): brief context of the conversation (1 sentence)\n"
+        "- speaker_statement (string): what the other person says that causes confusion (1-2 sentences)\n"
+        "- confusion_point (string): what specifically is unclear or confusing (1 sentence)\n"
+        "- repair_type (string): one of 'clarify', 'repeat', 'confirm', 'define' — "
+        "the type of repair strategy the learner should practice\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in conversation repair strategies. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="conversation_repair_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Conversation repair scenario generation failed")
+
+    valid_repair_types = {"clarify", "repeat", "confirm", "define"}
+    raw_type = str(result.get("repair_type", "clarify")).lower().strip()
+    repair_type = raw_type if raw_type in valid_repair_types else "clarify"
+
+    return {
+        "situation": str(result.get("situation", "You are talking to a colleague about a project deadline.")),
+        "speaker_statement": str(result.get("speaker_statement", "We need to get the deliverables squared away by the end of play today.")),
+        "confusion_point": str(result.get("confusion_point", "The phrase 'squared away' and 'end of play' are unclear.")),
+        "repair_type": repair_type,
+        "difficulty": difficulty,
+    }
+
+
+class ConversationRepairEvaluateRequest(BaseModel):
+    situation: str = Field(min_length=1, max_length=1000)
+    speaker_statement: str = Field(min_length=1, max_length=1000)
+    confusion_point: str = Field(min_length=1, max_length=500)
+    repair_type: str = Field(min_length=1, max_length=50)
+    transcript: str = Field(min_length=1, max_length=3000)
+
+
+class ConversationRepairEvaluateResponse(BaseModel):
+    strategy_score: float
+    politeness_score: float
+    grammar_score: float
+    overall_score: float
+    feedback: str
+    model_repair: str
+
+
+@router.post("/conversation-repair/evaluate", response_model=ConversationRepairEvaluateResponse)
+async def evaluate_conversation_repair(
+    body: ConversationRepairEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's conversation repair attempt."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Conversation situation: \"{body.situation}\"\n"
+        f"Speaker's confusing statement: \"{body.speaker_statement}\"\n"
+        f"Confusion point: \"{body.confusion_point}\"\n"
+        f"Expected repair type: {body.repair_type} "
+        "(clarify = ask for clarification, repeat = request repetition, "
+        "confirm = confirm understanding, define = ask for definition)\n"
+        f"User's spoken repair attempt:\n\"{body.transcript}\"\n\n"
+        "Evaluate how well the learner used the repair strategy. Return JSON with:\n"
+        "- strategy_score (1-10): did they correctly use the expected repair strategy?\n"
+        "- politeness_score (1-10): was the repair request polite and natural?\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- overall_score (1-10): overall quality of the repair attempt\n"
+        "- feedback (string): encouraging feedback with specific tips (2-3 sentences)\n"
+        "- model_repair (string): a native-like model repair response (1-2 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in conversation repair and clarification strategies. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="conversation_repair_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Conversation repair evaluation failed")
+
+    return {
+        "strategy_score": clamp_score(result.get("strategy_score", 5)),
+        "politeness_score": clamp_score(result.get("politeness_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_repair": str(result.get("model_repair", "")),
+    }

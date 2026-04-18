@@ -3225,3 +3225,66 @@ export function evaluateProofread(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Connected Speech Practice ───────────────────────────────
+
+export interface ConnectedSpeechResponse {
+  phrase: string;
+  pattern_type: string;
+  formal_pronunciation: string;
+  natural_pronunciation: string;
+  explanation: string;
+  difficulty: string;
+}
+
+export interface ConnectedSpeechEvaluateResponse {
+  naturalness_score: number;
+  accuracy_score: number;
+  rhythm_score: number;
+  overall_score: number;
+  feedback: string;
+  pronunciation_tip: string;
+}
+
+export function getConnectedSpeech(difficulty: string = 'intermediate'): Promise<ConnectedSpeechResponse> {
+  return request<ConnectedSpeechResponse>(`/api/pronunciation/connected-speech?difficulty=${difficulty}`);
+}
+
+export function evaluateConnectedSpeech(phrase: string, pattern_type: string, transcript: string): Promise<ConnectedSpeechEvaluateResponse> {
+  return request<ConnectedSpeechEvaluateResponse>('/api/pronunciation/connected-speech/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phrase, pattern_type, transcript }),
+  });
+}
+
+// ── Quick Conversation Repair ────────────────────────────────────
+
+export interface ConversationRepairPromptResponse {
+  situation: string;
+  speaker_statement: string;
+  confusion_point: string;
+  repair_type: string;
+  difficulty: string;
+}
+
+export interface ConversationRepairEvaluateResponse {
+  strategy_score: number;
+  politeness_score: number;
+  grammar_score: number;
+  overall_score: number;
+  feedback: string;
+  model_repair: string;
+}
+
+export function getConversationRepair(difficulty: string = 'intermediate'): Promise<ConversationRepairPromptResponse> {
+  return request<ConversationRepairPromptResponse>(`/api/pronunciation/conversation-repair?difficulty=${difficulty}`);
+}
+
+export function evaluateConversationRepair(situation: string, speaker_statement: string, confusion_point: string, repair_type: string, transcript: string): Promise<ConversationRepairEvaluateResponse> {
+  return request<ConversationRepairEvaluateResponse>('/api/pronunciation/conversation-repair/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ situation, speaker_statement, confusion_point, repair_type, transcript }),
+  });
+}

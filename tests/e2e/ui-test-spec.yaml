@@ -3526,3 +3526,86 @@ pages:
         type: functional
         priority: medium
         added_in: 599
+
+  quick_practice_connected_speech:
+    path: /
+    tests:
+      - id: qp-connected-speech-001
+        target: Connected Speech card renders in Speaking tab
+        action: Navigate to home page and select Speaking tab in Quick Practice Hub, scroll to Connected Speech card
+        expect: Card with "Connected Speech" heading and Link2 icon is visible
+        type: functional
+        priority: high
+        added_in: 600
+
+      - id: qp-connected-speech-002
+        target: Pattern type badge is displayed with correct emoji
+        action: Load a connected speech phrase and observe the pattern badge
+        expect: A color-coded badge shows one of 🔗 Linking, 🔽 Reduction, ✂️ Elision, or 🔄 Assimilation
+        type: visual
+        priority: medium
+        added_in: 600
+
+      - id: qp-connected-speech-003
+        target: Listen button plays TTS and transitions to annotate phase
+        action: Click the "Listen" button on the Connected Speech card
+        expect: TTS plays the phrase, button shows "Playing…", then formal/natural pronunciations appear side-by-side
+        type: functional
+        priority: high
+        added_in: 600
+
+      - id: qp-connected-speech-004
+        target: Formal vs Natural pronunciation shown side-by-side in annotate phase
+        action: After listening, observe the pronunciation display
+        expect: Two columns show "Formal" and "Natural" pronunciation annotations
+        type: visual
+        priority: medium
+        added_in: 600
+
+      - id: qp-connected-speech-005
+        target: Speak button starts recording in annotate phase
+        action: Click "Speak" button after listening to the phrase
+        expect: Recording starts, Stop button appears, live transcript is shown
+        type: functional
+        priority: high
+        added_in: 600
+
+      - id: qp-connected-speech-006
+        target: Stop recording evaluates and shows scores
+        action: Click "Stop" button after recording speech
+        expect: Card transitions to done phase showing naturalness, accuracy, rhythm, and overall scores
+        type: functional
+        priority: high
+        added_in: 600
+
+      - id: qp-connected-speech-007
+        target: Pronunciation tip is displayed in done phase
+        action: Complete a connected speech evaluation
+        expect: A tip box with 💡 icon and actionable pronunciation advice is visible
+        type: functional
+        priority: medium
+        added_in: 600
+
+      - id: qp-connected-speech-008
+        target: Try Again button resets to annotate phase
+        action: Click "Try Again" button in done phase
+        expect: Card resets to annotate phase with formal/natural display, ready for re-recording
+        type: functional
+        priority: medium
+        added_in: 600
+
+      - id: qp-connected-speech-009
+        target: New Phrase button loads a fresh phrase
+        action: Click "New Phrase" button
+        expect: Card resets to idle phase and a new phrase with possibly different pattern type loads
+        type: functional
+        priority: medium
+        added_in: 600
+
+      - id: qp-connected-speech-010
+        target: Difficulty change triggers new phrase
+        action: Change difficulty while connected speech card is visible
+        expect: A new phrase loads matching the selected difficulty
+        type: functional
+        priority: medium
+        added_in: 600
