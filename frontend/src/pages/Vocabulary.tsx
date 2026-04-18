@@ -11,6 +11,7 @@ import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
 import VocabSpellingBee from '../components/VocabSpellingBee';
 import InlineErrorBanner from '../components/InlineErrorBanner';
+import WordFamilyPanel from '../components/WordFamilyPanel';
 
 const TOPIC_EMOJIS: Record<string, string> = {
   hotel_checkin: '🏨',
@@ -38,6 +39,7 @@ export default function Vocabulary() {
   const [etymologyMap, setEtymologyMap] = useState<Record<number, EtymologyInfo | 'loading'>>({});
   const [expandedEtymology, setExpandedEtymology] = useState<number | null>(null);
   const [inlineError, setInlineError] = useState<string | null>(null);
+  const [wordFamilyTarget, setWordFamilyTarget] = useState<{ wordId: number; word: string } | null>(null);
 
   // Drill mode state
   const [drillWords, setDrillWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -744,6 +746,7 @@ export default function Vocabulary() {
                   cursor: 'pointer',
                   background: answers[i] ? 'var(--success-bg)' : 'var(--danger-bg)',
                   color: answers[i] ? 'var(--success-text-vivid)' : 'var(--danger-text-vivid)',
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}
                 onClick={() => {
                   if (expandedEtymology === wordId) {
@@ -761,6 +764,18 @@ export default function Vocabulary() {
                 title="Click for word origin"
               >
                 {answers[i] ? '✓' : '✗'} {displayWord} 📜
+                <button
+                  onClick={(e) => { e.stopPropagation(); setWordFamilyTarget({ wordId, word: displayWord }); }}
+                  title="Explore word family"
+                  aria-label={`Word family for ${displayWord}`}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '0 2px', fontSize: 14, lineHeight: 1,
+                    color: 'inherit',
+                  }}
+                >
+                  🔤
+                </button>
               </span>
               );
             })}
@@ -790,6 +805,14 @@ export default function Vocabulary() {
         <button className="btn btn-primary" onClick={() => { setPhase('select'); setIsOfflineMode(false); }} style={{ marginTop: 16 }}>
           Try Another Topic
         </button>
+
+        {wordFamilyTarget && (
+          <WordFamilyPanel
+            word={wordFamilyTarget.word}
+            wordId={wordFamilyTarget.wordId}
+            onClose={() => setWordFamilyTarget(null)}
+          />
+        )}
       </div>
     );
   }

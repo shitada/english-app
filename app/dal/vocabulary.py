@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json as _json
 import random
 import re
 from datetime import datetime, timedelta, timezone
@@ -1159,3 +1160,29 @@ async def get_vocabulary_usage_analysis(db: aiosqlite.Connection) -> dict[str, A
             "most_used_word": most_used_word,
         },
     }
+
+
+async def get_word_family(db: aiosqlite.Connection, word_id: int) -> tuple[str | None, dict | None]:
+    """Get word text and cached word family data. Returns (word, family_dict) or (None, None)."""
+    rows = await db.execute_fetchall(
+        "SELECT word, word_family_json FROM vocabulary_words WHERE id = ?", (word_id,)
+    )
+    if not rows:
+        return None, None
+    word = rows[0]["word"]
+    raw = rows[0]["word_family_json"]
+    if raw:
+        try:
+            return word, _json.loads(raw)
+        except Exception:
+            pass
+    return word, None
+
+
+async def save_word_family(db: aiosqlite.Connection, word_id: int, family_data: dict) -> None:
+    """Cache word family JSON for a word."""
+    await db.execute(
+        "UPDATE vocabulary_words SET word_family_json = ? WHERE id = ?",
+        (_json.dumps(family_data), word_id),
+    )
+    await db.commit()

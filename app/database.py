@@ -357,6 +357,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
         "add index on streak_freezes freeze_date",
         "CREATE INDEX IF NOT EXISTS idx_streak_freezes_date ON streak_freezes(freeze_date)",
     ),
+    (
+        "add word_family_json column to vocabulary_words",
+        "ALTER TABLE vocabulary_words ADD COLUMN word_family_json TEXT",
+    ),
 ]
 
 

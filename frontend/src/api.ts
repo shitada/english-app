@@ -1295,6 +1295,24 @@ export async function getWordEtymology(wordId: number): Promise<EtymologyRespons
   return request<EtymologyResponse>(`/api/vocabulary/${wordId}/etymology`);
 }
 
+// Word Family
+export interface WordFamilyForm {
+  part_of_speech: string;
+  form: string;
+  example_sentence: string;
+  pronunciation_tip: string;
+}
+
+export interface WordFamilyResponse {
+  word_id: number;
+  word: string;
+  forms: WordFamilyForm[];
+}
+
+export async function getWordFamily(wordId: number): Promise<WordFamilyResponse> {
+  return request<WordFamilyResponse>(`/api/vocabulary/${wordId}/word-family`);
+}
+
 // ── Session Averages ────────────────────────────────────
 
 export interface SessionAveragesResponse {

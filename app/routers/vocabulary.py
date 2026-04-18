@@ -910,6 +910,71 @@ async def get_word_etymology(
     return {"word_id": word_id, "word": word_text, "etymology": result}
 
 
+# ── Word Family Explorer ─────────────────────────────────────────────────────
+
+class WordFamilyForm(BaseModel):
+    part_of_speech: str
+    form: str
+    example_sentence: str
+    pronunciation_tip: str
+
+
+class WordFamilyResponse(BaseModel):
+    word_id: int
+    word: str
+    forms: list[WordFamilyForm]
+
+
+@router.get("/{word_id}/word-family", response_model=WordFamilyResponse)
+async def get_word_family(
+    word_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Get all word forms (noun, verb, adjective, adverb), generating via LLM if not cached."""
+    import json as _json
+
+    word_text, cached = await vocab_dal.get_word_family(db, word_id)
+    if word_text is None:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    if cached:
+        forms = cached.get("forms") or []
+        return {"word_id": word_id, "word": word_text, "forms": forms}
+
+    copilot = get_copilot_service()
+    user_prompt = (
+        f"Generate all word forms (noun, verb, adjective, adverb) for the word '{word_text}'. "
+        'Return JSON: {"forms": [{"part_of_speech": "noun|verb|adjective|adverb", '
+        '"form": "the word form", "example_sentence": "a short example", '
+        '"pronunciation_tip": "a brief tip"}]}'
+    )
+
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary expert. Return ONLY valid JSON, no markdown.",
+                user_prompt,
+            ),
+            context="word_family",
+        )
+    except Exception:
+        result = {
+            "forms": [
+                {
+                    "part_of_speech": "unknown",
+                    "form": word_text,
+                    "example_sentence": "Information unavailable.",
+                    "pronunciation_tip": "",
+                }
+            ]
+        }
+
+    forms = result.get("forms") or []
+    await vocab_dal.save_word_family(db, word_id, {"forms": forms})
+    return {"word_id": word_id, "word": word_text, "forms": forms}
+
+
 class EvaluateSentenceUseRequest(BaseModel):
     word: str = Field(min_length=1, max_length=100)
     meaning: str = Field(min_length=1, max_length=500)

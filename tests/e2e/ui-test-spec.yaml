@@ -1186,6 +1186,38 @@ pages:
         priority: medium
         added_in: 565
 
+      - id: vocab-029
+        target: Word Family button appears in quiz results
+        action: complete a vocabulary quiz, snapshot result word tags
+        expect: Each word tag contains a 🔤 button with aria-label "Word family for <word>"
+        type: functional
+        priority: high
+        added_in: 571
+
+      - id: vocab-030
+        target: Word Family panel opens on button click
+        action: complete a quiz, click the 🔤 button on a word tag
+        expect: A modal dialog with role="dialog" opens showing "Word Family" heading and word forms with POS badges
+        type: functional
+        priority: high
+        added_in: 571
+
+      - id: vocab-031
+        target: Word Family panel close button works
+        action: open the word family panel, click the X close button
+        expect: The modal dialog is removed from the DOM
+        type: functional
+        priority: medium
+        added_in: 571
+
+      - id: vocab-032
+        target: Word Family mini quiz starts
+        action: open word family panel with 2+ forms, click "Mini Quiz" button
+        expect: Quiz interface appears with "Which form is the <POS>?" prompt and clickable form buttons
+        type: functional
+        priority: medium
+        added_in: 571
+
   dashboard:
     path: /dashboard
     tests:
