@@ -15,6 +15,8 @@ import { RephraseChallenge } from './RephraseChallenge';
 import { SpokenRetelling } from './SpokenRetelling';
 import { ExpressItBetter } from './ExpressItBetter';
 import { ShareCard } from './ShareCard';
+import { NextStepsCard } from './NextStepsCard';
+import type { NextStepsData } from './NextStepsCard';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -853,6 +855,27 @@ export function ConversationSummary({
           )}
         </div>
       )}
+
+      {/* Personalized Next Steps */}
+      {summary.performance && (() => {
+        const avgRespTime = (responseTimes ?? []).length > 0
+          ? responseTimes!.reduce((a, b) => a + b, 0) / responseTimes!.length
+          : undefined;
+        const nextStepsData: NextStepsData = {
+          grammarAccuracy: summary.performance.grammar_checked > 0
+            ? summary.performance.grammar_accuracy_rate
+            : undefined,
+          fillerCount: fillerCount,
+          avgResponseTime: avgRespTime,
+          avgWordsPerMessage: summary.performance.avg_words_per_message > 0
+            ? summary.performance.avg_words_per_message
+            : undefined,
+          vocabDiversity: summary.performance.vocabulary_diversity > 0
+            ? summary.performance.vocabulary_diversity
+            : undefined,
+        };
+        return <NextStepsCard data={nextStepsData} />;
+      })()}
 
       {/* Corrections Review */}
       {(() => {

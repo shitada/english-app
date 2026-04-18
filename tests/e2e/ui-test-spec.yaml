@@ -3016,3 +3016,27 @@ pages:
         type: functional
         priority: high
         added_in: 587
+
+      - id: conv-123
+        target: Next Steps card renders on conversation summary
+        action: Complete a conversation with grammar accuracy below 70%, then check summary
+        expect: Element with data-testid="next-steps-card" is visible with heading "🚀 What to Practice Next"
+        type: functional
+        priority: high
+        added_in: 588
+
+      - id: conv-124
+        target: Next Steps card shows up to 3 recommendations with links
+        action: Complete a conversation with weak grammar, many fillers, and slow response times
+        expect: Up to 3 elements with data-testid="next-step-0", "next-step-1", "next-step-2" are visible, each with a Link button
+        type: functional
+        priority: high
+        added_in: 588
+
+      - id: conv-125
+        target: Next Steps card shows congratulatory message when all metrics are good
+        action: Complete a conversation with grammar ≥70%, fillers ≤3, response <15s, words/msg ≥6, vocab ≥40%
+        expect: The next-steps-card shows "Level up! Try Advanced difficulty" and "Explore a new topic" recommendations
+        type: functional
+        priority: medium
+        added_in: 588
