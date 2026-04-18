@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LazySection } from '../hooks/useLazyLoad';
 import QuickShadowCard from './QuickShadowCard';
 import QuickDictationCard from './QuickDictationCard';
 import QuickSpeakCard from './QuickSpeakCard';
@@ -172,60 +173,60 @@ export default function QuickPracticeHub() {
       <div role="tabpanel" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {activeTab === 'speaking' && (
           <>
-            <QuickSpeakCard />
-            <QuickShadowCard />
-            <QuickOpinionCard />
-            <QuickStoryCard />
-            <QuickFollowUpCard />
-            <QuickIdiomCard />
-            <QuickQuestionCard />
-            <QuickExplainCard />
-            <QuickRolePlayCard />
-            <QuickTongueTwisterCard />
-            <QuickRapidFireCard />
-            <QuickSentenceStressCard />
-            <QuickRegisterSwitchCard />
-            <QuickDebateCard />
-            <QuickSceneDescriptionCard />
-            <QuickFillerReductionCard />
-            <QuickEmotionResponseCard />
-            <QuickDialogueGapCard />
+            <LazySection height={180}><QuickSpeakCard /></LazySection>
+            <LazySection height={180}><QuickShadowCard /></LazySection>
+            <LazySection height={180}><QuickOpinionCard /></LazySection>
+            <LazySection height={180}><QuickStoryCard /></LazySection>
+            <LazySection height={180}><QuickFollowUpCard /></LazySection>
+            <LazySection height={180}><QuickIdiomCard /></LazySection>
+            <LazySection height={180}><QuickQuestionCard /></LazySection>
+            <LazySection height={180}><QuickExplainCard /></LazySection>
+            <LazySection height={180}><QuickRolePlayCard /></LazySection>
+            <LazySection height={180}><QuickTongueTwisterCard /></LazySection>
+            <LazySection height={180}><QuickRapidFireCard /></LazySection>
+            <LazySection height={180}><QuickSentenceStressCard /></LazySection>
+            <LazySection height={180}><QuickRegisterSwitchCard /></LazySection>
+            <LazySection height={180}><QuickDebateCard /></LazySection>
+            <LazySection height={180}><QuickSceneDescriptionCard /></LazySection>
+            <LazySection height={180}><QuickFillerReductionCard /></LazySection>
+            <LazySection height={180}><QuickEmotionResponseCard /></LazySection>
+            <LazySection height={180}><QuickDialogueGapCard /></LazySection>
           </>
         )}
         {activeTab === 'listening' && (
           <>
-            <QuickDictationCard />
-            <QuickListenRespondCard />
-            <QuickListenParaphraseCard />
-            <QuickMinimalPairsCard />
-            <QuickListeningCompCard />
-            <QuickSpotErrorCard />
-            <QuickPredictNextCard />
-            <QuickDictoglossCard />
+            <LazySection height={180}><QuickDictationCard /></LazySection>
+            <LazySection height={180}><QuickListenRespondCard /></LazySection>
+            <LazySection height={180}><QuickListenParaphraseCard /></LazySection>
+            <LazySection height={180}><QuickMinimalPairsCard /></LazySection>
+            <LazySection height={180}><QuickListeningCompCard /></LazySection>
+            <LazySection height={180}><QuickSpotErrorCard /></LazySection>
+            <LazySection height={180}><QuickPredictNextCard /></LazySection>
+            <LazySection height={180}><QuickDictoglossCard /></LazySection>
           </>
         )}
         {activeTab === 'grammar' && (
           <>
-            <QuickGrammarCard />
-            <QuickRephraseCard />
-            <QuickTransformCard />
-            <QuickConnectorDrillCard />
-            <QuickPhrasalVerbCard />
-            <QuickSentenceScrambleCard />
+            <LazySection height={180}><QuickGrammarCard /></LazySection>
+            <LazySection height={180}><QuickRephraseCard /></LazySection>
+            <LazySection height={180}><QuickTransformCard /></LazySection>
+            <LazySection height={180}><QuickConnectorDrillCard /></LazySection>
+            <LazySection height={180}><QuickPhrasalVerbCard /></LazySection>
+            <LazySection height={180}><QuickSentenceScrambleCard /></LazySection>
           </>
         )}
         {activeTab === 'vocabulary' && (
           <>
-            <QuickVocabSentenceCard />
-            <QuickVocabRecallCard />
-            <QuickWordAssociationCard />
-            <QuickCollocationCard />
+            <LazySection height={180}><QuickVocabSentenceCard /></LazySection>
+            <LazySection height={180}><QuickVocabRecallCard /></LazySection>
+            <LazySection height={180}><QuickWordAssociationCard /></LazySection>
+            <LazySection height={180}><QuickCollocationCard /></LazySection>
           </>
         )}
         {activeTab === 'writing' && (
           <>
-            <QuickWriteCard />
-            <QuickReadingCard />
+            <LazySection height={180}><QuickWriteCard /></LazySection>
+            <LazySection height={180}><QuickReadingCard /></LazySection>
           </>
         )}
       </div>

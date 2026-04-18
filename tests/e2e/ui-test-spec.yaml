@@ -2421,6 +2421,30 @@ pages:
         priority: low
         added_in: 575
 
+      - id: quick-practice-hub-113
+        target: Below-fold Quick Practice cards show skeleton placeholders
+        action: Navigate to home page Speaking tab in Quick Practice Hub without scrolling
+        expect: Cards below the visible viewport render as skeleton-card placeholders (height 180px) instead of full card components; only the first 2-3 cards are fully mounted
+        type: performance
+        priority: high
+        added_in: 582
+
+      - id: quick-practice-hub-114
+        target: Quick Practice cards lazy-load on scroll
+        action: Scroll down in the Speaking tab of Quick Practice Hub until a skeleton placeholder enters the viewport
+        expect: Skeleton placeholder is replaced by the actual card component content; the card fetches its data only after becoming visible
+        type: performance
+        priority: high
+        added_in: 582
+
+      - id: quick-practice-hub-115
+        target: Lazy-loaded Quick Practice cards stay mounted after scrolling away
+        action: Scroll to load a below-fold card in Quick Practice Hub, then scroll back up
+        expect: The previously loaded card remains mounted (latching behavior) and does not revert to a skeleton placeholder
+        type: functional
+        priority: medium
+        added_in: 582
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase
