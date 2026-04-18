@@ -28,5 +28,6 @@ export { ExpressItBetter } from './ExpressItBetter';
 export { ListenModeCloze } from './ListenModeCloze';
 export { LiveFluencyRing } from './LiveFluencyRing';
 export { GrammarStreakBadge } from './GrammarStreakBadge';
+export { ConversationMemory } from './ConversationMemory';
 export { NextStepsCard, generateRecommendations } from './NextStepsCard';
 export type { NextStepsData, Recommendation } from './NextStepsCard';

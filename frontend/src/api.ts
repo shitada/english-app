@@ -168,6 +168,12 @@ export const api = {
   getExpressBetter: (conversationId: number) =>
     request<ExpressBetterResponse>(`/api/conversation/${conversationId}/express-better`, { method: 'POST' }),
 
+  getConversationMemory: () =>
+    request<{ facts: string[] }>('/api/conversation/memory'),
+
+  clearConversationMemory: () =>
+    request<{ cleared: boolean }>('/api/conversation/memory', { method: 'DELETE' }),
+
   // Pronunciation
   getPronunciationSentences: (difficulty?: 'beginner' | 'intermediate' | 'advanced') => {
     const qs = difficulty ? `?difficulty=${difficulty}` : '';

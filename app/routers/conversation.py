@@ -117,6 +117,31 @@ class ConversationListResponse(BaseModel):
     has_more: bool
 
 
+CONVERSATION_MEMORY_KEY = "conversation_memory"
+
+
+@router.get("/memory")
+async def get_conversation_memory(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Load stored personal facts the AI remembers about the user."""
+    raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+    if not raw:
+        return {"facts": []}
+    try:
+        facts = json.loads(raw)
+        if not isinstance(facts, list):
+            return {"facts": []}
+        return {"facts": [str(f) for f in facts if f]}
+    except (json.JSONDecodeError, TypeError):
+        return {"facts": []}
+
+
+@router.delete("/memory")
+async def clear_conversation_memory(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Clear all stored personal facts."""
+    deleted = await pref_dal.delete_preference(db, CONVERSATION_MEMORY_KEY)
+    return {"cleared": deleted}
+
+
 @router.get("/topics")
 async def list_topics(db: aiosqlite.Connection = Depends(get_db_session)):
     config_topics = get_conversation_topics()
@@ -298,6 +323,21 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty] + PERSONALITY_INSTRUCTIONS[req.personality]
+
+    # Inject stored memory facts for personalised conversations
+    memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+    if memory_raw:
+        try:
+            memory_facts: list[str] = json.loads(memory_raw)
+            if isinstance(memory_facts, list) and memory_facts:
+                system += (
+                    "\n\nThings you know about this student from past conversations: "
+                    + "; ".join(str(f) for f in memory_facts[:10])
+                    + ". Use these naturally when relevant — don't list them explicitly."
+                )
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     try:
         opening = await safe_llm_call(
             lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
@@ -477,6 +517,21 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     personality = conv.get("personality") or "patient_teacher"
     if personality in PERSONALITY_INSTRUCTIONS:
         system += PERSONALITY_INSTRUCTIONS[personality]
+
+    # Inject stored memory facts for continuity
+    memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+    if memory_raw:
+        try:
+            memory_facts_msg: list[str] = json.loads(memory_raw)
+            if isinstance(memory_facts_msg, list) and memory_facts_msg:
+                system += (
+                    "\n\nThings you know about this student from past conversations: "
+                    + "; ".join(str(f) for f in memory_facts_msg[:10])
+                    + ". Use these naturally when relevant — don't list them explicitly."
+                )
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."
 
     # Run grammar check and conversation response in PARALLEL
@@ -566,6 +621,47 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
         raise HTTPException(status_code=409, detail="Conversation was already ended")
+
+    # Extract personal facts from the conversation for cross-session memory (non-fatal)
+    try:
+        if not req.skip_summary:
+            history_text = await conv_dal.format_history_text(db, req.conversation_id)
+            copilot_svc = get_copilot_service()
+            extract_prompt = (
+                f"From this English practice conversation, extract 2-3 personal facts about "
+                f"the student (NOT the AI). Facts like: their job, hobbies, family, travel "
+                f"plans, preferences, hometown, etc. Only include facts the student themselves "
+                f"stated. If no personal facts were shared, return an empty array.\n\n"
+                f"Conversation:\n{history_text}\n\n"
+                f'Return JSON: {{"facts": ["fact1", "fact2"]}}'
+            )
+            extracted = await copilot_svc.ask_json(
+                "You are a fact extractor. Return ONLY valid JSON.",
+                extract_prompt,
+            )
+            new_facts = extracted.get("facts", [])
+            if isinstance(new_facts, list) and new_facts:
+                new_facts = [str(f).strip() for f in new_facts if f and str(f).strip()][:3]
+                # Merge with existing facts, keeping max 10
+                existing_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+                existing_facts: list[str] = []
+                if existing_raw:
+                    try:
+                        existing_facts = json.loads(existing_raw)
+                        if not isinstance(existing_facts, list):
+                            existing_facts = []
+                    except (json.JSONDecodeError, TypeError):
+                        existing_facts = []
+                # Deduplicate (case-insensitive) and cap at 10
+                seen_lower = {f.lower() for f in existing_facts}
+                for fact in new_facts:
+                    if fact.lower() not in seen_lower:
+                        existing_facts.append(fact)
+                        seen_lower.add(fact.lower())
+                merged = existing_facts[-10:]  # keep most recent 10
+                await pref_dal.set_preference(db, CONVERSATION_MEMORY_KEY, json.dumps(merged))
+    except Exception as e:
+        logger.warning("Memory extraction failed (non-fatal): %s", e)
 
     return {"summary": summary}
 

@@ -3113,6 +3113,30 @@ pages:
         priority: high
         added_in: 592
 
+      - id: conv-128
+        target: Conversation Memory panel renders in select phase when facts exist
+        action: Check for element with data-testid="conversation-memory" in select phase
+        expect: Panel with "🧠 AI remembers about you..." header is visible
+        type: functional
+        priority: medium
+        added_in: 597
+
+      - id: conv-129
+        target: Conversation Memory panel toggles expand/collapse
+        action: Click the memory toggle button (data-testid="conversation-memory-toggle")
+        expect: Facts list appears when expanded, hides when collapsed; chevron rotates
+        type: functional
+        priority: medium
+        added_in: 597
+
+      - id: conv-130
+        target: Conversation Memory clear button removes facts
+        action: Expand memory panel, click "Clear Memory" button (data-testid="conversation-memory-clear")
+        expect: Facts are removed; panel disappears after clearing
+        type: functional
+        priority: medium
+        added_in: 597
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

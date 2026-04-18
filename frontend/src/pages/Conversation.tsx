@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -904,6 +904,7 @@ export default function Conversation() {
                 prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
               )}
             />
+            <ConversationMemory />
             {topicsLoading ? (
               <div className="topic-grid">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
