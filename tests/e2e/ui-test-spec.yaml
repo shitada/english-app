@@ -3289,3 +3289,52 @@ pages:
         type: functional
         priority: medium
         added_in: 595
+
+      # Quick Instruction Giver card
+      - id: qp-instruction-001
+        target: Instruction Giver card renders in speaking tab
+        action: Navigate to Quick Practice speaking tab and scroll to Instruction Giver card
+        expect: Card displays with ClipboardList icon, title "Instruction Giver", task text, hint, expected steps count, and "Give Instructions (30s)" button
+        type: presence
+        priority: high
+        added_in: 596
+
+      - id: qp-instruction-002
+        target: Give Instructions button starts recording
+        action: Click "Give Instructions (30s)" button in idle phase
+        expect: Phase transitions to speaking with Mic icon pulsing, 30s countdown timer, transcript display, and "Done" button
+        type: functional
+        priority: high
+        added_in: 596
+
+      - id: qp-instruction-003
+        target: Done button shows evaluation results
+        action: Click "Done" button during speaking phase
+        expect: Phase transitions to evaluating, then shows scores (Sequencing, Clarity, Complete, Grammar, Overall) and feedback
+        type: functional
+        priority: high
+        added_in: 596
+
+      - id: qp-instruction-004
+        target: Model Instructions shown in results
+        action: Complete an instruction giver exercise
+        expect: Results phase shows "Model Instructions" section with step-by-step example text
+        type: functional
+        priority: medium
+        added_in: 596
+
+      - id: qp-instruction-005
+        target: Try Again resets to idle with same task
+        action: Click "Try Again" button in done phase
+        expect: Card resets to idle phase with the same task displayed
+        type: functional
+        priority: medium
+        added_in: 596
+
+      - id: qp-instruction-006
+        target: New Task button loads a new task
+        action: Click "New Task" button in done phase
+        expect: Card resets to idle phase with a new task and hint
+        type: functional
+        priority: medium
+        added_in: 596

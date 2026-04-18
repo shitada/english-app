@@ -5477,3 +5477,113 @@ async def evaluate_summarize_respond(
         "model_summary": str(result.get("model_summary", "")),
         "model_response": str(result.get("model_response", "")),
     }
+
+
+# ── Quick Instruction Giver Speaking Drill ───────────────────────
+
+
+class InstructionPromptResponse(BaseModel):
+    task: str
+    hint: str
+    expected_steps: int
+    difficulty: str
+
+
+@router.get("/instruction-prompt", response_model=InstructionPromptResponse)
+async def get_instruction_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a random instructional task for step-by-step speaking practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        "Generate a random instructional task for English speaking practice. "
+        "The user must give step-by-step instructions. "
+        f"Difficulty: {difficulty}.\n"
+        "Return JSON with:\n"
+        "- task (string): the instructional task, e.g. 'Explain how to make a cup of tea'\n"
+        "- hint (string): a short hint to help structure the instructions (1 sentence)\n"
+        "- expected_steps (integer): the expected number of steps (3-8)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in procedural and instructional language. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="instruction_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Instruction prompt generation failed")
+
+    raw_steps = result.get("expected_steps", 5)
+    try:
+        expected_steps = max(2, min(10, int(raw_steps)))
+    except (TypeError, ValueError):
+        expected_steps = 5
+
+    return {
+        "task": str(result.get("task", "Explain how to make a cup of tea.")),
+        "hint": str(result.get("hint", "Think about the order of actions from start to finish.")),
+        "expected_steps": expected_steps,
+        "difficulty": difficulty,
+    }
+
+
+class InstructionEvaluateRequest(BaseModel):
+    task: str = Field(min_length=1, max_length=2000)
+    transcript: str = Field(min_length=1, max_length=5000)
+    duration_seconds: float = Field(ge=1, le=120)
+
+
+class InstructionEvaluateResponse(BaseModel):
+    sequencing_score: float
+    clarity_score: float
+    completeness_score: float
+    grammar_score: float
+    overall_score: float
+    model_instructions: str
+    feedback: str
+
+
+@router.post("/instruction-prompt/evaluate", response_model=InstructionEvaluateResponse)
+async def evaluate_instruction_prompt(
+    body: InstructionEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's step-by-step instructional speech."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Task: \"{body.task}\"\n\n"
+        f"User's spoken instructions ({body.duration_seconds:.0f}s):\n"
+        f"\"{body.transcript}\"\n\n"
+        "The user was asked to give clear step-by-step instructions for the task above.\n"
+        "Evaluate their attempt. Return JSON with:\n"
+        "- sequencing_score (1-10): are the steps in a logical order?\n"
+        "- clarity_score (1-10): how clear and understandable are the instructions?\n"
+        "- completeness_score (1-10): are all necessary steps included?\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- overall_score (1-10): overall quality of the instructions\n"
+        "- model_instructions (string): a well-crafted model set of step-by-step instructions for the same task\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in procedural and instructional language. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="instruction_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Instruction evaluation failed")
+
+    return {
+        "sequencing_score": clamp_score(result.get("sequencing_score", 5)),
+        "clarity_score": clamp_score(result.get("clarity_score", 5)),
+        "completeness_score": clamp_score(result.get("completeness_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "model_instructions": str(result.get("model_instructions", "")),
+        "feedback": str(result.get("feedback", "")),
+    }

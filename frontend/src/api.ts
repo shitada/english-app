@@ -3094,3 +3094,38 @@ export function evaluateSummarizeRespond(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Instruction Giver Speaking Drill ──────────────────────
+
+export interface InstructionPromptResponse {
+  task: string;
+  hint: string;
+  expected_steps: number;
+  difficulty: string;
+}
+
+export interface InstructionEvaluateResponse {
+  sequencing_score: number;
+  clarity_score: number;
+  completeness_score: number;
+  grammar_score: number;
+  overall_score: number;
+  model_instructions: string;
+  feedback: string;
+}
+
+export function getInstructionPrompt(difficulty: string = 'intermediate'): Promise<InstructionPromptResponse> {
+  return request<InstructionPromptResponse>(`/api/pronunciation/instruction-prompt?difficulty=${difficulty}`);
+}
+
+export function evaluateInstruction(data: {
+  task: string;
+  transcript: string;
+  duration_seconds: number;
+}): Promise<InstructionEvaluateResponse> {
+  return request<InstructionEvaluateResponse>('/api/pronunciation/instruction-prompt/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
