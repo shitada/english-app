@@ -2874,6 +2874,37 @@ export function getFillerDrillPrompt(difficulty: string = 'intermediate'): Promi
   return request<FillerDrillPromptResponse>(`/api/pronunciation/filler-drill-prompt?difficulty=${difficulty}`);
 }
 
+// ── Quick Emotion Response ──────────────────────────────────────
+
+export interface EmotionResponsePromptResponse {
+  situation: string;
+  expected_emotion: string;
+  hint_phrases: string[];
+  difficulty: string;
+}
+
+export interface EmotionResponseEvaluateResponse {
+  emotional_appropriateness_score: number;
+  expression_variety_score: number;
+  grammar_score: number;
+  overall_score: number;
+  feedback: string;
+  model_response: string;
+  useful_phrases: string[];
+}
+
+export function getEmotionResponse(difficulty: string = 'intermediate'): Promise<EmotionResponsePromptResponse> {
+  return request<EmotionResponsePromptResponse>(`/api/pronunciation/emotion-response?difficulty=${difficulty}`);
+}
+
+export function evaluateEmotionResponse(situation: string, expected_emotion: string, transcript: string): Promise<EmotionResponseEvaluateResponse> {
+  return request<EmotionResponseEvaluateResponse>('/api/pronunciation/emotion-response/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ situation, expected_emotion, transcript }),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

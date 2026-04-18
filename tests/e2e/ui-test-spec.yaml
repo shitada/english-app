@@ -2784,3 +2784,27 @@ pages:
         type: functional
         priority: low
         added_in: 574
+
+      - id: conv-099
+        target: Quick Emotion Response card renders in Speaking tab
+        action: Navigate to home page, open Speaking tab in Quick Practice Hub, scroll to Emotion Response card
+        expect: QuickEmotionResponseCard shows a social situation, expected emotion badge, hint phrases, and a "Respond (15s)" button
+        type: functional
+        priority: medium
+        added_in: 576
+
+      - id: conv-100
+        target: Quick Emotion Response card speaking and evaluation flow
+        action: Click "Respond (15s)" button, speak a response, click Done
+        expect: Card transitions through speaking phase (with timer and mic animation) to evaluating then done phase showing Emotion, Variety, Grammar, Overall scores, feedback, model response, and useful phrases
+        type: functional
+        priority: medium
+        added_in: 576
+
+      - id: conv-101
+        target: Quick Emotion Response card New Scenario button
+        action: Complete an emotion response evaluation, click "New Scenario" button
+        expect: Card resets to idle phase with a new social situation loaded
+        type: functional
+        priority: low
+        added_in: 576

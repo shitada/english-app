@@ -4978,3 +4978,112 @@ async def get_filler_drill_prompt(
         "tip": str(result.get("tip", "Pause silently instead of saying 'um' or 'uh' — brief pauses sound confident.")),
         "difficulty": difficulty,
     }
+
+
+# ── Quick Emotion Response ──────────────────────────────────────
+
+
+class EmotionResponsePromptResponse(BaseModel):
+    situation: str
+    expected_emotion: str
+    hint_phrases: list[str]
+    difficulty: str
+
+
+@router.get("/emotion-response", response_model=EmotionResponsePromptResponse)
+async def get_emotion_response(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a social situation requiring an emotional response."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a social situation for a {difficulty}-level English learner that requires "
+        "an emotional response in conversation.\n"
+        "The situation should be realistic and require the speaker to express one of these emotions: "
+        "sympathy, excitement, congratulation, apology, surprise, or encouragement.\n"
+        "Return JSON with:\n"
+        "- situation (string): a brief description of the social situation (1-2 sentences)\n"
+        "- expected_emotion (string): one of sympathy, excitement, congratulation, apology, surprise, encouragement\n"
+        "- hint_phrases (array of 3-4 strings): useful English phrases for expressing this emotion naturally\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in social-emotional communication. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="emotion_response_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Emotion scenario generation failed")
+
+    valid_emotions = {"sympathy", "excitement", "congratulation", "apology", "surprise", "encouragement"}
+    raw_emotion = str(result.get("expected_emotion", "sympathy")).lower().strip()
+    expected_emotion = raw_emotion if raw_emotion in valid_emotions else "sympathy"
+
+    return {
+        "situation": str(result.get("situation", "Your colleague tells you their pet just passed away.")),
+        "expected_emotion": expected_emotion,
+        "hint_phrases": [str(p) for p in result.get("hint_phrases", ["I'm so sorry to hear that", "That must be really tough", "Is there anything I can do?"])[:5]],
+        "difficulty": difficulty,
+    }
+
+
+class EmotionResponseEvaluateRequest(BaseModel):
+    situation: str = Field(min_length=1, max_length=1000)
+    expected_emotion: str = Field(min_length=1, max_length=100)
+    transcript: str = Field(min_length=1, max_length=3000)
+
+
+class EmotionResponseEvaluateResponse(BaseModel):
+    emotional_appropriateness_score: float
+    expression_variety_score: float
+    grammar_score: float
+    overall_score: float
+    feedback: str
+    model_response: str
+    useful_phrases: list[str]
+
+
+@router.post("/emotion-response/evaluate", response_model=EmotionResponseEvaluateResponse)
+async def evaluate_emotion_response(
+    body: EmotionResponseEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's spoken emotional response to a social situation."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Social situation: \"{body.situation}\"\n"
+        f"Expected emotion: {body.expected_emotion}\n"
+        f"User's spoken response:\n\"{body.transcript}\"\n\n"
+        "Evaluate this emotional response. Return JSON with:\n"
+        "- emotional_appropriateness_score (1-10): did the tone match the expected emotion?\n"
+        "- expression_variety_score (1-10): did they use natural emotional phrases vs generic ones?\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- overall_score (1-10): overall quality of the emotional response\n"
+        "- feedback (string): encouraging feedback with specific tips (2-3 sentences)\n"
+        "- model_response (string): a native-like model response to the situation (2-3 sentences)\n"
+        "- useful_phrases (array of 3-4 strings): useful phrases for expressing this emotion category"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English speaking coach specializing in social-emotional communication and natural expression. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="emotion_response_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Emotion response evaluation failed")
+
+    return {
+        "emotional_appropriateness_score": clamp_score(result.get("emotional_appropriateness_score", 5)),
+        "expression_variety_score": clamp_score(result.get("expression_variety_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_response": str(result.get("model_response", "")),
+        "useful_phrases": [str(p) for p in result.get("useful_phrases", [])[:5]],
+    }
