@@ -512,11 +512,8 @@ export default function Conversation() {
     });
   };
 
-  const startConversation = async (topicId: string) => {
-    setLoading(true);
-    setStartError(null);
-    autoEndAttempted.current = false;
-    // Reset session-scoped state to prevent stale data leaking across sessions
+  // --- Session / conversation reset helpers ---
+  const resetSessionScopedState = () => {
     setFillerCount(0);
     setFillerDetails({});
     setCorrectionAttempts(0);
@@ -531,6 +528,28 @@ export default function Conversation() {
     setHintCount(0);
     setFailedMessage(null);
     setSendError(null);
+  };
+
+  const resetConversationState = () => {
+    setMessages([]);
+    setSummary(null);
+    setConversationId(null);
+    setQuizQuestions([]);
+    setQuizIndex(0);
+    setQuizAnswers([]);
+    setQuizRevealed(false);
+    setQuizFinished(false);
+    setQuizError('');
+    setResponseTimes([]);
+    setSessionGoals([]);
+    resetSessionScopedState();
+  };
+
+  const startConversation = async (topicId: string) => {
+    setLoading(true);
+    setStartError(null);
+    autoEndAttempted.current = false;
+    resetSessionScopedState();
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setCurrentTopicId(topicId);
@@ -1234,61 +1253,11 @@ export default function Conversation() {
   // Summary
   if (phase === 'summary' && summary) {
     const handleNewConversation = () => {
+      resetConversationState();
       setPhase('select');
-      setMessages([]);
-      setSummary(null);
-      setConversationId(null);
-      setQuizQuestions([]);
-      setQuizIndex(0);
-      setQuizAnswers([]);
-      setQuizRevealed(false);
-      setQuizFinished(false);
-      setQuizError('');
-      setResponseTimes([]);
-      setSessionGoals([]);
-      // Reset session-scoped state to prevent stale data leaking across sessions
-      setFillerCount(0);
-      setFillerDetails({});
-      setCorrectionAttempts(0);
-      setCorrectionSuccesses(0);
-      setErrorPatterns(new Map());
-      setListenCorrect(0);
-      setListenTotal(0);
-      setRevealedMessages(new Set());
-      setSavedChatPhrases(new Set());
-      setHintText(null);
-      setHintUsedThisTurn(false);
-      setHintCount(0);
-      setFailedMessage(null);
-      setSendError(null);
     };
     const handlePracticeAgain = () => {
-      setMessages([]);
-      setSummary(null);
-      setConversationId(null);
-      setQuizQuestions([]);
-      setQuizIndex(0);
-      setQuizAnswers([]);
-      setQuizRevealed(false);
-      setQuizFinished(false);
-      setQuizError('');
-      setResponseTimes([]);
-      setSessionGoals([]);
-      // Reset session-scoped state to prevent stale data leaking across sessions
-      setFillerCount(0);
-      setFillerDetails({});
-      setCorrectionAttempts(0);
-      setCorrectionSuccesses(0);
-      setErrorPatterns(new Map());
-      setListenCorrect(0);
-      setListenTotal(0);
-      setRevealedMessages(new Set());
-      setSavedChatPhrases(new Set());
-      setHintText(null);
-      setHintUsedThisTurn(false);
-      setHintCount(0);
-      setFailedMessage(null);
-      setSendError(null);
+      resetConversationState();
       startConversation(currentTopicId);
     };
     return (
