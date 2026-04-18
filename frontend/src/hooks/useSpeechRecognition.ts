@@ -48,7 +48,7 @@ export function useSpeechRecognition(
     typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
-  const start = useCallback(async () => {
+  const start = useCallback(() => {
     log('INFO', 'start() called. isSupported=' + isSupported);
 
     if (!isSupported) {
@@ -56,24 +56,6 @@ export function useSpeechRecognition(
       log('ERROR', msg);
       setError(msg);
       return;
-    }
-
-    // Check if mediaDevices is available (requires secure context)
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      log('WARN', 'navigator.mediaDevices not available, skipping permission request (non-secure context?)');
-    } else {
-      // Request microphone permission explicitly
-      try {
-        log('INFO', 'Requesting microphone permission via getUserMedia...');
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach((track) => track.stop());
-        log('INFO', 'Microphone permission granted.');
-      } catch (err: any) {
-        const msg = `Microphone access denied: ${err.message || err}`;
-        log('ERROR', msg);
-        setError(msg);
-        return;
-      }
     }
 
     // Stop any existing recognition
