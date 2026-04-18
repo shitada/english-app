@@ -2623,3 +2623,52 @@ pages:
         type: functional
         priority: medium
         added_in: 562
+
+      # --- Listen Mode Cloze (added in iteration 572) ---
+      - id: conv-091
+        target: Listen Mode cloze blanks appear for AI messages
+        action: Toggle Listen Mode ON, then send a message so AI replies; observe the AI message area
+        expect: AI message text shows with 2-3 blanks (____) and multiple-choice option chips below each blank instead of plain "Tap to reveal"
+        type: functional
+        priority: high
+        added_in: 572
+
+      - id: conv-092
+        target: Selecting correct option fills the blank with green feedback
+        action: Click the correct word chip for a blank in the Listen Mode cloze
+        expect: Blank is replaced with the word in green with a check-circle icon
+        type: functional
+        priority: high
+        added_in: 572
+
+      - id: conv-093
+        target: Selecting wrong option shows red feedback and correct answer
+        action: Click an incorrect word chip for a blank in the Listen Mode cloze
+        expect: Incorrect word shows in red with strikethrough plus the correct answer in green beside it
+        type: functional
+        priority: high
+        added_in: 572
+
+      - id: conv-094
+        target: Completing all blanks reveals the full highlighted message
+        action: Answer all blanks in the Listen Mode cloze for a message
+        expect: Full AI message text is revealed with HighlightedMessage rendering (key phrases, grammar notes); completion summary line appears
+        type: functional
+        priority: high
+        added_in: 572
+
+      - id: conv-095
+        target: Listening accuracy stats appear in the stats bar
+        action: Enable Listen Mode, complete one or more cloze exercises
+        expect: Stats bar shows "🎧 X/Y (Z%)" listening accuracy alongside the revealed count
+        type: functional
+        priority: medium
+        added_in: 572
+
+      - id: conv-096
+        target: Listen Mode cloze falls back for very short messages
+        action: Enable Listen Mode when AI sends a very short message with no blankable words
+        expect: A "Tap to reveal text" fallback is shown; clicking it reveals the message
+        type: functional
+        priority: medium
+        added_in: 572

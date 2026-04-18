@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -79,6 +79,8 @@ export default function Conversation() {
   const [speakWalkthrough, setSpeakWalkthrough] = useState(false);
   const [listenMode, setListenMode] = useState(false);
   const [revealedMessages, setRevealedMessages] = useState<Set<number>>(new Set());
+  const [listenCorrect, setListenCorrect] = useState(0);
+  const [listenTotal, setListenTotal] = useState(0);
   const [quizQuestions, setQuizQuestions] = useState<ConversationQuizQuestion[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>([]);
@@ -1391,7 +1393,16 @@ export default function Conversation() {
               })()}
               {listenMode && (() => {
                 const assistantCount = messages.filter((m) => m.role === 'assistant').length;
-                return assistantCount > 0 ? ` · 👁 ${revealedMessages.size}/${assistantCount} revealed` : '';
+                const listenAccuracy = listenTotal > 0 ? Math.round((listenCorrect / listenTotal) * 100) : null;
+                const listenColor = listenAccuracy !== null ? (listenAccuracy >= 80 ? 'var(--success, #22c55e)' : listenAccuracy >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)') : '';
+                return assistantCount > 0 ? (
+                  <>
+                    {` · 👁 ${revealedMessages.size}/${assistantCount} revealed`}
+                    {listenAccuracy !== null && (
+                      <> · <span title="Listening cloze accuracy">🎧 <strong style={{ color: listenColor }}>{listenCorrect}/{listenTotal}</strong> ({listenAccuracy}%)</span></>
+                    )}
+                  </>
+                ) : '';
               })()}
               {fillerCount > 0 && (
                 <> · <FillerWordBadge fillerCount={fillerCount} fillerDetails={fillerDetails} /></>
@@ -1461,12 +1472,16 @@ export default function Conversation() {
             <div className={`message message-${msg.role}`}>
               {msg.role === 'assistant' ? (
                 listenMode && !revealedMessages.has(i) ? (
-                  <div
-                    onClick={() => setRevealedMessages((prev) => new Set(prev).add(i))}
-                    style={{ padding: '12px 16px', background: 'var(--bg-secondary, #f0f0f0)', borderRadius: 8, cursor: 'pointer', textAlign: 'center', color: 'var(--text-secondary)', userSelect: 'none' }}
-                  >
-                    🎧 Tap to reveal text
-                  </div>
+                  <ListenModeCloze
+                    content={msg.content}
+                    onComplete={(correct, total) => {
+                      setRevealedMessages((prev) => new Set(prev).add(i));
+                      if (total > 0) {
+                        setListenCorrect((c) => c + correct);
+                        setListenTotal((t) => t + total);
+                      }
+                    }}
+                  />
                 ) : (
                   <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} />
                 )

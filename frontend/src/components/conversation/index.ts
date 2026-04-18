@@ -25,3 +25,4 @@ export { GoalSelector, GoalTracker, GoalSummary } from './ConversationGoals';
 export { ReplaySpeakWalkthrough } from './ReplaySpeakWalkthrough';
 export { FillerWordBadge } from './FillerWordBadge';
 export { ExpressItBetter } from './ExpressItBetter';
+export { ListenModeCloze } from './ListenModeCloze';
