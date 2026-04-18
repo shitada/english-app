@@ -2936,3 +2936,35 @@ pages:
         type: state
         priority: medium
         added_in: 584
+
+      - id: conv-113
+        target: Live fluency ring is hidden before 2nd checked message
+        action: Start a conversation and send only 1 message that receives grammar feedback
+        expect: No element with data-testid="live-fluency-ring" is present in the DOM
+        type: state
+        priority: medium
+        added_in: 586
+
+      - id: conv-114
+        target: Live fluency ring appears after 2nd checked message
+        action: Start a conversation and send 2 messages that both receive grammar feedback
+        expect: An element with data-testid="live-fluency-ring" is visible in the stats bar, showing a number 0-100 inside an SVG ring
+        type: functional
+        priority: high
+        added_in: 586
+
+      - id: conv-115
+        target: Live fluency ring color matches score threshold
+        action: Send several messages during a conversation and observe the fluency ring color
+        expect: Ring stroke is red (#ef4444) for score <40, amber (#f59e0b) for <65, indigo (#6366f1) for <85, emerald (#10b981) for ≥85
+        type: visual
+        priority: medium
+        added_in: 586
+
+      - id: conv-116
+        target: Live fluency ring tooltip shows score and label
+        action: Hover over the live fluency ring element during the chat phase
+        expect: Title attribute shows "Fluency: <score> — <label>" (e.g., "Fluency: 72.3 — Fluent")
+        type: functional
+        priority: low
+        added_in: 586
