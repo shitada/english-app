@@ -42,6 +42,7 @@ import QuickSynonymSwapCard from './QuickSynonymSwapCard';
 import QuickSummarizeRespondCard from './QuickSummarizeRespondCard';
 import QuickInstructionCard from './QuickInstructionCard';
 import QuickEmailCard from './QuickEmailCard';
+import QuickProofreadCard from './QuickProofreadCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -235,6 +236,7 @@ export default function QuickPracticeHub() {
             <LazySection height={180}><QuickWriteCard /></LazySection>
             <LazySection height={180}><QuickReadingCard /></LazySection>
             <LazySection height={180}><QuickEmailCard /></LazySection>
+            <LazySection height={180}><QuickProofreadCard /></LazySection>
           </>
         )}
       </div>

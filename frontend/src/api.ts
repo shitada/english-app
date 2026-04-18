@@ -3182,3 +3182,46 @@ export function evaluateEmail(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ── Quick Proofreading Practice ─────────────────────────────────
+
+export interface ProofreadScenarioResponse {
+  paragraph_with_errors: string;
+  error_count: number;
+  topic: string;
+  difficulty: string;
+}
+
+export interface ProofreadCorrectionItem {
+  original: string;
+  user_fix: string;
+  correct_fix: string;
+  is_correct: boolean;
+}
+
+export interface ProofreadEvaluateResponse {
+  errors_found: number;
+  errors_missed: number;
+  corrections: ProofreadCorrectionItem[];
+  accuracy_score: number;
+  grammar_score: number;
+  overall_score: number;
+  feedback: string;
+  fully_corrected_version: string;
+}
+
+export function getProofreadScenario(difficulty: string = 'intermediate'): Promise<ProofreadScenarioResponse> {
+  return request<ProofreadScenarioResponse>(`/api/pronunciation/proofread?difficulty=${difficulty}`);
+}
+
+export function evaluateProofread(data: {
+  original_paragraph: string;
+  user_corrected: string;
+  error_count: number;
+}): Promise<ProofreadEvaluateResponse> {
+  return request<ProofreadEvaluateResponse>('/api/pronunciation/proofread/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

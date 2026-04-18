@@ -5745,3 +5745,165 @@ async def evaluate_email(
         "model_email_subject": str(result.get("model_email_subject", "")),
         "model_email_body": str(result.get("model_email_body", "")),
     }
+
+
+# ── Quick Proofreading Practice ─────────────────────────────────
+
+
+class ProofreadScenarioResponse(BaseModel):
+    paragraph_with_errors: str
+    error_count: int
+    topic: str
+    difficulty: str
+
+
+@router.get("/proofread", response_model=ProofreadScenarioResponse)
+async def get_proofread_paragraph(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a paragraph with intentional errors for proofreading practice."""
+    copilot = get_copilot_service()
+    error_range = {"beginner": "2", "intermediate": "3", "advanced": "4"}.get(difficulty, "3")
+    prompt_text = (
+        f"Generate a short paragraph (3-5 sentences) for a {difficulty}-level English learner.\n"
+        f"The paragraph MUST contain exactly {error_range} intentional errors.\n"
+        "Errors can be grammar mistakes, spelling errors, wrong word choice, or punctuation errors.\n"
+        "The paragraph should read naturally except for the planted errors.\n"
+        "Return JSON with:\n"
+        "- paragraph_with_errors (string): the paragraph containing the errors\n"
+        f"- error_count (integer): the number of errors (must be {error_range})\n"
+        "- topic (string): a short label for the paragraph topic (e.g. 'Travel', 'Technology', 'Food')\n"
+        "Use varied, everyday topics: travel, work, hobbies, food, technology, environment, health, education."
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach. Generate paragraphs with intentional errors for proofreading practice. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="proofread_scenario",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Proofread paragraph generation failed")
+
+    paragraph = str(result.get("paragraph_with_errors", ""))
+    if not paragraph:
+        paragraph = "Yesterday I goes to the store and buyed some grocerries. The whether was very nice so I walk there."
+
+    raw_count = result.get("error_count", int(error_range))
+    try:
+        error_count = int(raw_count)
+        error_count = max(1, min(10, error_count))
+    except (TypeError, ValueError):
+        error_count = int(error_range)
+
+    topic = str(result.get("topic", "General"))
+    if not topic:
+        topic = "General"
+
+    return {
+        "paragraph_with_errors": paragraph,
+        "error_count": error_count,
+        "topic": topic,
+        "difficulty": difficulty,
+    }
+
+
+class ProofreadCorrectionItem(BaseModel):
+    original: str
+    user_fix: str
+    correct_fix: str
+    is_correct: bool
+
+
+class ProofreadEvaluateRequest(BaseModel):
+    original_paragraph: str = Field(min_length=1, max_length=5000)
+    user_corrected: str = Field(min_length=1, max_length=5000)
+    error_count: int = Field(ge=1, le=10)
+
+
+class ProofreadEvaluateResponse(BaseModel):
+    errors_found: int
+    errors_missed: int
+    corrections: list[ProofreadCorrectionItem]
+    accuracy_score: float
+    grammar_score: float
+    overall_score: float
+    feedback: str
+    fully_corrected_version: str
+
+
+@router.post("/proofread/evaluate", response_model=ProofreadEvaluateResponse)
+async def evaluate_proofread(
+    body: ProofreadEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate a user's proofreading corrections."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original paragraph (with {body.error_count} intentional errors):\n\"{body.original_paragraph}\"\n\n"
+        f"User's corrected version:\n\"{body.user_corrected}\"\n\n"
+        "Compare the original paragraph with the user's corrected version.\n"
+        "Identify which errors the user found and fixed, which they missed, "
+        "and whether their corrections are accurate.\n"
+        "Return JSON with:\n"
+        "- errors_found (integer): number of errors the user successfully corrected\n"
+        "- errors_missed (integer): number of errors the user did not fix\n"
+        "- corrections (array of objects): each with:\n"
+        "  - original (string): the erroneous text from the original\n"
+        "  - user_fix (string): what the user wrote instead (or same as original if missed)\n"
+        "  - correct_fix (string): the correct version\n"
+        "  - is_correct (boolean): whether the user's fix is correct\n"
+        "- accuracy_score (1-10): how accurately the user identified and fixed errors\n"
+        "- grammar_score (1-10): overall grammar quality of the user's corrected text\n"
+        "- overall_score (1-10): overall proofreading performance\n"
+        "- feedback (string): constructive feedback (2-3 sentences)\n"
+        "- fully_corrected_version (string): the paragraph with ALL errors properly corrected"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English writing coach specializing in proofreading evaluation. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="proofread_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Proofread evaluation failed")
+
+    raw_corrections = result.get("corrections", [])
+    if not isinstance(raw_corrections, list):
+        raw_corrections = []
+    corrections = []
+    for c in raw_corrections:
+        if isinstance(c, dict):
+            corrections.append({
+                "original": str(c.get("original", "")),
+                "user_fix": str(c.get("user_fix", "")),
+                "correct_fix": str(c.get("correct_fix", "")),
+                "is_correct": bool(c.get("is_correct", False)),
+            })
+
+    raw_found = result.get("errors_found", 0)
+    try:
+        errors_found = max(0, int(raw_found))
+    except (TypeError, ValueError):
+        errors_found = 0
+
+    raw_missed = result.get("errors_missed", 0)
+    try:
+        errors_missed = max(0, int(raw_missed))
+    except (TypeError, ValueError):
+        errors_missed = 0
+
+    return {
+        "errors_found": errors_found,
+        "errors_missed": errors_missed,
+        "corrections": corrections,
+        "accuracy_score": clamp_score(result.get("accuracy_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "fully_corrected_version": str(result.get("fully_corrected_version", "")),
+    }

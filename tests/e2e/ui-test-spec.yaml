@@ -3445,3 +3445,84 @@ pages:
         type: functional
         priority: medium
         added_in: 598
+
+      # ── Quick Proofread Card ──────────────────────────────────────
+      - id: qp-proofread-001
+        target: QuickProofreadCard renders in writing tab
+        action: Click Writing tab in Quick Practice Hub
+        expect: QuickProofreadCard appears with FileSearch icon and "Quick Proofread" title
+        type: functional
+        priority: high
+        added_in: 599
+
+      - id: qp-proofread-002
+        target: Paragraph with errors is displayed
+        action: Open writing tab and wait for proofreading card to load
+        expect: A paragraph is shown in a secondary background box with topic label and error count badge
+        type: functional
+        priority: high
+        added_in: 599
+
+      - id: qp-proofread-003
+        target: Textarea for corrections is present
+        action: Locate the proofread card
+        expect: A textarea with placeholder "Type the corrected paragraph here…" is visible below the paragraph
+        type: functional
+        priority: high
+        added_in: 599
+
+      - id: qp-proofread-004
+        target: Check button disabled when textarea empty
+        action: Leave the textarea empty and observe the Check button
+        expect: Check button appears disabled with reduced opacity
+        type: functional
+        priority: medium
+        added_in: 599
+
+      - id: qp-proofread-005
+        target: Submitting corrections transitions to evaluating then done
+        action: Type corrected text in textarea and click Check
+        expect: Card shows "Evaluating your corrections…" briefly, then shows results with scores
+        type: functional
+        priority: high
+        added_in: 599
+
+      - id: qp-proofread-006
+        target: Score bars display accuracy, grammar, overall
+        action: Submit a proofread correction and view results
+        expect: Three score bars (Accuracy, Grammar, Overall) are shown with numeric values and colored fill
+        type: functional
+        priority: medium
+        added_in: 599
+
+      - id: qp-proofread-007
+        target: Error details show found vs missed with color coding
+        action: Submit a correction that has both found and missed errors
+        expect: Found errors have green left border with "Found" badge, missed errors have red left border with "Missed" badge
+        type: functional
+        priority: medium
+        added_in: 599
+
+      - id: qp-proofread-008
+        target: Fully corrected version displayed
+        action: Complete a proofread evaluation
+        expect: A "Fully Corrected Version" section shows the ideal corrected paragraph with purple left border
+        type: functional
+        priority: medium
+        added_in: 599
+
+      - id: qp-proofread-009
+        target: Next Paragraph button resets the card
+        action: Click "Next Paragraph" button in done phase
+        expect: Card resets to idle phase with a new paragraph loaded
+        type: functional
+        priority: medium
+        added_in: 599
+
+      - id: qp-proofread-010
+        target: Difficulty change triggers new paragraph
+        action: Change difficulty while proofread card is in idle phase
+        expect: A new paragraph loads matching the selected difficulty
+        type: functional
+        priority: medium
+        added_in: 599
