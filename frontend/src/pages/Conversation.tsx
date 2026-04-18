@@ -516,6 +516,21 @@ export default function Conversation() {
     setLoading(true);
     setStartError(null);
     autoEndAttempted.current = false;
+    // Reset session-scoped state to prevent stale data leaking across sessions
+    setFillerCount(0);
+    setFillerDetails({});
+    setCorrectionAttempts(0);
+    setCorrectionSuccesses(0);
+    setErrorPatterns(new Map());
+    setListenCorrect(0);
+    setListenTotal(0);
+    setRevealedMessages(new Set());
+    setSavedChatPhrases(new Set());
+    setHintText(null);
+    setHintUsedThisTurn(false);
+    setHintCount(0);
+    setFailedMessage(null);
+    setSendError(null);
     try {
       const res = await api.startConversation(topicId, difficulty, roleSwap);
       setCurrentTopicId(topicId);
@@ -1231,6 +1246,21 @@ export default function Conversation() {
       setQuizError('');
       setResponseTimes([]);
       setSessionGoals([]);
+      // Reset session-scoped state to prevent stale data leaking across sessions
+      setFillerCount(0);
+      setFillerDetails({});
+      setCorrectionAttempts(0);
+      setCorrectionSuccesses(0);
+      setErrorPatterns(new Map());
+      setListenCorrect(0);
+      setListenTotal(0);
+      setRevealedMessages(new Set());
+      setSavedChatPhrases(new Set());
+      setHintText(null);
+      setHintUsedThisTurn(false);
+      setHintCount(0);
+      setFailedMessage(null);
+      setSendError(null);
     };
     const handlePracticeAgain = () => {
       setMessages([]);
@@ -1244,6 +1274,21 @@ export default function Conversation() {
       setQuizError('');
       setResponseTimes([]);
       setSessionGoals([]);
+      // Reset session-scoped state to prevent stale data leaking across sessions
+      setFillerCount(0);
+      setFillerDetails({});
+      setCorrectionAttempts(0);
+      setCorrectionSuccesses(0);
+      setErrorPatterns(new Map());
+      setListenCorrect(0);
+      setListenTotal(0);
+      setRevealedMessages(new Set());
+      setSavedChatPhrases(new Set());
+      setHintText(null);
+      setHintUsedThisTurn(false);
+      setHintCount(0);
+      setFailedMessage(null);
+      setSendError(null);
       startConversation(currentTopicId);
     };
     return (

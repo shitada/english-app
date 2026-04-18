@@ -2840,3 +2840,19 @@ pages:
         type: functional
         priority: low
         added_in: 577
+
+      - id: conv-106
+        target: New Conversation resets all session-scoped state
+        action: Complete a conversation with fillers, corrections, hints used, then click "Start New Conversation"
+        expect: Returns to select phase with fillerCount=0, correctionAttempts=0, hintCount=0, errorPatterns empty, savedChatPhrases empty, no stale error banners or hint text
+        type: functional
+        priority: high
+        added_in: 580
+
+      - id: conv-107
+        target: Practice Again resets all session-scoped state
+        action: Complete a conversation with fillers, corrections, hints used, then click "Same Topic Again"
+        expect: New conversation starts with fillerCount=0, correctionAttempts=0, hintCount=0, errorPatterns empty, savedChatPhrases empty, no stale error banners or hint text
+        type: functional
+        priority: high
+        added_in: 580
