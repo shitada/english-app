@@ -3609,3 +3609,76 @@ pages:
         type: functional
         priority: medium
         added_in: 600
+
+      # ── Quick Conversation Repair Card ──────────────────────
+      - id: qp-conversation-repair-001
+        target: Conversation Repair card renders in Speaking tab
+        action: Navigate to Quick Practice Hub and select Speaking tab
+        expect: Conversation Repair card is visible with scenario, speaker statement, confusion point, and repair type badge
+        type: presence
+        priority: high
+        added_in: 601
+
+      - id: qp-conversation-repair-002
+        target: Start recording button begins speech recognition
+        action: Click "Respond (15s)" button on Conversation Repair card
+        expect: Card transitions to speaking phase with pulsing mic icon and 15s countdown timer
+        type: functional
+        priority: high
+        added_in: 601
+
+      - id: qp-conversation-repair-003
+        target: Done button stops recording and evaluates
+        action: Click "Done" button during speaking phase
+        expect: Card transitions to evaluating state, then shows scores (Strategy, Politeness, Grammar, Overall)
+        type: functional
+        priority: high
+        added_in: 601
+
+      - id: qp-conversation-repair-004
+        target: Timer auto-finishes after 15 seconds
+        action: Start recording and wait 15 seconds without clicking Done
+        expect: Recording stops automatically and evaluation begins
+        type: functional
+        priority: medium
+        added_in: 601
+
+      - id: qp-conversation-repair-005
+        target: Score bars display correct values after evaluation
+        action: Complete a conversation repair attempt and view results
+        expect: Four score displays (Strategy, Politeness, Grammar, Overall) show values 1-10 with color coding
+        type: visual
+        priority: medium
+        added_in: 601
+
+      - id: qp-conversation-repair-006
+        target: Model Repair section displays model answer
+        action: Complete a conversation repair attempt
+        expect: A "Model Repair" block appears with a native-like repair response highlighted with purple left border
+        type: presence
+        priority: medium
+        added_in: 601
+
+      - id: qp-conversation-repair-007
+        target: Try Again button resets to idle with same scenario
+        action: Click "Try Again" button in done phase
+        expect: Card resets to idle phase with same scenario displayed
+        type: functional
+        priority: medium
+        added_in: 601
+
+      - id: qp-conversation-repair-008
+        target: New Scenario button loads a fresh scenario
+        action: Click "New Scenario" button
+        expect: Card resets to idle phase and a new conversation repair scenario loads
+        type: functional
+        priority: medium
+        added_in: 601
+
+      - id: qp-conversation-repair-009
+        target: Difficulty change triggers new scenario
+        action: Change difficulty while conversation repair card is visible
+        expect: A new scenario loads matching the selected difficulty
+        type: functional
+        priority: medium
+        added_in: 601

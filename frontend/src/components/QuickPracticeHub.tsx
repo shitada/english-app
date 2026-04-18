@@ -44,6 +44,7 @@ import QuickInstructionCard from './QuickInstructionCard';
 import QuickEmailCard from './QuickEmailCard';
 import QuickProofreadCard from './QuickProofreadCard';
 import QuickConnectedSpeechCard from './QuickConnectedSpeechCard';
+import QuickConversationRepairCard from './QuickConversationRepairCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -200,6 +201,7 @@ export default function QuickPracticeHub() {
             <LazySection height={180}><QuickDialogueGapCard /></LazySection>
             <LazySection height={180}><QuickSummarizeRespondCard /></LazySection>
             <LazySection height={180}><QuickInstructionCard /></LazySection>
+            <LazySection height={180}><QuickConversationRepairCard /></LazySection>
           </>
         )}
         {activeTab === 'listening' && (
