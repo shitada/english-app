@@ -20,6 +20,7 @@ from app.database import init_db, get_db, get_db_session, start_wal_checkpoint_t
 from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
 from app.routers import preferences
+from app.routers import listening
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -178,6 +179,7 @@ app.include_router(pronunciation.router)
 app.include_router(vocabulary.router)
 app.include_router(dashboard.router)
 app.include_router(preferences.router)
+app.include_router(listening.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

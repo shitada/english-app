@@ -3064,3 +3064,73 @@ pages:
         type: functional
         priority: medium
         added_in: 588
+
+  minimal_pairs:
+    path: /minimal-pairs
+    tests:
+      - id: mp-001
+        target: Minimal Pairs page renders with header and contrast info
+        action: Navigate to /minimal-pairs
+        expect: Element with data-testid="minimal-pairs-page" is visible with "Minimal Pairs" heading and contrast (e.g. "/i/-/iː/") shown
+        type: functional
+        priority: high
+        added_in: 590
+
+      - id: mp-002
+        target: Play Sound button starts the round
+        action: Click element with data-testid="play-sound-btn"
+        expect: TTS speaks a word and two answer choices (data-testid="choice-a-btn" / "choice-b-btn") become visible
+        type: functional
+        priority: high
+        added_in: 590
+
+      - id: mp-003
+        target: Choosing an answer shows feedback with IPA
+        action: Click data-testid="choice-a-btn" or "choice-b-btn"
+        expect: Feedback section appears with ✅/❌ and IPA contrast displayed; data-testid="next-round-btn" visible
+        type: functional
+        priority: high
+        added_in: 590
+
+      - id: mp-004
+        target: Replay buttons (normal and slow) are clickable during answering
+        action: Click data-testid="replay-normal-btn" then data-testid="replay-slow-btn"
+        expect: TTS replays the word; no errors thrown; choice buttons remain visible
+        type: functional
+        priority: medium
+        added_in: 590
+
+      - id: mp-005
+        target: After 5 rounds, results view shows score and Try Again button
+        action: Complete 5 rounds clicking through Play → choice → Next
+        expect: Element with data-testid="results-view" is visible showing "N/5" score and data-testid="try-again-btn"
+        type: functional
+        priority: high
+        added_in: 590
+
+      - id: mp-006
+        target: Try Again button starts a new session
+        action: Click data-testid="try-again-btn" on results view
+        expect: Page returns to round 1/5 with a new contrast and data-testid="play-sound-btn" visible
+        type: functional
+        priority: medium
+        added_in: 590
+
+  home_minimal_pairs_cta:
+    path: /
+    tests:
+      - id: home-mp-001
+        target: Home page shows Minimal Pairs CTA card
+        action: Visit / and scroll to find data-testid="minimal-pairs-cta"
+        expect: Card visible with "Minimal Pairs" title and "Train your ear" button
+        type: functional
+        priority: medium
+        added_in: 590
+
+      - id: home-mp-002
+        target: Clicking Minimal Pairs CTA navigates to /minimal-pairs
+        action: Click data-testid="minimal-pairs-cta" link
+        expect: URL changes to /minimal-pairs and data-testid="minimal-pairs-page" is visible
+        type: navigation
+        priority: medium
+        added_in: 590

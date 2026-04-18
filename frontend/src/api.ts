@@ -360,7 +360,38 @@ export const api = {
 
   getTopicAccuracy: () =>
     request<TopicAccuracyResponse>('/api/vocabulary/topic-accuracy'),
+
+  // Listening minimal-pair drill (full-page page)
+  startMinimalPairListening: (rounds: number = 5) =>
+    request<MinimalPairListeningStart>(`/api/listening/minimal-pair/start?rounds=${rounds}`, {
+      method: 'POST',
+    }),
+
+  saveMinimalPairListeningResult: (
+    correct: number,
+    total: number,
+    contrast_summary: { contrast: string; correct: number; total: number }[],
+  ) =>
+    request<{ id: number; correct: number; total: number }>('/api/listening/minimal-pair/result', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correct, total, contrast_summary }),
+    }),
 };
+
+export interface MinimalPairListeningRound {
+  word_a: string;
+  word_b: string;
+  ipa_a: string;
+  ipa_b: string;
+  contrast: string;
+  play: 'a' | 'b';
+}
+
+export interface MinimalPairListeningStart {
+  contrast: string;
+  rounds: MinimalPairListeningRound[];
+}
 
 // Types
 export interface GrammarFeedback {

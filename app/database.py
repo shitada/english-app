@@ -158,6 +158,16 @@ CREATE TABLE IF NOT EXISTS streak_freezes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_streak_freezes_date ON streak_freezes(freeze_date);
+
+CREATE TABLE IF NOT EXISTS minimal_pair_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    correct INTEGER NOT NULL,
+    total INTEGER NOT NULL,
+    contrast_summary TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_mp_sessions_created ON minimal_pair_sessions(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -360,6 +370,20 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add word_family_json column to vocabulary_words",
         "ALTER TABLE vocabulary_words ADD COLUMN word_family_json TEXT",
+    ),
+    (
+        "create minimal_pair_sessions table",
+        """CREATE TABLE IF NOT EXISTS minimal_pair_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            correct INTEGER NOT NULL,
+            total INTEGER NOT NULL,
+            contrast_summary TEXT NOT NULL DEFAULT '{}'
+        )""",
+    ),
+    (
+        "add index on minimal_pair_sessions created_at",
+        "CREATE INDEX IF NOT EXISTS idx_mp_sessions_created ON minimal_pair_sessions(created_at DESC)",
     ),
 ]
 
