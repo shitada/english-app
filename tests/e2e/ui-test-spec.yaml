@@ -879,6 +879,86 @@ pages:
         priority: low
         added_in: 566
 
+      - id: list-017
+        target: Speed Challenge button appears on results screen
+        action: Complete a listening quiz to reach results phase
+        expect: A "Speed Challenge" button with Zap icon is visible alongside other action buttons
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-018
+        target: Speed Challenge button navigates to speed-challenge phase
+        action: Click the "Speed Challenge" button on the results screen
+        expect: Phase changes to speed-challenge, ListeningSpeedChallenge component renders with speed ladder
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-019
+        target: Speed Challenge shows ready screen with Start button
+        action: Enter Speed Challenge phase, observe the initial ready screen
+        expect: Ready screen shows instructions, Start Challenge button, and speed ladder with 5 levels (0.8x–1.5x)
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-020
+        target: Speed Challenge Start button begins audio playback
+        action: Click "Start Challenge" button on ready screen
+        expect: Phase transitions to playing, pulsing Volume2 icon shown, "Listening at 0.8x…" text visible
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-021
+        target: Speed Challenge question phase shows question with options
+        action: Wait for audio to finish playing in Speed Challenge
+        expect: A comprehension question appears with selectable answer options and submit button
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-022
+        target: Speed Challenge correct answer advances to next level
+        action: Select the correct answer and click Submit in Speed Challenge
+        expect: "Correct!" feedback shown with green checkmark, "Next Level" button appears
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-023
+        target: Speed Challenge wrong answer ends the challenge
+        action: Select a wrong answer and click Submit in Speed Challenge
+        expect: Challenge ends showing result screen with max speed gauge and tier message
+        type: functional
+        priority: high
+        added_in: 570
+
+      - id: list-024
+        target: Speed Challenge result screen shows speed gauge
+        action: Complete or fail the Speed Challenge
+        expect: Visual gauge bar shows max comprehension speed reached, speed labels below, personal best badge
+        type: visual
+        priority: medium
+        added_in: 570
+
+      - id: list-025
+        target: Speed Challenge Back button returns to results
+        action: Click "Back" button in Speed Challenge header
+        expect: Phase returns to results, audio stops, results screen is visible again
+        type: functional
+        priority: medium
+        added_in: 570
+
+      - id: list-026
+        target: Speed Challenge Try Again button restarts the challenge
+        action: On result screen, click "Try Again" button
+        expect: Challenge restarts from level 1 (0.8x), audio begins playing
+        type: functional
+        priority: medium
+        added_in: 570
+
   vocabulary:
     path: /vocabulary
     tests:

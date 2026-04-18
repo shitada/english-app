@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play, ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
+import { Volume2, Eye, EyeOff, CheckCircle, XCircle, RotateCcw, History, Play, ArrowLeft, ChevronDown, ChevronRight, Zap } from 'lucide-react';
 import { EchoPractice, extractSentences } from '../components/EchoPractice';
 import { ClozeListening } from '../components/ClozeListening';
 import { ListenAndSummarize } from '../components/ListenAndSummarize';
@@ -7,11 +7,12 @@ import { ListeningSpokenQA } from '../components/ListeningSpokenQA';
 import { ListeningKeyVocab } from '../components/ListeningKeyVocab';
 import { ListeningDiscussion } from '../components/ListeningDiscussion';
 import { ListeningParaphrase } from '../components/ListeningParaphrase';
+import { ListeningSpeedChallenge } from '../components/ListeningSpeedChallenge';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 
-type Phase = 'setup' | 'listen' | 'quiz' | 'results';
+type Phase = 'setup' | 'listen' | 'quiz' | 'results' | 'speed-challenge';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 
 interface QuizResult {
@@ -746,6 +747,21 @@ export default function Listening() {
                 <Play size={14} /> Retry Wrong ({results.filter(r => r.selectedIndex !== r.correctIndex).length})
               </button>
             )}
+            {passage && questions.length > 0 && (
+              <button
+                className="btn"
+                onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setPhase('speed-challenge'); }}
+                data-testid="start-speed-challenge-btn"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  border: '2px solid var(--warning, #f59e0b)',
+                  background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(99,102,241,0.1))',
+                  color: 'var(--text)', fontWeight: 600,
+                }}
+              >
+                <Zap size={14} color="var(--warning, #f59e0b)" /> Speed Challenge
+              </button>
+            )}
           </div>
           {/* Playback speed for replay */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
@@ -773,6 +789,14 @@ export default function Listening() {
           {passage && <ListeningDiscussion passage={passage} />}
           {passage && <ListeningParaphrase passage={passage} />}
         </div>
+      )}
+
+      {phase === 'speed-challenge' && passage && questions.length > 0 && (
+        <ListeningSpeedChallenge
+          passage={passage}
+          questions={questions}
+          onBack={() => setPhase('results')}
+        />
       )}
     </div>
   );
