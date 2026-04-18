@@ -2862,6 +2862,18 @@ export function getSentenceScramble(difficulty: string = 'intermediate'): Promis
   return request<SentenceScrambleResponse>(`/api/pronunciation/sentence-scramble?difficulty=${difficulty}`);
 }
 
+// ── Filler Drill Prompt ─────────────────────────────────────────
+
+export interface FillerDrillPromptResponse {
+  question: string;
+  tip: string;
+  difficulty: string;
+}
+
+export function getFillerDrillPrompt(difficulty: string = 'intermediate'): Promise<FillerDrillPromptResponse> {
+  return request<FillerDrillPromptResponse>(`/api/pronunciation/filler-drill-prompt?difficulty=${difficulty}`);
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

@@ -4934,3 +4934,47 @@ async def get_sentence_scramble(
         "grammar_point": str(result.get("grammar_point", "sentence structure")),
         "difficulty": difficulty,
     }
+
+
+# ── Filler Drill Prompt ─────────────────────────────────────────
+
+
+class FillerDrillPromptResponse(BaseModel):
+    question: str
+    tip: str
+    difficulty: str
+
+
+@router.get("/filler-drill-prompt", response_model=FillerDrillPromptResponse)
+async def get_filler_drill_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a thought-provoking discussion prompt for filler word reduction practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a thought-provoking discussion question for a {difficulty}-level English learner.\n"
+        "The question should require extended speech (30+ seconds) and naturally elicit opinions, "
+        "explanations, or storytelling — contexts where filler words like 'um', 'uh', 'like', 'you know' "
+        "tend to appear.\n"
+        "Return JSON with:\n"
+        "- question (string): an open-ended discussion question (1-2 sentences)\n"
+        "- tip (string): a brief tip on how to avoid fillers while answering (1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English fluency coach specialising in filler-word reduction. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="filler_drill_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Filler drill prompt generation failed")
+
+    return {
+        "question": str(result.get("question", "Describe a time when you had to make a difficult decision and explain your reasoning.")),
+        "tip": str(result.get("tip", "Pause silently instead of saying 'um' or 'uh' — brief pauses sound confident.")),
+        "difficulty": difficulty,
+    }

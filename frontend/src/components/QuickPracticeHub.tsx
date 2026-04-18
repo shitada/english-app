@@ -34,6 +34,7 @@ import QuickSceneDescriptionCard from './QuickSceneDescriptionCard';
 import QuickPredictNextCard from './QuickPredictNextCard';
 import QuickDictoglossCard from './QuickDictoglossCard';
 import QuickSentenceScrambleCard from './QuickSentenceScrambleCard';
+import QuickFillerReductionCard from './QuickFillerReductionCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -184,6 +185,7 @@ export default function QuickPracticeHub() {
             <QuickRegisterSwitchCard />
             <QuickDebateCard />
             <QuickSceneDescriptionCard />
+            <QuickFillerReductionCard />
           </>
         )}
         {activeTab === 'listening' && (

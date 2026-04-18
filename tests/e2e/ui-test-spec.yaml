@@ -2389,6 +2389,38 @@ pages:
         priority: medium
         added_in: 573
 
+      - id: quick-practice-hub-109
+        target: QuickFillerReductionCard renders in speaking tab
+        action: Open Quick Practice Hub on the Speaking tab and scroll to the Filler Reduction card
+        expect: Card is visible with title "Filler Reduction", a discussion prompt, tip text, and a "Start Speaking" button
+        type: functional
+        priority: medium
+        added_in: 575
+
+      - id: quick-practice-hub-110
+        target: QuickFillerReductionCard live filler counter during speaking
+        action: Click "Start Speaking" and speak with filler words
+        expect: A live filler counter is visible showing "🚫 Fillers: N" that updates in real time; timer counts down from 30s
+        type: functional
+        priority: medium
+        added_in: 575
+
+      - id: quick-practice-hub-111
+        target: QuickFillerReductionCard results screen
+        action: Click "Done" after speaking in the Filler Reduction card
+        expect: Results show total fillers, word count, words/filler ratio, per-filler breakdown with replacement tips, and action buttons
+        type: functional
+        priority: medium
+        added_in: 575
+
+      - id: quick-practice-hub-112
+        target: QuickFillerReductionCard new prompt button
+        action: Click "New Prompt" on the Filler Reduction results screen
+        expect: Card resets to idle phase with a new discussion prompt loaded
+        type: functional
+        priority: low
+        added_in: 575
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase
