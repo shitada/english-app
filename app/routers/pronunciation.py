@@ -5087,3 +5087,143 @@ async def evaluate_emotion_response(
         "model_response": str(result.get("model_response", "")),
         "useful_phrases": [str(p) for p in result.get("useful_phrases", [])[:5]],
     }
+
+
+# ── Quick Dialogue Gap Fill ─────────────────────────────────────
+
+
+class DialogueLineItem(BaseModel):
+    speaker: str
+    line: str
+
+
+class DialogueGapPromptResponse(BaseModel):
+    dialogue: list[DialogueLineItem]
+    gap_index: int
+    situation: str
+    difficulty: str
+
+
+@router.get("/dialogue-gap", response_model=DialogueGapPromptResponse)
+async def get_dialogue_gap(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a 4-line dialogue with one gap for the user to fill."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a short 4-line dialogue between two speakers (A and B) for a {difficulty}-level "
+        "English learner. Choose one line (index 0-3) as the gap the learner must fill by speaking.\n"
+        "The dialogue should be natural, everyday conversation.\n"
+        "Return JSON with:\n"
+        "- dialogue (array of 4 objects, each with 'speaker' (string 'A' or 'B') and 'line' (string))\n"
+        "- gap_index (integer 0-3): the index of the line the learner should fill\n"
+        "- situation (string): a brief description of the conversation context (1 sentence)\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach creating dialogue gap-fill exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="dialogue_gap_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Dialogue gap generation failed")
+
+    raw_dialogue = result.get("dialogue", [])
+    if not isinstance(raw_dialogue, list) or len(raw_dialogue) < 4:
+        raw_dialogue = [
+            {"speaker": "A", "line": "Hey, are you free this weekend?"},
+            {"speaker": "B", "line": "I think so. Why do you ask?"},
+            {"speaker": "A", "line": "I was wondering if you'd like to go hiking."},
+            {"speaker": "B", "line": "That sounds great! Let's do it."},
+        ]
+    dialogue = []
+    for item in raw_dialogue[:4]:
+        if isinstance(item, dict):
+            dialogue.append({
+                "speaker": str(item.get("speaker", "A"))[:10],
+                "line": str(item.get("line", "")),
+            })
+        else:
+            dialogue.append({"speaker": "A", "line": str(item)})
+    while len(dialogue) < 4:
+        dialogue.append({"speaker": "A", "line": "..."})
+
+    raw_gap = result.get("gap_index", 1)
+    try:
+        gap_index = int(raw_gap)
+    except (TypeError, ValueError):
+        gap_index = 1
+    gap_index = max(0, min(3, gap_index))
+
+    return {
+        "dialogue": dialogue,
+        "gap_index": gap_index,
+        "situation": str(result.get("situation", "Two friends chatting about weekend plans.")),
+        "difficulty": difficulty,
+    }
+
+
+class DialogueGapEvaluateRequest(BaseModel):
+    dialogue: list[DialogueLineItem] = Field(min_length=4, max_length=4)
+    gap_index: int = Field(ge=0, le=3)
+    transcript: str = Field(min_length=1, max_length=3000)
+    difficulty: str = Field(default="intermediate", pattern="^(beginner|intermediate|advanced)$")
+
+
+class DialogueGapEvaluateResponse(BaseModel):
+    contextual_fit: float
+    grammar_score: float
+    naturalness: float
+    overall_score: float
+    feedback: str
+    model_answer: str
+
+
+@router.post("/dialogue-gap/evaluate", response_model=DialogueGapEvaluateResponse)
+async def evaluate_dialogue_gap(
+    body: DialogueGapEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's spoken response for a dialogue gap."""
+    dialogue_text = "\n".join(
+        f"{d.speaker}: {d.line}" if i != body.gap_index else f"{d.speaker}: ___"
+        for i, d in enumerate(body.dialogue)
+    )
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Dialogue:\n{dialogue_text}\n\n"
+        f"The user was asked to fill line {body.gap_index + 1} (the gap marked '___').\n"
+        f"The original line was: \"{body.dialogue[body.gap_index].line}\"\n"
+        f"User's spoken response: \"{body.transcript}\"\n"
+        f"Difficulty: {body.difficulty}\n\n"
+        "Evaluate how well the user's response fits the dialogue. Return JSON with:\n"
+        "- contextual_fit (1-10): how well the response fits the conversation context\n"
+        "- grammar_score (1-10): grammatical accuracy\n"
+        "- naturalness (1-10): how natural and conversational the response sounds\n"
+        "- overall_score (1-10): overall quality\n"
+        "- feedback (string): encouraging feedback with specific tips (2-3 sentences)\n"
+        "- model_answer (string): the ideal response for this gap (1 sentence)"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English conversation coach evaluating dialogue gap-fill exercises. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="dialogue_gap_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Dialogue gap evaluation failed")
+
+    return {
+        "contextual_fit": clamp_score(result.get("contextual_fit", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "naturalness": clamp_score(result.get("naturalness", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "model_answer": str(result.get("model_answer", "")),
+    }

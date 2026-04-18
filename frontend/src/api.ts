@@ -2905,6 +2905,41 @@ export function evaluateEmotionResponse(situation: string, expected_emotion: str
   });
 }
 
+// ── Quick Dialogue Gap Fill ─────────────────────────────────────
+
+export interface DialogueLineItem {
+  speaker: string;
+  line: string;
+}
+
+export interface DialogueGapPromptResponse {
+  dialogue: DialogueLineItem[];
+  gap_index: number;
+  situation: string;
+  difficulty: string;
+}
+
+export interface DialogueGapEvaluateResponse {
+  contextual_fit: number;
+  grammar_score: number;
+  naturalness: number;
+  overall_score: number;
+  feedback: string;
+  model_answer: string;
+}
+
+export function getDialogueGap(difficulty: string = 'intermediate'): Promise<DialogueGapPromptResponse> {
+  return request<DialogueGapPromptResponse>(`/api/pronunciation/dialogue-gap?difficulty=${difficulty}`);
+}
+
+export function evaluateDialogueGap(dialogue: DialogueLineItem[], gap_index: number, transcript: string, difficulty: string = 'intermediate'): Promise<DialogueGapEvaluateResponse> {
+  return request<DialogueGapEvaluateResponse>('/api/pronunciation/dialogue-gap/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dialogue, gap_index, transcript, difficulty }),
+  });
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;

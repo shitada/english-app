@@ -2808,3 +2808,35 @@ pages:
         type: functional
         priority: low
         added_in: 576
+
+      - id: conv-102
+        target: Quick Dialogue Gap Fill card renders in Speaking tab
+        action: Navigate to Quick Practice Hub, ensure Speaking tab is active, scroll to Dialogue Gap Fill card
+        expect: Card shows "Dialogue Gap Fill" heading with dialogue lines, one gap highlighted, and "Speak the missing line" button
+        type: functional
+        priority: medium
+        added_in: 577
+
+      - id: conv-103
+        target: Quick Dialogue Gap Fill card speaking phase
+        action: Click "Speak the missing line" button on Dialogue Gap Fill card
+        expect: Card enters speaking phase with mic animation, countdown timer, and Done button visible
+        type: functional
+        priority: medium
+        added_in: 577
+
+      - id: conv-104
+        target: Quick Dialogue Gap Fill card done phase shows scores
+        action: Complete a dialogue gap fill recording and wait for evaluation
+        expect: Card shows contextual_fit, grammar, naturalness, overall scores with feedback and model answer
+        type: functional
+        priority: medium
+        added_in: 577
+
+      - id: conv-105
+        target: Quick Dialogue Gap Fill card New Dialogue button
+        action: Complete a dialogue gap fill evaluation, click "New Dialogue" button
+        expect: Card resets to idle phase with a new dialogue loaded
+        type: functional
+        priority: low
+        added_in: 577
