@@ -33,6 +33,7 @@ import QuickDebateCard from './QuickDebateCard';
 import QuickSceneDescriptionCard from './QuickSceneDescriptionCard';
 import QuickPredictNextCard from './QuickPredictNextCard';
 import QuickDictoglossCard from './QuickDictoglossCard';
+import QuickSentenceScrambleCard from './QuickSentenceScrambleCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -204,6 +205,7 @@ export default function QuickPracticeHub() {
             <QuickTransformCard />
             <QuickConnectorDrillCard />
             <QuickPhrasalVerbCard />
+            <QuickSentenceScrambleCard />
           </>
         )}
         {activeTab === 'vocabulary' && (

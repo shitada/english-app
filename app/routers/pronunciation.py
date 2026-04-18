@@ -4872,3 +4872,65 @@ async def evaluate_dictogloss(
         "feedback": str(result.get("feedback", "")),
         "model_reconstruction": str(result.get("model_reconstruction", "")),
     }
+
+
+# ---------------------------------------------------------------------------
+# Sentence Scramble
+# ---------------------------------------------------------------------------
+
+class SentenceScrambleResponse(BaseModel):
+    sentence: str
+    words: list[str]
+    hint: str
+    grammar_point: str
+    difficulty: str
+
+
+@router.get("/sentence-scramble", response_model=SentenceScrambleResponse)
+async def get_sentence_scramble(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence scramble exercise for word-ordering practice."""
+    copilot = get_copilot_service()
+    word_target = {"beginner": "4-6", "intermediate": "7-10", "advanced": "10-14"}.get(difficulty, "7-10")
+    prompt_text = (
+        f"Generate a single English sentence for a {difficulty}-level learner ({word_target} words).\n"
+        "The sentence should be grammatically interesting and suitable for a word-ordering exercise.\n"
+        "Return JSON with:\n"
+        "- sentence (string): the correct complete sentence with proper punctuation\n"
+        "- words (array of strings): the words of the sentence in SHUFFLED/random order "
+        "(do NOT include punctuation in the word tokens; strip periods, commas, etc.)\n"
+        "- hint (string): a short clue about the sentence meaning (1 sentence)\n"
+        "- grammar_point (string): the main grammar point demonstrated (e.g. 'present perfect continuous')"
+    )
+    fallback_sentence = "The cat sat on the warm mat."
+    fallback_words = ["mat", "the", "on", "cat", "warm", "sat", "The"]
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English grammar coach specializing in sentence structure exercises. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="sentence_scramble",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Sentence scramble generation failed")
+
+    sentence = str(result.get("sentence", "")).strip()
+    words = result.get("words", [])
+    if not isinstance(words, list):
+        words = []
+    words = [str(w).strip() for w in words if str(w).strip()]
+
+    if not sentence or len(words) < 2:
+        sentence = fallback_sentence
+        words = fallback_words
+
+    return {
+        "sentence": sentence,
+        "words": words,
+        "hint": str(result.get("hint", "Rearrange the words to form a correct sentence.")),
+        "grammar_point": str(result.get("grammar_point", "sentence structure")),
+        "difficulty": difficulty,
+    }

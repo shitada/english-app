@@ -2325,6 +2325,70 @@ pages:
         priority: medium
         added_in: 561
 
+      - id: quick-practice-hub-101
+        target: QuickSentenceScrambleCard renders on Grammar tab
+        action: Click the Grammar tab in Quick Practice Hub
+        expect: A "Sentence Scramble" card appears with a Puzzle icon, hint text, word bank chips, and a sentence building area
+        type: functional
+        priority: high
+        added_in: 573
+
+      - id: quick-practice-hub-102
+        target: QuickSentenceScrambleCard tap word to build sentence
+        action: In the Sentence Scramble card, click a word chip in the word bank
+        expect: The word moves from the bank to the sentence building area and appears as a blue chip
+        type: functional
+        priority: high
+        added_in: 573
+
+      - id: quick-practice-hub-103
+        target: QuickSentenceScrambleCard remove word from sentence
+        action: Click a placed word chip in the sentence building area
+        expect: The word moves back to the word bank area
+        type: functional
+        priority: high
+        added_in: 573
+
+      - id: quick-practice-hub-104
+        target: QuickSentenceScrambleCard check correct answer
+        action: Arrange all words in the correct order and click "Check"
+        expect: Green success feedback appears with "Correct!" message and grammar point explanation
+        type: functional
+        priority: critical
+        added_in: 573
+
+      - id: quick-practice-hub-105
+        target: QuickSentenceScrambleCard check incorrect answer
+        action: Arrange words in wrong order and click "Check"
+        expect: Red feedback appears with "Not quite!" message, correct sentence shown, and grammar point
+        type: functional
+        priority: critical
+        added_in: 573
+
+      - id: quick-practice-hub-106
+        target: QuickSentenceScrambleCard retry after incorrect
+        action: Click "Retry" button after an incorrect answer
+        expect: Card resets to building phase with all words back in the bank
+        type: functional
+        priority: high
+        added_in: 573
+
+      - id: quick-practice-hub-107
+        target: QuickSentenceScrambleCard next button loads new exercise
+        action: Click "Next" button after checking an answer
+        expect: A new scramble exercise loads with different words and hint
+        type: functional
+        priority: high
+        added_in: 573
+
+      - id: quick-practice-hub-108
+        target: QuickSentenceScrambleCard check button disabled when empty
+        action: View the Sentence Scramble card without placing any words
+        expect: The "Check" button is disabled and not clickable
+        type: functional
+        priority: medium
+        added_in: 573
+
       - id: conv-062
         target: Same Topic Again button visible in conversation summary
         action: Complete a conversation and view the summary phase

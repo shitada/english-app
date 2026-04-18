@@ -2835,6 +2835,19 @@ export function evaluateDictogloss(data: {
   });
 }
 
+// Sentence Scramble types
+export interface SentenceScrambleResponse {
+  sentence: string;
+  words: string[];
+  hint: string;
+  grammar_point: string;
+  difficulty: string;
+}
+
+export function getSentenceScramble(difficulty: string = 'intermediate'): Promise<SentenceScrambleResponse> {
+  return request<SentenceScrambleResponse>(`/api/pronunciation/sentence-scramble?difficulty=${difficulty}`);
+}
+
 // Express It Better types
 export interface ExpressBetterPair {
   original: string;
