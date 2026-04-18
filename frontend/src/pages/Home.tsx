@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award, Headphones, PenTool } from 'lucide-react';
-import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getPhraseOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type PhraseOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement } from '../api';
+import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getPhraseOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, evaluateWotdSentence, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type PhraseOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement, type WotdPracticeResult } from '../api';
 import { api } from '../api';
 import type { StreakMilestonesResponse } from '../api';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -364,6 +364,10 @@ function DailyPracticeCard() {
 function WordOfTheDayCard() {
   const { t } = useI18n();
   const [word, setWord] = useState<WordOfTheDay | null>(null);
+  const [phase, setPhase] = useState<'display' | 'speaking' | 'evaluating' | 'result'>('display');
+  const [transcript, setTranscript] = useState('');
+  const [result, setResult] = useState<WotdPracticeResult | null>(null);
+  const [evalError, setEvalError] = useState<string | null>(null);
 
   useEffect(() => {
     getWordOfTheDay().then(setWord).catch(() => {});
@@ -378,7 +382,45 @@ function WordOfTheDayCard() {
     }
   }, []);
 
+  const startSpeaking = useCallback(() => {
+    const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    setPhase('speaking');
+    setTranscript('');
+    setResult(null);
+    setEvalError(null);
+    const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      const text = e.results[0][0].transcript;
+      setTranscript(text);
+      if (word) {
+        setPhase('evaluating');
+        evaluateWotdSentence(word.word, word.meaning, text)
+          .then((res) => { setResult(res); setPhase('result'); })
+          .catch(() => { setEvalError('Failed to evaluate. Please try again.'); setPhase('result'); });
+      }
+    };
+    recognition.onerror = () => { setPhase('display'); };
+    recognition.onend = () => {
+      // If no result was captured, go back to display
+      setPhase((prev) => prev === 'speaking' ? 'display' : prev);
+    };
+    recognition.start();
+  }, [word]);
+
+  const handleRetry = useCallback(() => {
+    setPhase('display');
+    setTranscript('');
+    setResult(null);
+    setEvalError(null);
+  }, []);
+
   if (!word) return null;
+
+  const scoreColor = (score: number) =>
+    score >= 8 ? 'var(--success, #10b981)' : score >= 5 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)';
 
   return (
     <div style={{
@@ -427,9 +469,114 @@ function WordOfTheDayCard() {
         </div>
       )}
 
-      <Link to="/vocabulary" style={{ display: 'inline-block', marginTop: 10, fontSize: '0.85rem', color: 'var(--primary, #6366f1)', fontWeight: 600, textDecoration: 'none' }}>
-        {t('practiceVocabulary')}
-      </Link>
+      {/* Sentence challenge section */}
+      {phase === 'display' && (
+        <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            data-testid="wotd-make-sentence"
+            onClick={startSpeaking}
+            style={{
+              padding: '7px 16px', borderRadius: 8,
+              border: 'none', background: 'var(--primary, #6366f1)',
+              color: '#fff', cursor: 'pointer', fontSize: '0.85rem',
+              fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            🎤 Make a Sentence
+          </button>
+          <Link to="/vocabulary" style={{ fontSize: '0.85rem', color: 'var(--primary, #6366f1)', fontWeight: 600, textDecoration: 'none' }}>
+            {t('practiceVocabulary')}
+          </Link>
+        </div>
+      )}
+
+      {phase === 'speaking' && (
+        <div data-testid="wotd-speaking" style={{ marginTop: 12, textAlign: 'center', padding: '12px 0' }}>
+          <div style={{ fontSize: 32, marginBottom: 8, animation: 'pulse 1.5s infinite' }}>🎙️</div>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            Listening… Speak a sentence using "<strong>{word.word}</strong>"
+          </p>
+        </div>
+      )}
+
+      {phase === 'evaluating' && (
+        <div data-testid="wotd-evaluating" style={{ marginTop: 12, textAlign: 'center', padding: '12px 0' }}>
+          <div style={{ fontSize: 24, marginBottom: 8, animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</div>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Evaluating your sentence…</p>
+          {transcript && (
+            <p style={{ margin: '6px 0 0', fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--text)' }}>
+              "{transcript}"
+            </p>
+          )}
+        </div>
+      )}
+
+      {phase === 'result' && (
+        <div data-testid="wotd-result" style={{ marginTop: 12 }}>
+          {transcript && (
+            <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: 'var(--text)' }}>
+              Your sentence: <em>"{transcript}"</em>
+            </p>
+          )}
+
+          {evalError ? (
+            <p style={{ color: 'var(--danger, #ef4444)', fontSize: '0.85rem', margin: '0 0 8px' }}>{evalError}</p>
+          ) : result && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span
+                  data-testid="wotd-word-usage-badge"
+                  style={{
+                    padding: '3px 10px', borderRadius: 12, fontSize: '0.8rem', fontWeight: 600,
+                    background: result.word_used_correctly ? 'var(--success, #10b981)' : 'var(--danger, #ef4444)',
+                    color: '#fff',
+                  }}
+                >
+                  {result.word_used_correctly ? '✓ Word used correctly' : '✗ Word not used correctly'}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: scoreColor(result.grammar_score), fontWeight: 600 }}>
+                  Grammar: {result.grammar_score}/10
+                </span>
+                <span style={{ fontSize: '0.8rem', color: scoreColor(result.naturalness_score), fontWeight: 600 }}>
+                  Naturalness: {result.naturalness_score}/10
+                </span>
+              </div>
+
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text)' }}>
+                {result.feedback}
+              </p>
+
+              {result.model_sentence && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 10px', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 6 }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>💡 Model:</span>
+                  <span style={{ fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--text)', flex: 1 }}>
+                    "{result.model_sentence}"
+                  </span>
+                  <button
+                    onClick={() => speak(result.model_sentence)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, fontSize: 14, color: 'var(--text-secondary)', flexShrink: 0 }}
+                  >
+                    🔊
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            data-testid="wotd-retry"
+            onClick={handleRetry}
+            style={{
+              marginTop: 10, padding: '6px 14px', borderRadius: 8,
+              border: '1px solid var(--border, #e5e7eb)',
+              background: 'var(--bg-secondary, #f9fafb)',
+              cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+            }}
+          >
+            🔄 Try Again
+          </button>
+        </div>
+      )}
     </div>
   );
 }

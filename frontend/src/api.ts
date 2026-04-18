@@ -1095,6 +1095,26 @@ export async function getWordOfTheDay(): Promise<WordOfTheDay | null> {
   return res.json();
 }
 
+// WOTD sentence practice evaluation
+export interface WotdPracticeResult {
+  word_used_correctly: boolean;
+  grammar_score: number;
+  naturalness_score: number;
+  feedback: string;
+  model_sentence: string;
+}
+
+export async function evaluateWotdSentence(
+  word: string,
+  meaning: string,
+  userSentence: string,
+): Promise<WotdPracticeResult> {
+  return request<WotdPracticeResult>('/api/dashboard/wotd-practice', {
+    method: 'POST',
+    body: JSON.stringify({ word, meaning, user_sentence: userSentence }),
+  });
+}
+
 export interface PhraseOfTheDay {
   phrase: string;
   topic: string;

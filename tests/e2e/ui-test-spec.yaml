@@ -218,6 +218,38 @@ pages:
         priority: medium
         added_in: 583
 
+      - id: home-026
+        target: WOTD Make a Sentence button visible
+        action: snapshot the Word of the Day card
+        expect: Button with text "Make a Sentence" and data-testid="wotd-make-sentence" is visible
+        type: functional
+        priority: high
+        added_in: 593
+
+      - id: home-027
+        target: WOTD speaking phase shows recording indicator
+        action: click the "Make a Sentence" button (wotd-make-sentence)
+        expect: Element with data-testid="wotd-speaking" appears showing a microphone icon and listening message
+        type: state
+        priority: medium
+        added_in: 593
+
+      - id: home-028
+        target: WOTD result phase shows evaluation scores and badges
+        action: after speech recognition completes and evaluation returns, snapshot result area
+        expect: Element with data-testid="wotd-result" contains word usage badge, grammar score, naturalness score, feedback text, and model sentence
+        type: functional
+        priority: high
+        added_in: 593
+
+      - id: home-029
+        target: WOTD retry button resets to display phase
+        action: click the retry button (wotd-retry) in the result phase
+        expect: Result area disappears and "Make a Sentence" button reappears
+        type: functional
+        priority: medium
+        added_in: 593
+
   conversation:
     path: /conversation
     tests:

@@ -494,6 +494,63 @@ async def get_word_of_the_day(
     return WordOfTheDayResponse(**result)
 
 
+# ---------------------------------------------------------------------------
+# Word of the Day — Sentence Practice (AI evaluation)
+# ---------------------------------------------------------------------------
+
+
+class WotdPracticeRequest(BaseModel):
+    word: str = Field(..., min_length=1, max_length=100)
+    meaning: str = Field(..., min_length=1, max_length=500)
+    user_sentence: str = Field(..., min_length=1, max_length=1000)
+
+
+class WotdPracticeResponse(BaseModel):
+    word_used_correctly: bool
+    grammar_score: int = Field(..., ge=1, le=10)
+    naturalness_score: int = Field(..., ge=1, le=10)
+    feedback: str
+    model_sentence: str
+
+
+@router.post("/wotd-practice", response_model=WotdPracticeResponse)
+async def evaluate_wotd_sentence(req: WotdPracticeRequest):
+    """Evaluate a user's sentence using the Word of the Day via LLM."""
+    copilot = get_copilot_service()
+
+    system_prompt = (
+        "You are an English language evaluator. A student is practicing using a vocabulary word "
+        "in a sentence. Evaluate their sentence and return a JSON object with these keys:\n"
+        '- "word_used_correctly": boolean — whether the target word is used with the correct meaning\n'
+        '- "grammar_score": integer 1-10 — grammatical correctness\n'
+        '- "naturalness_score": integer 1-10 — how natural the sentence sounds\n'
+        '- "feedback": string — brief, encouraging feedback (1-2 sentences)\n'
+        '- "model_sentence": string — a natural example sentence using the word\n'
+        "Return ONLY valid JSON, no markdown."
+    )
+
+    user_prompt = (
+        f"Target word: \"{req.word}\"\n"
+        f"Word meaning: \"{req.meaning}\"\n"
+        f"Student's sentence: \"{req.user_sentence}\"\n\n"
+        "Evaluate the sentence and return JSON."
+    )
+
+    try:
+        result = await copilot.ask_json(system_prompt, user_prompt)
+    except Exception as exc:
+        logger.error("Copilot wotd-practice failed: %s", exc)
+        raise HTTPException(status_code=502, detail="Failed to evaluate sentence")
+
+    return WotdPracticeResponse(
+        word_used_correctly=bool(result.get("word_used_correctly", False)),
+        grammar_score=max(1, min(10, int(result.get("grammar_score", 5)))),
+        naturalness_score=max(1, min(10, int(result.get("naturalness_score", 5)))),
+        feedback=str(result.get("feedback", "Keep practicing!")),
+        model_sentence=str(result.get("model_sentence", "")),
+    )
+
+
 class PhraseOfTheDayResponse(BaseModel):
     phrase: str
     topic: str
