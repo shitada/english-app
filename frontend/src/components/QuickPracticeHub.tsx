@@ -38,6 +38,7 @@ import QuickSentenceScrambleCard from './QuickSentenceScrambleCard';
 import QuickFillerReductionCard from './QuickFillerReductionCard';
 import QuickEmotionResponseCard from './QuickEmotionResponseCard';
 import QuickDialogueGapCard from './QuickDialogueGapCard';
+import QuickSynonymSwapCard from './QuickSynonymSwapCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -221,6 +222,7 @@ export default function QuickPracticeHub() {
             <LazySection height={180}><QuickVocabRecallCard /></LazySection>
             <LazySection height={180}><QuickWordAssociationCard /></LazySection>
             <LazySection height={180}><QuickCollocationCard /></LazySection>
+            <LazySection height={180}><QuickSynonymSwapCard /></LazySection>
           </>
         )}
         {activeTab === 'writing' && (

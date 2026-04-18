@@ -5243,3 +5243,123 @@ async def evaluate_dialogue_gap(
         "feedback": str(result.get("feedback", "")),
         "model_answer": str(result.get("model_answer", "")),
     }
+
+
+# ── Quick Synonym Swap Speaking Drill ────────────────────────────
+
+
+class SynonymSwapPromptResponse(BaseModel):
+    sentence: str
+    target_word: str
+    context_hint: str
+    example_synonyms: list[str]
+    difficulty: str
+
+
+@router.get("/synonym-swap", response_model=SynonymSwapPromptResponse)
+async def get_synonym_swap_prompt(
+    difficulty: str = Query(default="intermediate", pattern="^(beginner|intermediate|advanced)$"),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate a sentence with a target word for synonym swap practice."""
+    copilot = get_copilot_service()
+    prompt_text = (
+        f"Generate a synonym swap exercise for a {difficulty}-level English learner.\n"
+        "Create a natural English sentence that contains a target word which has multiple "
+        "contextually appropriate synonyms. The learner will read the sentence aloud, "
+        "replacing the target word with a suitable synonym.\n"
+        "Return JSON with:\n"
+        "- sentence (string): a natural English sentence (10-20 words) containing the target word\n"
+        "- target_word (string): the word to be replaced (must appear in the sentence)\n"
+        "- context_hint (string): a brief hint about the meaning/context to guide synonym choice (1 sentence)\n"
+        "- example_synonyms (array of 3 strings): three contextually appropriate synonyms for the target word\n"
+        "- difficulty (string): the difficulty level"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach specializing in synonym awareness and contextual word choice. Return ONLY valid JSON.",
+                prompt_text,
+            ),
+            context="synonym_swap_prompt",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Synonym swap prompt generation failed")
+
+    raw_synonyms = result.get("example_synonyms", [])
+    if not isinstance(raw_synonyms, list):
+        raw_synonyms = []
+    example_synonyms = [str(s) for s in raw_synonyms if s][:5]
+    if len(example_synonyms) == 0:
+        example_synonyms = ["alternative", "option", "choice"]
+
+    return {
+        "sentence": str(result.get("sentence", "The quick brown fox jumps over the lazy dog.")),
+        "target_word": str(result.get("target_word", "quick")),
+        "context_hint": str(result.get("context_hint", "Think about words with a similar meaning.")),
+        "example_synonyms": example_synonyms,
+        "difficulty": difficulty,
+    }
+
+
+class SynonymSwapEvaluateRequest(BaseModel):
+    original_sentence: str = Field(min_length=1, max_length=2000)
+    target_word: str = Field(min_length=1, max_length=200)
+    user_transcript: str = Field(min_length=1, max_length=5000)
+
+
+class SynonymSwapEvaluateResponse(BaseModel):
+    synonym_accuracy_score: float
+    context_fit_score: float
+    grammar_score: float
+    overall_score: float
+    feedback: str
+    suggested_synonyms: list[str]
+
+
+@router.post("/synonym-swap/evaluate", response_model=SynonymSwapEvaluateResponse)
+async def evaluate_synonym_swap(
+    body: SynonymSwapEvaluateRequest,
+    _rl=Depends(require_rate_limit),
+):
+    """Evaluate the user's synonym swap attempt."""
+    copilot = get_copilot_service()
+    eval_prompt = (
+        f"Original sentence: \"{body.original_sentence}\"\n"
+        f"Target word to replace: \"{body.target_word}\"\n"
+        f"User's spoken sentence: \"{body.user_transcript}\"\n\n"
+        "The user was asked to read the sentence aloud, replacing the target word "
+        "with a contextually appropriate synonym.\n"
+        "Evaluate the user's attempt. Return JSON with:\n"
+        "- synonym_accuracy_score (1-10): how good/accurate the chosen synonym is "
+        "(is it a true synonym in this context?)\n"
+        "- context_fit_score (1-10): how well the synonym fits the original sentence context\n"
+        "- grammar_score (1-10): grammatical correctness of the resulting sentence\n"
+        "- overall_score (1-10): overall quality of the synonym swap\n"
+        "- feedback (string): encouraging feedback with specific observations (2-3 sentences)\n"
+        "- suggested_synonyms (array of 3-5 strings): other good synonyms the user could have used"
+    )
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach specializing in synonym awareness and contextual word choice. Return ONLY valid JSON.",
+                eval_prompt,
+            ),
+            context="synonym_swap_evaluate",
+        )
+    except HTTPException:
+        raise HTTPException(status_code=502, detail="Synonym swap evaluation failed")
+
+    raw_suggested = result.get("suggested_synonyms", [])
+    if not isinstance(raw_suggested, list):
+        raw_suggested = []
+    suggested_synonyms = [str(s) for s in raw_suggested if s][:5]
+
+    return {
+        "synonym_accuracy_score": clamp_score(result.get("synonym_accuracy_score", 5)),
+        "context_fit_score": clamp_score(result.get("context_fit_score", 5)),
+        "grammar_score": clamp_score(result.get("grammar_score", 5)),
+        "overall_score": clamp_score(result.get("overall_score", 5)),
+        "feedback": str(result.get("feedback", "")),
+        "suggested_synonyms": suggested_synonyms,
+    }

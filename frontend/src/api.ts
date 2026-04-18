@@ -3021,3 +3021,38 @@ export interface VocabDueCountResponse {
 export async function getVocabDueCount(): Promise<VocabDueCountResponse> {
   return request<VocabDueCountResponse>('/api/vocabulary/due-count');
 }
+
+// ── Quick Synonym Swap Speaking Drill ───────────────────────────
+
+export interface SynonymSwapPromptResponse {
+  sentence: string;
+  target_word: string;
+  context_hint: string;
+  example_synonyms: string[];
+  difficulty: string;
+}
+
+export interface SynonymSwapEvaluateResponse {
+  synonym_accuracy_score: number;
+  context_fit_score: number;
+  grammar_score: number;
+  overall_score: number;
+  feedback: string;
+  suggested_synonyms: string[];
+}
+
+export function getSynonymSwapPrompt(difficulty: string = 'intermediate'): Promise<SynonymSwapPromptResponse> {
+  return request<SynonymSwapPromptResponse>(`/api/pronunciation/synonym-swap?difficulty=${difficulty}`);
+}
+
+export function evaluateSynonymSwap(data: {
+  original_sentence: string;
+  target_word: string;
+  user_transcript: string;
+}): Promise<SynonymSwapEvaluateResponse> {
+  return request<SynonymSwapEvaluateResponse>('/api/pronunciation/synonym-swap/evaluate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}

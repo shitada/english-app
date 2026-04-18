@@ -551,3 +551,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 590	550fc83	2026-04-18T23:52:48+09:00	0	0	0	0	0	0	0	pass	7.0	keep	minimal pairs listening discrimination drill
 591	ccdbbcb	2026-04-18	0	243	147	0	390	1939	1940	fail	6.75	discarded	Pin favorite Quick Practice cards (discarded: unrelated test failure)
 592	43d29f3	2026-04-19	451	195	350	174	1170	1946	1947	pass	7.80	kept	Add conversation partner personality selector for varied register practice
+593	49ba033	2026-04-19	0	578	137	128	843	1953	1954	pass	7.00	kept	Add Word of the Day sentence challenge with speaking + AI evaluation

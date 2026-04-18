@@ -3182,3 +3182,54 @@ pages:
         type: navigation
         priority: medium
         added_in: 590
+
+  quick_practice_synonym_swap:
+    path: /
+    tests:
+      - id: qp-synswap-001
+        target: Synonym Swap card appears under vocabulary tab
+        action: Click vocabulary tab in Quick Practice Hub and scroll to find "Synonym Swap" heading
+        expect: Card with ArrowLeftRight icon and "Synonym Swap" title is visible
+        type: functional
+        priority: high
+        added_in: 594
+
+      - id: qp-synswap-002
+        target: Synonym Swap card shows sentence with highlighted target word
+        action: Wait for card to load in vocabulary tab
+        expect: Sentence text visible with target word highlighted (wavy underline style), context hint, and example synonym tags
+        type: functional
+        priority: high
+        added_in: 594
+
+      - id: qp-synswap-003
+        target: Listen & Speak button starts TTS then recording
+        action: Click "Listen & Speak" button
+        expect: Phase transitions to listening (shows Volume2 icon and "Listening…"), then to recording (shows Mic icon with countdown timer)
+        type: functional
+        priority: high
+        added_in: 594
+
+      - id: qp-synswap-004
+        target: Done button stops recording and shows evaluation
+        action: Click "Done" button during recording phase
+        expect: Phase transitions to evaluating, then shows scores (Synonym, Context, Grammar, Overall) and feedback
+        type: functional
+        priority: high
+        added_in: 594
+
+      - id: qp-synswap-005
+        target: Try Another button loads a new sentence
+        action: Click "Try Another" button in done phase
+        expect: Card resets to idle phase with a new sentence and target word
+        type: functional
+        priority: medium
+        added_in: 594
+
+      - id: qp-synswap-006
+        target: Suggested synonyms list shown in results
+        action: Complete a synonym swap exercise
+        expect: Results phase shows "Other synonyms you could try" section with synonym tags
+        type: functional
+        priority: medium
+        added_in: 594
