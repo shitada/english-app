@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -117,6 +117,8 @@ export default function Conversation() {
   const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
   const [errorPatterns, setErrorPatterns] = useState<Map<string, number>>(new Map());
   const [topicMastery, setTopicMastery] = useState<TopicMasteryMap>({});
+  const [grammarStreak, setGrammarStreak] = useState(0);
+  const [bestGrammarStreak, setBestGrammarStreak] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -528,6 +530,8 @@ export default function Conversation() {
     setHintCount(0);
     setFailedMessage(null);
     setSendError(null);
+    setGrammarStreak(0);
+    setBestGrammarStreak(0);
   };
 
   const resetConversationState = () => {
@@ -669,6 +673,18 @@ export default function Conversation() {
           }
           return next;
         });
+      }
+      // Update grammar streak counter
+      if (res.feedback) {
+        if (res.feedback.is_correct) {
+          setGrammarStreak((prev) => {
+            const next = prev + 1;
+            setBestGrammarStreak((best) => Math.max(best, next));
+            return next;
+          });
+        } else {
+          setGrammarStreak(0);
+        }
       }
       tts.speak(res.message);
     } catch (err) {
@@ -1298,6 +1314,7 @@ export default function Conversation() {
         correctionAttempts={correctionAttempts}
         correctionSuccesses={correctionSuccesses}
         hintCount={hintCount}
+        bestGrammarStreak={bestGrammarStreak}
       />
       </PhaseTransition>
     );
@@ -1455,7 +1472,7 @@ export default function Conversation() {
         const color = rate >= 80 ? 'var(--success, #22c55e)' : rate >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)';
         return (
           <div style={{ padding: '4px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', background: 'var(--bg-secondary, #f9fafb)', borderBottom: '1px solid var(--border, #e5e7eb)' }}>
-            <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>)<LiveFluencyRing messages={messages} /></span>
+            <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>){(grammarStreak >= 2 || bestGrammarStreak >= 2) && <>{' '}<GrammarStreakBadge currentStreak={grammarStreak} bestStreak={bestGrammarStreak} /></>}<LiveFluencyRing messages={messages} /></span>
             <span>
               {messages.filter((m) => m.role === 'user').length} messages sent
               {wpmValues.length > 0 && (() => {

@@ -56,6 +56,7 @@ interface ConversationSummaryProps {
   correctionAttempts?: number;
   correctionSuccesses?: number;
   hintCount?: number;
+  bestGrammarStreak?: number;
 }
 
 export function ConversationSummary({
@@ -85,6 +86,7 @@ export function ConversationSummary({
   correctionAttempts,
   correctionSuccesses,
   hintCount,
+  bestGrammarStreak,
 }: ConversationSummaryProps) {
   const [copied, setCopied] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -571,13 +573,14 @@ export function ConversationSummary({
         </div>
       )}
 
-      {/* Session Insights — filler words, response time, corrections, hints */}
+      {/* Session Insights — filler words, response time, corrections, hints, grammar streak */}
       {(() => {
         const hasFillers = (fillerCount ?? 0) > 0;
         const hasResponseTimes = (responseTimes ?? []).length > 0;
         const hasCorrections = (correctionAttempts ?? 0) > 0;
         const hasHints = (hintCount ?? 0) > 0;
-        if (!hasFillers && !hasResponseTimes && !hasCorrections && !hasHints) return null;
+        const hasStreak = (bestGrammarStreak ?? 0) >= 2;
+        if (!hasFillers && !hasResponseTimes && !hasCorrections && !hasHints && !hasStreak) return null;
 
         const avgResponseTime = hasResponseTimes
           ? responseTimes!.reduce((a, b) => a + b, 0) / responseTimes!.length
@@ -647,6 +650,14 @@ export function ConversationSummary({
                     {hintCount}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>💡 Hints Used</div>
+                </div>
+              )}
+              {hasStreak && (
+                <div data-testid="best-grammar-streak" style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--success, #22c55e)' }}>
+                    🔥 {bestGrammarStreak}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Best Grammar Streak</div>
                 </div>
               )}
             </div>

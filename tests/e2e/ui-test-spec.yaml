@@ -2968,3 +2968,51 @@ pages:
         type: functional
         priority: low
         added_in: 586
+
+      - id: conv-117
+        target: Grammar streak badge appears after 2 consecutive correct messages
+        action: Start a conversation and send 2 messages that both receive is_correct=true feedback
+        expect: An element with data-testid="grammar-streak-badge" appears in the chat status bar showing "🔥 2"
+        type: functional
+        priority: high
+        added_in: 587
+
+      - id: conv-118
+        target: Grammar streak badge is hidden when streak is below 2
+        action: Start a conversation and send 1 correct message
+        expect: No element with data-testid="grammar-streak-badge" is present in the DOM
+        type: state
+        priority: medium
+        added_in: 587
+
+      - id: conv-119
+        target: Grammar streak badge shows broken flash on error after streak
+        action: Build a streak of 3+ correct messages then send one with a grammar error
+        expect: The badge briefly shows "💔 streak broken" text with data-streak-broken="true" then fades out
+        type: functional
+        priority: high
+        added_in: 587
+
+      - id: conv-120
+        target: Grammar streak badge color changes at streak 5
+        action: Send 5 consecutive correct messages during a conversation
+        expect: The badge text color changes from amber (--warning) to green (--success) at streak 5
+        type: visual
+        priority: medium
+        added_in: 587
+
+      - id: conv-121
+        target: Grammar streak badge tooltip shows session best
+        action: Hover over the grammar streak badge during chat
+        expect: Title attribute shows "Grammar streak: N in a row (session best!)" or "(best: M)" if current < best
+        type: functional
+        priority: low
+        added_in: 587
+
+      - id: conv-122
+        target: Best grammar streak appears in Session Insights on summary
+        action: Complete a conversation where the best grammar streak was 3+
+        expect: The Session Insights card contains an element with data-testid="best-grammar-streak" showing "🔥 3" and label "Best Grammar Streak"
+        type: functional
+        priority: high
+        added_in: 587
