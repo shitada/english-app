@@ -13,6 +13,7 @@ from app.dal.vocabulary import (
     export_words,
     get_attempt_history,
     get_drill_words,
+    get_due_count,
     get_due_word_ids,
     get_due_words,
     get_etymology,
@@ -1887,3 +1888,52 @@ class TestGetVocabularyUsageAnalysis:
         assert result["actively_used"][0]["journal_count"] == 1
         assert result["actively_used"][0]["total_count"] == 2
         assert result["summary"]["most_used_word"] == "confirm"
+
+
+# ---------------------------------------------------------------------------
+# get_due_count
+# ---------------------------------------------------------------------------
+
+class TestGetDueCount:
+    @pytest.mark.asyncio
+    async def test_zero_when_no_progress(self, test_db):
+        """Returns 0 when there are no vocabulary_progress rows."""
+        count = await get_due_count(test_db)
+        assert count == 0
+
+    @pytest.mark.asyncio
+    async def test_counts_null_next_review(self, test_db):
+        """Words with NULL next_review_at are considered due."""
+        saved = await save_words(test_db, "business", _make_questions(2))
+        for w in saved:
+            await test_db.execute(
+                "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level) VALUES (?, 0, 0, 0)",
+                (w["id"],),
+            )
+        await test_db.commit()
+        count = await get_due_count(test_db)
+        assert count == 2
+
+    @pytest.mark.asyncio
+    async def test_counts_past_review_date(self, test_db):
+        """Words with next_review_at in the past are due."""
+        saved = await save_words(test_db, "business", _make_questions(1))
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 1, 0, 1, '2000-01-01T00:00:00+00:00')",
+            (saved[0]["id"],),
+        )
+        await test_db.commit()
+        count = await get_due_count(test_db)
+        assert count == 1
+
+    @pytest.mark.asyncio
+    async def test_excludes_future_review_date(self, test_db):
+        """Words with next_review_at in the far future are NOT due."""
+        saved = await save_words(test_db, "business", _make_questions(1))
+        await test_db.execute(
+            "INSERT INTO vocabulary_progress (word_id, correct_count, incorrect_count, level, next_review_at) VALUES (?, 1, 0, 1, '2099-12-31T23:59:59+00:00')",
+            (saved[0]["id"],),
+        )
+        await test_db.commit()
+        count = await get_due_count(test_db)
+        assert count == 0

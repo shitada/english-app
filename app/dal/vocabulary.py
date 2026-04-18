@@ -1186,3 +1186,13 @@ async def save_word_family(db: aiosqlite.Connection, word_id: int, family_data: 
         (_json.dumps(family_data), word_id),
     )
     await db.commit()
+
+
+async def get_due_count(db: aiosqlite.Connection) -> int:
+    """Return the number of vocabulary words currently due for SRS review."""
+    now = datetime.now(timezone.utc).isoformat()
+    row = await db.execute_fetchall(
+        "SELECT COUNT(*) AS cnt FROM vocabulary_progress WHERE next_review_at IS NULL OR next_review_at <= ?",
+        (now,),
+    )
+    return int(row[0]["cnt"]) if row else 0

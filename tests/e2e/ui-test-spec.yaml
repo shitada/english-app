@@ -202,6 +202,22 @@ pages:
         priority: low
         added_in: 550
 
+      - id: home-024
+        target: Vocabulary SRS due-count badge appears on nav link when words are due
+        action: snapshot the Vocabulary NavLink in the header
+        expect: A red circle badge with due count is visible next to the Vocabulary link when due_count > 0
+        type: functional
+        priority: medium
+        added_in: 583
+
+      - id: home-025
+        target: Vocabulary SRS due-count badge hidden when count is zero
+        action: snapshot the Vocabulary NavLink in the header when no words are due
+        expect: No .nav-badge element is rendered next to the Vocabulary link
+        type: state
+        priority: medium
+        added_in: 583
+
   conversation:
     path: /conversation
     tests:

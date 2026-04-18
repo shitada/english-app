@@ -2951,3 +2951,12 @@ export interface ExpressBetterResponse {
   conversation_id: number;
   pairs: ExpressBetterPair[];
 }
+
+// Vocabulary due-count
+export interface VocabDueCountResponse {
+  due_count: number;
+}
+
+export async function getVocabDueCount(): Promise<VocabDueCountResponse> {
+  return request<VocabDueCountResponse>('/api/vocabulary/due-count');
+}

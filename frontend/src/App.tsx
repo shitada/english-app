@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Globe, Moon, Sun } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -7,6 +7,7 @@ import StudyTimer from './components/StudyTimer';
 import { useTheme } from './hooks/useTheme';
 import { useHealthCheck } from './hooks/useHealthCheck';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
+import { getVocabDueCount } from './api';
 import Home from './pages/Home';
 import Conversation from './pages/Conversation';
 import Pronunciation from './pages/Pronunciation';
@@ -14,12 +15,30 @@ import Vocabulary from './pages/Vocabulary';
 import Listening from './pages/Listening';
 import Dashboard from './pages/Dashboard';
 
+const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
+
 function Header() {
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const health = useHealthCheck();
   const { locale, setLocale, t } = useI18n();
+  const [dueCount, setDueCount] = useState(0);
+
+  const fetchDueCount = useCallback(async () => {
+    try {
+      const data = await getVocabDueCount();
+      setDueCount(data.due_count);
+    } catch {
+      // silently ignore – badge just won't show
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDueCount();
+    const id = setInterval(fetchDueCount, DUE_COUNT_REFRESH_MS);
+    return () => clearInterval(id);
+  }, [fetchDueCount]);
 
   const handleNavClick = () => setNavOpen(false);
 
@@ -37,7 +56,10 @@ function Header() {
         <NavLink to="/conversation" onClick={handleNavClick}>{t('navConversation')}</NavLink>
         <NavLink to="/pronunciation" onClick={handleNavClick}>{t('navPronunciation')}</NavLink>
         <NavLink to="/listening" onClick={handleNavClick}>{t('navListening')}</NavLink>
-        <NavLink to="/vocabulary" onClick={handleNavClick}>{t('navVocabulary')}</NavLink>
+        <NavLink to="/vocabulary" onClick={handleNavClick} style={{ position: 'relative' }}>
+          {t('navVocabulary')}
+          {dueCount > 0 && <span className="nav-badge" aria-label={`${dueCount} words due for review`}>{dueCount}</span>}
+        </NavLink>
         <NavLink to="/dashboard" onClick={handleNavClick}>{t('navDashboard')}</NavLink>
       </nav>
       <button

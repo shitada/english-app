@@ -538,6 +538,17 @@ async def batch_import(
     return await vocab_dal.batch_import_words(db, words_data)
 
 
+class DueCountResponse(BaseModel):
+    due_count: int
+
+
+@router.get("/due-count", response_model=DueCountResponse)
+async def get_due_count(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Return the number of vocabulary words currently due for SRS review."""
+    count = await vocab_dal.get_due_count(db)
+    return DueCountResponse(due_count=count)
+
+
 class ToggleFavoriteResponse(BaseModel):
     word_id: int
     is_favorite: bool
