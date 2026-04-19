@@ -29,6 +29,7 @@ from app.dal.vocabulary import (
     get_vocabulary_stats,
     get_vocabulary_usage_analysis,
     get_weak_words,
+    get_hard_words,
     get_word,
     get_word_detail,
     get_word_with_notes,
@@ -1937,3 +1938,68 @@ class TestGetDueCount:
         await test_db.commit()
         count = await get_due_count(test_db)
         assert count == 0
+
+
+@pytest.mark.unit
+class TestGetHardWords:
+    async def test_empty(self, test_db):
+        assert await get_hard_words(test_db) == []
+
+    async def test_filters_by_accuracy_and_attempts(self, test_db):
+        """Verifies all filters: 1 incorrect excluded; 80% excluded;
+        40% with 3 attempts (and >=2 wrong) included; ordering by accuracy ASC."""
+        # Need 5 distinct words
+        ws = await save_words(test_db, "t1", _make_questions(5))
+
+        # w0: 1 attempt, 1 incorrect -> excluded (only 1 total attempt, also <2 incorrect)
+        await update_progress(test_db, ws[0]["id"], False)
+
+        # w1: 4 correct + 1 incorrect = 80% accuracy -> excluded (accuracy >= 0.6)
+        for _ in range(4):
+            await update_progress(test_db, ws[1]["id"], True)
+        await update_progress(test_db, ws[1]["id"], False)
+
+        # w2: 3 attempts, 2 correct + 1 incorrect = 66% -> excluded
+        # (incorrect_count < 2 so excluded by that rule too)
+        await update_progress(test_db, ws[2]["id"], True)
+        await update_progress(test_db, ws[2]["id"], True)
+        await update_progress(test_db, ws[2]["id"], False)
+
+        # w3: 3 attempts, 1 correct + 2 incorrect = ~33% -> included
+        await update_progress(test_db, ws[3]["id"], True)
+        await update_progress(test_db, ws[3]["id"], False)
+        await update_progress(test_db, ws[3]["id"], False)
+
+        # w4: 5 attempts, 2 correct + 3 incorrect = 40% -> included
+        await update_progress(test_db, ws[4]["id"], True)
+        await update_progress(test_db, ws[4]["id"], True)
+        await update_progress(test_db, ws[4]["id"], False)
+        await update_progress(test_db, ws[4]["id"], False)
+        await update_progress(test_db, ws[4]["id"], False)
+
+        rows = await get_hard_words(test_db)
+        ids = [r["id"] for r in rows]
+
+        assert ws[0]["id"] not in ids, "1 attempt should be excluded"
+        assert ws[1]["id"] not in ids, "80% accuracy should be excluded"
+        assert ws[2]["id"] not in ids, "incorrect_count < 2 should be excluded"
+        assert ws[3]["id"] in ids, "33% w/ 2 wrong should be included"
+        assert ws[4]["id"] in ids, "40% w/ 3 wrong should be included"
+
+        # Order by accuracy ASC (worst first): w3 (~0.33) before w4 (0.40)
+        assert ids.index(ws[3]["id"]) < ids.index(ws[4]["id"])
+
+        # Verify returned shape
+        first = next(r for r in rows if r["id"] == ws[3]["id"])
+        assert "word" in first and "meaning" in first and "topic" in first
+        assert "correct_count" in first and "incorrect_count" in first
+        assert "accuracy" in first and isinstance(first["accuracy"], float)
+        assert 0.0 <= first["accuracy"] < 0.6
+
+    async def test_limit(self, test_db):
+        ws = await save_words(test_db, "t1", _make_questions(3))
+        for w in ws:
+            await update_progress(test_db, w["id"], False)
+            await update_progress(test_db, w["id"], False)
+        rows = await get_hard_words(test_db, limit=2)
+        assert len(rows) == 2

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Volume2, Check, X, ArrowRight, Zap, Mic, SkipForward, RotateCcw } from 'lucide-react';
-import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, type EtymologyInfo, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers, getWordEtymology } from '../api';
+import { api, type QuizQuestion, type FillBlankQuestion, type SentenceBuildExercise, type SentenceCraftWord, type SentenceCraftResult, type TiersResponse, type EtymologyInfo, type HardWordItem, fetchHardWords, getSentenceBuildExercises, checkSentenceBuild, getSentenceCraftWords, evaluateSentenceCraft, getVocabularyTiers, getWordEtymology } from '../api';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -66,6 +66,11 @@ export default function Vocabulary() {
   const [tiersData, setTiersData] = useState<TiersResponse | null>(null);
   const [tiersLoading, setTiersLoading] = useState(false);
   const [expandedTiers, setExpandedTiers] = useState<Set<string>>(new Set(['struggling', 'learning']));
+
+  // Hard words to revisit
+  const [hardWords, setHardWords] = useState<HardWordItem[] | null>(null);
+  const [hardWordsLoading, setHardWordsLoading] = useState(false);
+  const [hardWordsOpen, setHardWordsOpen] = useState(false);
 
   // Word pronunciation practice state
   const [pronWords, setPronWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
@@ -276,6 +281,56 @@ export default function Vocabulary() {
     });
   };
 
+  const toggleHardWords = async () => {
+    const next = !hardWordsOpen;
+    setHardWordsOpen(next);
+    if (next && hardWords === null && !hardWordsLoading) {
+      setHardWordsLoading(true);
+      try {
+        const res = await fetchHardWords(20);
+        setHardWords(res.words);
+      } catch (err) {
+        console.error(err);
+        setInlineError('Failed to load hard words.');
+        setHardWords([]);
+      } finally {
+        setHardWordsLoading(false);
+      }
+    }
+  };
+
+  const drillHardWords = async () => {
+    setLoading(true);
+    setSrsChanges([]);
+    try {
+      const res = hardWords && hardWords.length > 0
+        ? { words: hardWords }
+        : await fetchHardWords(20);
+      const items = res.words || [];
+      if (items.length === 0) {
+        setInlineError('No struggling words yet — keep practicing!');
+        return;
+      }
+      // Reuse drill phase: map to drill word shape
+      const drillItems = items.slice(0, 10).map(w => ({
+        id: w.id,
+        word: w.word,
+        meaning: w.meaning,
+        topic: w.topic,
+        difficulty: 1,
+        example_sentence: '',
+      }));
+      setDrillWords(drillItems);
+      setPhase('drill');
+      tts.speak(drillItems[0].word);
+    } catch (err) {
+      console.error(err);
+      setInlineError('Failed to start hard-words drill.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   // Auto-play TTS for audio quiz mode
   useEffect(() => {
@@ -438,6 +493,92 @@ export default function Vocabulary() {
         >
           📊 Word Tiers — see your mastery levels
         </button>
+
+        <div
+          data-testid="hard-words-card"
+          style={{
+            marginBottom: 20, borderRadius: 12, border: '2px solid #ef4444',
+            background: 'linear-gradient(135deg, #fee2e2, #fecaca)', overflow: 'hidden',
+          }}
+        >
+          <button
+            onClick={toggleHardWords}
+            disabled={loading || hardWordsLoading}
+            aria-expanded={hardWordsOpen}
+            aria-controls="hard-words-panel"
+            aria-label="Toggle hard words to revisit"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              width: '100%', padding: '14px 20px', cursor: 'pointer',
+              border: 'none', background: 'transparent',
+              color: '#991b1b', fontWeight: 600, fontSize: '1rem',
+            }}
+          >
+            <span>🔥 Hard words to revisit{hardWords ? ` (${hardWords.length})` : ''}</span>
+            <span aria-hidden="true">{hardWordsOpen ? '▾' : '▸'}</span>
+          </button>
+          {hardWordsOpen && (
+            <div
+              id="hard-words-panel"
+              style={{ padding: '0 20px 16px 20px', background: 'rgba(255,255,255,0.6)' }}
+            >
+              {hardWordsLoading ? (
+                <p style={{ margin: '12px 0', color: '#7f1d1d' }}>Loading…</p>
+              ) : hardWords && hardWords.length > 0 ? (
+                <>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0', maxHeight: 260, overflowY: 'auto' }}>
+                    {hardWords.map(w => {
+                      const pct = Math.round((w.accuracy || 0) * 100);
+                      return (
+                        <li
+                          key={w.id}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            gap: 8, padding: '8px 10px', marginBottom: 6, borderRadius: 8,
+                            background: '#fff', border: '1px solid #fecaca',
+                          }}
+                        >
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontWeight: 600, color: '#111827' }}>{w.word}</div>
+                            <div style={{ fontSize: '0.85rem', color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {w.meaning}
+                            </div>
+                          </div>
+                          <span
+                            aria-label={`Accuracy ${pct} percent`}
+                            style={{
+                              flex: '0 0 auto', padding: '2px 8px', borderRadius: 999,
+                              background: pct < 30 ? '#dc2626' : pct < 50 ? '#f59e0b' : '#fbbf24',
+                              color: '#fff', fontSize: '0.75rem', fontWeight: 700,
+                            }}
+                          >
+                            {pct}%
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <button
+                    onClick={drillHardWords}
+                    disabled={loading}
+                    aria-label="Drill hard words"
+                    style={{
+                      width: '100%', padding: '10px 16px', borderRadius: 8, cursor: 'pointer',
+                      border: 'none', background: '#dc2626', color: '#fff',
+                      fontWeight: 600, fontSize: '0.95rem',
+                    }}
+                  >
+                    🎯 Drill these
+                  </button>
+                </>
+              ) : (
+                <p style={{ margin: '12px 0', color: '#7f1d1d' }}>
+                  No struggling words yet — keep practicing!
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={async () => {

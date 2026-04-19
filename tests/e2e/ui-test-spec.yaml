@@ -1330,6 +1330,22 @@ pages:
         priority: medium
         added_in: 571
 
+      - id: vocab-033
+        target: Hard words to revisit card toggles
+        action: click the "🔥 Hard words to revisit" header on the vocabulary select page
+        expect: Panel expands showing either word list with accuracy badges and "Drill these" button, or empty-state message "No struggling words yet — keep practicing!"
+        type: functional
+        priority: medium
+        added_in: 633
+
+      - id: vocab-034
+        target: Drill hard words button starts focused drill
+        action: expand "Hard words to revisit" card with at least one word, click "Drill these"
+        expect: Phase changes to drill view loaded with the hard words
+        type: functional
+        priority: medium
+        added_in: 633
+
   dashboard:
     path: /dashboard
     tests:

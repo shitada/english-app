@@ -362,4 +362,117 @@ Now I have enough context. Let me create the utility, tests, and edit Listening.
 2. Add state for `playingReviewIdx` and per-question `showSentence` toggles
 3. Add `replayReviewSentence` and `replayAllMissed` callbacks
 4. Cancel speech on phase change out of results
-5. Render buttons in resultsNow add the callbacks and the effect. Let me find a good spot:Now add UI: top button + per-question replay buttons in results.Now add the top "Replay all missed sentences" button:Let me verify it compiles by running the frontend tests for the new util file:Now update UI test spec since Listening.tsx page was modified:
+5. Render buttons in resultsNow add the callbacks and the effect. Let me find a good spot:Now add UI: top button + per-question replay buttons in results.Now add the top "Replay all missed sentences" button:Let me verify it compiles by running the frontend tests for the new util file:Now update UI test spec since Listening.tsx page was modified:```json
+{
+  "committed": true,
+  "commit_hash": "01d6865",
+  "files_changed": ["frontend/src/pages/Listening.tsx", "frontend/src/utils/listeningReview.ts", "frontend/src/__tests__/listeningReview.test.ts", "tests/e2e/ui-test-spec.yaml"],
+  "tests_added": 6,
+  "ui_spec_updated": true,
+  "description": "Added per-question 'Replay sentence (0.75x)' button, show-sentence toggle, and 'Replay all missed sentences' chained playback for the Listening quiz results phase, with sentence-relevance helper and unit tests."
+}
+```● Coder implement iter 632
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #632: per-question replay sentence for missed
+  │   │ listening answers
+  │   │
+  │   │ Co-authored-by: Copilot <copilot@github.com>" 2>&1 | tail -10
+  │   └ 11 lines...
+  └ check commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1
+      │ --format="%H" && git show --stat HEAD | head -20
+      └ 18 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2131,
+  "tests_total": 2131,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "vitest_result": "pass (6/6 listeningReview)",
+  "overall_pass": true,
+  "test_output": "======================= 2131 passed in 105.25s (0:01:45) =======================",
+  "failure_summary": ""
+}
+```
+
+All checks passed:
+- **Pytest**: 2131/2131 passed
+- **TypeScript**: clean (exit 0)
+- **Vitest** (listeningReview.test.ts): 6/6 passed
+- **Smoke test**: skipped (no backend files changed)
+- **E2E**: not run (no results file)● Tester test iter 632
+  │ Vitest for listeningReview (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ src/__tests__/listeningReview.test.ts 2>&1 | tail -30
+  │   └ 9 lines...
+  └ Check e2e results (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Based on the summary: all 2131 tests pass, TS check passes, vitest 6/6 passes. Frontend .tsx changes were made but no QA tester was run (smoke skip). Per rules, when QA wasn't run on frontend changes, I should be cautious but the change is well-tested with unit tests.
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 6,
+  "total_score": 6.75,
+  "verdict": "keep",
+  "reason": "Useful per-question replay UX for missed listening answers backed by new unit tests; all tests and TS checks pass, though no QA smoke run was performed."
+}
+```● Evaluator evaluate iter 632
+  └ List directory .
+      └ 211 files found
+
+● record iter 632 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776596755 T1=1776596822 T2=1776596956 T3=1776597090 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "632"
+  │ "01d6865" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))"
+  │ "$((T4-T3))" "$((T4-T0))" "2131" "2131" "pass" "6.75" "kept" "Listening …
+  └ 5 lines...
+
+Iter 632 kept. Moving to iter 633.
+
+● T0 iter 633 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Add 'Hard words to revisit' smart tier on Vocabulary page",
+  "description": "Surface a new UX-facing tier on the Vocabulary page that highlights the user's struggling words (high error rate, low SRS level despite multiple attempts). This is high-value because struggling words are exactly what learners should drill, but today they are buried in the generic level-based tiers.\n\nBackend (app/dal/vocabulary.py): add a new async function `get_hard_words(db, limit: int = 20) -> list[dict]` that returns words from `vocabulary_progress` where `(correct_count + incorrect_count) >= 2` AND `incorrect_count >= 2` AND accuracy = correct_count/(correct_count+incorrect_count) < 0.6, ordered by accuracy ASC then incorrect_count DESC. Join with vocabulary_words to return id, word, meaning, topic, level, correct_count, incorrect_count, accuracy (float), last_reviewed.\n\nAPI (app/routers/vocabulary.py): add GET `/api/vocabulary/hard-words?limit=20` that calls the new DAL function and returns `{words: [...]}`. No schema changes required (uses existing columns, no migration needed).\n\nFrontend (frontend/src/api.ts): add `fetchHardWords(limit?: number)` typed wrapper.\n\nFrontend (frontend/src/pages/Vocabulary.tsx): add a new collapsible 'Hard words to revisit' tier card that: (1) loads on mount and after each quiz completion; (2) shows the list with word, meaning, accuracy badge (e.g. '40% correct'), and a 'Drill these' button; (3) clicking 'Drill these' starts a focused mini-quiz using only those words (reuse existing quiz UI by populating the question list from the selected hard words instead of fetching by topic). Empty state: 'No struggling words yet — keep practicing!'.\n\nTests: add `tests/unit/test_vocabulary_dal.py::test_get_hard_words_filters_by_accuracy_and_attempts` covering: word with 1 incorrect (excluded — too few attempts), word with 80% accuracy (excluded), word with 40% accuracy and 3 attempts (included), ordering by accuracy ASC. Add an integration test for the new endpoint.",
+  "files_to_modify": ["app/dal/vocabulary.py", "app/routers/vocabulary.py", "frontend/src/api.ts", "frontend/src/pages/Vocabulary.tsx", "tests/unit/test_vocabulary_dal.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer propose iter 633
+  │ Read vocabulary.py
+  │   │ app/dal/vocabulary.py
+  │   └ L1:50 (50 lines read)
+  └ Read vocabulary.py
+      │ app/dal/vocabulary.py
+      └ L50:250 (199 lines read)
+
+● T1 iter 633 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me check the existing test patterns and frontend conventions.Good. Now let me look at the integration test pattern and frontend api.ts/Vocabulary.tsx.Now let me check the Vocabulary.tsx file structure for where to add the tier card.Now I have enough to implement. Let me check Vocabulary.tsx where to inject the card and the `ui-test-spec.yaml`.Now I have enough info. Let me implement everything.Now implementing.Now the router:Now the frontend api.ts:Also export a top-level `fetchHardWords` wrapper as the proposal mentions a typed wrapper:Now Vocabulary.tsx — add a collapsible "Hard words to revisit" tier card. Add state and UI:Now add handlers and the UI card. Let me add right after `toggleTier`:Now insert the collapsible card UI right after the "Word Tiers" button:Now add unit tests + integration tests. First unit tests:Now integration test:Update ui-test-spec.yaml:Quick sanity-check Python compiles and imports:Now check TypeScript compiles:All clean. Commit:

@@ -365,6 +365,30 @@ async def get_weak_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict
     return [dict(r) for r in rows]
 
 
+async def get_hard_words(db: aiosqlite.Connection, limit: int = 20) -> list[dict[str, Any]]:
+    """Return words the user struggles with: >=2 attempts, >=2 incorrect, accuracy <0.6.
+
+    Ordered by accuracy ASC (worst first), then incorrect_count DESC.
+    """
+    rows = await db.execute_fetchall(
+        """SELECT vw.id, vw.word, vw.meaning, vw.topic,
+                  vp.correct_count, vp.incorrect_count, vp.level,
+                  vp.last_reviewed,
+                  CAST(vp.correct_count AS REAL) /
+                      (vp.correct_count + vp.incorrect_count) AS accuracy
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           WHERE (vp.correct_count + vp.incorrect_count) >= 2
+             AND vp.incorrect_count >= 2
+             AND CAST(vp.correct_count AS REAL) /
+                 (vp.correct_count + vp.incorrect_count) < 0.6
+           ORDER BY accuracy ASC, vp.incorrect_count DESC, vw.id ASC
+           LIMIT ?""",
+        (limit,),
+    )
+    return [dict(r) for r in rows]
+
+
 async def get_drill_words(db: aiosqlite.Connection, count: int = 10) -> list[dict[str, Any]]:
     """Get words for quick drill: prioritize due and weak words, fill with random."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")

@@ -296,6 +296,34 @@ async def get_weak_words(
     return {"words": words}
 
 
+class HardWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    topic: str
+    correct_count: int
+    incorrect_count: int
+    level: int
+    accuracy: float
+    last_reviewed: str | None = None
+
+
+class HardWordsResponse(BaseModel):
+    words: list[HardWordItem]
+
+
+@router.get("/hard-words", response_model=HardWordsResponse)
+async def get_hard_words(
+    limit: int = Query(default=20, ge=1, le=100),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Get words the user struggles with (>=2 attempts, >=2 wrong, accuracy <60%)."""
+    words = await vocab_dal.get_hard_words(db, limit)
+    vocab_topics = get_vocabulary_topics()
+    words = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in words]
+    return {"words": words}
+
+
 class DrillWordItem(BaseModel):
     id: int
     word: str

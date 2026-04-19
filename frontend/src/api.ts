@@ -293,6 +293,11 @@ export const api = {
       `/api/vocabulary/drill?count=${count}`
     ),
 
+  fetchHardWords: (limit = 20) =>
+    request<{ words: { id: number; word: string; meaning: string; topic: string; correct_count: number; incorrect_count: number; level: number; accuracy: number; last_reviewed: string | null }[] }>(
+      `/api/vocabulary/hard-words?limit=${limit}`
+    ),
+
   // Dashboard
   getDashboardStats: () => request<DashboardStats>('/api/dashboard/stats'),
 
@@ -390,6 +395,21 @@ export const api = {
       body: JSON.stringify({ correct, total, contrast_summary }),
     }),
 };
+
+export type HardWordItem = {
+  id: number;
+  word: string;
+  meaning: string;
+  topic: string;
+  correct_count: number;
+  incorrect_count: number;
+  level: number;
+  accuracy: number;
+  last_reviewed: string | null;
+};
+
+export const fetchHardWords = (limit = 20): Promise<{ words: HardWordItem[] }> =>
+  api.fetchHardWords(limit);
 
 export interface MinimalPairListeningRound {
   word_a: string;

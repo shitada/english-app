@@ -1162,3 +1162,44 @@ async def test_due_count_with_due_words(client, mock_copilot):
     assert res.status_code == 200
     data = res.json()
     assert isinstance(data["due_count"], int)
+
+
+@pytest.mark.asyncio
+async def test_hard_words_empty(client):
+    res = await client.get("/api/vocabulary/hard-words")
+    assert res.status_code == 200
+    assert res.json() == {"words": []}
+
+
+@pytest.mark.asyncio
+async def test_hard_words_after_wrong_answers(client, mock_copilot):
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [
+            {"word": "tricky", "correct_meaning": "difficult", "example_sentence": "Tricky.", "difficulty": 1},
+        ]
+    })
+    quiz = await client.get("/api/vocabulary/quiz?topic=shopping&count=1")
+    wid = quiz.json()["questions"][0]["id"]
+    # 1 correct + 3 wrong → accuracy = 0.25, incorrect_count = 3 (>=2)
+    await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": True})
+    for _ in range(3):
+        await client.post("/api/vocabulary/answer", json={"word_id": wid, "is_correct": False})
+
+    res = await client.get("/api/vocabulary/hard-words?limit=10")
+    assert res.status_code == 200
+    words = res.json()["words"]
+    assert len(words) == 1
+    w = words[0]
+    assert w["id"] == wid
+    assert w["word"] == "tricky"
+    assert w["incorrect_count"] == 3
+    assert w["correct_count"] == 1
+    assert 0.0 <= w["accuracy"] < 0.6
+
+
+@pytest.mark.asyncio
+async def test_hard_words_validates_limit(client):
+    res = await client.get("/api/vocabulary/hard-words?limit=0")
+    assert res.status_code == 422
+    res = await client.get("/api/vocabulary/hard-words?limit=101")
+    assert res.status_code == 422
