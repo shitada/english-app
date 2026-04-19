@@ -588,3 +588,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 635	84380ea	2026-04-19	51	103	319	42	515	2151	2151	pass	7.00	kept	Skip grammar-check LLM call for trivial messages (<4 words or known ack) in /conversation/message
 636	7b349df	2026-04-19	141	272	135	19	567	2156	2156	pass	7.55	kept	Copilot session warm-pool (background prefetch of next session per system_prompt)
 637	148bc82	2026-04-19	70	158	137	31	396	2159	2159	pass	7.00	kept	Shadowing progress badge (attempts, avg-last-20, best) + GET /api/shadowing/stats
+638	51c90cf	2026-04-19	124	361	135	27	647	2166	2166	pass	7.00	kept	Conversation Quick Reply mode (1-sentence AI replies, skips grammar check)

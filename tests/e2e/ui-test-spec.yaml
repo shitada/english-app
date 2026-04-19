@@ -836,6 +836,22 @@ pages:
         priority: medium
         added_in: 589
 
+      - id: pron-014
+        target: Trouble Words card appears on /pronunciation when low-score attempts exist
+        action: visit /pronunciation after low-scoring attempts, locate data-testid="trouble-words-card"
+        expect: Card with heading "Trouble Words" lists repeatedly-missed words with miss_count, total_seen, miss_rate, and an example sentence; card is hidden when no trouble words exist
+        type: functional
+        priority: medium
+        added_in: 639
+
+      - id: pron-015
+        target: Trouble Words Practice button starts shadowing for example sentence
+        action: Click data-testid="trouble-word-practice-<word>" inside the trouble words card
+        expect: App transitions to practice phase with the example_sentence pre-loaded as the selected sentence
+        type: functional
+        priority: medium
+        added_in: 639
+
   listening:
     path: /listening
     tests:

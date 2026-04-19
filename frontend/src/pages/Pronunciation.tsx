@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Volume2, MicOff, RotateCcw, ChevronRight, History, Mic, Play, Keyboard } from 'lucide-react';
-import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress, type DictationResult, type SentenceStatsResponse, checkDictation } from '../api';
+import { api, type PronunciationFeedback, type PronunciationAttempt, type PronunciationProgress, type DictationResult, type SentenceStatsResponse, type PronunciationTroubleWord, checkDictation } from '../api';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
@@ -36,6 +36,7 @@ export default function Pronunciation() {
   const [dictationPlayed, setDictationPlayed] = useState(false);
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [sentenceStats, setSentenceStats] = useState<SentenceStatsResponse | null>(null);
+  const [troubleWords, setTroubleWords] = useState<PronunciationTroubleWord[]>([]);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -67,6 +68,15 @@ export default function Pronunciation() {
       // Use sample sentences if API fails
     });
   }, []);
+
+  // Load trouble words on mount and when returning to select phase
+  useEffect(() => {
+    if (phase === 'select') {
+      api.getPronunciationTroubleWords(8)
+        .then((res) => setTroubleWords(res.words || []))
+        .catch(() => setTroubleWords([]));
+    }
+  }, [phase]);
 
   // Fetch sentence stats when entering result phase
   useEffect(() => {
@@ -188,6 +198,79 @@ export default function Pronunciation() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Shadowing: Listen to a sentence, then repeat it immediately. The app will auto-record after playback.
         </p>
+
+        {troubleWords.length > 0 && (
+          <div
+            className="card"
+            data-testid="trouble-words-card"
+            style={{
+              marginBottom: 16,
+              background: 'var(--card-bg, var(--bg-secondary))',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <h3 style={{ marginBottom: 4, fontSize: 16, color: 'var(--text-primary)' }}>
+              🎯 Trouble Words
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
+              Words you've recently missed in low-scoring attempts. Practice them in context.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {troubleWords.map((tw) => (
+                <li
+                  key={tw.word}
+                  data-testid={`trouble-word-${tw.word}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '8px 10px',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    background: 'var(--bg-primary)',
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>{tw.word}</strong>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                        missed {tw.miss_count}× of {tw.total_seen} ({Math.round(tw.miss_rate * 100)}%)
+                      </span>
+                    </div>
+                    {tw.example_sentence && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: 'var(--text-secondary)',
+                          marginTop: 2,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={tw.example_sentence}
+                      >
+                        “{tw.example_sentence}”
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    data-testid={`trouble-word-practice-${tw.word}`}
+                    onClick={() => {
+                      if (tw.example_sentence) {
+                        startPractice(tw.example_sentence);
+                      }
+                    }}
+                    disabled={!tw.example_sentence}
+                    style={{ fontSize: 12, padding: '4px 10px', flexShrink: 0 }}
+                  >
+                    Practice
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <button

@@ -350,6 +350,9 @@ export const api = {
   getPronunciationScoreTrend: () =>
     request<ScoreTrendResponse>('/api/pronunciation/trend'),
 
+  getPronunciationTroubleWords: (limit = 8) =>
+    request<PronunciationTroubleWordsResponse>(`/api/pronunciation/trouble-words?limit=${limit}`),
+
   getPronunciationDistribution: () =>
     request<ScoreDistributionResponse>('/api/pronunciation/distribution'),
 
@@ -610,6 +613,18 @@ export interface ScoreTrendResponse {
   recent_avg: number;
   previous_avg: number;
   change: number;
+}
+
+export interface PronunciationTroubleWord {
+  word: string;
+  miss_count: number;
+  total_seen: number;
+  miss_rate: number;
+  example_sentence: string;
+}
+
+export interface PronunciationTroubleWordsResponse {
+  words: PronunciationTroubleWord[];
 }
 
 export interface ScoreDistributionItem {

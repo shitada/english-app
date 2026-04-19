@@ -303,6 +303,28 @@ async def get_score_trend(db: aiosqlite.Connection = Depends(get_db_session)):
     return await pron_dal.get_score_trend(db)
 
 
+class TroubleWordItem(BaseModel):
+    word: str
+    miss_count: int
+    total_seen: int
+    miss_rate: float
+    example_sentence: str
+
+
+class TroubleWordsResponse(BaseModel):
+    words: list[TroubleWordItem]
+
+
+@router.get("/trouble-words", response_model=TroubleWordsResponse)
+async def get_trouble_words(
+    limit: int = Query(8, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Surface words the user repeatedly mispronounces (missing from transcription)."""
+    words = await pron_dal.get_trouble_words(db, limit=limit)
+    return {"words": words}
+
+
 class ScoreDistributionItem(BaseModel):
     bucket: str
     label: str

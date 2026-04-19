@@ -1304,6 +1304,89 @@ async def get_filler_word_analysis(db: aiosqlite.Connection) -> dict:
     }
 
 
+_TROUBLE_STOPWORDS = frozenset({
+    "a", "an", "the", "is", "are", "was", "were", "of", "to", "in", "on", "at",
+    "and", "or", "but", "i", "you", "he", "she", "it", "we", "they", "my", "your",
+})
+
+
+def _tokenize_trouble(text: str) -> list[str]:
+    """Lowercase alphanumeric tokenization (whitespace + punctuation split)."""
+    return re.findall(r"[a-z0-9]+", (text or "").lower())
+
+
+async def get_trouble_words(
+    db: aiosqlite.Connection,
+    limit: int = 8,
+    lookback: int = 50,
+    max_score: float = 7.5,
+) -> list[dict[str, Any]]:
+    """Find words repeatedly missing from the user's transcription.
+
+    Pulls the last ``lookback`` pronunciation attempts with score <= ``max_score``,
+    tokenizes both reference_text and user_transcription, and counts words that
+    appear in the reference but are missing (multiset-aware) from the user's
+    transcription. Stopwords and tokens shorter than 3 characters are filtered.
+
+    Returns up to ``limit`` items sorted by miss_count desc (ties broken by
+    miss_rate desc, then alphabetically), each with::
+
+        {word, miss_count, total_seen, miss_rate, example_sentence}
+
+    where ``example_sentence`` is the most-recent reference text containing the
+    word.
+    """
+    rows = await db.execute_fetchall(
+        """SELECT id, reference_text, user_transcription, score
+           FROM pronunciation_attempts
+           WHERE score IS NOT NULL AND score <= ?
+           ORDER BY id DESC
+           LIMIT ?""",
+        (max_score, lookback),
+    )
+
+    miss_counts: dict[str, int] = {}
+    total_seen: dict[str, int] = {}
+    examples: dict[str, str] = {}
+
+    for r in rows:
+        ref_tokens = _tokenize_trouble(r["reference_text"])
+        user_tokens = _tokenize_trouble(r["user_transcription"])
+        # Multiset difference: how many copies of each ref token are missing
+        from collections import Counter
+        ref_c = Counter(ref_tokens)
+        user_c = Counter(user_tokens)
+        missing = ref_c - user_c  # multiset diff
+        # Track unique ref tokens (for total_seen) once per attempt
+        for tok in set(ref_tokens):
+            if len(tok) < 3 or tok in _TROUBLE_STOPWORDS:
+                continue
+            total_seen[tok] = total_seen.get(tok, 0) + 1
+            # Most recent example: rows are DESC by id, so first time we see it is most recent
+            if tok not in examples:
+                examples[tok] = r["reference_text"]
+        for tok, cnt in missing.items():
+            if len(tok) < 3 or tok in _TROUBLE_STOPWORDS:
+                continue
+            if cnt > 0:
+                miss_counts[tok] = miss_counts.get(tok, 0) + cnt
+
+    items = []
+    for word, miss_count in miss_counts.items():
+        seen = total_seen.get(word, 0)
+        miss_rate = round(miss_count / seen, 3) if seen else 0.0
+        items.append({
+            "word": word,
+            "miss_count": miss_count,
+            "total_seen": seen,
+            "miss_rate": miss_rate,
+            "example_sentence": examples.get(word, ""),
+        })
+
+    items.sort(key=lambda x: (-x["miss_count"], -x["miss_rate"], x["word"]))
+    return items[:limit]
+
+
 async def get_today_used_journal_prompts(db: aiosqlite.Connection) -> list[str]:
     """Return distinct prompts already used in today's speaking journal entries."""
     cursor = await db.execute(
