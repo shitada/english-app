@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import logging.handlers
+import asyncio
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -72,9 +73,30 @@ async def lifespan(app: FastAPI):
     await init_db()
     start_wal_checkpoint_task()
     logger.info("Database ready.")
+
+    # Pre-warm Copilot SDK in background — must NOT block startup.
+    from app.copilot_client import get_copilot_service
+    try:
+        app.state.copilot_prewarm_task = asyncio.create_task(
+            get_copilot_service().prewarm()
+        )
+        logger.info("Copilot SDK prewarm scheduled.")
+    except Exception as exc:
+        logger.warning("Failed to schedule Copilot prewarm: %s", exc)
+        app.state.copilot_prewarm_task = None
+
     yield
     stop_wal_checkpoint_task()
-    from app.copilot_client import get_copilot_service
+
+    prewarm_task = getattr(app.state, "copilot_prewarm_task", None)
+    if prewarm_task is not None and not prewarm_task.done():
+        try:
+            await asyncio.wait_for(asyncio.shield(prewarm_task), timeout=0.1)
+        except asyncio.TimeoutError:
+            pass
+        except Exception as exc:
+            logger.debug("Prewarm task shutdown swallowed: %s", exc)
+
     await get_copilot_service().close()
 
 

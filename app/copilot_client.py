@@ -130,6 +130,7 @@ class CopilotService:
         self._retry_delays = cfg.get("retry_delays", [5, 15, 45])
         self._client: CopilotClient | None = None
         self._init_lock = asyncio.Lock()
+        self._prewarmed: bool = False
         logger.info(
             "CopilotService configured: model=%s, timeout=%d, retries=%d",
             self._model, self._timeout, self._max_retries,
@@ -262,6 +263,39 @@ class CopilotService:
 
         logger.error("Failed to parse JSON from response: %s", raw[:300])
         raise ValueError(f"Failed to parse JSON: {raw[:200]}")
+
+    async def prewarm(self) -> None:
+        """Pre-warm the Copilot SDK by creating and destroying a throwaway session.
+
+        This eliminates the ~0.6s cold-start session-creation cost from the first
+        real user request. Idempotent and never raises — failures are logged and
+        swallowed so startup is never blocked.
+        """
+        if self._prewarmed:
+            return
+        t0 = time.monotonic()
+        try:
+            client = await self._ensure_client()
+
+            def _on_permission_request(req: Any, ctx: dict[str, str]) -> PermissionRequestResult:
+                return PermissionRequestResult(kind="approved")
+
+            session = await client.create_session(
+                model=self._model,
+                system_message=SystemMessageReplaceConfig(mode="replace", content="ping"),
+                on_permission_request=_on_permission_request,
+            )
+            try:
+                await session.destroy()
+            except Exception as exc:
+                logger.warning("Copilot prewarm session.destroy() failed: %s", exc)
+            self._prewarmed = True
+            logger.info("Copilot SDK prewarmed in %.2fs", time.monotonic() - t0)
+        except Exception as exc:
+            logger.warning(
+                "Copilot prewarm failed (%.2fs): %s — first request will pay cold-start cost",
+                time.monotonic() - t0, exc,
+            )
 
     async def close(self) -> None:
         if self._client is not None:
