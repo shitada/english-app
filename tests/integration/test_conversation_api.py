@@ -2022,7 +2022,7 @@ async def test_start_conversation_role_swap_returns_briefing(client, mock_copilo
     """role_swap=True should populate user_role and role_briefing via parallel LLM calls."""
     briefing_json = '["May I see your reservation?", "Your room is on the 5th floor.", "Here is your key card.", "Enjoy your stay!"]'
 
-    async def ask_side_effect(system, prompt):
+    async def ask_side_effect(system, prompt, **kwargs):
         if "role-playing" in prompt:
             return briefing_json
         return "Hello, welcome to our hotel. How can I help?"
@@ -2045,7 +2045,7 @@ async def test_start_conversation_role_swap_returns_briefing(client, mock_copilo
 async def test_start_conversation_role_swap_briefing_failure_non_fatal(client, mock_copilot):
     """If briefing call fails, /start should still succeed with empty role_briefing."""
 
-    async def ask_side_effect(system, prompt):
+    async def ask_side_effect(system, prompt, **kwargs):
         if "role-playing" in prompt:
             raise RuntimeError("briefing LLM down")
         return "Welcome to the hotel!"
@@ -2070,7 +2070,7 @@ async def test_start_conversation_role_swap_calls_dispatched_concurrently(client
     max_in_flight = 0
     briefing_json = '["A","B","C","D"]'
 
-    async def ask_side_effect(system, prompt):
+    async def ask_side_effect(system, prompt, **kwargs):
         nonlocal in_flight, max_in_flight
         in_flight += 1
         max_in_flight = max(max_in_flight, in_flight)
@@ -2255,7 +2255,7 @@ async def test_send_message_history_truncated_to_max_turns(client, mock_copilot)
     # Capture the conv_prompt passed to copilot.ask
     captured: dict = {}
 
-    async def fake_ask(system, user_prompt):
+    async def fake_ask(system, user_prompt, **kwargs):
         captured["system"] = system
         captured["user_prompt"] = user_prompt
         return "OK reply"

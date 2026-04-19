@@ -1285,4 +1285,170 @@ No E2E failures file. Starting iteration 628.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now let me update the UI test spec and run tsc/vitest.All 4 tests pass. Remove unused `vi` import and commit.Still used. Let me run tsc to verify and commit.
+Now let me update the UI test spec and run tsc/vitest.All 4 tests pass. Remove unused `vi` import and commit.Still used. Let me run tsc to verify and commit.```json
+{
+  "committed": true,
+  "commit_hash": "cce071f",
+  "files_changed": [
+    "frontend/src/hooks/useSpeechSynthesis.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/useSpeechSynthesis.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 4,
+  "ui_spec_updated": true,
+  "description": "Added per-message Slow Replay (🐢 0.6×) button on assistant turns in Conversation; extended useSpeechSynthesis.speak with optional rateOverride and added vitest coverage."
+}
+```● Coder Implement iter 628
+  │ tsc (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -10
+  │   └ 1 line...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #628: add per-message slow-replay (0.6×) button on
+      │ assistant turns
+      │
+      │ Co-authored-by: autoresearch-coder <noreply@anthropic.com>" 2>&1 | tail …
+      └ 18 lines...
+
+● Mark T2 and check commit (shell)
+  │ echo "T2=$(date +%s)" && cd /Users/shingotada/Documents/vscode/english-app
+  │ && git --no-pager log --oneline -2 && git --no-pager diff HEAD~1 --name-only
+  └ 11 lines...
+
+```json
+{
+  "tests_passed": 2118,
+  "tests_total": 2118,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "vitest_result": "pass (4/4)",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": true,
+  "test_output": "======================= 2118 passed in 104.44s (0:01:44) =======================\nTypeScript: clean (exit 0)\nVitest useSpeechSynthesis.test.tsx: 4/4 passed",
+  "failure_summary": ""
+}
+```● Tester Test iter 628
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ src/__tests__/useSpeechSynthesis.test.tsx 2>&1 | tail -40
+  │   └ 9 lines...
+  └ e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● Mark T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.5,
+  "verdict": "keep",
+  "reason": "Small backward-compatible UX addition with new vitest coverage; all 2118 tests and TS checks pass."
+}● Evaluator Evaluate iter 628
+
+● Record iter 628 results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=628 HASH=cce071f PASSED=2118 TOTAL=2118 TS=pass SCORE=7.50 VERDICT=kept
+  │ DESC="Add per-message Slow Replay (0.6x) button on assistant turns in
+  │ Conversation" && T0=1776576702 T1=1776576793 T2=1776576931 T3=1776577064
+  │ && printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' …
+  └ 7 lines...
+
+Iter 628 done. Starting iter 629.
+
+● Mark T0 iter 629 (shell)
+  │ echo "T0_629=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Track Copilot call latency (p50/p95) and expose via metrics endpoint",
+  "description": "The PERF-HIGH backlog item asks for 'p50 応答時間を計測してログに記録' so future conversation-latency optimizations can be measured. Currently `app/copilot_client.py` logs per-call session/llm/total durations as one-off lines, but there is no aggregation, making it impossible to see whether iters 624-628 actually moved p50/p95.\n\nChanges:\n\n1. **`app/copilot_client.py`** — Add a module-level `LatencyTracker` class with thread-safe (asyncio.Lock-free, just per-event-loop) `record(label: str, session_s: float, llm_s: float, total_s: float)` and `snapshot() -> dict` methods. `snapshot()` returns, for each label and 'all', `{count, p50_s, p95_s, p99_s, mean_s, max_s, last_s}` for both `llm` and `total` durations. Keep a bounded ring buffer (e.g. last 200 samples per label) to cap memory. Expose a module function `get_latency_tracker()` returning the singleton.\n\n   Modify `CopilotService.ask()` to accept an optional `label: str = 'default'` parameter and, after the existing log line, call `get_latency_tracker().record(label, session_s, llm_s, total_s)`. Also add a periodic aggregate log: when a label's count crosses each multiple of 20, emit `logger.info('Copilot latency [%s] n=%d p50=%.2fs p95=%.2fs total p50=%.2fs p95=%.2fs', ...)`.\n\n   Update `ask_json()` to forward the `label` kwarg.\n\n2. **`app/routers/conversation.py`** (and lightly the other routers that call `service.ask`/`ask_json` for conversation) — pass `label='conversation_start'`, `'conversation_message'`, `'conversation_end'` at the call sites in conversation.py only (other routers can be left as default to keep the diff small).\n\n3. **New `app/routers/metrics.py`** — Tiny router with `GET /api/internal/copilot-metrics` returning `get_latency_tracker().snapshot()` as JSON. Register it in `app/main.py` (one-line include_router).\n\n4. **`tests/unit/test_copilot_latency.py`** — New unit tests for `LatencyTracker`: empty snapshot, single record, percentile correctness on a known sample (e.g. records 1..100 → p50≈50, p95≈95), ring-buffer cap (record 300, count stays at 200), per-label isolation.\n\n5. **`tests/integration/test_metrics_endpoint.py`** — Integration test that hits `/api/internal/copilot-metrics`, verifies 200 + expected schema (dict keyed by label with `count`, `llm`, `total` sub-dicts), and that after manually calling `tracker.record()` the snapshot reflects it.\n\nNo schema changes. No config.yaml changes. The tracker is in-memory only (acceptable: this is a single-process dev/learning app, and the backlog only asks for logs + visibility). This unblocks measuring the next round of perf work (prompt shortening, streaming).",
+  "files_to_modify": ["app/copilot_client.py", "app/routers/conversation.py", "app/routers/metrics.py", "tests/unit/test_copilot_latency.py", "tests/integration/test_metrics_endpoint.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 629
+  │ List directory app/routers
+  │   └ 9 files found
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L1:60 (60 lines read)
+
+● Mark T1 iter 629 (shell)
+  │ echo "T1_629=$(date +%s)"
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now update `ask` and `ask_json`:Now update conversation router call sites for the three labels (start, message, end):Now create metrics router:Now create the tests:All 8 tests pass. Let me also do a quick smoke check that nothing else broke (import the modules):```json
+{
+  "committed": true,
+  "commit_hash": "cf705a7",
+  "files_changed": [
+    "app/copilot_client.py",
+    "app/routers/conversation.py",
+    "app/routers/metrics.py",
+    "app/main.py",
+    "tests/unit/test_copilot_latency.py",
+    "tests/integration/test_metrics_endpoint.py"
+  ],
+  "tests_added": 8,
+  "ui_spec_updated": false,
+  "description": "Added in-memory LatencyTracker for Copilot calls with per-label p50/p95/p99 stats, periodic log emission every 20 calls, labeled conversation_start/message/end call sites, and new GET /api/internal/copilot-metrics endpoint."
+}
+```● Coder Implement iter 629
+  │ commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #629: add Copilot latency tracker +
+  │   │ /api/internal/copilot-metrics endpoint
+  │   │
+  │   │ Co-authored-by: autoresearch-coder <noreply@anthropic.com>" 2>&1 | tail …
+  │   └ 12 lines...
+  └ get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+● Mark T2 iter 629 (shell)
+  │ echo "T2_629=$(date +%s)" && cd
+  │ /Users/shingotada/Documents/vscode/english-app && git --no-pager log
+  │ --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2120,
+  "tests_total": 2126,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": false,
+  "test_output": "6 failed, 2120 passed in 125.77s\nFAILED tests/unit/test_conversation_memory.py::test_memory_extraction_on_end_conversation\nFAILED tests/unit/test_conversation_memory.py::test_memory_merge_deduplication\nFAILED tests/integration/test_conversation_api.py::test_start_conversation_role_swap_returns_briefing\nFAILED tests/integration/test_conversation_api.py::test_start_conversation_role_swap_briefing_failure_non_fatal\nFAILED tests/integration/test_conversation_api.py::test_start_conversation_role_swap_calls_dispatched_concurrently\nFAILED tests/integration/test_conversation_api.py::test_send_message_history_truncated_to_max_turns\n\nRoot cause (consistent across all 6): The conversation router now passes a `label` keyword argument to copilot_client.ask(...) (likely for the new latency/metrics instrumentation introduced in this iteration), but existing test fakes/mocks for `ask` do not accept `label`, raising: `TypeError: ...ask()/ask_side_effect()/fake_ask() got an unexpected keyword argument 'label'`. The LLM retry wrapper retries 3x then returns 502. Tests in test_copilot_latency.py and the new metrics endpoint test pass, but pre-existing conversation tests need their mock signatures updated to accept **kwargs (or `label`).",
+  "failure_summary": "6 conversation tests fail because router now passes `label` kwarg to copilot_client.ask() but their mock `ask` fakes don't accept it (TypeError -> 502). Mocks need **kwargs or a `label` parameter."
+}
+```● Tester Test iter 629
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ Read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+Tests failed — mocks don't accept `label` kwarg. Have coder fix the mocks.
+
+Now I'll fix all the mock signatures:All 2126 pass. Now amend:

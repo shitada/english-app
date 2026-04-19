@@ -578,3 +578,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 625	6060597	2026-04-19	50	369	131	25	575	2109	2109	pass	7.35	kept	Parallelize opening message and role-briefing LLM calls in /conversation/start
 626	7725c52	2026-04-19	70	175	130	27	402	2113	2113	pass	7.55	kept	Parallelize summary + memory extraction in /conversation/end (asyncio.gather)
 627	78f1da2	2026-04-19	69	250	132	18	469	2118	2118	pass	7.55	kept	Bound /message LLM context with history truncation (max_turns=16)
+628	cce071f	2026-04-19	91	138	133	9	371	2118	2118	pass	7.50	kept	Add per-message Slow Replay (0.6x) button on assistant turns in Conversation

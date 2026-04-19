@@ -375,7 +375,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         # Run opening greeting and role-briefing concurrently to halve latency.
         t0 = time.monotonic()
         opening_task = safe_llm_call(
-            lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
+            lambda: copilot.ask(system, "Start the scenario. Greet the user in character.", label="conversation_start"),
             context="start_conversation",
         )
         briefing_task = _get_briefing()
@@ -395,7 +395,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
     else:
         try:
             opening = await safe_llm_call(
-                lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
+                lambda: copilot.ask(system, "Start the scenario. Greet the user in character.", label="conversation_start"),
                 context="start_conversation",
             )
         except Exception:
@@ -572,6 +572,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
             return await copilot.ask_json(
                 "You are an English grammar and expression checker. Return ONLY valid JSON.",
                 grammar_prompt,
+                label="conversation_message",
             )
         except Exception as e:
             logger.warning("Grammar check failed (non-fatal): %s", e)
@@ -580,7 +581,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     try:
         feedback, ai_response = await asyncio.gather(
             _safe_grammar_check(),
-            safe_llm_call(lambda: copilot.ask(system, conv_prompt), context="send_message"),
+            safe_llm_call(lambda: copilot.ask(system, conv_prompt, label="conversation_message"), context="send_message"),
         )
     except Exception:
         await conv_dal.delete_message(db, user_msg_id)
@@ -692,6 +693,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
                     lambda: copilot.ask_json(
                         "You are an English learning assistant. Return ONLY valid JSON.",
                         summary_prompt,
+                        label="conversation_end",
                     ),
                     context="end_conversation",
                 )
@@ -709,6 +711,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
                 extracted = await copilot.ask_json(
                     "You are a fact extractor. Return ONLY valid JSON.",
                     extract_prompt,
+                    label="conversation_end",
                 )
                 facts = extracted.get("facts", []) if isinstance(extracted, dict) else []
                 if isinstance(facts, list) and facts:

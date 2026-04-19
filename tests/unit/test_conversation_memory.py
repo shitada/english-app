@@ -128,7 +128,7 @@ async def test_memory_extraction_on_end_conversation(client, mock_copilot):
     original_ask_json = mock_copilot.ask_json
 
     call_count = 0
-    async def smart_ask_json(system, prompt):
+    async def smart_ask_json(system, prompt, **kwargs):
         nonlocal call_count
         call_count += 1
         # First ask_json call is the summary, second is memory extraction
@@ -184,7 +184,7 @@ async def test_memory_merge_deduplication(client, mock_copilot):
     )
 
     # Mock extraction to return one duplicate and one new fact
-    async def extract_facts(system, prompt):
+    async def extract_facts(system, prompt, **kwargs):
         if "extract" in prompt.lower() or "personal facts" in prompt.lower():
             return {"facts": ["Lives in Tokyo", "Enjoys reading sci-fi"]}
         return {
