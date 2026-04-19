@@ -97,6 +97,13 @@ class ShadowingAttemptResponse(BaseModel):
     duration_ms: int
 
 
+class ShadowingStatsResponse(BaseModel):
+    total_attempts: int
+    avg_combined_last_20: float
+    best_combined: float
+    last_attempt_at: str | None = None
+
+
 # ---------------------------------------------------------------------------
 # Scoring helpers (server-side, also covered by unit tests)
 # ---------------------------------------------------------------------------
@@ -211,3 +218,16 @@ async def submit_attempt(
         combined_score=combined_score(payload.accuracy, payload.timing_score),
         duration_ms=payload.duration_ms,
     )
+
+
+@router.get("/stats", response_model=ShadowingStatsResponse)
+async def get_stats(
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> ShadowingStatsResponse:
+    """Return cumulative shadowing stats for the progress badge."""
+    try:
+        stats = await shadow_dal.get_stats(db)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to fetch shadowing stats")
+        raise HTTPException(status_code=500, detail="Failed to fetch stats")
+    return ShadowingStatsResponse(**stats)

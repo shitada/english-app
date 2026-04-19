@@ -3865,3 +3865,11 @@ pages:
         type: functional
         priority: low
         added_in: 621
+
+      - id: shadowing-004
+        target: Progress badge renders attempts count near header
+        action: Visit /shadowing and locate data-testid="shadowing-stats-badge" and data-testid="shadowing-stats-attempts"
+        expect: Badge visible showing "Attempts: N"; when total_attempts > 0 also shows data-testid="shadowing-stats-avg" and data-testid="shadowing-stats-best"; otherwise shows data-testid="shadowing-stats-hint"
+        type: functional
+        priority: medium
+        added_in: 637

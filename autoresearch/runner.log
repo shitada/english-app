@@ -1066,4 +1066,107 @@ Based on the explicit backlog item PERF-HIGH (conversation 応答遅い) and una
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now create the unit test:All tests pass. Commit:
+Now create the unit test:All tests pass. Commit:Autoresearch logs were swept up — that's expected for this workflow. Done.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "7b349df",
+  "files_changed": ["app/copilot_client.py", "tests/unit/test_copilot_warm_pool.py"],
+  "tests_added": 5,
+  "ui_spec_updated": false,
+  "description": "Added Copilot warm-pool: background prefetch of next session per system_prompt, consumed on next ask() to overlap ~0.6s session-creation cost; LatencyTracker snapshot now reports session p50/p95."
+}
+```● Coder Implement iter 636
+  │ show commit stats (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+  │   │ head -20
+  │   └ 20 lines...
+  └ show files changed (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat
+      │ --format="" HEAD
+      └ 7 lines...
+
+● T2 + verify (shell)
+  │ echo "T2=$(date +%s)" && cd /Users/shingotada/Documents/vscode/english-app
+  │ && git --no-pager log --oneline -2 && git diff HEAD~1 --name-only
+  └ 9 lines...
+
+```json
+{
+  "tests_passed": 2156,
+  "tests_total": 2156,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "smoke_pass": true,
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": true,
+  "test_output": "======================= 2156 passed in 105.86s (0:01:45) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 636
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ read ui results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "NO_FILE"
+      └ 2 lines...
+
+● T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+```json
+{"code_quality":8,"feature_value":8,"maintainability":7,"ux_quality":7,"total_score":7.55,"verdict":"keep","reason":"Well-implemented warm-pool with bounded resources, race-handling, graceful failure, and new tests; addresses real perf backlog item with all tests passing."}
+```● Evaluator Evaluate iter 636
+  └ Read copilot_client.py
+      │ app/copilot_client.py
+      └ 407 lines read
+
+● Record iter 636 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776598766; T1=1776598907; T2=1776599179; T3=1776599314 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "636" "7b349df" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iter 636 done. Starting iter 637.
+
+● T0 iter 637 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && grep '^- \[ \]' autoresearch/backlog.md | head -10
+  └ 5 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Shadowing progress badge — show attempts, avg & best score on Shadowing page",
+  "description": "Add a small motivational progress badge to the Quick Shadowing Drill so users can see their cumulative practice and improvement at a glance. Currently `app/routers/shadowing.py` only returns per-attempt feedback and never surfaces aggregate progress, so users have no sense of momentum between sessions.\n\nBackend (no schema changes — uses existing `shadowing_attempts` table):\n1. In `app/dal/shadowing.py`, add `async def get_stats(db) -> dict[str, Any]` that returns: `total_attempts` (int, COUNT(*)), `avg_combined_last_20` (float, AVG((accuracy+timing_score)/2.0) over the 20 most recent rows ordered by created_at DESC, id DESC; rounded to 1 decimal; 0.0 when no rows), `best_combined` (float, MAX((accuracy+timing_score)/2.0); 0.0 when no rows), and `last_attempt_at` (ISO string or null). Implement with a single SELECT for totals and a subquery/CTE for the last-20 average so it stays one round trip.\n2. In `app/routers/shadowing.py`, add a `ShadowingStatsResponse` Pydantic model and a `GET /api/shadowing/stats` endpoint that calls the DAL and returns the response. Return zeros / null when there are no attempts (do not 404).\n\nFrontend:\n3. In `frontend/src/api.ts`, export `type ShadowingStats` and `getShadowingStats(): Promise<ShadowingStats>` (GET `/api/shadowing/stats`).\n4. In `frontend/src/pages/Shadowing.tsx`, fetch stats once on mount (and refresh after each successful `submitShadowingAttempt`). Render a compact badge near the page header showing: `Attempts: N · Avg (last 20): X.X · Best: Y.Y`. Hide the avg/best chips when `total_attempts === 0` and instead show a friendly hint (\"Your progress will appear here after your first attempt\"). Keep styling consistent with existing badges; ensure dark-mode classes are applied.\n\nTests:\n5. Add `tests/unit/test_shadowing_stats.py` (new file) covering the DAL `get_stats`: empty table returns zeros and null timestamp; after inserting 3 attempts via `record_attempt`, totals/avg/best/last_attempt_at are correct; after inserting 25 attempts with varying scores, `avg_combined_last_20` only averages the 20 most recent and `best_combined` reflects the global maximum (not just last 20). Use the existing in-memory db fixture pattern from other DAL tests.\n\nAcceptance: new endpoint returns 200 with correct shape; Shadowing page renders the badge; tests pass.",
+  "files_to_modify": [
+    "app/dal/shadowing.py",
+    "app/routers/shadowing.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Shadowing.tsx",
+    "tests/unit/test_shadowing_stats.py"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 637
+  │ List directory frontend/src/pages
+  │   └ 8 files found
+  └ Read Shadowing.tsx
+      │ frontend/src/pages/Shadowing.tsx
+      └ L1:60 (60 lines read)
+
+● T1 iter 637 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now frontend api.ts and Shadowing.tsx:Now create the unit test:Now update UI test spec:

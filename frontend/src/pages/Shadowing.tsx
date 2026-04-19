@@ -6,7 +6,9 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import {
   getShadowingSentence,
   submitShadowingAttempt,
+  getShadowingStats,
   type ShadowingSentence,
+  type ShadowingStats,
 } from '../api';
 
 type Phase = 'loading' | 'idle' | 'playing' | 'countdown' | 'recording' | 'scoring' | 'results' | 'error';
@@ -54,7 +56,17 @@ export default function Shadowing() {
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [timingScore, setTimingScore] = useState<number | null>(null);
   const [transcriptCaptured, setTranscriptCaptured] = useState('');
+  const [stats, setStats] = useState<ShadowingStats | null>(null);
   const initialized = useRef(false);
+
+  const refreshStats = useCallback(async () => {
+    try {
+      const s = await getShadowingStats();
+      setStats(s);
+    } catch {
+      /* best effort */
+    }
+  }, []);
 
   const loadSentence = useCallback(async () => {
     setPhase('loading');
@@ -78,8 +90,9 @@ export default function Shadowing() {
     if (!initialized.current) {
       initialized.current = true;
       loadSentence();
+      refreshStats();
     }
-  }, [loadSentence]);
+  }, [loadSentence, refreshStats]);
 
   const playSentence = useCallback(() => {
     if (!item || !tts.isSupported) return;
@@ -149,10 +162,12 @@ export default function Shadowing() {
       accuracy: acc,
       timing_score: ts,
       duration_ms: Math.round(actualSeconds * 1000),
-    }).catch(() => { /* persistence is best-effort */ });
+    })
+      .then(() => { refreshStats(); })
+      .catch(() => { /* persistence is best-effort */ });
 
     setPhase('results');
-  }, [phase, recog.isListening, recog.transcript, item, actualSeconds]);
+  }, [phase, recog.isListening, recog.transcript, item, actualSeconds, refreshStats]);
 
   const tryAgain = useCallback(() => {
     setActualSeconds(null);
@@ -182,6 +197,38 @@ export default function Shadowing() {
       <p style={{ color: 'var(--text-secondary)', margin: '0 0 1rem' }}>
         Listen to a native-paced sentence, then repeat it as closely as you can.
       </p>
+
+      {stats && (
+        <div
+          data-testid="shadowing-stats-badge"
+          style={{
+            display: 'inline-flex', flexWrap: 'wrap', alignItems: 'center', gap: 8,
+            padding: '6px 10px', marginBottom: 12, borderRadius: 999,
+            border: '1px solid var(--border)', background: 'var(--bg, #f8fafc)',
+            color: 'var(--text)', fontSize: 13,
+          }}
+        >
+          <span data-testid="shadowing-stats-attempts">
+            🎯 Attempts: <strong>{stats.total_attempts}</strong>
+          </span>
+          {stats.total_attempts > 0 ? (
+            <>
+              <span style={{ color: 'var(--text-secondary)' }}>·</span>
+              <span data-testid="shadowing-stats-avg">
+                Avg (last 20): <strong>{stats.avg_combined_last_20.toFixed(1)}</strong>
+              </span>
+              <span style={{ color: 'var(--text-secondary)' }}>·</span>
+              <span data-testid="shadowing-stats-best">
+                Best: <strong>{stats.best_combined.toFixed(1)}</strong>
+              </span>
+            </>
+          ) : (
+            <span style={{ color: 'var(--text-secondary)' }} data-testid="shadowing-stats-hint">
+              Try your first attempt to start tracking progress!
+            </span>
+          )}
+        </div>
+      )}
 
       {phase === 'error' && (
         <div className="card" style={{ padding: '1rem', borderColor: '#dc2626' }}>

@@ -3404,3 +3404,14 @@ export function submitShadowingAttempt(input: ShadowingAttemptInput): Promise<Sh
     body: JSON.stringify(input),
   });
 }
+
+export interface ShadowingStats {
+  total_attempts: number;
+  avg_combined_last_20: number;
+  best_combined: number;
+  last_attempt_at: string | null;
+}
+
+export function getShadowingStats(): Promise<ShadowingStats> {
+  return request<ShadowingStats>('/api/shadowing/stats');
+}
