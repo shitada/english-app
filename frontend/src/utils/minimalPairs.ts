@@ -86,3 +86,63 @@ export const MINIMAL_PAIR_SETS: MinimalPairSet[] = [
 export function pickRandomSet(): MinimalPairSet {
   return MINIMAL_PAIR_SETS[Math.floor(Math.random() * MINIMAL_PAIR_SETS.length)];
 }
+
+export type SpeakAttemptScore = 'match' | 'confused' | 'unclear';
+
+/**
+ * Normalize a transcript / word for comparison: lowercase, strip everything
+ * that isn't a basic latin letter, collapse whitespace.
+ */
+function normalize(s: string): string {
+  return (s ?? '')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Score a Speak-mode attempt for the MinimalPairs production drill.
+ *
+ *  - `match`     – the user said the target word (exact word or as one of the
+ *                   tokens in their utterance, including simple inflections
+ *                   like "rights" → "right").
+ *  - `confused`  – the user said the *other* word in the pair (a contrast
+ *                   confusion such as L↔R, V↔B, TH↔S).
+ *  - `unclear`   – ASR returned nothing meaningful, or neither word matched.
+ *
+ * Pure function: easy to unit test, no side effects.
+ */
+export function scoreSpeakAttempt(
+  transcript: string,
+  target: string,
+  other: string,
+): SpeakAttemptScore {
+  const t = normalize(transcript);
+  const tgt = normalize(target);
+  const oth = normalize(other);
+
+  if (!t || !tgt) return 'unclear';
+
+  const tokens = t.split(' ').filter(Boolean);
+
+  const tokenMatchesWord = (token: string, word: string): boolean => {
+    if (!word) return false;
+    if (token === word) return true;
+    // Allow simple inflections / sub-string forms ("rights" → "right",
+    // "lighter" → "light"). We require the candidate word to be a prefix
+    // of the spoken token AND the token to be at most 3 chars longer
+    // (covers -s, -ed, -ing, -er endings) to avoid spurious matches.
+    if (token.startsWith(word) && token.length - word.length <= 3) return true;
+    return false;
+  };
+
+  const matchesTarget = tokens.some(tok => tokenMatchesWord(tok, tgt));
+  const matchesOther  = oth ? tokens.some(tok => tokenMatchesWord(tok, oth)) : false;
+
+  // Prefer target match — if both appear (e.g. "right not light"), credit
+  // the learner: they produced the target word.
+  if (matchesTarget) return 'match';
+  if (matchesOther) return 'confused';
+  return 'unclear';
+}

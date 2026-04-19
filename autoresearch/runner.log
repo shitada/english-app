@@ -668,4 +668,222 @@ Iter 654 done (kept, score 7.0). Starting iter 655.
   │ echo "T1_655=$(date +%s)"
   └ 2 lines...
 
-Now I have enough context. Let me also check `MistakeReviewItem` type and look at vitest config briefly.Now implement the change:Now modify the component body — replace from `export function MistakeReviewDrill` through end:Now run tsc:Clean. Now write the test file:All 12 tests pass. Now update UI test spec since a frontend component was modified:
+Now I have enough context. Let me also check `MistakeReviewItem` type and look at vitest config briefly.Now implement the change:Now modify the component body — replace from `export function MistakeReviewDrill` through end:Now run tsc:Clean. Now write the test file:All 12 tests pass. Now update UI test spec since a frontend component was modified:```json
+{
+  "committed": true,
+  "commit_hash": "9a34849",
+  "files_changed": ["frontend/src/components/dashboard/MistakeReviewDrill.tsx", "frontend/src/__tests__/MistakeReviewDrill.test.tsx", "tests/e2e/ui-test-spec.yaml"],
+  "tests_added": 12,
+  "ui_spec_updated": true,
+  "description": "Added 🎤 Speak Mode to MistakeReviewDrill: localStorage-persisted Type/Speak toggle, mic button with aria-live interim transcript, TTS preview, Try Again Aloud, Space-key shortcut, and graceful fallback when speech recognition is unsupported."
+}
+```● Coder Implement iter 655
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #655: Add Speak Mode to MistakeReviewDrill
+  │   │
+  │   │ Adds a 🎤 Speak / Type input mode toggle to the dashboard's Mistake
+  │   │ Review Drill. In Speak Mode the user can press a large mic button (or…
+  │   └ 25 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --format="%h
+      │ %s" && git diff-tree --no-commit-id --name-only -r HEAD
+      └ 7 lines...
+
+● T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2_655=$(date
+  │ +%s)" && git log --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2215 passed in 115.80s (0:01:55) ==================",
+  "failure_summary": "2 pre-existing integration test failures in test_dashboard_api.py (pronunciation activity not reflected) — unrelated to this frontend-only change (MistakeReviewDrill.tsx). TypeScript check passes; smoke skipped (no backend changes); E2E not run."
+}
+```
+
+Note: Per your instructions, the 2 failing tests are pre-existing and unrelated to the frontend-only changes in this iteration, so `overall_pass` is reported as `true`. If strict pass/fail accounting is needed, `all_passed` is `false` (2215/2217).● Tester Test iter 655
+  │ tsc check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1
+      └ 2 lines...
+
+● T3 (shell)
+  │ echo "T3_655=$(date +%s)"
+  └ 2 lines...
+
+{
+  "code_quality": 7,
+  "feature_value": 6,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 6.75,
+  "verdict": "keep",
+  "reason": "Frontend-only Speak Mode addition with 12 new tests; the 2 failing tests are pre-existing dashboard API integration failures unrelated to this change, and TS check passes."
+}● Evaluator Evaluate iter 655
+  └ List directory .
+      └ 212 files found
+
+● Record iter 655 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776615830 T1=1776615936 T2=1776616185 T3=1776616334 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "655" "9a34849" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Completed 2 iterations. Stopping per task instructions.
+
+**Summary:**
+- **Iter 654** — `8d9b1a3` — Pronunciation Missed-Word Mini-Drill (frontend TTS+ASR loop) — score 7.00, **kept**
+- **Iter 655** — `9a34849` — Speak Mode for MistakeReviewDrill (mic + TTS preview) — score 6.75, **kept**
+
+Both passed all relevant tests (2215/2217; 2 failures are pre-existing dashboard API issues unrelated to these frontend-only changes). TypeScript checks clean. Backlog unchanged (no new completed items there; remaining items are bugfix/perf/infra and out-of-scope for this feature-targeted run).
+
+
+Changes   +0 -0
+Requests  7.5 Premium (17m 25s)
+Tokens    ↑ 2.9m • ↓ 54.0k • 2.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-654-to-679.md
+[2026-04-20 01:32:40] Copilot invocation completed (duration: 1047s)
+[2026-04-20 01:32:40] Recording agent traces...
+[2026-04-20 01:32:40]   AGENT_TRACE iter=654 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 01:32:40]   AGENT_TRACE iter=655 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 01:32:40] SMOKE_UI: UI changes detected in pages: dashboard,pronunciation
+[2026-04-20 01:32:40] SMOKE_UI: Level=full (iteration 655 is divisible by 5)
+[2026-04-20 01:32:40] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1814ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1662ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1652ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1567ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1621ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1817ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3726ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2027ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (1994ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1914ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1956ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2134ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1674ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1608ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1633ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1574ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1611ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1726ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-20 01:33:21] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 01:33:21] Running post-invocation audit (iter 654-655)...
+============================================
+ Autoresearch Audit
+ Iterations: 654 — 655
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 01:33:21
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 654 655[0m
+[0;31m  Evaluator: FAIL — missing: 654 655[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 01:33:22] Audit found 2 error(s) — fixes applied where possible
+[2026-04-20 01:33:25] Current iteration count: 655 / 679
+[2026-04-20 01:33:25] ------------------------------------------
+[2026-04-20 01:33:25] Invocation 4 / 10
+[2026-04-20 01:33:25] Resuming from iteration 656
+[2026-04-20 01:33:25] ------------------------------------------
+[2026-04-20 01:33:25] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-656-to-679.md)...
+● Restore iteration context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md | head -30 && echo "---GIT---"
+  │ && git --no-pager log --oneline -5 && echo "---UITEST---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 39 lines...
+
+● tail latest session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1 | xargs -I {} tail -30
+  │ {} 2>/dev/null
+  └ 30 lines...
+
+No UI test failures. Starting iteration 656.
+
+```json
+{
+  "type": "feature",
+  "title": "MinimalPairs: add 'Speak the Pair' production mode with ASR contrast scoring",
+  "description": "MinimalPairs currently only trains *listening* discrimination — users hear one of two contrasting words (e.g., light/right, base/vase) and pick which one. For Japanese learners, the *production* side of these contrasts (L/R, B/V, S/TH, etc.) is an even bigger fluency blocker. Add a new 'Speak the Pair' mode toggle on frontend/src/pages/MinimalPairs.tsx and a new component frontend/src/components/MinimalPairsSpeakMode.tsx that drills production:\n\nFlow per round (5 rounds/session, reusing pickRandomSet / startMinimalPairListening pool so no backend change is required):\n1. Show both words side by side with IPA and a 🔊 TTS button each (uses existing useSpeechSynthesis).\n2. The app randomly TARGETS one of the two words and asks the user to say it (e.g., 'Say: RIGHT (not light)').\n3. User taps mic → useSpeechRecognition (lang='en-US', continuous=false, interimResults=false) captures one utterance.\n4. Score the attempt: normalize transcript to lowercase letters; if it matches the target word → ✅ 'Clear contrast!'; if it matches the *other* word in the pair → ❌ 'Sounded like \"<other>\" — try again'; otherwise → ⚠️ 'Couldn't catch that, retry'. Allow up to 2 retries before auto-advance, tracking first-try success.\n5. After each round play TTS of BOTH words back-to-back at 0.85x so the user can hear the contrast they just produced.\n6. End-of-session results card: per-pair first-try accuracy, the contrast label (e.g., 'L vs R'), a 'Drill the misses' button that re-runs only failed pairs, and total stars (⭐ ≥80%, ⭐⭐ ≥90%, ⭐⭐⭐ 100%).\n\nUI integration: at the top of MinimalPairs add a segmented toggle [👂 Listen | 🎤 Speak] (default Listen, persist last choice in localStorage key 'mp_mode'). When Speak is selected, render <MinimalPairsSpeakMode contrast={contrast} pairs={rounds} onRestart={startSession} />. Reuse the existing contrast/round data (the round's word_a/word_b/ipa_a/ipa_b are sufficient — ignore the `play` field in speak mode).\n\nAccessibility: mic button has aria-label='Record pronunciation of <target word>', target word is announced via aria-live='polite', dark-mode colors use existing CSS vars (--bg-secondary, --text-primary, --success, --danger). Gracefully fall back with an inline banner 'Speech recognition not supported in this browser — switch to Listen mode' when useSpeechRecognition.supported is false.\n\nFiles: frontend/src/pages/MinimalPairs.tsx (add mode toggle + render branch + small CSS), frontend/src/components/MinimalPairsSpeakMode.tsx (new), frontend/src/utils/minimalPairs.ts (add small helper `scoreSpeakAttempt(transcript, target, other) -> 'match' | 'confused' | 'unclear'` — pure function, easy to unit test), tests/unit/test_minimal_pairs_speak.test.ts or extend tests/unit/test_minimal_pairs_utils.test.ts with cases for scoreSpeakAttempt (exact match, other-word confusion, empty transcript, punctuation/case insensitivity, partial-word substring like 'rights' counting as 'right'). No backend, no schema, no migration changes.",
+  "files_to_modify": ["frontend/src/pages/MinimalPairs.tsx", "frontend/src/components/MinimalPairsSpeakMode.tsx", "frontend/src/utils/minimalPairs.ts", "frontend/tests/unit/test_minimal_pairs_utils.test.ts"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 656
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read MinimalPairs.tsx
+      │ frontend/src/pages/MinimalPairs.tsx
+      └ L1:60 (60 lines read)
+
+Good — `speak` accepts `(text, lang?, rateOverride?)`. Now let me implement.Now create the SpeakMode component:Now update the MinimalPairs page to add the toggle:Now insert the toggle UI and the speak-mode rendering branch:Now I need to make remaining listen-mode renderings only show when mode === 'listen':Also hide the "currentIdx/total" header when in speak mode:Now create the unit test file:Now run tsc and vitest:All tests pass. Now update the UI test spec:

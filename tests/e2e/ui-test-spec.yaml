@@ -3659,6 +3659,46 @@ pages:
         priority: medium
         added_in: 590
 
+      - id: mp-007
+        target: Mode toggle (Listen / Speak) renders at top of page
+        action: Navigate to /minimal-pairs and look for data-testid="mp-mode-toggle"
+        expect: Toggle visible with both data-testid="mp-mode-listen-btn" and data-testid="mp-mode-speak-btn"; Listen is selected by default (aria-selected="true")
+        type: functional
+        priority: high
+        added_in: 656
+
+      - id: mp-008
+        target: Selecting Speak mode renders MinimalPairsSpeakMode component
+        action: Click data-testid="mp-mode-speak-btn"
+        expect: Element with data-testid="speak-mode" appears (or fallback alert if speech recognition unsupported); listen-mode controls (play-sound-btn) are no longer visible
+        type: functional
+        priority: high
+        added_in: 656
+
+      - id: mp-009
+        target: Speak mode shows target prompt and mic button
+        action: After switching to Speak mode, look for data-testid="speak-target-prompt" and data-testid="speak-mic-btn"
+        expect: Prompt reads "Say: <WORD> (not <other>)"; mic button has aria-label starting with "Record pronunciation of"
+        type: functional
+        priority: high
+        added_in: 656
+
+      - id: mp-010
+        target: Speak mode word cards expose per-word TTS buttons
+        action: After switching to Speak mode, look for data-testid="speak-word-a", data-testid="speak-word-b", data-testid="speak-tts-a-btn", data-testid="speak-tts-b-btn"
+        expect: Both word cards visible with IPA and a Play button each
+        type: functional
+        priority: medium
+        added_in: 656
+
+      - id: mp-011
+        target: Mode preference persists across reloads via localStorage key 'mp_mode'
+        action: Click data-testid="mp-mode-speak-btn", reload the page, and re-inspect the toggle
+        expect: After reload, data-testid="mp-mode-speak-btn" is selected (aria-selected="true") and data-testid="speak-mode" (or unsupported fallback) is rendered
+        type: state
+        priority: medium
+        added_in: 656
+
   home_minimal_pairs_cta:
     path: /
     tests:

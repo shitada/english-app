@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Ear, Volume2, RefreshCw, CheckCircle, XCircle, ArrowLeft, Gauge } from 'lucide-react';
+import { Ear, Volume2, RefreshCw, CheckCircle, XCircle, ArrowLeft, Gauge, Mic } from 'lucide-react';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { api, type MinimalPairListeningRound } from '../api';
 import { pickRandomSet } from '../utils/minimalPairs';
+import MinimalPairsSpeakMode from '../components/MinimalPairsSpeakMode';
 
 const ROUNDS_PER_SESSION = 5;
+const MODE_STORAGE_KEY = 'mp_mode';
+type Mode = 'listen' | 'speak';
 
 interface RoundResult {
   round: MinimalPairListeningRound;
@@ -25,6 +28,23 @@ export default function MinimalPairs() {
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const initialized = useRef(false);
+
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window === 'undefined') return 'listen';
+    try {
+      const saved = window.localStorage.getItem(MODE_STORAGE_KEY);
+      return saved === 'speak' ? 'speak' : 'listen';
+    } catch {
+      return 'listen';
+    }
+  });
+
+  const handleSetMode = useCallback((next: Mode) => {
+    setMode(next);
+    try {
+      window.localStorage.setItem(MODE_STORAGE_KEY, next);
+    } catch { /* ignore */ }
+  }, []);
 
   const startSession = useCallback(async () => {
     setPhase('loading');
@@ -174,7 +194,7 @@ export default function MinimalPairs() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
           <Ear size={24} color="#8b5cf6" />
           <h2 style={{ margin: 0, fontSize: 20 }}>Minimal Pairs</h2>
-          {phase !== 'loading' && phase !== 'done' && (
+          {mode === 'listen' && phase !== 'loading' && phase !== 'done' && (
             <span style={{ marginLeft: 'auto', fontSize: 14, color: 'var(--text-secondary)' }}>
               {currentIdx + 1}/{rounds.length}
             </span>
@@ -185,16 +205,71 @@ export default function MinimalPairs() {
           {contrast && <> Today: <strong style={{ color: 'var(--text)' }}>{contrast}</strong></>}
         </p>
 
-        {phase === 'loading' && <p>Loading…</p>}
+        {/* Mode toggle: Listen vs Speak */}
+        <div
+          role="tablist"
+          aria-label="Practice mode"
+          data-testid="mp-mode-toggle"
+          style={{
+            display: 'inline-flex',
+            border: '1px solid var(--border)',
+            borderRadius: 999,
+            padding: 3,
+            marginBottom: 14,
+            background: 'var(--bg-secondary, transparent)',
+          }}
+        >
+          {([
+            { key: 'listen' as const, label: '👂 Listen', testid: 'mp-mode-listen-btn' },
+            { key: 'speak' as const,  label: '🎤 Speak',  testid: 'mp-mode-speak-btn' },
+          ]).map(opt => {
+            const active = mode === opt.key;
+            return (
+              <button
+                key={opt.key}
+                role="tab"
+                aria-selected={active}
+                data-testid={opt.testid}
+                onClick={() => handleSetMode(opt.key)}
+                style={{
+                  padding: '6px 14px',
+                  border: 'none',
+                  borderRadius: 999,
+                  background: active ? 'var(--primary, #3b82f6)' : 'transparent',
+                  color: active ? 'white' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {opt.key === 'speak' ? <Mic size={12} /> : <Ear size={12} />}
+                <span>{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-        {phase === 'error' && (
+        {mode === 'speak' && rounds.length > 0 && (
+          <MinimalPairsSpeakMode
+            contrast={contrast}
+            pairs={rounds}
+            onRestart={startSession}
+          />
+        )}
+
+        {mode === 'listen' && phase === 'loading' && <p>Loading…</p>}
+
+        {mode === 'listen' && phase === 'error' && (
           <div>
             <p style={{ color: '#ef4444' }}>{errorMsg}</p>
             <button onClick={startSession} className="btn-primary">Retry</button>
           </div>
         )}
 
-        {phase === 'idle' && currentRound && (
+        {mode === 'listen' && phase === 'idle' && currentRound && (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <p style={{ marginBottom: 16, fontSize: 15 }}>Listen carefully and choose the word you hear.</p>
             <button
@@ -211,7 +286,7 @@ export default function MinimalPairs() {
           </div>
         )}
 
-        {phase === 'answering' && currentRound && (
+        {mode === 'listen' && phase === 'answering' && currentRound && (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <p style={{ marginBottom: 12, fontSize: 15 }}>Which word did you hear?</p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -257,7 +332,7 @@ export default function MinimalPairs() {
           </div>
         )}
 
-        {phase === 'feedback' && lastResult && currentRound && (
+        {mode === 'listen' && phase === 'feedback' && lastResult && currentRound && (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <div style={{
               padding: '14px 18px', borderRadius: 10, marginBottom: 14,
@@ -290,7 +365,7 @@ export default function MinimalPairs() {
           </div>
         )}
 
-        {phase === 'done' && (
+        {mode === 'listen' && phase === 'done' && (
           <div data-testid="results-view" style={{ textAlign: 'center', padding: '1rem 0' }}>
             <p style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px' }}>
               {correctCount}/{results.length}

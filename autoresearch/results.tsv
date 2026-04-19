@@ -605,3 +605,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 652	2ccf4fb	2026-04-20	107	311	149	29	596	2215	2217	pass	7.55	kept	Progressive TTS — sentence-by-sentence speak during SSE streaming on Conversation
 653	2801fff	2026-04-20	104	381	157	39	681	2215	2217	pass	7.50	kept	Pinned key phrases sticky bar with auto-detect ✓ + ✨ toast on Conversation
 654	8d9b1a3	2026-04-20	102	181	175	15	473	2215	2217	pass	7.00	kept	Pronunciation result → Instant Missed-Word Mini-Drill (frontend-only TTS+ASR loop)
+655	9a34849	2026-04-20	106	249	149	20	524	2215	2217	pass	6.75	kept	Speak Mode for MistakeReviewDrill (TTS preview + mic recording, frontend-only)
