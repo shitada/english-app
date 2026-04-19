@@ -3156,6 +3156,24 @@ pages:
         priority: medium
         added_in: 655
 
+      - id: dashboard-mistake-journal-001
+        target: Mistake Journal card exposes a Listen 🔊 button per entry
+        selector: "[data-testid='mistake-card-listen']"
+        action: Open the dashboard, scroll to the Mistake Journal, click the Listen button on a card
+        expect: A button with data-testid="mistake-card-listen" is rendered for each card and clicking it triggers TTS playback (no console error, button shows "Playing…" or "Listen 🔊")
+        type: functional
+        priority: medium
+        added_in: 665
+
+      - id: dashboard-mistake-journal-002
+        target: Mistake Journal card exposes a Shadow 🎤 button when speech recognition is supported
+        selector: "[data-testid='mistake-card-shadow']"
+        action: In a Chromium browser with SpeechRecognition available, locate a Mistake Journal card
+        expect: A button with data-testid="mistake-card-shadow" containing the label "Shadow 🎤" is visible; pressing it toggles aria-pressed and shows a 🎙️ interim transcript region with aria-live="polite"
+        type: functional
+        priority: medium
+        added_in: 665
+
   quick_practice_dictogloss:
     path: /
     tests:
