@@ -1578,3 +1578,114 @@ Now I have a solid understanding. Let me create a separate component file for te
       │ 2>&1 | tail -20
       └ 20 lines...
 
+[2026-04-20 02:33:13] Copilot invocation completed (duration: 1192s)
+[2026-04-20 02:33:13] Recording agent traces...
+[2026-04-20 02:33:13]   AGENT_TRACE iter=660 proposer=1 coder=1 tester=1 evaluator=0
+[2026-04-20 02:33:13]   AGENT_TRACE iter=661 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-20 02:33:13] SMOKE_UI: UI changes detected in pages: vocabulary
+[2026-04-20 02:33:13] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 02:33:13] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: vocabulary
+
+  ✅ vocabulary: smoke 4✓ 0✗ (1697ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 02:33:21] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 02:33:21] Running post-invocation audit (iter 660-661)...
+============================================
+ Autoresearch Audit
+ Iterations: 660 — 661
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 02:33:21
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 661[0m
+[0;31m  Tester: FAIL — missing: 660 661[0m
+[0;31m  Evaluator: FAIL — missing: 660 661[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 02:33:23] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 02:33:26] Current iteration count: 661 / 679
+[2026-04-20 02:33:26] ------------------------------------------
+[2026-04-20 02:33:26] Invocation 7 / 10
+[2026-04-20 02:33:26] Resuming from iteration 662
+[2026-04-20 02:33:26] ------------------------------------------
+[2026-04-20 02:33:26] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-662-to-679.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log
+  │ --oneline -5 && echo "---UI RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 38 lines...
+
+● T0 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Conversation Reply Hints — get 2-3 suggested replies when stuck",
+  "description": "Add a 'Need a hint? 💡' button in the Conversation chat phase (frontend/src/pages/Conversation.tsx and/or its chat subcomponent under frontend/src/components/) that fetches 2-3 short, natural English reply suggestions tailored to the AI's most recent message. Each suggestion is rendered as a tappable chip — tapping inserts the text into the user's reply input (does NOT auto-send, so the learner still has to read it aloud / edit it). Optionally show a tiny 🇯🇵 toggle next to each chip to reveal a Japanese gloss inline (reuses the JP translation pattern from #650).\n\nWhy: Beginner/intermediate learners frequently freeze in free conversation. Today they can only retry, slow-replay, or give up. A lightweight hint nudges them past the blocker without breaking the speaking-practice loop, directly supporting the app's fluency goal. Distinct from existing features: not a drill, not pronunciation feedback, not a translation of the AI line — it's *forward-looking reply scaffolding*.\n\nBackend: add POST /api/conversation/{conversation_id}/reply-hints in app/routers/conversation.py. Body: {turn_index?: int}. Behavior:\n- Load the conversation row and topic via conv_dal (reuse existing helpers; do NOT add columns — no migration needed).\n- Take the last assistant message (or message at turn_index if provided) plus the topic label.\n- Call the Copilot service via safe_llm_call with a new prompt key 'conversation_reply_hints' (added to config.yaml prompts section if a prompt registry exists, otherwise inline) instructing the model to return STRICT JSON: {\"hints\": [{\"en\": str, \"jp\": str}, ...]} with exactly 3 short (≤10 word) natural learner-level replies that move the conversation forward. Parse defensively; on parse failure return 200 with hints=[] and a 'fallback' flag so the UI can hide the panel quietly.\n- Apply require_rate_limit dependency, mirror error handling style of other endpoints in this router.\n- Cache the last response per (conversation_id, turn_index) in-memory for ~60s to avoid duplicate LLM spend if the user toggles the panel.\n\nFrontend: add api.ts function fetchReplyHints(conversationId, turnIndex?). Add a small collapsible HintsPanel component (or inline in Conversation chat component) with: button '💡 Hint', loading spinner, 2-3 chips, and a per-chip 'JP' toggle. Clicking a chip calls the existing setInput / message-input setter. Track usage with the existing metrics hook (e.g. trackEvent('conversation_hint_used')) if present; otherwise skip silently. Hide the button entirely if the last message is from the user (no AI turn to respond to).\n\nTesting: add a unit test in tests/unit/ for the new endpoint covering (a) happy path returns 3 hints, (b) malformed LLM JSON returns hints=[] with fallback flag, (c) 404 when conversation_id missing. Mock copilot_service like other conversation tests do.\n\nFiles to modify (≤5): backend router, api.ts, one Conversation component, one new test file, and config.yaml ONLY if a prompts: section already holds conversation prompts (otherwise inline the prompt in conversation.py to stay within the no-config-change rule).",
+  "files_to_modify": [
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/components/ConversationChat.tsx",
+    "tests/unit/test_conversation_reply_hints.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 662
+  │ List directory frontend/src
+  │   └ 12 files found
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L1:60 (60 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me look for where to add the endpoint and check rate_limit:Now I have enough. Let me add the endpoint right after `get_conversation_hint`:Now write the unit tests:All pass. Now add the frontend API:Now add HintsPanel to the Conversation page. Let me check imports and where to insert:Now add reply hints state:Now find the fetchHint function and add fetchReplyHints right after; also reset on new turn:Now reset reply hints when a new turn happens (where `setHintUsedThisTurn(false)` is called):Now reset reply hints when new assistant turn arrives. Both message handlers reset hint—do same:Now add the HintsPanel UI. Insert it just before the chat-input-bar (right after PinnedPhrasesBar). Also place a "Need a hint? 💡" button. The existing Lightbulb button shows the directional hint — distinct feature. Let me place the reply-hints UI panel between PinnedPhrasesBar and chat-input-bar. Show button only when last message is from assistant:Now run typecheck:Run all unit tests for conversation:Update UI test spec:Commit:

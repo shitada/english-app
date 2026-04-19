@@ -235,6 +235,12 @@ export const api = {
   getConversationHint: (conversationId: number) =>
     request<{ hint: string }>(`/api/conversation/${conversationId}/hint`, { method: 'POST' }),
 
+  getConversationReplyHints: (conversationId: number) =>
+    request<{ hints: { en: string; jp: string }[]; fallback: boolean; turn_index: number }>(
+      `/api/conversation/${conversationId}/reply-hints`,
+      { method: 'POST' },
+    ),
+
   saveConversationSelfAssessment: (conversationId: number, data: { confidence_rating: number; fluency_rating: number; comprehension_rating: number }) =>
     request<{ conversation_id: number; confidence_rating: number; fluency_rating: number; comprehension_rating: number; created_at: string | null }>(`/api/conversation/${conversationId}/self-assessment`, {
       method: 'POST',

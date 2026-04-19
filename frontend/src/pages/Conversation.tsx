@@ -145,6 +145,12 @@ export default function Conversation() {
   const [hintLoading, setHintLoading] = useState(false);
   const [hintUsedThisTurn, setHintUsedThisTurn] = useState(false);
   const [hintCount, setHintCount] = useState(0);
+  // Reply hints panel (tappable suggested replies tailored to the AI's last message).
+  const [replyHints, setReplyHints] = useState<{ en: string; jp: string }[]>([]);
+  const [replyHintsLoading, setReplyHintsLoading] = useState(false);
+  const [replyHintsError, setReplyHintsError] = useState<string | null>(null);
+  const [replyHintsVisible, setReplyHintsVisible] = useState(false);
+  const [replyHintJpVisible, setReplyHintJpVisible] = useState<Record<number, boolean>>({});
   const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
   // Per-message JP translation cache and UI state, keyed by message index.
   const [messageTranslations, setMessageTranslations] = useState<Record<number, string>>({});
@@ -582,6 +588,10 @@ export default function Conversation() {
     setHintText(null);
     setHintUsedThisTurn(false);
     setHintCount(0);
+    setReplyHints([]);
+    setReplyHintsVisible(false);
+    setReplyHintsError(null);
+    setReplyHintJpVisible({});
     setFailedMessage(null);
     setSendError(null);
     setGrammarStreak(0);
@@ -910,6 +920,10 @@ export default function Conversation() {
         setPhraseSuggestions(res.phrase_suggestions || []);
         setHintUsedThisTurn(false);
         setHintText(null);
+        setReplyHints([]);
+        setReplyHintsVisible(false);
+        setReplyHintsError(null);
+        setReplyHintJpVisible({});
         if (res.feedback && !res.feedback.is_correct && res.feedback.errors.length > 0) {
           setErrorPatterns((prev) => {
             const next = new Map(prev);
@@ -960,6 +974,10 @@ export default function Conversation() {
         setPhraseSuggestions([]);
         setHintUsedThisTurn(false);
         setHintText(null);
+        setReplyHints([]);
+        setReplyHintsVisible(false);
+        setReplyHintsError(null);
+        setReplyHintJpVisible({});
         if (finalFeedback && !finalFeedback.is_correct && finalFeedback.errors.length > 0) {
           setErrorPatterns((prev) => {
             const next = new Map(prev);
@@ -1025,6 +1043,30 @@ export default function Conversation() {
       setHintLoading(false);
     }
   }, [conversationId, hintLoading, hintUsedThisTurn]);
+
+  const fetchReplyHints = useCallback(async () => {
+    if (!conversationId || replyHintsLoading) return;
+    setReplyHintsVisible(true);
+    setReplyHintsLoading(true);
+    setReplyHintsError(null);
+    try {
+      const res = await api.getConversationReplyHints(conversationId);
+      setReplyHints(res.hints);
+      if (res.fallback || res.hints.length === 0) {
+        setReplyHintsError('No suggestions right now — try again in a moment.');
+      }
+    } catch {
+      setReplyHints([]);
+      setReplyHintsError('Could not load reply hints. Try again later.');
+    } finally {
+      setReplyHintsLoading(false);
+    }
+  }, [conversationId, replyHintsLoading]);
+
+  const handlePickReplyHint = useCallback((text: string) => {
+    setInput(text);
+    setReplyHintsVisible(false);
+  }, []);
 
   const handleSavePhrase = useCallback(async (phrase: string) => {
     if (!conversationId) return;
@@ -2232,6 +2274,121 @@ export default function Conversation() {
         usedPhrases={usedPinnedPhrases}
         onUnpin={handleUnpinPhrase}
       />
+      {(() => {
+        const lastMsg = messages[messages.length - 1];
+        const showReplyHintsArea = phase === 'chat' && !!conversationId && !!lastMsg && lastMsg.role === 'assistant' && !lastMsg.streaming && !loading;
+        if (!showReplyHintsArea) return null;
+        return (
+          <div
+            data-testid="reply-hints-panel"
+            style={{
+              padding: '6px 16px',
+              borderTop: '1px solid var(--border, #e2e8f0)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }}
+          >
+            {!replyHintsVisible && (
+              <button
+                type="button"
+                onClick={fetchReplyHints}
+                aria-label="Get suggested replies"
+                data-testid="reply-hints-button"
+                style={{
+                  alignSelf: 'flex-start',
+                  padding: '4px 12px',
+                  borderRadius: 16,
+                  border: '1px solid var(--primary, #6366f1)',
+                  background: 'transparent',
+                  color: 'var(--primary, #6366f1)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                💡 Need a hint?
+              </button>
+            )}
+            {replyHintsVisible && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} aria-label="Suggested replies">
+                {replyHintsLoading && (
+                  <div style={{ fontSize: 12, color: 'var(--muted, #94a3b8)' }} role="status" aria-live="polite">
+                    Loading suggestions…
+                  </div>
+                )}
+                {!replyHintsLoading && replyHintsError && (
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary, #64748b)' }} role="status">
+                    {replyHintsError}
+                  </div>
+                )}
+                {!replyHintsLoading && replyHints.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                    {replyHints.map((h, i) => (
+                      <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <button
+                          type="button"
+                          data-testid={`reply-hint-chip-${i}`}
+                          onClick={() => handlePickReplyHint(h.en)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 16,
+                            border: '1px solid var(--primary, #6366f1)',
+                            background: 'var(--bg, #fff)',
+                            color: 'var(--primary, #6366f1)',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                          }}
+                        >
+                          {h.en}
+                        </button>
+                        {h.jp && (
+                          <button
+                            type="button"
+                            aria-label={replyHintJpVisible[i] ? 'Hide Japanese translation' : 'Show Japanese translation'}
+                            aria-pressed={!!replyHintJpVisible[i]}
+                            onClick={() => setReplyHintJpVisible((prev) => ({ ...prev, [i]: !prev[i] }))}
+                            style={{
+                              padding: '2px 6px',
+                              borderRadius: 10,
+                              border: '1px solid var(--border, #e2e8f0)',
+                              background: replyHintJpVisible[i] ? 'var(--primary-light, #eef2ff)' : 'transparent',
+                              color: 'var(--text-secondary, #64748b)',
+                              cursor: 'pointer',
+                              fontSize: 11,
+                            }}
+                          >
+                            🇯🇵
+                          </button>
+                        )}
+                        {h.jp && replyHintJpVisible[i] && (
+                          <span data-testid={`reply-hint-jp-${i}`} style={{ fontSize: 12, color: 'var(--text-secondary, #64748b)' }}>
+                            {h.jp}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setReplyHintsVisible(false)}
+                      aria-label="Hide reply hints"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--text-secondary, #64748b)',
+                        padding: 2,
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
       <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>
         <button
           className={`btn btn-icon ${speech.isListening ? 'mic-active' : 'btn-secondary'}`}

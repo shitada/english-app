@@ -611,3 +611,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 658	3433d74	2026-04-20	93	303	163	21	580	2215	2217	pass	7.75	kept	Stress Tap pronunciation mini-game (tap-the-syllable + TTS + weighted SRS in localStorage)
 659	fd8a80e	2026-04-20	83	302	169	26	580	2215	2217	pass	7.50	kept	Home Listening Warmup tile (60s passive TTS modal + warmup streak in localStorage)
 660	9aae106	2026-04-20	66	167	155	37	425	2215	2217	pass	8.80	kept	Shadowing missed-words tap-to-hear drill (chips @0.7x + Play-all-slowly + perfect state)
+661	57a4629	2026-04-20	70	431	160	73	734	2220	2222	pass	7.20	kept	Vocabulary Collocation Match mini-mode (LLM MCQ + SRS + 503 fallback)

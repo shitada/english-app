@@ -3704,6 +3704,30 @@ pages:
         priority: medium
         added_in: 653
 
+      - id: conv-147
+        target: "Need a hint?" button appears after the AI replies and reveals reply hint chips
+        action: In the chat phase, after an assistant message, locate data-testid="reply-hints-button" and click it.
+        expect: data-testid="reply-hints-panel" remains visible; while loading a "Loading suggestions…" status appears, then up to 3 chips render as data-testid="reply-hint-chip-0/1/2".
+        type: functional
+        priority: high
+        added_in: 662
+
+      - id: conv-148
+        target: Tapping a reply-hint chip inserts the suggestion into the message input without sending
+        action: After loading reply hints (conv-147), click data-testid="reply-hint-chip-0".
+        expect: The text from the chip appears in the input with aria-label="Message input"; no POST to /api/conversation/message is fired; the hints panel is hidden.
+        type: functional
+        priority: high
+        added_in: 662
+
+      - id: conv-149
+        target: 🇯🇵 toggle next to a reply-hint chip reveals the Japanese gloss inline
+        action: With reply hints loaded (conv-147), click the 🇯🇵 button next to chip 0.
+        expect: data-testid="reply-hint-jp-0" becomes visible showing the Japanese gloss; the toggle aria-pressed becomes "true". Clicking again hides it.
+        type: functional
+        priority: medium
+        added_in: 662
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

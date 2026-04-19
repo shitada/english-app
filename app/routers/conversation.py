@@ -1688,6 +1688,141 @@ async def get_conversation_hint(
 
 
 # ---------------------------------------------------------------------------
+# Reply hints — 2-3 short tappable reply suggestions for stuck learners
+# ---------------------------------------------------------------------------
+
+class ReplyHintItem(BaseModel):
+    en: str
+    jp: str = ""
+
+
+class ReplyHintsResponse(BaseModel):
+    hints: list[ReplyHintItem]
+    fallback: bool = False
+    turn_index: int = 0
+
+
+# In-memory cache: key=(conversation_id, turn_index) -> (timestamp, response_dict)
+_REPLY_HINTS_CACHE: dict[tuple[int, int], tuple[float, dict]] = {}
+_REPLY_HINTS_TTL_SEC = 60.0
+
+
+def _cache_get_reply_hints(conv_id: int, turn_index: int) -> dict | None:
+    entry = _REPLY_HINTS_CACHE.get((conv_id, turn_index))
+    if not entry:
+        return None
+    ts, payload = entry
+    if (time.time() - ts) > _REPLY_HINTS_TTL_SEC:
+        _REPLY_HINTS_CACHE.pop((conv_id, turn_index), None)
+        return None
+    return payload
+
+
+def _cache_set_reply_hints(conv_id: int, turn_index: int, payload: dict) -> None:
+    _REPLY_HINTS_CACHE[(conv_id, turn_index)] = (time.time(), payload)
+    # Trim if oversized
+    if len(_REPLY_HINTS_CACHE) > 256:
+        # Drop oldest 64
+        for key in sorted(_REPLY_HINTS_CACHE, key=lambda k: _REPLY_HINTS_CACHE[k][0])[:64]:
+            _REPLY_HINTS_CACHE.pop(key, None)
+
+
+@router.post("/{conversation_id}/reply-hints", response_model=ReplyHintsResponse)
+async def get_conversation_reply_hints(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Return 2-3 short, natural English reply suggestions tailored to the AI's last message.
+
+    Each hint includes an English reply (≤10 words) and an optional Japanese gloss.
+    On LLM/parse failure, returns 200 with hints=[] and fallback=True so the UI can degrade gracefully.
+    """
+    conv = await conv_dal.get_active_conversation(db, conversation_id)
+    if not conv:
+        status = await conv_dal.get_conversation_status(db, conversation_id)
+        if status is not None:
+            raise HTTPException(status_code=409, detail="Conversation is already ended")
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    history = await conv_dal.get_conversation_history(db, conversation_id)
+    last_assistant = next(
+        (m for m in reversed(history) if extract_role(m.get("role")) == "assistant"),
+        None,
+    )
+    # turn_index = number of assistant messages so far (1-based) for cache stability
+    turn_index = sum(1 for m in history if extract_role(m.get("role")) == "assistant")
+
+    if not last_assistant or not str(last_assistant.get("content", "")).strip():
+        return ReplyHintsResponse(hints=[], fallback=True, turn_index=turn_index)
+
+    cached = _cache_get_reply_hints(conversation_id, turn_index)
+    if cached is not None:
+        return ReplyHintsResponse(**cached)
+
+    topics = get_conversation_topics()
+    topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
+    if topic_data is None:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
+    topic_label = topic_data["label"] if topic_data else conv["topic"]
+    difficulty = conv.get("difficulty", "intermediate")
+
+    ai_message = str(last_assistant["content"]).strip()
+    copilot = get_copilot_service()
+
+    system_prompt = (
+        "You are an English conversation coach helping a Japanese learner reply naturally. "
+        "Return ONLY valid JSON, no prose, no markdown."
+    )
+    user_prompt = (
+        f"Scenario: {topic_label} (difficulty: {difficulty}).\n"
+        f'The AI just said: "{ai_message}"\n\n'
+        "Suggest exactly 3 short, natural English replies the learner could send next. "
+        "Each reply must be ≤10 words, varied in intent (e.g. answer, ask back, react), "
+        "and appropriate for the learner's level. Also provide a brief Japanese gloss for each.\n\n"
+        'Return JSON: {"hints": [{"en": "reply text", "jp": "日本語訳"}, '
+        '{"en": "...", "jp": "..."}, {"en": "...", "jp": "..."}]}'
+    )
+
+    hints: list[dict] = []
+    fallback = False
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(system_prompt, user_prompt, label="conversation_reply_hints"),
+            context="conversation_reply_hints",
+        )
+        raw_hints = result.get("hints") if isinstance(result, dict) else None
+        if not isinstance(raw_hints, list):
+            raise ValueError("hints field missing or not a list")
+        for h in raw_hints[:3]:
+            if not isinstance(h, dict):
+                continue
+            en = str(h.get("en", "")).strip().strip('"').strip("'")
+            jp = str(h.get("jp", "")).strip()
+            if not en:
+                continue
+            # Cap length to ~10 words / 80 chars defensively.
+            if len(en.split()) > 12:
+                en = " ".join(en.split()[:12])
+            if len(en) > 120:
+                en = en[:120].rstrip()
+            if len(jp) > 120:
+                jp = jp[:120].rstrip()
+            hints.append({"en": en, "jp": jp})
+        if not hints:
+            fallback = True
+    except Exception as e:  # noqa: BLE001 — defensive: LLM/parse failures must degrade
+        logger.warning("reply-hints generation failed: %s", e)
+        hints = []
+        fallback = True
+
+    payload = {"hints": hints, "fallback": fallback, "turn_index": turn_index}
+    _cache_set_reply_hints(conversation_id, turn_index, payload)
+    return ReplyHintsResponse(**payload)
+
+
+# ---------------------------------------------------------------------------
 # Save conversation vocabulary to SRS bank
 # ---------------------------------------------------------------------------
 
