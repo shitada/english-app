@@ -2015,3 +2015,75 @@ async def test_send_message_no_longer_calls_reply_helpers(client, mock_copilot):
     assert data["grammar_notes"] == []
     # Exactly one ask_json call (grammar check), not two (no helpers)
     assert mock_copilot.ask_json.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_role_swap_returns_briefing(client, mock_copilot):
+    """role_swap=True should populate user_role and role_briefing via parallel LLM calls."""
+    briefing_json = '["May I see your reservation?", "Your room is on the 5th floor.", "Here is your key card.", "Enjoy your stay!"]'
+
+    async def ask_side_effect(system, prompt):
+        if "role-playing" in prompt:
+            return briefing_json
+        return "Hello, welcome to our hotel. How can I help?"
+
+    mock_copilot.ask = AsyncMock(side_effect=ask_side_effect)
+    res = await client.post(
+        "/api/conversation/start",
+        json={"topic": "hotel_checkin", "difficulty": "beginner", "role_swap": True},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["user_role"]  # non-empty
+    assert isinstance(data["role_briefing"], list)
+    assert len(data["role_briefing"]) == 4
+    # Both LLM calls dispatched
+    assert mock_copilot.ask.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_role_swap_briefing_failure_non_fatal(client, mock_copilot):
+    """If briefing call fails, /start should still succeed with empty role_briefing."""
+
+    async def ask_side_effect(system, prompt):
+        if "role-playing" in prompt:
+            raise RuntimeError("briefing LLM down")
+        return "Welcome to the hotel!"
+
+    mock_copilot.ask = AsyncMock(side_effect=ask_side_effect)
+    res = await client.post(
+        "/api/conversation/start",
+        json={"topic": "hotel_checkin", "difficulty": "beginner", "role_swap": True},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["role_briefing"] == []
+    assert data["message"] == "Welcome to the hotel!"
+
+
+@pytest.mark.asyncio
+async def test_start_conversation_role_swap_calls_dispatched_concurrently(client, mock_copilot):
+    """Both opening and briefing LLM calls should be in-flight before either resolves."""
+    import asyncio
+
+    in_flight = 0
+    max_in_flight = 0
+    briefing_json = '["A","B","C","D"]'
+
+    async def ask_side_effect(system, prompt):
+        nonlocal in_flight, max_in_flight
+        in_flight += 1
+        max_in_flight = max(max_in_flight, in_flight)
+        await asyncio.sleep(0.05)
+        in_flight -= 1
+        if "role-playing" in prompt:
+            return briefing_json
+        return "Hi there!"
+
+    mock_copilot.ask = AsyncMock(side_effect=ask_side_effect)
+    res = await client.post(
+        "/api/conversation/start",
+        json={"topic": "hotel_checkin", "difficulty": "beginner", "role_swap": True},
+    )
+    assert res.status_code == 200
+    assert max_in_flight == 2, f"expected concurrent dispatch, observed max_in_flight={max_in_flight}"

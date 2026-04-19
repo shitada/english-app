@@ -348,42 +348,61 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         except (json.JSONDecodeError, TypeError):
             pass
 
-    try:
-        opening = await safe_llm_call(
+    async def _get_briefing() -> list[str]:
+        prompt = (
+            f"The user is practicing English by role-playing as '{user_role_name}' in a {topic_label} scenario. "
+            f"List exactly 4 short professional English phrases that a {user_role_name} would commonly say. "
+            "Return ONLY a JSON array of strings, no explanation."
+        )
+        try:
+            raw = await safe_llm_call(
+                lambda: copilot.ask("You are a helpful English teacher.", prompt),
+                context="role_briefing",
+            )
+            parsed = json.loads(raw.strip().removeprefix("```json").removesuffix("```").strip())
+            if isinstance(parsed, list):
+                return [str(p) for p in parsed[:4]]
+        except Exception:
+            logger.warning("Failed to generate role briefing phrases")
+        return []
+
+    role_briefing: list[str] = []
+    if req.role_swap and user_role_name:
+        # Run opening greeting and role-briefing concurrently to halve latency.
+        t0 = time.monotonic()
+        opening_task = safe_llm_call(
             lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
             context="start_conversation",
         )
-    except Exception:
-        await conv_dal.delete_conversation(db, conversation_id)
-        raise
+        briefing_task = _get_briefing()
+        results = await asyncio.gather(opening_task, briefing_task, return_exceptions=True)
+        opening_result, briefing_result = results
+        if isinstance(opening_result, BaseException):
+            await conv_dal.delete_conversation(db, conversation_id)
+            raise opening_result
+        opening = opening_result
+        # Briefing failure is non-fatal.
+        if isinstance(briefing_result, BaseException):
+            logger.warning("Role briefing task raised: %s", briefing_result)
+            role_briefing = []
+        else:
+            role_briefing = briefing_result
+        logger.info("Parallel start LLM calls completed (%.1fs)", time.monotonic() - t0)
+    else:
+        try:
+            opening = await safe_llm_call(
+                lambda: copilot.ask(system, "Start the scenario. Greet the user in character."),
+                context="start_conversation",
+            )
+        except Exception:
+            await conv_dal.delete_conversation(db, conversation_id)
+            raise
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
     suggestions: list[str] = []
     key_phrases: list[str] = []
     grammar_notes: list[dict] = []
-
-    role_briefing: list[str] = []
-    if req.role_swap and user_role_name:
-        async def _get_briefing() -> list[str]:
-            prompt = (
-                f"The user is practicing English by role-playing as '{user_role_name}' in a {topic_label} scenario. "
-                f"List exactly 4 short professional English phrases that a {user_role_name} would commonly say. "
-                "Return ONLY a JSON array of strings, no explanation."
-            )
-            try:
-                raw = await safe_llm_call(
-                    lambda: copilot.ask("You are a helpful English teacher.", prompt),
-                    context="role_briefing",
-                )
-                parsed = json.loads(raw.strip().removeprefix("```json").removesuffix("```").strip())
-                if isinstance(parsed, list):
-                    return [str(p) for p in parsed[:4]]
-            except Exception:
-                logger.warning("Failed to generate role briefing phrases")
-            return []
-
-        role_briefing = await _get_briefing()
 
     return {
         "conversation_id": conversation_id,
