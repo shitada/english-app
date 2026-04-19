@@ -104,3 +104,115 @@ Now let me look at safe_llm_call and copilot to understand testing patterns:Now 
       │ with_activity 2>&1 | grep -E "(assert|Error|FAILED|>)" | head -30
       └ 15 lines...
 
+[2026-04-20 00:53:01] Copilot invocation completed (duration: 1159s)
+[2026-04-20 00:53:01] Recording agent traces...
+[2026-04-20 00:53:01]   AGENT_TRACE iter=650 proposer=1 coder=1 tester=1 evaluator=0
+[2026-04-20 00:53:01]   AGENT_TRACE iter=651 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-20 00:53:01] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-20 00:53:01] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 00:53:01] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation
+
+  ✅ conversation: smoke 4✓ 0✗ (1713ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 00:53:10] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 00:53:10] Running post-invocation audit (iter 650-651)...
+============================================
+ Autoresearch Audit
+ Iterations: 650 — 651
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 00:53:10
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 650 651[0m
+[0;31m  Tester: FAIL — missing: 650 651[0m
+[0;31m  Evaluator: FAIL — missing: 650 651[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 00:53:11] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 00:53:14] Current iteration count: 651 / 679
+[2026-04-20 00:53:14] ------------------------------------------
+[2026-04-20 00:53:14] Invocation 2 / 10
+[2026-04-20 00:53:14] Resuming from iteration 652
+[2026-04-20 00:53:14] ------------------------------------------
+[2026-04-20 00:53:14] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-652-to-679.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo '---BACKLOG---' && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo '---GIT---' && git --no-pager log
+  │ --oneline -5 && echo '---LOG---' && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 87 lines...
+
+● T0 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0"
+  └ 2 lines...
+
+```json
+{
+  "type": "ux",
+  "title": "Progressive TTS: speak streamed AI reply sentence-by-sentence (perceived speed)",
+  "description": "Currently in Conversation.tsx, TTS only fires after the streaming SSE reply finishes (`tts.speak(streamedText)` inside the `else` branch around line 864 after `await api.streamMessage(...)` resolves). With ~15s end-to-end latency the user hears nothing for many seconds even though tokens are arriving. This proposal addresses the PERF-HIGH backlog item (faster perceived response) as a UX feature: start speaking each completed sentence as soon as it streams in, so the AI's voice begins within ~1-2s of the first token.\n\nChanges:\n\n1. `frontend/src/hooks/useSpeechSynthesis.ts`\n   - Add a new method `enqueue(text: string, lang?: string, rateOverride?: number)` that appends sentences to an internal FIFO queue (`pendingRef = useRef<SpeechSynthesisUtterance[]>([])`) and drains them sequentially via `utterance.onend` chaining without calling `speechSynthesis.cancel()` first.\n   - Add `flush()` to mark end-of-stream so the hook knows no more chunks are coming (used to keep `isSpeaking` true between utterances).\n   - `stop()` must clear the queue AND call `cancel()`.\n   - Each enqueued utterance still runs through `sanitizeForSpeech()` and uses the same voice/volume/rate logic as `speak()`.\n   - `speak()` keeps existing behavior (cancels then speaks) for backwards compatibility (used by /start opening, vocab pronunciation, replays).\n\n2. `frontend/src/pages/Conversation.tsx`\n   - In `sendMessage`, maintain a local `let spokenUpTo = 0;` cursor and a `let speakBuffer = '';` accumulator.\n   - Inside `onChunk`, after updating `streamedText`, scan `streamedText.slice(spokenUpTo)` for sentence terminators using regex `/[^.!?\\n]*[.!?\\n]+\\s*/g`. For each complete match, call `tts.enqueue(match)` and advance `spokenUpTo`.\n   - In the streaming-success branch (around line 864), replace `tts.speak(streamedText)` with: enqueue any tail `streamedText.slice(spokenUpTo)` if non-empty, then `tts.flush()`. Do NOT call the old `speak(streamedText)` (would re-speak everything).\n   - Fallback path (non-streaming `else if (streamFailed)`) continues to use `tts.speak(res.message)` unchanged.\n   - Guard with a feature flag-like check: only enqueue progressively when `tts.isSupported`. Existing TTS volume slider / mute behavior must keep working (queue respects current `volumeRef`).\n\n3. `frontend/src/utils/sanitizeForSpeech.ts` — no change required (already used by hook).\n\n4. Add a small unit test `frontend/src/hooks/useSpeechSynthesis.test.ts` (new file) using vitest + jsdom mocking `window.speechSynthesis`: verify (a) `enqueue` called twice results in two utterances spoken in order (simulate `onend`), (b) `stop()` clears pending utterances, (c) `enqueue` after `stop()` works again.\n\nNo backend changes, no schema changes, no migrations. Existing streaming endpoint already emits chunk events suitable for sentence detection. The change is small/focused and directly improves perceived responsiveness of every conversation turn — the user hears the assistant speaking within ~1-2s of streaming start instead of after the full ~15s response completes.",
+  "files_to_modify": [
+    "frontend/src/hooks/useSpeechSynthesis.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/hooks/useSpeechSynthesis.test.ts"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Iter 652 proposal
+  │ Read useSpeechSynthesis.ts
+  │   │ frontend/src/hooks/useSpeechSynthesis.ts
+  │   └ 95 lines read
+  └ Read Conversation.tsx
+      │ frontend/src/pages/Conversation.tsx
+      └ L760:900 (141 lines read)
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now update Conversation.tsx:The `let utterancesCreated = []` reassignment is suspicious — let me match the existing pattern:Found the bug: `drainNextRef.current` is updated in `useEffect`, which doesn't run during SSR (used by tests). Update the ref during render instead.All 4 pass. Now run tsc and check existing tests still pass:Existing tests still pass. Commit:

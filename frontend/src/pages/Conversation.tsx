@@ -749,6 +749,11 @@ export default function Conversation() {
       let streamFeedback: GrammarFeedback | null = null;
       let streamPaceWpm: number | null = null;
       let streamFailed = false;
+      // Progressive TTS: speak each completed sentence as soon as it
+      // streams in, so the AI's voice begins within ~1-2s of the first
+      // token instead of after the full response arrives.
+      let spokenUpTo = 0;
+      const sentenceRegex = /[^.!?\n]*[.!?\n]+\s*/g;
 
       await api.streamMessage(conversationId, userMsg, {
         onChunk: (text) => {
@@ -763,6 +768,18 @@ export default function Conversation() {
             }
             return updated;
           });
+          // Find any newly-completed sentences past the cursor and enqueue
+          // them for sequential TTS playback.
+          const remaining = streamedText.slice(spokenUpTo);
+          const matches = remaining.match(sentenceRegex);
+          if (matches && matches.length > 0) {
+            let consumedLen = 0;
+            for (const sentence of matches) {
+              tts.enqueue(sentence);
+              consumedLen += sentence.length;
+            }
+            spokenUpTo += consumedLen;
+          }
         },
         onDone: ({ grammar, pace_wpm }) => {
           streamFeedback = grammar;
@@ -861,7 +878,8 @@ export default function Conversation() {
             setGrammarStreak(0);
           }
         }
-        tts.speak(streamedText);
+        tts.enqueue(streamedText.slice(spokenUpTo));
+        tts.flush();
         if (conversationId) loadHelpersInBackground(conversationId);
       }
     } catch (err) {
