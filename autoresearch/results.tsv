@@ -590,3 +590,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 637	148bc82	2026-04-19	70	158	137	31	396	2159	2159	pass	7.00	kept	Shadowing progress badge (attempts, avg-last-20, best) + GET /api/shadowing/stats
 638	51c90cf	2026-04-19	124	361	135	27	647	2166	2166	pass	7.00	kept	Conversation Quick Reply mode (1-sentence AI replies, skips grammar check)
 639	c1feb57	2026-04-19	79	348	134	60	621	2173	2173	pass	7.25	kept	Pronunciation Trouble Words panel (DAL token-diff + endpoint + Practice button)
+640	6accf90	2026-04-19	117	201	141	35	494	2173	2173	pass	8.00	kept	Inline Shadow this line mini-drill button on assistant messages in Conversation

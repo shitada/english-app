@@ -34,3 +34,4 @@ export type { NextStepsData, Recommendation } from './NextStepsCard';
 export { ReplyProgressIndicator, getStageLabel, shouldShowElapsed } from './ReplyProgressIndicator';
 export type { ReplyProgressIndicatorProps } from './ReplyProgressIndicator';
 export { InlineShadowButton, splitIntoShadowableLines } from './InlineShadowButton';
+export { CorrectedShadowButton } from './CorrectedShadowButton';

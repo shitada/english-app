@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -1754,6 +1754,14 @@ export default function Conversation() {
               setCorrectionAttempts(p => p + 1);
               if (success) setCorrectionSuccesses(p => p + 1);
             }} />}
+            {msg.role === 'user' && msg.feedback?.corrected_text && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
+                <CorrectedShadowButton
+                  correctedText={msg.feedback.corrected_text}
+                  originalText={msg.content}
+                />
+              </div>
+            )}
           </div>
         ))}
         {sendError && (

@@ -3310,6 +3310,14 @@ pages:
         priority: medium
         added_in: 640
 
+      - id: conv-135
+        target: "Shadow correction" button under user messages with grammar feedback
+        action: Send a user message that triggers grammar feedback with a corrected_text that differs from the original. Look for a button with data-testid="corrected-shadow-button" (aria-label="Hear corrected version and shadow") rendered beneath the user bubble. Click it.
+        expect: Button is visible only on user messages whose feedback.corrected_text is non-empty and differs from msg.content; clicking calls window.speechSynthesis.speak at rate 0.75; label transitions idle ("Shadow correction") → "Listening…" while playing → "Now repeat" after audio ends; button is hidden when corrected_text is empty or equals the original
+        type: functional
+        priority: medium
+        added_in: 641
+
       - id: conv-133
         target: Reply progress indicator appears while waiting for assistant reply
         action: Send a message during chat phase and inspect the bottom of the chat scroll area for data-testid="reply-progress-indicator"
