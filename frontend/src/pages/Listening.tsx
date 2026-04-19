@@ -9,7 +9,7 @@ import { ListeningDiscussion } from '../components/ListeningDiscussion';
 import { ListeningParaphrase } from '../components/ListeningParaphrase';
 import { ListeningSpeedChallenge } from '../components/ListeningSpeedChallenge';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
+import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail, getListeningSpeed, saveListeningSpeed } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
 import { findRelevantSentenceIndex } from '../utils/listeningReview';
 
@@ -22,6 +22,35 @@ interface QuizResult {
   correctIndex: number;
   explanation: string;
   options: string[];
+}
+
+// ── Speed Ladder helpers (exported for unit testing) ─────────────────
+export const SPEED_LADDER_RUNGS: readonly number[] = [0.85, 1.0, 1.15, 1.3, 1.5];
+
+/**
+ * Pure step function for the Speed Ladder.
+ * Two consecutive first-try correct answers → step up one rung (cap at top).
+ * One wrong (non-first-try-correct) answer → step down one rung (floor at 0).
+ * Returns the next ladder index, the next consecutive-correct counter, and a hint.
+ */
+export function nextLadderStep(
+  currentIndex: number,
+  consecCorrect: number,
+  isCorrectFirstTry: boolean,
+  rungs: readonly number[] = SPEED_LADDER_RUNGS,
+): { nextIndex: number; nextConsec: number; hint: 'up' | 'down' | null } {
+  const max = rungs.length - 1;
+  if (!isCorrectFirstTry) {
+    if (currentIndex > 0) {
+      return { nextIndex: currentIndex - 1, nextConsec: 0, hint: 'down' };
+    }
+    return { nextIndex: 0, nextConsec: 0, hint: null };
+  }
+  const newConsec = consecCorrect + 1;
+  if (newConsec >= 2 && currentIndex < max) {
+    return { nextIndex: currentIndex + 1, nextConsec: 0, hint: 'up' };
+  }
+  return { nextIndex: currentIndex, nextConsec: newConsec, hint: null };
 }
 
 export default function Listening() {
@@ -54,14 +83,26 @@ export default function Listening() {
   const [playingReviewIdx, setPlayingReviewIdx] = useState<number | null>(null);
   const [shownReviewSentences, setShownReviewSentences] = useState<Record<number, boolean>>({});
 
+  // ── Speed Ladder mode ─────────────────────────────────────────────
+  // Ladder rungs: 0.85, 1.0, 1.15, 1.3, 1.5 (cap)
+  const [speedLadder, setSpeedLadder] = useState(false);
+  const [ladderIndex, setLadderIndex] = useState(0);
+  const [consecCorrect, setConsecCorrect] = useState(0);
+  const [ladderHint, setLadderHint] = useState<'up' | 'down' | null>(null);
+  const [ladderTopSpeed, setLadderTopSpeed] = useState<number>(0.85);
+  const [savedTopSpeed, setSavedTopSpeed] = useState<number>(1.0);
+
   const sentences = passage ? extractSentences(passage) : [];
+
+  // Effective playback speed depends on whether Speed Ladder mode is active
+  const effectiveRate = speedLadder ? SPEED_LADDER_RUNGS[ladderIndex] : playbackRate;
 
   const playSentence = useCallback((text: string, idx: number) => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = playbackRate;
+    utterance.rate = effectiveRate;
     utterance.onend = () => setPlayingSentenceIdx(null);
     utterance.onerror = () => setPlayingSentenceIdx(null);
     setPlayingSentenceIdx(idx);
@@ -79,7 +120,7 @@ export default function Listening() {
         return next;
       });
     }
-  }, [playbackRate, phase, quizIndex]);
+  }, [effectiveRate, phase, quizIndex]);
 
   useEffect(() => {
     getListeningQuizHistory(10).then(setHistory).catch(() => {});
@@ -94,6 +135,26 @@ export default function Listening() {
     api.getConversationTopics().then(t => setTopics(t.map(({ id, label }) => ({ id, label })))).catch(() => {});
     return () => { window.speechSynthesis.cancel(); };
   }, []);
+
+  // Load saved best ladder speed for the chosen topic; start one rung below it.
+  useEffect(() => {
+    if (!speedLadder) return;
+    let cancelled = false;
+    getListeningSpeed(selectedTopic || 'all').then(r => {
+      if (cancelled) return;
+      setSavedTopSpeed(r.max_speed);
+      // Find the highest rung index whose value <= saved max, then drop one
+      const idxAtSaved = SPEED_LADDER_RUNGS.reduce(
+        (best, val, i) => (val <= r.max_speed ? i : best),
+        0,
+      );
+      const startIdx = Math.max(0, idxAtSaved - 1);
+      setLadderIndex(startIdx);
+      setLadderTopSpeed(SPEED_LADDER_RUNGS[startIdx]);
+      setConsecCorrect(0);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [speedLadder, selectedTopic]);
 
   const generateQuiz = useCallback(async () => {
     setLoading(true);
@@ -119,7 +180,7 @@ export default function Listening() {
     }
     const utterance = new SpeechSynthesisUtterance(passage);
     utterance.lang = 'en-US';
-    utterance.rate = playbackRate;
+    utterance.rate = effectiveRate;
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
@@ -137,11 +198,13 @@ export default function Listening() {
         return next;
       });
     }
-  }, [passage, playbackRate, isSpeaking, phase, quizIndex]);
+  }, [passage, effectiveRate, isSpeaking, phase, quizIndex]);
 
   const handleAnswer = useCallback(() => {
     if (selectedOption === null) return;
     const q = questions[quizIndex];
+    const wasFirstListen = firstListenFlags[quizIndex] ?? true;
+    const isCorrect = selectedOption === q.correct_index;
     setResults(prev => [...prev, {
       question: q.question,
       selectedIndex: selectedOption,
@@ -151,11 +214,28 @@ export default function Listening() {
     }]);
     setAnsweredFirstListen(prev => {
       const next = [...prev];
-      next[quizIndex] = firstListenFlags[quizIndex] ?? true;
+      next[quizIndex] = wasFirstListen;
       return next;
     });
     setAnswered(true);
-  }, [selectedOption, questions, quizIndex, firstListenFlags]);
+
+    // Speed Ladder progression — only when ladder mode is active
+    if (speedLadder) {
+      const correctFirstTry = isCorrect && wasFirstListen;
+      const step = nextLadderStep(ladderIndex, consecCorrect, correctFirstTry);
+      if (step.nextIndex !== ladderIndex) {
+        setLadderIndex(step.nextIndex);
+        const nextSpeed = SPEED_LADDER_RUNGS[step.nextIndex];
+        if (nextSpeed > ladderTopSpeed) setLadderTopSpeed(nextSpeed);
+      }
+      setConsecCorrect(step.nextConsec);
+      setLadderHint(step.hint);
+      if (step.hint) {
+        // auto-clear hint after a moment
+        window.setTimeout(() => setLadderHint(null), 1800);
+      }
+    }
+  }, [selectedOption, questions, quizIndex, firstListenFlags, speedLadder, ladderIndex, consecCorrect, ladderTopSpeed]);
 
   const handleNext = useCallback(() => {
     if (quizIndex < questions.length - 1) {
@@ -188,8 +268,14 @@ export default function Listening() {
           getListeningQuizHistory(10).then(setHistory).catch(() => {});
         }).catch(() => {});
       }
+      // Persist speed-ladder top speed (only if ladder mode was active)
+      if (speedLadder && ladderTopSpeed > savedTopSpeed) {
+        saveListeningSpeed(selectedTopic || '', ladderTopSpeed)
+          .then(r => setSavedTopSpeed(r.max_speed))
+          .catch(() => {});
+      }
     }
-  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry, passage, selectedTopic, answeredFirstListen, firstListenFlags]);
+  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry, passage, selectedTopic, answeredFirstListen, firstListenFlags, speedLadder, ladderTopSpeed, savedTopSpeed]);
 
   const handleRestart = useCallback(() => {
     setPhase('setup');
@@ -208,6 +294,9 @@ export default function Listening() {
     setIsSpeaking(false);
     setShowBreakdown(false);
     setPlayingSentenceIdx(null);
+    setConsecCorrect(0);
+    setLadderHint(null);
+    // ladderIndex / ladderTopSpeed re-initialize via the speedLadder effect on next start
   }, []);
 
   const handleReplay = useCallback(async (quizId: number) => {
@@ -435,6 +524,36 @@ export default function Listening() {
             </div>
           )}
           {error && <p style={{ color: 'var(--danger, #ef4444)', marginBottom: 12 }}>{error}</p>}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+            marginBottom: 12, padding: '10px 12px', borderRadius: 8,
+            border: `2px solid ${speedLadder ? 'var(--warning, #f59e0b)' : 'var(--border)'}`,
+            background: speedLadder ? 'rgba(245,158,11,0.08)' : 'var(--bg-secondary, #f9fafb)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Zap size={16} color={speedLadder ? 'var(--warning, #f59e0b)' : 'var(--text-secondary)'} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>Speed Ladder</div>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                  Train your ear: 0.85x → 1.5x. 2 right in a row → speed up.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSpeedLadder(v => !v)}
+              data-testid="speed-ladder-toggle"
+              aria-pressed={speedLadder}
+              style={{
+                padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                border: '1px solid var(--border)',
+                background: speedLadder ? 'var(--warning, #f59e0b)' : 'transparent',
+                color: speedLadder ? '#fff' : 'var(--text)',
+              }}
+            >
+              {speedLadder ? 'On' : 'Off'}
+            </button>
+          </div>
           <button
             className="btn btn-primary"
             onClick={generateQuiz}
@@ -675,6 +794,32 @@ export default function Listening() {
               <Volume2 size={14} /> Replay
             </button>
           </div>
+          {speedLadder && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <span
+                data-testid="speed-ladder-chip"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+                  background: 'var(--warning, #f59e0b)', color: '#fff',
+                }}
+              >
+                ⚡ {SPEED_LADDER_RUNGS[ladderIndex]}x · Level {ladderIndex + 1}/{SPEED_LADDER_RUNGS.length}
+              </span>
+              {ladderHint === 'up' && (
+                <span data-testid="speed-ladder-hint-up"
+                      style={{ fontSize: 12, fontWeight: 700, color: 'var(--success, #22c55e)' }}>
+                  ⬆️ Speed up!
+                </span>
+              )}
+              {ladderHint === 'down' && (
+                <span data-testid="speed-ladder-hint-down"
+                      style={{ fontSize: 12, fontWeight: 700, color: 'var(--danger, #ef4444)' }}>
+                  ⬇️ Slowing down
+                </span>
+              )}
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Speed:</span>
             {[0.5, 0.75, 1.0, 1.25, 1.5].map(r => (
@@ -821,6 +966,21 @@ export default function Listening() {
       {phase === 'results' && (
         <div className="card" style={{ maxWidth: 600, margin: '0 auto' }}>
           <h3 style={{ textAlign: 'center', marginBottom: 16 }}>Quiz Complete!</h3>
+          {speedLadder && (
+            <div
+              data-testid="speed-ladder-top-speed"
+              style={{
+                textAlign: 'center', marginBottom: 12, padding: '8px 12px',
+                borderRadius: 999, display: 'inline-flex', alignItems: 'center',
+                justifyContent: 'center', gap: 6,
+                background: 'var(--warning, #f59e0b)', color: '#fff', fontWeight: 700, fontSize: 13,
+                marginLeft: 'auto', marginRight: 'auto',
+              }}
+            >
+              ⚡ Top speed reached: {ladderTopSpeed}x
+              {ladderTopSpeed > savedTopSpeed && <span style={{ fontSize: 11, opacity: 0.9 }}>· new best!</span>}
+            </div>
+          )}
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <span style={{
               fontSize: 48, fontWeight: 700,

@@ -210,6 +210,12 @@ CREATE TABLE IF NOT EXISTS dictation_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_dictation_attempts_created ON dictation_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS listening_speed_progress (
+    topic TEXT PRIMARY KEY,
+    max_speed REAL NOT NULL DEFAULT 1.0,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 """
 
 # ---------------------------------------------------------------------------
@@ -485,6 +491,14 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add pace_wpm column to messages",
         "ALTER TABLE messages ADD COLUMN pace_wpm REAL",
+    ),
+    (
+        "create listening_speed_progress table",
+        """CREATE TABLE IF NOT EXISTS listening_speed_progress (
+            topic TEXT PRIMARY KEY,
+            max_speed REAL NOT NULL DEFAULT 1.0,
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
     ),
 ]
 

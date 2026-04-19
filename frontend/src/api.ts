@@ -1641,6 +1641,26 @@ export async function getListeningDifficultyRecommendation(): Promise<ListeningD
   return request<ListeningDifficultyRecommendation>('/api/pronunciation/listening-quiz/difficulty-recommendation');
 }
 
+// ── Listening Speed Ladder ────────────────────────────
+
+export interface ListeningSpeedProgress {
+  topic: string;
+  max_speed: number;
+}
+
+export async function getListeningSpeed(topic: string): Promise<ListeningSpeedProgress> {
+  const safe = encodeURIComponent(topic && topic.trim() ? topic.trim() : 'all');
+  return request<ListeningSpeedProgress>(`/api/listening/speed/${safe}`);
+}
+
+export async function saveListeningSpeed(topic: string, speed: number): Promise<{ ok: boolean; topic: string; max_speed: number }> {
+  return request<{ ok: boolean; topic: string; max_speed: number }>('/api/listening/speed', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic: topic || '', speed }),
+  });
+}
+
 // ── Listening Progress ────────────────────────────────
 
 export interface ListeningDifficultyBreakdown {

@@ -1156,6 +1156,39 @@ pages:
         priority: medium
         added_in: 632
 
+      # --- Speed Ladder mode (added in iteration 648) ---
+      - id: list-035
+        target: Speed Ladder toggle on Listening setup screen
+        action: On the Listening setup screen, click the button with data-testid="speed-ladder-toggle"
+        expect: The toggle switches between 'Off' and 'On' (aria-pressed flips); when On, audio plays at the current ladder rung instead of the manual playback speed
+        type: functional
+        priority: high
+        added_in: 648
+
+      - id: list-036
+        target: Speed Ladder chip is shown above quiz audio when ladder mode is active
+        action: Enable Speed Ladder, generate a quiz and reach the quiz phase
+        expect: Element with data-testid="speed-ladder-chip" is visible showing '⚡ Xx · Level N/5' where X is one of 0.85, 1.0, 1.15, 1.3, 1.5
+        type: functional
+        priority: high
+        added_in: 648
+
+      - id: list-037
+        target: Speed Ladder transient hint after each answer
+        action: With Speed Ladder enabled, answer two questions correctly on first listen; then answer one wrong
+        expect: After the second consecutive correct answer, data-testid="speed-ladder-hint-up" briefly appears ('⬆️ Speed up!'); after a wrong answer, data-testid="speed-ladder-hint-down" appears ('⬇️ Slowing down')
+        type: functional
+        priority: medium
+        added_in: 648
+
+      - id: list-038
+        target: Top speed reached shown on results when Speed Ladder mode was active
+        action: Complete a Speed-Ladder quiz to reach the results phase
+        expect: Element with data-testid="speed-ladder-top-speed" is visible showing '⚡ Top speed reached: Xx' and persists the per-topic best via POST /api/listening/speed
+        type: functional
+        priority: high
+        added_in: 648
+
   vocabulary:
     path: /vocabulary
     tests:

@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from app.copilot_client import get_copilot_service
+from app.dal import listening_speed as ls_dal
 from app.dal import minimal_pair as mp_dal
 from app.dal import numbers_drill as nd_dal
 from app.database import get_db_session
@@ -393,3 +394,59 @@ async def submit_numbers_drill(
             expected_normalized=normalize_answer(item.expected_answer),
         ))
     return NumbersDrillSubmitResponse(results=results, correct=correct, total=len(payload.items))
+
+
+# ---------------------------------------------------------------------------
+# Speed Ladder progress (per-topic best playback rate)
+# ---------------------------------------------------------------------------
+
+class SpeedProgressResponse(BaseModel):
+    topic: str
+    max_speed: float
+
+
+class SpeedProgressRequest(BaseModel):
+    topic: str = Field(default="", max_length=200)
+    speed: float = Field(..., ge=0.5, le=2.0)
+
+
+class SpeedProgressSaveResponse(BaseModel):
+    ok: bool
+    topic: str
+    max_speed: float
+
+
+@router.get("/speed/{topic}", response_model=SpeedProgressResponse)
+async def get_listening_speed(
+    topic: str,
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> SpeedProgressResponse:
+    """Return the saved best playback speed for a topic (default 1.0)."""
+    # Treat reserved sentinel "all" / "any" / "none" as the global bucket
+    norm = topic.strip().lower()
+    if norm in {"all", "any", "none", "global", "_"}:
+        norm = ""
+    try:
+        max_speed = await ls_dal.get_max_speed(db, norm)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to fetch listening speed for topic=%s", topic)
+        raise HTTPException(status_code=500, detail="Failed to fetch listening speed")
+    return SpeedProgressResponse(topic=norm, max_speed=max_speed)
+
+
+@router.post("/speed", response_model=SpeedProgressSaveResponse)
+async def save_listening_speed(
+    payload: SpeedProgressRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> SpeedProgressSaveResponse:
+    """UPSERT a new best speed for a topic (only persists if greater)."""
+    try:
+        new_max = await ls_dal.record_speed(db, payload.topic, payload.speed)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to record listening speed: topic=%s speed=%s",
+                         payload.topic, payload.speed)
+        raise HTTPException(status_code=500, detail="Failed to record listening speed")
+    norm = (payload.topic or "").strip().lower()
+    logger.info("listening_speed: topic=%s submitted=%s stored_max=%s",
+                norm, payload.speed, new_max)
+    return SpeedProgressSaveResponse(ok=True, topic=norm, max_speed=new_max)
