@@ -10,6 +10,7 @@ import {
   type ShadowingSentence,
   type ShadowingStats,
 } from '../api';
+import { MissedWordsDrill } from '../components/shadowing/MissedWordsDrill';
 
 type Phase = 'loading' | 'idle' | 'playing' | 'countdown' | 'recording' | 'scoring' | 'results' | 'error';
 
@@ -351,6 +352,12 @@ export default function Shadowing() {
                   ))}
                 </div>
               </div>
+
+              <MissedWordsDrill
+                expected={item.sentence}
+                transcript={transcriptCaptured}
+                speak={tts.speak}
+              />
 
               <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                 💡 {item.focus_tip}

@@ -4319,3 +4319,31 @@ pages:
         type: functional
         priority: medium
         added_in: 637
+      - id: shadowing-005
+        target: Missed-word drill panel renders after a scored attempt with missed words
+        action: Complete a shadowing attempt that leaves at least one expected word unmatched, then look for data-testid="missed-words-drill" with one or more data-testid="missed-word-chip" elements
+        expect: Drill panel is visible under the Word check diff; each missed word appears as a tappable chip and a data-testid="drill-play-all" button is shown
+        type: functional
+        priority: medium
+        added_in: 660
+      - id: shadowing-006
+        target: Tapping a missed-word chip re-speaks that word slowly (rate 0.7)
+        action: On the shadowing results screen with at least one missed word, click data-testid="missed-word-chip"
+        expect: useSpeechSynthesis.speak is invoked with that single word, lang "en-US", and rate 0.7 (no errors thrown if browser TTS is unavailable)
+        type: functional
+        priority: medium
+        added_in: 660
+      - id: shadowing-007
+        target: Play-all-slowly button cycles through every missed word
+        action: On the shadowing results screen with multiple missed words, click data-testid="drill-play-all"
+        expect: speak is called once per missed word in order at rate 0.7
+        type: functional
+        priority: low
+        added_in: 660
+      - id: shadowing-008
+        target: Perfect-state celebration replaces drill panel when nothing was missed
+        action: Complete (or mock) a shadowing attempt where the transcript contains every expected word
+        expect: data-testid="drill-perfect-state" is visible with text "Perfect — no drill needed 🎉"; no chips and no drill-play-all button render
+        type: functional
+        priority: low
+        added_in: 660

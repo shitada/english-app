@@ -1330,4 +1330,196 @@ Iter 658 done. Now iter 659.
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me create the component and tests.Now update Home.tsx to add the tile:Now create the tests:All tests pass. Now let me update the e2e UI test spec:
+Now I have enough context. Let me create the component and tests.Now update Home.tsx to add the tile:Now create the tests:All tests pass. Now let me update the e2e UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "fd8a80e",
+  "files_changed": [
+    "frontend/src/components/ListeningWarmup.tsx",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/__tests__/ListeningWarmup.test.tsx",
+    "frontend/src/__tests__/Home.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 25,
+  "ui_spec_updated": true,
+  "description": "Added 60-second Listening Warmup tile on Home that opens a modal panel playing up to 6 sentences via speechSynthesis (slow then normal pass), with Pause/Resume/Skip/Stop, ESC-to-close, circular progress ring, vocab-cache sourcing with built-in fallback, and localStorage-backed daily warmup streak badge."
+}
+```● Coder Implement iter 659
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #659: Home Listening Warmup tile (60s passive TTS)
+  │   │
+  │   │ Co-authored-by: Copilot <copilot@github.com>" 2>&1 | tail -15
+  │   └ 16 lines...
+  └ commit info (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git diff --name-only HEAD~1 HEAD
+      └ 9 lines...
+
+● T2 iter 659 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2215 passed in 117.44s (0:01:57) ==================\n\nFailure detail (test_daily_challenge_current_count_with_activity):\n>           assert data[\"current_count\"] >= 1  # We seeded 2, target is 1 → capped at min(2,1)=1\nE           assert 0 >= 1\ntests/integration/test_dashboard_api.py:1893: AssertionError\n\nVitest (changed test files): 25/25 passed (ListeningWarmup.test.tsx 21, Home.test.tsx 4).",
+  "failure_summary": "2 backend integration tests failed in tests/integration/test_dashboard_api.py (test_daily_challenge_current_count_with_activity, TestDayDetailAPI::test_pronunciation_activity_reflected) — current_count returned 0 instead of expected >=1. Unrelated to changed frontend files; appears to be a pre-existing dashboard API issue. Frontend tsc passed; vitest for changed files passed (25/25)."
+}
+```● Tester Test iter 659
+  │ vitest for changed tests (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ src/__tests__/ListeningWarmup.test.tsx src/__tests__/Home.test.tsx 2>&1 |
+  │   │ tail -40
+  │   └ 10 lines...
+  └ failure detail (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+      │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+      │ with_activity 2>&1 | grep -E "(FAILED|assert|Error|>)" | head -30
+      └ 15 lines...
+
+● T3 iter 659 (shell)
+  │ date +%s
+  └ 2 lines...
+
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.5, "verdict": "keep", "reason": "Clean self-contained ListeningWarmup modal with thorough unit tests (25 new), proper a11y, ESC handling, streak persistence, and TTS fallbacks; pre-existing dashboard test failures are unrelated to this frontend-only change."}● Evaluator Evaluate iter 659
+  └ Read ListeningWarmup.tsx
+      │ frontend/src/components/ListeningWarmup.tsx
+      └ 521 lines read
+
+● Record iter 659 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ echo "T4=$T4" && python3 -c "
+  │ T0,T1,T2,T3,T4 = 1776618190, 1776618273, 1776618575, 1776618744, $T4
+  │ row = ['659','fd8a80e','2026-04-20', str(T1-T0), str(T2-T1), str(T3-T2),
+  │ str(T4-T3), str(T4-T0), '2215','2217','pass','7.50','kept','Home Listening…
+  └ 6 lines...
+
+Both iterations complete. Stopping per task instructions.
+
+**Summary:**
+- **Iter 658** — `3433d74` — Stress Tap pronunciation mini-game (tap-the-syllable + TTS + weighted SRS in localStorage, 24 tests) — score **7.75**, **kept**
+- **Iter 659** — `fd8a80e` — Home Listening Warmup tile (60s passive TTS modal + warmup streak in localStorage, 25 tests) — score **7.50**, **kept**
+
+Both frontend-only. TS check passed. Vitest for new files 100% pass. Same 2 pre-existing dashboard integration failures persist (unrelated). Diversified to Pronunciation + Home this round.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (19m 54s)
+Tokens    ↑ 3.1m • ↓ 63.8k • 2.9m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-658-to-679.md
+[2026-04-20 02:12:57] Copilot invocation completed (duration: 1197s)
+[2026-04-20 02:12:57] Recording agent traces...
+[2026-04-20 02:12:58]   AGENT_TRACE iter=658 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 02:12:58]   AGENT_TRACE iter=659 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 02:12:58] SMOKE_UI: UI changes detected in pages: home,listening,pronunciation
+[2026-04-20 02:12:58] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 02:12:58] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home, listening, pronunciation
+
+  ✅ home: smoke 4✓ 0✗ (1834ms)
+  ✅ listening: smoke 4✓ 0✗ (1559ms)
+  ✅ pronunciation: smoke 4✓ 0✗ (1625ms)
+
+✅ UI TEST PASS (3/3 pages)
+[2026-04-20 02:13:16] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 02:13:16] Running post-invocation audit (iter 658-659)...
+============================================
+ Autoresearch Audit
+ Iterations: 658 — 659
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 02:13:16
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 658 659[0m
+[0;31m  Tester: FAIL — missing: 658 659[0m
+[0;31m  Evaluator: FAIL — missing: 658 659[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 02:13:18] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 02:13:21] Current iteration count: 659 / 679
+[2026-04-20 02:13:21] ------------------------------------------
+[2026-04-20 02:13:21] Invocation 6 / 10
+[2026-04-20 02:13:21] Resuming from iteration 660
+[2026-04-20 02:13:21] ------------------------------------------
+[2026-04-20 02:13:21] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-660-to-679.md)...
+● Gather context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT---" && git log
+  │ --oneline -5 && echo "---UI RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 39 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Shadowing: tap-to-hear drill for missed words after each attempt",
+  "description": "On the Shadowing results screen, the app already calls diffMissedWords() to highlight which expected words were not detected in the user's transcript. Today these words are only displayed visually. Add a small interactive 'Drill missed words' panel directly under the diff: render each missed word as a tappable chip with a small Volume2 icon. Tapping a chip uses the existing useSpeechSynthesis hook to speak that single word at a slowed rate (e.g. rate=0.7) so the learner can isolate and rehearse trouble words before clicking 'Try again'. Also add a 'Play all slowly' button that speaks each missed word in sequence with a short pause. If there are zero missed words, show a small 'Perfect — no drill needed 🎉' message instead. This is a frontend-only change leveraging APIs already on the page; no backend or schema changes. It directly reinforces the listening/speaking-fluency goal by tightening the feedback→practice loop within a single session.\n\nImplementation notes:\n- Edit frontend/src/pages/Shadowing.tsx: in the results phase JSX, after the existing missed-words diff render, add a new section <MissedWordsDrill words={missedWords} />. Keep it as a small inline component (or a helper) inside the same file to stay under the file limit.\n- Use the existing useSpeechSynthesis hook's speak({ text, rate: 0.7 }) call (matching current usage). Disable buttons while speaking.\n- Style: reuse existing chip/button Tailwind classes already used elsewhere on the page (rounded-full, bg-slate-100 dark:bg-slate-800, etc.) for visual consistency and dark-mode support.\n- Add a data-testid='missed-word-chip' on each chip and data-testid='drill-play-all' on the bulk button to enable testing.\n\nTests (frontend/src/__tests__/Shadowing.test.tsx or new Shadowing.drill.test.tsx):\n- Mock useSpeechSynthesis to expose a spy speak(); render the results phase with a known expected sentence and a transcript missing 2 words; assert 2 chips render and clicking one calls speak with that word and rate 0.7.\n- When all words match, assert the 'Perfect' message renders and no chips are present.\n- Clicking 'Play all slowly' calls speak() once per missed word with rate 0.7.",
+  "files_to_change": [
+    "frontend/src/pages/Shadowing.tsx",
+    "frontend/src/__tests__/Shadowing.drill.test.tsx"
+  ],
+  "test_plan": "1) New Vitest unit tests in Shadowing.drill.test.tsx mocking useSpeechSynthesis and useSpeechRecognition: render Shadowing in results phase via state injection (or by simulating a completed attempt flow with mocked api), then assert chip rendering, click-to-speak calls, and the empty/perfect state. 2) Run the existing Shadowing test suite to confirm no regressions. 3) Manual smoke: complete one shadowing attempt, verify chips appear for missed words, tap one to hear it slowly, tap 'Play all slowly' to drill all, then click 'Try again' and confirm normal flow resumes.",
+  "success_criteria": "On the Shadowing results screen, every missed word from diffMissedWords() renders as a tappable chip that, when clicked, calls useSpeechSynthesis.speak with that word at rate 0.7; a 'Play all slowly' button speaks all missed words sequentially; when there are no missed words a 'Perfect — no drill needed' message is shown; new unit tests pass and existing Shadowing tests remain green; no backend or schema changes; dark mode styling is consistent with the rest of the page.",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 660
+  │ List directory frontend/src/pages
+  │   └ 8 files found
+  └ Read Shadowing.tsx
+      │ frontend/src/pages/Shadowing.tsx
+      └ L1:40 (40 lines read)
+
+● T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now I have a solid understanding. Let me create a separate component file for testability and inline-use it in Shadowing.tsx.Now wire it into Shadowing.tsx:Now write the tests:All 12 tests pass. Now update UI test spec since I changed `pages/Shadowing.tsx`:

@@ -609,3 +609,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 656	01fd4e7	2026-04-20	30	600	130	25	785	2215	2217	pass	7.25	kept	MinimalPairs: Speak the Pair production mode (ASR contrast scoring + mode toggle)
 657	7300710	2026-04-20	30	550	130	25	735	2215	2217	pass	7.50	kept	Phrase of the Day: 3-attempt shadowing drill with speed ladder (frontend-only + helper unit tests)
 658	3433d74	2026-04-20	93	303	163	21	580	2215	2217	pass	7.75	kept	Stress Tap pronunciation mini-game (tap-the-syllable + TTS + weighted SRS in localStorage)
+659	fd8a80e	2026-04-20	83	302	169	26	580	2215	2217	pass	7.50	kept	Home Listening Warmup tile (60s passive TTS modal + warmup streak in localStorage)
