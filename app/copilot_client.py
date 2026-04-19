@@ -79,10 +79,12 @@ class LatencyTracker:
         }
 
     def _label_snapshot(self, records: list[tuple[float, float, float]]) -> dict[str, Any]:
+        session = [r[0] for r in records]
         llm = [r[1] for r in records]
         total = [r[2] for r in records]
         return {
             "count": len(records),
+            "session": self._stats(session),
             "llm": self._stats(llm),
             "total": self._stats(total),
         }
@@ -131,6 +133,12 @@ class CopilotService:
         self._client: CopilotClient | None = None
         self._init_lock = asyncio.Lock()
         self._prewarmed: bool = False
+        # Warm-pool of pre-created sessions, keyed by system_prompt.
+        # Bounded to a small number of distinct system prompts to avoid memory growth.
+        self._warm_pool: dict[str, Any] = {}
+        self._warm_pool_max: int = 4
+        self._warm_lock: asyncio.Lock | None = None  # lazy: must be created on running loop
+        self._warm_in_flight: set[str] = set()
         logger.info(
             "CopilotService configured: model=%s, timeout=%d, retries=%d",
             self._model, self._timeout, self._max_retries,
@@ -162,6 +170,64 @@ class CopilotService:
                         raise
         return self._client  # type: ignore[return-value]
 
+    def _get_warm_lock(self) -> asyncio.Lock:
+        if self._warm_lock is None:
+            self._warm_lock = asyncio.Lock()
+        return self._warm_lock
+
+    @staticmethod
+    def _approve_permission(req: Any, ctx: dict[str, str]) -> PermissionRequestResult:
+        return PermissionRequestResult(kind="approved")
+
+    async def _take_warm_session(self, system_prompt: str) -> Any | None:
+        """Pop a warm session matching `system_prompt` from the pool, if any."""
+        lock = self._get_warm_lock()
+        async with lock:
+            return self._warm_pool.pop(system_prompt, None)
+
+    async def _prewarm_session(self, system_prompt: str) -> None:
+        """Background task: create a session for `system_prompt` and stash it in the pool."""
+        lock = self._get_warm_lock()
+        async with lock:
+            if system_prompt in self._warm_pool:
+                return
+            if system_prompt in self._warm_in_flight:
+                return
+            if len(self._warm_pool) >= self._warm_pool_max:
+                # Pool is full of other prompts; skip to bound resource usage.
+                return
+            self._warm_in_flight.add(system_prompt)
+        session = None
+        try:
+            client = await self._ensure_client()
+            session = await client.create_session(
+                model=self._model,
+                system_message=SystemMessageReplaceConfig(mode="replace", content=system_prompt),
+                on_permission_request=self._approve_permission,
+            )
+            async with lock:
+                if system_prompt in self._warm_pool or len(self._warm_pool) >= self._warm_pool_max:
+                    # Race: another prewarm finished first, or pool filled. Destroy ours.
+                    stash = None
+                else:
+                    self._warm_pool[system_prompt] = session
+                    stash = session
+            if stash is None and session is not None:
+                try:
+                    await session.destroy()
+                except Exception:
+                    pass
+        except Exception as exc:
+            logger.debug("Copilot warm-pool prefetch failed: %s", exc)
+            if session is not None:
+                try:
+                    await session.destroy()
+                except Exception:
+                    pass
+        finally:
+            async with lock:
+                self._warm_in_flight.discard(system_prompt)
+
     async def ask(
         self,
         system_prompt: str,
@@ -170,20 +236,23 @@ class CopilotService:
         label: str = "default",
     ) -> str:
         """Send a prompt and return the text response."""
-        client = await self._ensure_client()
         timeout = timeout or self._timeout
 
-        def _on_permission_request(req: Any, ctx: dict[str, str]) -> PermissionRequestResult:
-            return PermissionRequestResult(kind="approved")
-
         t0 = time.monotonic()
-        session = await client.create_session(
-            model=self._model,
-            system_message=SystemMessageReplaceConfig(mode="replace", content=system_prompt),
-            on_permission_request=_on_permission_request,
-        )
-        t_session = time.monotonic()
-        logger.info("Session created (%.1fs)", t_session - t0)
+        # Try to consume a warm session for this exact system_prompt.
+        session = await self._take_warm_session(system_prompt)
+        if session is not None:
+            t_session = time.monotonic()
+            logger.debug("Copilot warm-pool hit (saved session creation)")
+        else:
+            client = await self._ensure_client()
+            session = await client.create_session(
+                model=self._model,
+                system_message=SystemMessageReplaceConfig(mode="replace", content=system_prompt),
+                on_permission_request=self._approve_permission,
+            )
+            t_session = time.monotonic()
+            logger.info("Session created (%.1fs)", t_session - t0)
 
         try:
             response = await session.send_and_wait(
@@ -205,20 +274,31 @@ class CopilotService:
                     snap = tracker.snapshot()["labels"].get(label)
                     if snap:
                         logger.info(
-                            "Copilot latency [%s] n=%d llm p50=%.2fs p95=%.2fs total p50=%.2fs p95=%.2fs",
+                            "Copilot latency [%s] n=%d session p50=%.2fs llm p50=%.2fs p95=%.2fs total p50=%.2fs p95=%.2fs",
                             label, count,
+                            snap["session"]["p50_s"],
                             snap["llm"]["p50_s"], snap["llm"]["p95_s"],
                             snap["total"]["p50_s"], snap["total"]["p95_s"],
                         )
             except Exception as exc:  # never fail a real request because of metrics
                 logger.debug("Latency tracking failed: %s", exc)
 
+            # Schedule a background prefetch of the next session for this system_prompt
+            # so the next ask() with the same prompt overlaps session creation with caller work.
+            try:
+                asyncio.create_task(self._prewarm_session(system_prompt))
+            except Exception as exc:
+                logger.debug("Failed to schedule warm-pool prefetch: %s", exc)
+
             if response and hasattr(response, "data") and hasattr(response.data, "content"):
                 return str(response.data.content)
             logger.warning("Empty response from Copilot SDK")
             return ""
         finally:
-            await session.destroy()
+            try:
+                await session.destroy()
+            except Exception:
+                pass
 
     async def ask_json(
         self,
@@ -277,13 +357,10 @@ class CopilotService:
         try:
             client = await self._ensure_client()
 
-            def _on_permission_request(req: Any, ctx: dict[str, str]) -> PermissionRequestResult:
-                return PermissionRequestResult(kind="approved")
-
             session = await client.create_session(
                 model=self._model,
                 system_message=SystemMessageReplaceConfig(mode="replace", content="ping"),
-                on_permission_request=_on_permission_request,
+                on_permission_request=self._approve_permission,
             )
             try:
                 await session.destroy()
@@ -298,6 +375,19 @@ class CopilotService:
             )
 
     async def close(self) -> None:
+        # Drain warm pool sessions before stopping the client.
+        try:
+            lock = self._get_warm_lock()
+            async with lock:
+                pool = list(self._warm_pool.values())
+                self._warm_pool.clear()
+            for session in pool:
+                try:
+                    await session.destroy()
+                except Exception:
+                    pass
+        except Exception:
+            pass
         if self._client is not None:
             try:
                 await self._client.stop()

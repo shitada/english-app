@@ -877,3 +877,193 @@ Now I have what I need. Let me implement.Now the unit test:All pass. Commit:```j
       │ lts.json 2>&1 | head -100
       └ 2 lines...
 
+```json
+{
+  "committed": true,
+  "commit_hash": "84380ea",
+  "files_changed": ["tests/integration/test_conversation_api.py"],
+  "tests_added": 0,
+  "ui_spec_updated": false,
+  "description": "Fix test_send_message_no_longer_calls_reply_helpers by using a non-trivial message ('I would like to book a room please.') so the grammar-check ask_json path runs; all 12 targeted tests pass. Amended onto previous commit."
+}
+```● Coder Fix existing test
+  │ run tests (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │   │ tests/integration/test_conversation_api.py::test_send_message_no_longer_call
+  │   │ s_reply_helpers tests/integration/test_conversation_skip_grammar.py
+  │   │ tests/unit/test_conversation_skip_grammar.py -v 2>&1 | tail -40
+  │   └ 24 lines...
+  └ amend (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit --amend --no-edit && git rev-parse --short HEAD
+      └ 19 lines...
+
+```json
+{
+  "tests_passed": 2151,
+  "tests_total": 2151,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2151 passed in 109.56s (0:01:49) =======================",
+  "failure_summary": ""
+}
+```● Tester Re-test iter 635
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30; echo
+  │   │ "EXIT=$?"
+  │   └ 24 lines...
+  └ Check e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "NOT_FOUND"
+      └ 2 lines...
+
+● Mark T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+I'll need to look at the diff directly. Let me find the relevant files.```json
+{
+  "code_quality": 8,
+  "feature_value": 6,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Clean, well-scoped latency optimization with a clear helper, tests pass and TS check passes; minor pedagogical concern that 4-word threshold may skip grammar feedback on short erroneous learner sentences (e.g. 'I has dog'), but trivial-ack heuristic is reasonable and frontend already handles feedback=None."
+}
+```● Evaluator Evaluate iter 635
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L450:620 (171 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L620:720 (101 lines read)
+
+● Record iter 635 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=635 && HASH=84380ea && PASSED=2151 && TOTAL=2151 && TS=pass &&
+  │ SCORE=7.00 && VERDICT=kept && DESC="Skip grammar-check LLM call for
+  │ trivial messages (<4 words or known ack) in /conversation/message" &&
+  │ T0=1776598218 && T1=1776598269 && T2=1776598372 && T3=1776598691 && printf…
+  └ 7 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **Iter 634** (cf1e4e2, kept 7.25): Pre-warm Copilot SDK session in FastAPI lifespan startup — eliminates ~0.6s cold-start cost on first /conversation/start. 2140/2140 tests pass.
+- **Iter 635** (84380ea, kept 7.00): Skip grammar-check LLM call in /conversation/message for trivial messages (<4 words or known acknowledgments like "yes"/"thanks") — saves one LLM round-trip on common acks. 2151/2151 tests pass.
+
+Both targeted the PERF-HIGH backlog item on conversation latency. Each iteration required one amend to fix a test issue (TypedDict isinstance, and an existing test using "Hello!" that became trivial under the new rule).
+
+
+Changes   +0 -0
+Requests  7.5 Premium (18m 43s)
+Tokens    ↑ 2.0m • ↓ 37.5k • 1.8m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-634-to-639.md
+[2026-04-19 20:38:59] Copilot invocation completed (duration: 1125s)
+[2026-04-19 20:38:59] Recording agent traces...
+[2026-04-19 20:38:59]   AGENT_TRACE iter=634 proposer=1 coder=1 tester=2 evaluator=1
+[2026-04-19 20:38:59]   AGENT_TRACE iter=635 proposer=1 coder=1 tester=2 evaluator=1
+[2026-04-19 20:38:59] SMOKE_UI: No UI file changes — skipping Playwright smoke test
+[2026-04-19 20:38:59] Running post-invocation audit (iter 634-635)...
+============================================
+ Autoresearch Audit
+ Iterations: 634 — 635
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 20:38:59
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 635[0m
+[0;31m  Tester: FAIL — missing: 634 635[0m
+[0;31m  Evaluator: FAIL — missing: 634 635[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 20:39:01] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 20:39:04] Current iteration count: 635 / 639
+[2026-04-19 20:39:04] ------------------------------------------
+[2026-04-19 20:39:04] Invocation 4 / 10
+[2026-04-19 20:39:04] Resuming from iteration 636
+[2026-04-19 20:39:04] ------------------------------------------
+[2026-04-19 20:39:04] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-636-to-639.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md | head -30 && echo "---GIT---" && git --no-pager
+  │ log --oneline -5 && echo "---UI-RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && grep -o '"overall":"[A-Z]*"' …
+  └ 34 lines...
+
+● Get T0 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && ls -t autoresearch/logs/session-*.md 2>/dev/null | head -1
+  └ 3 lines...
+
+Starting iteration 636. Dispatching proposer.
+
+Based on the explicit backlog item PERF-HIGH (conversation 応答遅い) and unaddressed sub-options (warm pool, parallelize feedback+reply already done in #625/#626/#635), the remaining high-leverage win is **session warm-pool**. Logs in `copilot_client.ask()` show session creation is timed separately from LLM and is a meaningful chunk of the 15s budget. Pre-creating the next session in the background after each call eliminates that cost on the next request.
+
+```json
+{
+  "type": "feature",
+  "title": "Copilot session warm-pool to cut conversation /message latency",
+  "description": "Address backlog item [PERF-HIGH] (Conversation 応答遅い). Per the existing log line in app/copilot_client.py CopilotService.ask() — `Session created (%.1fs)` — the SDK's `client.create_session(...)` step is reported separately from the LLM `send_and_wait` time and contributes a non-trivial portion of the 15s p95. We already pre-warmed the SDK client (#634) and parallelized start (#625) / end (#626) / skip-grammar-trivial (#635). The remaining unimplemented sub-option from the backlog is a warm pool.\n\nImplementation (single backend file + one test file):\n1. In `app/copilot_client.py`, extend `CopilotService` with a tiny session warm-pool:\n   - Add `self._warm_session: Any | None = None` and `self._warm_lock = asyncio.Lock()`.\n   - Add `async def _take_warm_session(self, system_prompt: str) -> tuple[Any, bool]`: under the lock, pop `self._warm_session` (if any) and return `(session, True)`. The caller will still need a session whose system message matches `system_prompt`. Because Copilot SDK creates the session with `SystemMessageReplaceConfig(mode='replace', content=system_prompt)`, we cannot reuse a session with a different system prompt directly. Instead, treat the warm session as a session pre-created with NO system message override, and pass the system prompt at session.send_and_wait time IF the SDK supports per-message override; if not, fall back to creating a fresh session.\n   - Simpler/safer alternative (preferred): treat the warm pool as a **session-creation lookahead**. In `ask()`, AFTER `await session.destroy()` in the `finally` block, schedule a background task `asyncio.create_task(self._prewarm_session())` that pre-creates a placeholder session (system_prompt=' ') and stores it in `self._warm_session`. In the next `ask()` call, if `self._warm_session is not None` AND the SDK supports replacing the system message via a second `SystemMessageReplaceConfig` send (verify via a try/except), use it; otherwise destroy it and create fresh. Net effect: even when reuse fails, the next call's session creation runs in parallel with prior I/O — but on the success path we save 1-3s.\n   - If runtime testing shows the SDK rejects system-message replacement on an existing session, fall back to a pure parallelism win: kick off `client.create_session(...)` BEFORE building prompts in `send_message` (router-level prefetch), and await it where `ask()` currently calls it. This still saves wall-clock by overlapping session creation with prompt assembly + DB reads.\n\n2. Add a per-label latency record so we can see the p50 improvement: in `LatencyTracker.record`, additionally track `session_s` (it already does — confirm). Log the p50 of `session_s` alongside llm/total in the existing periodic log at `_REPORT_EVERY=20`.\n\n3. Add `app/__init__.py` shutdown hook (or extend existing FastAPI shutdown in `app/main.py`) to destroy any warm session on app shutdown to avoid leaks. (1-line addition, only if main.py already has a shutdown handler — otherwise skip.)\n\n4. Tests in `tests/unit/test_copilot_warm_pool.py`:\n   - Mock `CopilotClient` and `client.create_session` to count invocations.\n   - Assert that after one `ask()` call, a background warm session is created (await `asyncio.sleep(0)` to let the task run).\n   - Assert that the second `ask()` consumes the warm session (no extra `create_session` call on the hot path) OR, in the fallback mode, that `create_session` is started before `send_and_wait` and is awaited inline.\n   - Assert latency tracker now reports `session_s` p50 in the periodic log (capture log output).\n\nNo schema changes. No config changes. Single backend module + one test file.",
+  "files_to_modify": ["app/copilot_client.py", "app/main.py", "tests/unit/test_copilot_warm_pool.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 636
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1:60 (60 lines read)
+  └ List directory frontend/src/components/conversation
+      └ 34 files found
+
+● T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now create the unit test:All tests pass. Commit:
