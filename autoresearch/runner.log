@@ -146,4 +146,220 @@ Iteration 630 complete (kept, 7.05). Starting iteration 631.
   │ date +%s
   └ 2 lines...
 
-Now the API types:Now the Listening.tsx changes:Now the save & "Start Questions" button reset, and the results display. Let me update handleNext and the start questions click:Also reset on handleRetryWrong (since it goes directly to quiz phase):Now add the badge & per-question replay subtext to results screen:Now add tests:Smoke test:Now check TypeScript:Now check ui-test-spec — we added a badge (testid `first-listen-accuracy-badge`) and per-question replay counters. They are not interactive (text only), but let's add them as visibility checks since the spec encourages tracking new data-testids.
+Now the API types:Now the Listening.tsx changes:Now the save & "Start Questions" button reset, and the results display. Let me update handleNext and the start questions click:Also reset on handleRetryWrong (since it goes directly to quiz phase):Now add the badge & per-question replay subtext to results screen:Now add tests:Smoke test:Now check TypeScript:Now check ui-test-spec — we added a badge (testid `first-listen-accuracy-badge`) and per-question replay counters. They are not interactive (text only), but let's add them as visibility checks since the spec encourages tracking new data-testids.```json
+{
+  "committed": true,
+  "commit_hash": "e251473",
+  "files_changed": ["app/database.py", "app/dal/pronunciation.py", "app/routers/pronunciation.py", "frontend/src/api.ts", "frontend/src/pages/Listening.tsx", "tests/unit/test_pronunciation_dal.py", "tests/integration/test_pronunciation_api.py", "tests/e2e/ui-test-spec.yaml"],
+  "tests_added": 5,
+  "ui_spec_updated": true,
+  "description": "Listening Quiz tracks first-listen accuracy and per-question replay counts; persisted to listening_quiz_results with new columns + migrations."
+}
+```● Coder Implement iteration 631
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #631: Listening Quiz first-listen accuracy +
+  │   │ replay counters
+  │   │
+  │   │ Track per-question replay counts in the Listening Quiz and surface a…
+  │   └ 17 lines...
+  └ commit info (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git diff-tree --no-commit-id --name-only -r HEAD
+      └ 12 lines...
+
+● Verify diff (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff
+  │ HEAD~1 --stat && echo "---" && git --no-pager log -1 --format=%B
+  └ 22 lines...
+
+● Check actual changes (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager diff
+  │ HEAD~1 -- app/database.py app/dal/pronunciation.py
+  │ app/routers/pronunciation.py
+  └ 100 lines...
+
+● T2 iter 631 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2131,
+  "tests_total": 2131,
+  "all_passed": true,
+  "ts_check": "pass",
+  "vitest_passed": 135,
+  "vitest_total": 135,
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "tests/integration/test_wotd_practice_api.py ....... [100%]\n======================= 2131 passed in 105.43s (0:01:45) =======================\nFrontend vitest: 135 passed (10 files)\nTypeScript: pass (exit 0)\nSmoke: SMOKE OK — all 21 endpoints returned 200",
+  "failure_summary": ""
+}
+```● Tester Test iteration 631
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -40
+  │   └ 18 lines...
+  └ e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 iter 631 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Based on the available information (all 2131 tests pass, TS check pass, vitest 135/135, smoke pass) and the focused scope (Listening Quiz first-listen accuracy + replay counters — a clear learning-value metric), and no QA report provided:
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "All 2131 tests and TS checks pass; the change adds meaningful listening-comprehension metrics (first-listen accuracy and replay counts) that directly support the app's listening focus without breaking existing functionality."
+}
+```● Evaluator Evaluate iteration 631
+  │ List directory autoresearch/reports
+  │   └ 4 files found
+  └ List directory autoresearch/logs
+      └ 170 files found
+
+● Record iter 631 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776596215
+  │ T1=1776596296 T2=1776596536 T3=1776596676 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "631"
+  │ "e251473" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))"
+  │ "$((T4-T3))" "$((T4-T0))" "2131" "2131" "pass" "7.00" "kept" "Listening …
+  └ 5 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **#630** (kept, 7.05): UX — staged `ReplyProgressIndicator` for Conversation chat phase (typing dots + cycling stage labels + elapsed counter). Frontend-only, 2126/2126 tests pass.
+- **#631** (kept, 7.00): Feature — Listening Quiz first-listen accuracy tracking + per-question replay counters; new schema columns + migrations. 2131/2131 tests + smoke pass.
+
+Both iterations satisfied the feature/ux requirement (no bugfixes). All 4 subagents (proposer, coder, tester, evaluator) called for each.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (16m 31s)
+Tokens    ↑ 3.5m • ↓ 49.0k • 3.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-630-to-639.md
+[2026-04-19 20:05:16] Copilot invocation completed (duration: 994s)
+[2026-04-19 20:05:16] Recording agent traces...
+[2026-04-19 20:05:16]   AGENT_TRACE iter=630 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 20:05:16]   AGENT_TRACE iter=631 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 20:05:16] SMOKE_UI: UI changes detected in pages: conversation,listening
+[2026-04-19 20:05:16] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-19 20:05:16] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation, listening
+
+  ✅ conversation: smoke 4✓ 0✗ (1707ms)
+  ✅ listening: smoke 4✓ 0✗ (1571ms)
+
+✅ UI TEST PASS (2/2 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-19 20:05:33] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 20:05:33] Running post-invocation audit (iter 630-631)...
+============================================
+ Autoresearch Audit
+ Iterations: 630 — 631
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 20:05:33
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 630 631[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 20:05:35] Audit found 1 error(s) — fixes applied where possible
+[2026-04-19 20:05:38] Current iteration count: 631 / 639
+[2026-04-19 20:05:38] ------------------------------------------
+[2026-04-19 20:05:38] Invocation 2 / 10
+[2026-04-19 20:05:38] Resuming from iteration 632
+[2026-04-19 20:05:38] ------------------------------------------
+[2026-04-19 20:05:38] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-632-to-639.md)...
+● restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI-RESULTS---" && (test -f autoresearch/ui-test-results.json &&
+  │ python3 -c "import json;d=json.load(open('autoresearch/ui-test-results.jso…
+  └ 34 lines...
+
+● T0 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "ux",
+  "title": "Listening results: per-question 'Replay sentence' for missed answers",
+  "description": "Enhance the Listening quiz results phase (frontend/src/pages/Listening.tsx) so that for each incorrectly answered question users can instantly re-hear the supporting passage sentence at a slower rate (0.75x) — a high-value review loop that turns mistakes into targeted listening practice. Currently the results screen lists results with explanations but offers no audio review path; users must replay the entire passage. Implementation:\n\n1. In Listening.tsx, persist the passage and sentences (already available via extractSentences(passage)) into the results phase render.\n2. Add a small helper findRelevantSentenceIndex(question, options[correctIndex], sentences) that scores each sentence by overlap of meaningful tokens (lowercase, length>=4, stopword filtered) with the correct option text and the question text, returning the highest-scoring index (fallback: 0). Place this helper in a new file frontend/src/utils/listeningReview.ts and unit-test it in frontend/src/__tests__/listeningReview.test.ts (cases: exact keyword match, no overlap fallback, tie-breaking by question overlap).\n3. In the results phase JSX, for every result where selectedIndex !== correctIndex, render a button '🔊 Replay sentence (0.75x)' that calls a new replayReviewSentence(idx) function which cancels current speech, creates a SpeechSynthesisUtterance with rate=0.75, lang='en-US', and tracks a playingReviewIdx state to show a small pulsing indicator while playing. Also add a 'Show sentence' toggle that reveals the sentence text under the button.\n4. Add a top-level 'Replay all missed sentences' button at the top of the results section that sequentially plays each missed sentence (chained via utterance.onend).\n5. Ensure speechSynthesis.cancel() runs on phase change / unmount (existing cleanup already covers unmount; extend to phase transition out of results).\n\nNo backend or schema changes. Files: frontend/src/pages/Listening.tsx, frontend/src/utils/listeningReview.ts, frontend/src/__tests__/listeningReview.test.ts. This builds directly on the recent listening quiz tracking work (iter 631) by closing the feedback loop with audio review.",
+  "files_to_modify": ["frontend/src/pages/Listening.tsx", "frontend/src/utils/listeningReview.ts", "frontend/src/__tests__/listeningReview.test.ts"],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer propose iter 632
+  │ List directory frontend/src/components/conversation
+  │   └ 34 files found
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L60:180 (121 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me create the utility, tests, and edit Listening.tsx.Now update Listening.tsx. I need to:
+1. Add import for the helper
+2. Add state for `playingReviewIdx` and per-question `showSentence` toggles
+3. Add `replayReviewSentence` and `replayAllMissed` callbacks
+4. Cancel speech on phase change out of results
+5. Render buttons in resultsNow add the callbacks and the effect. Let me find a good spot:Now add UI: top button + per-question replay buttons in results.Now add the top "Replay all missed sentences" button:Let me verify it compiles by running the frontend tests for the new util file:Now update UI test spec since Listening.tsx page was modified:

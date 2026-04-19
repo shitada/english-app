@@ -11,6 +11,7 @@ import { ListeningSpeedChallenge } from '../components/ListeningSpeedChallenge';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { api, saveListeningQuizResult, getListeningQuizHistory, getListeningDifficultyRecommendation, getListeningQuizDetail } from '../api';
 import type { ListeningQuizQuestion, ListeningQuizResult, ListeningDifficultyRecommendation } from '../api';
+import { findRelevantSentenceIndex } from '../utils/listeningReview';
 
 type Phase = 'setup' | 'listen' | 'quiz' | 'results' | 'speed-challenge';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
@@ -50,6 +51,8 @@ export default function Listening() {
   const [replayCounts, setReplayCounts] = useState<number[]>([]);
   const [firstListenFlags, setFirstListenFlags] = useState<boolean[]>([]);
   const [answeredFirstListen, setAnsweredFirstListen] = useState<boolean[]>([]);
+  const [playingReviewIdx, setPlayingReviewIdx] = useState<number | null>(null);
+  const [shownReviewSentences, setShownReviewSentences] = useState<Record<number, boolean>>({});
 
   const sentences = passage ? extractSentences(passage) : [];
 
@@ -251,6 +254,78 @@ export default function Listening() {
     setIsRetry(true);
     setPhase('quiz');
   }, [results, questions]);
+
+  // Cancel any ongoing speech when leaving the results phase.
+  useEffect(() => {
+    if (phase !== 'results') {
+      window.speechSynthesis.cancel();
+      setPlayingReviewIdx(null);
+    }
+  }, [phase]);
+
+  const replayReviewSentence = useCallback((idx: number) => {
+    if (!sentences || sentences.length === 0) return;
+    const r = results[idx];
+    if (!r) return;
+    const sentenceIdx = findRelevantSentenceIndex(
+      r.question,
+      r.options[r.correctIndex] ?? '',
+      sentences,
+    );
+    const text = sentences[sentenceIdx];
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.75;
+    utterance.onend = () => setPlayingReviewIdx(prev => (prev === idx ? null : prev));
+    utterance.onerror = () => setPlayingReviewIdx(prev => (prev === idx ? null : prev));
+    setPlayingReviewIdx(idx);
+    window.speechSynthesis.speak(utterance);
+  }, [sentences, results]);
+
+  const replayAllMissed = useCallback(() => {
+    if (!sentences || sentences.length === 0) return;
+    const missedIndices = results
+      .map((r, i) => (r.selectedIndex !== r.correctIndex ? i : -1))
+      .filter(i => i >= 0);
+    if (missedIndices.length === 0) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    let cursor = 0;
+    const playNext = () => {
+      if (cursor >= missedIndices.length) {
+        setPlayingReviewIdx(null);
+        return;
+      }
+      const idx = missedIndices[cursor++];
+      const r = results[idx];
+      const sentenceIdx = findRelevantSentenceIndex(
+        r.question,
+        r.options[r.correctIndex] ?? '',
+        sentences,
+      );
+      const text = sentences[sentenceIdx];
+      if (!text) {
+        playNext();
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.75;
+      utterance.onend = () => {
+        playNext();
+      };
+      utterance.onerror = () => {
+        playNext();
+      };
+      setPlayingReviewIdx(idx);
+      window.speechSynthesis.speak(utterance);
+    };
+    playNext();
+  }, [sentences, results]);
+
 
   const handleBackToSetup = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -777,6 +852,24 @@ export default function Listening() {
               );
             })()}
           </div>
+          {results.some(r => r.selectedIndex !== r.correctIndex) && sentences.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <button
+                type="button"
+                data-testid="replay-all-missed-btn"
+                onClick={replayAllMissed}
+                className="btn"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  border: '2px solid var(--primary, #6366f1)',
+                  color: 'var(--primary, #6366f1)', fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                🔊 Replay all missed sentences (0.75x)
+              </button>
+            </div>
+          )}
           {results.map((r, i) => (
             <div key={i} style={{
               padding: 12, marginBottom: 8, borderRadius: 6,
@@ -812,6 +905,68 @@ export default function Listening() {
                   <span style={{ color: 'var(--success, #22c55e)', fontWeight: 600 }}>{r.options[r.correctIndex]}</span>
                 </p>
               )}
+              {(r.selectedIndex !== r.correctIndex) && (() => {
+                const sentenceIdx = sentences.length > 0
+                  ? findRelevantSentenceIndex(r.question, r.options[r.correctIndex] ?? '', sentences)
+                  : -1;
+                const sentenceText = sentenceIdx >= 0 ? sentences[sentenceIdx] : '';
+                const isPlaying = playingReviewIdx === i;
+                const isShown = !!shownReviewSentences[i];
+                return (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                    <button
+                      type="button"
+                      data-testid={`replay-review-btn-${i}`}
+                      onClick={() => replayReviewSentence(i)}
+                      disabled={!sentenceText}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', fontSize: 11, fontWeight: 600,
+                        borderRadius: 4, cursor: sentenceText ? 'pointer' : 'not-allowed',
+                        border: '1px solid var(--primary, #6366f1)',
+                        background: isPlaying ? 'var(--primary, #6366f1)' : 'transparent',
+                        color: isPlaying ? 'white' : 'var(--primary, #6366f1)',
+                      }}
+                    >
+                      🔊 Replay sentence (0.75x)
+                      {isPlaying && (
+                        <span
+                          data-testid={`replay-review-pulse-${i}`}
+                          style={{
+                            display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+                            background: 'white', animation: 'pulse 1s ease-in-out infinite',
+                          }}
+                        />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      data-testid={`toggle-review-sentence-${i}`}
+                      onClick={() => setShownReviewSentences(prev => ({ ...prev, [i]: !prev[i] }))}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', fontSize: 11, fontWeight: 500,
+                        borderRadius: 4, cursor: 'pointer',
+                        border: '1px solid var(--border, #ccc)',
+                        background: 'transparent', color: 'var(--text)',
+                      }}
+                    >
+                      {isShown ? 'Hide sentence' : 'Show sentence'}
+                    </button>
+                    {isShown && sentenceText && (
+                      <p
+                        data-testid={`review-sentence-text-${i}`}
+                        style={{
+                          flexBasis: '100%', margin: '4px 0 0', fontSize: 12,
+                          fontStyle: 'italic', color: 'var(--text-secondary)',
+                        }}
+                      >
+                        “{sentenceText}”
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--text-secondary)' }}>{r.explanation}</p>
             </div>
           ))}

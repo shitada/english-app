@@ -1047,6 +1047,30 @@ pages:
         priority: medium
         added_in: 631
 
+      - id: list-029
+        target: Per-question 'Replay sentence (0.75x)' button on missed answers
+        action: Reach results screen of a listening quiz with at least one wrong answer
+        expect: For each missed question, a data-testid="replay-review-btn-N" button is visible; clicking it triggers TTS playback at 0.75x of the most relevant passage sentence
+        type: functional
+        priority: high
+        added_in: 632
+
+      - id: list-030
+        target: Show/Hide sentence toggle reveals supporting sentence text
+        action: On results screen with a missed question, click data-testid="toggle-review-sentence-N"
+        expect: Sentence text appears in italic via data-testid="review-sentence-text-N"; clicking again hides it
+        type: functional
+        priority: medium
+        added_in: 632
+
+      - id: list-031
+        target: 'Replay all missed sentences' top-level button chains playback
+        action: On results screen with one or more missed questions, click data-testid="replay-all-missed-btn"
+        expect: Each missed question's relevant sentence is played sequentially at 0.75x; pulsing indicator moves between questions
+        type: functional
+        priority: medium
+        added_in: 632
+
   vocabulary:
     path: /vocabulary
     tests:
