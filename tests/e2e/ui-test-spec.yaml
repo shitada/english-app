@@ -864,6 +864,38 @@ pages:
         priority: medium
         added_in: 639
 
+      - id: pron-016
+        target: Drill Missed Words CTA appears on shadowing result when there are non-correct words
+        action: complete a shadowing attempt that has at least one missed/partial word, then locate data-testid="open-missed-word-drill" on the result view
+        expect: A primary CTA button labelled "🎯 Drill Missed Words (N)" is visible; clicking it replaces the CTA with the drill panel (data-testid="missed-word-drill-panel")
+        type: functional
+        priority: high
+        added_in: 654
+
+      - id: pron-017
+        target: Missed-word drill panel cycles through each non-correct word with progress strip
+        action: Open the missed-word drill via data-testid="open-missed-word-drill" and observe data-testid="missed-word-drill-panel"
+        expect: Panel shows the current word (data-testid="missed-word-drill-current"), a progress indicator (data-testid="missed-word-drill-progress") of the form "Word X / N" with a strip of ✓ / · / * / ○ markers
+        type: functional
+        priority: high
+        added_in: 654
+
+      - id: pron-018
+        target: Missed-word drill Try Again and Skip buttons in feedback stage
+        action: After a recognized transcript fails to match the target word, the drill enters feedback stage showing the heard text and two buttons
+        expect: data-testid="missed-word-drill-try-again" (up to 3 attempts) and data-testid="missed-word-drill-skip" are visible; Try Again restarts preview/listening for the same word; Skip advances to the next word
+        type: functional
+        priority: high
+        added_in: 654
+
+      - id: pron-019
+        target: Missed-word drill summary card with Retry sentence and Done buttons
+        action: Complete (correct or skip) every word in the drill to reach the summary view (data-testid="missed-word-drill-summary")
+        expect: Summary shows "You nailed X of N" message and exposes data-testid="missed-word-drill-retry-sentence" (returns to practice phase with same selectedSentence and clears feedback) and data-testid="missed-word-drill-done" (returns to result view)
+        type: functional
+        priority: high
+        added_in: 654
+
   listening:
     path: /listening
     tests:

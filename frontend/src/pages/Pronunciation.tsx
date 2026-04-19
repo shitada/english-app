@@ -5,7 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
-import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory } from '../components/pronunciation';
+import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory, MissedWordDrill } from '../components/pronunciation';
 import { useRecordingStorage } from '../hooks/useRecordingStorage';
 import InlineErrorBanner from '../components/InlineErrorBanner';
 
@@ -37,6 +37,7 @@ export default function Pronunciation() {
   const [inlineError, setInlineError] = useState<string | null>(null);
   const [sentenceStats, setSentenceStats] = useState<SentenceStatsResponse | null>(null);
   const [troubleWords, setTroubleWords] = useState<PronunciationTroubleWord[]>([]);
+  const [showMissedWordDrill, setShowMissedWordDrill] = useState(false);
 
   const speech = useSpeechRecognition();
   const tts = useSpeechSynthesis();
@@ -140,6 +141,7 @@ export default function Pronunciation() {
     setDictationText('');
     setDictationResult(null);
     setDictationPlayed(false);
+    setShowMissedWordDrill(false);
     setPhase('practice');
   };
 
@@ -896,6 +898,37 @@ export default function Pronunciation() {
             </div>
           </div>
         )}
+
+        {/* Drill Missed Words CTA + panel */}
+        {(() => {
+          const missedWords = Array.from(new Set(
+            feedback.word_feedback
+              .filter((w) => w.is_correct !== true && w.expected)
+              .map((w) => w.expected.trim())
+              .filter(Boolean)
+          ));
+          if (missedWords.length === 0) return null;
+          return (
+            <div style={{ marginTop: 16 }}>
+              {!showMissedWordDrill ? (
+                <button
+                  className="btn btn-primary"
+                  data-testid="open-missed-word-drill"
+                  onClick={() => setShowMissedWordDrill(true)}
+                  style={{ width: '100%' }}
+                >
+                  🎯 Drill Missed Words ({missedWords.length})
+                </button>
+              ) : (
+                <MissedWordDrill
+                  words={missedWords}
+                  onRetrySentence={retry}
+                  onDone={() => setShowMissedWordDrill(false)}
+                />
+              )}
+            </div>
+          );
+        })()}
 
         {/* Comparison Playback */}
         <div style={{ marginTop: 20, padding: '1rem', background: 'var(--bg-secondary, #f9fafb)', borderRadius: 8 }}>

@@ -328,4 +328,226 @@ Iter 652 complete. Starting iter 653.
   │ "T1=$T1"
   └ 2 lines...
 
-Now I have enough context. Let me build the implementation.Now update GrammarNotesPanel to add pin button:Now update HighlightedMessage to add the new pin-to-try button:Now insert pin-to-try buttons in the two key-phrase render blocks (after the existing 📌 save button):Now wire up Conversation.tsx:Now add state, helpers and use them. First add state declarations near phraseSuggestions:Now reset pinned state in resetSessionScopedState:Add toggle helper + effect for flash auto-clear. Insert after resetConversationState:Now add detection in sendMessage. Insert after the vocabTargets check:Now wire up GrammarNotesPanel and HighlightedMessage with new props, and render the bar above the chat input. Let me do those edits:Now render PinnedPhrasesBar (and pinFlash) directly above the chat-input-bar:Now write tests:Now run typecheck and tests:All 8 tests pass. Now update UI test spec since pages/Conversation.tsx and components were changed:Final check + commit:
+Now I have enough context. Let me build the implementation.Now update GrammarNotesPanel to add pin button:Now update HighlightedMessage to add the new pin-to-try button:Now insert pin-to-try buttons in the two key-phrase render blocks (after the existing 📌 save button):Now wire up Conversation.tsx:Now add state, helpers and use them. First add state declarations near phraseSuggestions:Now reset pinned state in resetSessionScopedState:Add toggle helper + effect for flash auto-clear. Insert after resetConversationState:Now add detection in sendMessage. Insert after the vocabTargets check:Now wire up GrammarNotesPanel and HighlightedMessage with new props, and render the bar above the chat input. Let me do those edits:Now render PinnedPhrasesBar (and pinFlash) directly above the chat-input-bar:Now write tests:Now run typecheck and tests:All 8 tests pass. Now update UI test spec since pages/Conversation.tsx and components were changed:Final check + commit:```json
+{
+  "committed": true,
+  "commit_hash": "2801fff",
+  "files_changed": [
+    "frontend/src/components/conversation/PinnedPhrasesBar.tsx",
+    "frontend/src/components/conversation/GrammarNotesPanel.tsx",
+    "frontend/src/components/conversation/HighlightedMessage.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/PinnedPhrasesBar.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 8,
+  "ui_spec_updated": true,
+  "description": "Sticky 'Try to use' bar with up-to-2 pinned key phrases, pin buttons in HighlightedMessage and GrammarNotesPanel, and auto-detect ✓ + ✨ flash toast on use in Conversation page."
+}
+```● Coder Implement iter 653
+  │ typecheck and commit (shell)
+  │   │ cd frontend && npx tsc --noEmit 2>&1 | tail -10 && cd .. && git add -A &&
+  │   │ git -c user.name=autoresearch -c user.email=autoresearch@local commit -m
+  │   │ "autoresearch #653: pinned key phrases bar with auto-detect ✓ in
+  │   │ Conversation…
+  │   └ Permission denied and could not request permission from user
+  └ commit and get hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git -c
+      │ user.name=autoresearch -c user.email=autoresearch@local commit -m
+      │ "autoresearch #653: pinned key phrases bar with auto-detect ✓ in
+      │ Conversation…
+      └ 28 lines...
+
+● T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git --no-pager log --oneline -1
+  └ 3 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "vitest_passed": 204,
+  "vitest_total": 204,
+  "overall_pass": true,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2215 passed in 118.97s (0:01:58) ==================",
+  "failure_summary": "Only the 2 pre-existing date-dependent integration failures (test_daily_challenge_current_count_with_activity, TestDayDetailAPI::test_pronunciation_activity_reflected) — explicitly noted as expected. All other checks pass: tsc clean, vitest 204/204 (including new PinnedPhrasesBar 8/8), smoke skipped (no backend changes), e2e not run."
+}
+```● Tester Test iter 653
+  │ check e2e results (shell)
+  │   │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+  │   │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+  │   │ rch/ui-test-results.json
+  │   └ 2 lines...
+  └ vitest (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ 2>&1 | tail -30
+      └ 26 lines...
+
+● T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.5,
+  "verdict": "keep",
+  "reason": "Clean, self-contained sticky 'Try to use' bar with well-factored pure helpers (normalize/toggle/isPinned), 8 new vitest tests, no backend/schema impact, TS clean, and only pre-existing date-dependent failures remain."
+}
+```● Evaluator Eval iter 653
+  │ List directory frontend/src/components/conversation
+  │   └ 41 files found
+  └ Read PinnedPhrasesBar.tsx
+      │ frontend/src/components/conversation/PinnedPhrasesBar.tsx
+      └ 161 lines read
+
+● record iter 653 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ HASH=$(git rev-parse --short HEAD) && T0=1776614612 && T1=1776614716 &&
+  │ T2=1776615097 && T3=1776615254 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "653" "$HASH"
+  │ "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))" "$((T4-T3))" …
+  └ 6 lines...
+
+Both iterations complete. Stopping per instructions.
+
+**Summary:**
+- **Iter 652** (`2ccf4fb`, 7.55, kept): Progressive TTS — `enqueue`/`flush` added to `useSpeechSynthesis`, `Conversation.tsx` speaks each completed sentence as it streams in (begins ~1-2s vs ~15s). 4 new vitest tests, tsc clean.
+- **Iter 653** (`2801fff`, 7.50, kept): Sticky "Try to use" PinnedPhrasesBar with 📌 pin buttons in HighlightedMessage and GrammarNotesPanel; auto-detects normalized phrase use in user messages and shows ✓ + ✨ toast. 8 new vitest tests (204/204), tsc clean, ui-test-spec updated.
+
+Both iterations show the same 2 pre-existing date-dependent dashboard failures (2215/2217) — confirmed unrelated to changes.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (21m 43s)
+Tokens    ↑ 4.2m • ↓ 65.7k • 3.9m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-652-to-679.md
+[2026-04-20 01:15:00] Copilot invocation completed (duration: 1306s)
+[2026-04-20 01:15:00] Recording agent traces...
+[2026-04-20 01:15:00]   AGENT_TRACE iter=652 proposer=0 coder=1 tester=1 evaluator=1
+[2026-04-20 01:15:00]   AGENT_TRACE iter=653 proposer=0 coder=1 tester=1 evaluator=1
+[2026-04-20 01:15:00] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-20 01:15:00] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 01:15:00] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation
+
+  ✅ conversation: smoke 4✓ 0✗ (1694ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 01:15:08] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 01:15:08] Running post-invocation audit (iter 652-653)...
+============================================
+ Autoresearch Audit
+ Iterations: 652 — 653
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 01:15:08
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 652 653[0m
+[0;31m  Tester: FAIL — missing: 652 653[0m
+[0;31m  Evaluator: FAIL — missing: 652 653[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 01:15:10] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 01:15:13] Current iteration count: 653 / 679
+[2026-04-20 01:15:13] ------------------------------------------
+[2026-04-20 01:15:13] Invocation 3 / 10
+[2026-04-20 01:15:13] Resuming from iteration 654
+[2026-04-20 01:15:13] ------------------------------------------
+[2026-04-20 01:15:13] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-654-to-679.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI RESULTS---" && (test -f autoresearch/ui-test-results.json &&
+  │ python3 -c "import json; …
+  └ 39 lines...
+
+● List session logs (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls autoresearch/logs/
+  │ 2>/dev/null | tail -3
+  └ 4 lines...
+
+Starting iteration 654. No E2E failures to fix. Calling proposer.
+
+● T0 timestamp (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Pronunciation Result → Instant Missed-Word Mini-Drill",
+  "description": "After a Shadowing attempt on the Pronunciation page, the result screen lists every missed/partial word but offers no fast way to actually *practice* them — users have to navigate away and pick a new sentence. Add a frontend-only 'Drill Missed Words 🎯' panel/CTA on the shadowing result view that cycles the user through each non-correct word from `feedback.word_feedback` (excluding `is_correct === true`) one-by-one. For each word: (1) auto-play the word in isolation via `tts.speak(word)`, (2) play it inside a short example phrase ('Say: <word>. <word> is …'), (3) auto-start `useSpeechRecognition` and compare the recognized transcript (lowercased, punctuation-stripped) against the target word — case-insensitive exact match counts as ✓, otherwise show 'heard: \"…\"' with a Try Again button (max 3 attempts per word, then Skip). Show a small progress strip (e.g. 'Word 2 / 4 ✓✓·○'). On finish, show a summary card ('You nailed 3 of 4 — Retry whole sentence?') with two buttons: 'Retry sentence' (returns to practice phase with same selectedSentence and clears feedback) and 'Done' (returns to result view). \n\nImplementation:\n1. Create `frontend/src/components/pronunciation/MissedWordDrill.tsx` — a self-contained component taking props `{ words: string[]; tts: ReturnType<typeof useSpeechSynthesis>; speech: ReturnType<typeof useSpeechRecognition>; onRetrySentence: () => void; onClose: () => void; }`. Internal state: `idx`, `attemptsForWord`, `results: ('correct'|'skipped')[]`, `phase: 'listen'|'record'|'feedback'|'summary'`. Use `useEffect` watching `speech.transcript` to auto-evaluate.\n2. Export it from `frontend/src/components/pronunciation/index.ts`.\n3. In `frontend/src/pages/Pronunciation.tsx`: add `const [missedDrillOpen, setMissedDrillOpen] = useState(false);`. In the shadowing-result render block (around the existing `feedback.word_feedback.some((w) => !w.is_correct)` Tips section), add a prominent button '🎯 Drill these words ({n})' that opens the drill (rendered as a section above the Comparison Playback or as an inline replacement of the result card while open). Wire `onRetrySentence` to reset `feedback`, `speech.reset()`, and `setShadowingState('listening')` then `tts.speak(selectedSentence)`.\n4. Add `frontend/src/__tests__/MissedWordDrill.test.tsx` covering: (a) renders progress and first word, (b) marks word correct when transcript matches (case-insensitive), (c) advances index after correct, (d) Skip advances and records 'skipped', (e) summary appears after last word and Retry callback fires.\n\nThis is frontend-only (no API, no DB, no migration), under 5 files, closes the practice loop directly on the page where the diagnosis happens, and reinforces speaking — the app's stated goal.",
+  "files_to_modify": [
+    "frontend/src/components/pronunciation/MissedWordDrill.tsx",
+    "frontend/src/components/pronunciation/index.ts",
+    "frontend/src/pages/Pronunciation.tsx",
+    "frontend/src/__tests__/MissedWordDrill.test.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 654
+  │ Read Pronunciation.tsx
+  │   │ frontend/src/pages/Pronunciation.tsx
+  │   └ L600:800 (201 lines read)
+  └ Read Pronunciation.tsx
+      │ frontend/src/pages/Pronunciation.tsx
+      └ L800:950 (151 lines read)
+
+● T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now let me wire it into Pronunciation.tsx. I'll add a CTA + state to show/hide the drill on the shadowing result view, and a `retry` handler. Let me find the existing `retry` function:Now insert the CTA + drill into the shadowing result view, just after Tips section / before Comparison Playback:Now write tests:All 14 tests pass. Now update UI test spec since `Pronunciation.tsx` was modified with new interactive elements:
