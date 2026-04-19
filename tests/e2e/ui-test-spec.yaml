@@ -2995,6 +2995,38 @@ pages:
         priority: medium
         added_in: 568
 
+      - id: dashboard-mistake-drill-001
+        target: Mistake Review Drill exposes Type/Speak mode toggle when speech recognition is supported
+        action: Open the Mistake Review Drill from the Mistake Journal and inspect the toggle group at the top of the drill card
+        expect: Two buttons render with data-testid="mistake-drill-mode-type" (aria-label="Switch to typing mode") and data-testid="mistake-drill-mode-speak" (aria-label="Switch to speak mode"); the active one has aria-pressed="true"
+        type: functional
+        priority: high
+        added_in: 655
+
+      - id: dashboard-mistake-drill-002
+        target: Speak Mode renders mic, TTS preview, and aria-live transcript
+        action: Click data-testid="mistake-drill-mode-speak" (or set localStorage 'mistake_drill_input_mode'='speak') and inspect the drill panel
+        expect: data-testid="mistake-drill-speak-panel" is visible containing data-testid="mistake-drill-tts-preview" (Hear it), data-testid="mistake-drill-mic" (aria-pressed reflecting listening state, aria-label "Start recording"/"Stop recording"), and data-testid="mistake-drill-transcript" with aria-live="polite"
+        type: functional
+        priority: high
+        added_in: 655
+
+      - id: dashboard-mistake-drill-003
+        target: Speak Mode preference persists across reloads via localStorage
+        action: Toggle Speak Mode, reload the dashboard, reopen the Mistake Review Drill
+        expect: localStorage key 'mistake_drill_input_mode' equals 'speak' and the drill reopens with the speak panel rendered by default
+        type: functional
+        priority: medium
+        added_in: 655
+
+      - id: dashboard-mistake-drill-004
+        target: Try Again Aloud appears after an incorrect spoken attempt
+        action: In Speak Mode, submit an incorrect transcript, then inspect the result actions row
+        expect: data-testid="mistake-drill-try-again-aloud" button is rendered alongside Listen and Next, and clicking it returns to the speak input phase with the previous failed attempt cleared
+        type: functional
+        priority: medium
+        added_in: 655
+
   quick_practice_dictogloss:
     path: /
     tests:
