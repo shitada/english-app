@@ -191,13 +191,15 @@ function InlineShadowDrill({ phrase, onSpeak, onClose }: {
   );
 }
 
-export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak, onSavePhrase, savedPhrases }: {
+export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak, onSavePhrase, savedPhrases, pinnedPhrases, onTogglePin }: {
   content: string;
   keyPhrases?: string[];
   grammarNotes?: GrammarNote[];
   onSpeak: (text: string) => void;
   onSavePhrase?: (phrase: string) => Promise<void>;
   savedPhrases?: Set<string>;
+  pinnedPhrases?: string[];
+  onTogglePin?: (phrase: string) => void;
 }) {
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
   const [activeDrill, setActiveDrill] = useState<number | null>(null);
@@ -297,6 +299,24 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
                   {savedPhrases?.has(part.toLowerCase()) ? '✅' : savingPhrases.has(part.toLowerCase()) ? '⏳' : '📌'}
                 </span>
               )}
+              {onTogglePin && (() => {
+                const isPinnedNow = (pinnedPhrases || []).some((p) => p.toLowerCase() === part.toLowerCase());
+                return (
+                  <span
+                    onClick={(e) => { e.stopPropagation(); onTogglePin(part); }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onTogglePin(part); } }}
+                    aria-label={isPinnedNow ? `Unpin "${part}"` : `Pin "${part}" to try-to-use bar`}
+                    aria-pressed={isPinnedNow}
+                    title={isPinnedNow ? 'Unpin from Try-to-use bar' : 'Pin to Try-to-use bar (max 2)'}
+                    data-testid="pin-phrase-btn"
+                    style={{ fontSize: 11, cursor: 'pointer', marginLeft: 2, opacity: isPinnedNow ? 1 : 0.65 }}
+                  >
+                    {isPinnedNow ? '📍' : '📎'}
+                  </span>
+                );
+              })()}
               {activeDrill === i && (
                 <InlineShadowDrill
                   phrase={part}
@@ -359,6 +379,24 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
                   {savedPhrases?.has(part.toLowerCase()) ? '✅' : savingPhrases.has(part.toLowerCase()) ? '⏳' : '📌'}
                 </span>
               )}
+              {isKey && onTogglePin && (() => {
+                const isPinnedNow = (pinnedPhrases || []).some((p) => p.toLowerCase() === part.toLowerCase());
+                return (
+                  <span
+                    onClick={(e) => { e.stopPropagation(); onTogglePin(part); }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onTogglePin(part); } }}
+                    aria-label={isPinnedNow ? `Unpin "${part}"` : `Pin "${part}" to try-to-use bar`}
+                    aria-pressed={isPinnedNow}
+                    title={isPinnedNow ? 'Unpin from Try-to-use bar' : 'Pin to Try-to-use bar (max 2)'}
+                    data-testid="pin-phrase-btn"
+                    style={{ fontSize: 11, cursor: 'pointer', marginLeft: 2, opacity: isPinnedNow ? 1 : 0.65 }}
+                  >
+                    {isPinnedNow ? '📍' : '📎'}
+                  </span>
+                );
+              })()}
               <span style={{ fontSize: 10 }}> 📖</span>
             </span>
             {activeTooltip === i && grammarNote && (

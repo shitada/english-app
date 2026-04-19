@@ -3520,6 +3520,30 @@ pages:
         priority: low
         added_in: 651
 
+      - id: conv-144
+        target: Pin a key phrase from the assistant message into the "Try to use" sticky bar
+        action: On an assistant message that has highlighted key phrases, click data-testid="pin-phrase-btn" next to a phrase.
+        expect: A sticky bar with data-testid="pinned-phrases-bar" appears above the chat input containing a chip (data-testid="pinned-phrase-chip") with the phrase text, the 📌 icon, an ○ pending indicator, and an ✕ unpin button (data-testid="pinned-phrase-unpin"). The pin icon flips between 📎 (outline) and 📍 (filled) to reflect pinned state, capped at 2 chips (oldest evicted FIFO).
+        type: functional
+        priority: medium
+        added_in: 653
+
+      - id: conv-145
+        target: Auto-detect "✓ used" transition for a pinned phrase after sending a user message
+        action: Pin a phrase via data-testid="pin-phrase-btn", type a user reply containing that phrase (case/punctuation insensitive), and send.
+        expect: The chip's data-used attribute flips from "false" to "true" (showing ✓), a green flash banner with data-testid="pinned-phrase-flash" briefly shows ✨ You used: "<phrase>"!, and the chip auto-unpins on the next user message.
+        type: functional
+        priority: medium
+        added_in: 653
+
+      - id: conv-146
+        target: Pin button in the Grammar Notes panel toggles a phrase into the Try-to-use bar
+        action: Open the Grammar Notes panel and click data-testid="grammar-note-pin-btn" next to a note.
+        expect: The button's aria-pressed flips to "true", icon switches from PinOff to filled Pin, and the phrase appears as a chip inside data-testid="pinned-phrases-bar"; clicking again unpins it.
+        type: functional
+        priority: medium
+        added_in: 653
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

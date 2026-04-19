@@ -39,3 +39,11 @@ export { CorrectedShadowButton } from './CorrectedShadowButton';
 export { RoleSwapReplay } from './RoleSwapReplay';
 export { PaceBadge } from './PaceBadge';
 export { SlowReplayButton, splitIntoSentences } from './SlowReplayButton';
+export {
+  PinnedPhrasesBar,
+  normalizePhrase,
+  phraseUsedInMessage,
+  togglePin,
+  isPinned,
+  MAX_PINNED_PHRASES,
+} from './PinnedPhrasesBar';

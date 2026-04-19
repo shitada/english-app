@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge, SlowReplayButton } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge, SlowReplayButton, PinnedPhrasesBar, normalizePhrase as normalizePinnedPhrase, phraseUsedInMessage, togglePin as togglePinnedPhrase, MAX_PINNED_PHRASES } from '../components/conversation';
 import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -93,6 +93,13 @@ export default function Conversation() {
   const [customSaving, setCustomSaving] = useState(false);
   const [topicSuggestions, setTopicSuggestions] = useState<TopicRecommendation[]>([]);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
+  // "Try to use" pinned phrase bar — local-only, resets per conversation start.
+  const [pinnedPhrases, setPinnedPhrases] = useState<string[]>([]);
+  const [usedPinnedPhrases, setUsedPinnedPhrases] = useState<Set<string>>(new Set());
+  // Phrases that have been "used" in a previous turn and should auto-unpin
+  // on the NEXT user message ("Chip stays one more turn showing ✓ then auto-unpins").
+  const [pinnedToEvictNextTurn, setPinnedToEvictNextTurn] = useState<Set<string>>(new Set());
+  const [pinFlash, setPinFlash] = useState<string | null>(null);
   const [helpersLoading, setHelpersLoading] = useState(false);
   const [userRoleName, setUserRoleName] = useState('');
   const [roleBriefing, setRoleBriefing] = useState<string[]>([]);
@@ -579,6 +586,10 @@ export default function Conversation() {
     setSendError(null);
     setGrammarStreak(0);
     setBestGrammarStreak(0);
+    setPinnedPhrases([]);
+    setUsedPinnedPhrases(new Set());
+    setPinnedToEvictNextTurn(new Set());
+    setPinFlash(null);
   };
 
   const resetConversationState = () => {
@@ -595,6 +606,61 @@ export default function Conversation() {
     setSessionGoals([]);
     resetSessionScopedState();
   };
+
+  // Toggle a phrase in the pinned "Try to use" bar (cap of 2, oldest evicted).
+  const handleTogglePinPhrase = useCallback((phrase: string) => {
+    setPinnedPhrases((prev) => {
+      const next = togglePinnedPhrase(prev, phrase, MAX_PINNED_PHRASES);
+      // If we're removing this phrase, also drop any related used/evict state.
+      const norm = normalizePinnedPhrase(phrase);
+      const stillThere = next.some((p) => normalizePinnedPhrase(p) === norm);
+      if (!stillThere) {
+        setUsedPinnedPhrases((u) => {
+          if (!u.has(norm)) return u;
+          const n = new Set(u); n.delete(norm); return n;
+        });
+        setPinnedToEvictNextTurn((e) => {
+          if (!e.has(norm)) return e;
+          const n = new Set(e); n.delete(norm); return n;
+        });
+      }
+      // Also drop used/evict state for any phrase that was evicted by capacity.
+      const keepNorms = new Set(next.map((p) => normalizePinnedPhrase(p)));
+      setUsedPinnedPhrases((u) => {
+        let changed = false;
+        const n = new Set<string>();
+        u.forEach((v) => { if (keepNorms.has(v)) n.add(v); else changed = true; });
+        return changed ? n : u;
+      });
+      setPinnedToEvictNextTurn((e) => {
+        let changed = false;
+        const n = new Set<string>();
+        e.forEach((v) => { if (keepNorms.has(v)) n.add(v); else changed = true; });
+        return changed ? n : e;
+      });
+      return next;
+    });
+  }, []);
+
+  const handleUnpinPhrase = useCallback((phrase: string) => {
+    setPinnedPhrases((prev) => prev.filter((p) => normalizePinnedPhrase(p) !== normalizePinnedPhrase(phrase)));
+    const norm = normalizePinnedPhrase(phrase);
+    setUsedPinnedPhrases((u) => {
+      if (!u.has(norm)) return u;
+      const n = new Set(u); n.delete(norm); return n;
+    });
+    setPinnedToEvictNextTurn((e) => {
+      if (!e.has(norm)) return e;
+      const n = new Set(e); n.delete(norm); return n;
+    });
+  }, []);
+
+  // Auto-clear the "✨ You used:" flash toast after a few seconds.
+  useEffect(() => {
+    if (!pinFlash) return;
+    const t = setTimeout(() => setPinFlash(null), 2800);
+    return () => clearTimeout(t);
+  }, [pinFlash]);
 
   // Lazily fetch reply helpers (suggestions/key_phrases/grammar_notes) for the latest
   // assistant message after /start or /message has rendered. Silent on failure.
@@ -716,6 +782,43 @@ export default function Conversation() {
         }
         return next;
       });
+    }
+    // "Try to use" pinned-phrase auto-detection.
+    // 1) Auto-unpin any phrase that was marked used last turn (chip showed ✓ for one turn).
+    // 2) Detect new pending→used transitions in the current message and fire a flash toast.
+    if (pinnedPhrases.length > 0) {
+      const evictNow = pinnedToEvictNextTurn;
+      if (evictNow.size > 0) {
+        setPinnedPhrases((prev) => prev.filter((p) => !evictNow.has(normalizePinnedPhrase(p))));
+        setUsedPinnedPhrases((prev) => {
+          const n = new Set(prev);
+          evictNow.forEach((v) => n.delete(v));
+          return n;
+        });
+        setPinnedToEvictNextTurn(new Set());
+      }
+      const newlyUsed: string[] = [];
+      const remaining = pinnedPhrases.filter((p) => !evictNow.has(normalizePinnedPhrase(p)));
+      for (const phrase of remaining) {
+        const norm = normalizePinnedPhrase(phrase);
+        if (!usedPinnedPhrases.has(norm) && phraseUsedInMessage(phrase, userMsg)) {
+          newlyUsed.push(phrase);
+        }
+      }
+      if (newlyUsed.length > 0) {
+        setUsedPinnedPhrases((prev) => {
+          const n = new Set(prev);
+          for (const p of newlyUsed) n.add(normalizePinnedPhrase(p));
+          return n;
+        });
+        setPinnedToEvictNextTurn((prev) => {
+          const n = new Set(prev);
+          for (const p of newlyUsed) n.add(normalizePinnedPhrase(p));
+          return n;
+        });
+        // Show a flash toast for the most recently used phrase.
+        setPinFlash(`✨ You used: "${newlyUsed[newlyUsed.length - 1]}"!`);
+      }
     }
     if (lastAssistantAt > 0) {
       const elapsed = (Date.now() - lastAssistantAt) / 1000;
@@ -1809,7 +1912,7 @@ export default function Conversation() {
       })()}
 
       {showGrammarPanel && (
-        <GrammarNotesPanel notes={allGrammarNotes} onSpeak={tts.speak} onClose={() => setShowGrammarPanel(false)} />
+        <GrammarNotesPanel notes={allGrammarNotes} onSpeak={tts.speak} onClose={() => setShowGrammarPanel(false)} pinnedPhrases={pinnedPhrases} onTogglePin={handleTogglePinPhrase} />
       )}
 
       {vocabTargets.length > 0 && (
@@ -1880,7 +1983,7 @@ export default function Conversation() {
                   />
                 ) : (
                   <>
-                    <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} />
+                    <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} pinnedPhrases={pinnedPhrases} onTogglePin={handleTogglePinPhrase} />
                     {msg.streaming && (
                       <span
                         aria-hidden="true"
@@ -2107,6 +2210,28 @@ export default function Conversation() {
           </button>
         </div>
       )}
+      {pinFlash && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="pinned-phrase-flash"
+          style={{
+            padding: '8px 16px',
+            background: 'rgba(16,185,129,0.12)',
+            color: '#047857',
+            borderTop: '1px solid #10b981',
+            fontSize: 13,
+            fontWeight: 600,
+          }}
+        >
+          {pinFlash}
+        </div>
+      )}
+      <PinnedPhrasesBar
+        pinned={pinnedPhrases}
+        usedPhrases={usedPinnedPhrases}
+        onUnpin={handleUnpinPhrase}
+      />
       <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>
         <button
           className={`btn btn-icon ${speech.isListening ? 'mic-active' : 'btn-secondary'}`}

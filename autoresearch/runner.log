@@ -215,4 +215,117 @@ Now let me look at safe_llm_call and copilot to understand testing patterns:Now 
   │ "T1=$T1"
   └ 2 lines...
 
-Now I have enough context. Let me implement.Now update Conversation.tsx:The `let utterancesCreated = []` reassignment is suspicious — let me match the existing pattern:Found the bug: `drainNextRef.current` is updated in `useEffect`, which doesn't run during SSR (used by tests). Update the ref during render instead.All 4 pass. Now run tsc and check existing tests still pass:Existing tests still pass. Commit:
+Now I have enough context. Let me implement.Now update Conversation.tsx:The `let utterancesCreated = []` reassignment is suspicious — let me match the existing pattern:Found the bug: `drainNextRef.current` is updated in `useEffect`, which doesn't run during SSR (used by tests). Update the ref during render instead.All 4 pass. Now run tsc and check existing tests still pass:Existing tests still pass. Commit:Extras are autoresearch tracking files (expected). Done.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "2ccf4fb",
+  "files_changed": ["frontend/src/hooks/useSpeechSynthesis.ts", "frontend/src/hooks/useSpeechSynthesis.test.ts", "frontend/src/pages/Conversation.tsx"],
+  "tests_added": 4,
+  "ui_spec_updated": false,
+  "description": "Progressive TTS: enqueue/flush on useSpeechSynthesis + sentence-by-sentence streaming playback in Conversation.tsx so AI voice begins within ~1-2s of first token."
+}
+```● Coder Implement iter 652
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #652: progressive TTS — sentence-by-sentence
+  │   │ speech during streaming
+  │   │
+  │   │ Add enqueue()/flush() to useSpeechSynthesis so streamed AI replies in…
+  │   └ 19 lines...
+  └ check commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ tail -15
+      └ 16 lines...
+
+● T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git --no-pager log --oneline -1 && git --no-pager diff HEAD~1
+  │ --name-only
+  └ 10 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "vitest_result": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n2 failed, 2215 passed in 115.15s",
+  "failure_summary": "2 integration test failures in tests/integration/test_dashboard_api.py (test_daily_challenge_current_count_with_activity, TestDayDetailAPI::test_pronunciation_activity_reflected). Unrelated to changed files (frontend hooks/pages). TS check passed; vitest 4/4 passed; smoke skipped (no backend changes); E2E not run."
+}
+```● Tester Test iter 652
+  │ e2e results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -200
+  │   └ 2 lines...
+  └ vitest (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ src/hooks/useSpeechSynthesis.test.ts 2>&1 | tail -30
+      └ 9 lines...
+
+● T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+Code looks clean and well-designed. No QA report mentioned, frontend changes only, pre-existing failures unrelated.
+
+```json
+{"code_quality": 8, "feature_value": 8, "maintainability": 7, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "Clean progressive TTS implementation with proper FIFO queue chaining via onend, backwards-compatible speak(), and good UX impact (faster perceived AI response); only failures are confirmed pre-existing date-dependent backend tests unrelated to this frontend-only change."}
+```● Evaluator Eval iter 652
+  │ List directory .
+  │   └ 212 files found
+  └ Read useSpeechSynthesis.ts
+      │ frontend/src/hooks/useSpeechSynthesis.ts
+      └ 182 lines read
+
+● record iter 652 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ HASH=$(git rev-parse --short HEAD) && T0=1776614012 && T1=1776614119 &&
+  │ T2=1776614430 && T3=1776614579 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "652" "$HASH"
+  │ "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))" "$((T4-T3))" …
+  └ 5 lines...
+
+Iter 652 complete. Starting iter 653.
+
+● T0 iter 653 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Pin key phrases to a sticky 'Try to use' bar with auto-detect ✓",
+  "description": "Add an in-chat 'phrase pinning' UX so learners actively practice phrases surfaced by the helpers panel. Backend-free; pure frontend feature focused on smoother interaction flow + repetitive drill mechanic.\n\nWhat to build:\n1. New component `frontend/src/components/conversation/PinnedPhrasesBar.tsx`: a sticky bar shown directly above the chat input on the conversation chat page. Shows up to 2 pinned phrases, each as a chip with the phrase text, a 📌 icon, a small ✕ to unpin, and a status indicator (○ pending / ✓ used). Bar hides itself when the pinned list is empty. Accepts props `{ pinned: string[]; usedPhrases: Set<string>; onUnpin: (phrase: string) => void }`.\n2. Add a 📌 pin button next to each entry in `GrammarNotesPanel.tsx` (after the existing 🔊 Volume2 button) and next to each key phrase in the existing key-phrases display (search for where `key_phrases` from `/api/conversation/helpers` is rendered — likely inside `ConversationCoach.tsx` or the main conversation page; locate by grepping for `key_phrases.map`). Pin button toggles the phrase in pinned state, capped at 2 simultaneously (oldest evicted on overflow). Shows filled vs outline based on whether the phrase is currently pinned.\n3. Detection logic: in the conversation page (likely `frontend/src/pages/Conversation.tsx` or wherever user messages are POSTed via `sendConversationMessage`), after each successful user message add the lowercased user content to a tracking set; mark a pinned phrase as 'used' when its lowercased form (whitespace-collapsed, punctuation-stripped) is a substring of the lowercased user content. On transition pending→used, fire the existing toast helper with a celebratory message like `✨ You used: \"<phrase>\"!` and play the existing celebration sound if available; the chip stays in the bar for one more turn showing ✓ then auto-unpins.\n4. Persist `pinned` and `usedPhrases` only in component state (resets per conversation start). No backend, no DB, no API changes.\n5. Tests: add `frontend/src/__tests__/PinnedPhrasesBar.test.tsx` covering: renders nothing when empty; renders chips and triggers `onUnpin` on ✕ click; shows ✓ for phrases present in `usedPhrases`. Use the existing testing setup (vitest + @testing-library/react).\n\nWhy: directly advances the listening/speaking-fluency goal (active recall + repetition), provides clear user-facing UI, is self-contained, and is verifiable by both unit tests and a manual smoke flow.",
+  "files_to_modify": [
+    "frontend/src/components/conversation/PinnedPhrasesBar.tsx",
+    "frontend/src/components/conversation/GrammarNotesPanel.tsx",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/PinnedPhrasesBar.test.tsx"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Iter 653 proposal
+  │ Read GrammarNotesPanel.tsx
+  │   │ frontend/src/components/conversation/GrammarNotesPanel.tsx
+  │   └ L1:60 (60 lines read)
+  └ Read BookmarksReview.tsx
+      │ frontend/src/components/conversation/BookmarksReview.tsx
+      └ L1:40 (40 lines read)
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough context. Let me build the implementation.Now update GrammarNotesPanel to add pin button:Now update HighlightedMessage to add the new pin-to-try button:Now insert pin-to-try buttons in the two key-phrase render blocks (after the existing 📌 save button):Now wire up Conversation.tsx:Now add state, helpers and use them. First add state declarations near phraseSuggestions:Now reset pinned state in resetSessionScopedState:Add toggle helper + effect for flash auto-clear. Insert after resetConversationState:Now add detection in sendMessage. Insert after the vocabTargets check:Now wire up GrammarNotesPanel and HighlightedMessage with new props, and render the bar above the chat input. Let me do those edits:Now render PinnedPhrasesBar (and pinFlash) directly above the chat-input-bar:Now write tests:Now run typecheck and tests:All 8 tests pass. Now update UI test spec since pages/Conversation.tsx and components were changed:Final check + commit:
