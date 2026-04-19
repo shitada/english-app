@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge, SlowReplayButton } from '../components/conversation';
 import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -1896,30 +1896,15 @@ export default function Conversation() {
               >
                 <Volume2 size={14} color="var(--primary, #6366f1)" />
               </button>
-              {msg.role === 'assistant' && (
-                <button
-                  onClick={() => tts.speak(msg.content, 'en-US', 0.6)}
-                  disabled={tts.isSpeaking}
-                  aria-label="Slow replay (0.6×)"
-                  title="Slow replay (0.6×)"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: tts.isSpeaking ? 'default' : 'pointer',
-                    padding: '2px 4px',
-                    marginLeft: 2,
-                    opacity: tts.isSpeaking ? 0.4 : 0.6,
-                    transition: 'opacity 0.15s',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 2,
-                  }}
-                  onMouseEnter={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '1'; }}
-                  onMouseLeave={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '0.6'; }}
-                >
-                  <Headphones size={14} color="var(--primary, #6366f1)" />
-                  <span style={{ fontSize: 10, color: 'var(--primary, #6366f1)' }}>🐢</span>
-                </button>
+              {msg.role === 'assistant'
+                && !msg.streaming
+                && !(loading && phase === 'chat' && i === messages.length - 1) && (
+                <SlowReplayButton
+                  text={msg.content}
+                  speak={tts.speak}
+                  stop={tts.stop}
+                  isSpeaking={tts.isSpeaking}
+                />
               )}
               {msg.role === 'assistant'
                 && splitIntoShadowableLines(msg.content).length > 0

@@ -38,3 +38,4 @@ export { InlineDictationButton, diffDictation, tokenizeForDictation } from './In
 export { CorrectedShadowButton } from './CorrectedShadowButton';
 export { RoleSwapReplay } from './RoleSwapReplay';
 export { PaceBadge } from './PaceBadge';
+export { SlowReplayButton, splitIntoSentences } from './SlowReplayButton';

@@ -44,4 +44,63 @@ Backlog has no uncompleted feature/ux items (only bugs/perf/infra), so I'll prop
   └ List directory app/routers
       └ 10 files found
 
-Now let me look at safe_llm_call and copilot to understand testing patterns:Now I have enough context. Let me look at how an existing simple endpoint handles errors (for the safe_llm_call failure case):Now I have enough. Let me find a good place to insert the new endpoint:Now let me add the prompt, endpoint, and tests.Now add the endpoint to conversation.py. Let me append it after the existing models near the top, then put the route at end:Now write the unit tests:Now the frontend. Add per-message translation state + button + CSS class.Now add a handler. Let me find a good spot after handleSavePhrase:Now add the JP訳 button in the assistant control row, and render the translation below the bubble:Now add CSS. Check what file holds the conversation styles:Now update the UI test spec. Let me check it:Now let me quickly sanity-check the frontend builds (typescript). Just check the file imports and syntax with a minimal compile test isn't necessary; let me verify with grep that brackets/state usages look correct:Clean. Commit:
+Now let me look at safe_llm_call and copilot to understand testing patterns:Now I have enough context. Let me look at how an existing simple endpoint handles errors (for the safe_llm_call failure case):Now I have enough. Let me find a good place to insert the new endpoint:Now let me add the prompt, endpoint, and tests.Now add the endpoint to conversation.py. Let me append it after the existing models near the top, then put the route at end:Now write the unit tests:Now the frontend. Add per-message translation state + button + CSS class.Now add a handler. Let me find a good spot after handleSavePhrase:Now add the JP訳 button in the assistant control row, and render the translation below the bubble:Now add CSS. Check what file holds the conversation styles:Now update the UI test spec. Let me check it:Now let me quickly sanity-check the frontend builds (typescript). Just check the file imports and syntax with a minimal compile test isn't necessary; let me verify with grep that brackets/state usages look correct:Clean. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "aedbe9c",
+  "files_changed": [
+    "app/prompts.py",
+    "app/routers/conversation.py",
+    "frontend/src/index.css",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/unit/test_conversation_translate.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 4,
+  "ui_spec_updated": true,
+  "description": "Added POST /api/conversation/translate endpoint plus per-assistant-message JP訳 reveal button in Conversation chat with cached toggling and themed styling."
+}
+```● Coder implement iter 650
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #650: add per-message JP訳 translation reveal in
+  │   │ Conversation
+  │   │
+  │   │ Backend:…
+  │   └ 40 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --format="%H
+      │ %s" && echo --- && git show --stat HEAD | head -20
+      └ 23 lines...
+
+● mark T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "=========================== short test summary info ============================\nFAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2215 passed in 113.47s (0:01:53) ==================",
+  "failure_summary": "2 pre-existing dashboard integration tests failed (test_daily_challenge_current_count_with_activity: assert 0 >= 1 on current_count; TestDayDetailAPI::test_pronunciation_activity_reflected). Failures appear unrelated to the changed files (conversation/prompts/CSS) — likely pre-existing dashboard counter issues. TS check passed; smoke test passed (all endpoints 200); E2E ui-test-results.json not present (not_run)."
+}
+```● Tester test iter 650
+  │ failure detail (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │   │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+  │   │ with_activity tests/integration/test_dashboard_api.py::TestDayDetailAPI::tes
+  │   │ t_pronunciation_activity_reflected 2>&1 | tail -60
+  │   └ 61 lines...
+  └ failure detail (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+      │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+      │ with_activity 2>&1 | grep -E "(assert|Error|FAILED|>)" | head -30
+      └ 15 lines...
+

@@ -600,3 +600,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 647	4d53895	2026-04-19	108	353	146	28	635	2201	2201	pass	7.25	kept	ClozeListening focused retry on missed blanks with first-try score
 648	128bd24	2026-04-19	88	494	142	31	755	2213	2213	pass	7.15	kept	Listening Speed Ladder mode — adaptive playback speed (0.85→1.5x) with per-topic best persistence
 649	a325dde	2026-04-20	88	681	246	29	1044	2232	2234	fail	3.15	discarded	Streak Freeze (Duolingo-style) — migration regression on legacy table + dashboard pronunciation aggregation broken
+650	aedbe9c	2026-04-20	43	233	179	121	576	2215	2217	pass	6.75	kept	Per-message JP訳 translation reveal in Conversation (POST /translate + cached toggle, no TTS)

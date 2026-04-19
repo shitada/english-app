@@ -3504,6 +3504,22 @@ pages:
         priority: medium
         added_in: 650
 
+      - id: conv-142
+        target: Slow Replay (🐢) button is visible on each assistant message
+        action: Reach the chat phase and locate data-testid="slow-replay-button" inside the assistant message footer (next to the existing 🔊 speak button)
+        expect: Button visible with aria-label="Slow replay (0.6×)"; clicking it triggers TTS playback of the message at 0.6× rate (turtle icon swaps to a Square stop icon and aria-label changes to "Stop slow replay" while speaking).
+        type: functional
+        priority: medium
+        added_in: 651
+
+      - id: conv-143
+        target: Sentence stepper popover lets user step through assistant sentences
+        action: On a multi-sentence assistant message, click data-testid="slow-replay-stepper-toggle", then click data-testid="slow-replay-next" twice and confirm data-testid="slow-replay-counter" updates.
+        expect: Popover (data-testid="slow-replay-stepper-popover") opens, counter starts at "Sentence 1/N", advances to 2/N then 3/N on each Next click; Prev (data-testid="slow-replay-prev") moves it back; the Slow toggle (data-testid="slow-replay-slow-toggle") controls playback rate (0.6× when checked, ~0.9× when unchecked). Stepper toggle is hidden for single-sentence messages.
+        type: functional
+        priority: low
+        added_in: 651
+
   minimal_pairs:
     path: /minimal-pairs
     tests:
