@@ -34,6 +34,7 @@ export type { NextStepsData, Recommendation } from './NextStepsCard';
 export { ReplyProgressIndicator, getStageLabel, shouldShowElapsed } from './ReplyProgressIndicator';
 export type { ReplyProgressIndicatorProps } from './ReplyProgressIndicator';
 export { InlineShadowButton, splitIntoShadowableLines } from './InlineShadowButton';
+export { InlineDictationButton, diffDictation, tokenizeForDictation } from './InlineDictationButton';
 export { CorrectedShadowButton } from './CorrectedShadowButton';
 export { RoleSwapReplay } from './RoleSwapReplay';
 export { PaceBadge } from './PaceBadge';

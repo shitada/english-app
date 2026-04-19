@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
 from app.copilot_client import get_copilot_service
 from app.dal import conversation as conv_dal
+from app.dal import dictation as dictation_dal
 from app.dal import preferences as pref_dal
 from app.dal import vocabulary as vocab_dal
 from app.database import get_db_session
@@ -1916,3 +1917,53 @@ async def get_express_better(
             pairs.append({"original": original, "upgraded": upgraded, "explanation": explanation})
 
     return ExpressBetterResponse(conversation_id=conversation_id, pairs=pairs)
+
+
+# ---------------------------------------------------------------------------
+# Inline dictation mini-drill ('Type what you hear')
+# ---------------------------------------------------------------------------
+
+
+class DictationAttemptRequest(BaseModel):
+    conversation_id: str | None = Field(default=None, max_length=64)
+    message_id: str | None = Field(default=None, max_length=64)
+    accuracy: float = Field(..., ge=0.0, le=100.0)
+    word_count: int = Field(..., ge=0, le=500)
+    missed_word_count: int = Field(..., ge=0, le=500)
+
+
+class DictationAttemptResponse(BaseModel):
+    id: int
+    accuracy: float
+    word_count: int
+    missed_word_count: int
+    recent_avg_accuracy_7d: float
+
+
+@router.post("/dictation_attempt", response_model=DictationAttemptResponse)
+async def record_dictation_attempt(
+    req: DictationAttemptRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Record a single inline dictation attempt for analytics."""
+    if req.missed_word_count > req.word_count:
+        raise HTTPException(
+            status_code=400,
+            detail="missed_word_count cannot exceed word_count",
+        )
+    new_id = await dictation_dal.record_attempt(
+        db,
+        req.conversation_id,
+        req.message_id,
+        req.accuracy,
+        req.word_count,
+        req.missed_word_count,
+    )
+    avg7 = await dictation_dal.recent_avg_accuracy(db, days=7)
+    return DictationAttemptResponse(
+        id=new_id,
+        accuracy=req.accuracy,
+        word_count=req.word_count,
+        missed_word_count=req.missed_word_count,
+        recent_avg_accuracy_7d=round(avg7, 1),
+    )

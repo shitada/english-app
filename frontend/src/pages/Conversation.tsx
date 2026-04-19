@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton, RoleSwapReplay, PaceBadge } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge } from '../components/conversation';
 import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -1889,6 +1889,14 @@ export default function Conversation() {
                 && splitIntoShadowableLines(msg.content).length > 0
                 && !(loading && phase === 'chat' && i === messages.length - 1) && (
                 <InlineShadowButton text={msg.content} />
+              )}
+              {msg.role === 'assistant'
+                && !(loading && phase === 'chat' && i === messages.length - 1) && (
+                <InlineDictationButton
+                  text={msg.content}
+                  conversationId={conversationId}
+                  messageId={`${conversationId ?? 'c'}-${i}`}
+                />
               )}
             </div>
             {msg.role === 'user' && typeof msg.pace_wpm === 'number' && msg.pace_wpm > 0 && (

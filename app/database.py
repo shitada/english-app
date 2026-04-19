@@ -198,6 +198,18 @@ CREATE TABLE IF NOT EXISTS shadowing_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_shadowing_attempts_created ON shadowing_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS dictation_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id TEXT,
+    message_id TEXT,
+    accuracy REAL NOT NULL,
+    word_count INTEGER NOT NULL,
+    missed_word_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_dictation_attempts_created ON dictation_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------

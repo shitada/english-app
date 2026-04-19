@@ -3398,6 +3398,22 @@ pages:
         priority: medium
         added_in: 630
 
+      - id: conv-138
+        target: Inline "Dictation" (Type what you hear) button on assistant messages
+        action: After an assistant reply with 3–30 words appears, locate the inline button with data-testid="inline-dictation-button" (aria-label="Type what you hear (dictation)") rendered in the bottom-right of the bubble next to the 🔊 / 🐢 / Shadow buttons. Click it.
+        expect: Button is visible only on assistant messages of eligible length and not on the streaming/last bubble while waiting for a reply. Clicking opens an inline panel (data-testid="inline-dictation-panel") containing an input (data-testid="inline-dictation-input"), a Replay button (data-testid="inline-dictation-replay"), a Submit button (data-testid="inline-dictation-submit"), and a blurred placeholder of the original message.
+        type: functional
+        priority: medium
+        added_in: 646
+
+      - id: conv-139
+        target: Dictation submit shows accuracy and word-level diff
+        action: With the inline dictation panel open, type a partial transcription and click Submit (or press Enter). Inspect data-testid="inline-dictation-result" and the diff word chips.
+        expect: A pill shows "Accuracy: NN%" plus "(correct/total words)"; below it each word is rendered as a chip color-coded green (correct), red strike-through (missed), or amber (extra). A POST to /api/conversation/dictation_attempt is fired (best-effort; UI does not depend on its success). A "Replay & retry" button (data-testid="inline-dictation-retry") restarts the panel and re-plays the audio.
+        type: functional
+        priority: medium
+        added_in: 646
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

@@ -927,4 +927,247 @@ Iteration 644 done. Now iteration 645.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now let me look at conftest and an existing dashboard test for patterns.Now I have enough context. Let me implement.Now the router:Now frontend api.ts:Now i18n strings + index export + new component + SessionAnalytics integration.Add i18n keys:Now create the HeatmapDayDetail component:Good. Now wire up SessionAnalytics to make the daily bars clickable:Now add the panel render after daily breakdown. Let me see end of component:Now add migrations check (no schema changes — none needed). Add tests:Now integration test:Now run tests:All tests pass. Now TypeScript check:Now update UI test spec since SessionAnalytics.tsx and a new component were modified.
+Now let me look at conftest and an existing dashboard test for patterns.Now I have enough context. Let me implement.Now the router:Now frontend api.ts:Now i18n strings + index export + new component + SessionAnalytics integration.Add i18n keys:Now create the HeatmapDayDetail component:Good. Now wire up SessionAnalytics to make the daily bars clickable:Now add the panel render after daily breakdown. Let me see end of component:Now add migrations check (no schema changes — none needed). Add tests:Now integration test:Now run tests:All tests pass. Now TypeScript check:Now update UI test spec since SessionAnalytics.tsx and a new component were modified.```json
+{
+  "committed": true,
+  "commit_hash": "5dc7956",
+  "files_changed": [
+    "app/dal/dashboard.py",
+    "app/routers/dashboard.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/dashboard/HeatmapDayDetail.tsx",
+    "frontend/src/components/dashboard/SessionAnalytics.tsx",
+    "frontend/src/components/dashboard/index.ts",
+    "frontend/src/i18n/translations.ts",
+    "tests/e2e/ui-test-spec.yaml",
+    "tests/integration/test_dashboard_api.py",
+    "tests/unit/test_dashboard_dal.py"
+  ],
+  "tests_added": 6,
+  "ui_spec_updated": true,
+  "description": "Heatmap day drill-down: GET /api/dashboard/day-detail returns per-module breakdown; SessionAnalytics daily bars become clickable cells that open HeatmapDayDetail panel with conversation list, pronunciation/vocab/listening stats, new-word chips, and 'Practice again like this day' CTA routing to top module"
+}
+```● Coder Implement iter 645
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git commit -m
+  │   │ "autoresearch #645: Heatmap day drill-down (per-day module breakdown +
+  │   │ quick-resume CTA)
+  │   │
+  │   │ Co-authored-by: Autoresearch Coder <coder@autoresearch.local>" 2>&1 | tail…
+  │   └ 11 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+● T2 iter 645 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git --no-pager log --oneline -1
+  └ 3 lines...
+
+```json
+{
+  "tests_passed": 2192,
+  "tests_total": 2192,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2192 passed in 106.49s (0:01:46) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 645
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+  │   └ 23 lines...
+  └ read e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -200
+      └ 2 lines...
+
+● T3 iter 645 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 8,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "Adds a useful drill-down popover on the dashboard heatmap with a new endpoint and DAL function, no schema changes, and all 2192 tests plus TS check and smoke pass."
+}
+```● Evaluator Evaluate iter 645
+  │ List directory autoresearch
+  │   └ 14 files found
+  └ List directory autoresearch/logs
+      └ 177 files found
+
+● Record iter 645 + commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776607235; T1=1776607349; T2=1776608054; T3=1776608194 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "645" "5dc7956" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 14 lines...
+
+Both iterations complete. Stopping per instructions.
+
+**Summary:**
+- **Iter 644** (1cfcb70, 7.35, kept): Speaking Pace Coach — persists `speaking_seconds`/`pace_wpm` per user mic turn (with ALTER TABLE migrations), `PaceBadge` (🐢/✅/⚡) under user messages, Pacing card (avg/min/max WPM + tip) in Conversation Summary. 2186/2186 pass.
+- **Iter 645** (5dc7956, 7.25, kept): Heatmap day drill-down — new `GET /api/dashboard/day-detail`, clickable heatmap cells open `HeatmapDayDetail` panel with per-module breakdown, conversation list, new vocab chips, and "Practice again like this day" CTA. 2192/2192 pass.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (33m 19s)
+Tokens    ↑ 10.9m • ↓ 78.7k • 10.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-644-to-649.md
+[2026-04-19 23:17:07] Copilot invocation completed (duration: 2002s)
+[2026-04-19 23:17:07] Recording agent traces...
+[2026-04-19 23:17:07]   AGENT_TRACE iter=644 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 23:17:07]   AGENT_TRACE iter=645 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 23:17:07] SMOKE_UI: UI changes detected in pages: conversation,dashboard
+[2026-04-19 23:17:07] SMOKE_UI: Level=full (iteration 645 is divisible by 5)
+[2026-04-19 23:17:07] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1841ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1605ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1664ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1561ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1630ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1828ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3748ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2070ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (2005ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1930ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1980ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2143ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1686ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1632ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1664ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1563ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1617ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1726ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-19 23:17:48] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 23:17:48] Running post-invocation audit (iter 644-645)...
+============================================
+ Autoresearch Audit
+ Iterations: 644 — 645
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 23:17:48
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 644 645[0m
+[0;31m  Tester: FAIL — missing: 644 645[0m
+[0;31m  Evaluator: FAIL — missing: 644 645[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 23:17:49] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 23:17:52] Current iteration count: 645 / 649
+[2026-04-19 23:17:52] ------------------------------------------
+[2026-04-19 23:17:52] Invocation 4 / 10
+[2026-04-19 23:17:52] Resuming from iteration 646
+[2026-04-19 23:17:52] ------------------------------------------
+[2026-04-19 23:17:52] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-646-to-649.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log --oneline
+  │ -5 && echo "---LOG---" && ls -t autoresearch/logs/session-*.md 2>/dev/null |
+  │ head -1
+  └ 32 lines...
+
+● Check session log and UI test results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-644-to-649.md && echo "---UI-RESULTS---" && [
+  │ -f autoresearch/ui-test-results.json ] && grep -E '"overall"'
+  │ autoresearch/ui-test-results.json | head -3
+  └ 52 lines...
+
+● Mark T0 for iter 646 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Inline 'Type what you hear' dictation mini-drill on assistant messages",
+  "description": "Add a per-assistant-message 'Dictation' button in the conversation chat (frontend/src/components/conversation/* — likely ConversationChat.tsx / MessageBubble.tsx, alongside the existing Slow Replay / Shadow This Line buttons added in iter 628/640). When clicked, it (1) hides the message text behind a blur/placeholder, (2) plays the message TTS at 0.9x using the existing TTS hook, (3) opens a small inline input where the user types what they heard, and (4) on Submit, performs client-side word-level diff against the original (case/punctuation insensitive) and highlights correct/missed/extra words inline; shows accuracy % and a 'Replay & retry' button.\n\nPersist each attempt to a new lightweight backend endpoint `POST /api/conversation/dictation_attempt` accepting `{conversation_id, message_id, accuracy, word_count, missed_word_count}` so the data can later feed the dashboard / Trouble Words. Implement DAL `app/dal/dictation.py` with `record_attempt()` and `recent_avg_accuracy(days=7)`, and add a new table `dictation_attempts(id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id TEXT, message_id TEXT, accuracy REAL NOT NULL, word_count INTEGER NOT NULL, missed_word_count INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))` defined in `app/database.py` SCHEMA. Since this is a brand-new table, no ALTER TABLE migration is needed (CREATE TABLE IF NOT EXISTS in SCHEMA suffices for new tables). Add an integration test in `tests/integration/` covering attempt recording and a unit test for the DAL. This trains active listening comprehension — a stronger signal than passive replay — and reuses existing TTS infrastructure with no new LLM calls.",
+  "files_to_modify": [
+    "app/database.py",
+    "app/dal/dictation.py",
+    "app/routers/conversation.py",
+    "frontend/src/components/conversation/MessageBubble.tsx",
+    "tests/integration/test_dictation_api.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 646
+  │ List directory app/routers
+  │   └ 10 files found
+  └ Read listening.py
+      │ app/routers/listening.py
+      └ L1:50 (50 lines read)
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have all I need. Let me implement.Now add the route to conversation.py:Now create the InlineDictationButton component:Add an api wrapper for dictation:Now create the InlineDictationButton component:Now wire it into Conversation.tsx alongside the existing InlineShadowButton:Now create unit + integration tests:Now run tests:TS passes. Let me check the pytest.All 2201 tests pass. Now update UI test spec (since I added a new pages/Conversation.tsx interactive element):Commit:

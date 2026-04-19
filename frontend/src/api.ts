@@ -3544,3 +3544,32 @@ export interface ShadowingStats {
 export function getShadowingStats(): Promise<ShadowingStats> {
   return request<ShadowingStats>('/api/shadowing/stats');
 }
+
+// ---------------------------------------------------------------------------
+// Inline dictation mini-drill ('Type what you hear')
+// ---------------------------------------------------------------------------
+
+export interface DictationAttemptInput {
+  conversation_id?: string | null;
+  message_id?: string | null;
+  accuracy: number;
+  word_count: number;
+  missed_word_count: number;
+}
+
+export interface DictationAttemptResponse {
+  id: number;
+  accuracy: number;
+  word_count: number;
+  missed_word_count: number;
+  recent_avg_accuracy_7d: number;
+}
+
+export function submitDictationAttempt(
+  input: DictationAttemptInput,
+): Promise<DictationAttemptResponse> {
+  return request<DictationAttemptResponse>('/api/conversation/dictation_attempt', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
