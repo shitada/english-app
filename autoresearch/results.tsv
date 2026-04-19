@@ -597,3 +597,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 644	1cfcb70	2026-04-19	115	673	144	29	961	2186	2186	pass	7.35	kept	Speaking Pace Coach (WPM badge + pacing summary on Conversation)
 645	5dc7956	2026-04-19	114	705	140	26	985	2192	2192	pass	7.25	kept	Heatmap day drill-down (per-day module breakdown + quick-resume CTA on Dashboard)
 646	8f16bce	2026-04-19	61	489	149	31	730	2201	2201	pass	7.25	kept	Inline 'Type what you hear' dictation mini-drill on assistant messages
+647	4d53895	2026-04-19	108	353	146	28	635	2201	2201	pass	7.25	kept	ClozeListening focused retry on missed blanks with first-try score
