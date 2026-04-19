@@ -3295,6 +3295,22 @@ pages:
         added_in: 628
 
       - id: conv-133
+        target: Inline "Shadow this line" button on assistant messages
+        action: After an assistant reply containing at least one sentence of 4–18 words appears, locate the inline button with aria-label="Shadow this line" rendered at the bottom-right of the bubble (next to the 🔊 / 🐢 buttons). Click it to play the picked sentence at 0.85x.
+        expect: Button is visible only on assistant messages with a qualifying sentence; clicking plays TTS; button is hidden on the most recent assistant bubble while ReplyProgressIndicator is showing for the next reply
+        type: functional
+        priority: medium
+        added_in: 640
+
+      - id: conv-134
+        target: Inline shadow recording produces a Pronunciation pill
+        action: After clicking "Shadow this line" and the audio plays, click the Mic icon (aria-label="Record your shadow attempt"), speak the line, and wait for auto-stop after ~6s
+        expect: A compact pill with text "Pronunciation: NN%" appears (data-testid="inline-shadow-result"), color-coded green ≥80, amber ≥60, red <60, with a Retry icon button (aria-label="Retry shadow")
+        type: functional
+        priority: medium
+        added_in: 640
+
+      - id: conv-133
         target: Reply progress indicator appears while waiting for assistant reply
         action: Send a message during chat phase and inspect the bottom of the chat scroll area for data-testid="reply-progress-indicator"
         expect: An assistant-styled bubble with role="status", aria-live="polite", three animated dots, and the label "Reviewing your message…" replaces the previous generic spinner

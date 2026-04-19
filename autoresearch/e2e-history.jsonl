@@ -1,0 +1,1 @@
+{"timestamp": "2026-04-19T22:01:25", "iteration": 619, "level": "smoke", "overall": "PASS", "configs": ["light/desktop"], "pages_tested": 6, "pages_passed": 6, "pages_failed": 0, "spec_tests": 0, "spec_passed": 0, "spec_failed": 0, "spec_skipped": 0, "failed_ids": []}
