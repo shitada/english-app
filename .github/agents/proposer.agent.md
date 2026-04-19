@@ -1,6 +1,6 @@
 ---
 description: "Autoresearch proposer — analyzes the English learning app codebase and proposes one focused improvement. Use when: proposing code improvements, suggesting features, finding bugs."
-model: claude-opus-4.6
+model: claude-opus-4.7
 tools: [read, search]
 user-invocable: false
 ---

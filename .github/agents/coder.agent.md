@@ -1,6 +1,6 @@
 ---
 description: "Autoresearch coder — implements proposed changes with tests. Use when: implementing code changes from a proposal."
-model: claude-opus-4.6
+model: claude-opus-4.7
 tools: [read, edit, search, execute]
 user-invocable: false
 ---

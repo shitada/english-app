@@ -144,30 +144,22 @@ echo ""
 echo "=== AGENT INVOCATIONS ==="
 
 if [[ -f "$LOG_FILE" ]]; then
-    for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        p=$(grep -cE "Proposer.*(Propose |propose )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        t=$(grep -cE "Tester.*(QA |test )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        e=$(grep -cE "Evaluator.*(Evaluate |evaluate )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-        [[ "$p" -eq 0 || "$t" -eq 0 || "$e" -eq 0 ]] && echo "AGENT_SKIP|${i}|proposer=${p} tester=${t} evaluator=${e}"
-    done
-
-    # Count totals (support both old 3-agent and new 4-agent formats)
+    # Count totals — AGENT_TRACE is the authoritative source from run.sh
     total_p=0; total_c=0; total_t=0; total_e=0
     total_skip_p=0; total_skip_c=0; total_skip_t=0; total_skip_e=0
     for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        # Check new AGENT_TRACE format first
         trace=$(grep "AGENT_TRACE iter=$i " "$LOG_FILE" 2>/dev/null | head -1)
         if [[ -n "$trace" ]]; then
-            p=$(echo "$trace" | grep -oP 'proposer=\K[0-9]+')
-            c=$(echo "$trace" | grep -oP 'coder=\K[0-9]+')
-            t=$(echo "$trace" | grep -oP 'tester=\K[0-9]+')
-            e=$(echo "$trace" | grep -oP 'evaluator=\K[0-9]+')
+            p=$(echo "$trace" | sed -n 's/.*proposer=\([0-9]*\).*/\1/p')
+            c=$(echo "$trace" | sed -n 's/.*coder=\([0-9]*\).*/\1/p')
+            t=$(echo "$trace" | sed -n 's/.*tester=\([0-9]*\).*/\1/p')
+            e=$(echo "$trace" | sed -n 's/.*evaluator=\([0-9]*\).*/\1/p')
         else
-            # Fallback to old grep format
-            p=$(grep -cE "Proposer.*(Propose |propose )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-            c=$(grep -cE "Coder.*(Code |code |implement )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-            t=$(grep -cE "Tester.*(QA |test )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
-            e=$(grep -cE "Evaluator.*(Evaluate |evaluate )iteration $i\b" "$LOG_FILE" 2>/dev/null || true)
+            # Fallback: scan log directly. Match both "iter N" and "iteration N".
+            p=$(grep -cE "● Proposer.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
+            c=$(grep -cE "● Coder.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
+            t=$(grep -cE "● Tester.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
+            e=$(grep -cE "● Evaluator.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
         fi
         [[ "${p:-0}" -gt 0 ]] && total_p=$((total_p + 1)) || total_skip_p=$((total_skip_p + 1))
         [[ "${c:-0}" -gt 0 ]] && total_c=$((total_c + 1)) || total_skip_c=$((total_skip_c + 1))
@@ -176,13 +168,23 @@ if [[ -f "$LOG_FILE" ]]; then
         [[ "${p:-0}" -eq 0 || "${c:-0}" -eq 0 || "${t:-0}" -eq 0 || "${e:-0}" -eq 0 ]] && \
             echo "AGENT_SKIP|${i}|proposer=${p:-0} coder=${c:-0} tester=${t:-0} evaluator=${e:-0}"
     done
-    echo "Proposer: ${total_p}/${total_iters} called (${total_skip_p} skipped)"
-    echo "Coder: ${total_c}/${total_iters} called (${total_skip_c} skipped)"
-    echo "Tester: ${total_t}/${total_iters} called (${total_skip_t} skipped)"
-    echo "Evaluator: ${total_e}/${total_iters} called (${total_skip_e} skipped)"
+
+    pct() { local n=$1 d=$2; [[ "$d" -eq 0 ]] && echo "0" || echo "$(( n * 100 / d ))"; }
+    echo ""
+    echo "=== AGENT CALL RATES ==="
+    echo "Proposer:  ${total_p}/${total_iters} called (${total_skip_p} skipped) — $(pct $total_p $total_iters)%"
+    echo "Coder:     ${total_c}/${total_iters} called (${total_skip_c} skipped) — $(pct $total_c $total_iters)%"
+    echo "Tester:    ${total_t}/${total_iters} called (${total_skip_t} skipped) — $(pct $total_t $total_iters)%"
+    echo "Evaluator: ${total_e}/${total_iters} called (${total_skip_e} skipped) — $(pct $total_e $total_iters)%"
+    all4_min=$total_p
+    [[ $total_c -lt $all4_min ]] && all4_min=$total_c
+    [[ $total_t -lt $all4_min ]] && all4_min=$total_t
+    [[ $total_e -lt $all4_min ]] && all4_min=$total_e
+    echo "All 4 agents: ${all4_min}/${total_iters} — $(pct $all4_min $total_iters)%"
 else
     echo "No runner.log found"
 fi
+echo ""
 echo ""
 
 # ============================================================================

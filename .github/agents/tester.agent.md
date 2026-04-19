@@ -1,6 +1,6 @@
 ---
 description: "Autoresearch tester — runs all tests (pytest, TypeScript, smoke, E2E) and reports results. Use when: verifying code changes pass all tests."
-model: claude-opus-4.6
+model: claude-opus-4.7
 tools: [read, search, execute]
 user-invocable: false
 ---

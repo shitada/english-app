@@ -278,7 +278,7 @@ main() {
         copilot -p "$prompt" \
             --agent=orchestrator \
             --allow-all-tools \
-            --model claude-opus-4.6 \
+            --model claude-opus-4.7 \
             --share="$session_file" \
             2>&1 | tee -a "$LOG_FILE"
         local exit_code=$?
@@ -300,13 +300,14 @@ main() {
         new_iter=$(get_current_iteration)
         if [[ "$new_iter" -gt "$current" ]]; then
             # Agent invocation trace logging
+            # Match both "iteration N" and "iter N" (orchestrator uses both forms)
             log "Recording agent traces..."
             for iter_num in $(seq $((current + 1)) "$new_iter"); do
                 local p_count t_count e_count c_count
-                p_count=$(grep -cE "● Proposer.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
-                c_count=$(grep -cE "● Coder.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
-                t_count=$(grep -cE "● Tester.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
-                e_count=$(grep -cE "● Evaluator.*iteration $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                p_count=$(grep -cE "● Proposer.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                c_count=$(grep -cE "● Coder.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                t_count=$(grep -cE "● Tester.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
+                e_count=$(grep -cE "● Evaluator.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true)
                 log "  AGENT_TRACE iter=$iter_num proposer=$p_count coder=$c_count tester=$t_count evaluator=$e_count"
             done
 

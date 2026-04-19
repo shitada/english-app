@@ -140,6 +140,26 @@ else
     add_diagnosis "missing_iterations" "error" "$missing_iters" "recording_failure" "HIGH" \
         "Committed iterations not found in results.tsv"
 fi
+
+# --- 2b. Sequential gaps in results.tsv (iters attempted but never recorded) ---
+gap_iters=""
+for inum in $(seq "$FIRST_ITER" "$LAST_ITER"); do
+    in_tsv=$(awk -F'\t' -v n="$inum" 'NR>1 && $1==n {found=1} END {print found+0}' "$RESULTS_FILE")
+    if [[ "$in_tsv" -eq 0 ]]; then
+        # Check if there's evidence this iter was attempted (AGENT_TRACE or "Start iteration N" in runner.log)
+        attempted=0
+        if [[ -f "$LOG_FILE" ]]; then
+            grep -qE "AGENT_TRACE iter=$inum |Start iteration $inum\b|Propose .* iter(ation)? $inum\b" "$LOG_FILE" 2>/dev/null && attempted=1
+        fi
+        [[ "$attempted" -eq 1 ]] && gap_iters="$gap_iters $inum"
+    fi
+done
+if [[ -n "$gap_iters" ]]; then
+    echo -e "${RED}  GAP: Attempted but unrecorded iters:${gap_iters}${NC}"
+    ERRORS=$((ERRORS + 1))
+    add_diagnosis "gap_iterations" "error" "$gap_iters" "invocation_boundary_loss" "HIGH" \
+        "Iterations attempted (in runner.log) but not present in results.tsv — likely orchestrator timed out or failed to call record_results before invocation ended"
+fi
 echo ""
 
 # --- 3. Agent invocations ---

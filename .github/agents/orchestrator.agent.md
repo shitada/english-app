@@ -1,6 +1,6 @@
 ---
 description: "Autoresearch orchestrator — dispatches work to subagents in an autonomous improvement loop. Use when: starting autoresearch, running improvement loop."
-model: claude-opus-4.6
+model: claude-opus-4.7
 tools: [read, search, execute, agent]
 ---
 
