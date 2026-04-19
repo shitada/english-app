@@ -557,4 +557,16 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 596	30df481	2026-04-19	274	337	156	135	902	2004	2005	pass	6.50	kept	Add Quick Instruction Giver speaking drill card for procedural speaking practice
 597	0190e9b	2026-04-19	453	813	141	199	1606	2015	2016	pass	6.55	kept	Add Conversation AI Memory for cross-session user context
 598	717b452	2026-04-19	570	306	182	144	1202	2034	2035	pass	7.30	kept	Add Quick Email Writing Card with format-specific AI feedback
-600	none	2026-04-19	388	322	232	181	1123	2058	2059	pass	5.25	discarded	Quick Connected Speech Card for natural speech linking drills (discarded: code duplication)
+602	none	2026-04-19	316	157	151	73	697	2059	2060	pass	5.90	discarded	Add sticky section navigator to Dashboard for quick jump-to-section
+603	58fe1a1	2026-04-19	174	64	242	110	590	2060	2060	pass	7.50	kept	Fix timezone mismatch: use UTC dates consistently in dashboard DAL
+604	a683b93	2026-04-19	299	271	145	146	861	2074	2074	pass	7.25	kept	Add Quick Connected Speech Drill for natural pronunciation patterns
+605	273d9d2	2026-04-19	176	229	141	156	702	2088	2088	pass	7.30	kept	Add Quick Spot-the-Difference speaking card for comparison language practice
+606	699b43f	2026-04-19	552	277	126	117	1072	2088	2088	pass	7.25	kept	Add weak-word mini-drill to Pronunciation results for targeted mispronunciation practice
+611	none	2026-04-19	249	229	138	223	839	2120	2120	pass	5.00	discarded	Add Listen & Respond post-conversation drill (discarded: missing backend endpoint)
+612	07519fc	2026-04-19	273	209	157	120	759	2129	2129	pass	7.30	kept	Add Quick Voicemail Drill for structured voice message practice
+613	0578984	2026-04-19	277	239	475	187	1178	2142	2142	pass	6.20	kept	Add Quick Mixed Review Drill for cross-module interleaved practice
+615	none	2026-04-19	238	93	126	87	544	2142	2142	pass	5.90	discarded	Lazy-load QuickPracticeHub card components with React.lazy (discarded: below score threshold)
+616	b7b727b	2026-04-19	207	180	159	119	665	2142	2142	pass	6.70	kept	Add search, filter, and pagination to past conversations list
+617	f228456	2026-04-19	41	35	135	38	249	2142	2142	pass	7.80	kept	Rename useLazyLoad.ts to .tsx to fix JSX parse error in vitest
+618	2615bca	2026-04-19	380	171	376	148	1075	2159	2159	pass	7.60	kept	Add grammar error category breakdown to conversation performance metrics
+619	a8f3a1f	2026-04-19	616	166	146	106	1034	2162	2162	pass	7.80	kept	Fix coerce_bool(None) inflating grammar accuracy for null is_correct

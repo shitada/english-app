@@ -471,6 +471,41 @@ main() {
     log "Premium requests:  $total_premium"
     log "=========================================="
 
+    # ================================================================
+    # Auto-generate final report (calls report.sh, saves to reports/)
+    # ================================================================
+    if [[ "$final_iter" -gt "$START_ITER" ]] && [[ -x "$PROJECT_DIR/.github/skills/autoresearch-report/report.sh" ]]; then
+        local reports_dir="$PROJECT_DIR/autoresearch/reports"
+        mkdir -p "$reports_dir"
+        local ts
+        ts=$(date +%Y%m%d-%H%M%S)
+        local report_file="$reports_dir/report-${START_ITER}-to-${final_iter}-${ts}.md"
+        local report_from=$((START_ITER + 1))
+        log "Generating final report (iter ${report_from}-${final_iter}) → ${report_file}"
+        {
+            echo "# Autoresearch Report (iter ${report_from} — ${final_iter})"
+            echo ""
+            echo "- Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "- Total invocations: $invocation"
+            echo "- Premium requests: $total_premium"
+            echo ""
+            echo '```'
+            bash "$PROJECT_DIR/.github/skills/autoresearch-report/report.sh" \
+                -f "$report_from" -t "$final_iter" 2>&1 || true
+            echo '```'
+        } > "$report_file"
+        log "Report saved: $report_file"
+
+        # Keep latest N reports (clean up old ones)
+        local max_reports=20
+        local report_count
+        report_count=$(find "$reports_dir" -name 'report-*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
+        if [[ "$report_count" -gt "$max_reports" ]]; then
+            find "$reports_dir" -name 'report-*.md' -type f | sort | head -n "$((report_count - max_reports))" | xargs rm -f
+            log "Cleaned up old reports (kept $max_reports)"
+        fi
+    fi
+
     echo ""
     echo "  Premium requests used this run: $total_premium"
     echo ""

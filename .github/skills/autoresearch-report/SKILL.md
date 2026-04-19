@@ -132,14 +132,34 @@ Step 4 で挙げた「改善提案」のうち、以下に該当するものは 
 1. 対象ファイルが `--assume-unchanged` で保護されていれば一旦解除: `git update-index --no-assume-unchanged <file>`
 2. 修正を適用
 3. `bash -n` で構文チェック → 短い範囲で `report.sh` / `audit.sh` を再実行して動作確認
-4. 再保護: `git update-index --assume-unchanged <file>`
-5. レポート末尾に **「🔧 自動修正の実施内容」** セクションを追加し、何をどう直したかを表で報告
+4. **必ず git commit する**（後述「コミット必須ルール」参照）
+5. 再保護: `git update-index --assume-unchanged <file>`
+6. レポート末尾に **「🔧 自動修正の実施内容」** セクションを追加し、何をどう直したかを表で報告（コミットハッシュも記載）
+
+#### コミット必須ルール（重要）
+過去に「`--assume-unchanged` 保護のみで commit していなかったため、ローカル checkout / reset で改善内容が消失する」事案が多発した。**自動修正を行ったら必ずコミットする**こと。
+
+```bash
+# 例（main ブランチで作業している前提）
+git add .github/skills/autoresearch-report/report.sh autoresearch/run.sh autoresearch/audit.sh autoresearch/backlog.md
+git commit -m "infra: <一行サマリ>
+
+- 修正点1
+- 修正点2"
+```
+
+注意:
+- detached HEAD 状態でコミットしないように、作業前に `git branch --show-current` を確認
+- detached HEAD だった場合は `git checkout main && git cherry-pick <hash>` で main に取り込む
+- autoresearch ランタイム生成ファイル (`results.tsv`, `runner.log`, `audit-report.json`) はステージングに含めない（差分が大きくなりすぎるため）。指定パスでの `git add` を使うこと
+- コミット後に再度 `git update-index --assume-unchanged` で保護を戻す
 
 #### バックログ追記ルール
-ユーザーから明示的に「次回イテレーションで修正」と指示された改善案、もしくは自動修正対象外の機能改善案は、`autoresearch/backlog.md` の適切なセクションに追記する。形式は既存項目に倣い `- [ ] [HIGH/MEDIUM/LOW] [BUG/PERF/FEAT/INFRA] タイトル — 詳細と実装ヒント` とすること。追記後は backlog.md を `--assume-unchanged` で再保護すること。
+ユーザーから明示的に「次回イテレーションで修正」と指示された改善案、もしくは自動修正対象外の機能改善案は、`autoresearch/backlog.md` の適切なセクションに追記する。形式は既存項目に倣い `- [ ] [HIGH/MEDIUM/LOW] [BUG/PERF/FEAT/INFRA] タイトル — 詳細と実装ヒント` とすること。追記後も **必ずコミット** し、その上で `--assume-unchanged` で再保護すること。
 
 #### 検証ルール
 自動修正を行ったら必ず以下を確認:
 - `bash -n` で構文OK
 - 修正対象スクリプトを短い範囲で再実行し、エラーが出ない＆期待出力が得られることを確認
-- 修正で扱った項目は Step 4 の「改善提案」から「✅ 修正済み」表記に変える
+- 修正で扱った項目は Step 4 の「改善提案」から「✅ 修正済み（commit `<hash>`）」表記に変える
+- `git log --oneline -1` でコミット済みであることを確認
