@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSessionAnalytics, type SessionAnalyticsResponse } from '../../api';
+import { HeatmapDayDetail } from './HeatmapDayDetail';
 
 function formatTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -28,6 +29,7 @@ const MODULE_LABELS: Record<string, string> = {
 
 export function SessionAnalytics() {
   const [data, setData] = useState<SessionAnalyticsResponse | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     getSessionAnalytics(7).then(setData).catch(() => {});
@@ -105,10 +107,16 @@ export function SessionAnalytics() {
                 { key: 'listening', seconds: d.listening_seconds },
                 { key: 'speaking_journal', seconds: d.speaking_journal_seconds },
               ];
+              const isActive = selectedDate === d.date;
               return (
-                <div
+                <button
                   key={d.date}
+                  type="button"
                   title={`${d.date}: ${formatTime(dayTotal)}`}
+                  onClick={() => setSelectedDate(isActive ? null : d.date)}
+                  data-testid={`heatmap-cell-${d.date}`}
+                  aria-label={`${d.date}: ${formatTime(dayTotal)}`}
+                  aria-pressed={isActive}
                   style={{
                     flex: 1,
                     height: `${Math.max(h, 2)}%`,
@@ -116,12 +124,17 @@ export function SessionAnalytics() {
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    outline: isActive ? '2px solid var(--accent, #3b82f6)' : 'none',
+                    background: 'transparent',
                   }}
                 >
                   {segments.map((seg) => (
                     <div key={seg.key} style={{ flex: `${dayTotal > 0 ? (seg.seconds / dayTotal) * 100 : 0}`, background: MODULE_COLORS[seg.key] }} />
                   ))}
-                </div>
+                </button>
               );
             })}
           </div>
@@ -136,6 +149,10 @@ export function SessionAnalytics() {
             ))}
           </div>
         </>
+      )}
+
+      {selectedDate && (
+        <HeatmapDayDetail date={selectedDate} onClose={() => setSelectedDate(null)} />
       )}
     </div>
   );

@@ -801,4 +801,130 @@ Starting iteration 644. Dispatching proposer.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now let's look at the conversation router for /message endpoint and summary/end:Now let me check the test fixtures and existing patterns:Now I have enough context. Let me check Conversation.tsx to find mic/speech logic and ConversationSummary.tsx:Now let me look at api.ts for sendMessage and streamMessage:Now look at ConversationSummary component briefly:OK. Let me check the `performance` interface to understand what's already there, and check how stream endpoint accepts speaking_seconds. Let me check stream endpoint:Now I have a good plan. Let me implement everything. First the backend:Now update DAL `add_message` and add `get_pace_stats`:Now update get_conversation_history to include the new fields:Now update the router. Add `speaking_seconds` to MessageRequest, compute pace_wpm and pass to add_message; add `pace_stats` to summary/end responses:Now update both message endpoints to pass speaking_seconds + pace_wpm:I removed the `format_history_text` call. Let me restore it:Update the response of /message:Now stream endpoint:Now find where SSE 'done' event is yielded to add pace_wpm:Now add pace_stats to summary in /end and GET /summary:Now backend tests:Run pytest:All passing. Now run the full conversation suite to check for regressions:All 2186 tests pass. Now the frontend. First update api.ts:Add `pace_stats` to ConversationSummary type:Now create the PaceBadge component:Add i18n keys:Now check how I18nContext is used (to make sure t() works):Now create PaceBadge component:Now wire pace into Conversation.tsx. Need: track micStartedAt, compute speakingSeconds, pass to API, store on user Message, render PaceBadge.Now wire up Conversation.tsx. Add Message field, ref for micStartedAt, capture, send, render badge:Add PaceBadge import:Now find where speech recognition starts to record micStartedAt. The speech.start happens when mic button clicked, and there's auto-start in voice mode. Let me track via prevListeningRef:Add micStartedAtRef. Best place is via tracking speech.isListening transitions. Let me use the existing prevListeningRef effect. Add the ref:Now track mic start. Add an effect that watches speech.isListening transitions:Now in sendMessage compute speakingSeconds, pass to API, and stash pace_wpm:Now update the streamMessage call and sendMessage fallback to pass speakingSeconds and stash pace_wpm:Now find where streamFeedback is applied to the user message after stream completes (success path):Now render PaceBadge under user messages. Find where user messages are rendered:Insert PaceBadge for user mic-submitted messages. After the speak buttons row:Now add Pacing card to ConversationSummary.tsx. Add it after the Performance section:No i18n in this component currently. Let me add Pacing card with simple label since the component uses English elsewhere; use useI18n for consistency. Let me insert it right after the Performance block (line 576):Find a good place to add `t` hook:Now insert Pacing card. Find end of Performance block:Now run typecheck:Clean. Now update the UI test spec since pages/Conversation.tsx and components were changed:Find the highest conv-NNN id:Final verification — re-run typecheck and re-run the new tests once more:All green. Commit:
+Now let's look at the conversation router for /message endpoint and summary/end:Now let me check the test fixtures and existing patterns:Now I have enough context. Let me check Conversation.tsx to find mic/speech logic and ConversationSummary.tsx:Now let me look at api.ts for sendMessage and streamMessage:Now look at ConversationSummary component briefly:OK. Let me check the `performance` interface to understand what's already there, and check how stream endpoint accepts speaking_seconds. Let me check stream endpoint:Now I have a good plan. Let me implement everything. First the backend:Now update DAL `add_message` and add `get_pace_stats`:Now update get_conversation_history to include the new fields:Now update the router. Add `speaking_seconds` to MessageRequest, compute pace_wpm and pass to add_message; add `pace_stats` to summary/end responses:Now update both message endpoints to pass speaking_seconds + pace_wpm:I removed the `format_history_text` call. Let me restore it:Update the response of /message:Now stream endpoint:Now find where SSE 'done' event is yielded to add pace_wpm:Now add pace_stats to summary in /end and GET /summary:Now backend tests:Run pytest:All passing. Now run the full conversation suite to check for regressions:All 2186 tests pass. Now the frontend. First update api.ts:Add `pace_stats` to ConversationSummary type:Now create the PaceBadge component:Add i18n keys:Now check how I18nContext is used (to make sure t() works):Now create PaceBadge component:Now wire pace into Conversation.tsx. Need: track micStartedAt, compute speakingSeconds, pass to API, store on user Message, render PaceBadge.Now wire up Conversation.tsx. Add Message field, ref for micStartedAt, capture, send, render badge:Add PaceBadge import:Now find where speech recognition starts to record micStartedAt. The speech.start happens when mic button clicked, and there's auto-start in voice mode. Let me track via prevListeningRef:Add micStartedAtRef. Best place is via tracking speech.isListening transitions. Let me use the existing prevListeningRef effect. Add the ref:Now track mic start. Add an effect that watches speech.isListening transitions:Now in sendMessage compute speakingSeconds, pass to API, and stash pace_wpm:Now update the streamMessage call and sendMessage fallback to pass speakingSeconds and stash pace_wpm:Now find where streamFeedback is applied to the user message after stream completes (success path):Now render PaceBadge under user messages. Find where user messages are rendered:Insert PaceBadge for user mic-submitted messages. After the speak buttons row:Now add Pacing card to ConversationSummary.tsx. Add it after the Performance section:No i18n in this component currently. Let me add Pacing card with simple label since the component uses English elsewhere; use useI18n for consistency. Let me insert it right after the Performance block (line 576):Find a good place to add `t` hook:Now insert Pacing card. Find end of Performance block:Now run typecheck:Clean. Now update the UI test spec since pages/Conversation.tsx and components were changed:Find the highest conv-NNN id:Final verification — re-run typecheck and re-run the new tests once more:All green. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "1cfcb70",
+  "files_changed": [
+    "app/database.py",
+    "app/dal/conversation.py",
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/components/conversation/PaceBadge.tsx",
+    "frontend/src/components/conversation/ConversationSummary.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/i18n/translations.ts",
+    "tests/unit/test_pace_stats_dal.py",
+    "tests/integration/test_pace_coach_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 7,
+  "ui_spec_updated": true,
+  "description": "Speaking Pace Coach: persist speaking_seconds/pace_wpm per user turn, render PaceBadge under mic-submitted messages, and add Pacing card (avg/min/max WPM + coaching tip) to Conversation Summary."
+}
+```● Coder Implement iter 644
+  │ verify (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && python -m pytest
+  │   │ tests/unit/test_pace_stats_dal.py tests/integration/test_pace_coach_api.py
+  │   │ tests/integration/test_conversation_api.py
+  │   │ tests/integration/test_conversation_stream.py -q 2>&1 | tail -10 && echo
+  │   │ "---" && cd frontend && npx tsc --noEmit 2>&1 | tail -5
+  │   └ 5 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #644: Speaking Pace Coach (WPM badge + pacing
+      │ summary)
+      │
+      │ Add per-turn WPM badge under mic-submitted user messages and an…
+      └ 37 lines...
+
+● T2 + verify commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git --no-pager log --oneline -2 && git --no-pager diff HEAD~1 --name-only
+  └ 19 lines...
+
+```json
+{
+  "tests_passed": 2186,
+  "tests_total": 2186,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2186 passed in 105.66s (0:01:45) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 644
+  │ Read E2E results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -200
+  │   └ 2 lines...
+  └ Smoke test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40; echo
+      │ "EXIT:$?"
+      └ 24 lines...
+
+● T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+Migrations are properly added. Tests pass. Schema backward compatible. Solid feature.
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.35,
+  "verdict": "keep",
+  "reason": "Adds well-scoped speaking-pace tracking with proper ALTER TABLE migrations, all 2186 tests pass, TS check passes, and the feature meaningfully supports speaking practice in conversations."
+}
+```● Evaluator Evaluate iter 644
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L200:360 (161 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L360:480 (121 lines read)
+
+● Record iter 644 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776606261; T1=1776606376; T2=1776607049; T3=1776607193 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "644" "1cfcb70" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 6 lines...
+
+Iteration 644 done. Now iteration 645.
+
+● T0 iter 645 (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "ux",
+  "title": "Heatmap day drill-down popover with quick-resume actions",
+  "description": "The Dashboard heatmap (rendered via SessionAnalytics / heatmap component shown in dashboard-heatmap-overview.png) currently only shows a tooltip with total session count for each day. Users can see they practiced 16 minutes on a Tuesday but cannot tell *what* they did or jump back to it. Make each heatmap cell clickable: clicking opens a popover/inline panel beneath the heatmap titled 'Activity on <date>' with: (1) per-module breakdown (conversation N msgs, pronunciation N attempts avg score X, vocabulary N words learned, listening N quizzes), (2) up to 3 conversation topics practiced that day with a 'Replay summary' link to the conversation summary view, (3) any new vocab words added that day (chips), (4) one CTA button 'Practice again like this day' that routes to the most-practiced module. This turns the heatmap from a passive visualization into an actionable recall + repeat-success surface, supporting the app's short-session fluency loop.\n\nImplementation:\n- Backend: add `GET /api/dashboard/day-detail?date=YYYY-MM-DD` in `app/routers/dashboard.py` returning `{ date, conversations: [{id, topic, started_at}], pronunciation: {count, avg_score}, vocabulary: {new_words: [str], count}, listening: {count, accuracy}, total_minutes, top_module }`. Implement in `app/dal/dashboard.py` as `get_day_detail(db, date)` querying existing tables (conversations.started_at, pronunciation_attempts.created_at, vocab_progress, listening tables) filtered by `date(...) = ?`. No schema changes required.\n- Frontend: extend the heatmap component (in `frontend/src/components/dashboard/SessionAnalytics.tsx` or wherever the heatmap grid is rendered) to make cells `<button>` elements with onClick; add a new `HeatmapDayDetail.tsx` panel rendered below the heatmap when a date is selected, with close button and routes via react-router `Link`. Add `getDayDetail(date)` in `frontend/src/api.ts`.\n- Tests: unit test `get_day_detail` in `tests/unit/test_dashboard_dal.py` (existing file) covering empty day, mixed-activity day, and timezone/date filtering; integration test for the new endpoint in `tests/integration/test_dashboard_api.py`.\n\nFully accessible (button + aria-expanded), keyboard-navigable, and dark-mode aware using existing CSS variables.",
+  "files_to_modify": ["app/routers/dashboard.py", "app/dal/dashboard.py", "frontend/src/api.ts", "frontend/src/components/dashboard/SessionAnalytics.tsx", "frontend/src/components/dashboard/HeatmapDayDetail.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 645 feature
+  │ Read dashboard.py
+  │   │ app/routers/dashboard.py
+  │   └ L1:50 (50 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● T1 iter 645 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now let me look at conftest and an existing dashboard test for patterns.Now I have enough context. Let me implement.Now the router:Now frontend api.ts:Now i18n strings + index export + new component + SessionAnalytics integration.Add i18n keys:Now create the HeatmapDayDetail component:Good. Now wire up SessionAnalytics to make the daily bars clickable:Now add the panel render after daily breakdown. Let me see end of component:Now add migrations check (no schema changes — none needed). Add tests:Now integration test:Now run tests:All tests pass. Now TypeScript check:Now update UI test spec since SessionAnalytics.tsx and a new component were modified.

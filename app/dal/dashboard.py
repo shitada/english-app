@@ -3077,3 +3077,118 @@ async def get_cefr_estimate(db: aiosqlite.Connection) -> dict[str, Any]:
         "next_level": next_level,
         "focus_tip": focus_tips[weakest],
     }
+
+
+async def get_day_detail(db: aiosqlite.Connection, day: str) -> dict[str, Any]:
+    """Per-day drilldown for the heatmap.
+
+    Returns conversation list (max 3), pronunciation count + avg score,
+    new vocab words added that day, listening count + accuracy,
+    total minutes spoken, and the most-practiced module key.
+    """
+
+    # Conversations started that day (cap 3)
+    conv_rows = await db.execute_fetchall(
+        """SELECT id, topic, started_at
+           FROM conversations
+           WHERE date(started_at) = ?
+           ORDER BY started_at ASC
+           LIMIT 3""",
+        (day,),
+    )
+    conversations = [
+        {"id": r["id"], "topic": r["topic"], "started_at": r["started_at"]}
+        for r in conv_rows
+    ]
+
+    # User message count for the day (proxy for conversation activity volume)
+    msg_row = (
+        await db.execute_fetchall(
+            """SELECT COUNT(*) AS cnt, COALESCE(SUM(speaking_seconds), 0) AS spoken_seconds
+               FROM messages
+               WHERE role = 'user' AND date(created_at) = ?""",
+            (day,),
+        )
+    )[0]
+    conv_message_count = int(msg_row["cnt"])
+    spoken_seconds = float(msg_row["spoken_seconds"] or 0)
+
+    # Pronunciation
+    pron_row = (
+        await db.execute_fetchall(
+            """SELECT COUNT(*) AS cnt, AVG(score) AS avg_score
+               FROM pronunciation_attempts
+               WHERE date(created_at) = ?""",
+            (day,),
+        )
+    )[0]
+    pron_count = int(pron_row["cnt"])
+    pron_avg = round(float(pron_row["avg_score"] or 0), 1) if pron_count else 0.0
+
+    # Listening
+    lq_row = (
+        await db.execute_fetchall(
+            """SELECT COUNT(*) AS cnt,
+                      COALESCE(SUM(correct_count), 0) AS correct_sum,
+                      COALESCE(SUM(total_questions), 0) AS total_sum
+               FROM listening_quiz_results
+               WHERE date(created_at) = ?""",
+            (day,),
+        )
+    )[0]
+    listening_count = int(lq_row["cnt"])
+    total_sum = int(lq_row["total_sum"])
+    listening_accuracy = (
+        round(float(lq_row["correct_sum"]) / total_sum * 100, 1)
+        if total_sum > 0
+        else 0.0
+    )
+
+    # Vocabulary: words whose first ever quiz attempt was on this day
+    vocab_rows = await db.execute_fetchall(
+        """SELECT w.word
+           FROM vocabulary_words w
+           JOIN (
+               SELECT word_id, MIN(answered_at) AS first_attempt
+               FROM quiz_attempts
+               GROUP BY word_id
+           ) qa ON qa.word_id = w.id
+           WHERE date(qa.first_attempt) = ?
+           ORDER BY qa.first_attempt ASC
+           LIMIT 25""",
+        (day,),
+    )
+    new_words = [r["word"] for r in vocab_rows]
+
+    # Total quiz attempts that day (vocabulary activity volume)
+    qa_row = (
+        await db.execute_fetchall(
+            """SELECT COUNT(*) AS cnt FROM quiz_attempts WHERE date(answered_at) = ?""",
+            (day,),
+        )
+    )[0]
+    vocab_attempt_count = int(qa_row["cnt"])
+
+    total_minutes = int(round(spoken_seconds / 60))
+
+    # Choose top module by activity volume; fall back to None if all zero.
+    module_volumes: dict[str, int] = {
+        "conversation": conv_message_count,
+        "pronunciation": pron_count,
+        "vocabulary": vocab_attempt_count,
+        "listening": listening_count,
+    }
+    top_module: str | None = None
+    if any(v > 0 for v in module_volumes.values()):
+        top_module = max(module_volumes.items(), key=lambda kv: kv[1])[0]
+
+    return {
+        "date": day,
+        "conversations": conversations,
+        "conversation_message_count": conv_message_count,
+        "pronunciation": {"count": pron_count, "avg_score": pron_avg},
+        "vocabulary": {"new_words": new_words, "count": vocab_attempt_count},
+        "listening": {"count": listening_count, "accuracy": listening_accuracy},
+        "total_minutes": total_minutes,
+        "top_module": top_module,
+    }

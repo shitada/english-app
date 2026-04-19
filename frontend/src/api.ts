@@ -379,6 +379,9 @@ export const api = {
   getActivityHistory: (days = 30) =>
     request<ActivityHistoryResponse>(`/api/dashboard/activity-history?days=${days}`),
 
+  getDayDetail: (date: string) =>
+    request<DayDetailResponse>(`/api/dashboard/day-detail?date=${encodeURIComponent(date)}`),
+
   getStreakMilestones: () =>
     request<StreakMilestonesResponse>('/api/dashboard/streak-milestones'),
 
@@ -754,6 +757,17 @@ export interface TopicAccuracyResponse {
 export interface ActivityHistoryResponse {
   days: number;
   history: { date: string; conversations: number; messages: number; pronunciation_attempts: number; vocabulary_reviews: number; speaking_journal_entries: number; listening_quizzes: number }[];
+}
+
+export interface DayDetailResponse {
+  date: string;
+  conversations: { id: number; topic: string; started_at: string }[];
+  conversation_message_count: number;
+  pronunciation: { count: number; avg_score: number };
+  vocabulary: { new_words: string[]; count: number };
+  listening: { count: number; accuracy: number };
+  total_minutes: number;
+  top_module: 'conversation' | 'pronunciation' | 'vocabulary' | 'listening' | null;
 }
 
 export interface StreakMilestonesResponse {
@@ -1493,6 +1507,10 @@ export interface SessionAnalyticsResponse {
 
 export async function getSessionAnalytics(days = 7): Promise<SessionAnalyticsResponse> {
   return request<SessionAnalyticsResponse>(`/api/dashboard/session-analytics?days=${days}`);
+}
+
+export async function getDayDetail(date: string): Promise<DayDetailResponse> {
+  return request<DayDetailResponse>(`/api/dashboard/day-detail?date=${encodeURIComponent(date)}`);
 }
 
 // Etymology

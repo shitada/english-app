@@ -1633,6 +1633,46 @@ pages:
         priority: low
         added_in: 564
 
+      - id: dash-031
+        target: Heatmap daily breakdown cells are clickable buttons
+        action: Navigate to /dashboard, scroll to Session Analytics, locate data-testid="heatmap-cell-<YYYY-MM-DD>" elements in the daily breakdown row
+        expect: Each daily bar renders as a button with aria-label and aria-pressed; clicking one opens the day-detail panel
+        type: functional
+        priority: high
+        added_in: 645
+
+      - id: dash-032
+        target: Heatmap day-detail panel shows per-module breakdown
+        action: Click any heatmap cell, then inspect data-testid="heatmap-day-detail"
+        expect: Panel shows "Activity on <date>" heading; per-module lines for any non-zero modules (conversation messages, pronunciation count + avg, vocabulary reviews, listening count + accuracy); panel renders below the heatmap
+        type: functional
+        priority: high
+        added_in: 645
+
+      - id: dash-033
+        target: Heatmap day-detail panel close button dismisses panel
+        action: Open day-detail panel, click data-testid="heatmap-day-detail-close"
+        expect: Panel is removed from DOM; clicking the same cell re-opens it
+        type: functional
+        priority: medium
+        added_in: 645
+
+      - id: dash-034
+        target: Heatmap day-detail "Practice again like this day" CTA routes by top module
+        action: Open day-detail panel for a day with activity, click data-testid="heatmap-day-practice-again"
+        expect: Navigation occurs to /conversation, /pronunciation, /vocabulary, or /listening based on the most-practiced module of that day
+        type: functional
+        priority: medium
+        added_in: 645
+
+      - id: dash-035
+        target: Heatmap day-detail empty state
+        action: Click a heatmap cell for a day with no activity
+        expect: Panel renders with "no activity" message and no Practice-again button
+        type: state
+        priority: low
+        added_in: 645
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

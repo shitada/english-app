@@ -21,3 +21,4 @@ export { WeeklyReport } from './WeeklyReport';
 export { FluencyProgressionChart } from './FluencyProgressionChart';
 export { SelfAssessmentTrendChart } from './SelfAssessmentTrendChart';
 export { SpeakingJournalProgress } from './SpeakingJournalProgress';
+export { HeatmapDayDetail } from './HeatmapDayDetail';

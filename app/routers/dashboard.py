@@ -1066,3 +1066,62 @@ async def get_cefr_estimate(
 ):
     """Estimate the user's CEFR English level based on all available data."""
     return await dash_dal.get_cefr_estimate(db)
+
+
+# ---------------------------------------------------------------------------
+# Heatmap day drill-down
+# ---------------------------------------------------------------------------
+
+
+class DayDetailConversation(BaseModel):
+    id: int
+    topic: str
+    started_at: str
+
+
+class DayDetailPronunciation(BaseModel):
+    count: int
+    avg_score: float
+
+
+class DayDetailVocabulary(BaseModel):
+    new_words: list[str]
+    count: int
+
+
+class DayDetailListening(BaseModel):
+    count: int
+    accuracy: float
+
+
+class DayDetailResponse(BaseModel):
+    date: str
+    conversations: list[DayDetailConversation]
+    conversation_message_count: int
+    pronunciation: DayDetailPronunciation
+    vocabulary: DayDetailVocabulary
+    listening: DayDetailListening
+    total_minutes: int
+    top_module: str | None = None
+
+
+_DATE_RE = __import__("re").compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+@router.get("/day-detail", response_model=DayDetailResponse)
+async def get_day_detail(
+    date: str = Query(..., description="Day to drill into in YYYY-MM-DD format"),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Return a per-module breakdown of a single day's activity."""
+    if not _DATE_RE.match(date):
+        raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
+    detail = await dash_dal.get_day_detail(db, date)
+
+    # Convert raw conversation topic keys to friendly labels.
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
+    detail["conversations"] = [
+        {**c, "topic": get_topic_label(topics, c["topic"])}
+        for c in detail["conversations"]
+    ]
+    return detail

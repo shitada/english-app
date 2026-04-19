@@ -129,6 +129,17 @@ export interface Translations {
   paceMin: string;
   paceMax: string;
   paceWpmUnit: string;
+  // Heatmap day drill-down
+  heatmapActivityOn: string;
+  heatmapNoActivity: string;
+  heatmapNewWords: string;
+  heatmapReplaySummary: string;
+  heatmapPracticeAgainLikeThisDay: string;
+  heatmapClose: string;
+  heatmapPronCount: string;
+  heatmapVocabCount: string;
+  heatmapListeningCount: string;
+  heatmapConvCount: string;
 }
 
 export const en: Translations = {
@@ -260,6 +271,16 @@ export const en: Translations = {
   paceMin: 'Min',
   paceMax: 'Max',
   paceWpmUnit: 'WPM',
+  heatmapActivityOn: 'Activity on {date}',
+  heatmapNoActivity: 'No activity on this day yet.',
+  heatmapNewWords: 'New words',
+  heatmapReplaySummary: 'Replay summary',
+  heatmapPracticeAgainLikeThisDay: 'Practice again like this day',
+  heatmapClose: 'Close',
+  heatmapPronCount: '{count} attempts • avg {score}',
+  heatmapVocabCount: '{count} reviews',
+  heatmapListeningCount: '{count} quizzes • {accuracy}% acc',
+  heatmapConvCount: '{count} messages',
 };
 
 export const ja: Translations = {
@@ -391,6 +412,16 @@ export const ja: Translations = {
   paceMin: '最小',
   paceMax: '最大',
   paceWpmUnit: 'WPM',
+  heatmapActivityOn: '{date} のアクティビティ',
+  heatmapNoActivity: 'この日はまだ練習がありません。',
+  heatmapNewWords: '新しい単語',
+  heatmapReplaySummary: '要約を見る',
+  heatmapPracticeAgainLikeThisDay: 'この日のように練習する',
+  heatmapClose: '閉じる',
+  heatmapPronCount: '{count}回 • 平均 {score}',
+  heatmapVocabCount: '{count}回の復習',
+  heatmapListeningCount: '{count}クイズ • 正答率 {accuracy}%',
+  heatmapConvCount: '{count}件のメッセージ',
 };
 
 export type Locale = 'en' | 'ja';

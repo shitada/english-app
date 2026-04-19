@@ -2825,3 +2825,104 @@ class TestGetSelfAssessmentTrend:
             "rolling_comprehension", "rolling_overall", "created_at",
         }
         assert set(entry.keys()) == expected_keys
+
+
+# ---------------------------------------------------------------------------
+# get_day_detail
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestGetDayDetail:
+    async def test_empty_day_returns_zero_breakdown(self, test_db):
+        from app.dal.dashboard import get_day_detail
+
+        result = await get_day_detail(test_db, "2024-05-01")
+        assert result["date"] == "2024-05-01"
+        assert result["conversations"] == []
+        assert result["conversation_message_count"] == 0
+        assert result["pronunciation"] == {"count": 0, "avg_score": 0.0}
+        assert result["vocabulary"] == {"new_words": [], "count": 0}
+        assert result["listening"] == {"count": 0, "accuracy": 0.0}
+        assert result["total_minutes"] == 0
+        assert result["top_module"] is None
+
+    async def test_mixed_activity_picks_top_module_and_aggregates(self, test_db):
+        from app.dal.dashboard import get_day_detail
+
+        day = "2024-05-02"
+        # Conversation + 2 user messages with speaking_seconds
+        await test_db.execute(
+            "INSERT INTO conversations (id, topic, difficulty, started_at, status) "
+            "VALUES (1, 'hotel_checkin', 'beginner', ?, 'active')",
+            (f"{day} 10:00:00",),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, speaking_seconds, created_at) "
+            "VALUES (1, 'user', 'Hi', 60, ?)",
+            (f"{day} 10:01:00",),
+        )
+        await test_db.execute(
+            "INSERT INTO messages (conversation_id, role, content, speaking_seconds, created_at) "
+            "VALUES (1, 'user', 'Hello again', 60, ?)",
+            (f"{day} 10:02:00",),
+        )
+
+        # Pronunciation: two attempts
+        for score in (80, 90):
+            await test_db.execute(
+                "INSERT INTO pronunciation_attempts (reference_text, user_transcription, score, created_at) "
+                "VALUES ('hello', 'hello', ?, ?)",
+                (score, f"{day} 11:00:00"),
+            )
+
+        # Vocabulary: word with first quiz attempt on this day
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (id, topic, word, meaning) VALUES (1, 'hotel', 'lobby', 'entrance')"
+        )
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (1, 1, ?)",
+            (f"{day} 12:00:00",),
+        )
+
+        # Listening: 1 quiz, 4/5 correct -> 80% accuracy
+        await test_db.execute(
+            "INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, created_at) "
+            "VALUES ('t', 'beginner', 5, 4, 80.0, ?)",
+            (f"{day} 13:00:00",),
+        )
+        await test_db.commit()
+
+        result = await get_day_detail(test_db, day)
+        assert result["date"] == day
+        assert len(result["conversations"]) == 1
+        assert result["conversations"][0]["topic"] == "hotel_checkin"
+        assert result["conversation_message_count"] == 2
+        assert result["pronunciation"] == {"count": 2, "avg_score": 85.0}
+        assert result["vocabulary"]["count"] == 1
+        assert result["vocabulary"]["new_words"] == ["lobby"]
+        assert result["listening"] == {"count": 1, "accuracy": 80.0}
+        # 120 sec spoken => 2 minutes
+        assert result["total_minutes"] == 2
+        # Conversation messages (2) is the highest single-module count
+        assert result["top_module"] == "conversation"
+
+    async def test_new_words_excludes_words_first_attempted_earlier(self, test_db):
+        from app.dal.dashboard import get_day_detail
+
+        await test_db.execute(
+            "INSERT INTO vocabulary_words (id, topic, word, meaning) VALUES (1, 'x', 'old', 'm')"
+        )
+        # First attempt earlier; another attempt on the target day
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (1, 1, '2024-05-01 09:00:00')"
+        )
+        await test_db.execute(
+            "INSERT INTO quiz_attempts (word_id, is_correct, answered_at) VALUES (1, 1, '2024-05-03 09:00:00')"
+        )
+        await test_db.commit()
+
+        result = await get_day_detail(test_db, "2024-05-03")
+        assert result["vocabulary"]["new_words"] == []
+        assert result["vocabulary"]["count"] == 1  # but it counts as a review
+        assert result["top_module"] == "vocabulary"

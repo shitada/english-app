@@ -2073,3 +2073,38 @@ async def test_stats_recent_activity_null_detail_does_not_crash(client):
     for item in data["recent_activity"]:
         assert item["detail"] is not None
         assert len(item["detail"]) > 0
+
+
+@pytest.mark.integration
+class TestDayDetailAPI:
+    async def test_invalid_date_returns_400(self, client):
+        res = await client.get("/api/dashboard/day-detail?date=not-a-date")
+        assert res.status_code == 400
+
+    async def test_empty_day_returns_zeros(self, client):
+        res = await client.get("/api/dashboard/day-detail?date=2024-01-01")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["date"] == "2024-01-01"
+        assert data["conversations"] == []
+        assert data["conversation_message_count"] == 0
+        assert data["pronunciation"] == {"count": 0, "avg_score": 0.0}
+        assert data["vocabulary"]["new_words"] == []
+        assert data["listening"] == {"count": 0, "accuracy": 0.0}
+        assert data["top_module"] is None
+
+    async def test_pronunciation_activity_reflected(self, client):
+        # Create a pronunciation attempt today
+        resp = await client.post(
+            "/api/pronunciation/check",
+            json={"reference_text": "Good morning", "user_transcription": "Good morning"},
+        )
+        assert resp.status_code == 200
+
+        from datetime import date as _date
+        today = _date.today().isoformat()
+        res = await client.get(f"/api/dashboard/day-detail?date={today}")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["pronunciation"]["count"] >= 1
+        assert data["top_module"] == "pronunciation"
