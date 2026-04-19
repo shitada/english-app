@@ -270,6 +270,30 @@ pages:
         priority: medium
         added_in: 657
 
+      - id: home-032
+        target: Listening Warmup tile is present on the Home page
+        action: locate element with data-testid="listening-warmup-tile"
+        expect: A clickable tile labeled "Listening Warmup" appears with description "60-second passive ear-training" and a Start button
+        type: functional
+        priority: medium
+        added_in: 659
+
+      - id: home-033
+        target: Clicking the Listening Warmup tile opens the modal panel
+        action: click the listening-warmup-tile button
+        expect: A modal with data-testid="listening-warmup-panel" appears containing warmup-progress-ring, warmup-current-sentence, warmup-pause, warmup-skip, and warmup-stop controls
+        type: functional
+        priority: medium
+        added_in: 659
+
+      - id: home-034
+        target: Pressing Escape closes the Listening Warmup modal
+        action: open the warmup modal then press Escape
+        expect: listening-warmup-panel is removed from the DOM and focus returns to the Home page
+        type: functional
+        priority: low
+        added_in: 659
+
   conversation:
     path: /conversation
     tests:

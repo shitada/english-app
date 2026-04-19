@@ -8,6 +8,7 @@ import { useOnboarding } from '../hooks/useOnboarding';
 import OnboardingOverlay from '../components/OnboardingOverlay';
 import { AchievementToastContainer } from '../components/AchievementToast';
 import QuickPracticeHub from '../components/QuickPracticeHub';
+import ListeningWarmup, { readWarmupState, type WarmupState } from '../components/ListeningWarmup';
 import SmartReviewQueue from '../components/SmartReviewQueue';
 import SpeakingJournal from '../components/SpeakingJournal';
 import FluencySprintCard from '../components/FluencySprintCard';
@@ -1337,6 +1338,25 @@ function RecentAchievementsRow() {
 export default function Home() {
   const { t } = useI18n();
   const { isActive, currentStep, totalSteps, step, next, prev, skip, restartTour } = useOnboarding();
+  const [warmupOpen, setWarmupOpen] = useState(false);
+  const [warmupSentences, setWarmupSentences] = useState<string[] | undefined>(undefined);
+  const [warmupState, setWarmupState] = useState<WarmupState>(() => readWarmupState());
+
+  const openWarmup = useCallback(async () => {
+    setWarmupOpen(true);
+    if (!warmupSentences) {
+      try {
+        const res = await api.getDrillWords(6);
+        const sents = (res.words || [])
+          .map(w => (w.example_sentence || '').trim())
+          .filter(s => s.length > 0)
+          .slice(0, 6);
+        if (sents.length > 0) setWarmupSentences(sents);
+      } catch {
+        /* fall back to defaults inside ListeningWarmup */
+      }
+    }
+  }, [warmupSentences]);
 
   return (
     <div>
@@ -1389,6 +1409,55 @@ export default function Home() {
           Train your ear
         </span>
       </Link>
+
+      <button
+        type="button"
+        onClick={openWarmup}
+        data-testid="listening-warmup-tile"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textAlign: 'left', width: '100%',
+          color: 'inherit', cursor: 'pointer',
+          border: '1px solid var(--border)', borderRadius: 12,
+          background: 'var(--card-bg, transparent)',
+        }}
+      >
+        <Headphones size={28} color="#6366f1" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>
+            Listening Warmup
+            {warmupState.warmupStreak > 0 && (
+              <span
+                data-testid="warmup-streak-badge"
+                style={{
+                  marginLeft: 8, padding: '2px 8px', borderRadius: 12,
+                  background: '#fef3c7', color: '#92400e',
+                  fontSize: 11, fontWeight: 600,
+                }}
+              >
+                🔥 {warmupState.warmupStreak}d
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            60-second passive ear-training — 6 sentences, slow then normal.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#6366f1',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </button>
+
+      <ListeningWarmup
+        open={warmupOpen}
+        onClose={() => setWarmupOpen(false)}
+        sentences={warmupSentences}
+        onComplete={(s) => setWarmupState(s)}
+      />
 
       <Link
         to="/shadowing"
