@@ -372,7 +372,7 @@ main() {
 
                 # Run UI test
                 set +e
-                local ui_cmd="uv run python tests/e2e/smoke_ui.py --port 8098 --level $ui_level"
+                local ui_cmd="uv run python tests/e2e/smoke_ui.py --port 8098 --level $ui_level --iteration $new_iter"
                 if [[ -n "$pages_csv" ]]; then
                     ui_cmd="$ui_cmd --pages $pages_csv"
                 fi

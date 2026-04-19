@@ -24,6 +24,7 @@ pages:
     tests:
       - id: home-001
         target: Navigation bar renders with all links
+        selector: "nav"
         action: snapshot and check for nav links (Conversation, Pronunciation, Listening, Vocabulary, Dashboard)
         expect: All 5 navigation links visible and not disabled
         type: functional
@@ -32,6 +33,7 @@ pages:
 
       - id: home-002
         target: Theme toggle switches dark/light mode
+        selector: "button[aria-label*='theme'], button[aria-label*='Theme'], button:has(svg.lucide-moon), button:has(svg.lucide-sun)"
         action: click theme toggle button (Sun/Moon icon)
         expect: Body class changes to dark/light, icon switches
         type: functional
@@ -48,6 +50,7 @@ pages:
 
       - id: home-004
         target: Daily streak card displays correctly
+        selector: "[data-testid='streak-card'], .streak-card, section:has-text('streak')"
         action: snapshot Home page
         expect: Streak count visible with flame icon, no text overflow
         type: visual
@@ -56,6 +59,7 @@ pages:
 
       - id: home-005
         target: Word of the Day TTS button works
+        selector: "button[data-testid='wotd-tts'], button[aria-label*='speak'], button[aria-label*='listen']"
         action: click button[data-testid="wotd-tts"]
         expect: Button responds (not stuck disabled), no console errors
         type: functional
