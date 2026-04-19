@@ -300,6 +300,42 @@ class CopilotService:
             except Exception:
                 pass
 
+    async def stream_chat(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        timeout: int | None = None,
+        label: str = "default",
+        chunk_delay_s: float = 0.02,
+    ):
+        """Async generator that yields text chunks of the assistant reply.
+
+        The underlying Copilot SDK does not currently expose a token-streaming
+        API, so we fall back to a chunked simulation: call ask() once, then
+        split the full response into small word groups and yield them with
+        small awaits. This keeps the public API forward-compatible — the day
+        the SDK supports streaming we can rewrite the body without changing
+        callers.
+        """
+        full = await self.ask(system_prompt, user_prompt, timeout=timeout, label=label)
+        if not full:
+            return
+        # Split into roughly 3-word groups, preserving whitespace between them.
+        tokens = re.findall(r"\S+\s*", full)
+        if not tokens:
+            yield full
+            return
+        group_size = 3
+        for i in range(0, len(tokens), group_size):
+            chunk = "".join(tokens[i:i + group_size])
+            if chunk:
+                yield chunk
+                if chunk_delay_s > 0:
+                    try:
+                        await asyncio.sleep(chunk_delay_s)
+                    except Exception:
+                        pass
+
     async def ask_json(
         self,
         system_prompt: str,

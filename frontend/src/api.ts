@@ -91,6 +91,78 @@ export const api = {
       body: JSON.stringify({ conversation_id, content }),
     }),
 
+  /**
+   * Stream the assistant reply via SSE. Calls onChunk for each text fragment,
+   * onDone with the final {message_id, grammar} payload, and onError for any
+   * transport or server-side stream error. Returns a promise that resolves
+   * after the stream completes (success or error).
+   */
+  streamMessage: async (
+    conversation_id: number,
+    content: string,
+    handlers: {
+      onChunk?: (text: string) => void;
+      onDone?: (payload: { message_id: number | null; grammar: GrammarFeedback | null }) => void;
+      onError?: (err: Error) => void;
+      signal?: AbortSignal;
+    },
+  ): Promise<void> => {
+    const { onChunk, onDone, onError, signal } = handlers;
+    try {
+      const res = await fetch(`/api/conversation/${conversation_id}/message/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        body: JSON.stringify({ conversation_id, content }),
+        signal,
+      });
+      if (!res.ok || !res.body) {
+        const text = await res.text().catch(() => '');
+        throw new ApiError(res.status, `stream error ${res.status}: ${text}`);
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        // SSE events are separated by a blank line
+        let sep = buffer.indexOf('\n\n');
+        while (sep !== -1) {
+          const rawEvent = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          // Each event may have multiple "data:" lines — concatenate
+          const dataLines = rawEvent
+            .split('\n')
+            .filter((l) => l.startsWith('data:'))
+            .map((l) => l.slice(5).replace(/^ /, ''));
+          if (dataLines.length > 0) {
+            const payloadStr = dataLines.join('\n');
+            try {
+              const payload = JSON.parse(payloadStr);
+              if (payload && payload.type === 'chunk' && typeof payload.text === 'string') {
+                onChunk?.(payload.text);
+              } else if (payload && payload.type === 'done') {
+                onDone?.({ message_id: payload.message_id ?? null, grammar: payload.grammar ?? null });
+              } else if (payload && payload.type === 'error') {
+                throw new Error(payload.message || 'stream error');
+              }
+            } catch (e) {
+              if (e instanceof SyntaxError) {
+                // ignore malformed event
+              } else {
+                throw e;
+              }
+            }
+          }
+          sep = buffer.indexOf('\n\n');
+        }
+      }
+    } catch (err) {
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    }
+  },
+
   endConversation: (conversation_id: number) =>
     request<{ summary: ConversationSummary }>('/api/conversation/end', {
       method: 'POST',

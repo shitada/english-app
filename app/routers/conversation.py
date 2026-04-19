@@ -11,6 +11,7 @@ from typing import Any, Literal
 
 import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.config import get_conversation_topics, get_prompt, get_vocabulary_topics
@@ -658,6 +659,169 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     # Reply helpers (suggestions, key phrases, grammar notes) are fetched lazily
     # by the frontend via POST /api/conversation/helpers to reduce response latency.
     return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
+
+
+@router.post("/{conversation_id}/message/stream")
+async def stream_message(
+    conversation_id: int = Path(ge=1),
+    req: MessageRequest = ...,  # type: ignore[assignment]
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Stream the assistant reply as Server-Sent Events.
+
+    Emits two event types:
+      - {"type":"chunk","text":"..."}  (zero or more)
+      - {"type":"done","message_id":<int>,"grammar":<obj|null>}  (exactly one)
+
+    Same prep as /message: load session, save user turn, run grammar check
+    in parallel with the assistant reply. After the stream completes, persist
+    the full assistant message via the existing DAL.
+    """
+    # Allow path id to override body for safety; require they match if body sets it
+    if req.conversation_id != conversation_id:
+        raise HTTPException(status_code=400, detail="conversation_id mismatch")
+
+    conv = await conv_dal.get_active_conversation(db, conversation_id)
+    if not conv:
+        status = await conv_dal.get_conversation_status(db, conversation_id)
+        if status is not None:
+            raise HTTPException(status_code=409, detail="Conversation is already ended")
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    topics = get_conversation_topics()
+    topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
+    if topic_data is None:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
+    topic_label = topic_data["label"] if topic_data else conv["topic"]  # noqa: F841
+
+    user_msg_id = await conv_dal.add_message(db, conversation_id, "user", req.content)
+    history = await conv_dal.format_history_text(db, conversation_id, max_turns=MESSAGE_HISTORY_MAX_TURNS)
+
+    copilot = get_copilot_service()
+
+    grammar_prompt = get_prompt("grammar_checker").format(user_message=req.content)
+    scenario = topic_data.get("scenario", topic_label) if topic_data else topic_label
+    if conv.get("role_swap"):
+        scenario = _swap_scenario_roles(scenario)
+    system = get_prompt("conversation_partner").format(
+        scenario=scenario,
+        role=extract_role(scenario),
+        goal=topic_data.get("goal", "Have a natural conversation") if topic_data else "Have a natural conversation",
+    )
+    personality = conv.get("personality") or "patient_teacher"
+    if personality in PERSONALITY_INSTRUCTIONS:
+        system += PERSONALITY_INSTRUCTIONS[personality]
+
+    quick_mode = bool(conv.get("quick_mode"))
+    if quick_mode:
+        system += "\n\nReply with ONE short sentence only (max 18 words)."
+
+    memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+    if memory_raw:
+        try:
+            memory_facts_msg: list[str] = json.loads(memory_raw)
+            if isinstance(memory_facts_msg, list) and memory_facts_msg:
+                system += (
+                    "\n\nThings you know about this student from past conversations: "
+                    + "; ".join(str(f) for f in memory_facts_msg[:10])
+                    + ". Use these naturally when relevant — don't list them explicitly."
+                )
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    conv_prompt = (
+        f"Conversation so far:\n{history}\n\n"
+        "Continue the scenario naturally. Stay in character and respond to what the user just said."
+    )
+
+    skip_grammar = quick_mode or _should_skip_grammar_check(req.content)
+
+    async def _safe_grammar_check():
+        try:
+            return await copilot.ask_json(
+                "You are an English grammar and expression checker. Return ONLY valid JSON.",
+                grammar_prompt,
+                label="conversation_message_stream",
+            )
+        except Exception as e:
+            logger.warning("Grammar check failed (non-fatal, stream): %s", e)
+            return None
+
+    async def _skipped():
+        return None
+
+    grammar_task = asyncio.create_task(
+        _skipped() if skip_grammar else _safe_grammar_check()
+    )
+
+    def _sse(payload: dict[str, Any]) -> str:
+        return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+    async def event_gen():
+        chunks: list[str] = []
+        try:
+            async for chunk in copilot.stream_chat(
+                system, conv_prompt, label="conversation_message_stream"
+            ):
+                if not chunk:
+                    continue
+                chunks.append(chunk)
+                yield _sse({"type": "chunk", "text": chunk})
+        except Exception as exc:
+            logger.exception("stream_message: stream_chat failed: %s", exc)
+            try:
+                await conv_dal.delete_message(db, user_msg_id)
+            except Exception:
+                pass
+            yield _sse({"type": "error", "message": "stream_failed"})
+            return
+
+        full_text = "".join(chunks)
+
+        try:
+            feedback = await grammar_task
+        except Exception:
+            feedback = None
+
+        # Re-check conversation status after slow LLM calls
+        still_active = await conv_dal.get_active_conversation(db, conversation_id)
+        if not still_active:
+            try:
+                await conv_dal.delete_message(db, user_msg_id)
+            except Exception:
+                pass
+            yield _sse({"type": "error", "message": "conversation_ended"})
+            return
+
+        if feedback is not None:
+            feedback = _normalize_grammar_feedback(feedback)
+            try:
+                await conv_dal.update_message_feedback(db, user_msg_id, feedback)
+            except Exception as exc:
+                logger.warning("stream_message: update_message_feedback failed: %s", exc)
+
+        try:
+            assistant_msg_id = await conv_dal.add_message(
+                db, conversation_id, "assistant", full_text
+            )
+        except Exception as exc:
+            logger.exception("stream_message: failed to persist assistant message: %s", exc)
+            assistant_msg_id = None
+
+        yield _sse({
+            "type": "done",
+            "message_id": assistant_msg_id,
+            "grammar": feedback,
+        })
+
+    headers = {
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+        "Connection": "keep-alive",
+    }
+    return StreamingResponse(event_gen(), media_type="text/event-stream", headers=headers)
 
 
 @router.post("/helpers", response_model=HelpersResponse)

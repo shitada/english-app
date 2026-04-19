@@ -19,6 +19,7 @@ interface Message {
   feedback?: GrammarFeedback;
   key_phrases?: string[];
   grammar_notes?: import('../api').GrammarNote[];
+  streaming?: boolean;
 }
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -708,49 +709,126 @@ export default function Conversation() {
     setLoading(true);
     setReplyStartedAt(Date.now());
     try {
-      const res = await api.sendMessage(conversationId, userMsg);
-      setMessages((prev) => {
-        const updated = [...prev];
-        // Add feedback to the last user message
-        const lastUser = updated.findLastIndex((m) => m.role === 'user');
-        if (lastUser >= 0) {
-          updated[lastUser] = { ...updated[lastUser], feedback: res.feedback };
-        }
-        // Add AI response
-        updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] });
-        return updated;
+      // Append empty assistant bubble as a placeholder for streamed content.
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: '', key_phrases: [], grammar_notes: [], streaming: true },
+      ]);
+
+      let streamedText = '';
+      let streamFeedback: GrammarFeedback | null = null;
+      let streamFailed = false;
+
+      await api.streamMessage(conversationId, userMsg, {
+        onChunk: (text) => {
+          streamedText += text;
+          setMessages((prev) => {
+            const updated = [...prev];
+            for (let i = updated.length - 1; i >= 0; i--) {
+              if (updated[i].role === 'assistant' && updated[i].streaming) {
+                updated[i] = { ...updated[i], content: streamedText };
+                break;
+              }
+            }
+            return updated;
+          });
+        },
+        onDone: ({ grammar }) => {
+          streamFeedback = grammar;
+        },
+        onError: () => {
+          streamFailed = true;
+        },
       });
-      setLastAssistantAt(Date.now());
-      setPhraseSuggestions(res.phrase_suggestions || []);
-      setHintUsedThisTurn(false);
-      setHintText(null);
-      // Track grammar error patterns for coaching
-      if (res.feedback && !res.feedback.is_correct && res.feedback.errors.length > 0) {
-        setErrorPatterns((prev) => {
-          const next = new Map(prev);
-          for (const err of res.feedback.errors) {
-            const category = categorizeGrammarError(err);
-            next.set(category, (next.get(category) ?? 0) + 1);
+
+      if (streamFailed || !streamedText) {
+        // Remove placeholder and fall back to non-streaming endpoint
+        setMessages((prev) => prev.filter((m) => !(m.role === 'assistant' && m.streaming)));
+        const res = await api.sendMessage(conversationId, userMsg);
+        setMessages((prev) => {
+          const updated = [...prev];
+          const lastUser = updated.findLastIndex((m) => m.role === 'user');
+          if (lastUser >= 0) {
+            updated[lastUser] = { ...updated[lastUser], feedback: res.feedback };
           }
-          return next;
+          updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] });
+          return updated;
         });
-      }
-      // Update grammar streak counter
-      if (res.feedback) {
-        if (res.feedback.is_correct) {
-          setGrammarStreak((prev) => {
-            const next = prev + 1;
-            setBestGrammarStreak((best) => Math.max(best, next));
+        setLastAssistantAt(Date.now());
+        setPhraseSuggestions(res.phrase_suggestions || []);
+        setHintUsedThisTurn(false);
+        setHintText(null);
+        if (res.feedback && !res.feedback.is_correct && res.feedback.errors.length > 0) {
+          setErrorPatterns((prev) => {
+            const next = new Map(prev);
+            for (const err of res.feedback.errors) {
+              const category = categorizeGrammarError(err);
+              next.set(category, (next.get(category) ?? 0) + 1);
+            }
             return next;
           });
-        } else {
-          setGrammarStreak(0);
         }
+        if (res.feedback) {
+          if (res.feedback.is_correct) {
+            setGrammarStreak((prev) => {
+              const next = prev + 1;
+              setBestGrammarStreak((best) => Math.max(best, next));
+              return next;
+            });
+          } else {
+            setGrammarStreak(0);
+          }
+        }
+        tts.speak(res.message);
+        if (conversationId) loadHelpersInBackground(conversationId);
+      } else {
+        // Streaming path: finalize bubble and apply grammar feedback
+        const finalFeedback = streamFeedback as GrammarFeedback | null;
+        setMessages((prev) => {
+          const updated = [...prev];
+          const lastUser = updated.findLastIndex((m) => m.role === 'user');
+          if (lastUser >= 0 && finalFeedback) {
+            updated[lastUser] = { ...updated[lastUser], feedback: finalFeedback };
+          }
+          for (let i = updated.length - 1; i >= 0; i--) {
+            if (updated[i].role === 'assistant' && updated[i].streaming) {
+              updated[i] = { ...updated[i], content: streamedText, streaming: false };
+              break;
+            }
+          }
+          return updated;
+        });
+        setLastAssistantAt(Date.now());
+        setPhraseSuggestions([]);
+        setHintUsedThisTurn(false);
+        setHintText(null);
+        if (finalFeedback && !finalFeedback.is_correct && finalFeedback.errors.length > 0) {
+          setErrorPatterns((prev) => {
+            const next = new Map(prev);
+            for (const err of finalFeedback.errors) {
+              const category = categorizeGrammarError(err);
+              next.set(category, (next.get(category) ?? 0) + 1);
+            }
+            return next;
+          });
+        }
+        if (finalFeedback) {
+          if (finalFeedback.is_correct) {
+            setGrammarStreak((prev) => {
+              const next = prev + 1;
+              setBestGrammarStreak((best) => Math.max(best, next));
+              return next;
+            });
+          } else {
+            setGrammarStreak(0);
+          }
+        }
+        tts.speak(streamedText);
+        if (conversationId) loadHelpersInBackground(conversationId);
       }
-      tts.speak(res.message);
-      // Fetch reply helpers in background (does not block UI)
-      if (conversationId) loadHelpersInBackground(conversationId);
     } catch (err) {
+      // Remove any streaming placeholder on hard failure
+      setMessages((prev) => prev.filter((m) => !(m.role === 'assistant' && m.streaming)));
       console.error(err);
       if (err instanceof ApiError && err.status === 409) {
         try {
@@ -1695,7 +1773,18 @@ export default function Conversation() {
                     }}
                   />
                 ) : (
-                  <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} />
+                  <>
+                    <HighlightedMessage content={msg.content} keyPhrases={msg.key_phrases} grammarNotes={msg.grammar_notes} onSpeak={tts.speak} onSavePhrase={handleSavePhrase} savedPhrases={savedChatPhrases} />
+                    {msg.streaming && (
+                      <span
+                        aria-hidden="true"
+                        data-testid="streaming-caret"
+                        style={{ display: 'inline-block', width: 8, marginLeft: 2, animation: 'blink 1s step-end infinite' }}
+                      >
+                        ▍
+                      </span>
+                    )}
+                  </>
                 )
               ) : (
                 msg.content
