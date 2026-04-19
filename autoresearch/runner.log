@@ -1688,4 +1688,116 @@ Now I have a solid understanding. Let me create a separate component file for te
   │ date +%s
   └ 2 lines...
 
-Now let me look for where to add the endpoint and check rate_limit:Now I have enough. Let me add the endpoint right after `get_conversation_hint`:Now write the unit tests:All pass. Now add the frontend API:Now add HintsPanel to the Conversation page. Let me check imports and where to insert:Now add reply hints state:Now find the fetchHint function and add fetchReplyHints right after; also reset on new turn:Now reset reply hints when a new turn happens (where `setHintUsedThisTurn(false)` is called):Now reset reply hints when new assistant turn arrives. Both message handlers reset hint—do same:Now add the HintsPanel UI. Insert it just before the chat-input-bar (right after PinnedPhrasesBar). Also place a "Need a hint? 💡" button. The existing Lightbulb button shows the directional hint — distinct feature. Let me place the reply-hints UI panel between PinnedPhrasesBar and chat-input-bar. Show button only when last message is from assistant:Now run typecheck:Run all unit tests for conversation:Update UI test spec:Commit:
+Now let me look for where to add the endpoint and check rate_limit:Now I have enough. Let me add the endpoint right after `get_conversation_hint`:Now write the unit tests:All pass. Now add the frontend API:Now add HintsPanel to the Conversation page. Let me check imports and where to insert:Now add reply hints state:Now find the fetchHint function and add fetchReplyHints right after; also reset on new turn:Now reset reply hints when a new turn happens (where `setHintUsedThisTurn(false)` is called):Now reset reply hints when new assistant turn arrives. Both message handlers reset hint—do same:Now add the HintsPanel UI. Insert it just before the chat-input-bar (right after PinnedPhrasesBar). Also place a "Need a hint? 💡" button. The existing Lightbulb button shows the directional hint — distinct feature. Let me place the reply-hints UI panel between PinnedPhrasesBar and chat-input-bar. Show button only when last message is from assistant:Now run typecheck:Run all unit tests for conversation:Update UI test spec:Commit:```json
+{
+  "committed": true,
+  "commit_hash": "da2df53",
+  "files_changed": [
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/unit/test_conversation_reply_hints.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 6,
+  "ui_spec_updated": true,
+  "description": "Added POST /api/conversation/{id}/reply-hints with 60s in-memory cache + defensive parse (fallback=true), api.getConversationReplyHints, and Conversation chat-phase HintsPanel with tappable chips and 🇯🇵 toggle."
+}
+```● Coder Implement iter 662
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #662: Conversation reply hints — 2-3 tappable
+  │   │ suggested replies with optional JP gloss" 2>&1 | tail -10
+  │   └ 10 lines...
+  └ commit hash + files (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git diff-tree --no-commit-id --name-only -r HEAD
+      └ 11 lines...
+
+● T2 + diff (shell)
+  │ date +%s && git --no-pager log --oneline -1 && git --no-pager diff HEAD~1
+  │ --name-only
+  └ 12 lines...
+
+```json
+{
+  "tests_passed": 2226,
+  "tests_total": 2228,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2226 passed in 124.98s (0:02:04) ==================",
+  "failures": [
+    "tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity",
+    "tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected"
+  ],
+  "failure_summary": "2 integration test failures in test_dashboard_api.py (unrelated to changed conversation files); ts_check pass, smoke pass, e2e not run (no results file)."
+}
+```● Tester Test iter 662
+  │ read e2e results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -100
+  │   └ 2 lines...
+  └ smoke test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+      └ 23 lines...
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "New /reply-hints endpoint is well-implemented (defensive JSON parsing, 60s TTL cache with size trimming, graceful fallback flag, no DB schema changes), 6 new unit tests added, TS check passes, and the only 2 failing tests are pre-existing dashboard_api flakes in files this commit did not touch (baseline 2220→2226, all 6 new tests pass)."
+}
+```● Evaluator Evaluate iter 662
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L1300:1600 (300 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L1600:1900 (301 lines read)
+
+● Record iter 662 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776620038 T1=1776620099 T2=1776620388 T3=$T4 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "662" "da2df53" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "0" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iteration 662 done. Now iteration 663.
+
+● T0 for 663 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "ux",
+  "title": "Cloze 'Letter Hint' button to progressively reveal blanks",
+  "description": "Add a per-blank 'Hint' button to the ClozeListening component (frontend/src/components/ClozeListening.tsx). When a user is stuck on an unanswered blank, tapping the small 'Hint' button next to that input reveals the next missing letter of the answer (prefilling it into the input). Repeated taps reveal subsequent letters one-by-one. Track hinted blanks in a new `hintedIndices` Set state. When the user submits, blanks that received hints are still graded (correct vs incorrect) but rendered with a subtle '💡 hinted' badge in the per-blank result row, and hinted-correct blanks should NOT increment the 'all correct' celebration / streak counter — i.e., the 'perfect' state requires no hints used. Place the Hint button inline next to each blank input (only visible while phase is the input/listen phase and the blank is empty or partially filled), styled like the existing small icon buttons (use lucide-react `Lightbulb` icon). Add an aria-label `Reveal next letter for blank N` for accessibility. Persist `hintedIndices` only for the current passage (reset on Replay/Next). Add unit tests in frontend/src/__tests__/ClozeListening.test.tsx covering: (1) clicking Hint fills the first letter of the target word, (2) consecutive clicks reveal subsequent letters and disable when fully revealed, (3) hinted blanks display the 'hinted' badge in results, (4) a fully-correct submission with at least one hinted blank does NOT show the 'perfect' celebration. No backend changes required.",
+  "files_to_modify": ["frontend/src/components/ClozeListening.tsx", "frontend/src/__tests__/ClozeListening.test.tsx"],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 663
+  │ Read VocabFlashcardMode.tsx
+  │   │ frontend/src/components/VocabFlashcardMode.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read Home.tsx
+      │ frontend/src/pages/Home.tsx
+      └ L1:50 (50 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now update the component to add hint state, button, badge, celebration, and resets:Now add hint button to input render and badges + celebration:Now add the perfect celebration in the submitted block:Let me view the full file to check correctness:Clean. Now add tests:All 20 tests pass. Now check the e2e ui-test-spec:

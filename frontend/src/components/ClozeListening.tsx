@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Volume2, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { Volume2, CheckCircle, XCircle, RotateCcw, Lightbulb } from 'lucide-react';
 
 interface ClozeBlank {
   index: number;
@@ -92,6 +92,39 @@ export function computeMissedBlankIndices(
   return out;
 }
 
+/**
+ * Compute the next hint state for a blank. Reveals the next letter of `word`
+ * by returning the prefix of length `currentCount + 1`. When the answer is
+ * already fully revealed, returns the existing prefix and `fullyRevealed: true`.
+ */
+export function revealNextHintLetter(
+  word: string,
+  currentCount: number
+): { value: string; nextCount: number; fullyRevealed: boolean } {
+  const safeCurrent = Math.max(0, Math.min(currentCount, word.length));
+  if (safeCurrent >= word.length) {
+    return { value: word, nextCount: word.length, fullyRevealed: true };
+  }
+  const nextCount = safeCurrent + 1;
+  return {
+    value: word.slice(0, nextCount),
+    nextCount,
+    fullyRevealed: nextCount >= word.length,
+  };
+}
+
+/**
+ * A "perfect" celebration only fires when every blank is correct AND no hints
+ * were used during the attempt.
+ */
+export function shouldCelebratePerfect(
+  correctCount: number,
+  total: number,
+  hintsUsed: number
+): boolean {
+  return total > 0 && correctCount === total && hintsUsed === 0;
+}
+
 export function ClozeListening({ passage }: ClozeListeningProps) {
   const [started, setStarted] = useState(false);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -99,6 +132,9 @@ export function ClozeListening({ passage }: ClozeListeningProps) {
   const [clozeData] = useState(() => extractClozeBlanks(passage, 6));
   const [lockedBlanks, setLockedBlanks] = useState<Set<number>>(new Set());
   const [firstTry, setFirstTry] = useState<{ correct: number; total: number } | null>(null);
+  // Per-blank revealed-letter count (keyed by token index). A blank with count > 0
+  // is considered "hinted" for grading/badge/celebration purposes.
+  const [hintCounts, setHintCounts] = useState<Record<number, number>>({});
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const handleReplay = useCallback(() => {
@@ -140,12 +176,24 @@ export function ClozeListening({ passage }: ClozeListeningProps) {
     setSubmitted(false);
     setLockedBlanks(new Set());
     setFirstTry(null);
+    setHintCounts({});
+  };
+
+  const handleHint = (tokenIndex: number, word: string) => {
+    setHintCounts(prev => {
+      const current = prev[tokenIndex] || 0;
+      const { value, nextCount, fullyRevealed } = revealNextHintLetter(word, current);
+      if (fullyRevealed && current >= word.length) return prev;
+      setAnswers(a => ({ ...a, [tokenIndex]: value }));
+      return { ...prev, [tokenIndex]: nextCount };
+    });
   };
 
   const handleRetryMissed = () => {
     // Lock currently-correct blanks and clear wrong ones.
     const newLocked = new Set(lockedBlanks);
     const newAnswers: Record<number, string> = { ...answers };
+    const newHints: Record<number, number> = { ...hintCounts };
     let firstMissedTokenIndex: number | null = null;
     for (const b of clozeData.blanks) {
       const userAnswer = (answers[b.index] || '').trim().toLowerCase();
@@ -154,11 +202,13 @@ export function ClozeListening({ passage }: ClozeListeningProps) {
         newLocked.add(b.index);
       } else {
         delete newAnswers[b.index];
+        delete newHints[b.index];
         if (firstMissedTokenIndex === null) firstMissedTokenIndex = b.index;
       }
     }
     setLockedBlanks(newLocked);
     setAnswers(newAnswers);
+    setHintCounts(newHints);
     setSubmitted(false);
     handleReplay();
     // Focus the first missed input on next paint.
@@ -268,7 +318,47 @@ export function ClozeListening({ passage }: ClozeListeningProps) {
                       }}
                       aria-label={`Fill blank ${clozeData.blanks.indexOf(blank) + 1}`}
                     />
+                    {!submitted && (() => {
+                      const blankNum = clozeData.blanks.indexOf(blank) + 1;
+                      const revealed = hintCounts[i] || 0;
+                      const fullyRevealed = revealed >= blank.word.length;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => handleHint(i, blank.word)}
+                          disabled={fullyRevealed}
+                          aria-label={`Reveal next letter for blank ${blankNum}`}
+                          data-testid={`cloze-hint-btn-${i}`}
+                          title="Reveal next letter"
+                          style={{
+                            marginLeft: 4,
+                            padding: '2px 4px',
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: fullyRevealed ? 'not-allowed' : 'pointer',
+                            opacity: fullyRevealed ? 0.4 : 1,
+                            verticalAlign: 'middle',
+                            color: 'var(--warning, #f59e0b)',
+                          }}
+                        >
+                          <Lightbulb size={14} />
+                        </button>
+                      );
+                    })()}
                     {result === 'correct' && <CheckCircle size={14} color="var(--success, #22c55e)" style={{ marginLeft: 2 }} />}
+                    {submitted && (hintCounts[i] || 0) > 0 && (
+                      <span
+                        data-testid={`cloze-hinted-badge-${i}`}
+                        style={{
+                          marginLeft: 4,
+                          fontSize: 11,
+                          color: 'var(--warning, #b45309)',
+                          fontWeight: 500,
+                        }}
+                      >
+                        💡 hinted
+                      </span>
+                    )}
                     {result === 'wrong' && (
                       <span style={{ fontSize: 12, color: 'var(--danger, #ef4444)', marginLeft: 4 }}>
                         <XCircle size={14} style={{ verticalAlign: 'middle' }} /> {blank.word}
@@ -300,6 +390,18 @@ export function ClozeListening({ passage }: ClozeListeningProps) {
 
           {submitted ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
+              {shouldCelebratePerfect(correctCount, clozeData.blanks.length, Object.keys(hintCounts).length) && (
+                <span
+                  data-testid="cloze-perfect-celebration"
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: 'var(--success, #16a34a)',
+                  }}
+                >
+                  🎉 Perfect!
+                </span>
+              )}
               {firstTry && (
                 <span
                   data-testid="cloze-first-try-score"

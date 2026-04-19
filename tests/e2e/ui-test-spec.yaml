@@ -1244,6 +1244,39 @@ pages:
         priority: medium
         added_in: 647
 
+      # --- Cloze Listening per-blank Hint button (added in iteration 663) ---
+      - id: list-035
+        target: Cloze Listening shows a Hint (lightbulb) button next to each empty blank
+        action: Start the Cloze Listening drill so the input phase is visible
+        expect: Each blank input has an adjacent button with data-testid="cloze-hint-btn-*" and aria-label "Reveal next letter for blank N"
+        type: functional
+        priority: medium
+        added_in: 663
+
+      - id: list-036
+        target: Hint button progressively reveals letters into the blank
+        action: Click the Hint button for an unanswered blank multiple times
+        expect: The first click prefills the first letter of the answer; each subsequent click reveals the next letter; once the full word is revealed the button becomes disabled
+        type: functional
+        priority: medium
+        added_in: 663
+
+      - id: list-037
+        target: Hinted blanks display a "💡 hinted" badge in results
+        action: Use Hint on at least one blank, complete the rest, click "Check Answers"
+        expect: A small badge with data-testid="cloze-hinted-badge-*" containing "💡 hinted" appears next to each hinted blank in the results row
+        type: functional
+        priority: medium
+        added_in: 663
+
+      - id: list-038
+        target: Perfect celebration only fires when all blanks are correct without any hints
+        action: Solve all blanks correctly without using Hint and click "Check Answers"; separately, do the same but use Hint on at least one blank
+        expect: data-testid="cloze-perfect-celebration" with text "🎉 Perfect!" is visible only in the no-hint case; using any hint suppresses the celebration even at 100% correct
+        type: functional
+        priority: medium
+        added_in: 663
+
       - id: list-030
         target: Show/Hide sentence toggle reveals supporting sentence text
         action: On results screen with a missed question, click data-testid="toggle-review-sentence-N"
