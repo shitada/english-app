@@ -1170,4 +1170,133 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ "T1=$T1"
   └ 2 lines...
 
-Now I have all I need. Let me implement.Now add the route to conversation.py:Now create the InlineDictationButton component:Add an api wrapper for dictation:Now create the InlineDictationButton component:Now wire it into Conversation.tsx alongside the existing InlineShadowButton:Now create unit + integration tests:Now run tests:TS passes. Let me check the pytest.All 2201 tests pass. Now update UI test spec (since I added a new pages/Conversation.tsx interactive element):Commit:
+Now I have all I need. Let me implement.Now add the route to conversation.py:Now create the InlineDictationButton component:Add an api wrapper for dictation:Now create the InlineDictationButton component:Now wire it into Conversation.tsx alongside the existing InlineShadowButton:Now create unit + integration tests:Now run tests:TS passes. Let me check the pytest.All 2201 tests pass. Now update UI test spec (since I added a new pages/Conversation.tsx interactive element):Commit:```json
+{
+  "committed": true,
+  "commit_hash": "8f16bce",
+  "files_changed": [
+    "app/dal/dictation.py",
+    "app/database.py",
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/conversation/InlineDictationButton.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/e2e/ui-test-spec.yaml",
+    "tests/integration/test_dictation_api.py",
+    "tests/unit/test_dictation_dal.py"
+  ],
+  "tests_added": 9,
+  "ui_spec_updated": true,
+  "description": "Added inline 'Type what you hear' dictation drill on assistant messages with word-diff scoring, new dictation_attempts table, DAL, POST /api/conversation/dictation_attempt endpoint, and tests."
+}
+```● Coder Implement iter 646
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #646: inline 'Type what you hear' dictation
+  │   │ mini-drill on assistant messages" 2>&1 | tail -15
+  │   └ 16 lines...
+  └ commit hash & files (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git diff --name-only HEAD~1 HEAD
+      └ 15 lines...
+
+● Mark T2, get commit info (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && git
+  │ --no-pager log --oneline -2 && git diff HEAD~1 --name-only && echo "T2=$T2"
+  └ 17 lines...
+
+```json
+{
+  "tests_passed": 2201,
+  "tests_total": 2201,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2201 passed in 108.74s (0:01:48) =======================",
+  "failure_summary": "",
+  "ux_score": null
+}
+```
+
+Notes:
+- Unit + integration: 2201/2201 passed in 108.74s.
+- TypeScript check: clean (exit 0).
+- Smoke test: all endpoints returned 200 — `SMOKE OK`.
+- E2E: `autoresearch/ui-test-results.json` does not exist → `not_run`.
+- `ux_score`: not produced by any of the executed checks (no E2E results file present), so reported as `null`.● Tester Test iter 646
+  │ Read E2E results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -200
+  │   └ 2 lines...
+  └ Smoke test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+      └ 23 lines...
+
+● Mark T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+I need to see the diff. Let me check key files.Let me check if migrations were properly added by inspecting the diff via shell command. Since I don't have shell, let me look at the schema and migrations.All 2201 tests pass, TS check passes. New `dictation_attempts` table created via `CREATE TABLE IF NOT EXISTS` (no migration needed for new tables). Feature aligns with listening/speaking focus.
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 8,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "Inline dictation drill is a high-value listening feature with full-stack tests passing (2201/2201), TS clean, new table uses CREATE TABLE IF NOT EXISTS so no migration needed."
+}
+```● Evaluator Evaluate iter 646
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:50 (50 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L50:250 (201 lines read)
+
+● Record iter 646 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776608295; T1=1776608356; T2=1776608845; T3=1776608994 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "646" "8f16bce" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iter 646 done. Now iter 647.
+
+● Mark T0 for iter 647 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "ClozeListening: Focused Retry on Missed Blanks with first-try score",
+  "description": "Currently `frontend/src/components/ClozeListening.tsx` shows results once and the only option is 'Try Again', which resets ALL blanks (including the ones the user got right) and forces the learner to redo work. This punishes partial success and dilutes the listening practice — the user re-types correct words instead of focusing on what they actually missed.\n\nAdd a 'Focused Retry' flow that targets the listener's actual gaps:\n\n1. **First-try score tracking**: When the user clicks 'Check Answers', capture `firstTryCorrect = correctCount` and `firstTryTotal = blanks.length` into state (e.g. `firstTry` ref/state). Display it as `First-try: X/Y` next to the current `X/Y correct` line and persist for the session.\n2. **Retry Missed button**: Replace the existing single 'Try Again' with TWO buttons when `correctCount < blanks.length`:\n   - **'🔁 Retry Missed (N)'** (primary): clears only the wrong-blank `answers` entries, sets `submitted=false`, locks the correct blanks (render them as plain green text showing `blank.word` instead of an editable input — guard with a `lockedBlanks: Set<number>` state), automatically calls `handleReplay()` to play the audio again, and focuses the first missed input via a ref+`useEffect`.\n   - **'↺ Reset All'** (secondary): existing full reset behavior.\n   When all blanks are correct, only show a 🎉 celebration line and a 'Reset All' button.\n3. **Per-blank replay on wrong answers**: For each wrong blank shown after submit, add a small inline `🔊` button next to the `XCircle ... blank.word` element. Clicking it speaks ONLY the sentence containing that blank (split passage on `/(?<=[.!?])\\s+/`, find the sentence whose token range covers `blank.index`, then `speechSynthesis.speak()` at `rate=0.75`). This lets the learner re-listen to the exact context they missed without replaying the whole passage.\n4. **Locked-blank rendering**: When `lockedBlanks.has(i)` during a retry round, render the blank as a non-editable `<span>` with green background showing `blank.word` and the existing `CheckCircle`, so the learner sees their previously-correct answers in context but cannot accidentally clear them.\n5. **Final-round handling**: After the focused retry submit, recompute `correctCount` over ALL blanks (locked + newly answered). Keep displaying both `First-try: X/Y` and `Final: X/Y` so the learner sees their improvement.\n\nWhy this matters: this is a high-leverage listening UX change — it implements the same 'replay missed item' mechanic that worked well for iter 632 (Listening Replay sentence missed) and iter 631 (first-listen accuracy), but applied to the cloze drill which currently has no such mechanic. It directs practice time to actual gaps and gives the learner a meaningful first-try metric to improve on across sessions.\n\nAdd a Vitest unit test file `frontend/src/__tests__/ClozeListening.test.tsx` that: (a) renders the component with a fixed passage, starts the drill, fills some blanks correctly and some incorrectly, clicks 'Check Answers', asserts that 'First-try: X/Y' is shown, clicks 'Retry Missed', and asserts that correct blanks are now rendered as locked (no input element) while wrong blanks are editable again; (b) asserts the per-blank 🔊 button calls `window.speechSynthesis.speak` (mock it). Reuse mocking patterns from existing component tests in `frontend/src/__tests__/`.\n\nNo backend changes, no schema changes, no new API endpoints — strictly frontend.",
+  "files_to_modify": ["frontend/src/components/ClozeListening.tsx", "frontend/src/__tests__/ClozeListening.test.tsx"],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 647
+  │ Read ClozeListening.tsx
+  │   │ frontend/src/components/ClozeListening.tsx
+  │   └ L1:60 (60 lines read)
+  └ Read ClozeListening.tsx
+      │ frontend/src/components/ClozeListening.tsx
+      └ L60:250 (118 lines read)
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now create the test file:All 11 tests pass. Let me also run the full vitest suite to ensure no regressions, and run pytest.All tests pass. Now update the UI test spec:

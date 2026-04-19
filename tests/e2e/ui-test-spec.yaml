@@ -1099,6 +1099,47 @@ pages:
         priority: high
         added_in: 632
 
+      # --- Cloze Listening focused-retry (added in iteration 647) ---
+      - id: list-030
+        target: Cloze Listening shows First-try score after Check Answers
+        action: Start the Cloze Listening drill, fill some blanks, click "Check Answers"
+        expect: Element with data-testid="cloze-first-try-score" is visible showing "First-try: X/Y" where Y equals the total number of blanks
+        type: functional
+        priority: high
+        added_in: 647
+
+      - id: list-031
+        target: Retry Missed button appears with missed-blank count
+        action: Submit cloze answers with at least one wrong blank
+        expect: Button with data-testid="cloze-retry-missed-btn" is visible and labeled "🔁 Retry Missed (N)" where N matches the wrong-blank count
+        type: functional
+        priority: high
+        added_in: 647
+
+      - id: list-032
+        target: Retry Missed locks correct blanks and clears wrong ones
+        action: After submission with mixed correct/wrong answers, click the Retry Missed button
+        expect: Previously-correct blanks render as non-editable green spans (data-testid="cloze-locked-*") with a check icon; previously-wrong inputs are cleared and editable again, and audio replays
+        type: state
+        priority: high
+        added_in: 647
+
+      - id: list-033
+        target: Per-blank 🔊 button speaks the containing sentence
+        action: After submission with at least one wrong blank, click the inline 🔊 button (data-testid="cloze-speak-sentence-*") next to a wrong blank
+        expect: speechSynthesis.speak is invoked with only the sentence containing that blank at rate 0.75
+        type: functional
+        priority: medium
+        added_in: 647
+
+      - id: list-034
+        target: Reset All button restores the drill from scratch
+        action: After a focused retry, click the button with data-testid="cloze-reset-all-btn"
+        expect: All answers, locked blanks, and the first-try score are cleared; the drill returns to the unsubmitted state
+        type: functional
+        priority: medium
+        added_in: 647
+
       - id: list-030
         target: Show/Hide sentence toggle reveals supporting sentence text
         action: On results screen with a missed question, click data-testid="toggle-review-sentence-N"
