@@ -932,6 +932,34 @@ async def test_save_listening_quiz_result(client):
 
 
 @pytest.mark.integration
+async def test_save_listening_quiz_result_with_first_listen(client):
+    """Saving with first_listen_* fields persists them and returns via detail."""
+    res = await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "FL Test", "difficulty": "intermediate",
+        "total_questions": 5, "correct_count": 4, "score": 80,
+        "first_listen_correct": 3, "first_listen_total": 5,
+    })
+    assert res.status_code == 200
+    rid = res.json()["id"]
+    detail_res = await client.get(f"/api/pronunciation/listening-quiz/{rid}")
+    assert detail_res.status_code == 200
+    detail = detail_res.json()
+    assert detail["first_listen_correct"] == 3
+    assert detail["first_listen_total"] == 5
+
+
+@pytest.mark.integration
+async def test_save_listening_quiz_result_first_listen_validation(client):
+    """first_listen_correct > first_listen_total is rejected."""
+    res = await client.post("/api/pronunciation/listening-quiz/results", json={
+        "title": "Bad", "difficulty": "beginner",
+        "total_questions": 5, "correct_count": 4, "score": 80,
+        "first_listen_correct": 4, "first_listen_total": 2,
+    })
+    assert res.status_code == 422
+
+
+@pytest.mark.integration
 async def test_save_listening_quiz_result_validation(client):
     """correct_count > total_questions is rejected."""
     res = await client.post("/api/pronunciation/listening-quiz/results", json={

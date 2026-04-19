@@ -1427,6 +1427,8 @@ export interface ListeningQuizResult {
   created_at: string;
   passage?: string;
   questions?: ListeningQuizQuestion[];
+  first_listen_correct?: number;
+  first_listen_total?: number;
 }
 
 export async function saveListeningQuizResult(data: {
@@ -1438,6 +1440,8 @@ export async function saveListeningQuizResult(data: {
   topic?: string;
   passage?: string;
   questions?: ListeningQuizQuestion[];
+  first_listen_correct?: number;
+  first_listen_total?: number;
 }): Promise<{ id: number; message: string }> {
   return request<{ id: number; message: string }>('/api/pronunciation/listening-quiz/results', {
     method: 'POST',

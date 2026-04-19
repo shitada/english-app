@@ -580,3 +580,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 627	78f1da2	2026-04-19	69	250	132	18	469	2118	2118	pass	7.55	kept	Bound /message LLM context with history truncation (max_turns=16)
 628	cce071f	2026-04-19	91	138	133	9	371	2118	2118	pass	7.50	kept	Add per-message Slow Replay (0.6x) button on assistant turns in Conversation
 629	d0b558f	2026-04-19	60	151	462	25	698	2126	2126	pass	7.55	kept	Add Copilot LatencyTracker (p50/p95) + /api/internal/copilot-metrics endpoint
+630	9b0a0bd	2026-04-19	96	208	126	39	469	2126	2126	pass	7.05	kept	Add staged ReplyProgressIndicator (typing dots + cycling labels + elapsed counter) for Conversation chat

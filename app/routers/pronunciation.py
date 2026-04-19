@@ -893,6 +893,8 @@ class ListeningQuizResultRequest(BaseModel):
     topic: str = Field(default="", max_length=100)
     passage: str = Field(default="", max_length=10000)
     questions: list[dict] = Field(default_factory=list)
+    first_listen_correct: int = Field(default=0, ge=0)
+    first_listen_total: int = Field(default=0, ge=0)
 
 
 class ListeningQuizResultResponse(BaseModel):
@@ -908,9 +910,15 @@ async def save_listening_quiz_result(
     """Save a listening quiz result."""
     if req.correct_count > req.total_questions:
         raise HTTPException(status_code=422, detail="correct_count cannot exceed total_questions")
+    if req.first_listen_correct > req.first_listen_total:
+        raise HTTPException(status_code=422, detail="first_listen_correct cannot exceed first_listen_total")
+    if req.first_listen_total > req.total_questions:
+        raise HTTPException(status_code=422, detail="first_listen_total cannot exceed total_questions")
     result_id = await pron_dal.save_listening_quiz_result(
         db, req.title, req.difficulty, req.total_questions, req.correct_count, req.score, req.topic,
         req.passage, json.dumps(req.questions),
+        first_listen_correct=req.first_listen_correct,
+        first_listen_total=req.first_listen_total,
     )
     return {"id": result_id, "message": "Result saved"}
 

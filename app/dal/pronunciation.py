@@ -836,12 +836,15 @@ async def save_listening_quiz_result(
     topic: str = "",
     passage: str = "",
     questions_json: str = "[]",
+    first_listen_correct: int = 0,
+    first_listen_total: int = 0,
 ) -> int:
     """Save a listening quiz result and return the ID."""
     cursor = await db.execute(
-        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-        (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json),
+        """INSERT INTO listening_quiz_results (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json, first_listen_correct, first_listen_total)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (title, difficulty, total_questions, correct_count, score, topic, passage, questions_json,
+         first_listen_correct, first_listen_total),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
@@ -852,7 +855,8 @@ async def get_listening_quiz_history(
 ) -> list[dict[str, Any]]:
     """Get recent listening quiz results ordered by most recent."""
     rows = await db.execute_fetchall(
-        """SELECT id, title, difficulty, total_questions, correct_count, score, topic, created_at
+        """SELECT id, title, difficulty, total_questions, correct_count, score, topic,
+                  first_listen_correct, first_listen_total, created_at
            FROM listening_quiz_results ORDER BY created_at DESC LIMIT ?""",
         (limit,),
     )
@@ -864,7 +868,8 @@ async def get_listening_quiz_detail(
 ) -> dict[str, Any] | None:
     """Get a single listening quiz result including passage and questions for replay."""
     row = await db.execute(
-        """SELECT id, title, difficulty, total_questions, correct_count, score, topic, passage, questions_json, created_at
+        """SELECT id, title, difficulty, total_questions, correct_count, score, topic, passage, questions_json,
+                  first_listen_correct, first_listen_total, created_at
            FROM listening_quiz_results WHERE id = ?""",
         (quiz_id,),
     )

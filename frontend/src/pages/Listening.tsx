@@ -47,6 +47,9 @@ export default function Listening() {
   const [isRetry, setIsRetry] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [playingSentenceIdx, setPlayingSentenceIdx] = useState<number | null>(null);
+  const [replayCounts, setReplayCounts] = useState<number[]>([]);
+  const [firstListenFlags, setFirstListenFlags] = useState<boolean[]>([]);
+  const [answeredFirstListen, setAnsweredFirstListen] = useState<boolean[]>([]);
 
   const sentences = passage ? extractSentences(passage) : [];
 
@@ -60,7 +63,20 @@ export default function Listening() {
     utterance.onerror = () => setPlayingSentenceIdx(null);
     setPlayingSentenceIdx(idx);
     window.speechSynthesis.speak(utterance);
-  }, [playbackRate]);
+    if (phase === 'quiz') {
+      setReplayCounts(prev => {
+        const next = [...prev];
+        if (quizIndex < next.length) next[quizIndex] = (next[quizIndex] || 0) + 1;
+        return next;
+      });
+      setFirstListenFlags(prev => {
+        if (quizIndex >= prev.length) return prev;
+        const next = [...prev];
+        next[quizIndex] = false;
+        return next;
+      });
+    }
+  }, [playbackRate, phase, quizIndex]);
 
   useEffect(() => {
     getListeningQuizHistory(10).then(setHistory).catch(() => {});
@@ -105,7 +121,20 @@ export default function Listening() {
     utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
     window.speechSynthesis.speak(utterance);
-  }, [passage, playbackRate, isSpeaking]);
+    if (phase === 'quiz') {
+      setReplayCounts(prev => {
+        const next = [...prev];
+        if (quizIndex < next.length) next[quizIndex] = (next[quizIndex] || 0) + 1;
+        return next;
+      });
+      setFirstListenFlags(prev => {
+        if (quizIndex >= prev.length) return prev;
+        const next = [...prev];
+        next[quizIndex] = false;
+        return next;
+      });
+    }
+  }, [passage, playbackRate, isSpeaking, phase, quizIndex]);
 
   const handleAnswer = useCallback(() => {
     if (selectedOption === null) return;
@@ -117,8 +146,13 @@ export default function Listening() {
       explanation: q.explanation,
       options: q.options,
     }]);
+    setAnsweredFirstListen(prev => {
+      const next = [...prev];
+      next[quizIndex] = firstListenFlags[quizIndex] ?? true;
+      return next;
+    });
     setAnswered(true);
-  }, [selectedOption, questions, quizIndex]);
+  }, [selectedOption, questions, quizIndex, firstListenFlags]);
 
   const handleNext = useCallback(() => {
     if (quizIndex < questions.length - 1) {
@@ -132,16 +166,27 @@ export default function Listening() {
         const correctCount = results.filter(r => r.selectedIndex === r.correctIndex).length;
         const totalQ = questions.length;
         const scoreVal = Math.round((correctCount / totalQ) * 100);
+        // Capture current question's first-listen flag (handleNext fires after handleAnswer for last Q)
+        const firstListenForLast = answeredFirstListen[quizIndex] ?? (firstListenFlags[quizIndex] ?? true);
+        const flLatest = [...answeredFirstListen];
+        if (flLatest[quizIndex] === undefined) flLatest[quizIndex] = firstListenForLast;
+        const firstListenTotal = totalQ;
+        const firstListenCorrect = results.reduce((acc, r, i) => {
+          const wasFirst = flLatest[i] ?? true;
+          return acc + (wasFirst && r.selectedIndex === r.correctIndex ? 1 : 0);
+        }, 0);
         saveListeningQuizResult({
           title, difficulty, total_questions: totalQ, correct_count: correctCount, score: scoreVal, topic: selectedTopic,
           passage, questions,
+          first_listen_correct: firstListenCorrect,
+          first_listen_total: firstListenTotal,
         }).then(() => {
           setSaved(true);
           getListeningQuizHistory(10).then(setHistory).catch(() => {});
         }).catch(() => {});
       }
     }
-  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry, passage, selectedTopic]);
+  }, [quizIndex, questions, results, selectedOption, title, difficulty, isRetry, passage, selectedTopic, answeredFirstListen, firstListenFlags]);
 
   const handleRestart = useCallback(() => {
     setPhase('setup');
@@ -200,6 +245,9 @@ export default function Listening() {
     setSelectedOption(null);
     setAnswered(false);
     setResults([]);
+    setReplayCounts(new Array(wrongQuestions.length).fill(0));
+    setFirstListenFlags(new Array(wrongQuestions.length).fill(true));
+    setAnsweredFirstListen([]);
     setIsRetry(true);
     setPhase('quiz');
   }, [results, questions]);
@@ -500,7 +548,14 @@ export default function Listening() {
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button
               className="btn btn-primary"
-              onClick={() => { window.speechSynthesis.cancel(); setIsSpeaking(false); setPhase('quiz'); }}
+              onClick={() => {
+                window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+                setReplayCounts(new Array(questions.length).fill(0));
+                setFirstListenFlags(new Array(questions.length).fill(true));
+                setAnsweredFirstListen([]);
+                setPhase('quiz');
+              }}
             >
               Start Questions ({questions.length})
             </button>
@@ -700,6 +755,27 @@ export default function Listening() {
               {results.filter(r => r.selectedIndex === r.correctIndex).length}/{results.length}
             </span>
             <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--text-secondary)' }}>correct answers</p>
+            {(() => {
+              const flTotal = results.length;
+              const flCorrect = results.reduce((acc, r, i) => {
+                const wasFirst = answeredFirstListen[i] ?? true;
+                return acc + (wasFirst && r.selectedIndex === r.correctIndex ? 1 : 0);
+              }, 0);
+              const pct = flTotal > 0 ? Math.round((flCorrect / flTotal) * 100) : 0;
+              return (
+                <div
+                  data-testid="first-listen-accuracy-badge"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    marginTop: 8, padding: '4px 10px', borderRadius: 999,
+                    background: 'var(--bg-secondary, #f5f5f5)',
+                    fontSize: 12, fontWeight: 600, color: 'var(--text)',
+                  }}
+                >
+                  🎧 First-listen accuracy: {flCorrect} / {flTotal} ({pct}%)
+                </div>
+              );
+            })()}
           </div>
           {results.map((r, i) => (
             <div key={i} style={{
@@ -712,6 +788,22 @@ export default function Listening() {
                   ? <CheckCircle size={14} color="var(--success, #22c55e)" />
                   : <XCircle size={14} color="var(--danger, #ef4444)" />}
                 <span style={{ fontWeight: 600, fontSize: 13 }}>Q{i + 1}: {r.question}</span>
+                {(replayCounts[i] ?? 0) > 0 && (
+                  <span
+                    data-testid={`replay-count-${i}`}
+                    style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}
+                  >
+                    replayed {replayCounts[i]}×
+                  </span>
+                )}
+                {(replayCounts[i] ?? 0) === 0 && (
+                  <span
+                    data-testid={`replay-count-${i}`}
+                    style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--success, #22c55e)', fontWeight: 600 }}
+                  >
+                    🎧 first listen
+                  </span>
+                )}
               </div>
               {r.selectedIndex !== r.correctIndex && (
                 <p style={{ margin: '4px 0', fontSize: 12 }}>

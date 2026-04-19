@@ -1560,6 +1560,42 @@ class TestSaveListeningQuizResultPassageQuestions:
 
 
 @pytest.mark.unit
+class TestListeningQuizFirstListenAccuracy:
+    """Tests for first_listen_correct / first_listen_total round-trip."""
+
+    async def test_first_listen_fields_persisted(self, test_db):
+        """first_listen_correct/total are stored and returned in detail."""
+        rid = await save_listening_quiz_result(
+            test_db, "FL", "intermediate", 5, 4, 80.0,
+            first_listen_correct=3, first_listen_total=5,
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail is not None
+        assert detail["first_listen_correct"] == 3
+        assert detail["first_listen_total"] == 5
+
+    async def test_first_listen_fields_default_zero(self, test_db):
+        """Defaults to 0 when omitted."""
+        rid = await save_listening_quiz_result(
+            test_db, "Default", "beginner", 5, 3, 60.0,
+        )
+        detail = await get_listening_quiz_detail(test_db, rid)
+        assert detail["first_listen_correct"] == 0
+        assert detail["first_listen_total"] == 0
+
+    async def test_first_listen_fields_in_history(self, test_db):
+        """History rows include first_listen_correct/total."""
+        await save_listening_quiz_result(
+            test_db, "Hist", "beginner", 5, 5, 100.0,
+            first_listen_correct=4, first_listen_total=5,
+        )
+        history = await get_listening_quiz_history(test_db, limit=1)
+        assert history[0]["first_listen_correct"] == 4
+        assert history[0]["first_listen_total"] == 5
+
+
+
+@pytest.mark.unit
 class TestSpeakingJournalProgress:
     async def test_empty_journal_returns_zeros(self, test_db):
         """Empty journal should return zero stats."""

@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS listening_quiz_results (
     score REAL NOT NULL,
     passage TEXT NOT NULL DEFAULT '',
     questions_json TEXT NOT NULL DEFAULT '[]',
+    first_listen_correct INTEGER NOT NULL DEFAULT 0,
+    first_listen_total INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -315,6 +317,14 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add questions_json column to listening_quiz_results",
         "ALTER TABLE listening_quiz_results ADD COLUMN questions_json TEXT NOT NULL DEFAULT '[]'",
+    ),
+    (
+        "add first_listen_correct column to listening_quiz_results",
+        "ALTER TABLE listening_quiz_results ADD COLUMN first_listen_correct INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "add first_listen_total column to listening_quiz_results",
+        "ALTER TABLE listening_quiz_results ADD COLUMN first_listen_total INTEGER NOT NULL DEFAULT 0",
     ),
     (
         "create custom_topics table for user-defined conversation scenarios",

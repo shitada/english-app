@@ -42,4 +42,108 @@
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me create the component.Now wire it into Conversation.tsx:Now the test. Since RTL/jsdom aren't installed, follow project conventions (pure logic + static markup):All 18 tests pass. Now check the UI test spec:Verify TypeScript compiles:Pre-existing errors, unrelated to my changes. Commit:
+Now I have enough context. Let me create the component.Now wire it into Conversation.tsx:Now the test. Since RTL/jsdom aren't installed, follow project conventions (pure logic + static markup):All 18 tests pass. Now check the UI test spec:Verify TypeScript compiles:Pre-existing errors, unrelated to my changes. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "9b0a0bd",
+  "files_changed": [
+    "frontend/src/components/conversation/ReplyProgressIndicator.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/ReplyProgressIndicator.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 18,
+  "ui_spec_updated": true,
+  "description": "Added staged ReplyProgressIndicator (typing dots + cycling labels + elapsed counter) wired into Conversation chat phase, replacing the generic in-flight spinner."
+}
+```● Coder Implement iteration 630
+  │ verify commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --stat |
+  │   │ head -20 && echo --- && git rev-parse --short HEAD
+  │   └ 23 lines...
+  └ files changed (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ tail -15
+      └ 16 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2126,
+  "tests_total": 2126,
+  "all_passed": true,
+  "ts_check": "pass",
+  "vitest_passed": 135,
+  "vitest_total": 135,
+  "vitest_result": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2126 passed in 103.17s (0:01:43) =======================\nVitest: 10 files, 135 tests passed (438ms)\nTSC: clean (exit 0)",
+  "failure_summary": ""
+}
+```● Tester Test iteration 630
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -40
+  │   └ 18 lines...
+  └ read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "NOT_FOUND"
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{"code_quality": 8, "feature_value": 6, "maintainability": 7, "ux_quality": 7, "total_score": 7.05, "verdict": "keep", "reason": "Clean, well-tested pure-frontend UX polish that replaces a generic spinner with a staged typing indicator and elapsed counter; pure helpers are unit-testable and all 2126+135 tests pass with TS clean."}
+```● Evaluator Evaluate iteration 630
+  │ Read ReplyProgressIndicator.tsx
+  │   │ frontend/src/components/conversation/ReplyProgressIndicator.tsx
+  │   └ 133 lines read
+  └ Read index.ts
+      │ frontend/src/components/conversation/index.ts
+      └ 35 lines read
+
+● Record results 630 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776595743
+  │ T1=1776595839 T2=1776596047 T3=1776596173 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "630"
+  │ "9b0a0bd" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))"
+  │ "$((T4-T3))" "$((T4-T0))" "2126" "2126" "pass" "7.05" "kept" "Add staged …
+  └ 5 lines...
+
+Iteration 630 complete (kept, 7.05). Starting iteration 631.
+
+● T0 iter 631 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Listening Quiz: First-Listen Accuracy tracking + per-question replay counter",
+  "description": "Add a 'First-Listen Accuracy' metric to the Listening Quiz to discourage endless replays and build true listening comprehension — a core fluency skill. A question is marked 'first-listen' if the user answers it without triggering any replay (sentence playback or full passage replay) after entering the quiz phase.\n\n**Frontend (frontend/src/pages/Listening.tsx)**:\n- Add state `replayCounts: number[]` (length = questions.length, init 0) and `firstListenFlags: boolean[]` (init all true).\n- When entering quiz phase, reset both arrays.\n- In `playSentence` and the full-passage replay handler, if `phase === 'quiz'`, increment `replayCounts[quizIndex]` and set `firstListenFlags[quizIndex] = false`.\n- When user clicks an answer option (in the answer-handler), preserve the current `firstListenFlags[quizIndex]` value at answer time as the question's first-listen status (capture into a parallel `answeredFirstListen: boolean[]`).\n- On the results screen, display a prominent badge near the score: '🎧 First-listen accuracy: X / Y (Z%)' where X = count of questions answered correctly AND first-listen, Y = total questions. Also show per-question 'replayed Nx' subtext under each result row in the existing breakdown panel.\n- Pass `first_listen_correct` and `first_listen_total` (=total_questions) to `saveListeningQuizResult`.\n\n**API (frontend/src/api.ts)**: extend `saveListeningQuizResult` and `ListeningQuizResult` type with optional `first_listen_correct` (number) and `first_listen_total` (number).\n\n**Backend (app/routers/listening.py + app/dal/listening.py)**: extend the save endpoint Pydantic model and DAL insert to accept and persist `first_listen_correct` and `first_listen_total` (default 0). Include them in the row dict returned by history queries (`get_listening_quiz_history`, `get_listening_quiz_detail`).\n\n**Schema (app/database.py)**: add to `listening_quiz_results` CREATE TABLE the columns `first_listen_correct INTEGER NOT NULL DEFAULT 0` and `first_listen_total INTEGER NOT NULL DEFAULT 0`. Add the following migrations to the END of `_MIGRATIONS`:\n```\n('add first_listen_correct to listening_quiz_results', \"ALTER TABLE listening_quiz_results ADD COLUMN first_listen_correct INTEGER NOT NULL DEFAULT 0\"),\n('add first_listen_total to listening_quiz_results', \"ALTER TABLE listening_quiz_results ADD COLUMN first_listen_total INTEGER NOT NULL DEFAULT 0\"),\n```\n\n**Tests**: extend existing listening DAL test to verify save+retrieve round-trips the new fields, and an API integration test posting with the new fields.\n\nThis feature gamifies real listening comprehension and gives users a meaningful skill metric distinct from raw quiz score. Variety from recent conversation-heavy iterations (per priority instruction).",
+  "files_to_modify": ["frontend/src/pages/Listening.tsx", "frontend/src/api.ts", "app/routers/listening.py", "app/dal/listening.py", "app/database.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 631
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:50 (49 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L50:220 (171 lines read)
+
+● T1 iter 631 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now the API types:Now the Listening.tsx changes:Now the save & "Start Questions" button reset, and the results display. Let me update handleNext and the start questions click:Also reset on handleRetryWrong (since it goes directly to quiz phase):Now add the badge & per-question replay subtext to results screen:Now add tests:Smoke test:Now check TypeScript:Now check ui-test-spec — we added a badge (testid `first-listen-accuracy-badge`) and per-question replay counters. They are not interactive (text only), but let's add them as visibility checks since the spec encourages tracking new data-testids.
