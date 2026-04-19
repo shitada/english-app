@@ -45,6 +45,7 @@ import QuickEmailCard from './QuickEmailCard';
 import QuickProofreadCard from './QuickProofreadCard';
 import QuickConnectedSpeechCard from './QuickConnectedSpeechCard';
 import QuickConversationRepairCard from './QuickConversationRepairCard';
+import QuickNumbersDatesCard from './QuickNumbersDatesCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -214,6 +215,7 @@ export default function QuickPracticeHub() {
             <LazySection height={180}><QuickSpotErrorCard /></LazySection>
             <LazySection height={180}><QuickPredictNextCard /></LazySection>
             <LazySection height={180}><QuickDictoglossCard /></LazySection>
+            <LazySection height={220}><QuickNumbersDatesCard /></LazySection>
           </>
         )}
         {activeTab === 'grammar' && (

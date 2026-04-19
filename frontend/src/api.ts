@@ -3288,3 +3288,51 @@ export function evaluateConversationRepair(situation: string, speaker_statement:
     body: JSON.stringify({ situation, speaker_statement, confusion_point, repair_type, transcript }),
   });
 }
+
+
+// ── Quick Numbers & Dates Dictation Drill ────────────────────────────
+
+export interface NumbersDrillItem {
+  id: number;
+  kind: 'price' | 'year' | 'phone' | 'time' | 'date' | 'quantity';
+  spoken_text: string;
+  expected_answer: string;
+  accept_variants: string[];
+  hint: string;
+}
+
+export interface NumbersDrillResponse {
+  items: NumbersDrillItem[];
+}
+
+export interface NumbersDrillResultItem {
+  id: number;
+  kind: string;
+  expected_answer: string;
+  user_answer: string;
+  is_correct: boolean;
+  expected_normalized: string;
+}
+
+export interface NumbersDrillSubmitResponse {
+  results: NumbersDrillResultItem[];
+  correct: number;
+  total: number;
+}
+
+export function getNumbersDrill(): Promise<NumbersDrillResponse> {
+  return request<NumbersDrillResponse>('/api/listening/numbers-drill', { method: 'POST' });
+}
+
+export function submitNumbersDrill(items: Array<{
+  id: number;
+  kind: string;
+  expected_answer: string;
+  accept_variants: string[];
+  user_answer: string;
+}>): Promise<NumbersDrillSubmitResponse> {
+  return request<NumbersDrillSubmitResponse>('/api/listening/numbers-drill/submit', {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });
+}

@@ -2816,6 +2816,55 @@ pages:
         priority: medium
         added_in: 562
 
+      # --- Quick Numbers & Dates (added in iteration 620) ---
+      - id: qp-numbers-dates-001
+        target: Quick Numbers & Dates card renders in Listening tab
+        action: Click Listening tab in Quick Practice Hub, scroll to Numbers & Dates card
+        expect: Card with "Quick Numbers & Dates" heading and hash icon is visible
+        type: functional
+        priority: high
+        added_in: 620
+
+      - id: qp-numbers-dates-002
+        target: Quick Numbers & Dates loads 5 dictation items
+        action: Wait for the card to finish loading
+        expect: Five item rows render with Replay buttons and text inputs
+        type: functional
+        priority: high
+        added_in: 620
+
+      - id: qp-numbers-dates-003
+        target: Quick Numbers & Dates Replay button speaks the spoken_text via TTS
+        action: Click a Replay button on any item row
+        expect: window.speechSynthesis is invoked (no console errors)
+        type: functional
+        priority: medium
+        added_in: 620
+
+      - id: qp-numbers-dates-004
+        target: Quick Numbers & Dates Slow toggle changes TTS rate
+        action: Toggle the "Slow" checkbox on the card
+        expect: Subsequent Replay clicks speak more slowly (rate ≈ 0.6)
+        type: functional
+        priority: medium
+        added_in: 620
+
+      - id: qp-numbers-dates-005
+        target: Quick Numbers & Dates Submit shows per-item correctness and score
+        action: Type answers for the 5 items and click "Submit answers"
+        expect: Each row shows ✓ Correct or ✗ Incorrect with the expected answer; total score (e.g. 4 / 5) is displayed
+        type: functional
+        priority: high
+        added_in: 620
+
+      - id: qp-numbers-dates-006
+        target: Quick Numbers & Dates "Try another set" loads a fresh drill
+        action: Click the "Try another set" button after submitting
+        expect: Card resets and loads 5 new items in the drilling phase
+        type: functional
+        priority: medium
+        added_in: 620
+
       # --- Listen Mode Cloze (added in iteration 572) ---
       - id: conv-091
         target: Listen Mode cloze blanks appear for AI messages

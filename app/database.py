@@ -169,6 +169,18 @@ CREATE TABLE IF NOT EXISTS minimal_pair_sessions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_mp_sessions_created ON minimal_pair_sessions(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS numbers_drill_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT NOT NULL,
+    expected TEXT NOT NULL,
+    user_answer TEXT NOT NULL,
+    is_correct INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_numbers_drill_created ON numbers_drill_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_numbers_drill_kind ON numbers_drill_attempts(kind);
 """
 
 # ---------------------------------------------------------------------------
@@ -389,6 +401,25 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add personality column to conversations",
         "ALTER TABLE conversations ADD COLUMN personality TEXT NOT NULL DEFAULT 'patient_teacher'",
+    ),
+    (
+        "create numbers_drill_attempts table",
+        """CREATE TABLE IF NOT EXISTS numbers_drill_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kind TEXT NOT NULL,
+            expected TEXT NOT NULL,
+            user_answer TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on numbers_drill_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_numbers_drill_created ON numbers_drill_attempts(created_at DESC)",
+    ),
+    (
+        "add index on numbers_drill_attempts kind",
+        "CREATE INDEX IF NOT EXISTS idx_numbers_drill_kind ON numbers_drill_attempts(kind)",
     ),
 ]
 
