@@ -27,6 +27,25 @@ interface QuizResult {
 // ── Speed Ladder helpers (exported for unit testing) ─────────────────
 export const SPEED_LADDER_RUNGS: readonly number[] = [0.85, 1.0, 1.15, 1.3, 1.5];
 
+// ── Inline slow-replay helpers (exported for unit testing) ───────────
+export const AUTO_REPLAY_ON_WRONG_KEY = 'listening.autoReplayOnWrong';
+
+/**
+ * Pure predicate: should the inline slow-replay panel be visible?
+ * Visible only when the question has been answered AND the chosen option
+ * was not the correct one.
+ */
+export function shouldShowInlineReplay(args: {
+  answered: boolean;
+  selectedIndex: number | null;
+  correctIndex: number;
+}): boolean {
+  const { answered, selectedIndex, correctIndex } = args;
+  if (!answered) return false;
+  if (selectedIndex === null) return false;
+  return selectedIndex !== correctIndex;
+}
+
 /**
  * Pure step function for the Speed Ladder.
  * Two consecutive first-try correct answers → step up one rung (cap at top).
@@ -82,6 +101,16 @@ export default function Listening() {
   const [answeredFirstListen, setAnsweredFirstListen] = useState<boolean[]>([]);
   const [playingReviewIdx, setPlayingReviewIdx] = useState<number | null>(null);
   const [shownReviewSentences, setShownReviewSentences] = useState<Record<number, boolean>>({});
+  const [inlineReplayPlaying, setInlineReplayPlaying] = useState<boolean>(false);
+  const [autoReplayOnWrong, setAutoReplayOnWrong] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(AUTO_REPLAY_ON_WRONG_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [autoReplayFiredForIdx, setAutoReplayFiredForIdx] = useState<number | null>(null);
 
   // ── Speed Ladder mode ─────────────────────────────────────────────
   // Ladder rungs: 0.85, 1.0, 1.15, 1.3, 1.5 (cap)
@@ -242,6 +271,9 @@ export default function Listening() {
       setQuizIndex(prev => prev + 1);
       setSelectedOption(null);
       setAnswered(false);
+      // Cleanup inline slow-replay state when moving to the next question.
+      window.speechSynthesis.cancel();
+      setInlineReplayPlaying(false);
     } else {
       setPhase('results');
       if (!isRetry) {
@@ -296,6 +328,8 @@ export default function Listening() {
     setPlayingSentenceIdx(null);
     setConsecCorrect(0);
     setLadderHint(null);
+    setInlineReplayPlaying(false);
+    setAutoReplayFiredForIdx(null);
     // ladderIndex / ladderTopSpeed re-initialize via the speedLadder effect on next start
   }, []);
 
@@ -414,6 +448,56 @@ export default function Listening() {
     };
     playNext();
   }, [sentences, results]);
+
+  // Inline slow-replay during the quiz phase: plays the relevant sentence
+  // without bumping replayCounts/firstListenFlags (the question is already
+  // answered, so we don't want to penalize listening-stat metrics).
+  const playInlineReplay = useCallback((rate: number) => {
+    if (phase !== 'quiz') return;
+    const q = questions[quizIndex];
+    if (!q || !sentences || sentences.length === 0) return;
+    const sentenceIdx = findRelevantSentenceIndex(
+      q.question,
+      q.options[q.correct_index] ?? '',
+      sentences,
+    );
+    const text = sentences[sentenceIdx];
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = rate;
+    utterance.onend = () => setInlineReplayPlaying(false);
+    utterance.onerror = () => setInlineReplayPlaying(false);
+    setInlineReplayPlaying(true);
+    window.speechSynthesis.speak(utterance);
+  }, [phase, questions, quizIndex, sentences]);
+
+  // Auto-replay slowly once when a wrong answer is registered (if enabled).
+  useEffect(() => {
+    if (!autoReplayOnWrong) return;
+    if (phase !== 'quiz') return;
+    if (!answered) return;
+    const q = questions[quizIndex];
+    if (!q) return;
+    if (selectedOption === null || selectedOption === q.correct_index) return;
+    if (autoReplayFiredForIdx === quizIndex) return;
+    setAutoReplayFiredForIdx(quizIndex);
+    playInlineReplay(0.75);
+  }, [autoReplayOnWrong, phase, answered, selectedOption, questions, quizIndex, autoReplayFiredForIdx, playInlineReplay]);
+
+  const toggleAutoReplayOnWrong = useCallback(() => {
+    setAutoReplayOnWrong(prev => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(AUTO_REPLAY_ON_WRONG_KEY, next ? 'true' : 'false');
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
 
 
   const handleBackToSetup = useCallback(() => {
@@ -820,6 +904,24 @@ export default function Listening() {
               )}
             </div>
           )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={toggleAutoReplayOnWrong}
+              data-testid="auto-replay-on-wrong-toggle"
+              aria-pressed={autoReplayOnWrong}
+              title="Automatically replay the relevant sentence slowly after a wrong answer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                border: '1px solid var(--border)',
+                background: autoReplayOnWrong ? 'var(--primary, #6366f1)' : 'transparent',
+                color: autoReplayOnWrong ? '#fff' : 'var(--text-secondary)',
+              }}
+            >
+              <Volume2 size={12} /> Auto-replay slowly on wrong: {autoReplayOnWrong ? 'On' : 'Off'}
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Speed:</span>
             {[0.5, 0.75, 1.0, 1.25, 1.5].map(r => (
@@ -946,6 +1048,77 @@ export default function Listening() {
               💡 {questions[quizIndex].explanation}
             </div>
           )}
+          {shouldShowInlineReplay({
+            answered,
+            selectedIndex: selectedOption,
+            correctIndex: questions[quizIndex].correct_index,
+          }) && sentences.length > 0 && (() => {
+            const q = questions[quizIndex];
+            const sentenceIdx = findRelevantSentenceIndex(
+              q.question,
+              q.options[q.correct_index] ?? '',
+              sentences,
+            );
+            const text = sentences[sentenceIdx] ?? '';
+            return (
+              <div
+                data-testid="inline-replay-panel"
+                style={{
+                  padding: 12, borderRadius: 6, marginBottom: 12,
+                  background: 'var(--bg-secondary, #f5f5f5)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)',
+                  textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 6,
+                }}>
+                  🔁 Listen again to repair the gap
+                </div>
+                <p style={{
+                  margin: '0 0 8px', fontSize: 13, lineHeight: 1.4, color: 'var(--text)',
+                }}>
+                  {text}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => playInlineReplay(0.75)}
+                    data-testid="inline-replay-slow"
+                    disabled={inlineReplayPlaying}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                      border: '1px solid var(--border)',
+                      background: inlineReplayPlaying ? 'var(--bg-secondary, #f0f0f0)' : 'var(--primary, #6366f1)',
+                      color: inlineReplayPlaying ? 'var(--text-secondary)' : '#fff',
+                      cursor: inlineReplayPlaying ? 'default' : 'pointer',
+                      opacity: inlineReplayPlaying ? 0.6 : 1,
+                    }}
+                  >
+                    <Volume2 size={12} /> Listen slowly (0.75×)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => playInlineReplay(1.0)}
+                    data-testid="inline-replay-normal"
+                    disabled={inlineReplayPlaying}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text)',
+                      cursor: inlineReplayPlaying ? 'default' : 'pointer',
+                      opacity: inlineReplayPlaying ? 0.6 : 1,
+                    }}
+                  >
+                    <Play size={12} /> Listen normal (1.0×)
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
           {!answered ? (
             <button
               className="btn btn-primary"

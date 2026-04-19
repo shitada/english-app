@@ -2240,4 +2240,121 @@ Starting iteration 666.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now I have enough context. Let me implement the backend, frontend, and tests.Now let's add the listening router endpoint:Now api.ts and the React component:Now create the React component:Register in QuickPracticeHub (listening tab):Now write the unit + integration tests:Now run tests:
+Now I have enough context. Let me implement the backend, frontend, and tests.Now let's add the listening router endpoint:Now api.ts and the React component:Now create the React component:Register in QuickPracticeHub (listening tab):Now write the unit + integration tests:Now run tests:[2026-04-20 03:32:43] Copilot invocation completed (duration: 1487s)
+[2026-04-20 03:32:43] Recording agent traces...
+[2026-04-20 03:32:43]   AGENT_TRACE iter=666 proposer=1 coder=0 tester=0 evaluator=0
+[2026-04-20 03:32:43]   AGENT_TRACE iter=667 proposer=0 coder=0 tester=0 evaluator=0
+[2026-04-20 03:32:43] SMOKE_UI: UI changes detected in pages: dashboard,home
+[2026-04-20 03:32:43] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 03:32:43] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: dashboard, home
+
+  ✅ dashboard: smoke 4✓ 0✗ (2112ms)
+  ✅ home: smoke 4✓ 0✗ (1678ms)
+
+✅ UI TEST PASS (2/2 pages)
+[2026-04-20 03:32:54] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 03:32:54] Running post-invocation audit (iter 666-667)...
+============================================
+ Autoresearch Audit
+ Iterations: 666 — 667
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 03:32:54
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 667[0m
+[0;31m  Tester: FAIL — missing: 666 667[0m
+[0;31m  Evaluator: FAIL — missing: 666 667[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 03:32:55] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 03:32:58] Current iteration count: 667 / 679
+[2026-04-20 03:32:58] ------------------------------------------
+[2026-04-20 03:32:58] Invocation 10 / 10
+[2026-04-20 03:32:58] Resuming from iteration 668
+[2026-04-20 03:32:58] ------------------------------------------
+[2026-04-20 03:32:58] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-668-to-679.md)...
+● Check UI test results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && [ -f
+  │ autoresearch/ui-test-results.json ] && grep -o '"overall": *"[^"]*"'
+  │ autoresearch/ui-test-results.json | head -1 || echo "no
+  │ ui-test-results.json"
+  └ 2 lines...
+
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "--- results ---" && tail -20
+  │ autoresearch/results.tsv && echo "--- backlog uncompleted ---" && grep '^-
+  │ \[ \]' autoresearch/backlog.md && echo "--- git log ---" && git
+  │ --no-pager log --oneline -5 && echo "--- last session log ---" && ls -t …
+  └ 38 lines...
+
+● Last session log tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-666-to-679.md
+  └ 50 lines...
+
+Starting iteration 668.
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Listening Quiz: inline slow-replay of relevant sentence after wrong answer",
+  "description": "On the Listening Quiz page (frontend/src/pages/Listening.tsx), when the user answers a question incorrectly, currently they only see the explanation and must move on to the next question — the only way to re-hear the relevant sentence at slow speed is via the post-quiz Review screen (replayReviewSentence at 0.75×). Add an inline drill loop so the user can immediately repair their listening gap before continuing.\n\nChanges:\n1. After `handleAnswer` runs and the chosen option is wrong (`answered === true && selectedOption !== q.correct_index`), render a new compact panel inside the quiz card that shows: the relevant passage sentence (via `findRelevantSentenceIndex(q.question, q.options[q.correct_index], sentences)`) and two buttons: 'Listen slowly' (plays sentence at 0.75×) and 'Listen normal' (plays at 1.0×). Reuse a small inline player akin to `replayReviewSentence` but local to the quiz phase — set a new state `inlineReplayPlaying: boolean` and use Volume2 / Play icons from lucide-react already imported.\n2. Add a per-user toggle (persisted in localStorage key `listening.autoReplayOnWrong`, default false) labeled 'Auto-replay slowly on wrong' that lives next to the existing Speed Ladder toggle in the quiz toolbar. When true, the slow replay starts automatically (one time) as soon as a wrong answer is registered. Cancel any ongoing utterance via `window.speechSynthesis.cancel()` first so it composes safely with existing playback state.\n3. Do not count these inline replays toward `replayCounts` or flip `firstListenFlags`, since the question is already answered and we don't want to penalize listening-stat metrics.\n4. Hide the panel when `selectedOption === q.correct_index` (correct answers don't need repair) and when moving to the next question (cleanup in `handleNext`).\n\nWhy: This creates a tight 'hear-it-now' repair loop right at the moment of error — better encoding than waiting until the post-quiz review — and supports the app's mission of efficient short listening practice. It is fully frontend-only (no API/schema changes), reuses existing helpers (`findRelevantSentenceIndex`, `extractSentences`, `SpeechSynthesisUtterance`), and is easily testable.\n\nTests: extend `frontend/src/__tests__/Listening.test.tsx` (or create one) with a small unit for a new pure helper `shouldShowInlineReplay({ answered, selectedIndex, correctIndex }) => boolean`, and assert the panel renders only after a wrong answer in the quiz phase.",
+  "files_to_modify": ["frontend/src/pages/Listening.tsx", "frontend/src/__tests__/Listening.test.tsx"],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 668
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L80:200 (121 lines read)
+  └ Read Listening.tsx
+      │ frontend/src/pages/Listening.tsx
+      └ L200:380 (181 lines read)
+
+Now let me find the quiz toolbar and the area where the wrong-answer feedback is shown:Now I have the structure. Let me make the changes.Now add the state, the auto-replay effect, and the inline replay function. First, add state near `playingReviewIdx`:Now add the inline replay function. Insert it after `replayAllMissed` (around line 416):Now update `handleNext` to clean up inline state:Now add the toolbar toggle and the inline panel UI. The toolbar toggle should sit "next to the existing Speed Ladder toggle in the quiz toolbar" — that's the chip area at line ~797. Let me add it there even though Speed Ladder chip is conditional. Actually re-reading: the in-quiz Speed Ladder chip only appears when `speedLadder` is true. The proposal says "in the quiz toolbar". I'll add a small inline toggle in the speed-row at line 823 (where Speed: buttons are), unconditionally.Now add the inline replay panel after the explanation block. Let me find the explanation section:Now also reset `autoReplayFiredForIdx` and `inlineReplayPlaying` in `handleRestart`, `handleReplay`, `handleRetryWrong`, `handleBackToSetup`, and `handleNext` (the latter when moving to results too). Actually, since `autoReplayFiredForIdx` is keyed per quizIndex and we reset to 0 or to a fresh index in those paths, the old value is fine. But to be safe:Now create the test file:Now run TypeScript check:Let's also quickly run the new test:Now let's update the UI test spec since we modified a `pages/*.tsx`:

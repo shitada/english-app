@@ -1326,6 +1326,31 @@ pages:
         priority: high
         added_in: 648
 
+      # --- Inline slow-replay on wrong answer (added in iteration 668) ---
+      - id: list-039
+        target: Auto-replay-on-wrong toggle in quiz toolbar
+        action: In the quiz phase, click the button with data-testid="auto-replay-on-wrong-toggle"
+        expect: aria-pressed flips between true/false, label switches between 'On' and 'Off', and the value persists in localStorage under key 'listening.autoReplayOnWrong'
+        type: functional
+        priority: medium
+        added_in: 668
+
+      - id: list-040
+        target: Inline slow-replay panel appears after a wrong answer
+        action: In the quiz phase, select a wrong option and click Submit Answer
+        expect: Element with data-testid="inline-replay-panel" appears showing the relevant passage sentence with two buttons data-testid="inline-replay-slow" (Listen slowly 0.75×) and data-testid="inline-replay-normal" (Listen normal 1.0×)
+        type: functional
+        priority: high
+        added_in: 668
+
+      - id: list-041
+        target: Inline replay panel hides on correct answer and on next question
+        action: Answer a question correctly OR after a wrong answer click Next Question
+        expect: data-testid="inline-replay-panel" is not present in the DOM; any speech synthesis from the inline replay is cancelled
+        type: functional
+        priority: medium
+        added_in: 668
+
   vocabulary:
     path: /vocabulary
     tests:
