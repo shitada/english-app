@@ -1908,6 +1908,30 @@ pages:
         priority: low
         added_in: 645
 
+      - id: dash-036
+        target: Share Today's Progress card renders summary rows
+        action: Snapshot the dashboard near the top; locate data-testid="share-progress-card"
+        expect: Card shows today's date, streak row, and (when available) words-reviewed-today and top-skill rows
+        type: visual
+        priority: medium
+        added_in: 667
+
+      - id: dash-037
+        target: Copy text button copies multi-line summary
+        action: Click data-testid="share-copy-btn"
+        expect: clipboard.writeText invoked with multi-line summary; data-testid="share-status" shows "Copied!" for ~2s with role=status aria-live=polite
+        type: functional
+        priority: medium
+        added_in: 667
+
+      - id: dash-038
+        target: Download PNG button downloads english-app-progress-YYYY-MM-DD.png
+        action: Click data-testid="share-download-btn"
+        expect: A 600x315 PNG blob is generated; an anchor with download="english-app-progress-<today>.png" is clicked; data-testid="share-status" shows "Saved!"
+        type: functional
+        priority: medium
+        added_in: 667
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

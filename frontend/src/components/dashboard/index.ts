@@ -22,3 +22,4 @@ export { FluencyProgressionChart } from './FluencyProgressionChart';
 export { SelfAssessmentTrendChart } from './SelfAssessmentTrendChart';
 export { SpeakingJournalProgress } from './SpeakingJournalProgress';
 export { HeatmapDayDetail } from './HeatmapDayDetail';
+export { ShareProgressCard } from './ShareProgressCard';

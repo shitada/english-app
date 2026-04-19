@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
-import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend } from '../api';
+import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, type TodayActivity, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend, getTodayActivity } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, CEFRLevelCard, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, CEFRLevelCard, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, ShareProgressCard, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
 import { LazySection } from '../hooks/useLazyLoad';
 
 export default function Dashboard() {
@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewItems, setReviewItems] = useState<MistakeReviewItem[]>([]);
   const [confidenceTrend, setConfidenceTrend] = useState<ConfidenceTrendResponse | null>(null);
+  const [todayActivity, setTodayActivity] = useState<TodayActivity | null>(null);
 
   useEffect(() => {
     api.getDashboardStats()
@@ -41,6 +42,9 @@ export default function Dashboard() {
       .catch(() => {});
     getConfidenceTrend()
       .then(setConfidenceTrend)
+      .catch(() => {});
+    getTodayActivity()
+      .then(setTodayActivity)
       .catch(() => {});
   }, []);
 
@@ -105,6 +109,13 @@ export default function Dashboard() {
         <StatCard icon={<BookOpen size={24} color="#10b981" />} label="Words Reviewed" value={stats.total_vocab_reviewed} sub={`${stats.vocab_mastered} mastered`} />
         <StatCard icon={<Clock size={24} color={stats.vocab_due_count > 0 ? '#ef4444' : '#6b7280'} />} label="Due for Review" value={stats.vocab_due_count} sub={stats.vocab_due_count > 0 ? 'Words need review!' : 'All caught up!'} />
       </div>
+
+      {/* Share Today's Progress */}
+      <ShareProgressCard
+        streak={stats.streak}
+        wordsToday={todayActivity?.vocabulary_reviews}
+        topSkill={computeTopSkill(stats)}
+      />
 
       {/* Skills Radar Chart */}
       <SkillsRadarChart />
@@ -238,6 +249,19 @@ export default function Dashboard() {
       </LazySection>
     </div>
   );
+}
+
+function computeTopSkill(stats: DashboardStats): string | undefined {
+  const candidates: { label: string; value: number }[] = [
+    { label: 'Conversations', value: stats.total_conversations || 0 },
+    { label: 'Shadowing', value: stats.total_pronunciation || 0 },
+    { label: 'Vocabulary', value: stats.total_vocab_reviewed || 0 },
+  ];
+  let best: { label: string; value: number } | undefined;
+  for (const c of candidates) {
+    if (c.value > 0 && (!best || c.value > best.value)) best = c;
+  }
+  return best?.label;
 }
 
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: number; sub: string }) {
