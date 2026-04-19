@@ -459,4 +459,116 @@ Given SSE streaming for the conversation reply is the highest-value remaining su
   │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
   └ 2 lines...
 
-Now I have enough context. Let me implement the streaming features.Now add the streaming endpoint. Let me first refactor send_message to share prep, or add a parallel endpoint that duplicates prep concisely.Now add a streaming endpoint. I'll insert it right after `send_message`. Need to import StreamingResponse.Now update the frontend API and Conversation page.Now update Conversation.tsx to use streaming. Let me look at how messages are appended/rendered to add a "streaming" placeholder.Now update the sendMessage function to use streaming with non-streaming fallback:Now find where assistant messages are rendered to add a blinking caret while streaming:Now write the integration test.The mock doesn't have stream_chat. I need to set it in the test. Let me write the test.Now run the tests.Now full test suite + tsc.All passing. Now tsc:Now check ui-test-spec for streaming-caret addition.
+Now I have enough context. Let me implement the streaming features.Now add the streaming endpoint. Let me first refactor send_message to share prep, or add a parallel endpoint that duplicates prep concisely.Now add a streaming endpoint. I'll insert it right after `send_message`. Need to import StreamingResponse.Now update the frontend API and Conversation page.Now update Conversation.tsx to use streaming. Let me look at how messages are appended/rendered to add a "streaming" placeholder.Now update the sendMessage function to use streaming with non-streaming fallback:Now find where assistant messages are rendered to add a blinking caret while streaming:Now write the integration test.The mock doesn't have stream_chat. I need to set it in the test. Let me write the test.Now run the tests.Now full test suite + tsc.All passing. Now tsc:Now check ui-test-spec for streaming-caret addition.```json
+{
+  "committed": true,
+  "commit_hash": "d523eac",
+  "files_changed": [
+    "app/copilot_client.py",
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/integration/test_conversation_stream.py"
+  ],
+  "tests_added": 4,
+  "ui_spec_updated": false,
+  "description": "Added SSE streaming for conversation replies: stream_chat async generator (chunked simulation fallback), POST /api/conversation/{id}/message/stream endpoint, frontend streamMessage() reader, incremental assistant bubble with blinking caret, and 4 integration tests"
+}
+```● Coder Implement iter 642
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #642: SSE streaming for conversation replies
+  │   │ (instant first-token UX)
+  │   │
+  │   │ Co-authored-by: autoresearch-coder <autoresearch@local>" 2>&1 | tail -10
+  │   └ 11 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1
+      │ --format='%H' && git diff HEAD~1 --stat 2>&1 | tail -15
+      └ 13 lines...
+
+● T2 iter 642 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git log
+  │ --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2177,
+  "tests_total": 2177,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2177 passed in 103.99s (0:01:43) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 642
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30; echo
+  │   │ "EXIT:$?"
+  │   └ 24 lines...
+  └ read e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 iter 642 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+All tests pass and the change is purposeful (perceived-latency improvement on conversation). With 4 integration tests added and TS check passing, this is a solid maintainability-positive feature. No QA spec tests run, but smoke passed and frontend changes are incremental UX (caret + streamed text).
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 8,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "SSE streaming for conversation replies improves perceived latency, all 2177 tests pass with new integration coverage, TS check passes, and changes appear contained and additive."
+}
+```● Evaluator Evaluate iter 642
+  └ List directory .
+      └ 211 files found
+
+● Record iter 642 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=642 && HASH=d523eac && PASSED=2177 && TOTAL=2177 && TS=pass &&
+  │ SCORE=7.25 && VERDICT=kept && DESC="SSE streaming for conversation replies
+  │ (instant first-token UX, PERF-HIGH)" && T0=1776604913 && T1=1776604962 &&
+  │ T2=1776605365 && T3=1776605500 && printf …
+  └ 6 lines...
+
+Iteration 642 done. Now iteration 643.
+
+● T0 iter 643 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Conversation Role-Swap Replay: practice the AI's lines after a session",
+  "description": "Add a 'Role-Swap Replay' mode that appears on the Conversation summary screen. After a user completes a conversation (chat phase ended, summary visible), they can tap a new 'Practice the other side' button to replay the conversation with roles reversed: the system plays back (TTS) what the user originally said, and the user must speak (or type) what the AI originally said. This trains listening comprehension of the user's own utterances AND active recall/production of well-formed AI English — a high-leverage drill that reuses content already familiar to the user.\n\nScope (≤5 files):\n\n1. **app/routers/conversation.py** — Add `GET /api/conversation/{conversation_id}/role-swap` endpoint that returns the ordered turn list as `{ turns: [{ index, original_speaker: 'user'|'assistant', text: str }] }`. Reuses existing message fetch in `app/dal/conversation.py` (e.g., `get_messages_for_conversation` or equivalent — verify name; otherwise add a thin DAL wrapper). System turns and any non-conversational metadata are filtered out. Response also includes `topic` and `language_level` for context. No schema changes.\n\n2. **frontend/src/api.ts** — Add `getRoleSwapScript(conversationId)` typed function and `RoleSwapTurn` / `RoleSwapScript` types.\n\n3. **frontend/src/components/conversation/RoleSwapReplay.tsx** (NEW) — Component that walks through turns one at a time. For each turn:\n   - If `original_speaker === 'user'`: auto-play TTS (use existing `speak()` util / browser SpeechSynthesis already used elsewhere) and show a 'Listened' Next button.\n   - If `original_speaker === 'assistant'`: show a 'Reveal' button that hides the target text initially, plus a mic record button (reuse existing SpeechRecognition hook pattern from `Pronunciation.tsx` / `EchoPractice.tsx`) so the user attempts the line, then can compare with the revealed target text. Also a 'Skip' / 'Next' button.\n   - Progress indicator (turn N of M) and a 'Finish' button at the end that returns to the summary.\n\n4. **frontend/src/pages/Conversation.tsx** — On the summary phase, add a 'Practice the other side' button that toggles a new `roleSwapMode` state and renders `<RoleSwapReplay conversationId={...} onClose={...} />` inline (or as a modal overlay following existing modal patterns in the file). Add appropriate i18n keys (`roleSwapButton`, `roleSwapTitle`, `roleSwapListenPrompt`, `roleSwapSpeakPrompt`, `roleSwapReveal`, `roleSwapNext`, `roleSwapFinish`).\n\n5. **frontend/src/i18n/I18nContext.tsx** (or wherever translations live — verify path; likely `frontend/src/i18n/`) — Add the new keys for both `en` and `ja`.\n\nWhy high-value: (a) directly serves listening + speaking, the app's stated focus; (b) zero new content cost — it remixes data the user just generated, so each replay is uniquely personalized; (c) increases time-on-task and retention without LLM round-trips (no Copilot calls beyond the original fetch); (d) complements the recently shipped shadowing/replay UX line of work without duplicating it (those are sentence-level; this is dialogue-level).\n\nTesting: add a small unit test for the new endpoint in `tests/integration/` covering happy path and 404 for nonexistent conversation; component-level testing optional given scope.",
+  "files_to_modify": ["app/routers/conversation.py", "frontend/src/api.ts", "frontend/src/components/conversation/RoleSwapReplay.tsx", "frontend/src/pages/Conversation.tsx", "frontend/src/i18n/I18nContext.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 643
+  │ Read Home.tsx
+  │   │ frontend/src/pages/Home.tsx
+  │   └ L1:80 (80 lines read)
+  └ Read dashboard.py
+      │ app/routers/dashboard.py
+      └ L1:50 (50 lines read)
+
+● T1 iter 643 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Now let me look at api.ts and existing tests structure:Now I have enough context. Let me look at ConversationSummary component to find where to add the button, and check existing modal patterns:Now I have enough context. Let me look at conftest fixtures:Now I have everything. Let me implement:Now api.ts:Now create the RoleSwapReplay component:Now add i18n keys:Now wire the button into Conversation.tsx. Let me update the imports and the summary phase:Now add the button + modal in the summary phase:Now write integration test:Now check ui-test-spec and add an entry, then run tests:Now run tests:All green. Commit:

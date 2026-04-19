@@ -7,7 +7,8 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton, RoleSwapReplay } from '../components/conversation';
+import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -57,6 +58,7 @@ const PERSONALITY_OPTIONS: { value: Personality; label: string; emoji: string; d
 ];
 
 export default function Conversation() {
+  const { t } = useI18n();
   const [phase, setPhase] = useState<'select' | 'warmup' | 'chat' | 'summary' | 'history' | 'replay' | 'bookmarks'>('select');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,6 +68,7 @@ export default function Conversation() {
   const [duration, setDuration] = useState(5 * 60);
   const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [summary, setSummary] = useState<any>(null);
+  const [showRoleSwap, setShowRoleSwap] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('intermediate');
   const [diffRec, setDiffRec] = useState<DifficultyRecommendation | null>(null);
   const [roleSwap, setRoleSwap] = useState(false);
@@ -1480,6 +1483,25 @@ export default function Conversation() {
       <PhaseTransition phase={phase}>
       {sessionGoals.length > 0 && (
         <GoalSummary selectedGoals={sessionGoals} messages={messages} />
+      )}
+      {conversationId != null && (
+        <div style={{ margin: '0 0 12px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setShowRoleSwap(true)}
+            data-testid="practice-other-side-btn"
+            aria-label={t('practiceOtherSide')}
+          >
+            {t('practiceOtherSide')}
+          </button>
+        </div>
+      )}
+      {showRoleSwap && conversationId != null && (
+        <RoleSwapReplay
+          conversationId={conversationId}
+          onClose={() => setShowRoleSwap(false)}
+        />
       )}
       <ConversationSummaryView
         summary={summary}

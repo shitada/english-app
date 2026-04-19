@@ -35,3 +35,4 @@ export { ReplyProgressIndicator, getStageLabel, shouldShowElapsed } from './Repl
 export type { ReplyProgressIndicatorProps } from './ReplyProgressIndicator';
 export { InlineShadowButton, splitIntoShadowableLines } from './InlineShadowButton';
 export { CorrectedShadowButton } from './CorrectedShadowButton';
+export { RoleSwapReplay } from './RoleSwapReplay';

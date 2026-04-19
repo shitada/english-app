@@ -418,6 +418,10 @@ export const api = {
   exportConversation: (conversationId: number) =>
     request<ConversationExport>(`/api/conversation/${conversationId}/export`),
 
+  // Conversation Role-Swap Replay (practice the other side)
+  getRoleSwapScript: (conversationId: number) =>
+    request<RoleSwapScript>(`/api/conversation/${conversationId}/role-swap`),
+
   // Pronunciation extras
   getPronunciationScoreTrend: () =>
     request<ScoreTrendResponse>('/api/pronunciation/trend'),
@@ -564,6 +568,19 @@ export interface ConversationReplay {
   };
   turns: ReplayTurn[];
   total_turns: number;
+}
+
+export interface RoleSwapTurn {
+  index: number;
+  original_speaker: 'user' | 'assistant';
+  text: string;
+}
+
+export interface RoleSwapScript {
+  conversation_id: number;
+  topic: string;
+  language_level: string;
+  turns: RoleSwapTurn[];
 }
 
 export interface ConversationQuizQuestion {

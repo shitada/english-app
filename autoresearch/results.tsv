@@ -592,3 +592,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 639	c1feb57	2026-04-19	79	348	134	60	621	2173	2173	pass	7.25	kept	Pronunciation Trouble Words panel (DAL token-diff + endpoint + Practice button)
 640	6accf90	2026-04-19	117	201	141	35	494	2173	2173	pass	8.00	kept	Inline Shadow this line mini-drill button on assistant messages in Conversation
 641	2f23a45	2026-04-19	58	137	342	27	564	2173	2173	pass	7.75	kept	Inline corrected-shadow button (TTS 0.75x) under user messages with grammar feedback
+642	d523eac	2026-04-19	49	403	135	22	609	2177	2177	pass	7.25	kept	SSE streaming for conversation replies (instant first-token UX, PERF-HIGH)

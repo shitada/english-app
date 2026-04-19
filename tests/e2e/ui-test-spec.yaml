@@ -733,6 +733,14 @@ pages:
         priority: medium
         added_in: 524
 
+      - id: conv-062
+        target: Practice the other side button on summary opens Role-Swap Replay
+        action: Reach the conversation summary phase and locate data-testid="practice-other-side-btn"; click it
+        expect: data-testid="role-swap-replay" dialog appears with a turn-progress label and either a listen card or a hidden speak card
+        type: functional
+        priority: medium
+        added_in: 643
+
   pronunciation:
     path: /pronunciation
     tests:

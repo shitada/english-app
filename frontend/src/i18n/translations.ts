@@ -97,6 +97,26 @@ export interface Translations {
   promptLabel: string;
   durationLabel: string;
   trendLabel: string;
+  // Conversation Role-Swap Replay
+  practiceOtherSide: string;
+  roleSwapReplayTitle: string;
+  roleSwapLoading: string;
+  roleSwapEmpty: string;
+  roleSwapTurnProgress: string;
+  roleSwapListenPrompt: string;
+  roleSwapSpeakPrompt: string;
+  roleSwapHidden: string;
+  roleSwapReveal: string;
+  roleSwapReplayAudio: string;
+  roleSwapListened: string;
+  roleSwapStartMic: string;
+  roleSwapStopMic: string;
+  roleSwapYouSaid: string;
+  roleSwapSkip: string;
+  roleSwapNext: string;
+  roleSwapFinished: string;
+  roleSwapDone: string;
+  roleSwapClose: string;
 }
 
 export const en: Translations = {
@@ -198,6 +218,25 @@ export const en: Translations = {
   promptLabel: 'Prompt',
   durationLabel: 'duration',
   trendLabel: 'Trend',
+  practiceOtherSide: '🔀 Practice the other side',
+  roleSwapReplayTitle: 'Role-Swap Replay',
+  roleSwapLoading: 'Loading replay…',
+  roleSwapEmpty: 'No turns to replay yet.',
+  roleSwapTurnProgress: 'Turn {n} of {total}',
+  roleSwapListenPrompt: 'Listen to your line (now spoken to you)',
+  roleSwapSpeakPrompt: "Now say what the AI said. Speak, then reveal to compare.",
+  roleSwapHidden: '(target line hidden — try saying it first)',
+  roleSwapReveal: 'Reveal',
+  roleSwapReplayAudio: 'Replay audio',
+  roleSwapListened: 'Listened — Next',
+  roleSwapStartMic: 'Record',
+  roleSwapStopMic: 'Stop',
+  roleSwapYouSaid: 'You said',
+  roleSwapSkip: 'Skip',
+  roleSwapNext: 'Next',
+  roleSwapFinished: "You've finished the role-swap replay.",
+  roleSwapDone: 'Done',
+  roleSwapClose: 'Close',
 };
 
 export const ja: Translations = {
@@ -299,6 +338,25 @@ export const ja: Translations = {
   promptLabel: 'プロンプト',
   durationLabel: '時間',
   trendLabel: 'トレンド',
+  practiceOtherSide: '🔀 相手の役を練習',
+  roleSwapReplayTitle: 'ロール交代リプレイ',
+  roleSwapLoading: 'リプレイを読み込み中…',
+  roleSwapEmpty: 'リプレイできるターンがまだありません。',
+  roleSwapTurnProgress: '{total}ターン中 {n}',
+  roleSwapListenPrompt: 'あなたのセリフを聞きましょう（今度はAIが話します）',
+  roleSwapSpeakPrompt: 'AIが言ったことを話してみましょう。話してから答え合わせ。',
+  roleSwapHidden: '（お手本は非表示 — まず自分で言ってみよう）',
+  roleSwapReveal: '答えを表示',
+  roleSwapReplayAudio: 'もう一度再生',
+  roleSwapListened: '聞いた — 次へ',
+  roleSwapStartMic: '録音開始',
+  roleSwapStopMic: '停止',
+  roleSwapYouSaid: 'あなたの発話',
+  roleSwapSkip: 'スキップ',
+  roleSwapNext: '次へ',
+  roleSwapFinished: 'ロール交代リプレイを完了しました。',
+  roleSwapDone: '完了',
+  roleSwapClose: '閉じる',
 };
 
 export type Locale = 'en' | 'ja';

@@ -991,6 +991,54 @@ async def get_summary(conversation_id: int = Path(ge=1), db: aiosqlite.Connectio
     return {"summary": normalized}
 
 
+@router.get("/{conversation_id}/role-swap")
+async def get_role_swap_script(
+    conversation_id: int = Path(ge=1),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Return turns with reversed roles for the Role-Swap Replay feature.
+
+    Reuses already-generated content. The user practices the AI's lines, and
+    listens to playback of their own previous lines. Filters out empty/system
+    turns.
+    """
+    if not await conv_dal.conversation_exists(db, conversation_id):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    rows = await conv_dal.get_conversation_history(db, conversation_id)
+
+    # Fetch topic + difficulty (language_level) for context.
+    meta_rows = await db.execute_fetchall(
+        "SELECT topic, difficulty FROM conversations WHERE id = ?",
+        (conversation_id,),
+    )
+    meta = dict(meta_rows[0]) if meta_rows else {"topic": "", "difficulty": ""}
+    topics = get_conversation_topics() + await conv_dal.list_custom_topics(db)
+    topic_label = get_topic_label(topics, meta.get("topic") or "")
+
+    turns: list[dict[str, Any]] = []
+    for r in rows:
+        role = (r.get("role") or "").strip()
+        text = (r.get("content") or "").strip()
+        if not text:
+            continue
+        if role not in ("user", "assistant"):
+            # Skip system / non-conversational turns.
+            continue
+        turns.append({
+            "index": len(turns),
+            "original_speaker": role,
+            "text": text,
+        })
+
+    return {
+        "conversation_id": conversation_id,
+        "topic": topic_label,
+        "language_level": meta.get("difficulty") or "",
+        "turns": turns,
+    }
+
+
 @router.get("/{conversation_id}/history")
 async def get_history(conversation_id: int = Path(ge=1), db: aiosqlite.Connection = Depends(get_db_session)):
     if not await conv_dal.conversation_exists(db, conversation_id):
