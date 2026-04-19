@@ -4462,3 +4462,86 @@ pages:
         type: functional
         priority: low
         added_in: 660
+
+  quick_practice_thought_group:
+    path: /
+    tests:
+      - id: qp-thought-group-001
+        target: Thought-Group Phrasing card renders in Listening tab
+        action: Navigate to home page, open Quick Practice Hub Listening tab, scroll to Thought-Group Phrasing card
+        expect: Card with "Thought-Group Phrasing" heading and a purple Scissors icon is visible
+        type: functional
+        priority: high
+        added_in: 666
+
+      - id: qp-thought-group-002
+        target: Word chips render with tappable gap dots between them
+        action: After the sentence loads, observe the word chips area
+        expect: Each word appears as a chip; small "·" gap buttons (data-testid="tg-gap-N") sit between consecutive words
+        type: visual
+        priority: high
+        added_in: 666
+
+      - id: qp-thought-group-003
+        target: Tapping a gap inserts a "|" pause marker
+        action: Click data-testid="tg-gap-3" (or any gap button)
+        expect: The dot becomes a "|" with a blue background; clicking again toggles it off
+        type: functional
+        priority: high
+        added_in: 666
+
+      - id: qp-thought-group-004
+        target: Listen button plays the full sentence at normal speed
+        action: Click data-testid="tg-listen"
+        expect: TTS speaks the sentence; button is disabled while playing
+        type: functional
+        priority: high
+        added_in: 666
+
+      - id: qp-thought-group-005
+        target: Hear chunked button plays user-chosen segments with pauses
+        action: Insert 2-3 pause markers, then click data-testid="tg-hear-chunked"
+        expect: Sentence is spoken in segments separated by ~250ms gaps
+        type: functional
+        priority: medium
+        added_in: 666
+
+      - id: qp-thought-group-006
+        target: Check button reveals colored gaps and precision/recall/F1
+        action: After choosing some pause positions, click data-testid="tg-reveal"
+        expect: Gaps are colored green (correct), red (wrong), gray (missed); Precision, Recall, F1 percentages and a one-line tip are displayed
+        type: functional
+        priority: high
+        added_in: 666
+
+      - id: qp-thought-group-007
+        target: Shadow button starts mic recording after Check
+        action: After revealing scores, click data-testid="tg-shadow"
+        expect: Recording starts; data-testid="tg-stop" appears; live transcript may show
+        type: functional
+        priority: medium
+        added_in: 666
+
+      - id: qp-thought-group-008
+        target: Stop shadow shows similarity, duration check, and final score
+        action: After shadowing, click data-testid="tg-stop"
+        expect: A panel shows Shadow similarity %, duration with ✓ if within ±15% of chunked playback, and Final %
+        type: functional
+        priority: medium
+        added_in: 666
+
+      - id: qp-thought-group-009
+        target: Best F1 trophy badge appears and persists in localStorage
+        action: Achieve a non-zero F1, then reload the page
+        expect: Trophy badge "Best F1: NN%" is shown in the card header; value persists via localStorage key "thought-group-best-f1"
+        type: functional
+        priority: medium
+        added_in: 666
+
+      - id: qp-thought-group-010
+        target: New button fetches a fresh sentence and resets state
+        action: Click data-testid="tg-new"
+        expect: A new sentence loads; user picks, scores, and shadow result are cleared
+        type: functional
+        priority: medium
+        added_in: 666

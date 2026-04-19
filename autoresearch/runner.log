@@ -2015,4 +2015,229 @@ Now iteration 665.
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me write the new component and tests.Now create the test file:Type check passes. Now update the UI test spec:
+Now I have enough context. Let me write the new component and tests.Now create the test file:Type check passes. Now update the UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "b233ab6",
+  "files_changed": ["frontend/src/components/dashboard/MistakeJournal.tsx", "frontend/src/__tests__/MistakeJournal.test.tsx", "tests/e2e/ui-test-spec.yaml"],
+  "tests_added": 10,
+  "ui_spec_updated": true,
+  "description": "Added per-card Listen (TTS) and Shadow (ASR with ✅/👍/🔁 similarity badge) buttons to MistakeJournal cards, hidden when SpeechRecognition unsupported, with cleanup on unmount."
+}
+```● Coder Implement iteration 665
+  │ Edit ui-test-spec.yaml +18
+  │   └ tests/e2e/ui-test-spec.yaml
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #665: Mistake Journal Listen 🔊 + Shadow 🎤 buttons
+      │ (TTS + ASR similarity per card)" 2>&1 | tail -10 && git rev-parse --short
+      │ HEAD
+      └ 11 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2226,
+  "tests_total": 2228,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2226 passed in 123.88s (0:02:03) ==================",
+  "failure_summary": "2 pre-existing dashboard integration failures (test_daily_challenge_current_count_with_activity, TestDayDetailAPI::test_pronunciation_activity_reflected) — known unrelated to this iteration's frontend-only changes (MistakeJournal.tsx + test + e2e spec). No new regressions. TS check passed. Smoke skipped (no backend changes). E2E not run."
+}
+```● Tester Test iteration 665
+  │ tsc check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -200
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 8,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.8,
+  "verdict": "keep",
+  "reason": "Clean, well-scoped frontend addition: per-card Listen/Shadow buttons reuse existing TTS/ASR hooks and similarity utils, properly gate Shadow on isSupported, clean up on unmount, and ship 10 unit tests; the 2 failing tests are pre-existing dashboard issues unrelated to this change."
+}
+```● Evaluator Evaluate iteration 665
+  │ List directory frontend/src/components/dashboard
+  │   └ 26 files found
+  └ Read MistakeJournal.tsx
+      │ frontend/src/components/dashboard/MistakeJournal.tsx
+      └ 230 lines read
+
+● Record results 665 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "665"
+  │ "b233ab6" "$(date +%Y-%m-%d)" "68" "175" "151" "$((T4-1776621974))"
+  │ "$((T4-1776621580))" "2226" "2228" "pass" "7.80" "kept" "Mistake Journal
+  │ Listen 🔊 + Shadow 🎤 per-card (TTS + ASR similarity badge)" >> …
+  └ 4 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **Iter 664** (d363f03, 7.65, kept): Conversation per-message Shadow 🎤 button — ASR with word-level Levenshtein similarity, color-coded score, ✨ toast + persisted streak.
+- **Iter 665** (b233ab6, 7.80, kept): Mistake Journal per-card Listen 🔊 (TTS) + Shadow 🎤 (ASR + ✅/👍/🔁 similarity badge), reusing iter 664's similarity util.
+
+Both used full 4-subagent pipeline (proposer → coder → tester → evaluator). 2 pre-existing dashboard integration failures (unrelated to frontend changes) noted but did not block — same baseline as iters 662–663.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (15m 27s)
+Tokens    ↑ 2.4m • ↓ 40.4k • 2.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-664-to-679.md
+[2026-04-20 03:07:11] Copilot invocation completed (duration: 930s)
+[2026-04-20 03:07:11] Recording agent traces...
+[2026-04-20 03:07:11]   AGENT_TRACE iter=664 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 03:07:11]   AGENT_TRACE iter=665 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 03:07:11] SMOKE_UI: UI changes detected in pages: conversation,dashboard
+[2026-04-20 03:07:11] SMOKE_UI: Level=full (iteration 665 is divisible by 5)
+[2026-04-20 03:07:11] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1814ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1600ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1663ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1568ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1621ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1813ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3731ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2025ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (1978ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1885ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1957ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2132ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1687ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1604ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1631ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1556ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1613ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1729ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-20 03:07:52] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 03:07:52] Running post-invocation audit (iter 664-665)...
+============================================
+ Autoresearch Audit
+ Iterations: 664 — 665
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 03:07:52
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 664 665[0m
+[0;32m  Evaluator: PASS[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 1 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 03:07:53] Audit found 1 error(s) — fixes applied where possible
+[2026-04-20 03:07:56] Current iteration count: 665 / 679
+[2026-04-20 03:07:56] ------------------------------------------
+[2026-04-20 03:07:56] Invocation 9 / 10
+[2026-04-20 03:07:56] Resuming from iteration 666
+[2026-04-20 03:07:56] ------------------------------------------
+[2026-04-20 03:07:56] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-666-to-679.md)...
+● Get autoresearch context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UIRESULTS---" && (test -f autoresearch/ui-test-results.json &&
+  │ python3 -c "import json; …
+  └ 38 lines...
+
+Starting iteration 666.
+
+● Mark T0 (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Quick Thought-Group Phrasing Card (chunk-the-sentence drill)",
+  "description": "Add a new Quick Practice card 'QuickThoughtGroupCard' that trains learners to perceive and produce English thought groups (sense groups / prosodic phrasing) — a known bottleneck for fluency that current cards don't target. Cards like QuickConnectedSpeechCard focus on word-level liaison and QuickSentenceStressCard focuses on prominence; nothing yet trains *where to pause*.\n\nFlow:\n1. LISTEN phase: Backend returns one longer-than-average sentence (15-25 words, intermediate/advanced) plus an array of correct pause indices (word indices where a thought-group boundary belongs). TTS plays the sentence in full at normal speed.\n2. CHUNK phase: Sentence is rendered as tappable word chips. User taps between words to insert a '|' pause marker. Show count 'X / Y pauses placed'. A 'Hear chunked' button plays the sentence with short SSML-like pauses (implemented client-side by splitting sentence into segments and calling speak() sequentially with 250ms gaps between chunks at the user's chosen positions).\n3. CHECK: 'Reveal' button colors each gap green (correct), red (wrong place), gray (missed). Show precision/recall and a one-line tip referencing the rule (e.g., 'Pause before subordinate clauses (because/when/if)', 'Pause after long subjects', 'Pause at commas').\n4. SHADOW phase: User taps mic, shadows the sentence trying to honor the correct pauses. Use existing useSpeechRecognition; score = word-level transcript similarity (reuse normalize+token-overlap helper from QuickShadowCard). Award a small bonus if recording duration is within ±15% of the chunked playback duration (proxy for honoring pauses).\n5. Persist best F1 score for pause placement in localStorage ('thought-group-best-f1') and show a Trophy badge when beaten.\n\nBackend (app/routers/listening.py + app/prompts.py):\n- New endpoint `GET /api/listening/thought-group?difficulty=` returning `{ sentence: str, words: [str], pause_indices: [int], rules: [str] }` where pause_indices are 1-based positions meaning 'pause AFTER word i'. Use LLM via copilot_client with a prompt asking for one natural sentence and the indices of its thought-group boundaries plus a short rule label per boundary. Validate indices are within range and unique; fall back to a small static bank of 8 hand-curated sentences if LLM call fails or returns invalid JSON.\n- No DB schema changes, no migrations needed.\n\nFrontend:\n- Add `getThoughtGroup` to `frontend/src/api.ts` with TS types `ThoughtGroupResponse`.\n- New `frontend/src/components/QuickThoughtGroupCard.tsx` following the visual conventions of QuickConnectedSpeechCard (header icon, phase-driven UI, dark-mode classes, mobile-friendly chip layout via flex-wrap).\n- Register the card in `QuickPracticeHub.tsx` (add to the cards array with icon Scissors or Pause from lucide-react, label 'Thought Groups', short description 'Hear a sentence, tap where to pause, then shadow it').\n\nWhy this matters: pausing at the wrong places is one of the most intelligibility-damaging habits of L2 speakers; targeted perception+production practice on phrasing yields measurable fluency gains and is currently absent from the app.",
+  "files_to_modify": [
+    "app/routers/listening.py",
+    "app/prompts.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickThoughtGroupCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx"
+  ],
+  "test_plan": "1. Backend unit test in tests/ for the new endpoint: mock copilot_client to return a valid JSON payload and assert response shape, indices in range, deduped; mock a malformed LLM response and assert fallback bank is used. 2. Manual: open Quick Practice → Thought Groups → verify Listen plays, tapping toggles pauses, 'Hear chunked' produces audibly segmented playback, Reveal colors gaps correctly, mic shadow scores and persists best F1 to localStorage. 3. Verify dark mode and mobile (375px) layouts render without overflow. 4. npm run build and pytest must pass.",
+  "acceptance_criteria": "- New GET /api/listening/thought-group endpoint returns valid payload (LLM or fallback) with 200 in <2s. - QuickThoughtGroupCard renders in QuickPracticeHub and supports the full Listen → Chunk → Check → Shadow flow. - Pause precision/recall and shadow similarity are shown to the user. - Best F1 persists across reloads. - Works in dark mode and at 375px width. - All existing tests still pass; new backend test for the endpoint passes."
+}
+```● Proposer Propose iteration 666
+  │ Read QuickConnectedSpeechCard.tsx
+  │   │ frontend/src/components/QuickConnectedSpeechCard.tsx
+  │   └ L1:30 (30 lines read)
+  └ Read QuickFillerReductionCard.tsx
+      │ frontend/src/components/QuickFillerReductionCard.tsx
+      └ L1:30 (30 lines read)
+
+● Mark T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now I have enough context. Let me implement the backend, frontend, and tests.Now let's add the listening router endpoint:Now api.ts and the React component:Now create the React component:Register in QuickPracticeHub (listening tab):Now write the unit + integration tests:Now run tests:

@@ -98,6 +98,32 @@ def VOCABULARY_COLLOCATION_MATCH() -> str:
     )
 
 
+def THOUGHT_GROUP_PROMPT() -> str:
+    """System prompt for the Quick Thought-Group Phrasing drill."""
+    return (
+        "You generate English thought-group (sense-group / prosodic phrasing) "
+        "drill items for English learners.\n\n"
+        "Return STRICT JSON in this exact shape:\n"
+        '{ "sentence": "...", "words": ["...", "..."],'
+        ' "pause_indices": [3, 7],'
+        ' "rules": ["after subject phrase", "before subordinate clause"] }\n\n'
+        "Rules:\n"
+        "- sentence: ONE natural English sentence between 15 and 25 words long.\n"
+        "- words: the sentence split on whitespace (tokens may include trailing "
+        "punctuation such as commas/periods); preserve the original order.\n"
+        "- pause_indices: 1-based positions of words AFTER which a natural "
+        "thought-group pause occurs. Provide 2-4 pause positions, all unique, "
+        "each strictly between 1 and len(words)-1 (no pause at the very start "
+        "or end). Pauses should fall at sense-group boundaries: after subject "
+        "phrases, before/after subordinate clauses, between coordinated "
+        "clauses, before relative clauses, around appositives, etc.\n"
+        "- rules: one short label per pause (same length as pause_indices), "
+        "describing the boundary type (e.g. 'after subject phrase', 'before "
+        "subordinate clause', 'between coordinated clauses').\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+
+
 def NUMBERS_DRILL_PROMPT() -> str:
     """System prompt for the Quick Numbers & Dates listening drill."""
     return (

@@ -16,7 +16,7 @@ from app.dal import listening_speed as ls_dal
 from app.dal import minimal_pair as mp_dal
 from app.dal import numbers_drill as nd_dal
 from app.database import get_db_session
-from app.prompts import NUMBERS_DRILL_PROMPT
+from app.prompts import NUMBERS_DRILL_PROMPT, THOUGHT_GROUP_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -450,3 +450,162 @@ async def save_listening_speed(
     logger.info("listening_speed: topic=%s submitted=%s stored_max=%s",
                 norm, payload.speed, new_max)
     return SpeedProgressSaveResponse(ok=True, topic=norm, max_speed=new_max)
+
+
+# ---------------------------------------------------------------------------
+# Quick Thought-Group Phrasing drill
+# ---------------------------------------------------------------------------
+
+VALID_DIFFICULTIES = {"beginner", "intermediate", "advanced"}
+
+
+# Hand-curated fallback bank used when the LLM is unavailable or returns
+# malformed JSON. Each entry's pause_indices are 1-based positions of words
+# AFTER which a natural thought-group pause occurs.
+_FALLBACK_THOUGHT_GROUPS: list[dict[str, Any]] = [
+    {
+        "sentence": "When the meeting finally ended, everyone stood up, gathered their belongings, and quietly left the conference room.",
+        "pause_indices": [5, 9, 13],
+        "rules": ["after subordinate clause", "between coordinated verbs", "between coordinated verbs"],
+    },
+    {
+        "sentence": "Although the weather forecast predicted heavy rain, we decided to continue our hike up the mountain.",
+        "pause_indices": [7, 11],
+        "rules": ["after subordinate clause", "after main verb phrase"],
+    },
+    {
+        "sentence": "The new manager, who joined the company last month, has already introduced several important changes to the team.",
+        "pause_indices": [3, 9, 14],
+        "rules": ["before relative clause", "after relative clause", "after main verb phrase"],
+    },
+    {
+        "sentence": "After finishing her homework, Sarah went to the kitchen, made a quick sandwich, and sat down to read.",
+        "pause_indices": [4, 9, 13],
+        "rules": ["after introductory phrase", "between coordinated clauses", "between coordinated verbs"],
+    },
+    {
+        "sentence": "If you finish the project early, you can leave the office before five and enjoy the weekend.",
+        "pause_indices": [6, 12],
+        "rules": ["after subordinate clause", "between coordinated clauses"],
+    },
+    {
+        "sentence": "My younger brother, a talented musician, has been performing in local jazz clubs since he was sixteen.",
+        "pause_indices": [3, 6, 12],
+        "rules": ["before appositive", "after appositive", "before subordinate clause"],
+    },
+    {
+        "sentence": "Before you make any final decisions, please review the document carefully and discuss it with your team.",
+        "pause_indices": [5, 11],
+        "rules": ["after introductory clause", "between coordinated verbs"],
+    },
+    {
+        "sentence": "The book that I borrowed from the library last week was much more interesting than I had expected.",
+        "pause_indices": [2, 9, 13],
+        "rules": ["before relative clause", "after relative clause", "before comparison clause"],
+    },
+]
+
+
+class ThoughtGroupResponse(BaseModel):
+    sentence: str
+    words: list[str]
+    pause_indices: list[int]
+    rules: list[str]
+    difficulty: str
+
+
+def _split_sentence(sentence: str) -> list[str]:
+    return [w for w in re.split(r"\s+", sentence.strip()) if w]
+
+
+def _coerce_thought_group(raw: Any) -> dict[str, Any] | None:
+    """Validate and normalize an LLM thought-group payload. Returns None if invalid."""
+    if not isinstance(raw, dict):
+        return None
+    sentence = str(raw.get("sentence") or "").strip()
+    if not sentence:
+        return None
+
+    raw_words = raw.get("words")
+    if isinstance(raw_words, list) and raw_words:
+        words = [str(w).strip() for w in raw_words if str(w).strip()]
+    else:
+        words = _split_sentence(sentence)
+
+    n = len(words)
+    if n < 15 or n > 25:
+        return None
+
+    raw_indices = raw.get("pause_indices") or []
+    if not isinstance(raw_indices, list):
+        return None
+
+    pause_indices: list[int] = []
+    for v in raw_indices:
+        try:
+            i = int(v)
+        except (TypeError, ValueError):
+            continue
+        if 1 <= i <= n - 1 and i not in pause_indices:
+            pause_indices.append(i)
+    pause_indices.sort()
+    if len(pause_indices) < 2 or len(pause_indices) > 4:
+        return None
+
+    raw_rules = raw.get("rules") or []
+    if isinstance(raw_rules, list):
+        rules = [str(r).strip() for r in raw_rules if str(r).strip()]
+    else:
+        rules = []
+    # Pad / trim rules to match pause_indices length
+    if len(rules) < len(pause_indices):
+        rules = rules + ["thought-group boundary"] * (len(pause_indices) - len(rules))
+    rules = rules[: len(pause_indices)]
+
+    return {
+        "sentence": " ".join(words),
+        "words": words,
+        "pause_indices": pause_indices,
+        "rules": rules,
+    }
+
+
+def _fallback_thought_group() -> dict[str, Any]:
+    item = random.choice(_FALLBACK_THOUGHT_GROUPS)
+    words = _split_sentence(item["sentence"])
+    return {
+        "sentence": item["sentence"],
+        "words": words,
+        "pause_indices": list(item["pause_indices"]),
+        "rules": list(item["rules"]),
+    }
+
+
+@router.get("/thought-group", response_model=ThoughtGroupResponse)
+async def get_thought_group(difficulty: str = "intermediate") -> ThoughtGroupResponse:
+    """Return a sentence with curated/llm-suggested thought-group pause indices."""
+    norm = (difficulty or "intermediate").strip().lower()
+    if norm not in VALID_DIFFICULTIES:
+        norm = "intermediate"
+
+    coerced: dict[str, Any] | None = None
+    try:
+        service = get_copilot_service()
+        raw = await service.ask_json(
+            THOUGHT_GROUP_PROMPT(),
+            f"Generate one {norm}-level thought-group sentence now.",
+        )
+        coerced = _coerce_thought_group(raw)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("thought-group generation failed, using fallback: %s", exc)
+
+    if coerced is None:
+        coerced = _fallback_thought_group()
+
+    return ThoughtGroupResponse(
+        sentence=coerced["sentence"],
+        words=coerced["words"],
+        pause_indices=coerced["pause_indices"],
+        rules=coerced["rules"],
+        difficulty=norm,
+    )

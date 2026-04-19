@@ -3467,6 +3467,20 @@ export function evaluateConnectedSpeech(phrase: string, pattern_type: string, tr
   });
 }
 
+// ── Quick Thought-Group Phrasing ─────────────────────────────────
+
+export interface ThoughtGroupResponse {
+  sentence: string;
+  words: string[];
+  pause_indices: number[]; // 1-based, pause AFTER word i
+  rules: string[];
+  difficulty: string;
+}
+
+export function getThoughtGroup(difficulty: string = 'intermediate'): Promise<ThoughtGroupResponse> {
+  return request<ThoughtGroupResponse>(`/api/listening/thought-group?difficulty=${encodeURIComponent(difficulty)}`);
+}
+
 // ── Quick Conversation Repair ────────────────────────────────────
 
 export interface ConversationRepairPromptResponse {

@@ -615,3 +615,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 662	da2df53	2026-04-20	61	289	226	0	576	2226	2228	pass	7.25	kept	Conversation Reply Hints — 💡 button → 2-3 tappable suggested replies + optional 🇯🇵 gloss (POST /reply-hints, 60s cache)
 663	669084f	2026-04-20	70	219	163	0	452	2226	2228	pass	7.40	kept	Cloze per-blank Letter Hint button (progressive reveal + 'hinted' badge + perfect-only-without-hints)
 664	d363f03	2026-04-20	63	211	149	33	456	2226	2228	pass	7.65	kept	Conversation per-message Shadow 🎤 ASR similarity scoring + streak (pre-existing 2 dashboard test failures unrelated)
+665	b233ab6	2026-04-20	68	175	151	51	445	2226	2228	pass	7.80	kept	Mistake Journal Listen 🔊 + Shadow 🎤 per-card (TTS + ASR similarity badge)
