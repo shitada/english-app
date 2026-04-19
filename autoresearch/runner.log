@@ -1800,4 +1800,108 @@ Iteration 662 done. Now iteration 663.
   │ date +%s
   └ 2 lines...
 
-Now update the component to add hint state, button, badge, celebration, and resets:Now add hint button to input render and badges + celebration:Now add the perfect celebration in the submitted block:Let me view the full file to check correctness:Clean. Now add tests:All 20 tests pass. Now check the e2e ui-test-spec:
+Now update the component to add hint state, button, badge, celebration, and resets:Now add hint button to input render and badges + celebration:Now add the perfect celebration in the submitted block:Let me view the full file to check correctness:Clean. Now add tests:All 20 tests pass. Now check the e2e ui-test-spec:[2026-04-20 02:51:25] Copilot invocation completed (duration: 1079s)
+[2026-04-20 02:51:25] Recording agent traces...
+[2026-04-20 02:51:25]   AGENT_TRACE iter=662 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 02:51:25]   AGENT_TRACE iter=663 proposer=1 coder=0 tester=0 evaluator=0
+[2026-04-20 02:51:25] SMOKE_UI: UI changes detected in pages: conversation,listening
+[2026-04-20 02:51:25] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 02:51:25] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation, listening
+
+  ✅ conversation: smoke 4✓ 0✗ (1693ms)
+  ✅ listening: smoke 4✓ 0✗ (1557ms)
+
+✅ UI TEST PASS (2/2 pages)
+[2026-04-20 02:51:36] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 02:51:36] Running post-invocation audit (iter 662-663)...
+============================================
+ Autoresearch Audit
+ Iterations: 662 — 663
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 02:51:36
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 663[0m
+[0;31m  Tester: FAIL — missing: 662 663[0m
+[0;31m  Evaluator: FAIL — missing: 662 663[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 02:51:38] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 02:51:41] Current iteration count: 663 / 679
+[2026-04-20 02:51:41] ------------------------------------------
+[2026-04-20 02:51:41] Invocation 8 / 10
+[2026-04-20 02:51:41] Resuming from iteration 664
+[2026-04-20 02:51:41] ------------------------------------------
+[2026-04-20 02:51:41] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-664-to-679.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI-RESULTS---" && (test -f autoresearch/ui-test-results.json &&
+  │ python3 -c "import json; …
+  └ 38 lines...
+
+● T0 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Looking at recent kept iterations (658-663 scoring 7.2-8.8), the winning pattern is small frontend-only features that add a tap-to-practice loop on existing content. Iter 660 (Shadowing missed-words tap drill) scored 8.8. Iter 651 added per-message Slow Replay 🐢 on Conversation. A natural complement: turn each Conversation AI message into a shadowing target.```json
+{
+  "type": "feature",
+  "title": "Conversation per-message Shadow 🎤 button — repeat AI sentence with ASR similarity score",
+  "description": "Add a per-message 🎤 'Shadow' button on AI messages in Conversation.tsx, complementing the existing 🐢 Slow Replay (iter 651), 🇯🇵 translate (iter 650), and 💡 Reply Hints (iter 662) buttons. Tapping 🎤 starts SpeechRecognition (en-US, interim results), shows a recording indicator, and on stop computes a similarity score between the user's transcript and the AI message text using a normalized word-level Levenshtein/Jaccard helper. Display result inline under the bubble: '🟢 92% match', '🟡 65%', or '🔴 30% — try again', plus the recognized transcript in a muted line. A small 'Retry' button restarts; a perfect (≥90%) attempt shows a ✨ toast and persists a per-session shadow-streak counter in localStorage (key: `conv-shadow-streak`). Show streak count in the existing Conversation toolbar/badge area when >0.\n\nFrontend-only, no backend changes. Reuses existing useSpeechRecognition hook pattern from Pronunciation.tsx / Shadowing.tsx (or inline if no shared hook). Gracefully hide the 🎤 button if `window.SpeechRecognition`/`webkitSpeechRecognition` is unavailable.\n\nFiles:\n- frontend/src/pages/Conversation.tsx — add ShadowButton component + state per message id (recording, transcript, score), localStorage streak read/write, badge.\n- frontend/src/utils/similarity.ts (new) — export `wordSimilarity(a: string, b: string): number` returning 0–1 via normalized Levenshtein on lowercased, punctuation-stripped word arrays.\n- frontend/src/__tests__/similarity.test.ts (new) — unit tests: identical strings → 1.0, totally different → low, case/punctuation insensitivity, empty input handling, near-match (one word off in 5-word sentence) ≈ 0.8.\n\nKeep change scoped: do not alter SSE/streaming logic, do not add new API endpoints, do not modify backend. Reuse existing button styling classes used by 🐢/🇯🇵/💡 buttons so layout stays consistent in light + dark mode and on mobile.",
+  "files_to_modify": ["frontend/src/pages/Conversation.tsx", "frontend/src/utils/similarity.ts", "frontend/src/__tests__/similarity.test.ts"],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 664
+  │ List directory frontend/src
+  │   └ 12 files found
+  └ List directory frontend/src/pages
+      └ 8 files found
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me create the similarity util, test, and add the Shadow button to Conversation.tsx.Now create a `ShadowMessageButton` component inline in Conversation.tsx — actually, the proposal says to modify Conversation.tsx. Let me add an inline component in the same file. Let me check the imports area.Now let me check how SpeechRecognition support is detected & confirm `useSpeechRecognition` returns `isSupported`. Already confirmed. Now I'll add an inline ShadowMessageButton component and the shadow streak state.Now add the streak badge in the toolbar area (near the LiveFluencyRing line):Now insert the button into the per-message toolbar (next to InlineDictationButton):Now run typecheck and tests:All 15 tests pass. Now update the UI test spec since Conversation.tsx changed:

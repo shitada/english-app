@@ -13,6 +13,7 @@ import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
 import { categorizeGrammarError } from '../utils/grammarPatterns';
+import { wordSimilarity, classifySimilarity } from '../utils/similarity';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -22,6 +23,161 @@ interface Message {
   grammar_notes?: import('../api').GrammarNote[];
   streaming?: boolean;
   pace_wpm?: number | null;
+}
+
+/**
+ * Per-AI-message Shadow 🎤 button.
+ * Records the user's repeat of `text`, computes word-level similarity,
+ * shows colored feedback, and reports perfect (≥90%) matches via callbacks.
+ * Renders nothing if the SpeechRecognition API is unavailable in the browser.
+ */
+function ShadowMessageButton({
+  text,
+  onPerfect,
+  onMiss,
+}: {
+  text: string;
+  onPerfect: () => void;
+  onMiss: () => void;
+}) {
+  const speech = useSpeechRecognition({ continuous: false, interimResults: true, lang: 'en-US' });
+  const [phase, setPhase] = useState<'idle' | 'recording' | 'result'>('idle');
+  const [scoredTranscript, setScoredTranscript] = useState<string>('');
+  const [scoredPercent, setScoredPercent] = useState<number | null>(null);
+  const evaluatedRef = useRef(false);
+
+  // When recording finishes (isListening flips false), compute similarity.
+  useEffect(() => {
+    if (phase !== 'recording') return;
+    if (speech.isListening) return;
+    if (evaluatedRef.current) return;
+    const transcript = speech.transcript.trim();
+    if (!transcript) {
+      // Allow another attempt without locking up.
+      setPhase('idle');
+      return;
+    }
+    evaluatedRef.current = true;
+    const sim = wordSimilarity(text, transcript);
+    const verdict = classifySimilarity(sim);
+    setScoredTranscript(transcript);
+    setScoredPercent(verdict.percent);
+    setPhase('result');
+    if (verdict.percent >= 90) onPerfect();
+    else onMiss();
+  }, [phase, speech.isListening, speech.transcript, text, onPerfect, onMiss]);
+
+  const handleStart = useCallback(() => {
+    if (!speech.isSupported) return;
+    evaluatedRef.current = false;
+    setScoredTranscript('');
+    setScoredPercent(null);
+    speech.reset();
+    setPhase('recording');
+    speech.start();
+  }, [speech]);
+
+  const handleStop = useCallback(() => {
+    speech.stop();
+  }, [speech]);
+
+  const handleRetry = useCallback(() => {
+    evaluatedRef.current = false;
+    setScoredTranscript('');
+    setScoredPercent(null);
+    speech.reset();
+    setPhase('idle');
+  }, [speech]);
+
+  if (!speech.isSupported) return null;
+
+  const baseBtnStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    padding: '2px 6px',
+    background: 'transparent',
+    border: 'none',
+    borderRadius: 6,
+    cursor: 'pointer',
+    color: 'var(--primary, #6366f1)',
+    opacity: 0.75,
+  };
+
+  const verdict = scoredPercent !== null ? classifySimilarity(scoredPercent / 100) : null;
+
+  return (
+    <span data-testid="shadow-msg-button" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 4, flexWrap: 'wrap' }}>
+      {phase === 'idle' && (
+        <button
+          type="button"
+          onClick={handleStart}
+          aria-label="Shadow this AI sentence"
+          title="Shadow (repeat) this sentence"
+          style={baseBtnStyle}
+        >
+          <span aria-hidden="true">🎤</span>
+        </button>
+      )}
+      {phase === 'recording' && (
+        <button
+          type="button"
+          onClick={handleStop}
+          aria-label="Stop shadow recording"
+          title="Stop recording"
+          style={{ ...baseBtnStyle, color: 'var(--danger, #ef4444)', opacity: 1 }}
+        >
+          <span aria-hidden="true">🎤</span>
+          <span style={{ fontSize: 10 }}>● Listening…</span>
+        </button>
+      )}
+      {phase === 'result' && verdict && (
+        <span
+          data-testid="shadow-msg-result"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '2px 8px',
+            borderRadius: 999,
+            background:
+              verdict.tier === 'green'
+                ? 'rgba(34,197,94,0.15)'
+                : verdict.tier === 'yellow'
+                ? 'rgba(245,158,11,0.18)'
+                : 'rgba(239,68,68,0.15)',
+            color:
+              verdict.tier === 'green'
+                ? 'var(--success, #16a34a)'
+                : verdict.tier === 'yellow'
+                ? 'var(--warning, #b45309)'
+                : 'var(--danger, #b91c1c)',
+            fontSize: 11,
+            fontWeight: 600,
+          }}
+        >
+          {verdict.emoji} {verdict.label}
+          <button
+            type="button"
+            onClick={handleRetry}
+            aria-label="Retry shadow"
+            title="Retry"
+            style={{ ...baseBtnStyle, padding: '0 4px', opacity: 1 }}
+          >
+            ↻
+          </button>
+        </span>
+      )}
+      {phase === 'result' && scoredTranscript && (
+        <span
+          data-testid="shadow-msg-transcript"
+          style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)', fontStyle: 'italic' }}
+        >
+          “{scoredTranscript}”
+        </span>
+      )}
+    </span>
+  );
 }
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -100,6 +256,26 @@ export default function Conversation() {
   // on the NEXT user message ("Chip stays one more turn showing ✓ then auto-unpins").
   const [pinnedToEvictNextTurn, setPinnedToEvictNextTurn] = useState<Set<string>>(new Set());
   const [pinFlash, setPinFlash] = useState<string | null>(null);
+  // Per-session shadow streak (consecutive ≥90% repeats), persisted in localStorage.
+  const [shadowStreak, setShadowStreak] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('conv-shadow-streak');
+      const n = raw ? parseInt(raw, 10) : 0;
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    } catch { return 0; }
+  });
+  const bumpShadowStreak = useCallback(() => {
+    setShadowStreak((prev) => {
+      const next = prev + 1;
+      try { localStorage.setItem('conv-shadow-streak', String(next)); } catch {}
+      return next;
+    });
+    setPinFlash('✨ Perfect shadow! Streak +1');
+  }, []);
+  const resetShadowStreak = useCallback(() => {
+    setShadowStreak(0);
+    try { localStorage.setItem('conv-shadow-streak', '0'); } catch {}
+  }, []);
   const [helpersLoading, setHelpersLoading] = useState(false);
   const [userRoleName, setUserRoleName] = useState('');
   const [roleBriefing, setRoleBriefing] = useState<string[]>([]);
@@ -1924,7 +2100,15 @@ export default function Conversation() {
         const color = rate >= 80 ? 'var(--success, #22c55e)' : rate >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)';
         return (
           <div style={{ padding: '4px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, color: 'var(--text-secondary)', background: 'var(--bg-secondary, #f9fafb)', borderBottom: '1px solid var(--border, #e5e7eb)' }}>
-            <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>){(grammarStreak >= 2 || bestGrammarStreak >= 2) && <>{' '}<GrammarStreakBadge currentStreak={grammarStreak} bestStreak={bestGrammarStreak} /></>}<LiveFluencyRing messages={messages} /></span>
+            <span>📝 Grammar: <strong style={{ color }}>{correct.length}/{checked.length}</strong> correct (<strong style={{ color }}>{rate}%</strong>){(grammarStreak >= 2 || bestGrammarStreak >= 2) && <>{' '}<GrammarStreakBadge currentStreak={grammarStreak} bestStreak={bestGrammarStreak} /></>}<LiveFluencyRing messages={messages} />{shadowStreak > 0 && (
+              <span
+                data-testid="shadow-streak-badge"
+                title="Consecutive perfect (≥90%) shadow repeats"
+                style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 999, background: 'rgba(99,102,241,0.12)', color: 'var(--primary, #6366f1)', fontSize: 12, fontWeight: 700 }}
+              >
+                🎤 ×{shadowStreak}
+              </span>
+            )}</span>
             <span>
               {messages.filter((m) => m.role === 'user').length} messages sent
               {wpmValues.length > 0 && (() => {
@@ -2080,6 +2264,16 @@ export default function Conversation() {
                   text={msg.content}
                   conversationId={conversationId}
                   messageId={`${conversationId ?? 'c'}-${i}`}
+                />
+              )}
+              {msg.role === 'assistant'
+                && !msg.streaming
+                && msg.content.trim().length > 0
+                && !(loading && phase === 'chat' && i === messages.length - 1) && (
+                <ShadowMessageButton
+                  text={msg.content}
+                  onPerfect={bumpShadowStreak}
+                  onMiss={resetShadowStreak}
                 />
               )}
               {msg.role === 'assistant'

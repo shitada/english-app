@@ -3761,6 +3761,22 @@ pages:
         priority: medium
         added_in: 662
 
+      - id: conv-150
+        target: Per-AI-message Shadow 🎤 button records and scores word-similarity vs the AI sentence
+        action: After an assistant reply renders in /conversation chat phase, locate data-testid="shadow-msg-button" inside the controls row below the bubble (next to 🐢/🇯🇵/💡/Dictation). Click the 🎤 button, repeat the AI sentence aloud, then click the 🎤 stop control (or wait for recognition to end).
+        expect: While recording, a "● Listening…" indicator is shown. When recognition ends with a non-empty transcript, data-testid="shadow-msg-result" appears with a colored pill — 🟢 ≥90% match, 🟡 60–89%, 🔴 <60% "— try again". The recognized transcript is rendered immediately after in muted italic via data-testid="shadow-msg-transcript". A ↻ Retry button restarts the flow. The whole control is hidden if window.SpeechRecognition / webkitSpeechRecognition is unavailable.
+        type: functional
+        priority: medium
+        added_in: 664
+
+      - id: conv-151
+        target: Perfect (≥90%) shadow repeats fire a ✨ toast and increment the persisted shadow streak shown in the toolbar
+        action: Achieve a ≥90% similarity result via conv-150 once the grammar/messages toolbar is visible (i.e. after at least one user message with feedback exists).
+        expect: A green flash toast appears with "✨ Perfect shadow! Streak +1" (re-using data-testid="pinned-phrase-flash"). The toolbar shows data-testid="shadow-streak-badge" with content "🎤 ×N" where N is the running consecutive perfect-match count. The count is persisted under localStorage key "conv-shadow-streak" and reset to 0 when a non-perfect result occurs.
+        type: functional
+        priority: medium
+        added_in: 664
+
   minimal_pairs:
     path: /minimal-pairs
     tests:
