@@ -481,19 +481,21 @@ main() {
         ts=$(date +%Y%m%d-%H%M%S)
         local report_file="$reports_dir/report-${START_ITER}-to-${final_iter}-${ts}.md"
         local report_from=$((START_ITER + 1))
+        local report_script="$PROJECT_DIR/.github/skills/autoresearch-report/report.sh"
+        local format_script="$PROJECT_DIR/.github/skills/autoresearch-report/format-report.py"
         log "Generating final report (iter ${report_from}-${final_iter}) → ${report_file}"
-        {
-            echo "# Autoresearch Report (iter ${report_from} — ${final_iter})"
-            echo ""
-            echo "- Generated: $(date '+%Y-%m-%d %H:%M:%S')"
-            echo "- Total invocations: $invocation"
-            echo "- Premium requests: $total_premium"
-            echo ""
-            echo '```'
-            bash "$PROJECT_DIR/.github/skills/autoresearch-report/report.sh" \
-                -f "$report_from" -t "$final_iter" 2>&1 || true
-            echo '```'
-        } > "$report_file"
+        if [[ -f "$format_script" ]]; then
+            bash "$report_script" -f "$report_from" -t "$final_iter" 2>&1 \
+                | python3 "$format_script" > "$report_file" 2>&1 || true
+        else
+            {
+                echo "# Autoresearch Report (iter ${report_from} — ${final_iter})"
+                echo ""
+                echo '```'
+                bash "$report_script" -f "$report_from" -t "$final_iter" 2>&1 || true
+                echo '```'
+            } > "$report_file"
+        fi
         log "Report saved: $report_file"
 
         # Keep latest N reports (clean up old ones)

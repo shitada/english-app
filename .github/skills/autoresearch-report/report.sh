@@ -148,7 +148,7 @@ if [[ -f "$LOG_FILE" ]]; then
     total_p=0; total_c=0; total_t=0; total_e=0
     total_skip_p=0; total_skip_c=0; total_skip_t=0; total_skip_e=0
     for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
-        trace=$(grep "AGENT_TRACE iter=$i " "$LOG_FILE" 2>/dev/null | head -1)
+        trace=$(grep "AGENT_TRACE iter=$i " "$LOG_FILE" 2>/dev/null | head -1 || true)
         if [[ -n "$trace" ]]; then
             p=$(echo "$trace" | sed -n 's/.*proposer=\([0-9]*\).*/\1/p')
             c=$(echo "$trace" | sed -n 's/.*coder=\([0-9]*\).*/\1/p')
@@ -156,10 +156,10 @@ if [[ -f "$LOG_FILE" ]]; then
             e=$(echo "$trace" | sed -n 's/.*evaluator=\([0-9]*\).*/\1/p')
         else
             # Fallback: scan log directly. Match both "iter N" and "iteration N".
-            p=$(grep -cE "● Proposer.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
-            c=$(grep -cE "● Coder.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
-            t=$(grep -cE "● Tester.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
-            e=$(grep -cE "● Evaluator.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true)
+            p=$(grep -cE "● Proposer.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
+            c=$(grep -cE "● Coder.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
+            t=$(grep -cE "● Tester.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
+            e=$(grep -cE "● Evaluator.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
         fi
         [[ "${p:-0}" -gt 0 ]] && total_p=$((total_p + 1)) || total_skip_p=$((total_skip_p + 1))
         [[ "${c:-0}" -gt 0 ]] && total_c=$((total_c + 1)) || total_skip_c=$((total_skip_c + 1))
