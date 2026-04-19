@@ -5,7 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
-import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory, MissedWordDrill } from '../components/pronunciation';
+import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory, MissedWordDrill, StressTapDrill } from '../components/pronunciation';
 import { useRecordingStorage } from '../hooks/useRecordingStorage';
 import InlineErrorBanner from '../components/InlineErrorBanner';
 
@@ -30,7 +30,7 @@ export default function Pronunciation() {
   const [progressData, setProgressData] = useState<PronunciationProgress | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
-  const [practiceMode, setPracticeMode] = useState<'shadowing' | 'dictation' | 'minimal-pairs' | 'tongue-twisters' | 'quick-speak' | 'response-drill' | 'sentence-expand' | 'sentence-transform'>('shadowing');
+  const [practiceMode, setPracticeMode] = useState<'shadowing' | 'dictation' | 'minimal-pairs' | 'tongue-twisters' | 'quick-speak' | 'response-drill' | 'sentence-expand' | 'sentence-transform' | 'stress-tap'>('shadowing');
   const [dictationText, setDictationText] = useState('');
   const [dictationResult, setDictationResult] = useState<DictationResult | null>(null);
   const [dictationPlayed, setDictationPlayed] = useState(false);
@@ -331,6 +331,14 @@ export default function Pronunciation() {
           >
             🔄 Transform
           </button>
+          <button
+            className={`btn ${practiceMode === 'stress-tap' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setPracticeMode('stress-tap')}
+            data-testid="pronunciation-mode-stress-tap"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            🥁 Stress Tap
+          </button>
         </div>
 
         <div style={{ marginBottom: 16, textAlign: 'right', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -372,6 +380,8 @@ export default function Pronunciation() {
           <SentenceExpandDrill speechRecognition={speech} />
         ) : practiceMode === 'sentence-transform' ? (
           <SentenceTransformDrill speechRecognition={speech} />
+        ) : practiceMode === 'stress-tap' ? (
+          <StressTapDrill onBack={() => setPracticeMode('shadowing')} />
         ) : (
           <>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -444,6 +454,10 @@ export default function Pronunciation() {
 
     if (practiceMode === 'sentence-transform') {
       return <SentenceTransformDrill speechRecognition={speech} />;
+    }
+
+    if (practiceMode === 'stress-tap') {
+      return <StressTapDrill onBack={() => { setPracticeMode('shadowing'); setPhase('select'); }} />;
     }
 
     if (practiceMode === 'dictation') {

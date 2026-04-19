@@ -607,3 +607,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 654	8d9b1a3	2026-04-20	102	181	175	15	473	2215	2217	pass	7.00	kept	Pronunciation result → Instant Missed-Word Mini-Drill (frontend-only TTS+ASR loop)
 655	9a34849	2026-04-20	106	249	149	20	524	2215	2217	pass	6.75	kept	Speak Mode for MistakeReviewDrill (TTS preview + mic recording, frontend-only)
 656	01fd4e7	2026-04-20	30	600	130	25	785	2215	2217	pass	7.25	kept	MinimalPairs: Speak the Pair production mode (ASR contrast scoring + mode toggle)
+657	7300710	2026-04-20	30	550	130	25	735	2215	2217	pass	7.50	kept	Phrase of the Day: 3-attempt shadowing drill with speed ladder (frontend-only + helper unit tests)

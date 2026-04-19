@@ -912,6 +912,38 @@ pages:
         priority: high
         added_in: 654
 
+      - id: pron-020
+        target: Stress Tap mode selector button on /pronunciation select view
+        action: Visit /pronunciation, locate data-testid="pronunciation-mode-stress-tap" in the practice-mode row
+        expect: Button labelled "🥁 Stress Tap" is visible alongside Shadowing/Dictation/Minimal Pairs/etc.; clicking it switches practiceMode and renders the StressTapDrill panel (data-testid="stress-tap-drill")
+        type: functional
+        priority: medium
+        added_in: 658
+
+      - id: pron-021
+        target: Stress Tap drill renders syllable pills with Play and Replay-slow buttons
+        action: Open Stress Tap mode and observe data-testid="stress-tap-drill"
+        expect: Each syllable of the current word appears as a tappable pill (data-testid="stress-tap-pill-N"); buttons data-testid="stress-tap-play" and data-testid="stress-tap-replay-slow" trigger TTS at normal and 0.7x rate respectively; progress strip "Word X / N" is visible
+        type: functional
+        priority: medium
+        added_in: 658
+
+      - id: pron-022
+        target: Stress Tap grades a tap and reveals the correct syllable
+        action: Tap any data-testid="stress-tap-pill-N" pill in the Stress Tap drill
+        expect: Pills become disabled, the correct syllable pill turns green, an incorrect tapped pill turns red, data-testid="stress-tap-feedback" appears with Correct! or "Stress is on …" message, and TTS auto-plays the word
+        type: functional
+        priority: medium
+        added_in: 658
+
+      - id: pron-023
+        target: Stress Tap summary card after a 6-word round
+        action: Answer all words in the round then click data-testid="stress-tap-next" until reaching data-testid="stress-tap-summary"
+        expect: Summary shows score "X / N", a per-word list (data-testid="stress-tap-summary-row") with checkmarks/crosses and the stressed syllable in UPPERCASE; a New Round button (data-testid="stress-tap-restart") starts a fresh weighted round
+        type: functional
+        priority: medium
+        added_in: 658
+
   listening:
     path: /listening
     tests:

@@ -985,4 +985,216 @@ Now iteration 657.
       │ frontend/src/pages/Home.tsx
       └ L550:800 (251 lines read)
 
-Now I have enough context. Let me implement the changes.Now replace the PhraseOfTheDayCard component with the upgraded version that includes exported helpers:Now add i18n keys to translations.ts:Now create the unit test for the pure helpers:Now run typecheck:Clean typecheck. Let me also run the new test quickly to be sure:I'll extract the helpers into a separate module to avoid pulling in Home's transitive imports:Now update Home.tsx to import from the utils file (and remove local definitions, but keep re-exports for back-compat):Now remove the duplicated helper definitions in Home.tsx:Now update the test to import from the utils path:All 14 tests pass and tsc is clean. Now update UI test spec for new visible UI:
+Now I have enough context. Let me implement the changes.Now replace the PhraseOfTheDayCard component with the upgraded version that includes exported helpers:Now add i18n keys to translations.ts:Now create the unit test for the pure helpers:Now run typecheck:Clean typecheck. Let me also run the new test quickly to be sure:I'll extract the helpers into a separate module to avoid pulling in Home's transitive imports:Now update Home.tsx to import from the utils file (and remove local definitions, but keep re-exports for back-compat):Now remove the duplicated helper definitions in Home.tsx:Now update the test to import from the utils path:All 14 tests pass and tsc is clean. Now update UI test spec for new visible UI:```json
+{
+  "committed": true,
+  "commit_hash": "7300710",
+  "files_changed": [
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/utils/phraseShadowDrill.ts",
+    "frontend/src/i18n/translations.ts",
+    "frontend/src/__tests__/phraseShadowDrill.test.ts",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 14,
+  "ui_spec_updated": true,
+  "description": "Phrase of the Day card upgraded to a 3-attempt shadowing drill with Slow/Normal/Fast speed ladder, pip progress, summary, mastered badge, and restart; pure helpers extracted and unit-tested."
+}
+```● Coder Implement iter 657
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #657: phrase of the day shadow drill ×3 with speed
+  │   │ ladder
+  │   │
+  │   │ Upgrade the Home page Phrase of the Day card with a guided 3-attempt…
+  │   └ 38 lines...
+  └ get hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+```json
+{
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "all_passed": false,
+  "ts_check": "pass",
+  "vitest_result": "pass (14/14 in phraseShadowDrill.test.ts)",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "ux_score": null,
+  "overall_pass": false,
+  "test_output": "2 failed, 2215 passed in 118.16s\nFAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected",
+  "failure_summary": "2 pre-existing pytest failures in tests/integration/test_dashboard_api.py (test_daily_challenge_current_count_with_activity and TestDayDetailAPI::test_pronunciation_activity_reflected). Unrelated to this iteration's frontend-only changes (phraseShadowDrill, Home.tsx, translations, e2e yaml). TS check passed, vitest 14/14 passed, smoke skipped (no backend changes), e2e UI results JSON not present."
+}
+```● Tester Test iter 657
+  │ Read UI results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -100
+  │   └ 2 lines...
+  └ Detail failures (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+      │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+      │ with_activity tests/integration/test_dashboard_api.py::TestDayDetailAPI::tes
+      │ t_pronunciation_activity_reflected 2>&1 | tail -50
+      └ 51 lines...
+
+Code is clean, well-tested utility module with proper separation. Frontend-only with no schema risks. Tests pass, ts_check passes, only pre-existing dashboard failures remain. QA wasn't explicitly listed but tester reports look good.
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.5,
+  "verdict": "keep",
+  "reason": "Clean extraction of shadow-drill logic into a tested utility module (14/14 vitest), no schema/backend risk, ts_check passes, only pre-existing unrelated test failures remain."
+}
+```● Evaluator Evaluate iter 657
+  │ List directory frontend/src/__tests__
+  │   └ 19 files found
+  └ Read phraseShadowDrill.test.ts
+      │ frontend/src/__tests__/phraseShadowDrill.test.ts
+      └ 138 lines read
+
+● Record iter 657 result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && HASH=$(git rev-parse
+  │ --short HEAD) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' "657" "$HASH"
+  │ "$(date +%Y-%m-%d)" 30 550 130 25 735 2215 2217 pass 7.50 kept "Phrase of
+  │ the Day: 3-attempt shadowing drill with speed ladder (frontend-only + …
+  └ 5 lines...
+
+Completed 2 iterations. Stopping per task instructions.
+
+**Summary:**
+- **Iter 656** — `01fd4e7` — MinimalPairs "Speak the Pair" production mode (ASR contrast scoring + mode toggle, 12 unit tests) — score **7.25**, **kept**
+- **Iter 657** — `7300710` — Phrase of the Day 3-attempt shadowing drill with speed ladder (Slow/Normal/Fast pips, mastered badge, 14 helper unit tests) — score **7.50**, **kept**
+
+Both frontend-only. TypeScript clean. 2215/2217 pytest (same 2 pre-existing dashboard pronunciation aggregation failures as iter 650–655 — unrelated to these diffs). Diversified beyond Conversation: hit MinimalPairs and Home page.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (19m 15s)
+Tokens    ↑ 2.6m • ↓ 60.6k • 2.4m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-656-to-679.md
+[2026-04-20 01:52:43] Copilot invocation completed (duration: 1158s)
+[2026-04-20 01:52:43] Recording agent traces...
+[2026-04-20 01:52:43]   AGENT_TRACE iter=656 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 01:52:43]   AGENT_TRACE iter=657 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 01:52:43] SMOKE_UI: UI changes detected in pages: home
+[2026-04-20 01:52:43] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 01:52:43] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1846ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 01:52:56] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 01:52:56] Running post-invocation audit (iter 656-657)...
+============================================
+ Autoresearch Audit
+ Iterations: 656 — 657
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 01:52:56
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 656 657[0m
+[0;31m  Tester: FAIL — missing: 656 657[0m
+[0;31m  Evaluator: FAIL — missing: 656 657[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 01:52:57] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 01:53:00] Current iteration count: 657 / 679
+[2026-04-20 01:53:00] ------------------------------------------
+[2026-04-20 01:53:00] Invocation 5 / 10
+[2026-04-20 01:53:00] Resuming from iteration 658
+[2026-04-20 01:53:00] ------------------------------------------
+[2026-04-20 01:53:00] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-658-to-679.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "=== results tail ===" && tail -20
+  │ autoresearch/results.tsv && echo "=== backlog uncompleted ===" && grep '^-
+  │ \[ \]' autoresearch/backlog.md && echo "=== git log ===" && git
+  │ --no-pager log --oneline -5 && echo "=== last session log ===" && ls -t …
+  └ 38 lines...
+
+● Check session log and UI results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-656-to-679.md && echo "=== UI test results
+  │ ===" && [ -f autoresearch/ui-test-results.json ] && python3 -c "import
+  │ json; d=json.load(open('autoresearch/ui-test-results.json'));
+  │ print('overall:', d.get('overall')); print('ux_score:', …
+  └ 53 lines...
+
+No E2E failures. Starting iteration 658.
+
+Looking at the backlog, only bugs/perf/infra remain, so I'll propose a fresh feature. Recent work has heavily targeted Conversation, Vocabulary, Listening, and Minimal Pairs. Pronunciation page has Trouble Words & missed-word drill but lacks **prosody/stress training**, which is a known gap for fluent speaking. A small, self-contained "Stress Pattern Tap" mini-game fits perfectly: frontend-only, curated client-side data, tests are pure functions + component logic.```json
+{
+  "type": "feature",
+  "title": "Add Word Stress Tap mini-game to Pronunciation page (prosody training)",
+  "description": "Pronunciation practice currently focuses on phoneme accuracy, shadowing, dictation, minimal pairs, and missed-word drills, but English **prosody / word stress** — the single biggest contributor to perceived fluency — is never explicitly trained. Add a new self-contained 'Stress Tap' mini-mode under the Pronunciation page that drills primary-stress placement on multi-syllable words.\n\nUX flow (frontend-only, no backend changes):\n1. Add a new entry `'stress-tap'` to the existing `practiceMode` union in `frontend/src/pages/Pronunciation.tsx` and a card in the mode-selector grid (icon: existing lucide `Activity` or `Volume2`).\n2. New component `frontend/src/components/pronunciation/StressTapDrill.tsx` renders a curated word (e.g., `pho-TO-graph-y`) with each syllable as a tappable pill. The user taps the pill they think carries the primary stress. Feedback shows correct/incorrect, then auto-plays the word via `useSpeechSynthesis` so the user can hear the contrast. A 'Replay slow' button calls TTS at rate 0.7. After a 6-word round, show a summary score.\n3. Curated client-side data lives in `frontend/src/utils/stressPatterns.ts` as `STRESS_WORDS: { word: string; syllables: string[]; stressIndex: number; meaning?: string }[]` (~30 common multi-syllable words with known learner-tricky stress: photography, comfortable, necessary, develop, hotel, hospital, computer, restaurant, banana, tomato, vegetable, etc.). Also export a pure helper `pickStressRound(words, n, seed?)` that returns `n` randomly selected entries (Fisher-Yates with optional seed for testability).\n4. Persist a small per-word accuracy map under `localStorage['stress_tap_stats']` so future rounds bias toward the user's weak words. Helper `selectWeightedRound(words, stats, n)` should weight previously-wrong words ~3× and previously-correct words ~1×.\n\nTests (Vitest, frontend/src/__tests__/):\n- `stressPatterns.test.ts`: verifies `pickStressRound` returns exactly `n` distinct items, is deterministic with a seed, and never returns more than the dataset size; verifies `selectWeightedRound` increases the probability mass of words with prior wrong attempts (seeded run statistics).\n- `StressTapDrill.test.tsx`: renders the component, taps each syllable pill, asserts correct/incorrect feedback styling and that the score increments only on correct taps, and that the round-complete summary shows after N words.\n\nNo backend, no DB, no migration. Files modified ≤5. Estimated ~1 hour. Diversifies away from Conversation/Vocabulary, fills a real gap (prosody) for the listening/speaking-fluency goal of the app.",
+  "files_to_modify": [
+    "frontend/src/pages/Pronunciation.tsx",
+    "frontend/src/components/pronunciation/StressTapDrill.tsx",
+    "frontend/src/utils/stressPatterns.ts",
+    "frontend/src/__tests__/stressPatterns.test.ts",
+    "frontend/src/__tests__/StressTapDrill.test.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 658
+  │ Read Listening.tsx
+  │   │ frontend/src/pages/Listening.tsx
+  │   └ L1:50 (50 lines read)
+  └ Read Pronunciation.tsx
+      │ frontend/src/pages/Pronunciation.tsx
+      └ L1:40 (40 lines read)
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough context. Let me build the files.Now the component:Now update Pronunciation.tsx:Now write the tests:Now run the typecheck and tests:All 24 tests pass. Now update the UI test spec since Pronunciation.tsx and a new component .tsx were added:Now commit:
