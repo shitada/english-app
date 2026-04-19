@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { sanitizeForSpeech } from '../utils/sanitizeForSpeech';
 
 interface UseSpeechSynthesisReturn {
   speak: (text: string, lang?: string) => void;
@@ -50,8 +51,13 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
     (text: string, lang = 'en-US') => {
       if (!isSupported) return;
 
+      // Strip emoji/decorative icons so TTS does not read them aloud
+      // as their literal Unicode names (e.g. "smiling face").
+      const speakable = sanitizeForSpeech(text);
+      if (!speakable) return;
+
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(speakable);
       utterance.lang = lang;
       utterance.rate = rateRef.current;
       utterance.pitch = 1;

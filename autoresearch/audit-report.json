@@ -1,5 +1,3 @@
 [
-  {"check":"gap_iterations","severity":"error","iterations":" 610 614","root_cause":"invocation_boundary_loss","confidence":"HIGH","evidence":"Iterations attempted (in runner.log) but not present in results.tsv — likely orchestrator timed out or failed to call record_results before invocation ended","action":"none"}
-,
-  {"check":"agent_skip","severity":"error","iterations":" 610 611 612 614 615 616 617 619  610 611 614 615","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 620 621  620 621","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ]

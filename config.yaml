@@ -88,6 +88,7 @@ prompts:
     - Guide the conversation toward completing the scenario goal
     - Use natural, everyday English appropriate for the situation
     - If the user seems stuck, offer helpful prompts or choices
+    - Do not include emojis or decorative icons in your reply.
 
     Start by greeting the user in character and initiating the scenario.
 
@@ -199,6 +200,8 @@ prompts:
     2. Notable vocabulary used
     3. The user's overall communication level
 
+    Do not include emojis or decorative icons in your reply.
+
     Conversation:
     {conversation}
 
@@ -221,6 +224,8 @@ prompts:
 
     Generate multiple-choice questions (4 options each). Each question should test
     understanding of vocabulary or phrases actually used in the conversation.
+
+    Do not include emojis or decorative icons in your reply.
 
     Return a JSON object:
     {{

@@ -571,3 +571,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 618	2615bca	2026-04-19	380	171	376	148	1075	2159	2159	pass	7.60	kept	Add grammar error category breakdown to conversation performance metrics
 619	a8f3a1f	2026-04-19	616	166	146	106	1034	2162	2162	pass	7.80	kept	Fix coerce_bool(None) inflating grammar accuracy for null is_correct
 620	1e9b773	2026-04-19	54	438	127	24	643	2082	2082	pass	7.25	kept	Add Quick Numbers & Dates listening dictation drill
+621	7d3836d	2026-04-19	53	498	128	21	700	2101	2101	pass	7.25	kept	Add Quick Shadowing Drill (listen+repeat with timing & accuracy)
