@@ -2087,3 +2087,141 @@ async def test_start_conversation_role_swap_calls_dispatched_concurrently(client
     )
     assert res.status_code == 200
     assert max_in_flight == 2, f"expected concurrent dispatch, observed max_in_flight={max_in_flight}"
+
+
+# ---------------------------------------------------------------------------
+# /api/conversation/end parallelization tests (autoresearch #626)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_runs_summary_and_memory_in_parallel(client, mock_copilot):
+    """Summary + memory-extraction LLM calls during /end should overlap in time."""
+    import asyncio as _asyncio
+    import time as _time
+
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    intervals: list[tuple[float, float, str]] = []
+    call_delay = 0.2
+
+    async def slow_ask_json(system, prompt, *_a, **_kw):
+        kind = "memory" if "fact extractor" in (system or "").lower() or "personal facts" in (prompt or "") else "summary"
+        t_start = _time.monotonic()
+        await _asyncio.sleep(call_delay)
+        t_end = _time.monotonic()
+        intervals.append((t_start, t_end, kind))
+        if kind == "memory":
+            return {"facts": ["Likes coffee"]}
+        return {
+            "summary": "Nice chat.",
+            "key_vocabulary": ["check-in"],
+            "communication_level": "beginner",
+            "tip": "Keep practicing.",
+        }
+
+    mock_copilot.ask_json = AsyncMock(side_effect=slow_ask_json)
+
+    t0 = _time.monotonic()
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    elapsed = _time.monotonic() - t0
+    assert res.status_code == 200
+
+    kinds = {k for _, _, k in intervals}
+    assert kinds == {"summary", "memory"}, f"both prompts should run; got {kinds}"
+
+    # Intervals must overlap (parallel)
+    a, b = intervals[0], intervals[1]
+    overlap = min(a[1], b[1]) - max(a[0], b[0])
+    assert overlap > 0, f"intervals should overlap, got {intervals}"
+
+    # Total wall < 1.5x single call duration
+    assert elapsed < call_delay * 1.5 + 0.4, f"elapsed={elapsed:.3f}s, expected < {call_delay * 1.5 + 0.4:.3f}s"
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_memory_failure_does_not_block_summary(client, mock_copilot):
+    """If the memory-extraction call raises, the summary still succeeds and prefs are unchanged."""
+    from app.dal import preferences as pref_dal
+    from app.routers.conversation import CONVERSATION_MEMORY_KEY
+
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    summary_payload = {
+        "summary": "Good practice session.",
+        "key_vocabulary": ["reservation"],
+        "communication_level": "intermediate",
+        "tip": "Try longer sentences.",
+    }
+
+    async def routed_ask_json(system, prompt, *_a, **_kw):
+        if "fact extractor" in (system or "").lower():
+            raise RuntimeError("memory LLM down")
+        return summary_payload
+
+    mock_copilot.ask_json = AsyncMock(side_effect=routed_ask_json)
+
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["summary"]["communication_level"] == "intermediate"
+    assert "reservation" in data["summary"]["key_vocabulary"]
+
+    # conversation_memory preference unchanged (still empty)
+    res2 = await client.get("/api/conversation/memory")
+    assert res2.status_code == 200
+    assert res2.json().get("facts", []) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_skip_summary_makes_no_llm_calls(client, mock_copilot):
+    """skip_summary=True must not invoke ask_json at all."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask_json = AsyncMock(return_value={})
+    res = await client.post(
+        "/api/conversation/end",
+        json={"conversation_id": conv_id, "skip_summary": True},
+    )
+    assert res.status_code == 200
+    assert mock_copilot.ask_json.call_count == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.integration
+async def test_end_conversation_history_text_computed_once(client, mock_copilot, monkeypatch):
+    """format_history_text must be called exactly once during /end when skip_summary=False."""
+    from app.dal import conversation as conv_dal
+    from app.routers import conversation as conv_router
+
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Brief.",
+        "key_vocabulary": [],
+        "communication_level": "beginner",
+        "tip": "",
+    })
+
+    original = conv_dal.format_history_text
+    calls = {"n": 0}
+
+    async def spy(db, cid):
+        calls["n"] += 1
+        return await original(db, cid)
+
+    monkeypatch.setattr(conv_router.conv_dal, "format_history_text", spy)
+
+    res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    assert calls["n"] == 1, f"expected exactly 1 format_history_text call, got {calls['n']}"

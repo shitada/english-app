@@ -661,6 +661,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     if status != "active":
         raise HTTPException(status_code=409, detail="Conversation is already ended")
 
+    new_facts: list[str] = []
     if req.skip_summary:
         summary = {
             "note": "Session ended without summary",
@@ -669,26 +670,53 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
             "tip": "",
         }
     else:
-        history = await conv_dal.format_history_text(db, req.conversation_id)
-
+        history_text = await conv_dal.format_history_text(db, req.conversation_id)
         copilot = get_copilot_service()
-        summary_prompt = get_prompt("conversation_summary").format(conversation=history)
-        try:
-            summary = await safe_llm_call(
-                lambda: copilot.ask_json(
-                    "You are an English learning assistant. Return ONLY valid JSON.",
-                    summary_prompt,
-                ),
-                context="end_conversation",
-            )
-        except HTTPException:
-            logger.warning("Summary generation failed for conversation %s; using fallback", req.conversation_id)
-            summary = {
-                "note": "Summary could not be generated",
-                "key_vocabulary": [],
-                "communication_level": "unknown",
-                "tip": "",
-            }
+        summary_prompt = get_prompt("conversation_summary").format(conversation=history_text)
+        extract_prompt = (
+            f"From this English practice conversation, extract 2-3 personal facts about "
+            f"the student (NOT the AI). Facts like: their job, hobbies, family, travel "
+            f"plans, preferences, hometown, etc. Only include facts the student themselves "
+            f"stated. If no personal facts were shared, return an empty array.\n\n"
+            f"Conversation:\n{history_text}\n\n"
+            f'Return JSON: {{"facts": ["fact1", "fact2"]}}'
+        )
+
+        async def _summary_task() -> dict:
+            try:
+                return await safe_llm_call(
+                    lambda: copilot.ask_json(
+                        "You are an English learning assistant. Return ONLY valid JSON.",
+                        summary_prompt,
+                    ),
+                    context="end_conversation",
+                )
+            except HTTPException:
+                logger.warning("Summary generation failed for conversation %s; using fallback", req.conversation_id)
+                return {
+                    "note": "Summary could not be generated",
+                    "key_vocabulary": [],
+                    "communication_level": "unknown",
+                    "tip": "",
+                }
+
+        async def _memory_task() -> list[str]:
+            try:
+                extracted = await copilot.ask_json(
+                    "You are a fact extractor. Return ONLY valid JSON.",
+                    extract_prompt,
+                )
+                facts = extracted.get("facts", []) if isinstance(extracted, dict) else []
+                if isinstance(facts, list) and facts:
+                    return [str(f).strip() for f in facts if f and str(f).strip()][:3]
+                return []
+            except Exception as e:
+                logger.warning("Memory extraction failed (non-fatal): %s", e)
+                return []
+
+        t0 = time.monotonic()
+        summary, new_facts = await asyncio.gather(_summary_task(), _memory_task())
+        logger.info("end_conversation parallel LLM calls completed (%.1fs)", time.monotonic() - t0)
 
     summary = _normalize_summary(summary)
 
@@ -699,46 +727,28 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     if not transitioned:
         raise HTTPException(status_code=409, detail="Conversation was already ended")
 
-    # Extract personal facts from the conversation for cross-session memory (non-fatal)
-    try:
-        if not req.skip_summary:
-            history_text = await conv_dal.format_history_text(db, req.conversation_id)
-            copilot_svc = get_copilot_service()
-            extract_prompt = (
-                f"From this English practice conversation, extract 2-3 personal facts about "
-                f"the student (NOT the AI). Facts like: their job, hobbies, family, travel "
-                f"plans, preferences, hometown, etc. Only include facts the student themselves "
-                f"stated. If no personal facts were shared, return an empty array.\n\n"
-                f"Conversation:\n{history_text}\n\n"
-                f'Return JSON: {{"facts": ["fact1", "fact2"]}}'
-            )
-            extracted = await copilot_svc.ask_json(
-                "You are a fact extractor. Return ONLY valid JSON.",
-                extract_prompt,
-            )
-            new_facts = extracted.get("facts", [])
-            if isinstance(new_facts, list) and new_facts:
-                new_facts = [str(f).strip() for f in new_facts if f and str(f).strip()][:3]
-                # Merge with existing facts, keeping max 10
-                existing_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
-                existing_facts: list[str] = []
-                if existing_raw:
-                    try:
-                        existing_facts = json.loads(existing_raw)
-                        if not isinstance(existing_facts, list):
-                            existing_facts = []
-                    except (json.JSONDecodeError, TypeError):
+    # Merge extracted personal facts into cross-session memory (non-fatal)
+    if new_facts:
+        try:
+            existing_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
+            existing_facts: list[str] = []
+            if existing_raw:
+                try:
+                    existing_facts = json.loads(existing_raw)
+                    if not isinstance(existing_facts, list):
                         existing_facts = []
-                # Deduplicate (case-insensitive) and cap at 10
-                seen_lower = {f.lower() for f in existing_facts}
-                for fact in new_facts:
-                    if fact.lower() not in seen_lower:
-                        existing_facts.append(fact)
-                        seen_lower.add(fact.lower())
-                merged = existing_facts[-10:]  # keep most recent 10
-                await pref_dal.set_preference(db, CONVERSATION_MEMORY_KEY, json.dumps(merged))
-    except Exception as e:
-        logger.warning("Memory extraction failed (non-fatal): %s", e)
+                except (json.JSONDecodeError, TypeError):
+                    existing_facts = []
+            # Deduplicate (case-insensitive) and cap at 10
+            seen_lower = {f.lower() for f in existing_facts}
+            for fact in new_facts:
+                if fact.lower() not in seen_lower:
+                    existing_facts.append(fact)
+                    seen_lower.add(fact.lower())
+            merged = existing_facts[-10:]  # keep most recent 10
+            await pref_dal.set_preference(db, CONVERSATION_MEMORY_KEY, json.dumps(merged))
+        except Exception as e:
+            logger.warning("Memory persistence failed (non-fatal): %s", e)
 
     return {"summary": summary}
 

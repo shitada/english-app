@@ -786,4 +786,211 @@ Iter 624 complete. Starting iter 625.
   │ "T1=$T1"
   └ 2 lines...
 
-Now let me look at existing tests to understand fixtures:Now let me append new tests at the end of the file:All 3 new tests pass. Let me run the full conversation test suite to ensure no regressions, and the unit tests:All 2109 tests pass. Now frontend tsc:Clean. Commit:
+Now let me look at existing tests to understand fixtures:Now let me append new tests at the end of the file:All 3 new tests pass. Let me run the full conversation test suite to ensure no regressions, and the unit tests:All 2109 tests pass. Now frontend tsc:Clean. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "6060597",
+  "files_changed": ["app/routers/conversation.py", "tests/integration/test_conversation_api.py"],
+  "tests_added": 3,
+  "ui_spec_updated": false,
+  "description": "Parallelized opening greeting and role-briefing LLM calls in /conversation/start via asyncio.gather when role_swap=True; briefing failures remain non-fatal."
+}
+```● Coder Implement parallel start calls
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #625: parallelize opening + role-briefing LLM
+  │   │ calls in /start
+  │   │
+  │   │ Refactor start_conversation() to issue the opening greeting and the role…
+  │   └ 19 lines...
+  └ commit info (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --format="%h
+      │ %s" && git show --stat HEAD --format="" | tail -10
+      └ 7 lines...
+
+● Mark T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git log --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2109,
+  "tests_total": 2109,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2109 passed in 105.66s (0:01:45) =======================",
+  "failure_summary": ""
+}
+```● Tester Run all tests
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ Read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● Mark T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.35,
+  "verdict": "keep",
+  "reason": "Clean asyncio.gather parallelization of two independent LLM calls in role-swap start path; preserves non-fatal briefing semantics, deletes conversation on fatal opening failure, all 2109 tests pass, ts check passes, no risky changes."
+}
+```● Evaluator Evaluate iter 625
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L100:260 (160 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L300:480 (181 lines read)
+
+● Record iter 625 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=625 && HASH=6060597 && PASSED=2109 && TOTAL=2109 && TS=pass &&
+  │ SCORE=7.35 && VERDICT=kept && DESC="Parallelize opening message and
+  │ role-briefing LLM calls in /conversation/start" && T0=1776575180 &&
+  │ T1=1776575230 && T2=1776575599 && T3=1776575730 && printf …
+  └ 7 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **Iter 624** (e7aa60e, 7.65, kept): Lazy-load conversation reply helpers via new POST /api/conversation/helpers endpoint; /start and /message no longer block on the helpers LLM call. Frontend fetches in background. 2106/2106 tests pass.
+- **Iter 625** (6060597, 7.35, kept): Parallelize opening greeting + role-briefing LLM calls in /conversation/start using asyncio.gather when role_swap=True; briefing failures stay non-fatal. 2109/2109 tests pass.
+
+Both targeted the PERF-HIGH conversation latency backlog item with complementary tactics (lazy-load + parallelize).
+
+
+Changes   +0 -0
+Requests  7.5 Premium (20m 22s)
+Tokens    ↑ 2.7m • ↓ 36.1k • 2.5m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-624-to-629.md
+[2026-04-19 14:16:01] Copilot invocation completed (duration: 1226s)
+[2026-04-19 14:16:01] Recording agent traces...
+[2026-04-19 14:16:01]   AGENT_TRACE iter=624 proposer=0 coder=0 tester=0 evaluator=1
+[2026-04-19 14:16:01]   AGENT_TRACE iter=625 proposer=0 coder=0 tester=0 evaluator=1
+[2026-04-19 14:16:01] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-19 14:16:01] SMOKE_UI: Level=full (iteration 625 is divisible by 5)
+[2026-04-19 14:16:01] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+
+  ✅ home: smoke 4✓ 0✗ (1852ms)
+  ✅ conversation: smoke 4✓ 0✗ (1601ms)
+  ✅ pronunciation: smoke 4✓ 0✗ (1642ms)
+  ✅ listening: smoke 4✓ 0✗ (1555ms)
+  ✅ vocabulary: smoke 4✓ 0✗ (1625ms)
+  ✅ dashboard: smoke 4✓ 0✗ (1812ms)
+
+✅ UI TEST PASS (6/6 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-19 14:16:22] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 14:16:22] Running post-invocation audit (iter 624-625)...
+============================================
+ Autoresearch Audit
+ Iterations: 624 — 625
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 14:16:22
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 624 625[0m
+[0;31m  Tester: FAIL — missing: 624 625[0m
+[0;31m  Evaluator: FAIL — missing: 624 625[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 14:16:23] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 14:16:26] Current iteration count: 625 / 629
+[2026-04-19 14:16:26] ------------------------------------------
+[2026-04-19 14:16:26] Invocation 4 / 10
+[2026-04-19 14:16:26] Resuming from iteration 626
+[2026-04-19 14:16:26] ------------------------------------------
+[2026-04-19 14:16:26] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-626-to-629.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md | head -30 && echo "---GIT---"
+  │ && git log --oneline -5 && echo "---LASTLOG---" && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null && echo…
+  └ 86 lines...
+
+Starting iteration 626.
+
+```json
+{
+  "type": "feature",
+  "title": "Parallelize summary + memory extraction in POST /api/conversation/end (PERF-HIGH)",
+  "description": "Addresses the [PERF-HIGH] backlog item for conversation latency. Recent iterations parallelized /start (iter 625) and /message already runs grammar-check + reply via asyncio.gather. The remaining sequential bottleneck is POST /api/conversation/end in app/routers/conversation.py: it first awaits the conversation_summary LLM call (~6–10s) and then, before returning, performs a separate fact-extraction LLM call for cross-session memory (~3–6s). The user is blocked on the sum of both. Both calls only depend on `format_history_text(...)`, so they can run concurrently.\n\nChanges in `app/routers/conversation.py` `end_conversation`:\n1. When `req.skip_summary` is False, compute `history_text = await conv_dal.format_history_text(db, req.conversation_id)` ONCE (currently it's computed twice — once for summary and once again for memory extraction; eliminate the duplicate read).\n2. Build two coroutines: `_summary_task()` wrapping the existing `safe_llm_call(... copilot.ask_json(conversation_summary)...)` with the same HTTPException → fallback handling, and `_memory_task()` wrapping the existing fact-extraction `copilot.ask_json(...)` call (returns `[]` on any exception, never raises).\n3. `summary, new_facts = await asyncio.gather(_summary_task(), _memory_task())`.\n4. Keep the existing post-processing: `_normalize_summary`, attach metrics, `end_conversation(... summary=summary)`, and merge `new_facts` into `CONVERSATION_MEMORY_KEY` preference (dedupe case-insensitive, cap 10) — same logic as today, just moved out of the try/except wrapper since the task itself swallows exceptions.\n5. When `skip_summary=True`, behavior is unchanged (no LLM calls, no memory extraction — matches current code).\n6. Add an `info`-level log `\"end_conversation parallel LLM calls completed (%.1fs)\"` mirroring the pattern used in `/message` so latency is observable in logs.\n\nNo schema changes. No frontend changes (response shape identical). No config changes.\n\nExpected impact: end-of-conversation p50 latency cut from ~(T_summary + T_memory) to ~max(T_summary, T_memory), typically a 30–45% reduction on /end. Combined with prior /start and /message work this completes the asyncio.gather sub-task of the PERF-HIGH backlog item.\n\nTests to add in `tests/integration/test_conversation.py` (or the existing conversation integration test module — reuse fakes already present for copilot):\n- `test_end_conversation_runs_summary_and_memory_in_parallel`: patch `get_copilot_service` so that `ask_json` returns a coroutine that records call start/end timestamps and sleeps ~0.2s. Start a conversation, send one message, call /end. Assert (a) both prompts (summary prompt containing 'Conversation' and the fact-extraction prompt containing 'extract 2-3 personal facts') were invoked, (b) their execution intervals overlap (max(start_b, start_a) < min(end_a, end_b)), and (c) total wall time < 1.5 * single-call duration.\n- `test_end_conversation_memory_failure_does_not_block_summary`: fake copilot where the memory-extraction call raises but summary succeeds → response still 200 with valid summary; preferences row for `conversation_memory` remains unchanged.\n- `test_end_conversation_skip_summary_makes_no_llm_calls`: assert `ask_json` call count == 0 when `skip_summary=True`.\n- `test_end_conversation_history_text_computed_once`: spy on `conv_dal.format_history_text` and assert it is called exactly once during /end (regression guard for the dedup).\n\nAcceptance criteria:\n1. `pytest tests/integration -k end_conversation` passes including the four new tests.\n2. Existing conversation tests still pass (no behavioral regressions on response shape, status codes, or memory merging logic).\n3. With a fake copilot that sleeps 200 ms per call, /end completes in < 350 ms (proving parallelism), vs ~400 ms+ previously.\n4. `format_history_text` is invoked exactly once per /end request when `skip_summary=False`.\n5. `ruff check` and `mypy` (if configured) report no new issues in the modified file.",
+  "files_to_modify": [
+    "app/routers/conversation.py",
+    "tests/integration/test_conversation.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 626
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L500:720 (221 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L720:780 (61 lines read)
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now let me modify the router:Now add tests. Let me append to test_conversation_api.py:Good, the endpoint exists. Let me clean up the messy memory_failure test:Now run the tests:All 9 pass. Frontend tsc check (no frontend changes but per request):
