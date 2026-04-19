@@ -595,3 +595,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 642	d523eac	2026-04-19	49	403	135	22	609	2177	2177	pass	7.25	kept	SSE streaming for conversation replies (instant first-token UX, PERF-HIGH)
 643	f876bf4	2026-04-19	73	422	137	31	663	2179	2179	pass	6.75	kept	Conversation Role-Swap Replay (practice the other side, summary modal)
 644	1cfcb70	2026-04-19	115	673	144	29	961	2186	2186	pass	7.35	kept	Speaking Pace Coach (WPM badge + pacing summary on Conversation)
+645	5dc7956	2026-04-19	114	705	140	26	985	2192	2192	pass	7.25	kept	Heatmap day drill-down (per-day module breakdown + quick-resume CTA on Dashboard)
