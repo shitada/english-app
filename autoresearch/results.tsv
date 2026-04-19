@@ -576,3 +576,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 623	c614562	2026-04-19	94	95	128	24	341	2101	2101	pass	7.75	kept	Fix dark-mode conversation highlight contrast (BUG-HIGH WCAG AA)
 624	e7aa60e	2026-04-19	84	364	132	37	617	2106	2106	pass	7.65	kept	Lazy-load conversation reply helpers to cut /start and /message latency ~40%
 625	6060597	2026-04-19	50	369	131	25	575	2109	2109	pass	7.35	kept	Parallelize opening message and role-briefing LLM calls in /conversation/start
+626	7725c52	2026-04-19	70	175	130	27	402	2113	2113	pass	7.55	kept	Parallelize summary + memory extraction in /conversation/end (asyncio.gather)

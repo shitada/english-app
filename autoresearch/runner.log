@@ -993,4 +993,113 @@ Starting iteration 626.
   │ "T1=$T1"
   └ 2 lines...
 
-Now let me modify the router:Now add tests. Let me append to test_conversation_api.py:Good, the endpoint exists. Let me clean up the messy memory_failure test:Now run the tests:All 9 pass. Frontend tsc check (no frontend changes but per request):
+Now let me modify the router:Now add tests. Let me append to test_conversation_api.py:Good, the endpoint exists. Let me clean up the messy memory_failure test:Now run the tests:All 9 pass. Frontend tsc check (no frontend changes but per request):```json
+{
+  "committed": true,
+  "commit_hash": "7725c52",
+  "files_changed": ["app/routers/conversation.py", "tests/integration/test_conversation_api.py"],
+  "tests_added": 4,
+  "ui_spec_updated": false,
+  "description": "Parallelized summary + memory-extraction LLM calls in POST /api/conversation/end via asyncio.gather; format_history_text computed once; memory failures isolated."
+}
+```● Coder Implement iter 626
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #626: parallelize summary + memory extraction in
+  │   │ /conversation/end
+  │   │
+  │   │ Run conversation_summary and memory fact-extraction LLM calls concurrently…
+  │   └ 16 lines...
+  └ commit info (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --format="%h
+      │ %s" && git diff HEAD~1 --name-only
+      └ 7 lines...
+
+● T2 + diff names (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git log --oneline -2 && git diff HEAD~1 --name-only
+  └ 9 lines...
+
+```json
+{
+  "tests_passed": 2113,
+  "tests_total": 2113,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2113 passed in 104.85s (0:01:44) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 626
+  │ tsc check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ smoke test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+      └ 23 lines...
+
+● T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3" && git diff HEAD~1 --stat
+  └ 8 lines...
+
+Code looks clean, well-structured, with proper error isolation. All tests pass.
+
+```json
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "Clean parallelization of two independent LLM calls in /conversation/end via asyncio.gather with preserved memory failure isolation, deduped history formatting, and 4 new integration tests; all 2113 tests pass."}
+```● Evaluator Evaluate iter 626
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L400:600 (201 lines read)
+  └ Read conversation.py
+      │ app/routers/conversation.py
+      └ L600:800 (201 lines read)
+
+● Record iter 626 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=626 && HASH=7725c52 && PASSED=2113 && TOTAL=2113 && TS=pass &&
+  │ SCORE=7.55 && VERDICT=kept && DESC="Parallelize summary + memory
+  │ extraction in /conversation/end (asyncio.gather)" && T0=1776575801 &&
+  │ T1=1776575871 && T2=1776576046 && T3=1776576176 && printf …
+  └ 6 lines...
+
+Iter 626 done. Starting 627.
+
+● T0 iter 627 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && grep '^- \[ \]' autoresearch/backlog.md | head -10
+  └ 5 lines...
+
+```json
+{
+  "type": "perf",
+  "title": "Bound /message LLM context: truncate conversation history to last N turns",
+  "description": "Currently `app/dal/conversation.py::format_history_text` returns the ENTIRE conversation as a single string and `app/routers/conversation.py::send_message` injects all of it into the conversation LLM prompt on every turn. As sessions grow (10-30+ messages), this linearly inflates input tokens for the latency-critical /message endpoint, slowing each round-trip and increasing cost. /start (624), /start parallelization (625), /end parallelization (626), and lazy helpers were prior wins; remaining angle from the backlog is prompt/token reduction. This change targets that directly with a small, measurable, easily-testable diff.\n\nChanges:\n1. `app/dal/conversation.py`: extend `format_history_text(db, conversation_id, max_turns: int | None = None)` with an optional `max_turns` parameter. When set, query only the most recent `max_turns` rows using `ORDER BY created_at DESC, id DESC LIMIT ?`, then reverse them to chronological order before joining. When `max_turns is None`, behavior is identical to today (no breaking change for /end summary which needs full history). If the original message count exceeded `max_turns`, prepend a single short marker line `\"[earlier turns omitted for brevity]\"` so the model knows context was truncated.\n2. `app/routers/conversation.py::send_message`: call `format_history_text(db, req.conversation_id, max_turns=16)` (8 user + 8 assistant turns ≈ enough for coherent continuation). Leave `/end` (`format_history_text(...)` without max_turns) untouched so summaries remain faithful.\n3. Keep the constant local in conversation.py (e.g. `MESSAGE_HISTORY_MAX_TURNS = 16`) so it is easy to tune later without config.yaml churn.\n\nNo schema changes. No frontend changes. No new endpoints. The grammar-check LLM call (which only uses the user's single message) is unaffected.\n\nAcceptance criteria:\n- `format_history_text(db, cid)` (no kwarg) returns full history exactly as before — existing tests pass unchanged.\n- `format_history_text(db, cid, max_turns=4)` on a conversation with 10 messages returns a string containing the marker `[earlier turns omitted for brevity]` followed by exactly the last 4 messages in chronological order.\n- `format_history_text(db, cid, max_turns=100)` on a 3-message conversation returns the full history with NO marker (truncation only when actually needed).\n- `/message` integration test still passes (mocked copilot) and the prompt passed to `copilot.ask` for a long-history conversation contains the marker string and does NOT contain the earliest message content.\n- `/end` summary path continues to receive the full history (verify via existing tests; no regression).\n\nTests to add (`tests/unit/test_conversation_dal.py`):\n- `test_format_history_text_no_truncation_default`\n- `test_format_history_text_max_turns_truncates_with_marker`\n- `test_format_history_text_max_turns_larger_than_history_no_marker`\n- `test_format_history_text_preserves_chronological_order_after_truncation`\n\nAnd one router test (`tests/integration/test_conversation_router.py` or similar existing file): assert /message prompt for a >16-message conversation includes the omitted-marker and excludes the first message content.",
+  "files_to_modify": [
+    "app/dal/conversation.py",
+    "app/routers/conversation.py",
+    "tests/unit/test_conversation_dal.py",
+    "tests/integration/test_conversation_router.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 627
+  │ Read conversation.py
+  │   │ app/dal/conversation.py
+  │   └ L1:50 (49 lines read)
+  └ Read conversation.py
+      │ app/dal/conversation.py
+      └ L50:130 (81 lines read)
+
+● T1 627 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough context. Let me make the changes.Now add unit tests:Now add an integration test. Let me check the end of test_conversation_api.py:All 170 pass. Run the full conversation suite once more, plus tsc:All green. Commit:

@@ -2225,3 +2225,56 @@ async def test_end_conversation_history_text_computed_once(client, mock_copilot,
     res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
     assert res.status_code == 200
     assert calls["n"] == 1, f"expected exactly 1 format_history_text call, got {calls['n']}"
+
+
+@pytest.mark.asyncio
+async def test_send_message_history_truncated_to_max_turns(client, mock_copilot):
+    """For a long conversation, /message prompt should include truncation marker
+    and exclude the very first user message content."""
+    from app.routers import conversation as conv_router
+
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # Seed >16 messages directly in DB to avoid LLM round-trips.
+    # Use the same DB session override as the test client.
+    from app.dal import conversation as conv_dal
+    from app.database import get_db_session as real_get_db_session
+    from app.main import app as fastapi_app
+
+    db_dep = fastapi_app.dependency_overrides.get(real_get_db_session)
+    assert db_dep is not None, "Test client must override get_db_session"
+    async for db in db_dep():
+        for i in range(20):
+            role = "user" if i % 2 == 0 else "assistant"
+            await conv_dal.add_message(db, conv_id, role, f"FIRST_MARKER_{i}" if i == 0 else f"turn_{i}")
+        await db.commit()
+        break
+
+    # Capture the conv_prompt passed to copilot.ask
+    captured: dict = {}
+
+    async def fake_ask(system, user_prompt):
+        captured["system"] = system
+        captured["user_prompt"] = user_prompt
+        return "OK reply"
+
+    mock_copilot.ask = AsyncMock(side_effect=fake_ask)
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Hello.",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Hello.",
+    })
+    assert res.status_code == 200, res.text
+    prompt = captured.get("user_prompt", "")
+    assert "[earlier turns omitted for brevity]" in prompt
+    assert "FIRST_MARKER_0" not in prompt
+    # MESSAGE_HISTORY_MAX_TURNS bounds the count of message lines
+    assert conv_router.MESSAGE_HISTORY_MAX_TURNS == 16

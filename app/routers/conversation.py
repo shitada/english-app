@@ -26,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
+# Maximum number of past messages to include when building the LLM prompt for /message.
+# Keeps token usage bounded for long conversations; older turns are summarized as a marker.
+MESSAGE_HISTORY_MAX_TURNS = 16
+
 
 class StartRequest(BaseModel):
     topic: str = Field(min_length=1, max_length=100)
@@ -524,7 +528,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     user_msg_id = await conv_dal.add_message(db, req.conversation_id, "user", req.content)
 
-    history = await conv_dal.format_history_text(db, req.conversation_id)
+    history = await conv_dal.format_history_text(db, req.conversation_id, max_turns=MESSAGE_HISTORY_MAX_TURNS)
 
     copilot = get_copilot_service()
 

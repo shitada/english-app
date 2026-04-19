@@ -85,7 +85,30 @@ async def get_conversation_history(
     return [dict(r) for r in rows]
 
 
-async def format_history_text(db: aiosqlite.Connection, conversation_id: int) -> str:
+async def format_history_text(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+    max_turns: int | None = None,
+) -> str:
+    if max_turns is not None and max_turns >= 0:
+        # Get total count to determine if truncation marker is needed
+        count_rows = await db.execute_fetchall(
+            "SELECT COUNT(*) AS c FROM messages WHERE conversation_id = ?",
+            (conversation_id,),
+        )
+        total = int(count_rows[0]["c"]) if count_rows else 0
+        recent_rows = await db.execute_fetchall(
+            "SELECT role, content FROM messages WHERE conversation_id = ? "
+            "ORDER BY created_at DESC, id DESC LIMIT ?",
+            (conversation_id, max_turns),
+        )
+        # Reverse to chronological order
+        rows = list(reversed(list(recent_rows)))
+        body = "\n".join(f"{r['role']}: {r['content']}" for r in rows)
+        if total > max_turns:
+            marker = "[earlier turns omitted for brevity]"
+            return f"{marker}\n{body}" if body else marker
+        return body
     rows = await db.execute_fetchall(
         "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
         (conversation_id,),

@@ -216,6 +216,53 @@ class TestFormatHistoryText:
         result = await format_history_text(test_db, cid)
         assert result == ""
 
+    async def test_format_history_text_no_truncation_default(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "Welcome!")
+        await add_message(test_db, cid, "user", "Hi there")
+        await add_message(test_db, cid, "assistant", "How can I help?")
+        # Default behavior unchanged: no max_turns kwarg
+        result = await format_history_text(test_db, cid)
+        assert result == "assistant: Welcome!\nuser: Hi there\nassistant: How can I help?"
+        assert "[earlier turns omitted for brevity]" not in result
+
+    async def test_format_history_text_max_turns_truncates_with_marker(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(10):
+            role = "user" if i % 2 == 0 else "assistant"
+            await add_message(test_db, cid, role, f"msg{i}")
+        result = await format_history_text(test_db, cid, max_turns=4)
+        lines = result.split("\n")
+        assert lines[0] == "[earlier turns omitted for brevity]"
+        # Last 4 messages in chronological order: msg6, msg7, msg8, msg9
+        assert lines[1].endswith(": msg6")
+        assert lines[2].endswith(": msg7")
+        assert lines[3].endswith(": msg8")
+        assert lines[4].endswith(": msg9")
+        assert "msg0" not in result
+        assert "msg5" not in result
+
+    async def test_format_history_text_max_turns_larger_than_history_no_marker(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "assistant", "a")
+        await add_message(test_db, cid, "user", "b")
+        await add_message(test_db, cid, "assistant", "c")
+        result = await format_history_text(test_db, cid, max_turns=100)
+        assert result == "assistant: a\nuser: b\nassistant: c"
+        assert "[earlier turns omitted for brevity]" not in result
+
+    async def test_format_history_text_preserves_chronological_order_after_truncation(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        for i in range(8):
+            await add_message(test_db, cid, "user", f"u{i}")
+        result = await format_history_text(test_db, cid, max_turns=3)
+        lines = result.split("\n")
+        assert lines[0] == "[earlier turns omitted for brevity]"
+        # Chronological: u5, u6, u7
+        assert lines[1] == "user: u5"
+        assert lines[2] == "user: u6"
+        assert lines[3] == "user: u7"
+
 
 @pytest.mark.unit
 class TestEndConversation:
