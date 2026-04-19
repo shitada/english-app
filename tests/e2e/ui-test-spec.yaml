@@ -310,6 +310,22 @@ pages:
         priority: medium
         added_in: 293
 
+      - id: conv-008
+        target: Quick Reply mode toggle works
+        action: click "⚡ Quick Reply mode" toggle in select phase
+        expect: Toggle shows enabled state with primary background, explanation text "AI replies in one short sentence" appears, choice persists in localStorage
+        type: functional
+        priority: medium
+        added_in: 638
+
+      - id: conv-009
+        target: Quick Reply ⚡ badge shows in chat header when active
+        action: enable Quick Reply, start a conversation
+        expect: Chat header shows "⚡ Quick" badge next to scenario title
+        type: visual
+        priority: medium
+        added_in: 638
+
       # --- Chat phase (requires starting a conversation first) ---
       - id: conv-010
         target: Chat input accepts text and send works

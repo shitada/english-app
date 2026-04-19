@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     difficulty TEXT NOT NULL DEFAULT 'intermediate',
     role_swap INTEGER NOT NULL DEFAULT 0,
     personality TEXT DEFAULT 'patient_teacher',
+    quick_mode INTEGER NOT NULL DEFAULT 0,
     summary_json TEXT,
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
@@ -458,6 +459,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on shadowing_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_shadowing_attempts_created ON shadowing_attempts(created_at DESC)",
+    ),
+    (
+        "add quick_mode column to conversations",
+        "ALTER TABLE conversations ADD COLUMN quick_mode INTEGER NOT NULL DEFAULT 0",
     ),
 ]
 

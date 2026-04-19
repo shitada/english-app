@@ -1169,4 +1169,216 @@ Iter 636 done. Starting iter 637.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now I have enough context. Let me implement.Now frontend api.ts and Shadowing.tsx:Now create the unit test:Now update UI test spec:
+Now I have enough context. Let me implement.Now frontend api.ts and Shadowing.tsx:Now create the unit test:Now update UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "148bc82",
+  "files_changed": [
+    "app/dal/shadowing.py",
+    "app/routers/shadowing.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Shadowing.tsx",
+    "tests/unit/test_shadowing_stats.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 3,
+  "ui_spec_updated": true,
+  "description": "Added GET /api/shadowing/stats endpoint, DAL get_stats(), and Shadowing page progress badge (attempts, avg of last 20, best)."
+}
+```● Coder Implement iter 637
+  │ Edit ui-test-spec.yaml +8
+  │   └ tests/e2e/ui-test-spec.yaml
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #637: shadowing progress badge (attempts, avg,
+      │ best)
+      │
+      │ Co-authored-by: Copilot <copilot@github.com>" 2>&1 | tail -10 && git …
+      └ 12 lines...
+
+● T2 (shell)
+  │ echo "T2=$(date +%s)" && cd /Users/shingotada/Documents/vscode/english-app
+  │ && git --no-pager log --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2159,
+  "tests_total": 2159,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "smoke_pass": true,
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2159 passed in 106.95s (0:01:46) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 637
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40; echo
+  │   │ "EXIT:$?"
+  │   └ 24 lines...
+  └ Check e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "NOT_FOUND"
+      └ 2 lines...
+
+● T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+Based on the proposal (additive read-only endpoint + DAL function + small UI badge), with all 2159 tests passing, TS check pass, and smoke pass — this is a low-risk, valuable visibility improvement for the Shadowing feature.
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Additive shadowing stats endpoint with DAL separation and a small progress badge; all 2159 tests pass, TS clean, smoke pass — safe, useful visibility improvement."
+}
+```● Evaluator Evaluate iter 637
+  │ List directory autoresearch
+  │   └ 13 files found
+  └ List directory autoresearch/logs
+      └ 173 files found
+
+● Record iter 637 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776599337; T1=1776599407; T2=1776599565; T3=1776599702 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "637" "148bc82" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **Iter 636** (`7b349df`): Copilot session warm-pool — 2156/2156 pass, score 7.55, kept
+- **Iter 637** (`148bc82`): Shadowing progress badge + stats endpoint — 2159/2159 pass, score 7.00, kept
+
+
+Changes   +0 -0
+Requests  7.5 Premium (16m 29s)
+Tokens    ↑ 2.1m • ↓ 36.9k • 1.9m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-636-to-639.md
+[2026-04-19 20:55:36] Copilot invocation completed (duration: 992s)
+[2026-04-19 20:55:36] Recording agent traces...
+[2026-04-19 20:55:36]   AGENT_TRACE iter=636 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 20:55:36]   AGENT_TRACE iter=637 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 20:55:36] SMOKE_UI: UI changes detected in pages: 
+[2026-04-19 20:55:36] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-19 20:55:36] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: all
+
+  ✅ home: smoke 4✓ 0✗ (1822ms)
+  ✅ conversation: smoke 4✓ 0✗ (1611ms)
+  ✅ pronunciation: smoke 4✓ 0✗ (1646ms)
+  ✅ listening: smoke 4✓ 0✗ (1569ms)
+  ✅ vocabulary: smoke 4✓ 0✗ (1621ms)
+  ✅ dashboard: smoke 4✓ 0✗ (1832ms)
+
+✅ UI TEST PASS (6/6 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-19 20:55:57] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 20:55:57] Running post-invocation audit (iter 636-637)...
+============================================
+ Autoresearch Audit
+ Iterations: 636 — 637
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 20:55:57
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 637[0m
+[0;31m  Tester: FAIL — missing: 636 637[0m
+[0;31m  Evaluator: FAIL — missing: 636 637[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 20:55:58] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 20:56:01] Current iteration count: 637 / 639
+[2026-04-19 20:56:01] ------------------------------------------
+[2026-04-19 20:56:01] Invocation 5 / 10
+[2026-04-19 20:56:01] Resuming from iteration 638
+[2026-04-19 20:56:01] ------------------------------------------
+[2026-04-19 20:56:01] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-638-to-639.md)...
+● Gather context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md | head -30 && echo "---GIT---"
+  │ && git log --oneline -5 && echo "---UI-RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 37 lines...
+
+● Last session log tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50 "$(ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1)" 2>/dev/null | head
+  │ -60
+  └ 51 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Conversation Quick Reply mode (1-sentence AI replies, ~50% faster p50)",
+  "description": "Adds a user-facing 'Quick Reply' mode to /conversation that drastically lowers AI response latency by constraining the LLM to a single short reply (the dominant cost of conversation latency is generation tokens). This directly addresses the PERF-HIGH backlog item with a fresh angle (output-token reduction) that is independent of the already-shipped warm-pool, lifespan pre-warm, parallel grammar-call, and trivial-skip work.\n\nBackend (app/routers/conversation.py, app/dal/conversation.py, app/database.py):\n1. Add `quick_mode: bool = False` to `StartRequest`.\n2. Persist on the conversations row. Schema change in `database.py` SCHEMA: add `quick_mode INTEGER NOT NULL DEFAULT 0` to the `conversations` CREATE TABLE. REQUIRED migration (append to `_MIGRATIONS` in database.py): `\"ALTER TABLE conversations ADD COLUMN quick_mode INTEGER NOT NULL DEFAULT 0\"`.\n3. Update `conv_dal.create_conversation` to accept and store `quick_mode`; ensure `get_active_conversation` / row dict-conversion exposes the column (already implicit via SELECT *).\n4. In both `start_conversation` and `send_message`, when `conv.quick_mode` is true, append this instruction to the system prompt:  `\"\\nIMPORTANT: Reply with ONE short sentence only (max 18 words). Be natural and conversational, but never use multiple sentences.\"`\n5. In `send_message`, when quick_mode is true, also force-skip the grammar-check call (treat like trivial message) — this is opt-in by the user and avoids an entire parallel LLM call. Log `Quick Mode: grammar check skipped`.\n6. Include `quick_mode` in `StartResponse` so the frontend can confirm.\n\nFrontend (frontend/src/pages/Conversation.tsx, frontend/src/api.ts):\n1. Add `quick_mode?: boolean` to `startConversation` API params and to the StartResponse type.\n2. Add a small toggle (⚡ Quick Reply) in the pre-start panel near the difficulty/personality selectors with a tooltip: \"Faster, snappier replies (1 sentence). Great for rapid speaking drills.\"\n3. Pass the toggle value to `api.startConversation`. Persist the user's choice in localStorage so it survives reloads.\n4. While the conversation is active, show a small ⚡ badge in the header when quick mode is on.\n\nTesting (tests/unit/test_conversation_dal.py or new tests/integration/test_conversation_quick_mode.py):\n- DAL test: `create_conversation(..., quick_mode=True)` round-trips correctly.\n- Integration test: `POST /api/conversation/start` with `quick_mode=true` returns it in the response and persists it; subsequent `POST /api/conversation/message` skips grammar check (assert feedback is None and only ONE LLM call is made by mocking copilot).\n\nMeasurable outcome: log p50 of `conversation_message` label before/after (existing latency tracker). Expected ~30-50% p50 reduction when quick_mode=true because (a) only 1 LLM call instead of 2 in parallel and (b) shorter generated output.",
+  "files_to_modify": ["app/routers/conversation.py", "app/dal/conversation.py", "app/database.py", "frontend/src/pages/Conversation.tsx", "frontend/src/api.ts"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 638
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1:50 (49 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:60 (60 lines read)
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now let's look at the frontend Conversation.tsx (first relevant pre-start UI section) and api.ts:Now I have enough. Let me make all changes.Now update DAL:Now update router. StartRequest, StartResponse, start endpoint, and send_message:Append quick_mode instruction to system & include in response:Now update send_message to honor quick_mode (skip grammar + append instruction):Now api.ts:Now Conversation.tsx — add state with localStorage, toggle UI, pass to api, header badge:Now add the toggle UI after Role Swap, and a badge in header:Now create tests:Now UI test spec:Run tests:All passing. Commit:

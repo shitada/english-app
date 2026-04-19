@@ -67,6 +67,7 @@ class StartRequest(BaseModel):
     difficulty: Literal["beginner", "intermediate", "advanced"] = "intermediate"
     role_swap: bool = False
     personality: Literal["patient_teacher", "chatty_friend", "professional", "challenging"] = "patient_teacher"
+    quick_mode: bool = False
 
 
 PERSONALITY_INSTRUCTIONS: dict[str, str] = {
@@ -120,6 +121,7 @@ class StartResponse(BaseModel):
     grammar_notes: list[GrammarNote] = []
     user_role: str = ""
     role_briefing: list[str] = []
+    quick_mode: bool = False
 
 
 class MessageResponse(BaseModel):
@@ -344,7 +346,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         topic_data = custom_match
     topic_label = topic_data["label"]
 
-    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap, personality=req.personality)
+    conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap, personality=req.personality, quick_mode=req.quick_mode)
 
     copilot = get_copilot_service()
 
@@ -368,6 +370,9 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         role=extract_role(scenario),
         goal=topic_data.get("goal", "Have a natural conversation"),
     ) + difficulty_instructions[req.difficulty] + PERSONALITY_INSTRUCTIONS[req.personality]
+
+    if req.quick_mode:
+        system += "\n\nReply with ONE short sentence only (max 18 words)."
 
     # Inject stored memory facts for personalised conversations
     memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
@@ -448,6 +453,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         "grammar_notes": grammar_notes,
         "user_role": user_role_name,
         "role_briefing": role_briefing,
+        "quick_mode": req.quick_mode,
     }
 
 
@@ -578,6 +584,10 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     if personality in PERSONALITY_INSTRUCTIONS:
         system += PERSONALITY_INSTRUCTIONS[personality]
 
+    quick_mode = bool(conv.get("quick_mode"))
+    if quick_mode:
+        system += "\n\nReply with ONE short sentence only (max 18 words)."
+
     # Inject stored memory facts for continuity
     memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
     if memory_raw:
@@ -598,7 +608,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     # Grammar check is non-fatal — if it fails, we still return the AI response
     t0 = time.monotonic()
 
-    skip_grammar = _should_skip_grammar_check(req.content)
+    skip_grammar = quick_mode or _should_skip_grammar_check(req.content)
 
     async def _safe_grammar_check():
         try:
@@ -615,7 +625,10 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         return None
 
     if skip_grammar:
-        logger.info("Grammar check skipped for trivial message (len=%d)", len(req.content.strip()))
+        if quick_mode:
+            logger.info("Grammar check skipped (quick_mode)")
+        else:
+            logger.info("Grammar check skipped for trivial message (len=%d)", len(req.content.strip()))
         grammar_task = _skipped_grammar_check()
     else:
         grammar_task = _safe_grammar_check()

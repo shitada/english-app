@@ -69,6 +69,13 @@ export default function Conversation() {
   const [diffRec, setDiffRec] = useState<DifficultyRecommendation | null>(null);
   const [roleSwap, setRoleSwap] = useState(false);
   const [personality, setPersonality] = useState<Personality>('patient_teacher');
+  const [quickMode, setQuickMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('conversation_quick_mode') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [sessionGoals, setSessionGoals] = useState<string[]>([]);
   const [pastConversations, setPastConversations] = useState<ConversationListItem[]>([]);
   const [historyMessages, setHistoryMessages] = useState<import('../api').ChatMessage[]>([]);
@@ -606,7 +613,7 @@ export default function Conversation() {
     autoEndAttempted.current = false;
     resetSessionScopedState();
     try {
-      const res = await api.startConversation(topicId, difficulty, roleSwap, personality);
+      const res = await api.startConversation(topicId, difficulty, roleSwap, personality, quickMode);
       setCurrentTopicId(topicId);
       const matchedTopic = topics.find(t => t.id === topicId);
       setCurrentTopicLabel(matchedTopic?.label || topicId);
@@ -942,6 +949,40 @@ export default function Conversation() {
               {roleSwap && (
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: 4 }}>
                   Practice responding as the hotel clerk, waiter, or doctor.
+                </p>
+              )}
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quick Reply</h3>
+              <button
+                data-testid="quick-mode-toggle"
+                onClick={() => {
+                  const next = !quickMode;
+                  setQuickMode(next);
+                  try {
+                    localStorage.setItem('conversation_quick_mode', next ? '1' : '0');
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  border: quickMode ? '2px solid var(--primary)' : '2px solid var(--border)',
+                  background: quickMode ? 'var(--primary)' : 'transparent',
+                  color: quickMode ? 'white' : 'var(--text)',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                }}
+              >
+                ⚡ Quick Reply mode
+              </button>
+              {quickMode && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: 4 }}>
+                  AI replies in one short sentence (~50% faster). Grammar feedback is paused.
                 </p>
               )}
             </div>
@@ -1413,6 +1454,7 @@ export default function Conversation() {
           <span style={{ fontWeight: 600 }}>
             Role Play Scenario
             {roleSwap && <span style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>🔄 {userRoleName || 'Staff Role'}</span>}
+            {quickMode && <span data-testid="quick-mode-badge" style={{ marginLeft: 8, fontSize: '0.8rem', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: 12 }}>⚡ Quick</span>}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {duration > 0 ? (
