@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { sanitizeForSpeech } from '../utils/sanitizeForSpeech';
 
 interface UseSpeechSynthesisReturn {
-  speak: (text: string, lang?: string) => void;
+  speak: (text: string, lang?: string, rateOverride?: number) => void;
   stop: () => void;
   isSpeaking: boolean;
   isSupported: boolean;
@@ -48,7 +48,7 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
   }, []);
 
   const speak = useCallback(
-    (text: string, lang = 'en-US') => {
+    (text: string, lang = 'en-US', rateOverride?: number) => {
       if (!isSupported) return;
 
       // Strip emoji/decorative icons so TTS does not read them aloud
@@ -59,7 +59,7 @@ export function useSpeechSynthesis(): UseSpeechSynthesisReturn {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(speakable);
       utterance.lang = lang;
-      utterance.rate = rateRef.current;
+      utterance.rate = typeof rateOverride === 'number' ? rateOverride : rateRef.current;
       utterance.pitch = 1;
       utterance.volume = volumeRef.current;
 

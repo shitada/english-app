@@ -1667,6 +1667,31 @@ export default function Conversation() {
               >
                 <Volume2 size={14} color="var(--primary, #6366f1)" />
               </button>
+              {msg.role === 'assistant' && (
+                <button
+                  onClick={() => tts.speak(msg.content, 'en-US', 0.6)}
+                  disabled={tts.isSpeaking}
+                  aria-label="Slow replay (0.6×)"
+                  title="Slow replay (0.6×)"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: tts.isSpeaking ? 'default' : 'pointer',
+                    padding: '2px 4px',
+                    marginLeft: 2,
+                    opacity: tts.isSpeaking ? 0.4 : 0.6,
+                    transition: 'opacity 0.15s',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 2,
+                  }}
+                  onMouseEnter={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '1'; }}
+                  onMouseLeave={(e) => { if (!tts.isSpeaking) e.currentTarget.style.opacity = '0.6'; }}
+                >
+                  <Headphones size={14} color="var(--primary, #6366f1)" />
+                  <span style={{ fontSize: 10, color: 'var(--primary, #6366f1)' }}>🐢</span>
+                </button>
+              )}
             </div>
             {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} onCorrectionAttempt={(success) => {
               setCorrectionAttempts(p => p + 1);

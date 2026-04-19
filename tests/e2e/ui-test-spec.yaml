@@ -3194,6 +3194,14 @@ pages:
         priority: low
         added_in: 624
 
+      - id: conv-132
+        target: Slow Replay (🐢 0.6×) button on assistant messages
+        action: After an assistant reply appears, click the headphones button with aria-label="Slow replay (0.6×)" rendered next to the existing 🔊 listen button
+        expect: The assistant message is re-spoken via TTS at rate 0.6 without modifying the user's global TTS rate setting; button only appears for assistant messages
+        type: functional
+        priority: medium
+        added_in: 628
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

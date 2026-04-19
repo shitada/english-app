@@ -1102,4 +1102,187 @@ Iter 626 done. Starting 627.
   │ "T1=$T1"
   └ 2 lines...
 
-Now I have enough context. Let me make the changes.Now add unit tests:Now add an integration test. Let me check the end of test_conversation_api.py:All 170 pass. Run the full conversation suite once more, plus tsc:All green. Commit:
+Now I have enough context. Let me make the changes.Now add unit tests:Now add an integration test. Let me check the end of test_conversation_api.py:All 170 pass. Run the full conversation suite once more, plus tsc:All green. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "78f1da2",
+  "files_changed": ["app/dal/conversation.py", "app/routers/conversation.py", "tests/unit/test_conversation_dal.py", "tests/integration/test_conversation_api.py"],
+  "tests_added": 5,
+  "ui_spec_updated": false,
+  "description": "Added max_turns kwarg to format_history_text with chronological truncation marker; /message uses MESSAGE_HISTORY_MAX_TURNS=16 to bound LLM context; /end path unchanged."
+}
+```● Coder Implement iter 627
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #627: bound /message LLM context with history
+  │   │ truncation
+  │   │
+  │   │ Co-authored-by: Copilot <copilot@github.com>" 2>&1 | tail -10 && git …
+  │   └ 13 lines...
+  └ check what was committed (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ tail -15
+      └ 16 lines...
+
+● T2 627 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2118,
+  "tests_total": 2118,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2118 passed in 106.25s (0:01:46) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 627
+  │ tsc check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30; echo "EXIT:$?"
+  │   └ 2 lines...
+  └ smoke test (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+      │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30; echo
+      │ "EXIT:$?"
+      └ 24 lines...
+
+● T3 627 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "Sensible token-bounding via history truncation with clear marker, backward-compatible kwarg, all tests pass plus 5 new ones."}● Evaluator Evaluate iter 627
+
+● Record iter 627 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=627 && HASH=78f1da2 && PASSED=2118 && TOTAL=2118 && TS=pass &&
+  │ SCORE=7.55 && VERDICT=kept && DESC="Bound /message LLM context with
+  │ history truncation (max_turns=16)" && T0=1776576207 && T1=1776576276 &&
+  │ T2=1776576526 && T3=1776576658 && printf …
+  └ 7 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **Iter 626** (7725c52, 7.55, kept): Parallelize summary + memory-extraction LLM calls in `/conversation/end` via asyncio.gather; dedupe `format_history_text`. 2113/2113 tests pass.
+- **Iter 627** (78f1da2, 7.55, kept): Bound `/message` LLM context with `max_turns=16` history truncation + chronological "earlier turns omitted" marker; `/end` summary path untouched. 2118/2118 tests pass.
+
+Both target the PERF-HIGH conversation latency backlog item (parallelization + token reduction).
+
+
+Changes   +0 -0
+Requests  7.5 Premium (14m 52s)
+Tokens    ↑ 2.2m • ↓ 33.2k • 2.0m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-626-to-629.md
+[2026-04-19 14:31:21] Copilot invocation completed (duration: 895s)
+[2026-04-19 14:31:21] Recording agent traces...
+[2026-04-19 14:31:21]   AGENT_TRACE iter=626 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 14:31:21]   AGENT_TRACE iter=627 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 14:31:21] SMOKE_UI: No UI file changes — skipping Playwright smoke test
+[2026-04-19 14:31:21] Running post-invocation audit (iter 626-627)...
+============================================
+ Autoresearch Audit
+ Iterations: 626 — 627
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 14:31:21
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 626 627[0m
+[0;31m  Tester: FAIL — missing: 626 627[0m
+[0;31m  Evaluator: FAIL — missing: 626 627[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 2)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 14:31:23] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 14:31:26] Current iteration count: 627 / 629
+[2026-04-19 14:31:26] ------------------------------------------
+[2026-04-19 14:31:26] Invocation 5 / 10
+[2026-04-19 14:31:26] Resuming from iteration 628
+[2026-04-19 14:31:26] ------------------------------------------
+[2026-04-19 14:31:26] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-628-to-629.md)...
+● Read autoresearch context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "=== results.tsv ===" && tail -20
+  │ autoresearch/results.tsv && echo "=== backlog uncompleted ===" && grep '^-
+  │ \[ \]' autoresearch/backlog.md | head -30 && echo "=== git log ===" &&
+  │ git --no-pager log --oneline -5 && echo "=== latest session log ===" && …
+  └ 90 lines...
+
+● Check ui-test-results existence (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && cat
+  │ autoresearch/ui-test-results.json 2>/dev/null | head -c 500; echo; echo
+  │ "---"; ls autoresearch/ui-test-results.json 2>/dev/null
+  └ 2 lines...
+
+No E2E failures file. Starting iteration 628.
+
+```json
+{
+  "type": "feature",
+  "title": "Per-message slow-replay (🐢 0.6×) button on assistant turns in Conversation",
+  "description": "Add a 'Slow Replay' button next to the existing 🔊 speak button on every assistant message in the Conversation page so learners can re-listen to native-paced replies at a slower rate (0.6×) without changing their global TTS speed setting. This supports listening-skill drilling and matches the app's listening/speaking focus.\n\nChanges:\n\n1. `frontend/src/hooks/useSpeechSynthesis.ts`: Extend `speak` signature to `speak(text: string, lang?: string, rateOverride?: number)`. When `rateOverride` is provided (e.g. 0.6), use it for `utterance.rate` instead of `rateRef.current`. The global `rate` state and existing single-arg/two-arg call sites continue to work unchanged (backward compatible). Update the `UseSpeechSynthesisReturn` type accordingly.\n\n2. `frontend/src/pages/Conversation.tsx`: In the assistant-message render block (where the existing Volume2 / 🔊 replay button lives), add a sibling button using the existing `Headphones` icon (already imported) with aria-label 'Slow replay (0.6×)'. On click, call `speak(message.content, 'en-US', 0.6)`. Style consistently with the existing replay button (same hover/focus states, dark mode classes).\n\n3. `frontend/src/__tests__/useSpeechSynthesis.test.ts` (new or extend existing): Add a unit test that mocks `window.speechSynthesis` and `SpeechSynthesisUtterance`, calls `speak('hello', 'en-US', 0.6)`, and asserts the created utterance has `rate === 0.6` while a subsequent `speak('hi')` call uses the default `rateRef.current` (0.9). Also assert backward compatibility: `speak('hi', 'en-US')` still works with no third arg.\n\nWhy: Listening at native speed is hard for learners; a one-click slow-replay per message is a low-friction repetitive listening drill mechanic that complements the existing 🔊 button. It is purely client-side (no backend / no model calls), avoids overlap with recent perf work, and is small + testable.",
+  "files_to_modify": [
+    "frontend/src/hooks/useSpeechSynthesis.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/useSpeechSynthesis.test.ts"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 628
+  │ Read Conversation.tsx
+  │   │ frontend/src/pages/Conversation.tsx
+  │   └ L1:80 (80 lines read)
+  └ Read useSpeechSynthesis.ts
+      │ frontend/src/hooks/useSpeechSynthesis.ts
+      └ 95 lines read
+
+● Mark T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now let me update the UI test spec and run tsc/vitest.All 4 tests pass. Remove unused `vi` import and commit.Still used. Let me run tsc to verify and commit.
