@@ -99,6 +99,16 @@ class EndResponse(BaseModel):
     summary: dict[str, Any]
 
 
+class HelpersRequest(BaseModel):
+    conversation_id: int = Field(ge=1)
+
+
+class HelpersResponse(BaseModel):
+    phrase_suggestions: list[str] = []
+    key_phrases: list[str] = []
+    grammar_notes: list[GrammarNote] = []
+
+
 class ConversationListItem(BaseModel):
     id: int
     topic: str
@@ -349,7 +359,9 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     await conv_dal.add_message(db, conversation_id, "assistant", opening)
 
-    helpers_coro = _extract_reply_helpers(copilot, opening, topic_label, req.difficulty)
+    suggestions: list[str] = []
+    key_phrases: list[str] = []
+    grammar_notes: list[dict] = []
 
     role_briefing: list[str] = []
     if req.role_swap and user_role_name:
@@ -371,13 +383,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
                 logger.warning("Failed to generate role briefing phrases")
             return []
 
-        suggestions_result, briefing_result = await asyncio.gather(
-            helpers_coro, _get_briefing()
-        )
-        suggestions, key_phrases, grammar_notes = suggestions_result
-        role_briefing = briefing_result
-    else:
-        suggestions, key_phrases, grammar_notes = await helpers_coro
+        role_briefing = await _get_briefing()
 
     return {
         "conversation_id": conversation_id,
@@ -570,10 +576,62 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         await conv_dal.update_message_feedback(db, user_msg_id, feedback)
     await conv_dal.add_message(db, req.conversation_id, "assistant", ai_response)
 
-    # Generate phrase suggestions and extract key phrases (single combined LLM call)
-    suggestions, key_phrases, grammar_notes = await _extract_reply_helpers(copilot, ai_response, topic_label, conv.get("difficulty", "intermediate"))
+    # Reply helpers (suggestions, key phrases, grammar notes) are fetched lazily
+    # by the frontend via POST /api/conversation/helpers to reduce response latency.
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
 
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": suggestions, "key_phrases": key_phrases, "grammar_notes": grammar_notes}
+
+@router.post("/helpers", response_model=HelpersResponse)
+async def conversation_helpers(req: HelpersRequest, db: aiosqlite.Connection = Depends(get_db_session), _rl=Depends(require_rate_limit)):
+    """Generate reply helpers (suggestions, key phrases, grammar notes) for the latest
+    assistant message in a conversation. Called lazily by the frontend after /start
+    or /message so the user-visible AI reply is not blocked on this extra LLM call.
+
+    Accepts conversations in any status (active or ended). Returns 404 if not found.
+    On LLM failure, returns empty arrays (never 500).
+    """
+    # Try active first, then any status
+    conv = await conv_dal.get_active_conversation(db, req.conversation_id)
+    if not conv:
+        rows = await db.execute_fetchall(
+            "SELECT * FROM conversations WHERE id = ?",
+            (req.conversation_id,),
+        )
+        if not rows:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        conv = dict(rows[0])
+
+    history = await conv_dal.get_conversation_history(db, req.conversation_id)
+    last_assistant = next(
+        (m for m in reversed(history) if m.get("role") == "assistant"),
+        None,
+    )
+    if not last_assistant:
+        return {"phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
+
+    # Resolve topic label (config or custom)
+    topics = get_conversation_topics()
+    topic_data = next((t for t in topics if t["id"] == conv["topic"]), None)
+    if topic_data is None:
+        custom_topics = await conv_dal.list_custom_topics(db)
+        topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
+    topic_label = topic_data["label"] if topic_data else conv["topic"]
+    difficulty = conv.get("difficulty", "intermediate")
+
+    copilot = get_copilot_service()
+    try:
+        suggestions, key_phrases, grammar_notes = await _extract_reply_helpers(
+            copilot, last_assistant["content"], topic_label, difficulty
+        )
+    except Exception as e:
+        logger.warning("conversation_helpers failed (non-fatal): %s", e)
+        return {"phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
+
+    return {
+        "phrase_suggestions": suggestions,
+        "key_phrases": key_phrases,
+        "grammar_notes": grammar_notes,
+    }
 
 
 @router.post("/end", response_model=EndResponse)

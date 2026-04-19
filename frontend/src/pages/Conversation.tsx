@@ -80,6 +80,7 @@ export default function Conversation() {
   const [customSaving, setCustomSaving] = useState(false);
   const [topicSuggestions, setTopicSuggestions] = useState<TopicRecommendation[]>([]);
   const [phraseSuggestions, setPhraseSuggestions] = useState<string[]>([]);
+  const [helpersLoading, setHelpersLoading] = useState(false);
   const [userRoleName, setUserRoleName] = useState('');
   const [roleBriefing, setRoleBriefing] = useState<string[]>([]);
   const [showBriefing, setShowBriefing] = useState(false);
@@ -559,6 +560,38 @@ export default function Conversation() {
     resetSessionScopedState();
   };
 
+  // Lazily fetch reply helpers (suggestions/key_phrases/grammar_notes) for the latest
+  // assistant message after /start or /message has rendered. Silent on failure.
+  const loadHelpersInBackground = (convId: number) => {
+    setHelpersLoading(true);
+    api.fetchConversationHelpers(convId)
+      .then((helpers) => {
+        setPhraseSuggestions(helpers.phrase_suggestions || []);
+        const kp = helpers.key_phrases || [];
+        const gn = helpers.grammar_notes || [];
+        if (kp.length > 0 || gn.length > 0) {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastAssistant = updated.findLastIndex((m) => m.role === 'assistant');
+            if (lastAssistant >= 0) {
+              updated[lastAssistant] = {
+                ...updated[lastAssistant],
+                key_phrases: kp,
+                grammar_notes: gn,
+              };
+            }
+            return updated;
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('fetchConversationHelpers failed (non-fatal):', err);
+      })
+      .finally(() => {
+        setHelpersLoading(false);
+      });
+  };
+
   const startConversation = async (topicId: string) => {
     setLoading(true);
     setStartError(null);
@@ -587,6 +620,8 @@ export default function Conversation() {
         setShowBriefing(false);
       }
       tts.speak(res.message);
+      // Fetch reply helpers in background (does not block UI)
+      loadHelpersInBackground(res.conversation_id);
       // Fetch vocab target words for this topic
       try {
         const vocabRes = await api.getVocabularyProgress(topicId);
@@ -697,6 +732,8 @@ export default function Conversation() {
         }
       }
       tts.speak(res.message);
+      // Fetch reply helpers in background (does not block UI)
+      if (conversationId) loadHelpersInBackground(conversationId);
     } catch (err) {
       console.error(err);
       if (err instanceof ApiError && err.status === 409) {
@@ -1687,6 +1724,15 @@ export default function Conversation() {
       {speech.error && (
         <div style={{ padding: '8px 16px', background: '#fef2f2', color: '#b91c1c', fontSize: 13, borderTop: '1px solid #fecaca' }}>
           {speech.error}
+        </div>
+      )}
+      {phraseSuggestions.length === 0 && helpersLoading && !loading && !input.trim() && (
+        <div
+          aria-label="Loading reply suggestions"
+          aria-live="polite"
+          style={{ padding: '6px 16px', fontSize: 12, color: 'var(--muted, #94a3b8)', borderTop: '1px solid var(--border, #e2e8f0)' }}
+        >
+          Loading reply suggestions…
         </div>
       )}
       {phraseSuggestions.length > 0 && !loading && !input.trim() && (

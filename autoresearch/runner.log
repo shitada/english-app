@@ -483,4 +483,197 @@ Found the root cause. The dark-mode `--highlight-bg` is `#1e3a5f`, but the assis
   │ echo "T1=$T1_623"
   └ 2 lines...
 
-Now update HighlightedMessage.tsx — strengthen styles (fontWeight 600, padding '2px 5px') in both branches, and ensure grammar-only branch applies highlight-text color:Check existing __tests__ patterns:All passing, tsc clean. Commit:
+Now update HighlightedMessage.tsx — strengthen styles (fontWeight 600, padding '2px 5px') in both branches, and ensure grammar-only branch applies highlight-text color:Check existing __tests__ patterns:All passing, tsc clean. Commit:Done. Returning result:
+
+```json
+{
+  "committed": true,
+  "commit_hash": "c614562",
+  "files_changed": [
+    "frontend/src/index.css",
+    "frontend/src/components/conversation/HighlightedMessage.tsx",
+    "frontend/src/__tests__/HighlightedMessage.darkmode.test.tsx"
+  ],
+  "tests_added": 5,
+  "ui_spec_updated": false,
+  "description": "Fix dark-mode key-phrase highlight contrast: vivid blue bg/white text vars + stronger inline styles in HighlightedMessage with new render test"
+}
+```● Coder Implement iter 623
+  │ commit hash (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git log -1 --format=%H
+  │   └ 2 lines...
+  └ show files (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ tail -15
+      └ 15 lines...
+
+● T2 iter 623 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2_623=$(date +%s) &&
+  │ echo "T2=$T2_623"
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2101,
+  "tests_total": 2101,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "vitest_passed": 113,
+  "vitest_total": 113,
+  "overall_pass": true,
+  "test_output": "======================= 2101 passed in 100.64s (0:01:40) =======================\nVitest: 8 files, 113 passed (113) including HighlightedMessage.darkmode.test.tsx (5 tests)\nTSC: clean (exit 0)",
+  "failure_summary": ""
+}
+```● Tester Test iter 623
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -30
+  │   └ 16 lines...
+  └ e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>/dev/null || echo "NOT_FOUND"
+      └ 2 lines...
+
+● T3 iter 623 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3_623=$(date +%s) &&
+  │ echo "T3=$T3_623"
+  └ 2 lines...
+
+Looks reasonable. All tests pass, focused fix.
+
+```json
+{"code_quality":8,"feature_value":7,"maintainability":8,"ux_quality":8,"total_score":7.75,"verdict":"keep","reason":"Targeted dark-mode contrast bug fix with proper CSS variable usage and 5 new vitest cases; all 2101 tests pass and TypeScript compiles cleanly."}
+```● Evaluator Evaluate iter 623
+  └ Read HighlightedMessage.tsx
+      │ frontend/src/components/conversation/HighlightedMessage.tsx
+      └ 390 lines read
+
+● Record iter 623 + mark backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4_623=$(date +%s) &&
+  │ \
+  │ T0=1776574166; T1=1776574260; T2=1776574355; T3=1776574483; T4=$T4_623
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "623" "c614562" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" …
+  └ 19 lines...
+
+Completed both iterations. Stopping as instructed.
+
+**Summary:**
+
+| Iter | Hash | Score | Verdict | Description |
+|------|------|-------|---------|-------------|
+| 622 | 992b9d2 | 7.65 | kept | Strip emoji from SpeechSynthesis input (BUG-HIGH) |
+| 623 | c614562 | 7.75 | kept | Fix dark-mode conversation highlight contrast (BUG-HIGH WCAG AA) |
+
+Both BUG-HIGH backlog items addressed (emoji TTS + dark-mode highlight visibility), all 2101 backend tests + TS check + vitest suites pass. Backlog updated. Two remaining backlog items: PERF-HIGH conversation latency + 2 INFRA tasks. All 4 subagents (proposer, coder, tester, evaluator) called for each iteration.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (11m 41s)
+Tokens    ↑ 1.7m • ↓ 28.1k • 1.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-622-to-629.md
+[2026-04-19 13:55:14] Copilot invocation completed (duration: 705s)
+[2026-04-19 13:55:14] Recording agent traces...
+[2026-04-19 13:55:14]   AGENT_TRACE iter=622 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 13:55:14]   AGENT_TRACE iter=623 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 13:55:14] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-19 13:55:14] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-19 13:55:14] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation
+
+  ✅ conversation: smoke 4✓ 0✗ (1676ms)
+
+✅ UI TEST PASS (1/1 pages)
+   Results: autoresearch/ui-test-results.json
+[2026-04-19 13:55:31] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 13:55:31] Running post-invocation audit (iter 622-623)...
+============================================
+ Autoresearch Audit
+ Iterations: 622 — 623
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 13:55:31
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 622 623[0m
+[0;31m  Tester: FAIL — missing: 622 623[0m
+[0;31m  Evaluator: FAIL — missing: 622 623[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 13:55:32] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 13:55:35] Current iteration count: 623 / 629
+[2026-04-19 13:55:35] ------------------------------------------
+[2026-04-19 13:55:35] Invocation 3 / 10
+[2026-04-19 13:55:35] Resuming from iteration 624
+[2026-04-19 13:55:35] ------------------------------------------
+[2026-04-19 13:55:35] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-624-to-629.md)...
+● Gather context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md | head -30 && echo "---GIT---"
+  │ && git log --oneline -5 && echo "---UI-RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 37 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Lazy-load conversation reply helpers to cut /start and /message latency ~40%",
+  "description": "Conversation /start and /message currently block on an extra LLM call to _extract_reply_helpers (suggestions, key_phrases, grammar_notes) AFTER the opening/AI reply is already known. Users wait for this extra call before seeing the AI message — adding ~3-6s to the perceived 6-16s response time. Move helpers to a separate endpoint and have the frontend fetch them in the background while the user reads the AI reply.\n\nBackend changes (app/routers/conversation.py):\n1. Add a new endpoint `POST /api/conversation/helpers` taking `{conversation_id: int}`. It loads the latest assistant message for that conversation (via conv_dal.get_messages or a new helper), looks up the topic_label/difficulty from conv_dal.get_active_conversation (fall back to ended conversations too — accept any status), then calls `_extract_reply_helpers` and returns `{phrase_suggestions, key_phrases, grammar_notes}`. Add a Pydantic request/response model. Use `safe_llm_call`-style error handling (returns empty arrays on failure, never 500).\n2. In `start_conversation`, REMOVE the `await helpers_coro` step in the non-role-swap path; return empty arrays for `phrase_suggestions`, `key_phrases`, `grammar_notes` so the response returns as soon as the opening is generated. Keep role_briefing (it's only generated in role_swap mode and is needed for the briefing UI). For the role_swap path, also stop awaiting helpers — only await `_get_briefing()`.\n3. In `send_message`, REMOVE the trailing `await _extract_reply_helpers(...)` call after the parallel grammar+AI gather; return empty arrays for the three helper fields. The grammar feedback (errors/suggestions on the user's message) is unaffected — only the helpers about the AI's reply are deferred.\n\nFrontend changes (frontend/src/api.ts and frontend/src/pages/Conversation.tsx — file may be named ConversationPage.tsx; locate via the existing useConversation hook): \n4. Add `fetchConversationHelpers(conversationId)` API helper that POSTs to /api/conversation/helpers.\n5. In the conversation page, after the /start or /message response is rendered, fire `fetchConversationHelpers` in the background (no await blocking the UI). When it resolves, merge `phrase_suggestions`, `key_phrases`, `grammar_notes` into state so the UI updates. Show a subtle loading indicator (e.g., 'Loading suggestions…' or a spinner) in the suggestions/key-phrases panels while pending. If the call fails, silently leave arrays empty.\n\nTests (tests/integration/test_conversation_api.py):\n6. Add a test for POST /api/conversation/helpers happy path (mock copilot.ask_json to return suggestions/key_phrases/grammar_notes; assert response shape).\n7. Add a test that helpers endpoint 404s for unknown conversation_id.\n8. Update existing /start and /message tests if they assert non-empty `phrase_suggestions` — they should now expect empty arrays from the initial response.\n\nMeasure p50 latency before/after by timing /api/conversation/message in the integration test (logged via existing `logger.info`). Expected: ~30-45% reduction in /start and /message wall time since 1 of 2-3 sequential LLM calls is removed from the critical path.\n\nNo schema changes required.",
+  "files_to_modify": ["app/routers/conversation.py", "frontend/src/api.ts", "frontend/src/pages/Conversation.tsx", "tests/integration/test_conversation_api.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose improvement #624
+  │ List directory frontend
+  │   └ 14 files found
+  └ List directory frontend/src
+      └ 12 files found
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough. Let me make the backend changes.Now modify `start_conversation` to skip helpers and return empty arrays:Now modify `send_message`:Now add the `/helpers` endpoint after `send_message`:Now frontend api.ts:Now Conversation.tsx — add a helper function and call it in background. Also add a `helpersLoading` state for the subtle indicator.Now add a helper function and wire it into both `startConversation` and `sendMessage`:Now wire calls to `loadHelpersInBackground` after start and message responses:Now add a subtle loading indicator near the suggestions area:Now add tests:Now run tests and tsc:All tests pass. Now tsc:Clean. Now update UI test spec — Conversation.tsx was modified (added a loading indicator), but no new interactive elements (just an aria-live status text). I'll add one entry for the new status indicator:

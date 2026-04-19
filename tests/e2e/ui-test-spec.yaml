@@ -3186,6 +3186,14 @@ pages:
         priority: medium
         added_in: 597
 
+      - id: conv-131
+        target: Lazy reply-helpers loading indicator appears while suggestions are fetched
+        action: After AI replies, while phrase suggestions have not yet arrived, observe the "Loading reply suggestions…" indicator above the input
+        expect: A subtle text element with aria-label="Loading reply suggestions" is briefly visible, then replaced by the suggestion buttons once /api/conversation/helpers resolves
+        type: functional
+        priority: low
+        added_in: 624
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

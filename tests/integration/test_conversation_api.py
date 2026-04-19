@@ -1905,3 +1905,113 @@ async def test_topic_warmup_custom_topic(client, mock_copilot):
     assert data["topic"] == topic_id
     assert data["topic_label"] == "Pet Store"
     assert len(data["phrases"]) == 4
+
+
+@pytest.mark.integration
+async def test_conversation_helpers_happy_path(client, mock_copilot):
+    """POST /api/conversation/helpers returns suggestions, key_phrases, and grammar_notes
+    for the latest assistant message in an existing conversation."""
+    # Start a conversation so an assistant opening message exists
+    opening = "Welcome to our hotel! How can I help you today?"
+    mock_copilot.ask = AsyncMock(return_value=opening)
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    assert start.status_code == 200
+    conv_id = start.json()["conversation_id"]
+    # /start should NOT pre-compute helpers any more
+    assert start.json()["phrase_suggestions"] == []
+    assert start.json()["key_phrases"] == []
+    assert start.json()["grammar_notes"] == []
+
+    # Now /helpers should call ask_json once and return shaped data
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "suggestions": ["I'd like to check in.", "Do you have a reservation desk?"],
+        "key_phrases": ["how can i help you"],
+        "grammar_notes": [
+            {
+                "phrase": "how can i help you",
+                "grammar_point": "Modal Verb",
+                "explanation": "'Can' is used to offer help politely.",
+            }
+        ],
+    })
+    res = await client.post("/api/conversation/helpers", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    assert "phrase_suggestions" in data
+    assert "key_phrases" in data
+    assert "grammar_notes" in data
+    assert len(data["phrase_suggestions"]) == 2
+    assert "how can i help you" in data["key_phrases"]
+    assert len(data["grammar_notes"]) == 1
+    assert data["grammar_notes"][0]["grammar_point"] == "Modal Verb"
+    mock_copilot.ask_json.assert_awaited_once()
+
+
+@pytest.mark.integration
+async def test_conversation_helpers_unknown_id(client, mock_copilot):
+    """POST /api/conversation/helpers returns 404 for an unknown conversation_id."""
+    res = await client.post("/api/conversation/helpers", json={"conversation_id": 999999})
+    assert res.status_code == 404
+
+
+@pytest.mark.integration
+async def test_conversation_helpers_works_for_ended_conversation(client, mock_copilot):
+    """Helpers endpoint should accept ended conversations as well as active ones."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to our hotel!")
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start.json()["conversation_id"]
+
+    # End the conversation (skip summary to avoid extra LLM mocking)
+    end_res = await client.post("/api/conversation/end", json={"conversation_id": conv_id, "skip_summary": True})
+    assert end_res.status_code == 200
+
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "suggestions": ["Thanks!"],
+        "key_phrases": [],
+        "grammar_notes": [],
+    })
+    res = await client.post("/api/conversation/helpers", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["phrase_suggestions"] == ["Thanks!"]
+
+
+@pytest.mark.integration
+async def test_conversation_helpers_silent_on_llm_failure(client, mock_copilot):
+    """If the LLM call fails, /helpers returns empty arrays rather than 500."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome to our hotel!")
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start.json()["conversation_id"]
+
+    mock_copilot.ask_json = AsyncMock(side_effect=RuntimeError("LLM unavailable"))
+    res = await client.post("/api/conversation/helpers", json={"conversation_id": conv_id})
+    assert res.status_code == 200
+    assert res.json() == {"phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
+
+
+@pytest.mark.integration
+async def test_send_message_no_longer_calls_reply_helpers(client, mock_copilot):
+    """After lazy-loading, /message should not invoke the helpers LLM call.
+    Only the grammar-check ask_json call should occur."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="That sounds great.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Hello!",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Hello!",
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["phrase_suggestions"] == []
+    assert data["key_phrases"] == []
+    assert data["grammar_notes"] == []
+    # Exactly one ask_json call (grammar check), not two (no helpers)
+    assert mock_copilot.ask_json.await_count == 1

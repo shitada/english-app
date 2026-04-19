@@ -97,6 +97,12 @@ export const api = {
       body: JSON.stringify({ conversation_id }),
     }),
 
+  fetchConversationHelpers: (conversation_id: number) =>
+    request<{ phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[] }>('/api/conversation/helpers', {
+      method: 'POST',
+      body: JSON.stringify({ conversation_id }),
+    }),
+
   getHistory: (conversation_id: number) =>
     request<{ messages: ChatMessage[] }>(`/api/conversation/${conversation_id}/history`),
 

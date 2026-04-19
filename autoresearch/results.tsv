@@ -573,3 +573,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 620	1e9b773	2026-04-19	54	438	127	24	643	2082	2082	pass	7.25	kept	Add Quick Numbers & Dates listening dictation drill
 621	7d3836d	2026-04-19	53	498	128	21	700	2101	2101	pass	7.25	kept	Add Quick Shadowing Drill (listen+repeat with timing & accuracy)
 622	992b9d2	2026-04-19	48	160	90	26	324	2101	2101	pass	7.65	kept	Strip emoji from SpeechSynthesis input in conversation (BUG-HIGH)
+623	c614562	2026-04-19	94	95	128	24	341	2101	2101	pass	7.75	kept	Fix dark-mode conversation highlight contrast (BUG-HIGH WCAG AA)
