@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator } from '../components/conversation';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { countFillers } from '../utils/fillerWords';
@@ -61,6 +61,7 @@ export default function Conversation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [replyStartedAt, setReplyStartedAt] = useState<number | null>(null);
   const [duration, setDuration] = useState(5 * 60);
   const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [summary, setSummary] = useState<any>(null);
@@ -202,6 +203,13 @@ export default function Conversation() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-scroll when the reply progress indicator appears so it stays visible on mobile
+  useEffect(() => {
+    if (loading && phase === 'chat') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [loading, phase]);
 
   const endConversation = useCallback(async () => {
     if (!conversationId) return;
@@ -691,6 +699,7 @@ export default function Conversation() {
       });
     }
     setLoading(true);
+    setReplyStartedAt(Date.now());
     try {
       const res = await api.sendMessage(conversationId, userMsg);
       setMessages((prev) => {
@@ -753,6 +762,7 @@ export default function Conversation() {
       }
     } finally {
       setLoading(false);
+      setReplyStartedAt(null);
     }
   };
 
@@ -1738,10 +1748,8 @@ export default function Conversation() {
             )}
           </div>
         )}
-        {loading && (
-          <div className="message message-assistant">
-            <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2, margin: 0 }} />
-          </div>
+        {loading && phase === 'chat' && (
+          <ReplyProgressIndicator startedAt={replyStartedAt ?? undefined} />
         )}
         <div ref={messagesEndRef} />
       </div>

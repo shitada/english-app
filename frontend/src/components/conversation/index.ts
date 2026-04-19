@@ -31,3 +31,5 @@ export { GrammarStreakBadge } from './GrammarStreakBadge';
 export { ConversationMemory } from './ConversationMemory';
 export { NextStepsCard, generateRecommendations } from './NextStepsCard';
 export type { NextStepsData, Recommendation } from './NextStepsCard';
+export { ReplyProgressIndicator, getStageLabel, shouldShowElapsed } from './ReplyProgressIndicator';
+export type { ReplyProgressIndicatorProps } from './ReplyProgressIndicator';

@@ -3202,6 +3202,22 @@ pages:
         priority: medium
         added_in: 628
 
+      - id: conv-133
+        target: Reply progress indicator appears while waiting for assistant reply
+        action: Send a message during chat phase and inspect the bottom of the chat scroll area for data-testid="reply-progress-indicator"
+        expect: An assistant-styled bubble with role="status", aria-live="polite", three animated dots, and the label "Reviewing your message…" replaces the previous generic spinner
+        type: functional
+        priority: high
+        added_in: 630
+
+      - id: conv-134
+        target: Reply progress indicator cycles staged labels and shows elapsed counter after 3s
+        action: Trigger a slow reply (or stub a long-latency send) and observe the indicator label and the data-testid="reply-progress-elapsed" element over time
+        expect: Label changes to "Crafting reply…" by ~2s and "Polishing the wording…" by ~6s; the "Xs" elapsed counter appears once the wait exceeds 3s and ticks up each second
+        type: functional
+        priority: medium
+        added_in: 630
+
   minimal_pairs:
     path: /minimal-pairs
     tests:
