@@ -3488,6 +3488,22 @@ pages:
         priority: medium
         added_in: 646
 
+      - id: conv-140
+        target: Per-message JP訳 reveal button on assistant bubbles
+        action: After an assistant reply renders in /conversation chat phase, locate the small ghost button labeled "🇯🇵 JP訳" (class="message-translate-btn") near the existing 🔊 / 🐢 / Shadow / Dictation controls below the bubble. Click it once.
+        expect: A POST is sent to /api/conversation/translate with { text } equal to the assistant message content. While loading, the button shows a spinner ⏳ and is disabled. On success, a muted secondary line (class="message-translation") appears immediately below the bubble showing the Japanese translation. The button label changes to "JP訳を隠す" and aria-pressed becomes "true".
+        type: functional
+        priority: high
+        added_in: 650
+
+      - id: conv-141
+        target: JP訳 toggle hides/shows cached translation without refetching
+        action: After revealing a translation (conv-140), click the same button again to hide, then click once more to show.
+        expect: Hiding removes the .message-translation node and resets the label to "JP訳"; showing it again re-renders the SAME cached translation text without firing another POST to /api/conversation/translate (cached by message index in component state). The translation text is NEVER passed to the speech synthesis (TTS) controls — clicking 🔊 still speaks only the English content.
+        type: functional
+        priority: medium
+        added_in: 650
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

@@ -2,6 +2,13 @@
 
 from app.config import get_prompt
 
+# Tiny dedicated system prompt for the per-message JP translation reveal in
+# the Conversation page. Used by POST /api/conversation/translate.
+TRANSLATE_TO_JP_SYSTEM = (
+    "Translate the given English sentence to natural, concise Japanese. "
+    "Output only the translation, no quotes or commentary."
+)
+
 
 def CONVERSATION_PARTNER() -> str:
     return get_prompt("conversation_partner")

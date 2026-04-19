@@ -1967,3 +1967,41 @@ async def record_dictation_attempt(
         missed_word_count=req.missed_word_count,
         recent_avg_accuracy_7d=round(avg7, 1),
     )
+
+
+# ---------------------------------------------------------------------------
+# Per-message JP translation reveal (lightweight, no DB writes)
+# ---------------------------------------------------------------------------
+
+class TranslateRequest(BaseModel):
+    text: str = Field(..., max_length=4000)  # outer cap; precise checks below
+
+
+class TranslateResponse(BaseModel):
+    translation: str
+
+
+@router.post("/translate", response_model=TranslateResponse)
+async def translate_to_jp(
+    req: TranslateRequest,
+    _: None = Depends(require_rate_limit),
+) -> TranslateResponse:
+    """Translate a single English sentence/passage to natural Japanese.
+
+    Returns 422 on empty (after strip), 400 on >1000 chars, 502 on LLM failure.
+    No DB writes.
+    """
+    from app.prompts import TRANSLATE_TO_JP_SYSTEM
+
+    text = (req.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=422, detail="text must be non-empty")
+    if len(text) > 1000:
+        raise HTTPException(status_code=400, detail="text exceeds 1000 characters")
+
+    copilot = get_copilot_service()
+    translation = await safe_llm_call(
+        lambda: copilot.ask(TRANSLATE_TO_JP_SYSTEM, text, label="conversation_translate"),
+        context="conversation_translate",
+    )
+    return TranslateResponse(translation=(translation or "").strip())

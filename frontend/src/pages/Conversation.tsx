@@ -139,6 +139,11 @@ export default function Conversation() {
   const [hintUsedThisTurn, setHintUsedThisTurn] = useState(false);
   const [hintCount, setHintCount] = useState(0);
   const [savedChatPhrases, setSavedChatPhrases] = useState<Set<string>>(new Set());
+  // Per-message JP translation cache and UI state, keyed by message index.
+  const [messageTranslations, setMessageTranslations] = useState<Record<number, string>>({});
+  const [translationLoading, setTranslationLoading] = useState<Record<number, boolean>>({});
+  const [translationVisible, setTranslationVisible] = useState<Record<number, boolean>>({});
+  const [translationError, setTranslationError] = useState<Record<number, string>>({});
   const [errorPatterns, setErrorPatterns] = useState<Map<string, number>>(new Map());
   const [topicMastery, setTopicMastery] = useState<TopicMasteryMap>({});
   const [grammarStreak, setGrammarStreak] = useState(0);
@@ -907,6 +912,37 @@ export default function Conversation() {
     await api.saveConversationVocabulary(conversationId, [phrase]);
     setSavedChatPhrases((prev) => new Set(prev).add(key));
   }, [conversationId, savedChatPhrases]);
+
+  // Per-message JP translation reveal: fetches once per message, then toggles.
+  const handleToggleTranslation = useCallback(async (messageIndex: number, text: string) => {
+    // Toggle visibility if we already have a cached translation
+    if (messageTranslations[messageIndex]) {
+      setTranslationVisible((prev) => ({ ...prev, [messageIndex]: !prev[messageIndex] }));
+      return;
+    }
+    if (translationLoading[messageIndex]) return;
+    setTranslationLoading((prev) => ({ ...prev, [messageIndex]: true }));
+    setTranslationError((prev) => {
+      const { [messageIndex]: _drop, ...rest } = prev;
+      return rest;
+    });
+    try {
+      const resp = await fetch('/api/conversation/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      setMessageTranslations((prev) => ({ ...prev, [messageIndex]: data.translation || '' }));
+      setTranslationVisible((prev) => ({ ...prev, [messageIndex]: true }));
+    } catch (e) {
+      setTranslationError((prev) => ({ ...prev, [messageIndex]: 'JP訳の取得に失敗しました' }));
+    } finally {
+      setTranslationLoading((prev) => ({ ...prev, [messageIndex]: false }));
+    }
+  }, [messageTranslations, translationLoading]);
+
 
   // Topic selection
   if (phase === 'select') {
@@ -1898,7 +1934,41 @@ export default function Conversation() {
                   messageId={`${conversationId ?? 'c'}-${i}`}
                 />
               )}
+              {msg.role === 'assistant'
+                && !(loading && phase === 'chat' && i === messages.length - 1)
+                && msg.content.trim().length > 0 && (
+                <button
+                  type="button"
+                  className="message-translate-btn"
+                  onClick={() => handleToggleTranslation(i, msg.content)}
+                  disabled={!!translationLoading[i]}
+                  aria-label={translationVisible[i] ? 'JP訳を隠す' : 'JP訳を表示'}
+                  aria-pressed={!!translationVisible[i]}
+                  title={translationVisible[i] ? 'JP訳を隠す' : 'JP訳を表示'}
+                >
+                  {translationLoading[i]
+                    ? <span className="message-translate-spinner" aria-hidden="true">⏳</span>
+                    : <span aria-hidden="true">🇯🇵</span>}
+                  <span style={{ marginLeft: 4 }}>
+                    {translationVisible[i] ? 'JP訳を隠す' : 'JP訳'}
+                  </span>
+                </button>
+              )}
             </div>
+            {msg.role === 'assistant' && translationVisible[i] && messageTranslations[i] && (
+              <div
+                className="message-translation"
+                role="note"
+                aria-label="Japanese translation"
+              >
+                {messageTranslations[i]}
+              </div>
+            )}
+            {msg.role === 'assistant' && translationError[i] && (
+              <div className="message-translation message-translation-error" role="alert">
+                {translationError[i]}
+              </div>
+            )}
             {msg.role === 'user' && typeof msg.pace_wpm === 'number' && msg.pace_wpm > 0 && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
                 <PaceBadge wpm={msg.pace_wpm} />

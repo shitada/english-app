@@ -434,6 +434,60 @@ button.chat-header-toggle {
   border-bottom-left-radius: 4px;
 }
 
+/* Per-message JP translation reveal (ghost button + muted secondary line). */
+.message-translate-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 8px;
+  margin-left: 4px;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.message-translate-btn:hover:not(:disabled) {
+  background: var(--bg-card);
+  color: var(--text);
+  border-color: var(--primary);
+}
+.message-translate-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.message-translate-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.message-translate-spinner {
+  display: inline-block;
+  animation: rotateSpin 1.2s linear infinite;
+}
+@keyframes rotateSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.message-translation {
+  margin: 4px 8px 0 8px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--primary);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 4px;
+  max-width: 80%;
+  /* Light & dark themes inherit via CSS variables; --text on --bg-card
+     yields ≥4.5:1 contrast in both default themes. */
+}
+.message-translation-error {
+  border-left-color: #c0392b;
+  color: #c0392b;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
