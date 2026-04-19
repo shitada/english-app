@@ -3731,3 +3731,49 @@ pages:
         type: functional
         priority: medium
         added_in: 601
+
+  home_shadowing_cta:
+    path: /
+    tests:
+      - id: home-shadow-001
+        target: Home page shows Shadowing Drill CTA card
+        action: Visit / and scroll to find data-testid="shadowing-cta"
+        expect: Card visible with "Shadowing Drill" title and "Start" button
+        type: functional
+        priority: medium
+        added_in: 621
+
+      - id: home-shadow-002
+        target: Clicking Shadowing CTA navigates to /shadowing
+        action: Click data-testid="shadowing-cta" link
+        expect: URL changes to /shadowing and data-testid="shadowing-page" is visible
+        type: navigation
+        priority: medium
+        added_in: 621
+
+  shadowing:
+    path: /shadowing
+    tests:
+      - id: shadowing-001
+        target: Shadowing page renders heading and a sentence card
+        action: Visit /shadowing and snapshot
+        expect: "Shadowing Drill" heading visible and data-testid="shadowing-sentence" populated
+        type: visual
+        priority: high
+        added_in: 621
+
+      - id: shadowing-002
+        target: Listen button is present and enabled when idle
+        action: Wait for sentence to load, locate data-testid="shadowing-play"
+        expect: Button visible and not disabled
+        type: functional
+        priority: medium
+        added_in: 621
+
+      - id: shadowing-003
+        target: Next sentence button loads a new sentence after a results state
+        action: Inspect data-testid="shadowing-next" presence in results phase
+        expect: Button rendered as a clickable button (manual playthrough)
+        type: functional
+        priority: low
+        added_in: 621

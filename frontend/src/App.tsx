@@ -15,6 +15,7 @@ import Vocabulary from './pages/Vocabulary';
 import Listening from './pages/Listening';
 import Dashboard from './pages/Dashboard';
 import MinimalPairs from './pages/MinimalPairs';
+import Shadowing from './pages/Shadowing';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -109,6 +110,7 @@ export default function App() {
                 <Route path="/pronunciation" element={<Pronunciation />} />
                 <Route path="/listening" element={<Listening />} />
                 <Route path="/minimal-pairs" element={<MinimalPairs />} />
+                <Route path="/shadowing" element={<Shadowing />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

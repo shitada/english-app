@@ -41,4 +41,115 @@
   │ date +%s
   └ 2 lines...
 
-Now let me implement everything. First, prompts and database:Now create the DAL:Now extend the listening router:Now frontend api.ts and the component:Now create the React component:Need to use `setRate` rather than passing an opts object. Update component:Now register card in QuickPracticeHub listening tab:Now the tests:Now run tests:All pass. Quick run of broader unit/integration suite to confirm nothing broke:All 2082 tests pass. Now TypeScript check:Clean. Now update UI test spec:Commit:
+Now let me implement everything. First, prompts and database:Now create the DAL:Now extend the listening router:Now frontend api.ts and the component:Now create the React component:Need to use `setRate` rather than passing an opts object. Update component:Now register card in QuickPracticeHub listening tab:Now the tests:Now run tests:All pass. Quick run of broader unit/integration suite to confirm nothing broke:All 2082 tests pass. Now TypeScript check:Clean. Now update UI test spec:Commit:```json
+{
+  "committed": true,
+  "commit_hash": "1e9b773",
+  "files_changed": [
+    "app/prompts.py",
+    "app/database.py",
+    "app/dal/numbers_drill.py",
+    "app/routers/listening.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickNumbersDatesCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/unit/test_numbers_drill_normalize.py",
+    "tests/integration/test_numbers_drill_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 17,
+  "ui_spec_updated": true,
+  "description": "Added Quick Numbers & Dates listening dictation drill: POST /api/listening/numbers-drill (Copilot-generated with fallback) + /submit, numbers_drill_attempts table, NUMBERS_DRILL_PROMPT, normalize/compare helpers, QuickNumbersDatesCard in Listening tab, unit + integration tests, and 6 UI spec entries."
+}
+```● Coder Implement iter 620
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "feat: add Quick Numbers & Dates listening dictation drill (iter
+  │   │ 620)
+  │   │
+  │   │ Adds POST /api/listening/numbers-drill (Copilot-generated, with local…
+  │   └ 23 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git log -1 --stat | head -25
+      └ 27 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2082,
+  "tests_total": 2082,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2082 passed in 98.85s (0:01:38) ========================",
+  "failure_summary": ""
+}
+```● Tester Test iter 620
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40; echo
+  │   │ "EXIT=$?"
+  │   └ 24 lines...
+  └ read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -200
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+I don't have shell access, so I'll spot-check the key files for migration safety.All tests pass, TS passes, smoke passes. New table (CREATE TABLE IF NOT EXISTS) requires no ALTER migration. Feature adds clear listening-learning value.
+
+```json
+{"code_quality": 7, "feature_value": 8, "maintainability": 7, "ux_quality": 7, "total_score": 7.25, "verdict": "keep", "rationale": "New Numbers & Dates dictation drill adds clear listening value with full backend+frontend+tests; all 2082 tests pass, TS+smoke green, new table needs no ALTER migration."}
+```● Evaluator Evaluate iter 620
+  │ List directory .
+  │   └ 211 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (49 lines read)
+
+● Record iter 620 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s);
+  │ T0=1776572443; T1=1776572497; T2=1776572935; T3=1776573062; HASH=$(git
+  │ rev-parse --short HEAD); printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' 620 "$HASH"
+  │ "$(date +%Y-%m-%d)" $((T1-T0)) $((T2-T1)) $((T3-T2)) $((T4-T3)) $((T4-T0))…
+  └ 5 lines...
+
+Iteration 620 complete. Starting iteration 621.
+
+● T0 iter 621 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Quick Shadowing Drill: listen, repeat, and score timing + accuracy",
+  "description": "Add a new Quick Practice card 'Shadowing Drill' that helps users improve fluency and prosody by repeating short native-paced sentences immediately after hearing them. This targets the listening+speaking core goal of the app.\n\nFlow:\n1. User opens the card from Home Quick Practice grid (similar to existing Quick Speak / Quick Conversation cards).\n2. Backend endpoint `POST /api/shadowing/sentence` returns a single short sentence (8–18 words) appropriate for the user's level, plus expected speaking duration in seconds. Reuse `copilot_client` with a prompt in `app/prompts.py` (`SHADOWING_PROMPT`) that asks for: sentence, IPA-free phonetic hint, target_seconds, focus_tip (e.g., 'link \"want to\" → \"wanna\"'). Cache last 20 to avoid repeats per session.\n3. Frontend page `frontend/src/pages/Shadowing.tsx`:\n   - Plays the sentence via existing TTS (browser SpeechSynthesis, reuse helper from Pronunciation).\n   - Shows a 3-2-1 countdown, then records via Web Speech API (mirror pattern from `Pronunciation.tsx`).\n   - Computes two scores: (a) word-accuracy = % of expected words present in transcript (case/punct-insensitive), (b) timing-score = 100 - min(100, abs(actual_seconds - target_seconds)/target_seconds * 100).\n   - Displays combined score, the focus_tip, and 'Try again' / 'Next sentence' buttons. Shows transcript diff with missed words highlighted.\n4. Persist each attempt with `POST /api/shadowing/attempt` storing {sentence, transcript, accuracy, timing_score, duration_ms, created_at} in a new `shadowing_attempts` table for future trend display.\n5. Add route in `App.tsx` and a Quick Practice card on `Home.tsx` linking to `/shadowing`.\n\nSchema additions in `app/database.py` SCHEMA:\n```sql\nCREATE TABLE IF NOT EXISTS shadowing_attempts (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  sentence TEXT NOT NULL,\n  transcript TEXT,\n  accuracy REAL NOT NULL DEFAULT 0,\n  timing_score REAL NOT NULL DEFAULT 0,\n  duration_ms INTEGER NOT NULL DEFAULT 0,\n  created_at TEXT NOT NULL DEFAULT (datetime('now'))\n);\n```\nAnd append to `_MIGRATIONS` in `database.py` (idempotent, wrapped in try/except for already-exists):\n```python\n\"CREATE TABLE IF NOT EXISTS shadowing_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, sentence TEXT NOT NULL, transcript TEXT, accuracy REAL NOT NULL DEFAULT 0, timing_score REAL NOT NULL DEFAULT 0, duration_ms INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')))\",\n```\n\nAdd a router `app/routers/shadowing.py` registered in `main.py`, a small DAL `app/dal/shadowing.py` with `save_attempt` and `recent_attempts`, and basic unit/integration tests covering: sentence generation returns expected fields, attempt save persists row, accuracy calculation handled in frontend (test via small util in `frontend/src/utils/shadowing.ts` with vitest). Keep UI consistent with existing Quick Practice card styling (dark mode + mobile responsive).",
+  "files_to_modify": ["app/routers/shadowing.py", "app/database.py", "frontend/src/pages/Shadowing.tsx", "frontend/src/pages/Home.tsx", "frontend/src/App.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 621
+  │ List directory frontend/src
+  │   └ 12 files found
+  └ List directory frontend/src/pages
+      └ 7 files found
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me also look at the autoresearch ui-test-spec.yaml location:Now let me view the integration test for numbers drill as a template, and look at MinimalPairs.tsx briefly:Now I have full understanding. Let me build the implementation.
+
+First, the backend: prompts.py, dal/shadowing.py, routers/shadowing.py, database.py migration, main.py:Now create DAL:Now add the table to SCHEMA + migration:Now create the router:Register router:Now backend tests:Now frontend: api.ts additions, Home card, App.tsx route, Shadowing.tsx page.Add route in App.tsx:Add Shadowing CTA card on Home below MinimalPairs CTA:Now create the Shadowing page:Now check Home.tsx — `Mic` is already imported (yes per line 3). Good. Update UI test spec & run typecheck:Now run pytest:All 19 pass. Let me run the full unit+integration suites quickly to make sure nothing else broke:All 2101 pass. Now update UI test spec:Commit:

@@ -27,6 +27,27 @@ def CONVERSATION_QUIZ() -> str:
     return get_prompt("conversation_quiz")
 
 
+def SHADOWING_PROMPT() -> str:
+    """System prompt for the Quick Shadowing Drill (listen-and-repeat sentence)."""
+    return (
+        "You generate short native-paced English sentences for shadowing "
+        "practice (listen-and-repeat to improve fluency and prosody).\n\n"
+        "Return STRICT JSON in this exact shape:\n"
+        '{ "sentence": "...", "focus_tip": "...", "target_seconds": 4.5 }\n\n'
+        "Rules:\n"
+        "- sentence MUST be a single natural English sentence between 8 and 18 "
+        "words. Use everyday vocabulary and natural rhythm (avoid quotes, "
+        "lists, or formal jargon).\n"
+        "- focus_tip is ONE short coaching hint (max ~12 words) about a "
+        "prosody feature to focus on (e.g. linking, sentence stress, "
+        "intonation, reduced 'to', schwa, contractions).\n"
+        "- target_seconds is the approximate time a native speaker would take "
+        "to say the sentence at a natural pace, as a number between 2.5 and "
+        "8.0.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+
+
 def NUMBERS_DRILL_PROMPT() -> str:
     """System prompt for the Quick Numbers & Dates listening drill."""
     return (

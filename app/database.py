@@ -181,6 +181,18 @@ CREATE TABLE IF NOT EXISTS numbers_drill_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_numbers_drill_created ON numbers_drill_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_numbers_drill_kind ON numbers_drill_attempts(kind);
+
+CREATE TABLE IF NOT EXISTS shadowing_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sentence TEXT NOT NULL,
+    transcript TEXT NOT NULL DEFAULT '',
+    accuracy REAL NOT NULL DEFAULT 0,
+    timing_score REAL NOT NULL DEFAULT 0,
+    duration_ms INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_shadowing_attempts_created ON shadowing_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -420,6 +432,22 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on numbers_drill_attempts kind",
         "CREATE INDEX IF NOT EXISTS idx_numbers_drill_kind ON numbers_drill_attempts(kind)",
+    ),
+    (
+        "create shadowing_attempts table",
+        """CREATE TABLE IF NOT EXISTS shadowing_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sentence TEXT NOT NULL,
+            transcript TEXT NOT NULL DEFAULT '',
+            accuracy REAL NOT NULL DEFAULT 0,
+            timing_score REAL NOT NULL DEFAULT 0,
+            duration_ms INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on shadowing_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_shadowing_attempts_created ON shadowing_attempts(created_at DESC)",
     ),
 ]
 

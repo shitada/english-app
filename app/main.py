@@ -21,6 +21,7 @@ from app.routers import conversation, pronunciation, vocabulary
 from app.routers import dashboard
 from app.routers import preferences
 from app.routers import listening
+from app.routers import shadowing
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -180,6 +181,7 @@ app.include_router(vocabulary.router)
 app.include_router(dashboard.router)
 app.include_router(preferences.router)
 app.include_router(listening.router)
+app.include_router(shadowing.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

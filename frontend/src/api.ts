@@ -3336,3 +3336,41 @@ export function submitNumbersDrill(items: Array<{
     body: JSON.stringify({ items }),
   });
 }
+
+
+// ── Quick Shadowing Drill ─────────────────────────────────────────────
+
+export interface ShadowingSentence {
+  sentence: string;
+  focus_tip: string;
+  target_seconds: number;
+}
+
+export interface ShadowingAttemptInput {
+  sentence: string;
+  transcript: string;
+  accuracy: number;
+  timing_score: number;
+  duration_ms: number;
+}
+
+export interface ShadowingAttemptResponse {
+  id: number;
+  sentence: string;
+  transcript: string;
+  accuracy: number;
+  timing_score: number;
+  combined_score: number;
+  duration_ms: number;
+}
+
+export function getShadowingSentence(): Promise<ShadowingSentence> {
+  return request<ShadowingSentence>('/api/shadowing/sentence', { method: 'POST' });
+}
+
+export function submitShadowingAttempt(input: ShadowingAttemptInput): Promise<ShadowingAttemptResponse> {
+  return request<ShadowingAttemptResponse>('/api/shadowing/attempt', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
