@@ -140,6 +140,15 @@ export interface Translations {
   heatmapVocabCount: string;
   heatmapListeningCount: string;
   heatmapConvCount: string;
+  // Phrase of the Day shadow drill
+  shadowDrill: string;
+  shadowSlow: string;
+  shadowNormal: string;
+  shadowFast: string;
+  phraseMastered: string;
+  restartDrill: string;
+  bestScore: string;
+  averageScore: string;
 }
 
 export const en: Translations = {
@@ -281,6 +290,14 @@ export const en: Translations = {
   heatmapVocabCount: '{count} reviews',
   heatmapListeningCount: '{count} quizzes • {accuracy}% acc',
   heatmapConvCount: '{count} messages',
+  shadowDrill: 'Shadow ×3',
+  shadowSlow: 'Slow',
+  shadowNormal: 'Normal',
+  shadowFast: 'Fast',
+  phraseMastered: 'Phrase mastered!',
+  restartDrill: 'Restart drill',
+  bestScore: 'Best',
+  averageScore: 'Avg',
 };
 
 export const ja: Translations = {
@@ -422,6 +439,14 @@ export const ja: Translations = {
   heatmapVocabCount: '{count}回の復習',
   heatmapListeningCount: '{count}クイズ • 正答率 {accuracy}%',
   heatmapConvCount: '{count}件のメッセージ',
+  shadowDrill: 'シャドー×3',
+  shadowSlow: 'ゆっくり',
+  shadowNormal: '普通',
+  shadowFast: '速い',
+  phraseMastered: 'フレーズ習得！',
+  restartDrill: 'ドリルをやり直す',
+  bestScore: 'ベスト',
+  averageScore: '平均',
 };
 
 export type Locale = 'en' | 'ja';

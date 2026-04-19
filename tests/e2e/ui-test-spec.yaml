@@ -254,6 +254,22 @@ pages:
         priority: medium
         added_in: 593
 
+      - id: home-030
+        target: Phrase of the Day "Shadow ×3" button starts a 3-attempt drill
+        action: click the Shadow ×3 button (shadow-drill-btn) in the Phrase of the Day card
+        expect: A drill panel (shadow-drill-panel) appears with three pips (shadow-pip-0, shadow-pip-1, shadow-pip-2) initially in pending/in-progress states
+        type: functional
+        priority: medium
+        added_in: 657
+
+      - id: home-031
+        target: Shadow drill summary appears when all three attempts are scored
+        action: complete the 3-attempt shadow drill (mocked SpeechRecognition + speechSynthesis)
+        expect: shadow-drill-summary section renders with Best %, Avg %, Restart drill button, and shadow-drill-mastered badge when every pip is >=80%
+        type: functional
+        priority: medium
+        added_in: 657
+
   conversation:
     path: /conversation
     tests:

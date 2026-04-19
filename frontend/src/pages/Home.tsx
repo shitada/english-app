@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageSquare, Mic, BookOpen, BarChart3, Flame, AlertTriangle, Target, TrendingUp, TrendingDown, Minus, Trash2, CheckCircle, HelpCircle, Zap, Award, Headphones, PenTool } from 'lucide-react';
 import { getLearningInsights, getLearningGoals, setLearningGoal, deleteLearningGoal, getTodayActivity, getDailyChallenge, getWordOfTheDay, getPhraseOfTheDay, getVocabularyStats, getRecentActivity, getAchievements, evaluateWotdSentence, type LearningInsights, type LearningGoal, type TodayActivity, type DailyChallenge, type WordOfTheDay, type PhraseOfTheDay, type VocabularyStatsResponse, type RecentActivityItem, type Achievement, type WotdPracticeResult } from '../api';
@@ -13,6 +13,22 @@ import SpeakingJournal from '../components/SpeakingJournal';
 import FluencySprintCard from '../components/FluencySprintCard';
 import StudyPlanCard from '../components/StudyPlanCard';
 import { useI18n } from '../i18n/I18nContext';
+import {
+  SHADOW_DRILL_LADDER,
+  classifyAttempt,
+  summarizeDrill,
+  type ShadowSpeedKey,
+  type ShadowAttempt,
+  type AttemptStatus,
+} from '../utils/phraseShadowDrill';
+
+// Re-export so existing call-sites / tests can continue to import from this module.
+export {
+  SHADOW_DRILL_LADDER,
+  classifyAttempt,
+  summarizeDrill,
+};
+export type { ShadowSpeedKey, ShadowAttempt, AttemptStatus };
 
 const MODULE_ROUTES: Record<string, string> = {
   conversation: '/conversation',
@@ -581,14 +597,40 @@ function WordOfTheDayCard() {
   );
 }
 
+// ----- Phrase of the Day shadowing drill (helpers live in utils/phraseShadowDrill) -----
+
 function PhraseOfTheDayCard() {
   const { t } = useI18n();
   const [phrase, setPhrase] = useState<PhraseOfTheDay | null>(null);
   const [score, setScore] = useState<number | null>(null);
   const [listening, setListening] = useState(false);
 
+  // Drill state
+  const [drillActive, setDrillActive] = useState(false);
+  const [drillStep, setDrillStep] = useState(0); // 0..2; equals attempts.length when not running
+  const [drillRunning, setDrillRunning] = useState(false); // true while a step is playing/listening
+  const [attempts, setAttempts] = useState<ShadowAttempt[]>([]);
+
+  // Refs for cleanup
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const cancelledRef = useRef(false);
+
   useEffect(() => {
     getPhraseOfTheDay().then(setPhrase).catch(() => {});
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cancelledRef.current = true;
+      try {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      } catch { /* noop */ }
+      try {
+        recognitionRef.current?.abort?.();
+      } catch { /* noop */ }
+    };
   }, []);
 
   const speak = useCallback((text: string) => {
@@ -631,9 +673,145 @@ function PhraseOfTheDayCard() {
     recognition.start();
   }, [phrase, computeAccuracy]);
 
+  const speechRecognitionSupported = typeof window !== 'undefined' && (
+    !!(window as unknown as Record<string, unknown>).SpeechRecognition ||
+    !!(window as unknown as Record<string, unknown>).webkitSpeechRecognition
+  );
+
+  // Run a single drill step: speak at given rate, then start recognition on utterance end.
+  const runDrillStep = useCallback((stepIndex: number) => {
+    if (!phrase) return;
+    if (cancelledRef.current) return;
+    const rung = SHADOW_DRILL_LADDER[stepIndex];
+    if (!rung) return;
+    const SpeechRecognitionCtor = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) return;
+
+    setDrillRunning(true);
+
+    const finalize = (percent: number | null) => {
+      setAttempts((prev) => {
+        const next = [...prev];
+        next[stepIndex] = { speed: rung.speed, rate: rung.rate, percent };
+        return next;
+      });
+      setDrillRunning(false);
+      // Advance to next step (or finish)
+      setDrillStep(stepIndex + 1);
+    };
+
+    const startRecognition = () => {
+      if (cancelledRef.current) return;
+      try {
+        const recognition = new (SpeechRecognitionCtor as new () => SpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        let settled = false;
+        recognition.onresult = (e: SpeechRecognitionEvent) => {
+          settled = true;
+          const transcript = e.results[0][0].transcript;
+          finalize(computeAccuracy(phrase.phrase, transcript));
+        };
+        recognition.onerror = () => {
+          if (!settled) {
+            settled = true;
+            finalize(0);
+          }
+        };
+        recognition.onend = () => {
+          if (!settled) {
+            settled = true;
+            finalize(0);
+          }
+        };
+        recognitionRef.current = recognition;
+        recognition.start();
+      } catch {
+        finalize(0);
+      }
+    };
+
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch { /* noop */ }
+      const u = new SpeechSynthesisUtterance(phrase.phrase);
+      u.lang = 'en-US';
+      u.rate = rung.rate;
+      u.onend = () => startRecognition();
+      u.onerror = () => startRecognition();
+      utteranceRef.current = u;
+      window.speechSynthesis.speak(u);
+    } else {
+      startRecognition();
+    }
+  }, [phrase, computeAccuracy]);
+
+  const startDrill = useCallback(() => {
+    if (!phrase) return;
+    if (!speechRecognitionSupported) return;
+    cancelledRef.current = false;
+    setDrillActive(true);
+    setAttempts([]);
+    setDrillStep(0);
+    runDrillStep(0);
+  }, [phrase, speechRecognitionSupported, runDrillStep]);
+
+  // After each attempt completes, kick off the next step automatically.
+  useEffect(() => {
+    if (!drillActive) return;
+    if (drillRunning) return;
+    if (drillStep > 0 && drillStep < SHADOW_DRILL_LADDER.length) {
+      // small delay to let UI breathe
+      const id = setTimeout(() => runDrillStep(drillStep), 400);
+      return () => clearTimeout(id);
+    }
+  }, [drillActive, drillRunning, drillStep, runDrillStep]);
+
+  const restartDrill = useCallback(() => {
+    cancelledRef.current = true;
+    try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch { /* noop */ }
+    try { recognitionRef.current?.abort?.(); } catch { /* noop */ }
+    setDrillRunning(false);
+    setAttempts([]);
+    setDrillStep(0);
+    // Restart fresh
+    setTimeout(() => {
+      cancelledRef.current = false;
+      runDrillStep(0);
+    }, 50);
+  }, [runDrillStep]);
+
   if (!phrase) return null;
 
   const scoreColor = score !== null ? (score >= 80 ? 'var(--success, #10b981)' : score >= 50 ? 'var(--warning, #f59e0b)' : 'var(--danger, #ef4444)') : undefined;
+
+  // Build pips for rendering
+  const speedLabel = (s: ShadowSpeedKey): string => {
+    if (s === 'slow') return t('shadowSlow') || 'Slow';
+    if (s === 'normal') return t('shadowNormal') || 'Normal';
+    return t('shadowFast') || 'Fast';
+  };
+  const pipColor = (status: AttemptStatus): string => {
+    switch (status) {
+      case 'good': return 'var(--success, #10b981)';
+      case 'okay': return 'var(--warning, #f59e0b)';
+      case 'bad': return 'var(--danger, #ef4444)';
+      case 'inProgress': return 'var(--warning, #f59e0b)';
+      default: return 'var(--border, #d1d5db)';
+    }
+  };
+  const pipIcon = (status: AttemptStatus): string => {
+    switch (status) {
+      case 'good': return '✅';
+      case 'okay': return '🟠';
+      case 'bad': return '🔴';
+      case 'inProgress': return '🟡';
+      default: return '⚪';
+    }
+  };
+
+  const summary = summarizeDrill(
+    SHADOW_DRILL_LADDER.map((rung, i) => attempts[i] ?? { speed: rung.speed, rate: rung.rate, percent: null })
+  );
 
   return (
     <div style={{
@@ -658,23 +836,90 @@ function PhraseOfTheDayCard() {
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <button
           onClick={() => speak(phrase.phrase)}
+          disabled={drillActive && drillRunning}
           style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid var(--border, #e5e7eb)', background: 'var(--bg-secondary, #f9fafb)', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4 }}
         >
           🔊 {t('listen') || 'Listen'}
         </button>
         <button
           onClick={startPractice}
-          disabled={listening}
-          style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: listening ? 'var(--warning, #f59e0b)' : 'var(--primary, #6366f1)', color: '#fff', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4 }}
+          disabled={listening || (drillActive && drillRunning)}
+          style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: listening ? 'var(--warning, #f59e0b)' : 'var(--primary, #6366f1)', color: '#fff', cursor: (drillActive && drillRunning) ? 'not-allowed' : 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4, opacity: (drillActive && drillRunning) ? 0.6 : 1 }}
         >
-          🎙️ {listening ? (t('listening') || 'Listening...') : (t('practice') || 'Practice')}
+          🎙️ {listening ? (t('listeningLabel') || 'Listening...') : (t('practice') || 'Practice')}
         </button>
-        {score !== null && (
+        {speechRecognitionSupported && (
+          <button
+            onClick={startDrill}
+            disabled={drillActive && drillRunning}
+            data-testid="shadow-drill-btn"
+            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)', color: '#fff', cursor: (drillActive && drillRunning) ? 'not-allowed' : 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4, opacity: (drillActive && drillRunning) ? 0.7 : 1 }}
+          >
+            🎯 {t('shadowDrill') || 'Shadow ×3'}
+          </button>
+        )}
+        {score !== null && !drillActive && (
           <span style={{ fontWeight: 700, fontSize: '1rem', color: scoreColor, marginLeft: 8 }}>
             {score}%
           </span>
         )}
       </div>
+
+      {drillActive && (
+        <div style={{ marginTop: 14 }} data-testid="shadow-drill-panel">
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {SHADOW_DRILL_LADDER.map((rung, i) => {
+              const attempt = attempts[i];
+              const isActive = drillRunning && drillStep === i;
+              const status: AttemptStatus = classifyAttempt(attempt?.percent ?? null, isActive);
+              return (
+                <div
+                  key={rung.speed}
+                  data-testid={`shadow-pip-${i}`}
+                  data-status={status}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                    padding: '6px 10px', borderRadius: 8,
+                    border: `1px solid ${pipColor(status)}`,
+                    minWidth: 70,
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>{pipIcon(status)}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{speedLabel(rung.speed)}</span>
+                  <span style={{ fontSize: 11, color: pipColor(status) }}>
+                    {attempt?.percent !== null && attempt?.percent !== undefined ? `${attempt.percent}%` : '—'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {summary.completed && (
+            <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }} data-testid="shadow-drill-summary">
+              <span style={{ fontSize: 13, color: 'var(--text)' }}>
+                <strong>{t('bestScore') || 'Best'}:</strong> {summary.best}%
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--text)' }}>
+                <strong>{t('averageScore') || 'Avg'}:</strong> {summary.avg}%
+              </span>
+              {summary.mastered && (
+                <span
+                  data-testid="shadow-drill-mastered"
+                  style={{ padding: '3px 10px', borderRadius: 999, background: 'var(--success, #10b981)', color: '#fff', fontSize: 12, fontWeight: 700 }}
+                >
+                  🎉 {t('phraseMastered') || 'Phrase mastered!'}
+                </span>
+              )}
+              <button
+                onClick={restartDrill}
+                style={{ marginLeft: 'auto', padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border, #e5e7eb)', background: 'var(--bg-secondary, #f9fafb)', cursor: 'pointer', fontSize: '0.8rem' }}
+              >
+                ↻ {t('restartDrill') || 'Restart drill'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
