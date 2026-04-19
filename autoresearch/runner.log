@@ -725,3 +725,155 @@ Now create the test file:The autoresearch artifacts are picked up by `git add -A
       │ lts.json 2>&1 | head -100
       └ 2 lines...
 
+```json
+{
+  "committed": true,
+  "commit_hash": "cf1e4e2",
+  "files_changed": ["tests/unit/test_copilot_prewarm.py"],
+  "tests_added": 0,
+  "ui_spec_updated": false,
+  "description": "Fixed test_prewarm_creates_and_destroys_session by replacing isinstance check on TypedDict SystemMessageReplaceConfig with dict equality check; amended commit 838a623 → cf1e4e2."
+}
+```● Coder Fix prewarm test
+  │ run prewarm tests (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │   │ tests/unit/test_copilot_prewarm.py -v 2>&1 | tail -40
+  │   └ 15 lines...
+  └ amend commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit --amend --no-edit && git rev-parse HEAD
+      └ 18 lines...
+
+```json
+{
+  "tests_passed": 2140,
+  "tests_total": 2140,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2140 passed in 104.76s (0:01:44) =======================",
+  "failure_summary": ""
+}
+```● Tester Re-test iter 634
+  │ TypeScript check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30; echo "EXIT=$?"
+  │   └ 2 lines...
+  └ Check e2e results (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1; echo "---"; cat /Users/shingotada/Documents/vscode/english-app
+      │ /autoresearch/ui-test-results.json 2>/dev/null
+      └ 3 lines...
+
+● Mark T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T3=$(date +%s) && echo
+  │ "T3=$T3"
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "Clean, exception-safe, idempotent prewarm scheduled as a non-blocking background task in lifespan; all 2140 tests pass and TS compiles, with a tangible cold-start latency benefit for the first conversation request."
+}
+```● Evaluator Evaluate iter 634
+  │ Read main.py
+  │   │ app/main.py
+  │   └ L1:80 (80 lines read)
+  └ Read main.py
+      │ app/main.py
+      └ L80:130 (51 lines read)
+
+● Record iter 634 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=634 && HASH=cf1e4e2 && PASSED=2140 && TOTAL=2140 && TS=pass &&
+  │ SCORE=7.25 && VERDICT=kept && DESC="Pre-warm Copilot SDK session in
+  │ FastAPI lifespan startup (cuts ~0.6s cold-start)" && T0=1776597630 &&
+  │ T1=1776597803 && T2=1776597881 && T3=1776598178 && printf …
+  └ 6 lines...
+
+Iteration 634 complete (kept, 7.25). Moving to iteration 635.
+
+● Iter 635 context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) && echo
+  │ "T0=$T0" && grep '^- \[ \]' autoresearch/backlog.md | head -10
+  └ 5 lines...
+
+The PERF-HIGH item (4) parallelize feedback+reply is **already done** in /message (lines 568-589 use asyncio.gather). Pivoting to a different concrete perf win: skip the grammar-check LLM call when the user message is trivial (very short / acknowledgment-only). That saves an entire LLM call (~2–4s) on a common case.```json
+{
+  "type": "feature",
+  "title": "Skip grammar-check LLM call for trivial user messages in /api/conversation/message",
+  "description": "PERF win for the conversation endpoint. The original PERF-HIGH backlog item (4) — parallelize feedback+reply with asyncio.gather — is ALREADY IMPLEMENTED in app/routers/conversation.py send_message (lines 568-589). To make further p50 progress, skip the grammar-check LLM call entirely when the user's message is trivial: too short to meaningfully grammar-check or a pure acknowledgment. This removes one LLM round-trip (~2-4s) from a common case and is trivial to test.\n\n**Change in app/routers/conversation.py (send_message, around lines 566-589):**\n1. Add a small module-level helper `_should_skip_grammar_check(text: str) -> bool` that returns True when:\n   - The trimmed message has fewer than 4 word tokens (split on whitespace after stripping punctuation), OR\n   - The lowercased trimmed message (with trailing punctuation stripped) is in a small set of pure acknowledgments: {'yes','no','ok','okay','sure','thanks','thank you','yeah','yep','nope','cool','great','nice','hi','hello','hey','bye','goodbye','right','exactly','maybe','same','me too'}.\n2. In send_message, before constructing the parallel gather, compute `skip_grammar = _should_skip_grammar_check(req.content)`. If True, replace the `_safe_grammar_check` task with an `asyncio.sleep(0)`-style no-op that returns None, and log `latency_tracker`-friendly info `'skipping grammar check (trivial message)'`. The reply LLM call still runs. The rest of the flow is unchanged: `feedback` will be None and the existing `if feedback is not None:` branch already handles that.\n3. Keep behavior identical when message is non-trivial.\n\n**Tests in tests/unit/test_conversation_skip_grammar.py (new file):**\n- Unit-test `_should_skip_grammar_check` directly with: '', 'yes', 'Yes!', 'ok.', 'thank you', 'I am hungry today' (False — 4+ words), 'hi there friend' (False — 3 words but not in ack set, actually returns True since <4; document the rule), 'I went to the store yesterday and bought apples' (False).\n- Integration test (tests/integration/test_conversation_skip_grammar.py): mock copilot service so `ask` returns 'AI reply' and `ask_json` raises if called. POST to /api/conversation/start then /api/conversation/message with content='yes'. Assert response 200, feedback is None, and ask_json was NOT called. Then send a long message and assert ask_json IS called.\n\nNo schema changes. No frontend changes (feedback:null is already a supported response shape — see `Reply helpers ... fetched lazily` comment, and the frontend already tolerates null feedback from /helpers fallback).",
+  "files_to_modify": ["app/routers/conversation.py", "tests/unit/test_conversation_skip_grammar.py", "tests/integration/test_conversation_skip_grammar.py"],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 635
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L400:700 (301 lines read)
+  └ List directory tests
+      └ 8 files found
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have what I need. Let me implement.Now the unit test:All pass. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "f7b734a",
+  "files_changed": ["app/routers/conversation.py", "tests/unit/test_conversation_skip_grammar.py", "tests/integration/test_conversation_skip_grammar.py"],
+  "tests_added": 11,
+  "ui_spec_updated": false,
+  "description": "Skip grammar-check LLM call in /api/conversation/message when user content is trivial (short or known acknowledgment), saving one LLM round-trip."
+}
+```● Coder Implement iter 635
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #635: skip grammar-check LLM call for trivial
+  │   │ conversation messages
+  │   │
+  │   │ Co-authored-by: autoresearch-coder <noreply@anthropic.com>" 2>&1 | tail …
+  │   └ 13 lines...
+  └ show commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ head -20
+      └ 15 lines...
+
+● Mark T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2"
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2150,
+  "tests_total": 2151,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_conversation_api.py::test_send_message_no_longer_calls_reply_helpers - assert 0 == 1 (mock_copilot.ask_json.await_count). Grammar check was skipped for trivial message (len=6, content='Hello!'), so ask_json was never called. The new skip-grammar-for-trivial-messages logic in app/routers/conversation.py (line 618: 'Grammar check skipped for trivial message') breaks this existing test which expected exactly one ask_json call for the grammar check on 'Hello!'. 2150 passed, 1 failed in 104.37s.",
+  "failure_summary": "Integration test test_send_message_no_longer_calls_reply_helpers fails: new 'skip grammar for trivial messages' logic skips the ask_json grammar call for 'Hello!' (len=6), so await_count is 0 instead of expected 1."
+}
+```● Tester Test iter 635
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ Read UI test results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+

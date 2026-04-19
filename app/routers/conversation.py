@@ -26,6 +26,37 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
+# Trivial acknowledgments where the grammar-check LLM call adds no value.
+_TRIVIAL_ACKS = {
+    "yes", "no", "ok", "okay", "sure", "thanks", "thank you", "yeah", "yep",
+    "nope", "cool", "great", "nice", "hi", "hello", "hey", "bye", "goodbye",
+    "right", "exactly", "maybe", "same", "me too",
+}
+
+
+def _should_skip_grammar_check(text: str) -> bool:
+    """Return True if a user message is too trivial to warrant a grammar-check LLM call.
+
+    Skips when:
+      (a) trimmed message has fewer than 4 whitespace-split word tokens
+          (after stripping punctuation from each token), OR
+      (b) lowercased trimmed message (with trailing punctuation stripped)
+          is a known acknowledgment (e.g. "yes", "thank you").
+    """
+    if not text:
+        return True
+    stripped = text.strip()
+    if not stripped:
+        return True
+    # (b) acknowledgment match
+    lowered = stripped.lower().rstrip(" .!?,;:")
+    if lowered in _TRIVIAL_ACKS:
+        return True
+    # (a) word-count rule (strip punctuation from each token)
+    tokens = [re.sub(r"[^\w']", "", tok) for tok in stripped.split()]
+    tokens = [t for t in tokens if t]
+    return len(tokens) < 4
+
 # Maximum number of past messages to include when building the LLM prompt for /message.
 # Keeps token usage bounded for long conversations; older turns are summarized as a marker.
 MESSAGE_HISTORY_MAX_TURNS = 16
@@ -567,6 +598,8 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     # Grammar check is non-fatal — if it fails, we still return the AI response
     t0 = time.monotonic()
 
+    skip_grammar = _should_skip_grammar_check(req.content)
+
     async def _safe_grammar_check():
         try:
             return await copilot.ask_json(
@@ -578,9 +611,18 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
             logger.warning("Grammar check failed (non-fatal): %s", e)
             return None
 
+    async def _skipped_grammar_check():
+        return None
+
+    if skip_grammar:
+        logger.info("Grammar check skipped for trivial message (len=%d)", len(req.content.strip()))
+        grammar_task = _skipped_grammar_check()
+    else:
+        grammar_task = _safe_grammar_check()
+
     try:
         feedback, ai_response = await asyncio.gather(
-            _safe_grammar_check(),
+            grammar_task,
             safe_llm_call(lambda: copilot.ask(system, conv_prompt, label="conversation_message"), context="send_message"),
         )
     except Exception:

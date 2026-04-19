@@ -584,3 +584,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 631	e251473	2026-04-19	81	240	140	34	495	2131	2131	pass	7.00	kept	Listening Quiz first-listen accuracy + per-question replay counters
 632	01d6865	2026-04-19	67	134	134	22	357	2131	2131	pass	6.75	kept	Listening results: per-question Replay sentence (0.75x) + replay-all-missed for missed answers
 633	a524798	2026-04-19	54	267	134	25	480	2137	2137	pass	7.00	kept	Add Hard words to revisit smart tier (DAL + endpoint + Vocabulary card with Drill these)
+634	cf1e4e2	2026-04-19	173	78	297	36	584	2140	2140	pass	7.25	kept	Pre-warm Copilot SDK session in FastAPI lifespan startup (cuts ~0.6s cold-start)

@@ -2006,7 +2006,7 @@ async def test_send_message_no_longer_calls_reply_helpers(client, mock_copilot):
     })
     res = await client.post("/api/conversation/message", json={
         "conversation_id": conv_id,
-        "content": "Hello!",
+        "content": "I would like to book a room please.",
     })
     assert res.status_code == 200
     data = res.json()
