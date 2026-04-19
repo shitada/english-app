@@ -100,6 +100,22 @@ PERSONALITY_INSTRUCTIONS: dict[str, str] = {
 class MessageRequest(BaseModel):
     conversation_id: int = Field(ge=1)
     content: str = Field(min_length=1, max_length=2000)
+    speaking_seconds: float | None = Field(default=None, ge=0)
+
+
+def _compute_pace_wpm(content: str, speaking_seconds: float | None) -> float | None:
+    """Compute words-per-minute for a user turn.
+
+    Returns None when speaking_seconds is missing, <= 0.5s (too noisy), or
+    when the message is empty. Otherwise returns rounded WPM.
+    """
+    if speaking_seconds is None or speaking_seconds <= 0.5:
+        return None
+    words = [w for w in content.strip().split() if w]
+    if not words:
+        return None
+    wpm = len(words) / (speaking_seconds / 60.0)
+    return round(wpm, 1)
 
 
 class EndRequest(BaseModel):
@@ -131,6 +147,7 @@ class MessageResponse(BaseModel):
     phrase_suggestions: list[str] = []
     key_phrases: list[str] = []
     grammar_notes: list[GrammarNote] = []
+    pace_wpm: float | None = None
 
 
 class EndResponse(BaseModel):
@@ -564,7 +581,11 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
         topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
     topic_label = topic_data["label"] if topic_data else conv["topic"]
 
-    user_msg_id = await conv_dal.add_message(db, req.conversation_id, "user", req.content)
+    pace_wpm_val = _compute_pace_wpm(req.content, req.speaking_seconds)
+    user_msg_id = await conv_dal.add_message(
+        db, req.conversation_id, "user", req.content,
+        speaking_seconds=req.speaking_seconds, pace_wpm=pace_wpm_val,
+    )
 
     history = await conv_dal.format_history_text(db, req.conversation_id, max_turns=MESSAGE_HISTORY_MAX_TURNS)
 
@@ -658,7 +679,7 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Reply helpers (suggestions, key phrases, grammar notes) are fetched lazily
     # by the frontend via POST /api/conversation/helpers to reduce response latency.
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": []}
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val}
 
 
 @router.post("/{conversation_id}/message/stream")
@@ -696,7 +717,11 @@ async def stream_message(
         topic_data = next((t for t in custom_topics if t["id"] == conv["topic"]), None)
     topic_label = topic_data["label"] if topic_data else conv["topic"]  # noqa: F841
 
-    user_msg_id = await conv_dal.add_message(db, conversation_id, "user", req.content)
+    pace_wpm_val = _compute_pace_wpm(req.content, req.speaking_seconds)
+    user_msg_id = await conv_dal.add_message(
+        db, conversation_id, "user", req.content,
+        speaking_seconds=req.speaking_seconds, pace_wpm=pace_wpm_val,
+    )
     history = await conv_dal.format_history_text(db, conversation_id, max_turns=MESSAGE_HISTORY_MAX_TURNS)
 
     copilot = get_copilot_service()
@@ -814,6 +839,7 @@ async def stream_message(
             "type": "done",
             "message_id": assistant_msg_id,
             "grammar": feedback,
+            "pace_wpm": pace_wpm_val,
         })
 
     headers = {
@@ -948,6 +974,7 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
 
     metrics = await conv_dal.get_conversation_metrics(db, req.conversation_id)
     summary["performance"] = metrics
+    summary["pace_stats"] = await conv_dal.get_pace_stats(db, req.conversation_id)
 
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
@@ -988,6 +1015,8 @@ async def get_summary(conversation_id: int = Path(ge=1), db: aiosqlite.Connectio
     normalized = _normalize_summary(summary)
     if "performance" not in normalized:
         normalized["performance"] = await conv_dal.get_conversation_metrics(db, conversation_id)
+    if "pace_stats" not in normalized:
+        normalized["pace_stats"] = await conv_dal.get_pace_stats(db, conversation_id)
     return {"summary": normalized}
 
 

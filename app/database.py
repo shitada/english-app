@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS messages (
     content TEXT NOT NULL,
     feedback_json TEXT,
     is_bookmarked INTEGER NOT NULL DEFAULT 0,
+    speaking_seconds REAL,
+    pace_wpm REAL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
@@ -463,6 +465,14 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add quick_mode column to conversations",
         "ALTER TABLE conversations ADD COLUMN quick_mode INTEGER NOT NULL DEFAULT 0",
+    ),
+    (
+        "add speaking_seconds column to messages",
+        "ALTER TABLE messages ADD COLUMN speaking_seconds REAL",
+    ),
+    (
+        "add pace_wpm column to messages",
+        "ALTER TABLE messages ADD COLUMN pace_wpm REAL",
     ),
 ]
 

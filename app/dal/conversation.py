@@ -27,14 +27,42 @@ async def add_message(
     role: str,
     content: str,
     feedback: dict[str, Any] | None = None,
+    speaking_seconds: float | None = None,
+    pace_wpm: float | None = None,
 ) -> int:
     feedback_json = json.dumps(feedback) if feedback is not None else None
     cursor = await db.execute(
-        "INSERT INTO messages (conversation_id, role, content, feedback_json) VALUES (?, ?, ?, ?)",
-        (conversation_id, role, content, feedback_json),
+        "INSERT INTO messages (conversation_id, role, content, feedback_json, speaking_seconds, pace_wpm) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (conversation_id, role, content, feedback_json, speaking_seconds, pace_wpm),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def get_pace_stats(
+    db: aiosqlite.Connection,
+    conversation_id: int,
+) -> dict[str, Any]:
+    """Return aggregated speaking pace stats (WPM) for user turns in a conversation.
+
+    Only includes user messages where pace_wpm is non-NULL (i.e. the user
+    submitted via mic with speaking_seconds > 0.5).
+    """
+    rows = await db.execute_fetchall(
+        "SELECT pace_wpm FROM messages "
+        "WHERE conversation_id = ? AND role = 'user' AND pace_wpm IS NOT NULL",
+        (conversation_id,),
+    )
+    values = [float(r["pace_wpm"]) for r in rows if r["pace_wpm"] is not None]
+    if not values:
+        return {"avg_wpm": 0.0, "min_wpm": 0.0, "max_wpm": 0.0, "count": 0}
+    return {
+        "avg_wpm": round(sum(values) / len(values), 1),
+        "min_wpm": round(min(values), 1),
+        "max_wpm": round(max(values), 1),
+        "count": len(values),
+    }
 
 
 async def update_message_feedback(
@@ -79,7 +107,7 @@ async def get_conversation_history(
     conversation_id: int,
 ) -> list[dict[str, Any]]:
     rows = await db.execute_fetchall(
-        "SELECT id, role, content, feedback_json, is_bookmarked, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
+        "SELECT id, role, content, feedback_json, is_bookmarked, speaking_seconds, pace_wpm, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
         (conversation_id,),
     )
     return [dict(r) for r in rows]

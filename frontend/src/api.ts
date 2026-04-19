@@ -85,10 +85,10 @@ export const api = {
       body: JSON.stringify({ topic, difficulty, role_swap: roleSwap, personality, quick_mode: quickMode }),
     }),
 
-  sendMessage: (conversation_id: number, content: string) =>
-    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[] }>('/api/conversation/message', {
+  sendMessage: (conversation_id: number, content: string, speaking_seconds?: number | null) =>
+    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; pace_wpm: number | null }>('/api/conversation/message', {
       method: 'POST',
-      body: JSON.stringify({ conversation_id, content }),
+      body: JSON.stringify({ conversation_id, content, speaking_seconds: speaking_seconds ?? null }),
     }),
 
   /**
@@ -102,17 +102,18 @@ export const api = {
     content: string,
     handlers: {
       onChunk?: (text: string) => void;
-      onDone?: (payload: { message_id: number | null; grammar: GrammarFeedback | null }) => void;
+      onDone?: (payload: { message_id: number | null; grammar: GrammarFeedback | null; pace_wpm: number | null }) => void;
       onError?: (err: Error) => void;
       signal?: AbortSignal;
     },
+    speaking_seconds?: number | null,
   ): Promise<void> => {
     const { onChunk, onDone, onError, signal } = handlers;
     try {
       const res = await fetch(`/api/conversation/${conversation_id}/message/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-        body: JSON.stringify({ conversation_id, content }),
+        body: JSON.stringify({ conversation_id, content, speaking_seconds: speaking_seconds ?? null }),
         signal,
       });
       if (!res.ok || !res.body) {
@@ -143,7 +144,7 @@ export const api = {
               if (payload && payload.type === 'chunk' && typeof payload.text === 'string') {
                 onChunk?.(payload.text);
               } else if (payload && payload.type === 'done') {
-                onDone?.({ message_id: payload.message_id ?? null, grammar: payload.grammar ?? null });
+                onDone?.({ message_id: payload.message_id ?? null, grammar: payload.grammar ?? null, pace_wpm: payload.pace_wpm ?? null });
               } else if (payload && payload.type === 'error') {
                 throw new Error(payload.message || 'stream error');
               }
@@ -544,6 +545,12 @@ export interface ConversationSummary {
     grammar_checked: number;
     grammar_correct: number;
     grammar_accuracy_rate: number;
+  };
+  pace_stats?: {
+    avg_wpm: number;
+    min_wpm: number;
+    max_wpm: number;
+    count: number;
   };
 }
 

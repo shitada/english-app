@@ -5,6 +5,7 @@ import { api, getSessionAverages } from '../../api';
 import { generateStudyCardsCSV, hasStudyCards } from '../../utils/csvExport';
 import { computeFluencyScore } from '../../utils/fluencyScore';
 import type { FluencyResult } from '../../utils/fluencyScore';
+import { useI18n } from '../../i18n/I18nContext';
 import { ConversationQuiz } from './ConversationQuiz';
 import { CorrectionDrill } from './CorrectionDrill';
 import { SpeakCorrectionDrill } from './SpeakCorrectionDrill';
@@ -120,6 +121,8 @@ export function ConversationSummary({
     summary.performance && summary.performance.total_user_messages > 0
       ? computeFluencyScore(summary.performance)
       : null;
+
+  const { t } = useI18n();
 
   // Trigger gauge animation after mount
   useEffect(() => {
@@ -574,6 +577,39 @@ export function ConversationSummary({
           </div>
         </div>
       )}
+
+      {summary.pace_stats && summary.pace_stats.count > 0 && (() => {
+        const ps = summary.pace_stats;
+        const avg = ps.avg_wpm;
+        let coachTip = t('paceTipNatural');
+        let color = 'var(--success, #22c55e)';
+        if (avg < 90) { coachTip = t('paceTipSlow'); color = 'var(--info, #3b82f6)'; }
+        else if (avg > 160) { coachTip = t('paceTipFast'); color = 'var(--warning, #f59e0b)'; }
+        return (
+          <div data-testid="pacing-card" style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 8 }}>
+            <h4 style={{ marginBottom: 8 }}>🎙️ {t('pacingTitle')}</h4>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color }}>{Math.round(avg)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('paceAvg')} {t('paceWpmUnit')}</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>{Math.round(ps.min_wpm)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('paceMin')} {t('paceWpmUnit')}</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>{Math.round(ps.max_wpm)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('paceMax')} {t('paceWpmUnit')}</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>{ps.count}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Turns</div>
+              </div>
+            </div>
+            <p style={{ marginTop: 8, marginBottom: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{coachTip}</p>
+          </div>
+        );
+      })()}
 
       {/* Session Insights — filler words, response time, corrections, hints, grammar streak */}
       {(() => {

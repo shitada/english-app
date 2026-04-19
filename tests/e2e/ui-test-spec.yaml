@@ -3326,6 +3326,22 @@ pages:
         priority: medium
         added_in: 641
 
+      - id: conv-136
+        target: Pace badge renders under mic-submitted user messages
+        action: After submitting a user turn via the microphone, locate data-testid="pace-badge" beneath the user bubble
+        expect: Badge is a colored pill with emoji + label (🐢 Slow & clear / ✅ Natural / ⚡ Fast — slow down) and shows rounded WPM and a tooltip coaching tip; badge does NOT appear on typed messages or assistant messages
+        type: functional
+        priority: high
+        added_in: 644
+
+      - id: conv-137
+        target: Pacing card appears in conversation summary when mic turns were submitted
+        action: End a conversation that included at least one mic-submitted user turn and inspect the summary view for data-testid="pacing-card"
+        expect: Card titled "Pacing" with avg/min/max WPM stats, a Turns count, and a one-line coaching tip ("Try slowing down for clarity." / "Great pace — clear and natural." / "Try speaking a bit faster to sound more natural."); card is omitted when pace_stats.count === 0
+        type: functional
+        priority: medium
+        added_in: 644
+
       - id: conv-133
         target: Reply progress indicator appears while waiting for assistant reply
         action: Send a message during chat phase and inspect the bottom of the chat scroll area for data-testid="reply-progress-indicator"

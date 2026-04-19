@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton, RoleSwapReplay } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, CorrectedShadowButton, RoleSwapReplay, PaceBadge } from '../components/conversation';
 import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -21,6 +21,7 @@ interface Message {
   key_phrases?: string[];
   grammar_notes?: import('../api').GrammarNote[];
   streaming?: boolean;
+  pace_wpm?: number | null;
 }
 
 const TOPIC_EMOJIS: Record<string, string> = {
@@ -148,6 +149,9 @@ export default function Conversation() {
   const conversationIdRef = useRef<number | null>(null);
   const phaseRef = useRef(phase);
   const autoEndAttempted = useRef(false);
+  // Speaking Pace Coach: track when mic started listening to compute speaking duration.
+  // Reset to null when typed input is sent.
+  const micStartedAtRef = useRef<number | null>(null);
 
   // Keep refs in sync with state
   useEffect(() => { conversationIdRef.current = conversationId; }, [conversationId]);
@@ -323,6 +327,14 @@ export default function Conversation() {
       setInput(speech.transcript);
     }
   }, [speech.transcript]);
+
+  // Speaking Pace Coach: capture timestamp when mic starts listening.
+  // We don't reset on stop here; sendMessage reads & clears it.
+  useEffect(() => {
+    if (speech.isListening && micStartedAtRef.current == null) {
+      micStartedAtRef.current = Date.now();
+    }
+  }, [speech.isListening]);
 
   // Voice Mode: update status indicator
   useEffect(() => {
@@ -666,6 +678,16 @@ export default function Conversation() {
     const messageContent = retryContent || input.trim();
     if (!messageContent || !conversationId || loading) return;
 
+    // Speaking Pace Coach: compute speaking duration if mic was used.
+    // Only set when mic actually started for THIS turn (transcript non-empty
+    // and we have a recorded start time). Cleared after capture.
+    let speakingSeconds: number | null = null;
+    if (!retryContent && micStartedAtRef.current != null && speech.transcript) {
+      const elapsed = (Date.now() - micStartedAtRef.current) / 1000;
+      if (elapsed > 0) speakingSeconds = elapsed;
+    }
+    micStartedAtRef.current = null;
+
     // Stop recognition and capture current text before resetting
     speech.stop();
     const userMsg = messageContent;
@@ -720,6 +742,7 @@ export default function Conversation() {
 
       let streamedText = '';
       let streamFeedback: GrammarFeedback | null = null;
+      let streamPaceWpm: number | null = null;
       let streamFailed = false;
 
       await api.streamMessage(conversationId, userMsg, {
@@ -736,23 +759,24 @@ export default function Conversation() {
             return updated;
           });
         },
-        onDone: ({ grammar }) => {
+        onDone: ({ grammar, pace_wpm }) => {
           streamFeedback = grammar;
+          streamPaceWpm = pace_wpm;
         },
         onError: () => {
           streamFailed = true;
         },
-      });
+      }, speakingSeconds);
 
       if (streamFailed || !streamedText) {
         // Remove placeholder and fall back to non-streaming endpoint
         setMessages((prev) => prev.filter((m) => !(m.role === 'assistant' && m.streaming)));
-        const res = await api.sendMessage(conversationId, userMsg);
+        const res = await api.sendMessage(conversationId, userMsg, speakingSeconds);
         setMessages((prev) => {
           const updated = [...prev];
           const lastUser = updated.findLastIndex((m) => m.role === 'user');
           if (lastUser >= 0) {
-            updated[lastUser] = { ...updated[lastUser], feedback: res.feedback };
+            updated[lastUser] = { ...updated[lastUser], feedback: res.feedback, pace_wpm: res.pace_wpm };
           }
           updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] });
           return updated;
@@ -787,11 +811,17 @@ export default function Conversation() {
       } else {
         // Streaming path: finalize bubble and apply grammar feedback
         const finalFeedback = streamFeedback as GrammarFeedback | null;
+        const finalPaceWpm = streamPaceWpm;
         setMessages((prev) => {
           const updated = [...prev];
           const lastUser = updated.findLastIndex((m) => m.role === 'user');
-          if (lastUser >= 0 && finalFeedback) {
-            updated[lastUser] = { ...updated[lastUser], feedback: finalFeedback };
+          if (lastUser >= 0) {
+            const patch: Partial<Message> = {};
+            if (finalFeedback) patch.feedback = finalFeedback;
+            if (finalPaceWpm != null) patch.pace_wpm = finalPaceWpm;
+            if (Object.keys(patch).length > 0) {
+              updated[lastUser] = { ...updated[lastUser], ...patch };
+            }
           }
           for (let i = updated.length - 1; i >= 0; i--) {
             if (updated[i].role === 'assistant' && updated[i].streaming) {
@@ -1861,6 +1891,11 @@ export default function Conversation() {
                 <InlineShadowButton text={msg.content} />
               )}
             </div>
+            {msg.role === 'user' && typeof msg.pace_wpm === 'number' && msg.pace_wpm > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
+                <PaceBadge wpm={msg.pace_wpm} />
+              </div>
+            )}
             {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} onCorrectionAttempt={(success) => {
               setCorrectionAttempts(p => p + 1);
               if (success) setCorrectionSuccesses(p => p + 1);

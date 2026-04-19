@@ -117,6 +117,18 @@ export interface Translations {
   roleSwapFinished: string;
   roleSwapDone: string;
   roleSwapClose: string;
+  // Speaking Pace Coach
+  pacingTitle: string;
+  paceSlowClear: string;
+  paceNatural: string;
+  paceFast: string;
+  paceTipSlow: string;
+  paceTipNatural: string;
+  paceTipFast: string;
+  paceAvg: string;
+  paceMin: string;
+  paceMax: string;
+  paceWpmUnit: string;
 }
 
 export const en: Translations = {
@@ -237,6 +249,17 @@ export const en: Translations = {
   roleSwapFinished: "You've finished the role-swap replay.",
   roleSwapDone: 'Done',
   roleSwapClose: 'Close',
+  pacingTitle: 'Pacing',
+  paceSlowClear: 'Slow & clear',
+  paceNatural: 'Natural',
+  paceFast: 'Fast — slow down',
+  paceTipSlow: 'Try speaking a bit faster to sound more natural.',
+  paceTipNatural: 'Great pace — clear and natural.',
+  paceTipFast: 'Try slowing down for clarity.',
+  paceAvg: 'Avg',
+  paceMin: 'Min',
+  paceMax: 'Max',
+  paceWpmUnit: 'WPM',
 };
 
 export const ja: Translations = {
@@ -357,6 +380,17 @@ export const ja: Translations = {
   roleSwapFinished: 'ロール交代リプレイを完了しました。',
   roleSwapDone: '完了',
   roleSwapClose: '閉じる',
+  pacingTitle: 'ペース',
+  paceSlowClear: 'ゆっくり明瞭',
+  paceNatural: '自然',
+  paceFast: '速い — ゆっくりに',
+  paceTipSlow: 'もう少し速く話すと自然に聞こえます。',
+  paceTipNatural: '良いペースです — 明瞭で自然です。',
+  paceTipFast: '明瞭に伝えるためにペースを落としてみましょう。',
+  paceAvg: '平均',
+  paceMin: '最小',
+  paceMax: '最大',
+  paceWpmUnit: 'WPM',
 };
 
 export type Locale = 'en' | 'ja';

@@ -571,4 +571,234 @@ Iteration 642 done. Now iteration 643.
   │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
   └ 2 lines...
 
-Now let me look at api.ts and existing tests structure:Now I have enough context. Let me look at ConversationSummary component to find where to add the button, and check existing modal patterns:Now I have enough context. Let me look at conftest fixtures:Now I have everything. Let me implement:Now api.ts:Now create the RoleSwapReplay component:Now add i18n keys:Now wire the button into Conversation.tsx. Let me update the imports and the summary phase:Now add the button + modal in the summary phase:Now write integration test:Now check ui-test-spec and add an entry, then run tests:Now run tests:All green. Commit:
+Now let me look at api.ts and existing tests structure:Now I have enough context. Let me look at ConversationSummary component to find where to add the button, and check existing modal patterns:Now I have enough context. Let me look at conftest fixtures:Now I have everything. Let me implement:Now api.ts:Now create the RoleSwapReplay component:Now add i18n keys:Now wire the button into Conversation.tsx. Let me update the imports and the summary phase:Now add the button + modal in the summary phase:Now write integration test:Now check ui-test-spec and add an entry, then run tests:Now run tests:All green. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "f876bf4",
+  "files_changed": [
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/conversation/RoleSwapReplay.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/i18n/translations.ts",
+    "tests/integration/test_conversation_role_swap.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 2,
+  "ui_spec_updated": true,
+  "description": "Added GET /api/conversation/{id}/role-swap endpoint, RoleSwapReplay modal component (TTS playback for user lines, hidden+reveal+mic for AI lines), 'Practice the other side' button on summary, en/ja i18n keys, and integration tests."
+}
+```● Coder Implement iter 643
+  │ typecheck frontend (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #643: Conversation Role-Swap Replay (practice the
+      │ other side)
+      │
+      │ Co-authored-by: autoresearch <autoresearch@local>" 2>&1 | tail -15 && git …
+      └ 18 lines...
+
+● T2 iter 643 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git log
+  │ --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2179,
+  "tests_total": 2179,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2179 passed in 103.48s (0:01:43) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 643
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 iter 643 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 6,
+  "total_score": 6.75,
+  "verdict": "keep",
+  "reason": "Adds a valuable role-swap replay feature with new endpoint, modal, i18n, and integration tests; all 2179 tests and TS check pass, though QA spec tests were not run for the new frontend modal."
+}
+```● Evaluator Evaluate iter 643
+  └ List directory .
+      └ 211 files found
+
+● Record iter 643 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ N=643 && HASH=f876bf4 && PASSED=2179 && TOTAL=2179 && TS=pass &&
+  │ SCORE=6.75 && VERDICT=kept && DESC="Conversation Role-Swap Replay
+  │ (practice the other side, summary modal)" && T0=1776605525 &&
+  │ T1=1776605598 && T2=1776606020 && T3=1776606157 && printf …
+  └ 7 lines...
+
+● Read backlog.md
+  │ autoresearch/backlog.md
+  └ L1:30 (28 lines read)
+
+● Mark PERF-HIGH backlog done (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ import re
+  │ p='autoresearch/backlog.md'
+  │ s=open(p).read()
+  │ old='- [ ] [PERF-HIGH] Conversation の応答が遅い'…
+  └ 9 lines...
+
+● Commit backlog/results updates (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && git add
+  │ autoresearch/backlog.md autoresearch/results.tsv && git commit -m
+  │ "autoresearch: mark PERF-HIGH backlog done; record iter 642-643
+  │
+  │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" …
+  └ 5 lines...
+
+Both iterations completed. Stopping per instructions.
+
+**Summary:**
+- **Iter 642** (d523eac, 7.25, kept): SSE streaming for conversation replies — `stream_chat` async generator (chunked fallback), `POST /api/conversation/{id}/message/stream` endpoint, frontend `streamMessage()` reader, incremental assistant bubble with blinking caret. 4 new integration tests. 2177/2177 pass.
+- **Iter 643** (f876bf4, 6.75, kept): Conversation Role-Swap Replay — new `GET /api/conversation/{id}/role-swap` endpoint, `RoleSwapReplay` modal (TTS for user lines, hidden+reveal+mic for AI lines), "Practice the other side" button on summary, en/ja i18n, 2 integration tests. 2179/2179 pass.
+
+PERF-HIGH backlog item marked complete (5 sub-items shipped across recent iters incl. SSE streaming).
+
+
+Changes   +0 -0
+Requests  7.5 Premium (22m 1s)
+Tokens    ↑ 4.6m • ↓ 50.8k • 4.4m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-642-to-649.md
+[2026-04-19 22:43:33] Copilot invocation completed (duration: 1324s)
+[2026-04-19 22:43:33] Recording agent traces...
+[2026-04-19 22:43:33]   AGENT_TRACE iter=642 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 22:43:33]   AGENT_TRACE iter=643 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-19 22:43:33] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-19 22:43:33] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-19 22:43:33] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation
+
+  ✅ conversation: smoke 4✓ 0✗ (1675ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-19 22:43:41] SMOKE_UI_PASS: All UI pages passed
+[2026-04-19 22:43:41] Running post-invocation audit (iter 642-643)...
+============================================
+ Autoresearch Audit
+ Iterations: 642 — 643
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-19 22:43:41
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 642 643[0m
+[0;31m  Tester: FAIL — missing: 642 643[0m
+[0;31m  Evaluator: FAIL — missing: 642 643[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-19 22:43:42] Audit found 3 error(s) — fixes applied where possible
+[2026-04-19 22:43:45] Current iteration count: 643 / 649
+[2026-04-19 22:43:45] ------------------------------------------
+[2026-04-19 22:43:45] Invocation 3 / 10
+[2026-04-19 22:43:45] Resuming from iteration 644
+[2026-04-19 22:43:45] ------------------------------------------
+[2026-04-19 22:43:45] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-644-to-649.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log
+  │ --oneline -5 && echo "---UI-TEST---" && ls -la
+  │ autoresearch/ui-test-results.json 2>/dev/null && python3 -c "import json; …
+  └ 33 lines...
+
+● Read last session log tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && ls -t
+  │ autoresearch/logs/session-*.md 2>/dev/null | head -1 | xargs tail -50
+  │ 2>/dev/null
+  └ 51 lines...
+
+Starting iteration 644. Dispatching proposer.
+
+● Start time iter 644 (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Speaking Pace Coach: per-turn WPM badge + end-of-session pacing summary in Conversation",
+  "description": "Help users notice and self-correct their speaking pace (a key fluency dimension that no current feature addresses). When the user submits a turn via the mic in Conversation, capture the speech duration (the elapsed time between mic-on and mic-off, already tracked by useSpeechRecognition) and compute words-per-minute = wordCount / (speakingSeconds/60). Persist `speaking_seconds REAL` and `pace_wpm REAL` on the `messages` row for user turns so trends are queryable later.\n\nBackend:\n- `app/database.py`: extend SCHEMA `messages` with `speaking_seconds REAL` and `pace_wpm REAL`; add to `_MIGRATIONS`:\n  `ALTER TABLE messages ADD COLUMN speaking_seconds REAL;`\n  `ALTER TABLE messages ADD COLUMN pace_wpm REAL;`\n- `app/dal/conversation.py`: extend `add_message` (and its caller paths) to accept optional `speaking_seconds` and `pace_wpm`; add helper `get_pace_stats(conversation_id)` returning `{avg_wpm, min_wpm, max_wpm, count}` and `get_recent_pace_trend(limit=10)` returning per-conversation avg WPM list for trend display.\n- `app/routers/conversation.py`: extend `/conversation/message` request model with optional `speaking_seconds: float | None` (only sent when input came from mic). Extend conversation summary endpoint payload to include `pace_stats` from the new DAL helper.\n\nFrontend:\n- `frontend/src/pages/Conversation.tsx`: when speech recognition starts, record `micStartedAt`; when the transcript is submitted, compute `speakingSeconds = (now - micStartedAt)/1000` and pass it to the `/message` API call. Reset to null for typed input. Stash `pace_wpm` returned (or computed locally) on the user `Message` object.\n- New small `frontend/src/components/conversation/PaceBadge.tsx`: renders a colored pill (🐢 <90 wpm 'Slow & clear', ✅ 90–160 'Natural', ⚡ >160 'Fast — slow down') under user mic-submitted messages, plus tooltip showing exact WPM and seconds. Show only when `pace_wpm` is present.\n- Conversation Summary view (`ConversationSummary` in `components/conversation/`): add a 'Pacing' card showing avg/min/max WPM and a one-line coaching tip based on the average (e.g., 'Try slowing down — fast pace can hurt clarity').\n\nThis is fluency-focused, complements (does not duplicate) shadowing/SSE/role-swap/quick-reply, is fully user-visible, and is testable: DAL unit tests for `get_pace_stats` + a router test asserting that posting `speaking_seconds` persists `pace_wpm` correctly.",
+  "files_to_modify": ["app/database.py", "app/dal/conversation.py", "app/routers/conversation.py", "frontend/src/pages/Conversation.tsx", "frontend/src/components/conversation/PaceBadge.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 644 feature
+  │ List directory frontend/src/components
+  │   └ 78 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:60 (60 lines read)
+
+● T1 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now let's look at the conversation router for /message endpoint and summary/end:Now let me check the test fixtures and existing patterns:Now I have enough context. Let me check Conversation.tsx to find mic/speech logic and ConversationSummary.tsx:Now let me look at api.ts for sendMessage and streamMessage:Now look at ConversationSummary component briefly:OK. Let me check the `performance` interface to understand what's already there, and check how stream endpoint accepts speaking_seconds. Let me check stream endpoint:Now I have a good plan. Let me implement everything. First the backend:Now update DAL `add_message` and add `get_pace_stats`:Now update get_conversation_history to include the new fields:Now update the router. Add `speaking_seconds` to MessageRequest, compute pace_wpm and pass to add_message; add `pace_stats` to summary/end responses:Now update both message endpoints to pass speaking_seconds + pace_wpm:I removed the `format_history_text` call. Let me restore it:Update the response of /message:Now stream endpoint:Now find where SSE 'done' event is yielded to add pace_wpm:Now add pace_stats to summary in /end and GET /summary:Now backend tests:Run pytest:All passing. Now run the full conversation suite to check for regressions:All 2186 tests pass. Now the frontend. First update api.ts:Add `pace_stats` to ConversationSummary type:Now create the PaceBadge component:Add i18n keys:Now check how I18nContext is used (to make sure t() works):Now create PaceBadge component:Now wire pace into Conversation.tsx. Need: track micStartedAt, compute speakingSeconds, pass to API, store on user Message, render PaceBadge.Now wire up Conversation.tsx. Add Message field, ref for micStartedAt, capture, send, render badge:Add PaceBadge import:Now find where speech recognition starts to record micStartedAt. The speech.start happens when mic button clicked, and there's auto-start in voice mode. Let me track via prevListeningRef:Add micStartedAtRef. Best place is via tracking speech.isListening transitions. Let me use the existing prevListeningRef effect. Add the ref:Now track mic start. Add an effect that watches speech.isListening transitions:Now in sendMessage compute speakingSeconds, pass to API, and stash pace_wpm:Now update the streamMessage call and sendMessage fallback to pass speakingSeconds and stash pace_wpm:Now find where streamFeedback is applied to the user message after stream completes (success path):Now render PaceBadge under user messages. Find where user messages are rendered:Insert PaceBadge for user mic-submitted messages. After the speak buttons row:Now add Pacing card to ConversationSummary.tsx. Add it after the Performance section:No i18n in this component currently. Let me add Pacing card with simple label since the component uses English elsewhere; use useI18n for consistency. Let me insert it right after the Performance block (line 576):Find a good place to add `t` hook:Now insert Pacing card. Find end of Performance block:Now run typecheck:Clean. Now update the UI test spec since pages/Conversation.tsx and components were changed:Find the highest conv-NNN id:Final verification — re-run typecheck and re-run the new tests once more:All green. Commit:
