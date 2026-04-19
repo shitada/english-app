@@ -264,7 +264,8 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
                 style={{
                   background: 'var(--highlight-bg, #dbeafe)',
                   borderRadius: 3,
-                  padding: '1px 2px',
+                  padding: '2px 5px',
+                  fontWeight: 600,
                   cursor: 'pointer',
                   borderBottom: '2px solid var(--highlight-border, #3b82f6)',
                   color: 'var(--highlight-text, #1e3a5f)',
@@ -323,10 +324,11 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
               style={{
                 borderBottom: '2px dashed #22c55e',
                 cursor: 'pointer',
-                padding: '1px 2px',
+                padding: '2px 5px',
                 borderRadius: 3,
+                fontWeight: 600,
                 background: isKey ? 'var(--highlight-bg, #dbeafe)' : 'transparent',
-                color: isKey ? 'var(--highlight-text, #1e3a5f)' : undefined,
+                color: 'var(--highlight-text, #1e3a5f)',
               }}
             >
               {part}
