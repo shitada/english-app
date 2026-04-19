@@ -1353,6 +1353,30 @@ export async function evaluateSentenceCraft(
   });
 }
 
+// Collocation Match (autoresearch #661)
+export interface VocabCollocationItem {
+  word_id: number;
+  word: string;
+  prompt_sentence: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface VocabCollocationsResponse {
+  items: VocabCollocationItem[];
+}
+
+export async function getVocabularyCollocations(
+  topic: string,
+  count = 5,
+): Promise<VocabCollocationsResponse> {
+  return request<VocabCollocationsResponse>('/api/vocabulary/collocations', {
+    method: 'POST',
+    body: JSON.stringify({ topic, count }),
+  });
+}
+
 // Achievement badges (from iteration 253)
 export interface AchievementProgress {
   current: number;

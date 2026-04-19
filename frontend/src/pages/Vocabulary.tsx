@@ -10,6 +10,7 @@ import VocabFlashcardMode from '../components/VocabFlashcardMode';
 import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
 import VocabSpellingBee from '../components/VocabSpellingBee';
+import VocabCollocationMatch from '../components/VocabCollocationMatch';
 import InlineErrorBanner from '../components/InlineErrorBanner';
 import WordFamilyPanel from '../components/WordFamilyPanel';
 
@@ -23,14 +24,14 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen' | 'spelling-bee'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen' | 'spelling-bee' | 'collocation-match'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [loading, setLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build' | 'sentence-craft' | 'audio-quiz'>('word-to-meaning');
+  const [quizMode, setQuizMode] = useState<'word-to-meaning' | 'meaning-to-word' | 'fill-blank' | 'sentence-build' | 'sentence-craft' | 'audio-quiz' | 'collocation-match'>('word-to-meaning');
   const [topics, setTopics] = useState<{ id: string; label: string; description: string }[]>([]);
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [fillBlankInput, setFillBlankInput] = useState('');
@@ -83,6 +84,9 @@ export default function Vocabulary() {
   const [clWords, setClWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number; example_sentence: string }[]>([]);
   const [sbWords, setSbWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
 
+  // Collocation Match state (autoresearch #661)
+  const [collocTopic, setCollocTopic] = useState<string | null>(null);
+
   const tts = useSpeechSynthesis();
   const speech = useSpeechRecognition({ lang: 'en-US' });
 
@@ -125,6 +129,12 @@ export default function Vocabulary() {
         setCraftSentence('');
         setCraftResult(null);
         setPhase('sentence-craft');
+        return;
+      }
+      if (quizMode === 'collocation-match') {
+        // The component itself fetches from the API; we just hand it the topic.
+        setCollocTopic(topicId);
+        setPhase('collocation-match');
         return;
       }
       const apiMode = quizMode === 'fill-blank' ? 'fill_blank' : 'multiple_choice';
@@ -774,6 +784,19 @@ export default function Vocabulary() {
             >
               🎧 Audio Quiz
             </button>
+            <button
+              data-testid="vocab-mode-collocation-match"
+              onClick={() => setQuizMode('collocation-match')}
+              style={{
+                padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: '0.9rem',
+                border: quizMode === 'collocation-match' ? '2px solid var(--primary)' : '2px solid var(--border)',
+                background: quizMode === 'collocation-match' ? 'var(--primary)' : 'transparent',
+                color: quizMode === 'collocation-match' ? 'white' : 'var(--text)',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              🔗 Collocation Match
+            </button>
           </div>
         </div>
 
@@ -849,6 +872,17 @@ export default function Vocabulary() {
       <VocabSpellingBee
         initialWords={sbWords}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+      />
+    );
+  }
+
+  if (phase === 'collocation-match' && collocTopic) {
+    return (
+      <VocabCollocationMatch
+        topic={collocTopic}
+        count={5}
+        onComplete={() => { /* results screen is rendered inside the component */ }}
+        onBack={() => { setPhase('select'); setCollocTopic(null); setIsOfflineMode(false); }}
       />
     );
   }

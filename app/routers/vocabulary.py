@@ -1107,3 +1107,128 @@ async def get_usage_analysis(db: aiosqlite.Connection = Depends(get_db_session))
     """Analyse which studied vocabulary words the user actually uses in speaking activities."""
     data = await vocab_dal.get_vocabulary_usage_analysis(db)
     return VocabularyUsageAnalysisResponse(**data)
+
+
+# ── Collocation Match (autoresearch #661) ─────────────────
+
+class CollocationRequest(BaseModel):
+    topic: str = Field(..., min_length=1)
+    count: int = Field(default=5, ge=1, le=10)
+
+
+class CollocationItem(BaseModel):
+    word_id: int
+    word: str
+    prompt_sentence: str
+    options: list[str]
+    correct_index: int
+    explanation: str
+
+
+class CollocationResponse(BaseModel):
+    items: list[CollocationItem]
+
+
+def _parse_collocation_item(raw: Any, allowed_word_ids: set[int]) -> CollocationItem | None:
+    """Validate and coerce one raw LLM item; return None if it doesn't fit the schema."""
+    if not isinstance(raw, dict):
+        return None
+    try:
+        word_id = int(raw.get("word_id"))
+    except (TypeError, ValueError):
+        return None
+    if word_id not in allowed_word_ids:
+        return None
+    word = str(raw.get("word", "")).strip()
+    prompt_sentence = str(raw.get("prompt_sentence", "")).strip()
+    if not word or "____" not in prompt_sentence:
+        return None
+    options = raw.get("options")
+    if not isinstance(options, list) or len(options) != 4:
+        return None
+    options = [str(o).strip() for o in options]
+    if any(not o for o in options):
+        return None
+    try:
+        correct_index = int(raw.get("correct_index"))
+    except (TypeError, ValueError):
+        return None
+    if correct_index < 0 or correct_index > 3:
+        return None
+    explanation = str(raw.get("explanation", "")).strip()
+    return CollocationItem(
+        word_id=word_id,
+        word=word,
+        prompt_sentence=prompt_sentence,
+        options=options,
+        correct_index=correct_index,
+        explanation=explanation or "Natural collocation.",
+    )
+
+
+@router.post("/collocations", response_model=CollocationResponse)
+async def generate_collocations(
+    req: CollocationRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+    _rl=Depends(require_rate_limit),
+):
+    """Generate Collocation Match items for the user's saved vocabulary in *topic*.
+
+    Pulls random words for the topic, then asks the LLM in a single call to
+    produce a multiple-choice item per word where the learner picks the most
+    natural collocate to fill a blank. If the LLM fails entirely the endpoint
+    returns 503; if some items parse successfully they are returned.
+    """
+    vocab_topics = get_vocabulary_topics()
+    validate_topic(vocab_topics, req.topic)
+
+    words = await vocab_dal.get_random_words_for_craft(db, req.topic, req.count)
+    if not words:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No vocabulary words saved for topic '{req.topic}' yet.",
+        )
+
+    word_list_str = "\n".join(
+        f"- id={w['id']} word=\"{w['word']}\" meaning=\"{w['meaning']}\""
+        for w in words
+    )
+    prompt = get_prompt_collocation_match().format(
+        word_list=word_list_str, count=len(words),
+    )
+
+    copilot = get_copilot_service()
+    try:
+        result = await safe_llm_call(
+            lambda: copilot.ask_json(
+                "You are an English vocabulary coach. Return ONLY valid JSON.",
+                prompt,
+            ),
+            context="vocabulary_collocation_match",
+        )
+    except HTTPException:
+        # safe_llm_call raises 502; surface as 503 per the proposal so the
+        # frontend can show a "service unavailable" message.
+        raise HTTPException(
+            status_code=503,
+            detail="Collocation generator temporarily unavailable.",
+        )
+
+    raw_items = result.get("items") if isinstance(result, dict) else None
+    if not isinstance(raw_items, list):
+        raw_items = []
+
+    allowed_ids = {w["id"] for w in words}
+    items: list[CollocationItem] = []
+    for raw in raw_items:
+        parsed = _parse_collocation_item(raw, allowed_ids)
+        if parsed is not None:
+            items.append(parsed)
+
+    return CollocationResponse(items=items)
+
+
+def get_prompt_collocation_match() -> str:
+    """Late import to avoid circulars and to keep prompt text in app/prompts.py."""
+    from app.prompts import VOCABULARY_COLLOCATION_MATCH
+    return VOCABULARY_COLLOCATION_MATCH()

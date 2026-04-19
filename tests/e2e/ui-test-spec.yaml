@@ -1568,6 +1568,30 @@ pages:
         priority: medium
         added_in: 633
 
+      - id: vocab-035
+        target: Collocation Match quiz mode pill is selectable
+        action: click data-testid="vocab-mode-collocation-match" on the vocabulary select page
+        expect: Pill switches to primary background; subsequent topic-card clicks route to the Collocation Match phase instead of the standard quiz
+        type: functional
+        priority: medium
+        added_in: 661
+
+      - id: vocab-036
+        target: Collocation Match renders prompt + 4 options + feedback flow
+        action: with quizMode='collocation-match' selected, click a topic card; once items load look for data-testid="vocab-colloc-match" with data-testid="vocab-colloc-prompt" containing "____" and four data-testid="vocab-colloc-option-{0..3}" buttons
+        expect: Tapping an option reveals data-testid="vocab-colloc-feedback" (✓ if correct, ✗ otherwise), shows the explanation, and exposes data-testid="vocab-colloc-next" to advance; useSpeechSynthesis.speak is called with the completed sentence
+        type: functional
+        priority: medium
+        added_in: 661
+
+      - id: vocab-037
+        target: Collocation Match results screen reports score after final item
+        action: complete every item in a Collocation Match session
+        expect: data-testid="vocab-colloc-results" is visible with correct/total tally and a "Back to Vocabulary" button; onComplete is invoked exactly once with {total, correct, incorrect}
+        type: functional
+        priority: low
+        added_in: 661
+
   dashboard:
     path: /dashboard
     tests:

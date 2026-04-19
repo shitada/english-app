@@ -1522,4 +1522,59 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now I have a solid understanding. Let me create a separate component file for testability and inline-use it in Shadowing.tsx.Now wire it into Shadowing.tsx:Now write the tests:All 12 tests pass. Now update UI test spec since I changed `pages/Shadowing.tsx`:
+Now I have a solid understanding. Let me create a separate component file for testability and inline-use it in Shadowing.tsx.Now wire it into Shadowing.tsx:Now write the tests:All 12 tests pass. Now update UI test spec since I changed `pages/Shadowing.tsx`:The extra files are autoresearch artifacts swept up by `git add -A` (consistent with other autoresearch commits). My code changes are clean.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "9aae106",
+  "files_changed": [
+    "frontend/src/pages/Shadowing.tsx",
+    "frontend/src/components/shadowing/MissedWordsDrill.tsx",
+    "frontend/src/__tests__/Shadowing.drill.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 12,
+  "ui_spec_updated": true,
+  "description": "Added MissedWordsDrill panel on Shadowing results: tappable chips re-speak each missed word at rate 0.7, Play-all-slowly button cycles through them, and a perfect-state celebration replaces the panel when no words were missed. Type-check passes; all 12 new vitest tests green."
+}
+```● Coder Implement iter 660
+  │ Get commit hash (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+  │   │ HEAD && git log -1 --pretty=format:'%H%n%s' | cat
+  │   └ 4 lines...
+  └ Check files changed (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ head -20
+      └ 21 lines...
+
+● T2 + diff names (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && echo "T2=$(date +%s)"
+  │ && git log --oneline -1 && git diff HEAD~1 --name-only
+  └ 11 lines...
+
+```json
+{
+  "overall_pass": false,
+  "tests_passed": 2215,
+  "tests_total": 2217,
+  "ts_check": "pass",
+  "smoke": "skip",
+  "ux_score": null,
+  "failures": [
+    "tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity",
+    "tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected"
+  ],
+  "vitest": "317/317 passed (27 files)",
+  "notes": "2 backend integration test failures in dashboard_api (unrelated to changed files: Shadowing.tsx, MissedWordsDrill.tsx, drill test, ui-test-spec.yaml). TypeScript clean. Vitest fully green. Smoke skipped (no backend changes). ui-test-results.json not present."
+}
+```● Tester Test iter 660
+  │ vitest summary (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npm test
+  │   │ --silent -- --run 2>&1 | grep -E "Tests|Test Files" | tail -5
+  │   └ 1 line...
+  └ vitest run (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ 2>&1 | tail -20
+      └ 20 lines...
+

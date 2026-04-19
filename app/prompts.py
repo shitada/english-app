@@ -55,6 +55,49 @@ def SHADOWING_PROMPT() -> str:
     )
 
 
+def VOCABULARY_COLLOCATION_MATCH() -> str:
+    """System + user prompt body for the Vocabulary Collocation Match mini-mode.
+
+    Produces multiple-choice items where the learner picks the most natural
+    collocating word/phrase to fill a blank in a context sentence. Each item
+    is anchored to a known vocabulary word (id passed in) so SRS updates can
+    target the right row.
+    """
+    return (
+        "You are an English vocabulary coach. The user has these target "
+        "vocabulary words:\n{word_list}\n\n"
+        "Generate EXACTLY {count} collocation match items, one per word, in "
+        "the same order. For each word, write a natural English sentence that "
+        "uses the target word together with a strong COLLOCATE (a partner "
+        "word — a verb, adjective, preposition, or noun — that frequently "
+        "co-occurs with the target word). Replace ONLY the collocate with "
+        '\"____\" so the learner has to choose the most natural partner.\n\n'
+        "Return STRICT JSON in this exact shape (and NOTHING else):\n"
+        "{{\n"
+        '  \"items\": [\n'
+        "    {{\n"
+        '      \"word_id\": <int — copy from the input>,\n'
+        '      \"word\": \"<the target vocabulary word>\",\n'
+        '      \"prompt_sentence\": \"<a natural English sentence containing the target word and exactly one ____ where the collocate goes>\",\n'
+        '      \"options\": [\"<option1>\", \"<option2>\", \"<option3>\", \"<option4>\"],\n'
+        '      \"correct_index\": <int 0-3 — index of the natural collocate>,\n'
+        '      \"explanation\": \"<one short sentence (max ~20 words) explaining why the collocation is natural>\"\n'
+        "    }}\n"
+        "  ]\n"
+        "}}\n\n"
+        "Rules:\n"
+        "- options MUST be exactly 4 short strings (1-3 words each).\n"
+        "- Exactly ONE option (at correct_index) is the natural collocate; the "
+        "other 3 are plausible-but-unnatural distractors of the SAME part of "
+        "speech.\n"
+        "- prompt_sentence MUST contain the literal substring \"____\" exactly "
+        "once and MUST contain the target word.\n"
+        "- correct_index is an integer between 0 and 3 inclusive.\n"
+        "- word_id MUST exactly match the id provided for that word.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+
+
 def NUMBERS_DRILL_PROMPT() -> str:
     """System prompt for the Quick Numbers & Dates listening drill."""
     return (
