@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentType, type ReactNode } from 'react';
+import { Star, StarOff } from 'lucide-react';
 import { LazySection } from '../hooks/useLazyLoad';
+import { useFavorites } from '../hooks/useFavorites';
 import QuickShadowCard from './QuickShadowCard';
 import QuickDictationCard from './QuickDictationCard';
 import QuickSpeakCard from './QuickSpeakCard';
@@ -54,13 +56,16 @@ const DIFFICULTY_KEY = 'quick-practice-difficulty';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
 
+type TabKey = 'speaking' | 'listening' | 'grammar' | 'vocabulary' | 'writing' | 'favorites';
+
 interface TabDef {
-  key: string;
+  key: TabKey;
   emoji: string;
   label: string;
 }
 
 const TABS: TabDef[] = [
+  { key: 'favorites', emoji: '⭐', label: 'Favorites' },
   { key: 'speaking', emoji: '🗣️', label: 'Speaking' },
   { key: 'listening', emoji: '👂', label: 'Listening' },
   { key: 'grammar', emoji: '✍️', label: 'Grammar' },
@@ -68,11 +73,120 @@ const TABS: TabDef[] = [
   { key: 'writing', emoji: '✏️', label: 'Writing' },
 ];
 
+interface CardDef {
+  key: string;
+  tab: Exclude<TabKey, 'favorites'>;
+  label: string;
+  height: number;
+  Component: ComponentType;
+}
+
+const CARDS: CardDef[] = [
+  // Speaking
+  { key: 'speak', tab: 'speaking', label: 'Quick Speak', height: 180, Component: QuickSpeakCard },
+  { key: 'shadow', tab: 'speaking', label: 'Shadowing', height: 180, Component: QuickShadowCard },
+  { key: 'opinion', tab: 'speaking', label: 'Opinion', height: 180, Component: QuickOpinionCard },
+  { key: 'story', tab: 'speaking', label: 'Story', height: 180, Component: QuickStoryCard },
+  { key: 'follow-up', tab: 'speaking', label: 'Follow-up', height: 180, Component: QuickFollowUpCard },
+  { key: 'idiom', tab: 'speaking', label: 'Idiom', height: 180, Component: QuickIdiomCard },
+  { key: 'question', tab: 'speaking', label: 'Question', height: 180, Component: QuickQuestionCard },
+  { key: 'explain', tab: 'speaking', label: 'Explain', height: 180, Component: QuickExplainCard },
+  { key: 'role-play', tab: 'speaking', label: 'Role-play', height: 180, Component: QuickRolePlayCard },
+  { key: 'tongue-twister', tab: 'speaking', label: 'Tongue Twister', height: 180, Component: QuickTongueTwisterCard },
+  { key: 'rapid-fire', tab: 'speaking', label: 'Rapid Fire', height: 180, Component: QuickRapidFireCard },
+  { key: 'sentence-stress', tab: 'speaking', label: 'Sentence Stress', height: 180, Component: QuickSentenceStressCard },
+  { key: 'connected-speech', tab: 'speaking', label: 'Connected Speech', height: 180, Component: QuickConnectedSpeechCard },
+  { key: 'register-switch', tab: 'speaking', label: 'Register Switch', height: 180, Component: QuickRegisterSwitchCard },
+  { key: 'debate', tab: 'speaking', label: 'Debate', height: 180, Component: QuickDebateCard },
+  { key: 'scene-description', tab: 'speaking', label: 'Scene Description', height: 180, Component: QuickSceneDescriptionCard },
+  { key: 'filler-reduction', tab: 'speaking', label: 'Filler Reduction', height: 180, Component: QuickFillerReductionCard },
+  { key: 'emotion-response', tab: 'speaking', label: 'Emotion Response', height: 180, Component: QuickEmotionResponseCard },
+  { key: 'dialogue-gap', tab: 'speaking', label: 'Dialogue Gap', height: 180, Component: QuickDialogueGapCard },
+  { key: 'summarize-respond', tab: 'speaking', label: 'Summarize & Respond', height: 180, Component: QuickSummarizeRespondCard },
+  { key: 'instruction', tab: 'speaking', label: 'Instruction', height: 180, Component: QuickInstructionCard },
+  { key: 'conversation-repair', tab: 'speaking', label: 'Conversation Repair', height: 180, Component: QuickConversationRepairCard },
+  // Listening
+  { key: 'dictation', tab: 'listening', label: 'Dictation', height: 180, Component: QuickDictationCard },
+  { key: 'listen-respond', tab: 'listening', label: 'Listen & Respond', height: 180, Component: QuickListenRespondCard },
+  { key: 'listen-paraphrase', tab: 'listening', label: 'Listen & Paraphrase', height: 180, Component: QuickListenParaphraseCard },
+  { key: 'minimal-pairs', tab: 'listening', label: 'Minimal Pairs', height: 180, Component: QuickMinimalPairsCard },
+  { key: 'listening-comp', tab: 'listening', label: 'Listening Comprehension', height: 180, Component: QuickListeningCompCard },
+  { key: 'spot-error', tab: 'listening', label: 'Spot the Error', height: 180, Component: QuickSpotErrorCard },
+  { key: 'predict-next', tab: 'listening', label: 'Predict Next', height: 180, Component: QuickPredictNextCard },
+  { key: 'dictogloss', tab: 'listening', label: 'Dictogloss', height: 180, Component: QuickDictoglossCard },
+  { key: 'numbers-dates', tab: 'listening', label: 'Numbers & Dates', height: 220, Component: QuickNumbersDatesCard },
+  { key: 'thought-group', tab: 'listening', label: 'Thought Group', height: 260, Component: QuickThoughtGroupCard },
+  // Grammar
+  { key: 'grammar', tab: 'grammar', label: 'Grammar', height: 180, Component: QuickGrammarCard },
+  { key: 'rephrase', tab: 'grammar', label: 'Rephrase', height: 180, Component: QuickRephraseCard },
+  { key: 'transform', tab: 'grammar', label: 'Transform', height: 180, Component: QuickTransformCard },
+  { key: 'connector-drill', tab: 'grammar', label: 'Connector Drill', height: 180, Component: QuickConnectorDrillCard },
+  { key: 'phrasal-verb', tab: 'grammar', label: 'Phrasal Verb', height: 180, Component: QuickPhrasalVerbCard },
+  { key: 'sentence-scramble', tab: 'grammar', label: 'Sentence Scramble', height: 180, Component: QuickSentenceScrambleCard },
+  // Vocabulary
+  { key: 'vocab-sentence', tab: 'vocabulary', label: 'Vocab Sentence', height: 180, Component: QuickVocabSentenceCard },
+  { key: 'vocab-recall', tab: 'vocabulary', label: 'Vocab Recall', height: 180, Component: QuickVocabRecallCard },
+  { key: 'word-association', tab: 'vocabulary', label: 'Word Association', height: 180, Component: QuickWordAssociationCard },
+  { key: 'collocation', tab: 'vocabulary', label: 'Collocation', height: 180, Component: QuickCollocationCard },
+  { key: 'synonym-swap', tab: 'vocabulary', label: 'Synonym Swap', height: 180, Component: QuickSynonymSwapCard },
+  // Writing
+  { key: 'write', tab: 'writing', label: 'Write', height: 180, Component: QuickWriteCard },
+  { key: 'reading', tab: 'writing', label: 'Reading', height: 180, Component: QuickReadingCard },
+  { key: 'email', tab: 'writing', label: 'Email', height: 180, Component: QuickEmailCard },
+  { key: 'proofread', tab: 'writing', label: 'Proofread', height: 180, Component: QuickProofreadCard },
+];
+
+interface PinnableProps {
+  cardKey: string;
+  label: string;
+  pinned: boolean;
+  onToggle: (key: string) => void;
+  children: ReactNode;
+}
+
+function Pinnable({ cardKey, label, pinned, onToggle, children }: PinnableProps) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        type="button"
+        data-testid={`qp-pin-${cardKey}`}
+        aria-pressed={pinned}
+        aria-label={pinned ? `Unpin ${label} from favorites` : `Pin ${label} to favorites`}
+        title={pinned ? 'Unpin from favorites' : 'Pin to favorites'}
+        onClick={() => onToggle(cardKey)}
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          zIndex: 2,
+          width: 32,
+          height: 32,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px solid var(--border, #d1d5db)',
+          borderRadius: '50%',
+          background: pinned ? 'rgba(250, 204, 21, 0.18)' : 'var(--card-bg, white)',
+          color: pinned ? '#ca8a04' : 'var(--text-secondary, #6b7280)',
+          cursor: 'pointer',
+          padding: 0,
+          transition: 'all 0.15s',
+        }}
+      >
+        {pinned ? <Star size={16} fill="currentColor" /> : <StarOff size={16} />}
+      </button>
+      {children}
+    </div>
+  );
+}
+
 export default function QuickPracticeHub() {
-  const [activeTab, setActiveTab] = useState(() => {
+  const { favorites, isFavorite, toggle } = useFavorites();
+
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved && TABS.some(t => t.key === saved)) return saved;
+      if (saved && TABS.some(t => t.key === saved)) return saved as TabKey;
     } catch { /* ignore */ }
     return 'speaking';
   });
@@ -95,6 +209,28 @@ export default function QuickPracticeHub() {
     // Dispatch storage event so child cards can react
     window.dispatchEvent(new StorageEvent('storage', { key: DIFFICULTY_KEY, newValue: d }));
   };
+
+  const renderCard = (card: CardDef) => {
+    const Component = card.Component;
+    return (
+      <Pinnable
+        key={card.key}
+        cardKey={card.key}
+        label={card.label}
+        pinned={isFavorite(card.key)}
+        onToggle={toggle}
+      >
+        <LazySection height={card.height}><Component /></LazySection>
+      </Pinnable>
+    );
+  };
+
+  const cardsForTab = (tab: Exclude<TabKey, 'favorites'>) =>
+    CARDS.filter(c => c.tab === tab);
+
+  const favoriteCards = favorites
+    .map(key => CARDS.find(c => c.key === key))
+    .filter((c): c is CardDef => Boolean(c));
 
   return (
     <div style={{
@@ -127,6 +263,7 @@ export default function QuickPracticeHub() {
                 key={tab.key}
                 role="tab"
                 aria-selected={isActive}
+                data-testid={`qp-tab-${tab.key}`}
                 onClick={() => setActiveTab(tab.key)}
                 style={{
                   padding: '8px 14px',
@@ -142,6 +279,19 @@ export default function QuickPracticeHub() {
                 }}
               >
                 {tab.emoji} {tab.label}
+                {tab.key === 'favorites' && favorites.length > 0 && (
+                  <span style={{
+                    marginLeft: 6,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    background: 'var(--primary, #3b82f6)',
+                    color: '#fff',
+                    borderRadius: 999,
+                    padding: '1px 7px',
+                  }}>
+                    {favorites.length}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -179,74 +329,38 @@ export default function QuickPracticeHub() {
         </div>
       </div>
 
-      <div role="tabpanel" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {activeTab === 'speaking' && (
-          <>
-            <LazySection height={180}><QuickSpeakCard /></LazySection>
-            <LazySection height={180}><QuickShadowCard /></LazySection>
-            <LazySection height={180}><QuickOpinionCard /></LazySection>
-            <LazySection height={180}><QuickStoryCard /></LazySection>
-            <LazySection height={180}><QuickFollowUpCard /></LazySection>
-            <LazySection height={180}><QuickIdiomCard /></LazySection>
-            <LazySection height={180}><QuickQuestionCard /></LazySection>
-            <LazySection height={180}><QuickExplainCard /></LazySection>
-            <LazySection height={180}><QuickRolePlayCard /></LazySection>
-            <LazySection height={180}><QuickTongueTwisterCard /></LazySection>
-            <LazySection height={180}><QuickRapidFireCard /></LazySection>
-            <LazySection height={180}><QuickSentenceStressCard /></LazySection>
-            <LazySection height={180}><QuickConnectedSpeechCard /></LazySection>
-            <LazySection height={180}><QuickRegisterSwitchCard /></LazySection>
-            <LazySection height={180}><QuickDebateCard /></LazySection>
-            <LazySection height={180}><QuickSceneDescriptionCard /></LazySection>
-            <LazySection height={180}><QuickFillerReductionCard /></LazySection>
-            <LazySection height={180}><QuickEmotionResponseCard /></LazySection>
-            <LazySection height={180}><QuickDialogueGapCard /></LazySection>
-            <LazySection height={180}><QuickSummarizeRespondCard /></LazySection>
-            <LazySection height={180}><QuickInstructionCard /></LazySection>
-            <LazySection height={180}><QuickConversationRepairCard /></LazySection>
-          </>
+      <div role="tabpanel" data-testid={`qp-tabpanel-${activeTab}`} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {activeTab === 'favorites' && (
+          favoriteCards.length === 0 ? (
+            <div
+              data-testid="qp-favorites-empty"
+              style={{
+                padding: '24px 16px',
+                textAlign: 'center',
+                color: 'var(--text-secondary, #6b7280)',
+                fontSize: 14,
+                lineHeight: 1.5,
+                border: '1px dashed var(--border, #d1d5db)',
+                borderRadius: 12,
+              }}
+            >
+              <div style={{ fontSize: 28, marginBottom: 8 }}>⭐</div>
+              <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                No favorites yet
+              </div>
+              <div>
+                Tap the star on any practice card to pin it here for quick access.
+              </div>
+            </div>
+          ) : (
+            <>{favoriteCards.map(renderCard)}</>
+          )
         )}
-        {activeTab === 'listening' && (
-          <>
-            <LazySection height={180}><QuickDictationCard /></LazySection>
-            <LazySection height={180}><QuickListenRespondCard /></LazySection>
-            <LazySection height={180}><QuickListenParaphraseCard /></LazySection>
-            <LazySection height={180}><QuickMinimalPairsCard /></LazySection>
-            <LazySection height={180}><QuickListeningCompCard /></LazySection>
-            <LazySection height={180}><QuickSpotErrorCard /></LazySection>
-            <LazySection height={180}><QuickPredictNextCard /></LazySection>
-            <LazySection height={180}><QuickDictoglossCard /></LazySection>
-            <LazySection height={220}><QuickNumbersDatesCard /></LazySection>
-            <LazySection height={260}><QuickThoughtGroupCard /></LazySection>
-          </>
-        )}
-        {activeTab === 'grammar' && (
-          <>
-            <LazySection height={180}><QuickGrammarCard /></LazySection>
-            <LazySection height={180}><QuickRephraseCard /></LazySection>
-            <LazySection height={180}><QuickTransformCard /></LazySection>
-            <LazySection height={180}><QuickConnectorDrillCard /></LazySection>
-            <LazySection height={180}><QuickPhrasalVerbCard /></LazySection>
-            <LazySection height={180}><QuickSentenceScrambleCard /></LazySection>
-          </>
-        )}
-        {activeTab === 'vocabulary' && (
-          <>
-            <LazySection height={180}><QuickVocabSentenceCard /></LazySection>
-            <LazySection height={180}><QuickVocabRecallCard /></LazySection>
-            <LazySection height={180}><QuickWordAssociationCard /></LazySection>
-            <LazySection height={180}><QuickCollocationCard /></LazySection>
-            <LazySection height={180}><QuickSynonymSwapCard /></LazySection>
-          </>
-        )}
-        {activeTab === 'writing' && (
-          <>
-            <LazySection height={180}><QuickWriteCard /></LazySection>
-            <LazySection height={180}><QuickReadingCard /></LazySection>
-            <LazySection height={180}><QuickEmailCard /></LazySection>
-            <LazySection height={180}><QuickProofreadCard /></LazySection>
-          </>
-        )}
+        {activeTab === 'speaking' && <>{cardsForTab('speaking').map(renderCard)}</>}
+        {activeTab === 'listening' && <>{cardsForTab('listening').map(renderCard)}</>}
+        {activeTab === 'grammar' && <>{cardsForTab('grammar').map(renderCard)}</>}
+        {activeTab === 'vocabulary' && <>{cardsForTab('vocabulary').map(renderCard)}</>}
+        {activeTab === 'writing' && <>{cardsForTab('writing').map(renderCard)}</>}
       </div>
     </div>
   );

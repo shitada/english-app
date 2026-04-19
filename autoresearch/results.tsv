@@ -618,3 +618,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 665	b233ab6	2026-04-20	68	175	151	51	445	2226	2228	pass	7.80	kept	Mistake Journal Listen 🔊 + Shadow 🎤 per-card (TTS + ASR similarity badge)
 666	8f81164	2026-04-20	90	476	181	82	829	2241	2243	pass	7.25	kept	Quick Thought-Group Phrasing Card (Listen→Chunk→Check→Shadow + F1 + endpoint with fallback) — 2 dashboard fails pre-existing/unrelated
 667	98158c1	2026-04-20	82	358	162	28	630	2241	2243	pass	7.15	kept	Shareable Daily Progress Card on Dashboard (Copy text + Download PNG, frontend-only canvas, no deps)
+668	03aed83	2026-04-20	16	247	175	17	455	2241	2243	pass	7.55	kept	Listening Quiz inline slow-replay panel after wrong answer + auto-replay-on-wrong toggle (frontend-only); 2 dashboard fails pre-existing/unrelated

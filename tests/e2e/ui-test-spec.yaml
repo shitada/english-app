@@ -4594,3 +4594,43 @@ pages:
         type: functional
         priority: medium
         added_in: 666
+
+      - id: qp-favorites-001
+        target: Favorites tab is present in the Quick Practice Hub tab list
+        action: Open the Quick Practice Hub and look at the tab strip
+        expect: A "⭐ Favorites" tab (data-testid="qp-tab-favorites") appears alongside Speaking/Listening/Grammar/Vocabulary/Writing
+        type: functional
+        priority: medium
+        added_in: 669
+
+      - id: qp-favorites-002
+        target: Empty Favorites tab shows a friendly empty-state hint
+        action: With no cards pinned, click data-testid="qp-tab-favorites"
+        expect: The tabpanel (data-testid="qp-tabpanel-favorites") shows the empty state (data-testid="qp-favorites-empty") with a ⭐ icon and "No favorites yet" message
+        type: functional
+        priority: medium
+        added_in: 669
+
+      - id: qp-favorites-003
+        target: Each Quick Practice card has a star pin button in its top-right corner
+        action: Open any non-Favorites tab and inspect a card such as Quick Speak
+        expect: A circular star toggle button (e.g. data-testid="qp-pin-speak") with aria-pressed="false" is visible in the top-right of the card
+        type: functional
+        priority: medium
+        added_in: 669
+
+      - id: qp-favorites-004
+        target: Clicking the star pin toggles favorite state and persists across reloads
+        action: On the Speaking tab, click data-testid="qp-pin-speak", then reload the page
+        expect: aria-pressed becomes "true", a count badge appears on the Favorites tab, the Favorites tab shows the Quick Speak card after reload (localStorage key "quick-practice-favorites" stores ["speak"])
+        type: functional
+        priority: medium
+        added_in: 669
+
+      - id: qp-favorites-005
+        target: Active tab persists across reloads, including the Favorites tab
+        action: Click data-testid="qp-tab-favorites", then reload the page
+        expect: Favorites tab remains active after reload (localStorage key "quick-practice-tab" === "favorites")
+        type: functional
+        priority: low
+        added_in: 669
