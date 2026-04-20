@@ -5351,3 +5351,32 @@ pages:
         type: navigation
         priority: high
         added_in: 690
+
+  home_speed_ladder_card:
+    path: /
+    tests:
+      - id: home-speed-ladder-001
+        target: Home exposes a Listening Speed Ladder CTA card linking to /speed-ladder
+        action: Visit "/" and locate data-testid="speed-ladder-cta"
+        expect: Card is visible with text containing "Listening Speed Ladder" and the ladder emojis (🐢🚶🏃); clicking navigates to /speed-ladder
+        type: navigation
+        priority: high
+        added_in: 691
+
+  speed_ladder:
+    path: /speed-ladder
+    tests:
+      - id: speed-ladder-001
+        target: Speed Ladder drill page renders title and a Start button
+        action: Visit "/speed-ladder" and locate data-testid="speed-ladder-title" + data-testid="speed-ladder-start"
+        expect: Heading contains "Listening Speed Ladder" and a Start button is clickable
+        type: functional
+        priority: high
+        added_in: 691
+      - id: speed-ladder-002
+        target: Clicking Start loads the listening step UI
+        action: Click data-testid="speed-ladder-start", then wait for data-testid="speed-ladder-listen"
+        expect: A listen panel with Play and Reveal-question buttons appears
+        type: functional
+        priority: medium
+        added_in: 691

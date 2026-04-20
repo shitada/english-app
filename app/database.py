@@ -297,6 +297,17 @@ CREATE TABLE IF NOT EXISTS number_dictation_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_number_dictation_created ON number_dictation_sessions(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_number_dictation_category ON number_dictation_sessions(category);
+
+CREATE TABLE IF NOT EXISTS speed_ladder_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    speed REAL NOT NULL,
+    correct INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_speed_ladder_created ON speed_ladder_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_speed_ladder_session ON speed_ladder_attempts(session_id);
 """
 
 # ---------------------------------------------------------------------------
@@ -679,6 +690,24 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on number_dictation_sessions category",
         "CREATE INDEX IF NOT EXISTS idx_number_dictation_category ON number_dictation_sessions(category)",
+    ),
+    (
+        "create speed_ladder_attempts table",
+        """CREATE TABLE IF NOT EXISTS speed_ladder_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            speed REAL NOT NULL,
+            correct INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on speed_ladder_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_speed_ladder_created ON speed_ladder_attempts(created_at DESC)",
+    ),
+    (
+        "add index on speed_ladder_attempts session_id",
+        "CREATE INDEX IF NOT EXISTS idx_speed_ladder_session ON speed_ladder_attempts(session_id)",
     ),
 ]
 

@@ -1584,6 +1584,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/speed-ladder"
+        data-testid="speed-ladder-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Headphones size={28} color="#0ea5e9" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🐢🚶🏃 Listening Speed Ladder</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Same passage at 0.8× → 1.0× → 1.25× — one MCQ per speed.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#0ea5e9',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />

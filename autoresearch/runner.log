@@ -38,4 +38,77 @@ No UI test failures to fix. Starting iteration 690.
   └ List directory app/routers
       └ 15 files found
 
-Good. Now let me look at the frontend Home.tsx, App.tsx, and an existing simpler page for the pattern.Now I have enough context. Let me check tests/integration for an example to follow.Good. Now I have everything needed. Let me design the implementation.Now let me create everything. First, schema additions and migrations.Now create the DAL:Now the router:Register the router:Now backend tests:I need to fix the normalization so teens/tens words match digits.Now update the unit test expectations:Let me run unit tests to validate:Add parens to stripped chars:All backend tests pass. Now the frontend. Let me add the API client functions and the page.Now create the page:Now register route in App.tsx and add a home card.Now add the home card after the paraphrase card:Now a vitest for the page. Let me check the existing Paraphrase test for the convention.Now update the UI test spec for the new home card and page:Let's also confirm the backend imports cleanly and tests still pass:Commit:
+Good. Now let me look at the frontend Home.tsx, App.tsx, and an existing simpler page for the pattern.Now I have enough context. Let me check tests/integration for an example to follow.Good. Now I have everything needed. Let me design the implementation.Now let me create everything. First, schema additions and migrations.Now create the DAL:Now the router:Register the router:Now backend tests:I need to fix the normalization so teens/tens words match digits.Now update the unit test expectations:Let me run unit tests to validate:Add parens to stripped chars:All backend tests pass. Now the frontend. Let me add the API client functions and the page.Now create the page:Now register route in App.tsx and add a home card.Now add the home card after the paraphrase card:Now a vitest for the page. Let me check the existing Paraphrase test for the convention.Now update the UI test spec for the new home card and page:Let's also confirm the backend imports cleanly and tests still pass:Commit:Good — the autoresearch logs were also picked up but my code changes are the additions. Done.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "ece4d6a",
+  "files_changed": [
+    "app/dal/number_dictation.py",
+    "app/database.py",
+    "app/main.py",
+    "app/routers/number_dictation.py",
+    "frontend/src/App.tsx",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/pages/NumberDictation.tsx",
+    "frontend/src/pages/__tests__/NumberDictation.test.tsx",
+    "tests/e2e/ui-test-spec.yaml",
+    "tests/integration/test_number_dictation_api.py",
+    "tests/unit/test_number_dictation_dal.py"
+  ],
+  "tests_added": 41,
+  "ui_spec_updated": true,
+  "description": "Added Number & Date Dictation drill: backend router with deterministic item generators + normalization (teens/tens, prices, dates, times, years, phones), DAL + summary table with migration, frontend NumberDictation page + Home CTA + route, plus 39 backend pytest cases and 2 vitest SSR cases."
+}
+```● Coder Implement iter 690
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #690: add Number & Date Dictation listening drill"
+  │   │ 2>&1 | tail -15 && git rev-parse --short HEAD
+  │   └ 16 lines...
+  └ stat (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git --no-pager show
+      │ --stat HEAD | head -30
+      └ 25 lines...
+
+● Verify commit (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T2=$(date +%s) && echo
+  │ "T2=$T2" && git --no-pager log --oneline -2 && git --no-pager diff HEAD~1
+  │ --name-only
+  └ 21 lines...
+
+```json
+{
+  "tests_passed": 2473,
+  "tests_total": 2475,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": false,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n================== 2 failed, 2473 passed in 139.40s ==================",
+  "failure_summary": "2 dashboard integration tests fail: test_daily_challenge_current_count_with_activity asserts data['current_count'] >= 3 but got 0 (pronunciation activity not reflected in daily-challenge current_count); TestDayDetailAPI::test_pronunciation_activity_reflected fails similarly — pronunciation activity from /api/pronunciation/check is not being reflected in dashboard endpoints."
+}
+```● Tester Test iter 690
+  │ failure details (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │   │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+  │   │ with_activity tests/integration/test_dashboard_api.py::TestDayDetailAPI::tes
+  │   │ t_pronunciation_activity_reflected 2>&1 | tail -60
+  │   └ 61 lines...
+  └ failure assertion (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+      │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+      │ with_activity 2>&1 | grep -A 30 "FAILED\|assert\|Error" | head -60
+      └ 23 lines...
+
+● Re-run failing tests (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && uv run pytest
+  │ tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_
+  │ with_activity tests/integration/test_dashboard_api.py::TestDayDetailAPI::tes
+  │ t_pronunciation_activity_reflected -v 2>&1 | tail -40
+  └ 41 lines...
+

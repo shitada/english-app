@@ -4138,3 +4138,83 @@ export function completeNumberDictation(
     body: JSON.stringify({ session_id, category, results }),
   });
 }
+
+
+// ---------------------------------------------------------------------------
+// Listening Speed Ladder — 3-step progressive comprehension drill
+// (namespaced distinct from /api/listening/speed max-speed tracker)
+// ---------------------------------------------------------------------------
+
+export interface SpeedLadderQuestion {
+  id: string;
+  prompt: string;
+  choices: string[];
+  correct_index: number;
+  speed: number;
+  explanation: string;
+}
+
+export interface SpeedLadderStartResponse {
+  session_id: string;
+  passage_text: string;
+  tts_audio_url: string | null;
+  questions: SpeedLadderQuestion[];
+}
+
+export interface SpeedLadderAnswerInput {
+  session_id: string;
+  question_id: string;
+  choice_index: number;
+  speed: number;
+  correct_index: number;
+  explanation: string;
+}
+
+export interface SpeedLadderAnswerResponse {
+  correct: boolean;
+  correct_index: number;
+  explanation: string;
+}
+
+export interface SpeedLadderSpeedAccuracy {
+  total: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface SpeedLadderSessionHistory {
+  session_id: string;
+  created_at: string;
+  total: number;
+  correct: number;
+  by_speed: Record<string, SpeedLadderSpeedAccuracy>;
+}
+
+export interface SpeedLadderHistoryResponse {
+  sessions: SpeedLadderSessionHistory[];
+  overall_by_speed: Record<string, SpeedLadderSpeedAccuracy>;
+}
+
+export function startSpeedLadder(): Promise<SpeedLadderStartResponse> {
+  return request<SpeedLadderStartResponse>('/api/speed-ladder/start', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+}
+
+export function answerSpeedLadder(
+  payload: SpeedLadderAnswerInput,
+): Promise<SpeedLadderAnswerResponse> {
+  return request<SpeedLadderAnswerResponse>('/api/speed-ladder/answer', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getSpeedLadderHistory(
+  limit = 20,
+): Promise<SpeedLadderHistoryResponse> {
+  return request<SpeedLadderHistoryResponse>(
+    `/api/speed-ladder/history?limit=${encodeURIComponent(limit)}`,
+  );
+}
