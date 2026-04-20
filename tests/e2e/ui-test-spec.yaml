@@ -5305,3 +5305,49 @@ pages:
         type: navigation
         priority: high
         added_in: 689
+
+  number_dictation:
+    path: /number-dictation
+    tests:
+      - id: number-dictation-001
+        target: Page renders title and category picker
+        action: Visit /number-dictation
+        expect: data-testid="number-dictation-page" is visible; heading contains "Number" and "Dictation"; data-testid="number-dictation-picker" is visible with at least the "mixed", "prices", "dates", "times", "years", "phone", "teens_vs_tens" category buttons
+        type: functional
+        priority: high
+        added_in: 690
+
+      - id: number-dictation-002
+        target: Selecting a category starts a 6-item drill
+        action: Visit /number-dictation, click data-testid="number-dictation-cat-prices"; wait for /api/number-dictation/start
+        expect: data-testid="number-dictation-drill" appears; data-testid="number-dictation-progress" shows "1 / 6"; data-testid="number-dictation-play" button visible; data-testid="number-dictation-input" empty
+        type: functional
+        priority: high
+        added_in: 690
+
+      - id: number-dictation-003
+        target: Submitting an answer shows feedback with hint
+        action: Start a session (any category), type any answer, click data-testid="number-dictation-submit"
+        expect: data-testid="number-dictation-feedback" visible; data-testid="number-dictation-result-icon" shows ✅ or ❌; if shown data-testid="number-dictation-hint" contains 💡; data-testid="number-dictation-next" present
+        type: functional
+        priority: high
+        added_in: 690
+
+      - id: number-dictation-004
+        target: Completing all items shows summary with accuracy
+        action: Step through all 6 items by submitting an answer and clicking Next; on the last feedback click Next
+        expect: data-testid="number-dictation-summary" visible; data-testid="number-dictation-accuracy" shows a percentage (e.g. "0%" through "100%"); data-testid="number-dictation-restart" button visible; "Practice missed again" button (data-testid="number-dictation-retry-missed") appears only if at least one item was wrong
+        type: functional
+        priority: medium
+        added_in: 690
+
+  home_number_dictation_card:
+    path: /
+    tests:
+      - id: home-number-dictation-001
+        target: Home exposes a Number & Date Dictation CTA card linking to /number-dictation
+        action: Visit "/" and locate data-testid="number-dictation-cta"
+        expect: Card is visible with text containing "Number" and "Dictation" and a 🔢 emoji; clicking navigates to /number-dictation
+        type: navigation
+        priority: high
+        added_in: 690

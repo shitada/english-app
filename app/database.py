@@ -285,6 +285,18 @@ CREATE TABLE IF NOT EXISTS linker_drill_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_linker_drill_created ON linker_drill_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_linker_drill_category ON linker_drill_attempts(category);
+
+CREATE TABLE IF NOT EXISTS number_dictation_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    category TEXT NOT NULL,
+    total INTEGER NOT NULL,
+    correct INTEGER NOT NULL,
+    accuracy REAL NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_number_dictation_created ON number_dictation_sessions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_number_dictation_category ON number_dictation_sessions(category);
 """
 
 # ---------------------------------------------------------------------------
@@ -648,6 +660,25 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on linker_drill_attempts category",
         "CREATE INDEX IF NOT EXISTS idx_linker_drill_category ON linker_drill_attempts(category)",
+    ),
+    (
+        "create number_dictation_sessions table",
+        """CREATE TABLE IF NOT EXISTS number_dictation_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            category TEXT NOT NULL,
+            total INTEGER NOT NULL,
+            correct INTEGER NOT NULL,
+            accuracy REAL NOT NULL
+        )""",
+    ),
+    (
+        "add index on number_dictation_sessions created_at",
+        "CREATE INDEX IF NOT EXISTS idx_number_dictation_created ON number_dictation_sessions(created_at DESC)",
+    ),
+    (
+        "add index on number_dictation_sessions category",
+        "CREATE INDEX IF NOT EXISTS idx_number_dictation_category ON number_dictation_sessions(category)",
     ),
 ]
 

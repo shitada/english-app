@@ -1559,6 +1559,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/number-dictation"
+        data-testid="number-dictation-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Headphones size={28} color="#06b6d4" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🔢 Number &amp; Date Dictation</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Decode tricky spoken numerics — fifteen vs fifty, $3.49, 2019, March 3rd, 7:45.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#06b6d4',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />

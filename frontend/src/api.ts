@@ -4057,3 +4057,84 @@ export function scoreParaphrase(
     body: JSON.stringify({ source, attempt }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Number & Date Dictation
+// ---------------------------------------------------------------------------
+
+export type NumberDictationCategory =
+  | 'teens_vs_tens'
+  | 'prices'
+  | 'dates'
+  | 'times'
+  | 'years'
+  | 'phone'
+  | 'mixed';
+
+export interface NumberDictationItem {
+  id: string;
+  category: string;
+  expected_text: string;
+  spoken_form: string;
+  audio_url: string;
+  hint: string;
+}
+
+export interface NumberDictationStartResponse {
+  session_id: string;
+  category: string;
+  difficulty: string;
+  items: NumberDictationItem[];
+}
+
+export interface NumberDictationAnswerResponse {
+  correct: boolean;
+  expected_normalized: string;
+  user_normalized: string;
+  hint: string;
+}
+
+export interface NumberDictationCompleteResponse {
+  session_id: string;
+  total: number;
+  correct: number;
+  accuracy: number;
+  saved_id: number;
+}
+
+export function startNumberDictation(
+  category: NumberDictationCategory = 'mixed',
+  count = 6,
+): Promise<NumberDictationStartResponse> {
+  return request<NumberDictationStartResponse>('/api/number-dictation/start', {
+    method: 'POST',
+    body: JSON.stringify({ category, count }),
+  });
+}
+
+export function answerNumberDictation(
+  item: NumberDictationItem,
+  user_answer: string,
+): Promise<NumberDictationAnswerResponse> {
+  return request<NumberDictationAnswerResponse>('/api/number-dictation/answer', {
+    method: 'POST',
+    body: JSON.stringify({
+      item_id: item.id,
+      category: item.category,
+      expected_text: item.expected_text,
+      user_answer,
+      hint: item.hint,
+    }),
+  });
+}
+
+export function completeNumberDictation(
+  session_id: string,
+  category: string,
+  results: { item_id: string; category: string; correct: boolean }[],
+): Promise<NumberDictationCompleteResponse> {
+  return request<NumberDictationCompleteResponse>('/api/number-dictation/complete', {
+    method: 'POST',
+    body: JSON.stringify({ session_id, category, results }),
+  });
+}

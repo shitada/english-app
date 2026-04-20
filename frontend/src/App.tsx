@@ -20,6 +20,7 @@ import StressSpotlight from './pages/StressSpotlight';
 import SentenceEcho from './components/SentenceEcho';
 import ListenSummarize from './pages/ListenSummarize';
 import Paraphrase from './pages/Paraphrase';
+import NumberDictation from './pages/NumberDictation';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -119,6 +120,7 @@ export default function App() {
                 <Route path="/sentence-echo" element={<SentenceEcho />} />
                 <Route path="/listen-summarize" element={<ListenSummarize />} />
                 <Route path="/paraphrase" element={<Paraphrase />} />
+                <Route path="/number-dictation" element={<NumberDictation />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>
