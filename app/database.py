@@ -327,6 +327,20 @@ CREATE TABLE IF NOT EXISTS monologue_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_monologue_created ON monologue_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_monologue_scenario ON monologue_attempts(scenario_id);
+
+CREATE TABLE IF NOT EXISTS tense_contrast_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    session_id TEXT,
+    item_id TEXT,
+    tense_label TEXT,
+    user_answer TEXT,
+    correct INTEGER NOT NULL DEFAULT 0,
+    elapsed_ms INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_tense_contrast_created ON tense_contrast_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tense_contrast_session ON tense_contrast_attempts(session_id);
 """
 
 # ---------------------------------------------------------------------------
@@ -753,6 +767,27 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on monologue_attempts scenario_id",
         "CREATE INDEX IF NOT EXISTS idx_monologue_scenario ON monologue_attempts(scenario_id)",
+    ),
+    (
+        "create tense_contrast_attempts table",
+        """CREATE TABLE IF NOT EXISTS tense_contrast_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            session_id TEXT,
+            item_id TEXT,
+            tense_label TEXT,
+            user_answer TEXT,
+            correct INTEGER NOT NULL DEFAULT 0,
+            elapsed_ms INTEGER NOT NULL DEFAULT 0
+        )""",
+    ),
+    (
+        "add index on tense_contrast_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_tense_contrast_created ON tense_contrast_attempts(created_at DESC)",
+    ),
+    (
+        "add index on tense_contrast_attempts session_id",
+        "CREATE INDEX IF NOT EXISTS idx_tense_contrast_session ON tense_contrast_attempts(session_id)",
     ),
 ]
 

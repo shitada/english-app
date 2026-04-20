@@ -4328,3 +4328,87 @@ export function postTagQuestionAttempt(
     body: JSON.stringify(payload),
   });
 }
+
+
+// ---------------------------------------------------------------------------
+// Tense Contrast Drill — past simple vs. present perfect vs. present perfect continuous
+// ---------------------------------------------------------------------------
+
+export type TenseLabel =
+  | 'past_simple'
+  | 'present_perfect'
+  | 'present_perfect_continuous';
+
+export interface TenseContrastItem {
+  id: string;
+  sentence_with_blank: string;
+  verb_lemma: string;
+  correct_form: string[];
+  tense_label: TenseLabel;
+  cue: string;
+  explanation: string;
+}
+
+export interface TenseContrastSessionResponse {
+  session_id: string;
+  items: TenseContrastItem[];
+}
+
+export interface TenseContrastAttemptInput {
+  item_id: string;
+  user_answer: string;
+  correct: boolean;
+  tense_label: TenseLabel;
+  elapsed_ms: number;
+}
+
+export interface TenseContrastSubmitResponse {
+  inserted: number;
+}
+
+export interface TenseContrastTenseStats {
+  total: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface TenseContrastStatsResponse {
+  days: number;
+  total: number;
+  correct: number;
+  overall_accuracy: number;
+  by_tense: Record<string, TenseContrastTenseStats>;
+}
+
+export function createTenseContrastSession(
+  count = 8,
+): Promise<TenseContrastSessionResponse> {
+  return request<TenseContrastSessionResponse>(
+    '/api/tense-contrast/session',
+    {
+      method: 'POST',
+      body: JSON.stringify({ count }),
+    },
+  );
+}
+
+export function submitTenseContrastAttempts(
+  sessionId: string,
+  answers: TenseContrastAttemptInput[],
+): Promise<TenseContrastSubmitResponse> {
+  return request<TenseContrastSubmitResponse>(
+    '/api/tense-contrast/submit',
+    {
+      method: 'POST',
+      body: JSON.stringify({ session_id: sessionId, answers }),
+    },
+  );
+}
+
+export function getTenseContrastStats(
+  days = 30,
+): Promise<TenseContrastStatsResponse> {
+  return request<TenseContrastStatsResponse>(
+    `/api/tense-contrast/stats?days=${days}`,
+  );
+}

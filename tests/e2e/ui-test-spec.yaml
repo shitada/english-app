@@ -5480,3 +5480,42 @@ pages:
         type: functional
         priority: medium
         added_in: 694
+
+  home_tense_contrast_card:
+    path: /
+    tests:
+      - id: home-tense-contrast-001
+        target: Home exposes a Tense Contrast Drill CTA card linking to /tense-contrast
+        selector: data-testid="tense-contrast-cta"
+        action: Visit "/" and locate data-testid="tense-contrast-cta"
+        expect: Card is visible with text containing "Tense Contrast" and clicking navigates to /tense-contrast
+        type: navigation
+        priority: high
+        added_in: 695
+
+  tense_contrast:
+    path: /tense-contrast
+    tests:
+      - id: tense-contrast-001
+        target: Drill page renders title and Start button
+        selector: data-testid="tense-contrast-title"
+        action: Visit "/tense-contrast" and verify data-testid="tense-contrast-title" and data-testid="tense-contrast-start" are visible
+        expect: Heading contains "Tense Contrast Drill"; a Start button is present
+        type: functional
+        priority: high
+        added_in: 695
+      - id: tense-contrast-002
+        target: Clicking Start loads the drill UI with sentence, input, and Submit
+        selector: data-testid="tense-contrast-start"
+        action: Click data-testid="tense-contrast-start" and wait for data-testid="tense-contrast-drill"
+        expect: data-testid="tense-contrast-sentence", data-testid="tense-contrast-input", and data-testid="tense-contrast-submit" are visible; data-testid="tense-contrast-progress" shows "1 / 8"
+        type: functional
+        priority: high
+        added_in: 695
+      - id: tense-contrast-003
+        target: Submitting an answer shows feedback with explanation and accepted forms
+        action: After starting, type any text into data-testid="tense-contrast-input" and click data-testid="tense-contrast-submit"
+        expect: data-testid="tense-contrast-feedback" is visible with data-testid="tense-contrast-feedback-result", data-testid="tense-contrast-accepted", data-testid="tense-contrast-explanation", and data-testid="tense-contrast-next"
+        type: functional
+        priority: medium
+        added_in: 695

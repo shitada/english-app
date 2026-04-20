@@ -24,6 +24,7 @@ import NumberDictation from './pages/NumberDictation';
 import SpeedLadderDrill from './pages/SpeedLadderDrill';
 import PhrasalVerbDrill from './pages/PhrasalVerbDrill';
 import TagQuestionDrill from './pages/TagQuestionDrill';
+import TenseContrast from './pages/TenseContrast';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -127,6 +128,7 @@ export default function App() {
                 <Route path="/speed-ladder" element={<SpeedLadderDrill />} />
                 <Route path="/phrasal-verbs" element={<PhrasalVerbDrill />} />
                 <Route path="/tag-questions" element={<TagQuestionDrill />} />
+                <Route path="/tense-contrast" element={<TenseContrast />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

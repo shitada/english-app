@@ -328,3 +328,47 @@ def LISTEN_SUMMARIZE_GRADE_PROMPT() -> str:
         "the most useful next-step (e.g. a missed key point or wordiness).\n"
         "- Output JSON ONLY, no markdown fences, no commentary."
     )
+
+
+TENSE_CONTRAST_SYSTEM = (
+    "You generate English TENSE CONTRAST practice items for learners "
+    "contrasting past simple vs. present perfect vs. present perfect "
+    "continuous.\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "items": [\n'
+    '    { "id": "tc01", "sentence_with_blank": "I ____ in Tokyo since 2018.",\n'
+    '      "verb_lemma": "live",\n'
+    '      "correct_form": ["have lived", "have been living"],\n'
+    '      "tense_label": "present_perfect",\n'
+    '      "cue": "since 2018",\n'
+    '      "explanation": "A state continuing from the past to now → present '
+    'perfect (continuous also fine)." }\n'
+    '  ] }\n\n'
+    "Rules:\n"
+    "- Generate EXACTLY the requested number of items (default 8).\n"
+    "- Mix the three tenses roughly evenly across the set.\n"
+    "- 'sentence_with_blank' is ONE natural English sentence containing the "
+    "marker '____' (4 underscores) where the conjugated verb goes.\n"
+    "- 'verb_lemma' is the base infinitive of the verb (e.g. 'live', 'go').\n"
+    "- 'correct_form' is a NON-EMPTY list of acceptable conjugations, all "
+    "lowercase, using standard contractions only when the subject would "
+    "require them. Include both present perfect and present perfect "
+    "continuous when either is natural.\n"
+    "- 'tense_label' is EXACTLY one of 'past_simple', 'present_perfect', "
+    "'present_perfect_continuous'.\n"
+    "- 'cue' is the short time/aspect marker from the sentence that signals "
+    "the tense (e.g. 'yesterday', 'since 2018', 'for two hours', 'just').\n"
+    "- 'explanation' is ONE short sentence (max ~22 words) explaining WHY "
+    "this tense is correct.\n"
+    "- 'id' is a short unique string.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_tense_contrast_prompt(count: int = 8) -> tuple[str, str]:
+    """Return (system, user) messages for the Tense Contrast Drill."""
+    user = (
+        f"Generate EXACTLY {int(count)} tense-contrast items now, mixing past "
+        "simple, present perfect, and present perfect continuous roughly evenly."
+    )
+    return TENSE_CONTRAST_SYSTEM, user
