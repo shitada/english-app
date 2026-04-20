@@ -620,3 +620,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 667	98158c1	2026-04-20	82	358	162	28	630	2241	2243	pass	7.15	kept	Shareable Daily Progress Card on Dashboard (Copy text + Download PNG, frontend-only canvas, no deps)
 668	03aed83	2026-04-20	16	247	175	17	455	2241	2243	pass	7.55	kept	Listening Quiz inline slow-replay panel after wrong answer + auto-replay-on-wrong toggle (frontend-only); 2 dashboard fails pre-existing/unrelated
 669	2d81b62	2026-04-20	97	191	178	19	485	2241	2243	pass	7.55	kept	Favorites tab + ⭐ pin toggle for Quick Practice Hub (useFavorites hook + CARDS registry refactor); 2 dashboard fails pre-existing/unrelated
+670	ca1f310	2026-04-20	111	297	158	34	600	2243	2243	pass	7.00	kept	Quick Reverse Translation card (JP→EN speaking drill: 40 curated pairs, mic + similarity diff + TTS + summary, 16 new vitest)

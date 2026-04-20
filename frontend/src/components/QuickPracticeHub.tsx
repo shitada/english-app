@@ -50,6 +50,7 @@ import QuickConversationRepairCard from './QuickConversationRepairCard';
 import QuickNumbersDatesCard from './QuickNumbersDatesCard';
 import QuickThoughtGroupCard from './QuickThoughtGroupCard';
 import QuickReverseTranslationCard from './QuickReverseTranslationCard';
+import QuickQuestionFormationCard from './QuickQuestionFormationCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -107,6 +108,7 @@ const CARDS: CardDef[] = [
   { key: 'instruction', tab: 'speaking', label: 'Instruction', height: 180, Component: QuickInstructionCard },
   { key: 'conversation-repair', tab: 'speaking', label: 'Conversation Repair', height: 180, Component: QuickConversationRepairCard },
   { key: 'reverse-translation', tab: 'speaking', label: 'Reverse Translation', height: 260, Component: QuickReverseTranslationCard },
+  { key: 'question-formation', tab: 'speaking', label: 'Question Formation', height: 260, Component: QuickQuestionFormationCard },
   // Listening
   { key: 'dictation', tab: 'listening', label: 'Dictation', height: 180, Component: QuickDictationCard },
   { key: 'listen-respond', tab: 'listening', label: 'Listen & Respond', height: 180, Component: QuickListenRespondCard },

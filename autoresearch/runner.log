@@ -51,4 +51,122 @@ Starting iteration 670.
   │ echo "T1_670=$(date +%s)"
   └ 2 lines...
 
-Now I have enough context. Let me create the component file.Now register it in QuickPracticeHub:Add i18n strings:Now create unit tests:All 16 tests pass. Now check the UI test spec:
+Now I have enough context. Let me create the component file.Now register it in QuickPracticeHub:Add i18n strings:Now create unit tests:All 16 tests pass. Now check the UI test spec:Good — committed. The autoresearch log files were swept in but those are just runner artifacts.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "ca1f310",
+  "files_changed": [
+    "frontend/src/components/QuickReverseTranslationCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/i18n/translations.ts",
+    "frontend/src/__tests__/QuickReverseTranslationCard.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 16,
+  "ui_spec_updated": true,
+  "description": "Added Quick Reverse Translation card (Japanese→English speaking drill): 40 curated JP/EN pairs by difficulty, 5-prompt sessions with mic recording, token-level diff using existing similarity utils, TTS reference playback, and summary screen with 'practice missed ones' filter; registered in QuickPracticeHub Speaking tab; bilingual i18n strings; 16 unit tests covering sampling uniqueness, scoring/classification, missed-ones filter, summary stats, token diff, and render."
+}
+```● Coder Implement iter 670
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #670: Quick Reverse Translation speaking card
+  │   │ (JP→EN, frontend-only)
+  │   │
+  │   │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1…
+  │   └ 13 lines...
+  └ check commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ head -20
+      └ 20 lines...
+
+● T2 (shell)
+  │ echo "T2_670=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2243,
+  "tests_total": 2243,
+  "all_passed": true,
+  "ts_check": "pass",
+  "vitest_passed": 398,
+  "vitest_total": 398,
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": true,
+  "test_output": "2243 passed in 126.51s; tsc clean; vitest 398/398 passed (incl. 16 new QuickReverseTranslationCard tests)",
+  "failure_summary": "",
+  "notes": "Backend untouched so smoke test skipped. autoresearch/ui-test-results.json not present, so E2E result not_run. All checks green."
+}
+```● Tester Test iter 670
+  │ check e2e results (shell)
+  │   │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+  │   │ lts.json 2>&1 | head -100; echo "---EXIT---"; ls -la /Users/shingotada/Docum
+  │   │ ents/vscode/english-app/autoresearch/ui-test-results.json 2>&1
+  │   └ 4 lines...
+  └ vitest (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ 2>&1 | tail -25
+      └ 25 lines...
+
+● T3 (shell)
+  │ echo "T3_670=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Frontend-only JP→EN speaking drill with 16 new vitest tests, all 2243 pytest + 398 vitest pass and tsc is clean; meaningful production-speaking practice addition with adequate test coverage and no backend/schema risk."
+}
+```● Evaluator Evaluate iter 670
+  └ List directory .
+      └ 212 files found
+
+● Record iter 670 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776644155 T1=1776644266 T2=1776644563 T3=1776644721 && HASH=ca1f310 &&
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ 670 "$HASH" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))" "$((T3-T2))"
+  │ "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iter 670 done. Starting iter 671.
+
+● T0 for iter 671 (shell)
+  │ echo "T0_671=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Add Quick Question Formation card (statement → natural Wh-question)",
+  "description": "Add a new Quick Practice card that drills a high-value skill Japanese learners struggle with: forming natural English questions from declarative statements. The user sees a statement plus a target question word (e.g., statement: 'He arrived at the office at 9 a.m.' / target: 'When'), and must speak the corresponding question ('When did he arrive at the office?'). After speaking, show similarity-based feedback against the model answer, allow reveal, and TTS-play the model.\n\nWhy: existing Quick cards cover transformation, register switch, rephrase, connectors, etc., but none specifically drill question inversion / auxiliary placement / Wh-fronting — a top weakness for JP→EN learners and a critical conversational skill (asking follow-up questions in conversation).\n\nImplementation (frontend-only, follows QuickReverseTranslationCard pattern):\n\n1) Create `frontend/src/components/QuickQuestionFormationCard.tsx`:\n   - Curated bank of ~30 prompts: { id, statement, targetWh ('What'|'Where'|'When'|'Why'|'How'|'Who'|'Which'|'How long'|'How often'), modelQuestion, difficulty: 'beginner'|'intermediate' }. Cover present/past/perfect/modals so learners practice auxiliary selection (do/does/did/have/has/will/can).\n   - UI: card title 'Question Formation', difficulty toggle (beginner/intermediate), 'Next' button to shuffle, big statement display with target Wh badge, mic button using `useSpeechRecognition`, transcript display, 'Reveal answer' (Eye/EyeOff like ReverseTranslation), 🔊 button using `useSpeechSynthesis` to play model question.\n   - Feedback: use `wordSimilarity` + `classifySimilarity` from `utils/similarity` to compare normalized transcript vs `modelQuestion`. Show colored badge (great/good/try again) and a small hint when similarity low (e.g., 'Did you start with \"' + targetWh + '\" and use the right auxiliary?').\n   - Track session stats in component state: attempted, great-count, current streak. Persist personal best streak in localStorage under key `quick-question-formation-best-streak`.\n   - Dark-mode styling consistent with other Quick cards (Tailwind classes matching QuickReverseTranslationCard).\n\n2) Register in `frontend/src/components/QuickPracticeHub.tsx`: add an entry to the cards list with a HelpCircle (or MessageCircleQuestion) icon, title 'Question Formation', short description '声に出して自然な質問文を作る練習', and route/render the new component the same way other Quick cards are wired (favorites support comes for free via existing hub logic).\n\n3) Add a unit test `frontend/src/__tests__/QuickQuestionFormationCard.test.tsx` (Vitest + RTL) covering: renders prompt and target Wh, Next button advances to a different prompt, Reveal toggles model answer visibility, similarity classification renders correct badge for a mocked transcript matching the model.\n\nNo backend changes, no schema changes. Bank is fully client-side so no Copilot latency. Estimated ~250 lines for the card + ~50 for the test + 1 small edit to the hub.",
+  "files_to_modify": [
+    "frontend/src/components/QuickQuestionFormationCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/__tests__/QuickQuestionFormationCard.test.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 671
+  │ Read FluencySprintCard.tsx
+  │   │ frontend/src/components/FluencySprintCard.tsx
+  │   └ L1:30 (30 lines read)
+  └ List directory frontend/src/components/dashboard
+      └ 27 files found
+
+● T1 (shell)
+  │ echo "T1_671=$(date +%s)"
+  └ 2 lines...
+
+Now register in the Hub:Now create the test file:Now run typecheck and tests:All 15 tests pass. Now also ensure full test suite + tsc still pass:All 413 tests pass and tsc is clean. Now update UI test spec and commit.

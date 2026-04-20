@@ -4651,6 +4651,62 @@ pages:
         priority: medium
         added_in: 670
 
+      - id: qp-question-formation-001
+        target: Question Formation card appears in the Speaking tab of the Quick Practice Hub
+        action: Open the Quick Practice Hub and select the Speaking tab
+        expect: A card titled "Question Formation" with data-testid="quick-question-formation-card" is visible, showing a HelpCircle icon
+        type: functional
+        priority: medium
+        added_in: 671
+
+      - id: qp-question-formation-002
+        target: Card has beginner/intermediate/advanced difficulty toggle that filters the prompt pool
+        action: Inspect data-testid="qqf-difficulty-beginner", "qqf-difficulty-intermediate", and "qqf-difficulty-advanced"
+        expect: All three buttons are clickable; the active one has aria-pressed="true"; clicking switches difficulty and re-samples a prompt from that pool
+        type: functional
+        priority: medium
+        added_in: 671
+
+      - id: qp-question-formation-003
+        target: Statement and target Wh-word badge are displayed for each prompt
+        action: Look at data-testid="qqf-statement" and data-testid="qqf-wh-badge"
+        expect: A declarative English statement is shown alongside a colored badge containing the target Wh-word (e.g. "Where?", "When?", "How long?")
+        type: functional
+        priority: high
+        added_in: 671
+
+      - id: qp-question-formation-004
+        target: Reveal answer button toggles the model question with TTS playback
+        action: Click data-testid="qqf-reveal", then later data-testid="qqf-hide"
+        expect: Reveal shows data-testid="qqf-model-answer" with data-testid="qqf-tts" 🔊 button that speaks the model question; clicking Hide collapses it back behind the Reveal button
+        type: functional
+        priority: medium
+        added_in: 671
+
+      - id: qp-question-formation-005
+        target: 🎤 Speak button records the spoken Wh-question and shows a similarity verdict badge
+        action: Click data-testid="qqf-mic" to record, speak, then click again to stop
+        expect: After stop, data-testid="qqf-feedback" appears with data-testid="qqf-verdict-badge" set to data-verdict="great" / "good" / "try-again" based on similarity, a percent score, and the user's transcript via data-testid="qqf-transcript"
+        type: functional
+        priority: high
+        added_in: 671
+
+      - id: qp-question-formation-006
+        target: Stats line tracks attempted/great/streak and best streak persists across reloads
+        action: Look at data-testid="qqf-stats"; complete a great attempt; reload the page
+        expect: Counts update during the session; "best" reflects the highest streak achieved and is persisted in localStorage key "quick-question-formation-best-streak" so it remains after reload
+        type: functional
+        priority: medium
+        added_in: 671
+
+      - id: qp-question-formation-007
+        target: Next button advances to a different prompt
+        action: Click data-testid="qqf-next"
+        expect: A new statement and Wh badge are shown (the previously displayed prompt is excluded when alternatives exist), the answer is hidden again, and feedback is cleared
+        type: functional
+        priority: medium
+        added_in: 671
+
       - id: qp-favorites-001
         target: Favorites tab is present in the Quick Practice Hub tab list
         action: Open the Quick Practice Hub and look at the tab strip
