@@ -5211,3 +5211,38 @@ pages:
         type: visual
         priority: low
         added_in: 686
+
+  linker_drill:
+    path: /quick
+    tests:
+      - id: linker-001
+        target: Linker Drill card renders with sentence pair, options, and progress indicator
+        action: Pin and open the "Linker Speak Drill" card from /quick; inspect data-testid="linker-drill-root"
+        expect: data-testid="linker-drill-root" visible; data-testid="linker-progress" shows "1 / 5 · <category>"; data-testid="linker-options" contains 4 buttons (data-testid^="linker-option-")
+        type: functional
+        priority: critical
+        added_in: 688
+
+      - id: linker-002
+        target: Picking a connector reveals feedback, explanation, combined sentence, and Listen/Speak/Next controls
+        action: Click any data-testid^="linker-option-" button
+        expect: A green/red feedback chip appears with Check or X icon; combined sentence box visible; data-testid="linker-listen" and data-testid="linker-next" become visible
+        type: functional
+        priority: high
+        added_in: 688
+
+      - id: linker-003
+        target: Listen button triggers speech synthesis for the combined sentence
+        action: Click data-testid="linker-listen" after picking a connector
+        expect: No error thrown; SpeechSynthesis.speak invoked (mock or real). Button remains visible.
+        type: functional
+        priority: medium
+        added_in: 688
+
+      - id: linker-004
+        target: Next button advances to the next item until the round summary is shown
+        action: Click data-testid="linker-option-…" then data-testid="linker-next" five times
+        expect: After the 5th Next, the round summary card replaces the question card and shows "Connector accuracy", "Avg speaking similarity", "Weakest category", and a "New round" button
+        type: functional
+        priority: high
+        added_in: 688

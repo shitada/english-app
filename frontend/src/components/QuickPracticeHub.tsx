@@ -54,6 +54,7 @@ import QuickQuestionFormationCard from './QuickQuestionFormationCard';
 import QuickBackchannelCard from './QuickBackchannelCard';
 import QuickPaceMatchCard from './QuickPaceMatchCard';
 import QuickContrastiveStressCard from './QuickContrastiveStressCard';
+import LinkerDrill from './LinkerDrill';
 import ReducedFormsDrill from './ReducedFormsDrill';
 
 const STORAGE_KEY = 'quick-practice-tab';
@@ -116,6 +117,7 @@ const CARDS: CardDef[] = [
   { key: 'question-formation', tab: 'speaking', label: 'Question Formation', height: 260, Component: QuickQuestionFormationCard },
   { key: 'pace-match', tab: 'speaking', label: 'Pace Match', height: 320, Component: QuickPaceMatchCard },
   { key: 'contrastive-stress', tab: 'speaking', label: 'Contrastive Stress', height: 380, Component: QuickContrastiveStressCard },
+  { key: 'linker-drill', tab: 'speaking', label: 'Linker Speak Drill', height: 420, Component: LinkerDrill },
   // Listening
   { key: 'dictation', tab: 'listening', label: 'Dictation', height: 180, Component: QuickDictationCard },
   { key: 'listen-respond', tab: 'listening', label: 'Listen & Respond', height: 180, Component: QuickListenRespondCard },

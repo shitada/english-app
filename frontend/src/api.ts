@@ -3788,6 +3788,75 @@ export function getContrastiveStress(
 }
 
 // ---------------------------------------------------------------------------
+// Linker Speak Drill (cohesive connector practice)
+// ---------------------------------------------------------------------------
+
+export interface LinkerDrillItem {
+  id: string;
+  sentence_a: string;
+  sentence_b: string;
+  options: string[];
+  correct_linker: string;
+  combined_sentence: string;
+  explanation: string;
+  category: string;
+}
+
+export interface LinkerDrillRoundResponse {
+  items: LinkerDrillItem[];
+}
+
+export interface LinkerDrillAttemptInput {
+  item_id: string;
+  chosen_linker: string;
+  correct_linker: string;
+  is_correct: boolean;
+  category: string;
+  spoken_similarity: number | null;
+}
+
+export interface LinkerDrillAttemptResponse {
+  id: number;
+  is_correct: boolean;
+}
+
+export interface LinkerDrillCategoryStats {
+  total: number;
+  accuracy: number;
+  avg_similarity: number | null;
+}
+
+export interface LinkerDrillStatsResponse {
+  total: number;
+  overall_accuracy: number;
+  avg_similarity: number | null;
+  by_category: Record<string, LinkerDrillCategoryStats>;
+  weakest_category: string | null;
+}
+
+export function getLinkerDrillRound(count = 5): Promise<LinkerDrillRoundResponse> {
+  return request<LinkerDrillRoundResponse>(
+    `/api/linker-drill/round?count=${encodeURIComponent(count)}`
+  );
+}
+
+export function submitLinkerDrillAttempt(
+  payload: LinkerDrillAttemptInput
+): Promise<LinkerDrillAttemptResponse> {
+  return request<LinkerDrillAttemptResponse>('/api/linker-drill/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getLinkerDrillStats(limit = 50): Promise<LinkerDrillStatsResponse> {
+  return request<LinkerDrillStatsResponse>(
+    `/api/linker-drill/stats?limit=${encodeURIComponent(limit)}`
+  );
+}
+
+
+// ---------------------------------------------------------------------------
 // Inline dictation mini-drill ('Type what you hear')
 // ---------------------------------------------------------------------------
 

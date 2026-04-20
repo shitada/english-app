@@ -271,6 +271,20 @@ CREATE TABLE IF NOT EXISTS listen_summarize_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_listen_summarize_created ON listen_summarize_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS linker_drill_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    chosen_linker TEXT NOT NULL,
+    correct_linker TEXT NOT NULL,
+    is_correct INTEGER NOT NULL DEFAULT 0,
+    category TEXT NOT NULL,
+    spoken_similarity REAL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_linker_drill_created ON linker_drill_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_linker_drill_category ON linker_drill_attempts(category);
 """
 
 # ---------------------------------------------------------------------------
@@ -613,6 +627,27 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on sentence_echo_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_sentence_echo_created ON sentence_echo_attempts(created_at DESC)",
+    ),
+    (
+        "create linker_drill_attempts table",
+        """CREATE TABLE IF NOT EXISTS linker_drill_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            chosen_linker TEXT NOT NULL,
+            correct_linker TEXT NOT NULL,
+            is_correct INTEGER NOT NULL DEFAULT 0,
+            category TEXT NOT NULL,
+            spoken_similarity REAL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on linker_drill_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_linker_drill_created ON linker_drill_attempts(created_at DESC)",
+    ),
+    (
+        "add index on linker_drill_attempts category",
+        "CREATE INDEX IF NOT EXISTS idx_linker_drill_category ON linker_drill_attempts(category)",
     ),
 ]
 

@@ -2653,4 +2653,207 @@ Iter 686 done. Starting iter 687.
   │ date +%s
   └ 2 lines...
 
-Now let me look at api.ts and an existing integration test for reference, plus router endpoint patterns.Now I have enough context. Let me look at the dashboard router end to find where to add the endpoint, and api.ts pattern for adding interface and getter.Now let me look at the api.ts file structure and at an existing test like the one for streak/learning velocity to understand patterns:Now I have everything. Let me write the implementation.Let me now add the DAL function. First, append to the end of dashboard.py:Now add router endpoint. Append at end:Now add the BestTimeCard component, wire api.ts, and mount in Dashboard.Add to api.ts:Mount in Dashboard.tsx near other insight cards (after LearningVelocityCard):Now write integration tests. Need to look at how seed data is created in existing tests for direct DB insert:Now run the tests:All passing. Now check UI test spec:
+Now let me look at api.ts and an existing integration test for reference, plus router endpoint patterns.Now I have enough context. Let me look at the dashboard router end to find where to add the endpoint, and api.ts pattern for adding interface and getter.Now let me look at the api.ts file structure and at an existing test like the one for streak/learning velocity to understand patterns:Now I have everything. Let me write the implementation.Let me now add the DAL function. First, append to the end of dashboard.py:Now add router endpoint. Append at end:Now add the BestTimeCard component, wire api.ts, and mount in Dashboard.Add to api.ts:Mount in Dashboard.tsx near other insight cards (after LearningVelocityCard):Now write integration tests. Need to look at how seed data is created in existing tests for direct DB insert:Now run the tests:All passing. Now check UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "0473148",
+  "files_changed": [
+    "app/dal/dashboard.py",
+    "app/routers/dashboard.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/dashboard/BestTimeCard.tsx",
+    "frontend/src/components/dashboard/index.ts",
+    "frontend/src/pages/Dashboard.tsx",
+    "tests/e2e/ui-test-spec.yaml",
+    "tests/integration/test_dashboard_time_of_day.py"
+  ],
+  "tests_added": 4,
+  "ui_spec_updated": true,
+  "description": "Added time-of-day DAL/endpoint, BestTimeCard insight card on dashboard, and integration tests"
+}
+```● Coder Implement iter 687
+  │ Edit ui-test-spec.yaml +16
+  │   └ tests/e2e/ui-test-spec.yaml
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #687: Best Time of Day insight card on dashboard
+      │
+      │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1 |
+      │ tail -5 && git rev-parse --short HEAD
+      └ 7 lines...
+
+● T2 iter 687 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2406,
+  "tests_total": 2406,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "smoke_pass": true,
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2406 passed in 139.86s (0:02:19) =======================",
+  "failure_summary": "",
+  "failures": []
+}
+```● Tester Test iter 687
+  │ smoke (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 iter 687 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{"code_quality": 8, "feature_value": 6, "maintainability": 8, "ux_quality": 7, "total_score": 7.3, "verdict": "keep", "reason": "Clean, well-scoped insight feature with proper DAL/router separation, accessible component (a11y table + aria-label), no schema changes, and 4 new integration tests; all 2406 tests and TS checks pass."}
+```● Evaluator Evaluate iter 687
+  │ Read dashboard.py
+  │   │ app/dal/dashboard.py
+  │   └ L3000:3200 (200 lines read)
+  └ Read dashboard.py
+      │ app/dal/dashboard.py
+      └ L3197:3300 (65 lines read)
+
+● Record iter 687 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776656194
+  │ T1=1776656250 T2=1776656474 T3=1776656654 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "687" "0473148" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 8 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **#686** `467e441` — Listen & Summarize drill (gist comprehension TTS + AI-graded summary, 6-passage fallback, 7d sparkline; 18 new tests) — **7.80 kept** (2402/2402)
+- **#687** `0473148` — Best Time of Day dashboard insight card (24-hour activity buckets + peak/best-score hour; 4 new integration tests) — **7.30 kept** (2406/2406)
+
+
+Changes   +0 -0
+Requests  7.5 Premium (27m 39s)
+Tokens    ↑ 6.6m • ↓ 71.7k • 6.3m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-686-to-699.md
+[2026-04-20 12:46:05] Copilot invocation completed (duration: 1662s)
+[2026-04-20 12:46:05] Recording agent traces...
+[2026-04-20 12:46:05]   AGENT_TRACE iter=686 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 12:46:05]   AGENT_TRACE iter=687 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 12:46:05] SMOKE_UI: UI changes detected in pages: dashboard
+[2026-04-20 12:46:05] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 12:46:05] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: dashboard
+
+  ✅ dashboard: smoke 4✓ 0✗ (1980ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 12:46:18] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 12:46:18] Running post-invocation audit (iter 686-687)...
+============================================
+ Autoresearch Audit
+ Iterations: 686 — 687
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 12:46:18
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 686 687[0m
+[0;31m  Tester: FAIL — missing: 686 687[0m
+[0;31m  Evaluator: FAIL — missing: 686 687[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 12:46:20] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 12:46:23] Current iteration count: 687 / 699
+[2026-04-20 12:46:23] ------------------------------------------
+[2026-04-20 12:46:23] Invocation 10 / 10
+[2026-04-20 12:46:23] Resuming from iteration 688
+[2026-04-20 12:46:23] ------------------------------------------
+[2026-04-20 12:46:23] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-688-to-699.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log
+  │ --oneline -5 && echo "---UIRESULT---" && (test -f
+  │ autoresearch/ui-test-results.json && grep -o '"overall"[^,]*' …
+  └ 32 lines...
+
+● T0 iter 688 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Linker Speak Drill — connector/cohesion practice with TTS + speak-aloud",
+  "description": "Add a new focused drill that targets cohesive connectors (however, therefore, although, because, meanwhile, in fact, on the other hand, so, as a result, even though). This is currently uncovered by existing drills (which focus on reductions, stress, minimal pairs, fillers, etc.) and directly improves both speaking fluency and natural conversation flow.\n\nFlow per round (5 items):\n1. User sees two short sentences (e.g. 'I studied hard.' / 'I failed the test.') and 4 connector chips.\n2. User taps the most natural connector. Immediate correctness feedback with a 1-line explanation of the connector's meaning (contrast / cause / addition / time).\n3. Combined sentence is shown ('I studied hard, however, I failed the test.') with a 'Listen' button (browser SpeechSynthesis) and a 'Speak' button using existing webkitSpeechRecognition. Compare transcript to expected sentence (case-insensitive token Jaccard) — score shown 0–100.\n4. After 5 items: round summary (connector accuracy %, average speaking similarity, weakest connector category).\n\nBackend:\n- New file `app/routers/linker_drill.py` with endpoints:\n  - `GET /api/linker-drill/round?count=5` — returns 5 items from a small static curated bank (~40 items) seeded in code, balanced across categories (contrast/cause/addition/time/result). No LLM call needed; keeps it fast.\n  - `POST /api/linker-drill/attempt` — records {item_id, chosen_linker, correct_linker, is_correct, spoken_similarity (nullable 0-100), category}.\n  - `GET /api/linker-drill/stats` — returns recent accuracy by category and weakest connector.\n- New file `app/dal/linker_drill.py` with `record_attempt`, `get_recent_stats`, `get_weakest_category`.\n- Register router in `app/main.py`.\n- DB schema: add table `linker_drill_attempts` to `_SCHEMA` in `app/database.py` AND add migration entry to `_MIGRATIONS`:\n  ```sql\n  CREATE TABLE IF NOT EXISTS linker_drill_attempts (\n      id INTEGER PRIMARY KEY AUTOINCREMENT,\n      created_at TEXT NOT NULL DEFAULT (datetime('now')),\n      item_id TEXT NOT NULL,\n      category TEXT NOT NULL,\n      chosen_linker TEXT NOT NULL,\n      correct_linker TEXT NOT NULL,\n      is_correct INTEGER NOT NULL,\n      spoken_similarity INTEGER\n  );\n  ```\n  Migration entry (idempotent CREATE TABLE statement appended to `_MIGRATIONS` list) so existing databases pick it up.\n\nFrontend:\n- New file `frontend/src/components/LinkerDrill.tsx` with the 4-step flow described above, using existing TTS/STT helper patterns from ReducedForms/Shadowing components. Add a tile/route entry on the Quick Hub or speaking section so users can launch it (modify the hub component file — typically `frontend/src/App.tsx` or the existing quick-actions component).\n\nSuccess criteria: round endpoint returns 5 balanced items, attempt POST persists row, stats endpoint returns category breakdown, UI completes a full round end-to-end with mocked SpeechRecognition.",
+  "files_to_modify": [
+    "app/routers/linker_drill.py",
+    "app/dal/linker_drill.py",
+    "app/database.py",
+    "app/main.py",
+    "frontend/src/components/LinkerDrill.tsx"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 688
+  │ List directory app/routers
+  │   └ 13 files found
+  └ Read reduced_forms.py
+      │ app/routers/reduced_forms.py
+      └ L1:40 (39 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me look at frontend tests and the QuickContrastiveStressCard for pattern reference:Now let me create everything. First, the DAL:Now the router:Update database schema, register router:Now backend tests:Now let's verify backend tests pass quickly:Now frontend. Add API helpers and the component:Now LinkerDrill component:Good. Now register in QuickPracticeHub:Add a vitest for the Jaccard helper (node env compatible):Now run tsc to make sure frontend builds:Now append spec items:Let me verify everything still passes and commit:
