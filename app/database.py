@@ -353,6 +353,33 @@ CREATE TABLE IF NOT EXISTS wh_question_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_wh_question_user_id ON wh_question_attempts(user_id, id DESC);
 CREATE INDEX IF NOT EXISTS idx_wh_question_created ON wh_question_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS error_correction_sessions (
+    id TEXT PRIMARY KEY,
+    category TEXT NOT NULL,
+    level TEXT NOT NULL,
+    score REAL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS error_correction_items (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    idx INTEGER NOT NULL DEFAULT 0,
+    wrong TEXT NOT NULL,
+    reference TEXT NOT NULL,
+    error_type TEXT,
+    hint_ja TEXT,
+    user_answer TEXT,
+    is_correct INTEGER,
+    explanation_ja TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (session_id) REFERENCES error_correction_sessions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_error_correction_items_session ON error_correction_items(session_id, idx);
+CREATE INDEX IF NOT EXISTS idx_error_correction_sessions_created ON error_correction_sessions(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -819,6 +846,41 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on wh_question_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_wh_question_created ON wh_question_attempts(created_at DESC)",
+    ),
+    (
+        "create error_correction_sessions table",
+        """CREATE TABLE IF NOT EXISTS error_correction_sessions (
+            id TEXT PRIMARY KEY,
+            category TEXT NOT NULL,
+            level TEXT NOT NULL,
+            score REAL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            finished_at TEXT
+        )""",
+    ),
+    (
+        "create error_correction_items table",
+        """CREATE TABLE IF NOT EXISTS error_correction_items (
+            id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            idx INTEGER NOT NULL DEFAULT 0,
+            wrong TEXT NOT NULL,
+            reference TEXT NOT NULL,
+            error_type TEXT,
+            hint_ja TEXT,
+            user_answer TEXT,
+            is_correct INTEGER,
+            explanation_ja TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on error_correction_items session",
+        "CREATE INDEX IF NOT EXISTS idx_error_correction_items_session ON error_correction_items(session_id, idx)",
+    ),
+    (
+        "add index on error_correction_sessions created_at",
+        "CREATE INDEX IF NOT EXISTS idx_error_correction_sessions_created ON error_correction_sessions(created_at DESC)",
     ),
 ]
 

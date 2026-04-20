@@ -441,3 +441,88 @@ def build_wh_question_grade_prompt(
         f"LEARNER'S SPOKEN QUESTION: {user_question}"
     )
     return WH_QUESTION_GRADE_SYSTEM, user
+
+
+# ---------------------------------------------------------------------------
+# Error Correction Drill
+# ---------------------------------------------------------------------------
+
+ERROR_CORRECTION_CATEGORIES = (
+    "subject_verb_agreement",
+    "article",
+    "preposition",
+    "tense",
+    "word_order",
+    "plural_countable",
+)
+
+
+def build_error_correction_prompt(
+    category: str = "tense", level: str = "beginner", count: int = 5
+) -> tuple[str, str]:
+    """Return (system, user) for generating error-correction items.
+
+    Each item must have exactly ONE grammatical error of the requested category.
+    Output JSON shape::
+
+        {"items": [
+            {"wrong": "...", "reference": "...",
+             "error_type": "...", "hint_ja": "..."}
+        ]}
+    """
+    system = (
+        "You generate ENGLISH GRAMMAR ERROR-CORRECTION practice items for "
+        "Japanese learners.\n\n"
+        "Return STRICT JSON of this exact shape:\n"
+        '{ "items": [ { "wrong": "...", "reference": "...",'
+        ' "error_type": "...", "hint_ja": "..." } ] }\n\n'
+        "Rules:\n"
+        "- Generate EXACTLY the requested number of items.\n"
+        "- 'wrong' is a natural English sentence that contains EXACTLY ONE "
+        "grammatical error of the requested category. 6-16 words.\n"
+        "- 'reference' is the fully corrected sentence (same meaning as "
+        "'wrong', minimal edit). Must be grammatical and natural.\n"
+        "- 'error_type' is a short English label (e.g. 'subject-verb "
+        "agreement', 'article', 'preposition', 'tense', 'word order', "
+        "'plural/countable').\n"
+        "- 'hint_ja' is ONE short Japanese hint (max ~30 characters) pointing "
+        "the learner at the type of mistake WITHOUT revealing the fix.\n"
+        "- Level beginner=A2, intermediate=B1, advanced=B2+ vocabulary.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+    user = (
+        f"Generate EXACTLY {int(count)} {level}-level error-correction items "
+        f"focusing on the '{category}' error category now."
+    )
+    return system, user
+
+
+ERROR_CORRECTION_GRADE_SYSTEM = (
+    "You are an English teacher grading a learner's corrected sentence "
+    "against a reference correct sentence. The learner was shown a wrong "
+    "sentence and asked to retype the corrected version.\n\n"
+    "Return JSON ONLY with this exact shape:\n"
+    '  { "is_correct": true,\n'
+    '    "explanation_ja": "短い日本語の説明 (<=60 chars)" }\n\n'
+    "Rules:\n"
+    "- 'is_correct' is TRUE when the learner's answer is grammatically "
+    "correct AND has the same meaning as the reference. Accept alternative "
+    "valid phrasings (different word choice, contractions, punctuation) as "
+    "long as the target grammar point is fixed.\n"
+    "- If 'is_correct' is FALSE, 'explanation_ja' should briefly explain in "
+    "Japanese what is still wrong.\n"
+    "- Output JSON ONLY, no markdown, no commentary."
+)
+
+
+def build_error_correction_grade_prompt(
+    wrong: str, reference: str, user_answer: str, error_type: str = ""
+) -> tuple[str, str]:
+    user = (
+        "Grade this corrected sentence.\n"
+        f"ORIGINAL WRONG: {wrong}\n"
+        f"REFERENCE CORRECT: {reference}\n"
+        f"ERROR TYPE: {error_type}\n"
+        f"LEARNER ANSWER: {user_answer}"
+    )
+    return ERROR_CORRECTION_GRADE_SYSTEM, user

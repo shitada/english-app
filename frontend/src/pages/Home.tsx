@@ -1709,6 +1709,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/error-correction"
+        data-testid="error-correction-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <PenTool size={28} color="#6366f1" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>✏️ Error Correction</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Type the fix for one-error sentences — articles, prepositions, tense, word order, and more.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#6366f1',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />

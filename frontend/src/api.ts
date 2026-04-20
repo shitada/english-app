@@ -4481,3 +4481,89 @@ export function getWhQuestionStats(limit = 30): Promise<WhQuestionStatsResponse>
     `/api/wh-questions/stats?limit=${limit}`,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Error Correction Drill
+// ---------------------------------------------------------------------------
+
+export type ErrorCorrectionCategory =
+  | 'subject_verb_agreement'
+  | 'article'
+  | 'preposition'
+  | 'tense'
+  | 'word_order'
+  | 'plural_countable';
+
+export type ErrorCorrectionLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export interface ErrorCorrectionItem {
+  id: string;
+  wrong: string;
+  error_type: string;
+  hint_ja: string;
+}
+
+export interface ErrorCorrectionStartResponse {
+  session_id: string;
+  category: string;
+  level: string;
+  items: ErrorCorrectionItem[];
+}
+
+export interface ErrorCorrectionDiffToken {
+  token: string;
+  status: 'same' | 'insert' | 'delete';
+}
+
+export interface ErrorCorrectionGradeResponse {
+  is_correct: boolean;
+  reference: string;
+  explanation_ja: string;
+  diff: ErrorCorrectionDiffToken[];
+}
+
+export interface ErrorCorrectionMistake {
+  id: string;
+  wrong: string;
+  reference: string;
+  error_type: string;
+  user_answer: string;
+  explanation_ja: string;
+}
+
+export interface ErrorCorrectionFinishResponse {
+  total: number;
+  attempted: number;
+  correct: number;
+  score: number;
+  mistakes: ErrorCorrectionMistake[];
+}
+
+export const errorCorrection = {
+  startDrill(
+    category: ErrorCorrectionCategory,
+    level: ErrorCorrectionLevel,
+    count = 5,
+  ): Promise<ErrorCorrectionStartResponse> {
+    return request<ErrorCorrectionStartResponse>('/api/error-correction/start', {
+      method: 'POST',
+      body: JSON.stringify({ category, level, count }),
+    });
+  },
+  grade(
+    session_id: string,
+    item_id: string,
+    user_answer: string,
+  ): Promise<ErrorCorrectionGradeResponse> {
+    return request<ErrorCorrectionGradeResponse>('/api/error-correction/grade', {
+      method: 'POST',
+      body: JSON.stringify({ session_id, item_id, user_answer }),
+    });
+  },
+  finish(session_id: string): Promise<ErrorCorrectionFinishResponse> {
+    return request<ErrorCorrectionFinishResponse>('/api/error-correction/finish', {
+      method: 'POST',
+      body: JSON.stringify({ session_id }),
+    });
+  },
+};

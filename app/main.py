@@ -36,6 +36,7 @@ from app.routers import monologue
 from app.routers import tag_questions
 from app.routers import tense_contrast
 from app.routers import wh_questions
+from app.routers import error_correction
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -230,6 +231,7 @@ app.include_router(monologue.router)
 app.include_router(tag_questions.router)
 app.include_router(tense_contrast.router)
 app.include_router(wh_questions.router)
+app.include_router(error_correction.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

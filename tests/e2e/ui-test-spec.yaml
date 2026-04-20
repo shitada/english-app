@@ -5569,3 +5569,60 @@ pages:
         type: functional
         priority: medium
         added_in: 696
+
+  home_error_correction_card:
+    path: /
+    tests:
+      - id: home-error-correction-001
+        target: Home exposes an Error Correction CTA card linking to /error-correction
+        selector: data-testid="error-correction-cta"
+        action: Visit "/" and locate data-testid="error-correction-cta"
+        expect: Card is visible with text containing "Error Correction" and clicking navigates to /error-correction
+        type: navigation
+        priority: high
+        added_in: 697
+
+  error-correction:
+    path: /error-correction
+    tests:
+      - id: error-correction-001
+        target: Page renders intro with category/level selects and start button
+        selector: data-testid="error-correction-title"
+        action: Visit "/error-correction" and verify data-testid="error-correction-title", data-testid="error-correction-category", data-testid="error-correction-level", and data-testid="error-correction-start" are visible
+        expect: Title "Error Correction" is visible, both selects are visible with default selections, and Start button is enabled
+        type: functional
+        priority: critical
+        added_in: 697
+
+      - id: error-correction-002
+        target: Starting the drill loads the first wrong sentence with an input
+        selector: data-testid="error-correction-start"
+        action: Click data-testid="error-correction-start" and wait for data-testid="error-correction-drill"
+        expect: data-testid="error-correction-wrong", data-testid="error-correction-hint", data-testid="error-correction-input", and data-testid="error-correction-submit" are visible; data-testid="error-correction-progress" shows "1 / 5"
+        type: functional
+        priority: critical
+        added_in: 697
+
+      - id: error-correction-003
+        target: Submitting a typed answer shows feedback with reference + diff
+        action: After starting, type any text into data-testid="error-correction-input" and click data-testid="error-correction-submit"
+        expect: data-testid="error-correction-feedback" is visible with data-testid="error-correction-feedback-result", data-testid="error-correction-reference", data-testid="error-correction-diff", and data-testid="error-correction-next"
+        type: functional
+        priority: high
+        added_in: 697
+
+      - id: error-correction-004
+        target: Enter key submits and Shift+Enter inserts newline
+        action: After starting, type a short sentence into data-testid="error-correction-input", press Enter (no Shift)
+        expect: Form submits — data-testid="error-correction-feedback" becomes visible without clicking Submit
+        type: functional
+        priority: medium
+        added_in: 697
+
+      - id: error-correction-005
+        target: Completing all items shows summary with score and retry
+        action: After starting, submit all 5 items (any answer) and click Next on each feedback panel until the last
+        expect: data-testid="error-correction-summary" is visible with data-testid="error-correction-score" (a percentage) and data-testid="error-correction-retry"
+        type: functional
+        priority: medium
+        added_in: 697
