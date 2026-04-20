@@ -25,6 +25,7 @@ from app.routers import listening
 from app.routers import shadowing
 from app.routers import metrics
 from app.routers import reduced_forms
+from app.routers import stress_spotlight
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -208,6 +209,7 @@ app.include_router(listening.router)
 app.include_router(shadowing.router)
 app.include_router(metrics.router)
 app.include_router(reduced_forms.router)
+app.include_router(stress_spotlight.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

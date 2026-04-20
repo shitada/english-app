@@ -124,6 +124,31 @@ def THOUGHT_GROUP_PROMPT() -> str:
     )
 
 
+def STRESS_SPOTLIGHT_PROMPT() -> str:
+    """System prompt for the Sentence Stress Spotlight drill."""
+    return (
+        "You generate sentence-stress practice items for English learners.\n\n"
+        "Return STRICT JSON in this exact shape:\n"
+        '{ "sentence": "...", "words": ["...", "..."],'
+        ' "stressed_indices": [0, 3, 5],'
+        ' "rationale": "Content words (nouns, main verbs, adjectives, adverbs) carry primary stress." }\n\n'
+        "Rules:\n"
+        "- sentence: ONE natural English sentence between 8 and 16 words.\n"
+        "- words: the sentence split on whitespace (tokens may include trailing "
+        "punctuation such as commas/periods); preserve the original order.\n"
+        "- stressed_indices: 0-based positions of words that should receive "
+        "primary sentence stress when spoken at a natural conversational pace. "
+        "Provide 2-5 indices, all unique, each strictly between 0 and "
+        "len(words)-1 inclusive. Stress falls on content words (main nouns, "
+        "main verbs, adjectives, adverbs, negatives, wh-words, demonstratives) "
+        "and NOT on function words (articles, auxiliaries, pronouns, "
+        "prepositions, conjunctions) unless contrast/emphasis demands it.\n"
+        "- rationale: ONE short coaching note (max ~20 words) explaining why "
+        "the chosen words are stressed.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+
+
 def NUMBERS_DRILL_PROMPT() -> str:
     """System prompt for the Quick Numbers & Dates listening drill."""
     return (

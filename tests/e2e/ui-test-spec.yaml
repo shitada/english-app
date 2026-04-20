@@ -4915,3 +4915,97 @@ pages:
         priority: medium
         added_in: 674
 
+
+  home_stress_spotlight_cta:
+    path: /
+    tests:
+      - id: home-ss-001
+        target: Home page shows Stress Spotlight CTA card
+        action: Visit / and scroll to find data-testid="stress-spotlight-cta"
+        expect: Card visible with "Stress Spotlight" title and "Start" button
+        type: functional
+        priority: medium
+        added_in: 679
+
+      - id: home-ss-002
+        target: Clicking Stress Spotlight CTA navigates to /stress-spotlight
+        action: Click data-testid="stress-spotlight-cta" link
+        expect: URL changes to /stress-spotlight and data-testid="stress-spotlight-page" is visible
+        type: navigation
+        priority: medium
+        added_in: 679
+
+  stress_spotlight:
+    path: /stress-spotlight
+    tests:
+      - id: ss-001
+        target: Stress Spotlight page renders heading and word chips
+        action: Visit /stress-spotlight and wait for sentence to load
+        expect: "Stress Spotlight" heading visible; data-testid="ss-words" contains 8-16 data-testid^="ss-chip-" buttons
+        type: visual
+        priority: high
+        added_in: 679
+
+      - id: ss-002
+        target: Difficulty selector toggles active state
+        action: Click data-testid="ss-diff-beginner", then data-testid="ss-diff-advanced"
+        expect: Active button has aria-pressed="true"; switching loads a new sentence
+        type: functional
+        priority: medium
+        added_in: 679
+
+      - id: ss-003
+        target: Tapping a word chip toggles its picked state
+        action: Click data-testid="ss-chip-1" twice
+        expect: Chip background changes to blue (picked) on first click; reverts on second click
+        type: functional
+        priority: high
+        added_in: 679
+
+      - id: ss-004
+        target: Reveal button is disabled until at least one chip is picked
+        action: Inspect data-testid="ss-reveal" before any chip is picked
+        expect: Button is disabled and has reduced opacity
+        type: functional
+        priority: high
+        added_in: 679
+
+      - id: ss-005
+        target: Reveal shows precision/recall/f1 and rationale; chips colored
+        action: Pick a couple of chips then click data-testid="ss-reveal"
+        expect: data-testid="ss-scores" shows ss-precision, ss-recall, ss-f1; data-testid="ss-rationale" shows the explanation; correct picks are green, wrong picks red, missed amber
+        type: functional
+        priority: critical
+        added_in: 679
+
+      - id: ss-006
+        target: Listen with stress button uses TTS on the capitalization fallback
+        action: After Reveal, click data-testid="ss-listen-stress"
+        expect: SpeechSynthesis speaks the sentence; no errors in console if TTS unavailable
+        type: functional
+        priority: medium
+        added_in: 679
+
+      - id: ss-007
+        target: Shadow record button starts recognition and reveals Stop
+        action: After Reveal, click data-testid="ss-shadow"
+        expect: data-testid="ss-recording-indicator" appears and data-testid="ss-stop" replaces the shadow button
+        type: functional
+        priority: medium
+        added_in: 679
+
+      - id: ss-008
+        target: Next button loads a fresh sentence and resets state
+        action: Click data-testid="ss-next" after revealing
+        expect: New sentence renders in data-testid="ss-words"; scores and picks cleared
+        type: functional
+        priority: medium
+        added_in: 679
+
+      - id: ss-009
+        target: Recent attempts list renders after submitting an attempt
+        action: Submit at least one attempt, then look for data-testid="ss-recent"
+        expect: List shows up to 10 recent attempt rows with sentence text and an F1 percentage
+        type: functional
+        priority: low
+        added_in: 679

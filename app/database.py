@@ -231,6 +231,21 @@ CREATE TABLE IF NOT EXISTS reduced_form_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_created ON reduced_form_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_type ON reduced_form_attempts(reduction_type);
+
+CREATE TABLE IF NOT EXISTS stress_spotlight_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sentence TEXT NOT NULL,
+    words_json TEXT NOT NULL DEFAULT '[]',
+    expected_indices_json TEXT NOT NULL DEFAULT '[]',
+    user_indices_json TEXT NOT NULL DEFAULT '[]',
+    precision_score REAL NOT NULL DEFAULT 0,
+    recall_score REAL NOT NULL DEFAULT 0,
+    f1_score REAL NOT NULL DEFAULT 0,
+    difficulty TEXT NOT NULL DEFAULT 'intermediate',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_stress_spotlight_created ON stress_spotlight_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -536,6 +551,25 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on reduced_form_attempts reduction_type",
         "CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_type ON reduced_form_attempts(reduction_type)",
+    ),
+    (
+        "create stress_spotlight_attempts table",
+        """CREATE TABLE IF NOT EXISTS stress_spotlight_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sentence TEXT NOT NULL,
+            words_json TEXT NOT NULL DEFAULT '[]',
+            expected_indices_json TEXT NOT NULL DEFAULT '[]',
+            user_indices_json TEXT NOT NULL DEFAULT '[]',
+            precision_score REAL NOT NULL DEFAULT 0,
+            recall_score REAL NOT NULL DEFAULT 0,
+            f1_score REAL NOT NULL DEFAULT 0,
+            difficulty TEXT NOT NULL DEFAULT 'intermediate',
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on stress_spotlight_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_stress_spotlight_created ON stress_spotlight_attempts(created_at DESC)",
     ),
 ]
 

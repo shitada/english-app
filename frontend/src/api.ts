@@ -3645,6 +3645,91 @@ export function getShadowingStats(): Promise<ShadowingStats> {
   return request<ShadowingStats>('/api/shadowing/stats');
 }
 
+// ── Sentence Stress Spotlight ────────────────────────────────────────
+
+export interface StressSpotlightItem {
+  sentence: string;
+  words: string[];
+  stressed_indices: number[];
+  rationale: string;
+  difficulty: string;
+}
+
+export interface StressSpotlightAttemptInput {
+  sentence: string;
+  words: string[];
+  expected_indices: number[];
+  user_indices: number[];
+  difficulty?: string;
+}
+
+export interface StressSpotlightAttemptResponse {
+  id: number;
+  precision: number;
+  recall: number;
+  f1: number;
+}
+
+export interface StressSpotlightAudio {
+  sentence: string;
+  emphasized_indices: number[];
+  emphasized_words: string[];
+  ssml: string;
+  fallback_text: string;
+}
+
+export interface StressSpotlightRecentEntry {
+  id: number;
+  sentence: string;
+  words: string[];
+  expected_indices: number[];
+  user_indices: number[];
+  precision_score: number;
+  recall_score: number;
+  f1_score: number;
+  difficulty: string;
+  created_at: string;
+}
+
+export function generateStressSpotlight(
+  difficulty: string = 'intermediate'
+): Promise<StressSpotlightItem> {
+  return request<StressSpotlightItem>(
+    `/api/stress-spotlight/generate?difficulty=${encodeURIComponent(difficulty)}`,
+    { method: 'POST' }
+  );
+}
+
+export function getStressSpotlightAudio(
+  sentence: string,
+  emphasize: number[]
+): Promise<StressSpotlightAudio> {
+  const params = new URLSearchParams({
+    sentence,
+    emphasize: emphasize.join(','),
+  });
+  return request<StressSpotlightAudio>(
+    `/api/stress-spotlight/audio?${params.toString()}`
+  );
+}
+
+export function submitStressSpotlightAttempt(
+  input: StressSpotlightAttemptInput
+): Promise<StressSpotlightAttemptResponse> {
+  return request<StressSpotlightAttemptResponse>('/api/stress-spotlight/attempt', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function getStressSpotlightRecent(
+  limit = 10
+): Promise<{ items: StressSpotlightRecentEntry[] }> {
+  return request<{ items: StressSpotlightRecentEntry[] }>(
+    `/api/stress-spotlight/recent?limit=${limit}`
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Inline dictation mini-drill ('Type what you hear')
 // ---------------------------------------------------------------------------

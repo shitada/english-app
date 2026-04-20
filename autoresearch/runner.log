@@ -1380,4 +1380,130 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
   └ 2 lines...
 
-Now I have enough understanding. Let me implement.Now create the DAL with seed list and sampler:Now the router:Now create the frontend component. Let me check the API/hooks shape first:Now create the component:Now register the tile in QuickPracticeHub (under speaking, near shadowing):Now write tests:Good. Now integration tests:All 20 pass. Now update UI test spec — add tile tests to home page:Verify the broader test suite still passes for affected modules and DB init:
+Now I have enough understanding. Let me implement.Now create the DAL with seed list and sampler:Now the router:Now create the frontend component. Let me check the API/hooks shape first:Now create the component:Now register the tile in QuickPracticeHub (under speaking, near shadowing):Now write tests:Good. Now integration tests:All 20 pass. Now update UI test spec — add tile tests to home page:Verify the broader test suite still passes for affected modules and DB init:```json
+{
+  "committed": true,
+  "commit_hash": "6b695cd",
+  "files_changed": [
+    "app/database.py",
+    "app/dal/reduced_forms.py",
+    "app/routers/reduced_forms.py",
+    "app/main.py",
+    "frontend/src/components/ReducedFormsDrill.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/unit/test_reduced_forms_dal.py",
+    "tests/integration/test_reduced_forms_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 20,
+  "ui_spec_updated": true,
+  "description": "Add Reduced Forms drill: GET /round + POST /attempt with contraction-aware Expand grader, 35-item seed list across 8 reduction types, weakness-prioritized sampler, ReducedFormsDrill React component (Listen→Expand→Shadow), Quick Practice tile, schema + migration for reduced_form_attempts."
+}
+```● Coder Implement iter 678
+  │ Commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #678: add Reduced Forms drill (listen → expand →
+  │   │ shadow)" 2>&1 | tail -15
+  │   └ 16 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1
+      │ --format="%H"
+      └ 2 lines...
+
+● T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && git log
+  │ --oneline -2
+  └ 4 lines...
+
+```json
+{
+  "tests_passed": 2275,
+  "tests_total": 2275,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2275 passed in 130.09s (0:02:10) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 678
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+  │   └ 23 lines...
+  └ check e2e (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json
+      └ 2 lines...
+
+● T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Migration is properly added. All tests pass, ts_check passes, qa not specified but smoke=pass. Solid feature.
+
+```json
+{"code_quality": 8, "feature_value": 8, "maintainability": 8, "ux_quality": 7, "total_score": 7.8, "verdict": "keep", "reason": "New Reduced Forms drill is a well-scoped listening/speaking feature with proper schema migration, 20 new tests, all 2275 tests pass, ts_check pass, and smoke pass."}
+```● Evaluator Evaluate iter 678
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L50:400 (351 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L400:600 (201 lines read)
+
+● record 678 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776649133; T1=1776649200; T2=1776649539; T3=1776649703; \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "678" "6b695cd" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iteration 678 done. Starting 679.
+
+● T0 iter 679 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "title": "Sentence Stress Spotlight: tap stressed words then shadow",
+  "type": "feature",
+  "description": "Add a new practice card 'Stress Spotlight' that trains learners to perceive and produce English sentence stress (content vs. function words). Flow: (1) Backend endpoint POST /api/stress-spotlight/generate returns a short natural sentence (8–14 words) plus a list of indices marking which words should carry sentence stress (content words, focus words). Use the existing LLM helper (see app/services/llm.py / similar) with a strict JSON schema: {sentence: str, words: [str], stressed_indices: [int], rationale: str}. Cache prompts per difficulty (beginner/intermediate/advanced). (2) GET /api/stress-spotlight/audio?sentence=...&emphasize=1,3,5 returns TTS audio (reuse existing TTS service) where the emphasized word indices are wrapped with SSML <emphasis level='strong'> (or surrounded by capitalization fallback if SSML unsupported) so the model voice clearly stresses them. (3) Frontend page frontend/src/pages/StressSpotlight.tsx: shows the sentence as tappable word chips. User taps the words they predict are stressed, hits 'Reveal'. Correct chips turn green, missed = amber, false-positives = red. Show precision/recall and a one-line rationale. Then a 'Listen with stress' button plays the emphasized TTS, followed by a 'Shadow it' record button (reuse existing speech-recognition hook used by Shadow features) that scores how well the user's recording emphasizes the same words via word-timing/volume from the recognizer transcript (basic heuristic: stressed words present + slower duration ratio). (4) Add a card on Home (frontend/src/pages/Home.tsx) linking to /stress-spotlight, plus route registration. (5) Persist per-attempt results in a new table stress_spotlight_attempts(id INTEGER PK, created_at TEXT, sentence TEXT, stressed_indices TEXT, user_indices TEXT, precision REAL, recall REAL, shadow_score REAL) so dashboard streak/skill aggregates can later consume it. Schema migration: add to _MIGRATIONS in app/database.py: \"CREATE TABLE IF NOT EXISTS stress_spotlight_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, sentence TEXT NOT NULL, stressed_indices TEXT NOT NULL, user_indices TEXT NOT NULL, precision REAL NOT NULL, recall REAL NOT NULL, shadow_score REAL)\" (CREATE TABLE IF NOT EXISTS is acceptable here because the table is brand new — no ALTER needed). This is distinct from #666 Thought-Group Phrasing (which is about pause/chunk boundaries) and from any shadowing card because the core skill is identifying which individual words carry prominence.",
+  "files_to_modify": [
+    "app/routers/stress_spotlight.py",
+    "app/dal/stress_spotlight.py",
+    "app/database.py",
+    "frontend/src/pages/StressSpotlight.tsx",
+    "frontend/src/App.tsx"
+  ],
+  "acceptance_criteria": [
+    "POST /api/stress-spotlight/generate returns valid JSON with sentence, words array, and stressed_indices subset of word indices; supports difficulty query param.",
+    "GET /api/stress-spotlight/audio returns audio bytes where emphasized words are audibly stressed (SSML emphasis applied).",
+    "/stress-spotlight page lets the user tap word chips, reveal correctness with green/amber/red coloring, view precision & recall, play emphasized TTS, and record a shadow attempt.",
+    "Each completed attempt is persisted to stress_spotlight_attempts and visible via a debug GET /api/stress-spotlight/recent endpoint returning the last 10.",
+    "Home page surfaces a 'Stress Spotlight' practice card that routes to the new page.",
+    "Migration in _MIGRATIONS creates stress_spotlight_attempts; running existing test suite still passes on a fresh DB."
+  ],
+  "test_strategy": [
+    "Unit: tests/unit/test_stress_spotlight_dal.py — insert + fetch recent attempts, precision/recall edge cases (empty user picks, all-correct).",
+    "Unit: mock LLM client and assert the router validates the JSON schema and rejects malformed responses (returns 502).",
+    "Integration: tests/integration/test_stress_spotlight_api.py — generate → audio → submit attempt → recent list contains it.",
+    "Frontend: component test for StressSpotlight verifying tap toggles selection, reveal computes precision/recall, and Shadow button is disabled until reveal."
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 679
+
+● T1 iter 679 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Now let me check copilot and tests structure:Now I have enough context. Let me build it. First, check a quick existing similar feature: thought_group is in pronunciation router. Let me check for difficulty query param pattern:Now let me check copilot mock for existing reduced_forms feature for reference:Let me check the copilot fixture path for a similar new router (reduced_forms doesn't use copilot, thought_group does):Now I have a clear pattern. Let me start writing.
+
+First, add the prompt:Now create the DAL:Update the database schema and migrations:Now create the router:Wire up router in main.py:Create unit tests:Create integration tests:Now run backend tests:All 32 pass. Now let me build the frontend page.Now create the Stress Spotlight page:Now wire up route in App.tsx and add Home tile:Now add the home tile after the shadowing CTA:Now let me verify build & frontend compile, then add UI test spec entries:TypeScript clean. Now run the full backend test suite to make sure nothing's broken:
