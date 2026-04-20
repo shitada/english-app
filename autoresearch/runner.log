@@ -1156,4 +1156,121 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ "T1=$T1"
   └ 2 lines...
 
-Now let me look at a simpler reference page (PrepositionDrill or Paraphrase) for the frontend pattern:Now I have enough context. Let me start creating the backend files.Now I have enough context. Let me start creating the implementation. I'll write the DAL, router, prompts, migration, and frontend.Now the prompts addition:Now migration + SCHEMA:Now the router:Register in main.py:Now update conftest.py to patch our new router's copilot:Now unit tests:Now integration tests:All 31 pass. Now the frontend. Add API functions and build the page.Now the page:Now wire into App.tsx:Add Home card:Now tsc check:Now update ui-test-spec.yaml:Now run the full test suite quickly to make sure nothing else broke:
+Now let me look at a simpler reference page (PrepositionDrill or Paraphrase) for the frontend pattern:Now I have enough context. Let me start creating the backend files.Now I have enough context. Let me start creating the implementation. I'll write the DAL, router, prompts, migration, and frontend.Now the prompts addition:Now migration + SCHEMA:Now the router:Register in main.py:Now update conftest.py to patch our new router's copilot:Now unit tests:Now integration tests:All 31 pass. Now the frontend. Add API functions and build the page.Now the page:Now wire into App.tsx:Add Home card:Now tsc check:Now update ui-test-spec.yaml:Now run the full test suite quickly to make sure nothing else broke:[2026-04-21 04:35:31] Copilot invocation completed (duration: 2311s)
+[2026-04-21 04:35:31] Recording agent traces...
+[2026-04-21 04:35:31]   AGENT_TRACE iter=702 proposer=1 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 04:35:31]   AGENT_TRACE iter=703 proposer=0
+0 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 04:35:31] SMOKE_UI: UI changes detected in pages: home
+[2026-04-21 04:35:31] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-21 04:35:31] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1865ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-21 04:35:39] SMOKE_UI_PASS: All UI pages passed
+[2026-04-21 04:35:39] Running post-invocation audit (iter 702-703)...
+============================================
+ Autoresearch Audit
+ Iterations: 702 — 703
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-21 04:35:39
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 703[0m
+[0;31m  Tester: FAIL — missing: 702 703[0m
+[0;31m  Evaluator: FAIL — missing: 702 703[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-21 04:35:41] Audit found 3 error(s) — fixes applied where possible
+[2026-04-21 04:35:44] Current iteration count: 703 / 719
+[2026-04-21 04:35:44] ------------------------------------------
+[2026-04-21 04:35:44] Invocation 8 / 10
+[2026-04-21 04:35:44] Resuming from iteration 704
+[2026-04-21 04:35:44] ------------------------------------------
+[2026-04-21 04:35:44] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-704-to-719.md)...
+● Context restore (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "=== results ===" && tail -20
+  │ autoresearch/results.tsv && echo "=== backlog ===" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "=== git log ===" && git log --oneline -5
+  │ && echo "=== last session log ===" && ls -t autoresearch/logs/session-*.md…
+  └ 35 lines...
+
+● Session log and UI test results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-702-to-719.md && echo "=== ui-test-results
+  │ ===" && [ -f autoresearch/ui-test-results.json ] && head -c 300
+  │ autoresearch/ui-test-results.json || echo "no file"
+  └ 53 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Intonation Arrow Drill — rising vs falling final intonation",
+  "description": "Add a new listening micro-drill that trains perception of English sentence-final intonation (a gap in the current prosody tool set — we have stress_spotlight, contrastive_stress, shadowing, and speed_ladder, but nothing that isolates pitch contour). Each question plays a short TTS utterance (5–12 words) and the learner taps one of three chips: ↗ Rising, ↘ Falling, or ↗↘ Rise-Fall. The drill set mixes canonical patterns: yes/no questions and listing-continuations (rising), statements and wh-questions (falling), tag questions asking real info (rising) vs confirming (falling), and exclamations / choice questions (rise-fall).\n\nBackend (`app/routers/intonation_arrow.py`): POST `/api/intonation-arrow/session` returns 8 items from a curated JSON pool under `app/data/intonation_arrow.json` (fields: id, text, pattern ∈ {rising,falling,rise_fall}, explanation, category). POST `/api/intonation-arrow/attempt` with {item_id, chosen, correct, latency_ms} logs to new table `intonation_arrow_attempts(id, item_id, chosen, correct, latency_ms, created_at)`. GET `/api/intonation-arrow/stats` returns accuracy by pattern for the dashboard. TTS reuses existing `/api/tts` endpoint.\n\nFrontend (`frontend/src/pages/IntonationArrowPage.tsx` + route in `App.tsx` + Home card tile): a Listen button (auto-plays once, replay allowed twice), three large arrow chips with aria-labels, immediate correct/incorrect feedback showing the target contour and a one-line explanation (\"Yes/No questions typically rise at the end\"), and an end-of-session summary with per-pattern accuracy and a Retry Wrong Only button.\n\nMigration required — add to `_MIGRATIONS` in `app/database.py`:\n`CREATE TABLE IF NOT EXISTS intonation_arrow_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, item_id TEXT NOT NULL, chosen TEXT NOT NULL, correct INTEGER NOT NULL, latency_ms INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`\nand `CREATE INDEX IF NOT EXISTS idx_intonation_arrow_created ON intonation_arrow_attempts(created_at);`\n\nRationale: intonation perception is a well-known weakness for Japanese learners (flatter L1 contour) and directly affects listening comprehension of questions vs statements and speaking naturalness. Complements existing stress/rhythm drills without overlap.",
+  "files_to_modify": [
+    "app/routers/intonation_arrow.py",
+    "app/data/intonation_arrow.json",
+    "app/database.py",
+    "app/main.py",
+    "frontend/src/pages/IntonationArrowPage.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 704
+  │ List directory app
+  │   └ 12 files found
+  └ List directory app/routers
+      └ 28 files found
+
+Now let's look at the frontend side.Now let me look at how a TTS endpoint is called in frontend for a similar listen drill:Good. Now look at how Home.tsx shows CTAs:Now I have enough context. Let me now check the e2e ui spec and a preposition api integration test for attempts pattern.Now I have enough context. Let me start building. First, the data bank:Now DAL:Now the router:Now update database.py, main.py:Now tests:Now the frontend — api.ts additions:Now the React page:Now wire App.tsx and Home.tsx:Now add Home CTA. Let me check what icon is available — `Headphones` looks good:Now run tests:All 19 tests pass. Let me quickly run tsc:Clean. Now update UI test spec:

@@ -455,6 +455,18 @@ CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_created
     ON pause_predict_sessions(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_difficulty
     ON pause_predict_sessions(difficulty);
+
+CREATE TABLE IF NOT EXISTS intonation_arrow_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    chosen TEXT NOT NULL,
+    correct INTEGER NOT NULL,
+    latency_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_intonation_arrow_created
+    ON intonation_arrow_attempts(created_at);
 """
 
 # ---------------------------------------------------------------------------
@@ -1064,6 +1076,21 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on article_attempts difficulty",
         "CREATE INDEX IF NOT EXISTS idx_article_attempts_difficulty ON article_attempts(difficulty)",
+    ),
+    (
+        "create intonation_arrow_attempts table",
+        """CREATE TABLE IF NOT EXISTS intonation_arrow_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            chosen TEXT NOT NULL,
+            correct INTEGER NOT NULL,
+            latency_ms INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on intonation_arrow_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_intonation_arrow_created ON intonation_arrow_attempts(created_at)",
     ),
 ]
 

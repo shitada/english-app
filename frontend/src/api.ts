@@ -4949,3 +4949,70 @@ export function submitArticleSession(
 export function fetchArticleStats(days = 30): Promise<ArticleStatsResponse> {
   return request<ArticleStatsResponse>(`/api/articles/stats?days=${days}`);
 }
+
+// ---------------------------------------------------------------------------
+// Intonation Arrow Drill — listen and tap rising / falling / rise-fall
+// ---------------------------------------------------------------------------
+
+export type IntonationPattern = 'rising' | 'falling' | 'rise_fall';
+
+export interface IntonationItem {
+  id: string;
+  text: string;
+  pattern: IntonationPattern;
+  explanation: string;
+  category: string;
+}
+
+export interface IntonationSessionResponse {
+  count: number;
+  items: IntonationItem[];
+}
+
+export interface IntonationAttemptInput {
+  item_id: string;
+  chosen: IntonationPattern;
+  correct: boolean;
+  latency_ms?: number;
+}
+
+export interface IntonationAttemptResponse {
+  ok: boolean;
+  pattern: IntonationPattern;
+  explanation: string;
+  correct: boolean;
+}
+
+export interface IntonationPatternStat {
+  pattern: IntonationPattern;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface IntonationStatsResponse {
+  attempts: number;
+  correct: number;
+  accuracy: number;
+  per_pattern: IntonationPatternStat[];
+}
+
+export function fetchIntonationArrowSession(count = 8): Promise<IntonationSessionResponse> {
+  return request<IntonationSessionResponse>('/api/intonation-arrow/session', {
+    method: 'POST',
+    body: JSON.stringify({ count }),
+  });
+}
+
+export function postIntonationArrowAttempt(
+  payload: IntonationAttemptInput,
+): Promise<IntonationAttemptResponse> {
+  return request<IntonationAttemptResponse>('/api/intonation-arrow/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchIntonationArrowStats(): Promise<IntonationStatsResponse> {
+  return request<IntonationStatsResponse>('/api/intonation-arrow/stats');
+}

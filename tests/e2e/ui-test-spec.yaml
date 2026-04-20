@@ -5873,3 +5873,64 @@ pages:
         type: visual
         priority: medium
         added_in: 703
+
+  intonation-arrow:
+    path: /intonation-arrow
+    tests:
+      - id: intonation-arrow-001
+        target: Start page shows title and Start button
+        selector: data-testid="intonation-arrow-title"
+        action: Visit "/intonation-arrow" and verify data-testid="intonation-arrow-title" and data-testid="intonation-arrow-start"
+        expect: Title "Intonation Arrow" visible; Start drill button is enabled
+        type: functional
+        priority: critical
+        added_in: 704
+
+      - id: intonation-arrow-002
+        target: Starting a session renders drill with Listen / Replay / three arrow chips
+        action: Click data-testid="intonation-arrow-start" and wait for data-testid="intonation-arrow-drill"
+        expect: data-testid="intonation-arrow-progress", data-testid="intonation-arrow-listen", data-testid="intonation-arrow-replay", data-testid="intonation-arrow-chip-rising", data-testid="intonation-arrow-chip-falling", and data-testid="intonation-arrow-chip-rise_fall" are visible
+        type: functional
+        priority: critical
+        added_in: 704
+
+      - id: intonation-arrow-003
+        target: Choosing a chip reveals feedback, target contour, and Next button
+        action: Click data-testid="intonation-arrow-chip-falling" (any chip)
+        expect: data-testid="intonation-arrow-feedback" and data-testid="intonation-arrow-next" are visible; utterance text is revealed
+        type: functional
+        priority: high
+        added_in: 704
+
+      - id: intonation-arrow-004
+        target: Completing the session shows summary with per-pattern accuracy and retry buttons
+        action: Repeatedly pick a chip and click data-testid="intonation-arrow-next" until data-testid="intonation-arrow-summary" is visible
+        expect: data-testid="intonation-arrow-score", data-testid="intonation-arrow-per-pattern", and data-testid="intonation-arrow-retry" are visible
+        type: functional
+        priority: medium
+        added_in: 704
+
+      - id: intonation-arrow-005
+        target: Retry wrong only button appears when at least one item was missed
+        action: Finish a session with ≥1 wrong answer and verify data-testid="intonation-arrow-retry-wrong"
+        expect: data-testid="intonation-arrow-retry-wrong" is visible when and only when there are wrong attempts
+        type: state
+        priority: medium
+        added_in: 704
+
+      - id: intonation-arrow-006
+        target: Home exposes an Intonation Arrow CTA card linking to /intonation-arrow
+        selector: data-testid="intonation-arrow-cta"
+        action: Visit "/" and locate data-testid="intonation-arrow-cta"
+        expect: Card labeled "Intonation Arrow" is visible and links to /intonation-arrow
+        type: navigation
+        priority: high
+        added_in: 704
+
+      - id: intonation-arrow-007
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode via theme toggle, then resize viewport to 375x812 and visit /intonation-arrow
+        expect: Title, Start button, chips, and feedback are all legible; no overflow; colors respect dark tokens
+        type: visual
+        priority: medium
+        added_in: 704
