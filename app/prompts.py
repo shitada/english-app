@@ -652,3 +652,74 @@ def ELASTIC_SENTENCE_PROMPT() -> str:
         "- Prefer everyday vocabulary; avoid proper nouns.\n"
         "- Output JSON ONLY, no markdown fences, no commentary."
     )
+
+
+# ---------------------------------------------------------------------------
+# Reported Speech Transformation drill (direct → indirect)
+# ---------------------------------------------------------------------------
+REPORTED_SPEECH_SYSTEM = (
+    "You generate English REPORTED SPEECH (indirect speech) practice items. "
+    "The learner reads a DIRECT quote with a reporting clause and must "
+    "transform it into natural reported/indirect speech — applying the "
+    "correct backshift, pronoun shift, time-adverb shift, and (for "
+    "questions/commands) structural changes.\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "items": [\n'
+    '    { "id": "rs01",\n'
+    '      "direct": "She said, \\"I am tired today.\\"",\n'
+    '      "context_hint": "Report what she said.",\n'
+    '      "reference": "She said that she was tired that day.",\n'
+    '      "accepted_variants": ["She said she was tired that day."],\n'
+    '      "focus_tags": ["backshift", "time_adverb"] }\n'
+    '  ] }\n\n'
+    "Rules:\n"
+    "- Generate EXACTLY the requested number of items (default 5).\n"
+    "- Cover a mix of focus tags across the set: 'backshift' (tense "
+    "shift), 'pronoun' (pronoun shift), 'time_adverb' (today→that day, "
+    "now→then, tomorrow→the next day, yesterday→the day before), "
+    "'question' (reported questions with if/whether or wh-word + "
+    "declarative order), 'command' (reported commands with told X to / "
+    "asked X not to).\n"
+    "- 'direct' is ONE natural English sentence containing a direct "
+    "quote in double quotes.\n"
+    "- 'reference' is the canonical reported-speech version (one sentence).\n"
+    "- 'accepted_variants' is a list (may be empty) of equally-valid "
+    "alternatives (e.g. with/without 'that', with/without contractions).\n"
+    "- 'focus_tags' is a non-empty list drawn from the tags above.\n"
+    "- 'context_hint' is a short (<= 10 words) framing hint.\n"
+    "- 'id' is a short unique string.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_reported_speech_prompt(count: int = 5) -> tuple[str, str]:
+    """Return (system, user) messages for the Reported Speech drill."""
+    user = (
+        f"Generate EXACTLY {int(count)} reported-speech items now, spanning "
+        "backshift, pronoun shift, time-adverb shift, reported questions "
+        "and reported commands across the set."
+    )
+    return REPORTED_SPEECH_SYSTEM, user
+
+
+REPORTED_SPEECH_GRADE_SYSTEM = (
+    "You are an English teacher grading a student's attempt to transform a "
+    "DIRECT quote into REPORTED (indirect) speech. The reference answer "
+    "and a list of equally-valid accepted variants are provided. Judge the "
+    "student's attempt holistically — backshift, pronoun shift, time-adverb "
+    "shift, question/command structure, and overall naturalness.\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "correct": true,\n'
+    '  "score": 85,\n'
+    '  "feedback": "Good backshift but missed the time-adverb shift.",\n'
+    '  "diff_highlights": [\n'
+    '    { "kind": "missing", "text": "that day" },\n'
+    '    { "kind": "wrong", "text": "today" } ] }\n\n'
+    "Rules:\n"
+    "- 'correct' is true when the attempt is fully acceptable reported "
+    "speech, false otherwise.\n"
+    "- 'score' is an integer 0..100.\n"
+    "- 'feedback' is ONE short sentence (<= 24 words).\n"
+    "- 'diff_highlights' entries use kind = 'missing' | 'wrong' | 'extra'.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)

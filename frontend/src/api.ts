@@ -5146,3 +5146,81 @@ export function submitElasticSentence(input: ElasticSentenceSubmitInput): Promis
 export function getElasticSentenceStats(): Promise<ElasticSentenceStats> {
   return request<ElasticSentenceStats>('/api/elastic-sentence/stats');
 }
+
+
+// ---------------------------------------------------------------------------
+// Reported Speech Transformation drill
+// ---------------------------------------------------------------------------
+
+export type ReportedSpeechFocusTag =
+  | 'backshift'
+  | 'pronoun'
+  | 'time_adverb'
+  | 'question'
+  | 'command';
+
+export interface ReportedSpeechItem {
+  id: string;
+  direct: string;
+  context_hint: string;
+  reference: string;
+  accepted_variants: string[];
+  focus_tags: ReportedSpeechFocusTag[];
+}
+
+export interface ReportedSpeechSessionResponse {
+  session_id: string;
+  items: ReportedSpeechItem[];
+}
+
+export interface ReportedSpeechDiffHighlight {
+  kind: 'missing' | 'wrong' | 'extra';
+  text: string;
+}
+
+export interface ReportedSpeechGradeRequest {
+  item_id: string;
+  direct: string;
+  reference: string;
+  accepted_variants: string[];
+  focus_tags: ReportedSpeechFocusTag[];
+  user_answer: string;
+}
+
+export interface ReportedSpeechGradeResponse {
+  correct: boolean;
+  score: number;
+  feedback: string;
+  diff_highlights: ReportedSpeechDiffHighlight[];
+  matched: 'exact' | 'variant' | 'llm' | 'fallback';
+}
+
+export interface ReportedSpeechWeaknessTag {
+  tag: ReportedSpeechFocusTag;
+  total: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface ReportedSpeechWeaknessResponse {
+  limit: number;
+  tags: ReportedSpeechWeaknessTag[];
+}
+
+export function createReportedSpeechSession(count = 5): Promise<ReportedSpeechSessionResponse> {
+  return request<ReportedSpeechSessionResponse>('/api/reported-speech/session', {
+    method: 'POST',
+    body: JSON.stringify({ count }),
+  });
+}
+
+export function gradeReportedSpeech(payload: ReportedSpeechGradeRequest): Promise<ReportedSpeechGradeResponse> {
+  return request<ReportedSpeechGradeResponse>('/api/reported-speech/grade', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getReportedSpeechWeakness(limit = 20): Promise<ReportedSpeechWeaknessResponse> {
+  return request<ReportedSpeechWeaknessResponse>(`/api/reported-speech/weakness?limit=${limit}`);
+}

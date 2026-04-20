@@ -485,6 +485,24 @@ CREATE TABLE IF NOT EXISTS elastic_sentence_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_elastic_sentence_created
     ON elastic_sentence_sessions(created_at);
+
+CREATE TABLE IF NOT EXISTS reported_speech_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL DEFAULT 'local',
+    item_id TEXT,
+    direct TEXT,
+    reference TEXT,
+    user_answer TEXT,
+    correct INTEGER NOT NULL DEFAULT 0,
+    score INTEGER NOT NULL DEFAULT 0,
+    focus_tags TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reported_speech_created
+    ON reported_speech_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reported_speech_user
+    ON reported_speech_attempts(user_id);
 """
 
 # ---------------------------------------------------------------------------
@@ -1152,6 +1170,29 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on elastic_sentence_sessions created_at",
         "CREATE INDEX IF NOT EXISTS idx_elastic_sentence_created ON elastic_sentence_sessions(created_at)",
+    ),
+    (
+        "create reported_speech_attempts table",
+        """CREATE TABLE IF NOT EXISTS reported_speech_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'local',
+            item_id TEXT,
+            direct TEXT,
+            reference TEXT,
+            user_answer TEXT,
+            correct INTEGER NOT NULL DEFAULT 0,
+            score INTEGER NOT NULL DEFAULT 0,
+            focus_tags TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on reported_speech_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_reported_speech_created ON reported_speech_attempts(created_at DESC)",
+    ),
+    (
+        "add index on reported_speech_attempts user_id",
+        "CREATE INDEX IF NOT EXISTS idx_reported_speech_user ON reported_speech_attempts(user_id)",
     ),
 ]
 

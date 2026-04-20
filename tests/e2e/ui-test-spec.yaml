@@ -6073,3 +6073,83 @@ pages:
         type: visual
         priority: medium
         added_in: 706
+
+  reported_speech:
+    path: /reported-speech
+    tests:
+      - id: reported-speech-001
+        target: Intro card and Start button render
+        selector: data-testid="reported-speech-intro"
+        action: Visit /reported-speech and inspect
+        expect: data-testid="reported-speech-intro" and data-testid="reported-speech-start" are visible
+        type: functional
+        priority: high
+        added_in: 707
+
+      - id: reported-speech-002
+        target: Start button begins a session and shows a direct quote card
+        action: Click data-testid="reported-speech-start", wait for drill
+        expect: data-testid="reported-speech-drill" and data-testid="reported-speech-direct" are visible; at least one data-testid^="reported-speech-tag-" is visible
+        type: functional
+        priority: critical
+        added_in: 707
+
+      - id: reported-speech-003
+        target: Progress dots render five items
+        selector: data-testid="reported-speech-progress-dots"
+        action: After starting the session, count the dots
+        expect: data-testid="reported-speech-dot-0" through data-testid="reported-speech-dot-4" are visible
+        type: visual
+        priority: medium
+        added_in: 707
+
+      - id: reported-speech-004
+        target: TTS play button is clickable
+        selector: data-testid="reported-speech-tts"
+        action: Click the speaker icon next to the direct quote
+        expect: Click does not throw; button remains focused
+        type: functional
+        priority: low
+        added_in: 707
+
+      - id: reported-speech-005
+        target: Peek-reference toggle reveals reference answer
+        selector: data-testid="reported-speech-reveal"
+        action: Click reveal button, then click again to hide
+        expect: data-testid="reported-speech-reference-peek" appears, then disappears
+        type: functional
+        priority: medium
+        added_in: 707
+
+      - id: reported-speech-006
+        target: Submit shows feedback panel with score bar
+        action: Type any answer, click data-testid="reported-speech-submit"
+        expect: data-testid="reported-speech-feedback", data-testid="reported-speech-score-bar", data-testid="reported-speech-reference" visible
+        type: functional
+        priority: critical
+        added_in: 707
+
+      - id: reported-speech-007
+        target: Summary view shows per-tag accuracy bars
+        action: Complete all 5 items, reach summary
+        expect: data-testid="reported-speech-summary", data-testid="reported-speech-score-summary", at least one data-testid^="reported-speech-bar-" visible
+        type: functional
+        priority: high
+        added_in: 707
+
+      - id: reported-speech-008
+        target: Home CTA links to /reported-speech
+        selector: data-testid="reported-speech-cta"
+        action: Visit "/" and locate data-testid="reported-speech-cta"
+        expect: Card labeled "Reported Speech Drill" is visible and links to /reported-speech
+        type: navigation
+        priority: high
+        added_in: 707
+
+      - id: reported-speech-009
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode and resize viewport to 375x812, then visit /reported-speech
+        expect: Direct quote card, textarea, focus-tag chips legible; no horizontal overflow; score bar stays within card
+        type: visual
+        priority: medium
+        added_in: 707

@@ -1760,6 +1760,31 @@ export default function Home() {
       </Link>
 
       <Link
+        to="/reported-speech"
+        data-testid="reported-speech-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <PenTool size={28} color="#14b8a6" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🗣️ Reported Speech Drill</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Transform direct quotes into reported speech — backshift, pronoun &amp; time-adverb shift.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#14b8a6',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
+      <Link
         to="/wh-questions"
         data-testid="wh-question-cta"
         className="card"
