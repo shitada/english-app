@@ -308,6 +308,25 @@ CREATE TABLE IF NOT EXISTS speed_ladder_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_speed_ladder_created ON speed_ladder_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_speed_ladder_session ON speed_ladder_attempts(session_id);
+
+CREATE TABLE IF NOT EXISTS monologue_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scenario_id TEXT NOT NULL,
+    transcript TEXT NOT NULL,
+    duration_seconds REAL NOT NULL,
+    word_count INTEGER NOT NULL DEFAULT 0,
+    filler_count INTEGER NOT NULL DEFAULT 0,
+    wpm REAL NOT NULL DEFAULT 0,
+    coverage_ratio REAL NOT NULL DEFAULT 0,
+    fluency_score INTEGER NOT NULL DEFAULT 0,
+    structure_score INTEGER NOT NULL DEFAULT 0,
+    overall_score INTEGER NOT NULL DEFAULT 0,
+    feedback_json TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_monologue_created ON monologue_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_monologue_scenario ON monologue_attempts(scenario_id);
 """
 
 # ---------------------------------------------------------------------------
@@ -708,6 +727,32 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on speed_ladder_attempts session_id",
         "CREATE INDEX IF NOT EXISTS idx_speed_ladder_session ON speed_ladder_attempts(session_id)",
+    ),
+    (
+        "create monologue_attempts table",
+        """CREATE TABLE IF NOT EXISTS monologue_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            scenario_id TEXT NOT NULL,
+            transcript TEXT NOT NULL,
+            duration_seconds REAL NOT NULL,
+            word_count INTEGER NOT NULL DEFAULT 0,
+            filler_count INTEGER NOT NULL DEFAULT 0,
+            wpm REAL NOT NULL DEFAULT 0,
+            coverage_ratio REAL NOT NULL DEFAULT 0,
+            fluency_score INTEGER NOT NULL DEFAULT 0,
+            structure_score INTEGER NOT NULL DEFAULT 0,
+            overall_score INTEGER NOT NULL DEFAULT 0,
+            feedback_json TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on monologue_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_monologue_created ON monologue_attempts(created_at DESC)",
+    ),
+    (
+        "add index on monologue_attempts scenario_id",
+        "CREATE INDEX IF NOT EXISTS idx_monologue_scenario ON monologue_attempts(scenario_id)",
     ),
 ]
 

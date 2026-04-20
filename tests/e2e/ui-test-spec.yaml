@@ -5380,3 +5380,39 @@ pages:
         type: functional
         priority: medium
         added_in: 691
+
+  home_monologue_card:
+    path: /
+    tests:
+      - id: home-monologue-001
+        target: Home exposes a Situational Monologue Drill CTA linking to /monologue
+        action: Visit "/" and locate data-testid="monologue-cta"
+        expect: Card is visible with text containing "Situational Monologue Drill" and a 🎤 emoji; clicking navigates to /monologue
+        type: navigation
+        priority: high
+        added_in: 692
+
+  monologue:
+    path: /monologue
+    tests:
+      - id: monologue-001
+        target: Monologue Drill page renders title and scenario list
+        action: Visit "/monologue" and locate data-testid="monologue-title" + data-testid="monologue-scenarios"
+        expect: Heading contains "Situational Monologue Drill" and at least 5 scenario buttons are visible
+        type: functional
+        priority: high
+        added_in: 692
+      - id: monologue-002
+        target: Selecting a scenario reveals prompt, target duration, beat checklist, and a Start button
+        action: Click any data-testid^="monologue-scenario-" button, then wait for data-testid="monologue-prompt", data-testid="monologue-target", data-testid="monologue-beats", and data-testid="monologue-start"
+        expect: Prompt text, target seconds label, beat list, and a Start recording button are visible
+        type: functional
+        priority: high
+        added_in: 692
+      - id: monologue-003
+        target: Start recording transitions to timer + Stop button
+        action: Click data-testid="monologue-start" and wait for data-testid="monologue-timer" + data-testid="monologue-stop"
+        expect: Timer displays m:ss format and a Stop & score button is visible
+        type: functional
+        priority: medium
+        added_in: 692

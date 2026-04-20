@@ -4218,3 +4218,88 @@ export function getSpeedLadderHistory(
     `/api/speed-ladder/history?limit=${encodeURIComponent(limit)}`,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Situational Monologue Drill (elevator pitch)
+// ---------------------------------------------------------------------------
+
+export interface MonologueScenario {
+  id: string;
+  title: string;
+  prompt: string;
+  target_seconds: number;
+  content_beats: string[];
+}
+
+export interface MonologueScenarioListResponse {
+  scenarios: MonologueScenario[];
+}
+
+export interface MonologueFeedback {
+  beats_covered: string[];
+  fluency_score: number;
+  structure_score: number;
+  overall_score: number;
+  one_line_feedback: string;
+  suggested_rewrite_opening: string;
+}
+
+export interface MonologueAttemptResponse {
+  id: number;
+  scenario_id: string;
+  duration_seconds: number;
+  word_count: number;
+  filler_count: number;
+  wpm: number;
+  coverage_ratio: number;
+  fluency_score: number;
+  structure_score: number;
+  overall_score: number;
+  feedback: MonologueFeedback;
+}
+
+export interface MonologueHistoryItem {
+  id: number;
+  scenario_id: string;
+  duration_seconds: number;
+  word_count: number;
+  filler_count: number;
+  wpm: number;
+  coverage_ratio: number;
+  fluency_score: number;
+  structure_score: number;
+  overall_score: number;
+  feedback: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface MonologueHistoryResponse {
+  attempts: MonologueHistoryItem[];
+  personal_best: MonologueHistoryItem | null;
+}
+
+export function getMonologueScenarios(): Promise<MonologueScenarioListResponse> {
+  return request<MonologueScenarioListResponse>('/api/monologue/scenarios');
+}
+
+export function submitMonologueAttempt(
+  scenario_id: string,
+  transcript: string,
+  duration_seconds: number,
+): Promise<MonologueAttemptResponse> {
+  return request<MonologueAttemptResponse>('/api/monologue/attempt', {
+    method: 'POST',
+    body: JSON.stringify({ scenario_id, transcript, duration_seconds }),
+  });
+}
+
+export function getMonologueHistory(
+  scenario_id?: string,
+  limit = 20,
+): Promise<MonologueHistoryResponse> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (scenario_id) params.set('scenario_id', scenario_id);
+  return request<MonologueHistoryResponse>(
+    `/api/monologue/history?${params.toString()}`,
+  );
+}

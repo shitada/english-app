@@ -31,6 +31,7 @@ from app.routers import linker_drill
 from app.routers import paraphrase
 from app.routers import number_dictation
 from app.routers import speed_ladder
+from app.routers import monologue
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -220,6 +221,7 @@ app.include_router(linker_drill.router)
 app.include_router(paraphrase.router)
 app.include_router(number_dictation.router)
 app.include_router(speed_ladder.router)
+app.include_router(monologue.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

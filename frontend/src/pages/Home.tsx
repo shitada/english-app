@@ -1609,6 +1609,35 @@ export default function Home() {
         </span>
       </Link>
 
+          Start
+        </span>
+      </Link>
+
+      <Link
+        to="/monologue"
+        data-testid="monologue-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Mic size={28} color="#8b5cf6" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🎤 Situational Monologue Drill</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Elevator-pitch practice — 30-60s structured speaking for real situations.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#8b5cf6',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />
