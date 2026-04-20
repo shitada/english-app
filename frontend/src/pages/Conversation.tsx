@@ -7,7 +7,7 @@ import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatDateTime, formatRelativeTime } from '../utils/formatDate';
 import { getCache, setCache } from '../utils/localStorageCache';
-import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge, SlowReplayButton, PinnedPhrasesBar, normalizePhrase as normalizePinnedPhrase, phraseUsedInMessage, togglePin as togglePinnedPhrase, MAX_PINNED_PHRASES } from '../components/conversation';
+import { BookmarksReview, FeedbackPanel, GrammarNotesPanel, HighlightedMessage, ConversationReplay, ConversationSummary as ConversationSummaryView, ConversationHistory, PhaseTransition, ConversationWarmUp, VocabTargetBar, ConversationCoach, ResponseTimer, GoalSelector, GoalTracker, GoalSummary, ReplaySpeakWalkthrough, FillerWordBadge, ListenModeCloze, LiveFluencyRing, GrammarStreakBadge, ConversationMemory, ReplyProgressIndicator, ReplyPacingMeter, InlineShadowButton, splitIntoShadowableLines, InlineDictationButton, CorrectedShadowButton, RoleSwapReplay, PaceBadge, SlowReplayButton, PinnedPhrasesBar, normalizePhrase as normalizePinnedPhrase, phraseUsedInMessage, togglePin as togglePinnedPhrase, MAX_PINNED_PHRASES } from '../components/conversation';
 import { useI18n } from '../i18n/I18nContext';
 import KeyboardShortcutsPanel from '../components/KeyboardShortcutsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -337,6 +337,20 @@ export default function Conversation() {
   const [topicMastery, setTopicMastery] = useState<TopicMasteryMap>({});
   const [grammarStreak, setGrammarStreak] = useState(0);
   const [bestGrammarStreak, setBestGrammarStreak] = useState(0);
+  // Reply Pacing Meter: persisted last-5 final WPMs and the most recent turn's WPM.
+  const PACING_WPMS_KEY = 'conv_pacing_wpms_v1';
+  const [pacingRecentWpms, setPacingRecentWpms] = useState<number[]>(() => {
+    try {
+      const raw = localStorage.getItem(PACING_WPMS_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr.filter((n) => typeof n === 'number' && Number.isFinite(n) && n > 0).slice(-5);
+    } catch {
+      return [];
+    }
+  });
+  const [pacingLastWpm, setPacingLastWpm] = useState<number | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -527,6 +541,8 @@ export default function Conversation() {
   useEffect(() => {
     if (speech.isListening && micStartedAtRef.current == null) {
       micStartedAtRef.current = Date.now();
+      // Clear last turn's pacing tip when the user starts a new mic turn.
+      setPacingLastWpm(null);
     }
   }, [speech.isListening]);
 
@@ -942,6 +958,21 @@ export default function Conversation() {
     if (!retryContent && micStartedAtRef.current != null && speech.transcript) {
       const elapsed = (Date.now() - micStartedAtRef.current) / 1000;
       if (elapsed > 0) speakingSeconds = elapsed;
+    }
+    // Reply Pacing Meter: capture final WPM for this mic turn (frontend-only).
+    if (speakingSeconds && speakingSeconds > 0) {
+      const wc = messageContent.trim().split(/\s+/).filter(Boolean).length;
+      if (wc > 0) {
+        const finalWpm = Math.round(wc / (speakingSeconds / 60));
+        if (finalWpm > 0 && Number.isFinite(finalWpm)) {
+          setPacingLastWpm(finalWpm);
+          setPacingRecentWpms((prev) => {
+            const next = [...prev, finalWpm].slice(-5);
+            try { localStorage.setItem(PACING_WPMS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+            return next;
+          });
+        }
+      }
     }
     micStartedAtRef.current = null;
 
@@ -2583,12 +2614,20 @@ export default function Conversation() {
           </div>
         );
       })()}
+      {speech.isSupported && (
+        <ReplyPacingMeter
+          transcript={speech.transcript || input}
+          isRecording={speech.isListening}
+          startedAt={micStartedAtRef.current}
+          recentWpms={pacingRecentWpms}
+          finalWpm={!speech.isListening ? pacingLastWpm : null}
+        />
+      )}
       <div className="chat-input-bar" style={{ gap: 12, alignItems: 'center' }}>
         <button
           className={`btn btn-icon ${speech.isListening ? 'mic-active' : 'btn-secondary'}`}
           onClick={speech.isListening ? speech.stop : speech.start}
-          disabled={!speech.isSupported || loading}
-          title={speech.isSupported ? (speech.isListening ? 'Stop listening' : 'Start speaking') : 'Speech recognition not supported'}
+          disabled={!speech.isSupported || loading}          title={speech.isSupported ? (speech.isListening ? 'Stop listening' : 'Start speaking') : 'Speech recognition not supported'}
           aria-label={speech.isListening ? 'Stop listening' : 'Start speaking'}
           style={{ width: 48, height: 48, flexShrink: 0 }}
         >

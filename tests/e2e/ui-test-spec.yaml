@@ -3844,6 +3844,22 @@ pages:
         priority: medium
         added_in: 664
 
+      - id: conv-152
+        target: Reply Pacing Meter shows a live WPM gauge while the mic is recording in /conversation chat phase
+        action: In the chat phase, click the 🎤 mic button (data-testid not required; the button next to the input) and start speaking. Locate data-testid="reply-pacing-meter" rendered just above the chat-input-bar. While isListening, the meter contains data-testid="reply-pacing-gauge" (3-zone background — blue/green/orange) and data-testid="reply-pacing-needle" whose left% updates every 250ms based on word count and elapsed time, plus data-testid="reply-pacing-wpm" showing the live "<N> wpm" value.
+        expect: The meter is hidden entirely when window.SpeechRecognition / webkitSpeechRecognition is unavailable. While recording, the needle color matches data-zone — blue for <100 wpm, green for 100–160 wpm, orange for >160 wpm. After turn submit, the meter persists briefly with data-testid="reply-pacing-tip" containing one of "Nice natural pace ✨", "Try slowing down for clarity", or "You can speak a touch faster — sounded hesitant" based on final WPM. Tip clears when the next mic turn begins.
+        type: functional
+        priority: medium
+        added_in: 673
+
+      - id: conv-153
+        target: Reply Pacing Meter renders a 5-point sparkline of recent WPMs persisted to localStorage
+        action: Complete a few mic-driven user turns in /conversation. After each, observe data-testid="reply-pacing-sparkline" inside data-testid="reply-pacing-meter". Inspect localStorage key "conv_pacing_wpms_v1".
+        expect: data-testid="reply-pacing-sparkline" contains one data-testid="reply-pacing-sparkline-point" circle per persisted WPM, capped at the most recent 5 values. Each point is colored by zone (blue/green/orange via getZoneColor). localStorage["conv_pacing_wpms_v1"] is a JSON array of finite positive numbers with length ≤ 5; older entries are dropped FIFO. The sparkline element is omitted entirely until at least one final WPM has been captured.
+        type: functional
+        priority: low
+        added_in: 673
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

@@ -375,4 +375,114 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me create the component.Now register in the hub:Now create the test file:All tests pass and TS clean. Now update the UI test spec since I added a component.
+Now I have enough context. Let me create the component.Now register in the hub:Now create the test file:All tests pass and TS clean. Now update the UI test spec since I added a component.```json
+{
+  "committed": true,
+  "commit_hash": "2bb18be",
+  "files_changed": [
+    "frontend/src/components/QuickBackchannelCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/__tests__/QuickBackchannelCard.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 15,
+  "ui_spec_updated": true,
+  "description": "Added Quick Backchannel response card (21-prompt bank, 5-round MCQ flow with TTS auto-play, optional Web Speech 'Say it', summary screen) registered in the Quick Practice Hub Listening tab; covered by 15 vitest cases and 5 new UI test spec items."
+}
+```● Coder Implement iter 672
+  │ Commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #672: add Quick Backchannel response card to Quick
+  │   │ Practice Hub
+  │   │
+  │   │ Adds a frontend-only mini-drill that trains learners to produce natural…
+  │   └ 39 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git log -1 --stat | head -20
+      └ 22 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2243,
+  "tests_total": 2243,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2243 passed in 128.22s (0:02:08) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 672
+  │ tsc check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -30
+  │   └ 1 line...
+  └ read e2e results (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Self-contained frontend mini-drill with 15 new vitest cases, all 2243 tests pass and TS check passes; adds learning value (backchannel listener signals) to the Quick Practice Hub without backend or schema changes."
+}
+```● Evaluator Evaluate iter 672
+  └ List directory .
+      └ 212 files found
+
+● Record iter 672 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776645397 T1=1776645458 T2=1776645748 T3=1776645899 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "672" "2bb18be" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 6 lines...
+
+Iteration 672 complete. Now iteration 673.
+
+● T0 iter 673 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Conversation Reply Pacing Meter (live WPM gauge during user turns)",
+  "description": "Add a frontend-only 'Pacing Meter' to the Conversation page that gives the learner immediate feedback on their speaking pace during a reply turn. While the user is recording (speech recognition active in frontend/src/pages/Conversation.tsx), display a small horizontal gauge with three zones (slow <100 wpm = blue, natural 100-160 wpm = green, rushed >160 wpm = orange) and a moving needle showing the current live words-per-minute computed from the in-progress transcript and elapsed time. After the user submits the turn, show a one-line coaching tip beneath the input ('Nice natural pace ✨', 'Try slowing down for clarity', or 'You can speak a touch faster — sounded hesitant') based on the final WPM, and remember the last 5 WPM values in localStorage to render a tiny sparkline of pacing trend across turns within the same session.\n\nImplementation: create a new component frontend/src/components/conversation/ReplyPacingMeter.tsx that takes props { transcript: string, isRecording: boolean, startedAt: number | null, recentWpms: number[] } and renders the gauge + sparkline + tip. It must be purely presentational — computing WPM = wordCount / (elapsedSeconds/60), updated via a 250ms interval while isRecording. Wire it into Conversation.tsx near the user input area: capture recognition start time, pass live transcript, and on turn submit push the final wpm into a useState array also persisted to localStorage under key 'conv_pacing_wpms_v1' (cap length 5). Hide entirely on devices without speech recognition or in chat-only mode (mirror existing `recognitionSupported` checks).\n\nAdd unit tests in frontend/src/__tests__/ReplyPacingMeter.test.tsx covering: (1) renders nothing when not recording and no transcript, (2) shows correct zone color for slow/natural/rushed sample wpms, (3) renders correct tip text given a final wpm prop, (4) sparkline renders the right number of points from recentWpms.\n\nWhy: pacing is a top fluency signal beginners struggle with; a live ambient gauge nudges users toward natural rhythm without interrupting the conversation flow. It is outside the Quick Practice Hub, builds on existing speech-recognition infrastructure, and ships entirely on the frontend with no API or DB changes.",
+  "files_to_modify": [
+    "frontend/src/components/conversation/ReplyPacingMeter.tsx",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/ReplyPacingMeter.test.tsx"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iter 673
+  │ List directory frontend/src/components
+  │   └ 86 files found
+  └ List directory frontend/src/components/dashboard
+      └ 27 files found
+
+● T1 iter 673 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now creating the component:Now wire into Conversation.tsx and add export:Now wire into Conversation.tsx — add import, state for recentWpms (persisted) + lastFinalWpm, capture on send, render below input:Now capture WPM on send and persist. Update sendMessage's existing speakingSeconds block:Now render the meter just above the chat-input-bar:Now write tests:All 21 pass. Now update UI test spec:

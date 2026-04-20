@@ -33,6 +33,16 @@ export { NextStepsCard, generateRecommendations } from './NextStepsCard';
 export type { NextStepsData, Recommendation } from './NextStepsCard';
 export { ReplyProgressIndicator, getStageLabel, shouldShowElapsed } from './ReplyProgressIndicator';
 export type { ReplyProgressIndicatorProps } from './ReplyProgressIndicator';
+export {
+  ReplyPacingMeter,
+  computeWpm as computePacingWpm,
+  countWords as countPacingWords,
+  getPaceZone,
+  getZoneColor as getPaceZoneColor,
+  getCoachingTip as getPacingCoachingTip,
+  wpmToPercent as pacingWpmToPercent,
+} from './ReplyPacingMeter';
+export type { ReplyPacingMeterProps, PaceZone } from './ReplyPacingMeter';
 export { InlineShadowButton, splitIntoShadowableLines } from './InlineShadowButton';
 export { InlineDictationButton, diffDictation, tokenizeForDictation } from './InlineDictationButton';
 export { CorrectedShadowButton } from './CorrectedShadowButton';
