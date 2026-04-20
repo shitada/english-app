@@ -577,6 +577,35 @@ async def get_due_count(db: aiosqlite.Connection = Depends(get_db_session)):
     return DueCountResponse(due_count=count)
 
 
+class LeechWordItem(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    example_sentence: str = ""
+    topic: str
+    correct_count: int
+    incorrect_count: int
+    level: int
+    miss_rate: float
+
+
+class LeechWordsResponse(BaseModel):
+    leeches: list[LeechWordItem]
+
+
+@router.get("/leeches", response_model=LeechWordsResponse)
+async def get_leech_words(
+    limit: int = Query(default=10, ge=1, le=50),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Return 'leech' words: stubborn vocabulary words user repeatedly misses."""
+    leeches = await vocab_dal.get_leech_words(db, limit)
+    vocab_topics = get_vocabulary_topics()
+    leeches = [{**w, "topic": get_topic_label(vocab_topics, w["topic"])} for w in leeches]
+    return {"leeches": leeches}
+
+
+
 class ToggleFavoriteResponse(BaseModel):
     word_id: int
     is_favorite: bool

@@ -1034,4 +1034,129 @@ Starting iteration 676. Dispatching to proposer.
   │ echo "T1=$(date +%s)"
   └ 2 lines...
 
-Now I have enough info. Let me create the WordHeatmap component:Now integrate into Pronunciation.tsx — insert WordHeatmap above the existing word-comparison list, in shadowing result block:Now create the test file:All 10 tests pass. Now update the UI test spec since Pronunciation.tsx was modified:
+Now I have enough info. Let me create the WordHeatmap component:Now integrate into Pronunciation.tsx — insert WordHeatmap above the existing word-comparison list, in shadowing result block:Now create the test file:All 10 tests pass. Now update the UI test spec since Pronunciation.tsx was modified:The extras are autoresearch logs (those were ambient working-tree changes). My code changes are clean.
+
+```json
+{
+  "committed": true,
+  "commit_hash": "07d5825",
+  "files_changed": [
+    "frontend/src/components/pronunciation/WordHeatmap.tsx",
+    "frontend/src/components/pronunciation/__tests__/WordHeatmap.test.tsx",
+    "frontend/src/components/pronunciation/index.ts",
+    "frontend/src/pages/Pronunciation.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 10,
+  "ui_spec_updated": true,
+  "description": "Added WordHeatmap component rendering colored per-word tokens on the Pronunciation shadowing result phase, with tap-to-expand panels offering tip + 🔊 play-word + 🎤 ASR retry (up to 3 attempts) reusing transcriptMatches/normalizeWord helpers exported from MissedWordDrill."
+}
+```● Coder Implement iter 676
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #676: pronunciation word-level heatmap with
+  │   │ tap-to-drill on missed words
+  │   │
+  │   │ Co-authored-by: Copilot <copilot@github.com>" 2>&1 | tail -20
+  │   └ 17 lines...
+  └ show commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git show --stat HEAD |
+      │ tail -20
+      └ 19 lines...
+
+● T2 + changed files (shell)
+  │ echo "T2=$(date +%s)" && cd /Users/shingotada/Documents/vscode/english-app
+  │ && git diff HEAD~1 --name-only && git rev-parse --short HEAD
+  └ 12 lines...
+
+```json
+{
+  "tests_passed": 2249,
+  "tests_total": 2249,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2249 passed in 125.84s (0:02:05) =======================\nvitest: WordHeatmap.test.tsx 10/10 passed\ntsc --noEmit: exit 0",
+  "failure_summary": ""
+}
+```● Tester Test iter 676
+  │ e2e (shell)
+  │   │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+  │   │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+  │   │ rch/ui-test-results.json
+  │   └ 2 lines...
+  └ vitest (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ src/components/pronunciation/__tests__/WordHeatmap.test.tsx 2>&1 | tail -30
+      └ 9 lines...
+
+● T3 (shell)
+  │ echo "T3=$(date +%s)"
+  └ 2 lines...
+
+I need to inspect the diff. Let me check for QA info from input - the user gave overall_pass: true with smoke skipped, e2e not run. No QA tester info given explicitly, so I'll treat ux_quality more neutrally based on tests passing & ts pass.
+
+Without QA results provided in the proposal input (only test counts), and given frontend changes, I'll treat as "QA not run" → default ux_quality 7.Solid frontend-only feature with good tests, types, accessibility, all 2249 tests pass and TS passes.
+
+```json
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "Well-typed, accessible WordHeatmap component with thorough unit tests reusing existing normalize/match helpers; all 2249 tests and TS check pass with no schema or backend risk."}
+```● Evaluator Evaluate iter 676
+  │ Read WordHeatmap.tsx
+  │   │ frontend/src/components/pronunciation/WordHeatmap.tsx
+  │   └ 388 lines read
+  └ List directory frontend/src/components/pronunciation/__tests__
+      └ 1 file found
+
+● Record iter 676 result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776647649; T1=1776647814; T2=1776648083; T3=1776648237; \
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "676" "07d5825" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iteration 676 complete (kept, 7.55). Now iteration 677.
+
+● T0 iter 677 (shell)
+  │ echo "T0=$(date +%s)"
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Vocabulary Leech Words panel — surface stubborn words for focused drilling",
+  "description": "The Vocabulary page surfaces SRS due words and progress, but never highlights 'leech' words — words a user repeatedly gets wrong despite reviews. The schema already tracks per-word incorrect_count and correct_count in vocabulary_progress (no migration needed), so we can ship this in one iteration.\n\nWhat to build:\n\n1. Backend DAL — add `get_leech_words(limit: int = 10)` to `app/dal/vocabulary.py`. A 'leech' is defined as a word with `incorrect_count >= 3` AND `incorrect_count >= correct_count` AND `level <= 2` (i.e. user has tried it several times, still failing, hasn't graduated). Return joined rows with word, meaning, example_sentence, topic, correct_count, incorrect_count, level, and a derived `miss_rate = incorrect / (correct + incorrect)`. Order by miss_rate DESC then incorrect_count DESC. Skip words missing a vocabulary_progress row.\n\n2. Backend router — add `GET /api/vocabulary/leeches?limit=10` in `app/routers/vocabulary.py` returning `{ leeches: [...] }`. Also extend the existing per-word progress update path (where incorrect_count is incremented) with no logic change — just verify it still works. No new POST needed; reuse existing progress update endpoint when the user drills a leech word.\n\n3. Frontend component — create `frontend/src/components/VocabLeechesPanel.tsx`. Collapsible card titled '🪤 Leech Words — words that keep tripping you up'. Shows up to 5 leeches with: word (large), meaning, miss-rate badge (e.g. '4/5 wrong'), 🔊 button to TTS-pronounce the word (use existing speechSynthesis util), and a 'Drill' button. Drill mode shows the meaning + audio and asks the user to type the word (spelling recall — harder than multiple choice, well-suited for stubborn words). On submit, compare case-insensitively; call existing vocabulary progress update endpoint with correct/incorrect to update SRS. Show ✓/✗ feedback inline; auto-advance to next leech. After all 5 done, show a summary ('You drilled 5 leeches — 3 correct! Come back tomorrow to reinforce.'). Empty state: 'No leech words yet. Keep practicing — we surface words you miss 3+ times here.'\n\n4. Wire into `frontend/src/pages/Vocabulary.tsx` — render `<VocabLeechesPanel />` above the existing SRS progress card (only if leeches array non-empty, otherwise render collapsed empty state). Fetch on mount and after any drill round completes.\n\n5. API client — add `fetchVocabLeeches(limit?: number)` in `frontend/src/api.ts`.\n\nWhy: addresses an under-touched area (Vocabulary SRS / progress per the priority hint), targets a real learning pain (leech words are a known SRS problem), provides immediate UI value with focused drill mechanics (echoing recent successful drill features like #660, #665), and requires no schema migration since incorrect_count/correct_count already exist.\n\nTesting: unit test `get_leech_words` in `tests/unit/` covering (a) word with 4 incorrect / 1 correct surfaces, (b) word with 3 correct / 1 incorrect does NOT surface, (c) ordering by miss_rate, (d) limit honored, (e) words without progress row excluded.",
+  "files_to_modify": [
+    "app/dal/vocabulary.py",
+    "app/routers/vocabulary.py",
+    "frontend/src/components/VocabLeechesPanel.tsx",
+    "frontend/src/pages/Vocabulary.tsx",
+    "frontend/src/api.ts"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium",
+  "acceptance_criteria": [
+    "GET /api/vocabulary/leeches returns words with incorrect_count >= 3 AND incorrect_count >= correct_count AND level <= 2, ordered by miss_rate DESC, with limit honored.",
+    "Each returned leech includes word, meaning, example_sentence, topic, correct_count, incorrect_count, level, and miss_rate.",
+    "Vocabulary page renders a 🪤 Leech Words collapsible card above the SRS progress card when leeches exist; shows empty-state message when none.",
+    "Each leech row has a 🔊 TTS button and a 'Drill' button; drill mode plays audio + shows meaning and asks user to type the word, comparing case-insensitively.",
+    "Submitting a drill answer calls the existing vocabulary progress update endpoint to record correct/incorrect, updating SRS state, and the panel re-fetches leeches after the round.",
+    "Unit tests for get_leech_words cover surface/skip thresholds, ordering by miss_rate, limit, and excluded-when-no-progress-row cases — all passing."
+  ]
+}
+```● Proposer Propose iteration 677
+  │ Read ClozeListening.tsx
+  │   │ frontend/src/components/ClozeListening.tsx
+  │   └ L1:60 (60 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:80 (80 lines read)
+
+● T1 iter 677 (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now let me look at the Vocabulary page and api.ts patterns:Now let me look at the existing UI test spec format briefly:Now I have enough context. Let me implement the DAL function, router, frontend, and tests.Now add the router endpoint. Let me find a good place:Now write unit tests. Look at an existing test to find patterns:Now add the integration test and frontend pieces. First check fetchHardWords export pattern for top-level export:Verify request is in scope:Good. Now create the VocabLeechesPanel component. Look at VocabSRSProgress for style patterns:Also include in result phase above SRS to literally satisfy the spec:Add UI test spec items:Now run the unit tests and tsc:Let me also run the broader integration tests to confirm I haven't regressed anything:Good. Let me see if the original full run completed:All good. Let me commit:

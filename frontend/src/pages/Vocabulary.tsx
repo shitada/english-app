@@ -11,6 +11,7 @@ import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
 import VocabSpellingBee from '../components/VocabSpellingBee';
 import VocabCollocationMatch from '../components/VocabCollocationMatch';
+import VocabLeechesPanel from '../components/VocabLeechesPanel';
 import InlineErrorBanner from '../components/InlineErrorBanner';
 import WordFamilyPanel from '../components/WordFamilyPanel';
 
@@ -404,6 +405,8 @@ export default function Vocabulary() {
         <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
           Learn words and phrases used in real-life scenarios. Click any word to hear its pronunciation.
         </p>
+
+        <VocabLeechesPanel />
 
         <button
           onClick={startDrill}
@@ -974,6 +977,8 @@ export default function Vocabulary() {
             </div>
           )}
         </div>
+
+        <VocabLeechesPanel />
 
         <VocabSRSProgress changes={srsChanges} />
 

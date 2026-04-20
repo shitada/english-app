@@ -1666,6 +1666,22 @@ pages:
         priority: low
         added_in: 661
 
+      - id: vocab-038
+        target: Leech Words panel renders on Vocabulary select phase
+        action: load /vocabulary and look for data-testid="vocab-leeches-panel" with a "🪤 Leech Words" toggle button (data-testid="vocab-leeches-toggle")
+        expect: Panel is collapsed by default; clicking the toggle expands it. When no leeches exist, data-testid="vocab-leeches-empty" message is shown.
+        type: functional
+        priority: medium
+        added_in: 677
+
+      - id: vocab-039
+        target: Leech Words drill plays audio + asks user to type the word
+        action: with leeches present, expand panel, click data-testid="vocab-leech-drill-row" or data-testid="vocab-leeches-drill-all"; type the displayed meaning's target word into data-testid="vocab-leech-drill-input" then click data-testid="vocab-leech-drill-submit"
+        expect: data-testid="vocab-leech-drill-feedback" shows ✓ on case-insensitive match and ✗ otherwise; submission posts to /api/vocabulary/answer; after 5 items data-testid="vocab-leeches-summary" shows score
+        type: functional
+        priority: medium
+        added_in: 677
+
   dashboard:
     path: /dashboard
     tests:

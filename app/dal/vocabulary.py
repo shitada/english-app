@@ -1220,3 +1220,38 @@ async def get_due_count(db: aiosqlite.Connection) -> int:
         (now,),
     )
     return int(row[0]["cnt"]) if row else 0
+
+
+async def get_leech_words(db: aiosqlite.Connection, limit: int = 10) -> list[dict[str, Any]]:
+    """Return 'leech' words: stubborn words the user repeatedly misses.
+
+    A leech satisfies all of:
+      * has a vocabulary_progress row (INNER JOIN excludes words without progress)
+      * incorrect_count >= 3
+      * incorrect_count >= correct_count
+      * level <= 2
+    Ordered by miss_rate DESC then incorrect_count DESC; limit honored.
+    """
+    if limit < 1:
+        limit = 1
+    rows = await db.execute_fetchall(
+        """SELECT vw.id, vw.word, vw.meaning, vw.example_sentence, vw.topic,
+                  vp.correct_count, vp.incorrect_count, vp.level,
+                  CAST(vp.incorrect_count AS REAL) /
+                      (vp.correct_count + vp.incorrect_count) AS miss_rate
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           WHERE vp.incorrect_count >= 3
+             AND vp.incorrect_count >= vp.correct_count
+             AND vp.level <= 2
+           ORDER BY miss_rate DESC, vp.incorrect_count DESC, vw.id ASC
+           LIMIT ?""",
+        (limit,),
+    )
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["miss_rate"] = round(float(d["miss_rate"]), 4)
+        d["example_sentence"] = d.get("example_sentence") or ""
+        result.append(d)
+    return result

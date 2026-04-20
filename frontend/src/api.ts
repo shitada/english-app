@@ -509,6 +509,22 @@ export type HardWordItem = {
 export const fetchHardWords = (limit = 20): Promise<{ words: HardWordItem[] }> =>
   api.fetchHardWords(limit);
 
+export type LeechWordItem = {
+  id: number;
+  word: string;
+  meaning: string;
+  example_sentence: string;
+  topic: string;
+  correct_count: number;
+  incorrect_count: number;
+  level: number;
+  miss_rate: number;
+};
+
+export const fetchVocabLeeches = (limit = 10): Promise<{ leeches: LeechWordItem[] }> =>
+  request<{ leeches: LeechWordItem[] }>(`/api/vocabulary/leeches?limit=${limit}`);
+
+
 export interface MinimalPairListeningRound {
   word_a: string;
   word_b: string;
