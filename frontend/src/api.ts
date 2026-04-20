@@ -537,6 +537,35 @@ export const api = {
 
   getMinimalPairsDrillContrasts: () =>
     request<{ contrasts: string[] }>('/api/minimal-pairs/contrasts'),
+
+  // --- Connected Speech Decoder (/api/connected-speech/*) -------------------
+  getConnectedSpeechSession: (difficulty?: 'easy' | 'medium' | 'hard', count = 8) => {
+    const params = new URLSearchParams({ count: String(count) });
+    if (difficulty) params.set('difficulty', difficulty);
+    return request<ConnectedSpeechSession>(
+      `/api/connected-speech/session?${params.toString()}`,
+    );
+  },
+
+  submitConnectedSpeechAttempt: (payload: {
+    reduced: string;
+    expanded: string;
+    user_answer: string;
+    category?: string | null;
+    time_ms?: number | null;
+  }) =>
+    request<ConnectedSpeechAttempt>('/api/connected-speech/attempt', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  getConnectedSpeechStats: (lookbackDays = 30) =>
+    request<ConnectedSpeechStats>(
+      `/api/connected-speech/stats?lookback_days=${lookbackDays}`,
+    ),
+
+  getConnectedSpeechCategories: () =>
+    request<{ categories: string[] }>('/api/connected-speech/categories'),
 };
 
 export type HardWordItem = {
@@ -628,6 +657,39 @@ export interface MinimalPairsContrastStat {
 export interface MinimalPairsDrillStats {
   stats: MinimalPairsContrastStat[];
   weakest: MinimalPairsContrastStat[];
+}
+
+// --- Connected Speech Decoder types ---------------------------------------
+export interface ConnectedSpeechItem {
+  id: string;
+  reduced: string;
+  expanded: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface ConnectedSpeechSession {
+  difficulty: 'easy' | 'medium' | 'hard' | null;
+  items: ConnectedSpeechItem[];
+}
+
+export interface ConnectedSpeechAttempt {
+  id: number;
+  correct: boolean;
+  normalized_expected: string;
+  normalized_user: string;
+}
+
+export interface ConnectedSpeechCategoryStat {
+  category: string;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface ConnectedSpeechStats {
+  stats: ConnectedSpeechCategoryStat[];
+  recent_streak: number;
 }
 
 // Types

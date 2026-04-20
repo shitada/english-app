@@ -395,6 +395,21 @@ CREATE TABLE IF NOT EXISTS minimal_pairs_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_mp_attempts_contrast ON minimal_pairs_attempts(contrast);
 CREATE INDEX IF NOT EXISTS idx_mp_attempts_created ON minimal_pairs_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS connected_speech_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    reduced TEXT NOT NULL,
+    expanded TEXT NOT NULL,
+    user_answer TEXT NOT NULL,
+    correct INTEGER NOT NULL,
+    category TEXT,
+    time_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_connected_speech_category ON connected_speech_attempts(category);
+CREATE INDEX IF NOT EXISTS idx_connected_speech_created ON connected_speech_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -918,6 +933,28 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on minimal_pairs_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_mp_attempts_created ON minimal_pairs_attempts(created_at DESC)",
+    ),
+    (
+        "create connected_speech_attempts table for Connected Speech Decoder drill",
+        """CREATE TABLE IF NOT EXISTS connected_speech_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            reduced TEXT NOT NULL,
+            expanded TEXT NOT NULL,
+            user_answer TEXT NOT NULL,
+            correct INTEGER NOT NULL,
+            category TEXT,
+            time_ms INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on connected_speech_attempts category",
+        "CREATE INDEX IF NOT EXISTS idx_connected_speech_category ON connected_speech_attempts(category)",
+    ),
+    (
+        "add index on connected_speech_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_connected_speech_created ON connected_speech_attempts(created_at DESC)",
     ),
 ]
 

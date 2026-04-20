@@ -700,4 +700,117 @@ Now I have enough context. Let me implement.Now update database.py (schema + mig
   │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
   └ 2 lines...
 
-Now I have enough context. Let me implement.Now the router with curated items:Now update database.py to add the SCHEMA table and migration:Register the router in main.py:Now write unit and integration tests:Let's run the backend tests now:All 15 new backend tests pass. Now let me add the frontend.Now create the page:Wire up App.tsx route and Home card:Add Home card:Run tsc:TypeScript is clean. Now let me update the UI test spec:Now run the full backend test suite to make sure nothing broke:
+Now I have enough context. Let me implement.Now the router with curated items:Now update database.py to add the SCHEMA table and migration:Register the router in main.py:Now write unit and integration tests:Let's run the backend tests now:All 15 new backend tests pass. Now let me add the frontend.Now create the page:Wire up App.tsx route and Home card:Add Home card:Run tsc:TypeScript is clean. Now let me update the UI test spec:Now run the full backend test suite to make sure nothing broke:[2026-04-21 03:29:28] Copilot invocation completed (duration: 2239s)
+[2026-04-21 03:29:28] Recording agent traces...
+[2026-04-21 03:29:28]   AGENT_TRACE iter=698 proposer=1 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 03:29:28]   AGENT_TRACE iter=699 proposer=0
+0 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 03:29:28] SMOKE_UI: UI changes detected in pages: home
+[2026-04-21 03:29:28] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-21 03:29:28] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1859ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-21 03:29:39] SMOKE_UI_PASS: All UI pages passed
+[2026-04-21 03:29:39] Running post-invocation audit (iter 698-699)...
+============================================
+ Autoresearch Audit
+ Iterations: 698 — 699
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-21 03:29:39
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;31m  FAIL: Missing: 698[0m
+[0;31m  GAP: Attempted but unrecorded iters: 698[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 698 699[0m
+[0;31m  Tester: FAIL — missing: 698 699[0m
+[0;31m  Evaluator: FAIL — missing: 698 699[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [missing_iterations] HIGH confidence → auto-applying fix[0m
+[0;33m    Missing iterations will be fixed in Phase 3[0m
+[0;32m  [gap_iterations] HIGH confidence → auto-applying fix[0m
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;36m  Adding missing iterations...[0m
+[0;32m    Added iter 698 (5fbc1fe)[0m
+
+============================================
+[0;31m  AUDIT: 5 error(s), 1 warning(s)[0m
+[0;32m  Data repairs: 1[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-21 03:29:41] Audit found 5 error(s) — fixes applied where possible
+[2026-04-21 03:29:44] Current iteration count: 699 / 719
+[2026-04-21 03:29:44] ------------------------------------------
+[2026-04-21 03:29:44] Invocation 6 / 10
+[2026-04-21 03:29:44] Resuming from iteration 700
+[2026-04-21 03:29:44] ------------------------------------------
+[2026-04-21 03:29:44] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-700-to-719.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "--- results.tsv tail ---" && tail -20
+  │ autoresearch/results.tsv && echo "--- uncompleted backlog ---" && grep '^-
+  │ \[ \]' autoresearch/backlog.md && echo "--- recent commits ---" && git
+  │ --no-pager log --oneline -5 && echo "--- last session log ---" && …
+  └ 89 lines...
+
+Context restored. No E2E failures to fix. Starting iteration 700.
+
+{
+  "type": "feature",
+  "title": "Connected Speech Decoder drill (reductions like gonna/wanna/whatcha)",
+  "description": "Add a new listening drill page 'Connected Speech Decoder' that trains users to understand reduced/linked forms of natural spoken English (e.g., 'gonna'→'going to', 'whatcha doin''→'what are you doing', 'lemme'→'let me', 'didja'→'did you', 'kinda'→'kind of'). Each question plays TTS audio of a short casual phrase containing one or more reductions, and the user must type (or pick) the fully-expanded standard form. This targets a specific listening-comprehension gap not covered by existing Minimal Pairs, Listen & Summarize, or Dictation drills — decoding *reduced* natural speech rather than single-phoneme discrimination or full sentence dictation.\n\nBackend (app/routers/connected_speech.py, new): endpoints `GET /api/connected-speech/session?difficulty=easy|medium|hard&count=8` returns a session of N items. Items are generated by the LLM via `app/services/llm.py` with a seeded prompt asking for JSON `[{reduced: str, expanded: str, hint: str, category: 'gonna'|'wanna'|'yaknow'|'whatcha'|'other'}]`, or, to avoid per-session LLM cost, seed from a small curated JSON bank under `app/data/connected_speech_bank.json` (~60 items across categories) and shuffle. TTS for `reduced` uses existing `app/services/tts.py` (play casual/natural voice). `POST /api/connected-speech/attempt` accepts `{item_id, user_answer, reduced, expanded, correct, time_ms}`, normalizes and grades (lowercase, strip punctuation, allow contraction equivalents via a small equivalence table), persists to a new table `connected_speech_attempts(id, user_id, reduced, expanded, user_answer, correct, category, time_ms, created_at)` via `app/dal/connected_speech.py`. `GET /api/connected-speech/stats` returns accuracy per category for the dashboard.\n\nMigration: add to `_MIGRATIONS` in `app/database.py`:\n  `CREATE TABLE IF NOT EXISTS connected_speech_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, reduced TEXT NOT NULL, expanded TEXT NOT NULL, user_answer TEXT NOT NULL, correct INTEGER NOT NULL, category TEXT, time_ms INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`\n(Pure new table, no ALTER needed.) Also add matching SCHEMA entry.\n\nFrontend: new page `frontend/src/pages/ConnectedSpeechPage.tsx` with phases select→listen→answer→feedback→summary. Play button (replays audio up to 3x — counter shown), text input with submit, per-item feedback showing reduced spelling, expanded form, and category tag. Summary shows accuracy, per-category breakdown, and a 'reveal all' list. Register route in `frontend/src/App.tsx` as `/connected-speech`, and add a launcher card on the Home page under listening drills (follow existing card pattern used by Listen & Summarize / Minimal Pairs).\n\nRationale: reductions are the #1 reported reason intermediate learners fail to understand native speech; no existing drill in the app targets this explicitly. Small, self-contained, and reuses TTS + LLM infrastructure.",
+  "files_to_modify": [
+    "app/routers/connected_speech.py",
+    "app/dal/connected_speech.py",
+    "app/database.py",
+    "frontend/src/pages/ConnectedSpeechPage.tsx",
+    "frontend/src/App.tsx"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "medium",
+  "test_plan": "Unit: tests/unit/test_connected_speech_dal.py covers insert_attempt, stats_by_category (empty + populated), answer normalization helper (case/punct/contraction equivalence: 'going to'=='going to', 'what are you doing?'=='what are you doing'). Integration: tests/integration/test_connected_speech_api.py covers GET session returns N items with required fields, POST attempt persists and returns correct grading for both correct and near-miss inputs, GET stats returns per-category accuracy. Frontend: basic render test that ConnectedSpeechPage mounts, play button triggers audio, submitting an answer advances to feedback, and summary shows after last item."
+}● Proposer Propose iter 700
+
+Now I have a good grasp. Let me look at an integration test example and useSpeechSynthesis hook.Now I have enough context. Let me build the backend.Now the DAL:Now the router:Now DB migration — add to SCHEMA and _MIGRATIONS:Register router in main.py:Now the tests:Run tests now:All 19 tests pass. Now the frontend — api.ts helpers, route, page, and Home CTA.Now the page component. Let me look at useSpeechSynthesis signature briefly:Add route & Home CTA:Now add Home CTA after error-correction card:Now TypeScript check:TS clean. Now update UI test spec:Rerun tests once more to confirm:

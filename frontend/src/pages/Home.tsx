@@ -1759,6 +1759,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/connected-speech"
+        data-testid="connected-speech-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Headphones size={28} color="#14b8a6" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🎧 Connected Speech Decoder</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Hear gonna/wanna/whatcha/lemme/didja — type the fully-expanded standard form.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#14b8a6',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />

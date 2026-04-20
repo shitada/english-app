@@ -5667,3 +5667,44 @@ pages:
         type: functional
         priority: medium
         added_in: 698
+
+      - id: connected-speech-001
+        target: Connected Speech Decoder entry card on home
+        selector: data-testid="connected-speech-cta"
+        action: Visit "/" and locate data-testid="connected-speech-cta"
+        expect: Card labeled "Connected Speech Decoder" is visible and links to /connected-speech
+        type: functional
+        priority: high
+        added_in: 700
+
+      - id: connected-speech-002
+        target: Select phase shows difficulty picker and start button
+        action: Visit "/connected-speech" and verify data-testid="cs-difficulty-mixed" and data-testid="cs-start-button" are visible
+        expect: Difficulty buttons (mixed/easy/medium/hard) and Start Session button are all visible
+        type: functional
+        priority: critical
+        added_in: 700
+
+      - id: connected-speech-003
+        target: Listen phase shows replay button and answer input
+        action: Visit "/connected-speech", click data-testid="cs-start-button", wait for data-testid="cs-replay-button" and data-testid="cs-answer-input"
+        expect: Replay button shows counter "(1 / 3)" and text input is focused/editable
+        type: functional
+        priority: critical
+        added_in: 700
+
+      - id: connected-speech-004
+        target: Submitting an answer shows feedback panel with Next
+        action: Type any answer in data-testid="cs-answer-input", click data-testid="cs-submit-button", wait for data-testid="cs-next-button"
+        expect: Feedback panel with Next button is visible; shows reduced/expanded/category
+        type: functional
+        priority: high
+        added_in: 700
+
+      - id: connected-speech-005
+        target: Summary exposes retry-missed and new-session CTAs
+        action: Complete all items until data-testid="cs-new-session" is visible; if any missed, data-testid="cs-retry-missed" must also be visible
+        expect: Summary shows accuracy percent, per-category bars, all-items list, and new-session CTA
+        type: functional
+        priority: medium
+        added_in: 700
