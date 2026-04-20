@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Ear, Volume2, RefreshCw, CheckCircle, XCircle, ArrowLeft, Gauge, Mic } from 'lucide-react';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
-import { api, type MinimalPairListeningRound } from '../api';
+import { api, type MinimalPairListeningRound, type MinimalPairWeakContrast } from '../api';
 import { pickRandomSet } from '../utils/minimalPairs';
 import MinimalPairsSpeakMode from '../components/MinimalPairsSpeakMode';
 
@@ -27,6 +27,7 @@ export default function MinimalPairs() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [weakContrasts, setWeakContrasts] = useState<MinimalPairWeakContrast[]>([]);
   const initialized = useRef(false);
 
   const [mode, setMode] = useState<Mode>(() => {
@@ -46,13 +47,13 @@ export default function MinimalPairs() {
     } catch { /* ignore */ }
   }, []);
 
-  const startSession = useCallback(async () => {
+  const startSession = useCallback(async (focusContrast?: string) => {
     setPhase('loading');
     setErrorMsg('');
     setCurrentIdx(0);
     setResults([]);
     try {
-      const data = await api.startMinimalPairListening(ROUNDS_PER_SESSION);
+      const data = await api.startMinimalPairListening(ROUNDS_PER_SESSION, focusContrast);
       setContrast(data.contrast);
       setRounds(data.rounds);
       setPhase('idle');
@@ -82,6 +83,21 @@ export default function MinimalPairs() {
       startSession();
     }
   }, [startSession]);
+
+  // Fetch weakest contrasts when in idle phase (after a session loads or finishes)
+  useEffect(() => {
+    if (phase !== 'idle') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api.getMinimalPairWeakContrasts();
+        if (!cancelled) setWeakContrasts(data.contrasts ?? []);
+      } catch {
+        if (!cancelled) setWeakContrasts([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [phase]);
 
   const currentRound = rounds[currentIdx] ?? null;
 
@@ -256,7 +272,7 @@ export default function MinimalPairs() {
           <MinimalPairsSpeakMode
             contrast={contrast}
             pairs={rounds}
-            onRestart={startSession}
+            onRestart={() => startSession()}
           />
         )}
 
@@ -265,7 +281,64 @@ export default function MinimalPairs() {
         {mode === 'listen' && phase === 'error' && (
           <div>
             <p style={{ color: '#ef4444' }}>{errorMsg}</p>
-            <button onClick={startSession} className="btn-primary">Retry</button>
+            <button onClick={() => startSession()} className="btn-primary">Retry</button>
+          </div>
+        )}
+
+        {mode === 'listen' && phase === 'idle' && currentRound && weakContrasts.length > 0 && (
+          <div
+            data-testid="weak-contrasts-panel"
+            style={{
+              border: '1px solid var(--border)', borderRadius: 10,
+              padding: '10px 12px', marginBottom: 12,
+              background: 'var(--bg-secondary, transparent)',
+            }}
+          >
+            <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+              Your weakest contrasts
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {weakContrasts.map(wc => {
+                const pct = Math.round(wc.accuracy * 100);
+                const tone = pct < 50 ? '#ef4444' : pct < 75 ? '#f59e0b' : '#22c55e';
+                return (
+                  <div
+                    key={wc.contrast}
+                    data-testid={`weak-contrast-row-${wc.contrast}`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      flexWrap: 'wrap', fontSize: 13,
+                    }}
+                  >
+                    <code style={{ fontWeight: 700, color: 'var(--text)' }}>{wc.contrast}</code>
+                    <span
+                      data-testid={`weak-contrast-acc-${wc.contrast}`}
+                      style={{
+                        fontSize: 11, fontWeight: 700, color: 'white',
+                        background: tone, padding: '2px 6px', borderRadius: 999,
+                      }}
+                    >
+                      {pct}%
+                    </span>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {wc.correct}/{wc.total}
+                    </span>
+                    <button
+                      data-testid={`drill-contrast-btn-${wc.contrast}`}
+                      onClick={() => startSession(wc.contrast)}
+                      style={{
+                        marginLeft: 'auto', padding: '4px 10px',
+                        border: '1px solid var(--primary, #3b82f6)', borderRadius: 8,
+                        background: 'transparent', color: 'var(--primary, #3b82f6)',
+                        cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                      }}
+                    >
+                      Drill this contrast
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -401,7 +474,7 @@ export default function MinimalPairs() {
 
             <button
               data-testid="try-again-btn"
-              onClick={startSession}
+              onClick={() => startSession()}
               disabled={saving}
               style={{
                 padding: '10px 20px', border: 'none', borderRadius: 10,

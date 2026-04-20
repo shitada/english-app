@@ -468,10 +468,19 @@ export const api = {
     request<TopicAccuracyResponse>('/api/vocabulary/topic-accuracy'),
 
   // Listening minimal-pair drill (full-page page)
-  startMinimalPairListening: (rounds: number = 5) =>
-    request<MinimalPairListeningStart>(`/api/listening/minimal-pair/start?rounds=${rounds}`, {
-      method: 'POST',
-    }),
+  startMinimalPairListening: (rounds: number = 5, contrast?: string) => {
+    const params = new URLSearchParams({ rounds: String(rounds) });
+    if (contrast) params.set('contrast', contrast);
+    return request<MinimalPairListeningStart>(
+      `/api/listening/minimal-pair/start?${params.toString()}`,
+      { method: 'POST' },
+    );
+  },
+
+  getMinimalPairWeakContrasts: (lookback = 30, minAttempts = 3) =>
+    request<MinimalPairWeakContrastsResponse>(
+      `/api/listening/minimal-pair/weak-contrasts?lookback=${lookback}&min_attempts=${minAttempts}`,
+    ),
 
   saveMinimalPairListeningResult: (
     correct: number,
@@ -512,6 +521,17 @@ export interface MinimalPairListeningRound {
 export interface MinimalPairListeningStart {
   contrast: string;
   rounds: MinimalPairListeningRound[];
+}
+
+export interface MinimalPairWeakContrast {
+  contrast: string;
+  correct: number;
+  total: number;
+  accuracy: number;
+}
+
+export interface MinimalPairWeakContrastsResponse {
+  contrasts: MinimalPairWeakContrast[];
 }
 
 // Types

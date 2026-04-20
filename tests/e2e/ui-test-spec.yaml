@@ -3951,6 +3951,22 @@ pages:
         priority: medium
         added_in: 656
 
+      - id: mp-012
+        target: Weak contrasts panel renders in idle phase when /api/listening/minimal-pair/weak-contrasts returns entries
+        action: Navigate to /minimal-pairs in Listen mode after completing a few sessions and inspect data-testid="weak-contrasts-panel"
+        expect: Panel visible with "Your weakest contrasts" heading and one or more rows; each row has data-testid starting with "weak-contrast-row-", an accuracy badge data-testid="weak-contrast-acc-..." and a "Drill this contrast" button data-testid="drill-contrast-btn-..."; panel is hidden when API errors or returns no contrasts
+        type: ui
+        priority: medium
+        added_in: 675
+
+      - id: mp-013
+        target: Clicking "Drill this contrast" starts a focused 5-round session restricted to that contrast
+        action: Click any data-testid="drill-contrast-btn-..." in the weak contrasts panel
+        expect: A new session loads (phase becomes idle with data-testid="play-sound-btn"), the displayed contrast text matches the chosen contrast, and rounds are constrained to that contrast set
+        type: interaction
+        priority: medium
+        added_in: 675
+
   home_minimal_pairs_cta:
     path: /
     tests:

@@ -688,4 +688,111 @@ Good. No UI failures. Starting iteration 674.
   │ date +%s
   └ 2 lines...
 
-Now I have enough understanding. Let me look at the useSpeechRecognition hook briefly:Now I have all I need. Let me create the new card.Now register in the Hub:Now write the test file:All tests pass. Now update the UI test spec:
+Now I have enough understanding. Let me look at the useSpeechRecognition hook briefly:Now I have all I need. Let me create the new card.Now register in the Hub:Now write the test file:All tests pass. Now update the UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "49ae087",
+  "files_changed": [
+    "frontend/src/components/QuickPaceMatchCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/__tests__/QuickPaceMatchCard.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 22,
+  "ui_spec_updated": true,
+  "description": "Added Quick Pace Match card: target WPM picker (Slow/Natural/Fast, persisted), TTS at mapped rate, mic shadow with WPM + accuracy + delta-badge tempo gauge and last-5-attempts dots; registered in QuickPracticeHub Speaking tab; 22 vitest cases covering helpers and render."
+}
+```● Coder Implement iter 674
+  │ Commit changes (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #674: add Quick Pace Match card (target WPM
+  │   │ shadowing with live tempo feedback)
+  │   │
+  │   │ Co-authored-by: Autoresearch Coder <noreply@anthropic.com>" 2>&1 | tail …
+  │   └ 12 lines...
+  └ Get commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1
+      │ --format="%H" && git show --stat HEAD | head -20
+      └ 19 lines...
+
+● T2 + verify (shell)
+  │ date +%s && git -C /Users/shingotada/Documents/vscode/english-app rev-parse
+  │ --short HEAD && git -C /Users/shingotada/Documents/vscode/english-app diff
+  │ HEAD~1 --name-only
+  └ 11 lines...
+
+```json
+{
+  "tests_passed": 2243,
+  "tests_total": 2243,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2243 passed in 127.57s (0:02:07) =======================\nVitest: 471 passed (471) across 38 files\nTSC: clean (exit 0)",
+  "failure_summary": ""
+}
+```● Tester Test iter 674
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -30
+  │   └ 30 lines...
+  └ read ui results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{"code_quality":7,"feature_value":7,"maintainability":7,"ux_quality":7,"total_score":7.0,"verdict":"keep","reason":"Self-contained frontend-only quick practice card reusing existing speech hooks with 22 new vitest cases; full suite (2243) and TS check pass."}
+```● Evaluator Evaluate iter 674
+  └ List directory .
+      └ 212 files found
+
+● Record iter 674 result (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "674" "49ae087" "$(date +%Y-%m-%d)" "$((1776646551-1776646480))"
+  │ "$((1776646793-1776646551))" "$((1776646947-1776646793))"
+  │ "$((T4-1776646947))" "$((T4-1776646480))" \…
+  └ 6 lines...
+
+Iter 674 done (kept, 7.00). Now iter 675.
+
+● T0 iter 675 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Minimal Pairs: Weak Contrasts panel with one-click focused drill",
+  "description": "Add a 'Your weakest contrasts' panel to the Minimal Pairs page (frontend/src/pages/MinimalPairs.tsx) shown above the start controls. It surfaces the 1–3 phoneme contrasts (e.g. /l/-/r/, /i/-/iː/) where the user has the lowest accuracy across recent sessions, with the per-contrast accuracy % and attempt count, and a 'Drill this contrast' button that starts a focused 5-round session restricted to that contrast (no random choice).\n\nBackend changes:\n1. app/dal/minimal_pair.py — add async `aggregate_contrast_accuracy(db, lookback: int = 30, min_attempts: int = 3) -> list[dict]`. It reads the most recent `lookback` rows from `minimal_pair_sessions`, parses the `contrast_summary` JSON ({contrast: {correct, total}}), sums correct/total per contrast, filters to those with `total >= min_attempts`, computes accuracy = correct/total, and returns up to 3 entries sorted ascending by accuracy then descending by total. No schema change — the data is already stored in contrast_summary.\n2. app/routers/listening.py —\n   a. Add `GET /api/listening/minimal-pair/weak-contrasts?lookback=30&min_attempts=3` returning `{contrasts: [{contrast, correct, total, accuracy}]}` using the new DAL function.\n   b. Extend `POST /api/listening/minimal-pair/start` to accept an optional `contrast: str | None = None` query param. When provided and matching one of the curated MINIMAL_PAIR_SETS contrasts, use that set instead of `random.choice`. If unknown, fall back to random (don't 400, to keep client robust).\n\nFrontend changes:\n3. frontend/src/api.ts — add `getMinimalPairWeakContrasts()` and extend `startMinimalPairListening(rounds, contrast?)` with the optional contrast param.\n4. frontend/src/pages/MinimalPairs.tsx — on mount (when phase becomes 'idle' the first time), fetch weak contrasts. Render a small panel listing each weak contrast with its accuracy badge and a 'Drill this contrast' button that calls `startSession(contrast)`. Hide panel gracefully if API errors or list is empty. Reuse existing styles (Tailwind classes already present in the page) — keep it small (~40 lines of JSX). Include data-testid attributes for testability.\n\nTests:\n5. tests/unit/test_minimal_pair_dal.py — add tests for `aggregate_contrast_accuracy`: empty DB returns []; sessions are aggregated across multiple rows for the same contrast; contrasts below min_attempts are filtered; results sorted by ascending accuracy; lookback limit honored.\n\nThis is a non-Hub, listening-skill-focused feature that turns existing data into actionable practice and gives users a smoother path to fixing real weaknesses.",
+  "files_to_modify": [
+    "app/dal/minimal_pair.py",
+    "app/routers/listening.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/MinimalPairs.tsx",
+    "tests/unit/test_minimal_pair_dal.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 675
+  │ Read listening.py
+  │   │ app/routers/listening.py
+  │   └ L1:60 (60 lines read)
+  └ Read listening.py
+      │ app/routers/listening.py
+      └ L100:250 (151 lines read)
+
+● T1 iter 675 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now update the router:Now frontend api.ts:Now MinimalPairs.tsx:Now insert the weak-contrasts panel into the idle phase view. Let me find where:Now write tests:Now run tests + tsc:Run broader unit/integration tests for listening:All passing. Now update UI test spec:

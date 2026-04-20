@@ -72,3 +72,111 @@ async def test_get_recent_sessions_handles_bad_json(test_db):
     sessions = await mp_dal.get_recent_sessions(test_db)
     assert len(sessions) == 1
     assert sessions[0]["contrast_summary"] == {}
+
+
+# ---------------------------------------------------------------------------
+# aggregate_contrast_accuracy
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_empty_db(test_db):
+    out = await mp_dal.aggregate_contrast_accuracy(test_db)
+    assert out == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_sums_across_rows(test_db):
+    # Two sessions touching the same contrast — counts should be summed.
+    await mp_dal.save_session(
+        test_db, 1, 3,
+        {"/l/-/r/": {"correct": 1, "total": 3}},
+    )
+    await mp_dal.save_session(
+        test_db, 2, 3,
+        {"/l/-/r/": {"correct": 2, "total": 3}, "/i/-/iː/": {"correct": 3, "total": 3}},
+    )
+    out = await mp_dal.aggregate_contrast_accuracy(test_db, min_attempts=1)
+    by_contrast = {c["contrast"]: c for c in out}
+    assert by_contrast["/l/-/r/"]["correct"] == 3
+    assert by_contrast["/l/-/r/"]["total"] == 6
+    assert by_contrast["/l/-/r/"]["accuracy"] == 0.5
+    assert by_contrast["/i/-/iː/"]["correct"] == 3
+    assert by_contrast["/i/-/iː/"]["total"] == 3
+    assert by_contrast["/i/-/iː/"]["accuracy"] == 1.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_min_attempts_filter(test_db):
+    await mp_dal.save_session(
+        test_db, 0, 2,
+        {"/v/-/b/": {"correct": 0, "total": 2}, "/θ/-/s/": {"correct": 5, "total": 5}},
+    )
+    out = await mp_dal.aggregate_contrast_accuracy(test_db, min_attempts=3)
+    contrasts = [c["contrast"] for c in out]
+    assert "/v/-/b/" not in contrasts  # only 2 attempts → filtered
+    assert "/θ/-/s/" in contrasts
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_sort_order(test_db):
+    # Two contrasts with same low accuracy — higher total should come first.
+    await mp_dal.save_session(
+        test_db, 1, 4,
+        {"/l/-/r/": {"correct": 1, "total": 4}},  # 25%
+    )
+    await mp_dal.save_session(
+        test_db, 2, 8,
+        {"/v/-/b/": {"correct": 2, "total": 8}},  # 25%, more total
+    )
+    await mp_dal.save_session(
+        test_db, 4, 4,
+        {"/θ/-/s/": {"correct": 4, "total": 4}},  # 100%
+    )
+    out = await mp_dal.aggregate_contrast_accuracy(test_db, min_attempts=3)
+    # Weakest first; tied accuracies broken by larger total first.
+    assert out[0]["contrast"] == "/v/-/b/"
+    assert out[1]["contrast"] == "/l/-/r/"
+    assert out[-1]["contrast"] == "/θ/-/s/"
+    # Cap at 3
+    assert len(out) <= 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_lookback_limit(test_db):
+    # First session has the only /l/-/r/ data; subsequent sessions don't touch it.
+    await mp_dal.save_session(
+        test_db, 0, 5,
+        {"/l/-/r/": {"correct": 0, "total": 5}},
+    )
+    for _ in range(5):
+        await mp_dal.save_session(
+            test_db, 5, 5,
+            {"/i/-/iː/": {"correct": 5, "total": 5}},
+        )
+    # With lookback=3 the oldest /l/-/r/ session is excluded.
+    out = await mp_dal.aggregate_contrast_accuracy(test_db, lookback=3, min_attempts=1)
+    assert all(c["contrast"] != "/l/-/r/" for c in out)
+    # With a larger lookback it's included.
+    out_full = await mp_dal.aggregate_contrast_accuracy(test_db, lookback=50, min_attempts=1)
+    assert any(c["contrast"] == "/l/-/r/" for c in out_full)
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_aggregate_contrast_accuracy_returns_at_most_three(test_db):
+    summary = {
+        "/a/-/b/": {"correct": 1, "total": 5},
+        "/c/-/d/": {"correct": 2, "total": 5},
+        "/e/-/f/": {"correct": 3, "total": 5},
+        "/g/-/h/": {"correct": 4, "total": 5},
+    }
+    await mp_dal.save_session(test_db, 10, 20, summary)
+    out = await mp_dal.aggregate_contrast_accuracy(test_db, min_attempts=1)
+    assert len(out) == 3
+    # Lowest-accuracy contrast must be first.
+    assert out[0]["contrast"] == "/a/-/b/"

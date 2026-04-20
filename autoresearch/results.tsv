@@ -624,3 +624,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 671	c3e42e5	2026-04-20	95	317	160	26	598	2243	2243	pass	7.35	kept	Quick Question Formation card (statement→Wh-question speaking drill, 30 prompts, mic+similarity+TTS, 15 new vitest)
 672	2bb18be	2026-04-20	61	290	151	26	528	2243	2243	pass	7.00	kept	Quick Backchannel Response card (21-prompt MCQ + TTS + optional Say-it + 15 vitest)
 673	f60dd0f	2026-04-20	82	262	153	18	515	2243	2243	pass	7.75	kept	Conversation Reply Pacing Meter (live WPM gauge + coaching tip + 5-point sparkline; 21 vitest)
+674	49ae087	2026-04-20	71	242	154	29	496	2243	2243	pass	7.00	kept	Quick Pace Match card (target WPM shadowing: TTS+mic+gauge+last-5 dots; 22 vitest)

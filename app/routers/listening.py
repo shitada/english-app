@@ -137,14 +137,27 @@ class MinimalPairResultResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.post("/minimal-pair/start", response_model=MinimalPairStartResponse)
-async def start_minimal_pair_session(rounds: int = 5) -> MinimalPairStartResponse:
-    """Pick a random contrast set and return N rounds for the client to play.
+async def start_minimal_pair_session(
+    rounds: int = 5,
+    contrast: str | None = None,
+) -> MinimalPairStartResponse:
+    """Pick a contrast set and return N rounds for the client to play.
+
+    If ``contrast`` is provided and matches one of ``MINIMAL_PAIR_SETS``,
+    that set is used (focused drill). Otherwise a random set is chosen.
 
     Each round randomly chooses which of the two words to speak via TTS so the
     listener has to discriminate.
     """
     n = max(1, min(rounds, 10))
-    contrast_set = random.choice(MINIMAL_PAIR_SETS)
+    contrast_set: dict[str, Any] | None = None
+    if contrast:
+        for s in MINIMAL_PAIR_SETS:
+            if s["contrast"] == contrast:
+                contrast_set = s
+                break
+    if contrast_set is None:
+        contrast_set = random.choice(MINIMAL_PAIR_SETS)
     pool = list(contrast_set["pairs"])
     if len(pool) < n:
         # Repeat as needed for small contrast sets
@@ -187,6 +200,19 @@ async def get_minimal_pair_history(
 ) -> dict[str, Any]:
     sessions = await mp_dal.get_recent_sessions(db, limit=limit)
     return {"sessions": sessions}
+
+
+@router.get("/minimal-pair/weak-contrasts")
+async def get_minimal_pair_weak_contrasts(
+    lookback: int = 30,
+    min_attempts: int = 3,
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> dict[str, Any]:
+    """Return up to 3 weakest phoneme contrasts based on recent sessions."""
+    contrasts = await mp_dal.aggregate_contrast_accuracy(
+        db, lookback=lookback, min_attempts=min_attempts
+    )
+    return {"contrasts": contrasts}
 
 
 # ---------------------------------------------------------------------------
