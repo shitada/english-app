@@ -5934,3 +5934,72 @@ pages:
         type: visual
         priority: medium
         added_in: 704
+
+  collocation-chef:
+    path: /collocation-chef
+    tests:
+      - id: collocation-chef-001
+        target: Landing view shows title, difficulty chips and Start button
+        selector: data-testid="collocation-chef-title"
+        action: Visit "/collocation-chef" and verify data-testid="collocation-chef-title", data-testid="collocation-chef-difficulty-easy", data-testid="collocation-chef-difficulty-medium", data-testid="collocation-chef-difficulty-hard", and data-testid="collocation-chef-start"
+        expect: Title "Collocation Chef" visible; three difficulty buttons and a Start button are enabled
+        type: functional
+        priority: critical
+        added_in: 705
+
+      - id: collocation-chef-002
+        target: Starting a session renders progress bar, sentence, and 4 verb chips
+        action: Click data-testid="collocation-chef-start" and wait for data-testid="collocation-chef-drill"
+        expect: data-testid="collocation-chef-progress", data-testid="collocation-chef-progress-bar", data-testid="collocation-chef-sentence", and data-testid="collocation-chef-chips" with 4 chip buttons (data-testid starts with "collocation-chef-chip-") are visible
+        type: functional
+        priority: critical
+        added_in: 705
+
+      - id: collocation-chef-003
+        target: Choosing a chip reveals feedback with correct answer and related collocations
+        action: Click any data-testid starting with "collocation-chef-chip-"
+        expect: data-testid="collocation-chef-feedback", data-testid="collocation-chef-related", and data-testid="collocation-chef-next" are visible; correct verb is revealed in the sentence
+        type: functional
+        priority: high
+        added_in: 705
+
+      - id: collocation-chef-004
+        target: Keyboard 1-4 selects a chip when no feedback is shown
+        action: On drill, press key "1"
+        expect: First verb chip gets selected and data-testid="collocation-chef-feedback" appears
+        type: functional
+        priority: medium
+        added_in: 705
+
+      - id: collocation-chef-005
+        target: Completing the session shows summary with score and per-verb bars
+        action: Repeatedly pick a chip and click data-testid="collocation-chef-next" until data-testid="collocation-chef-summary" is visible
+        expect: data-testid="collocation-chef-score" and data-testid="collocation-chef-per-verb" are visible; at least one data-testid starting with "collocation-chef-bar-" is present
+        type: functional
+        priority: high
+        added_in: 705
+
+      - id: collocation-chef-006
+        target: Retry wrong only button appears when at least one item was missed
+        action: Finish a session with ≥1 wrong answer and verify data-testid="collocation-chef-retry-wrong"
+        expect: data-testid="collocation-chef-retry-wrong" is visible when there are wrong attempts; data-testid="collocation-chef-next-session" is always visible on summary
+        type: state
+        priority: medium
+        added_in: 705
+
+      - id: collocation-chef-007
+        target: Home exposes a Collocation Chef CTA card linking to /collocation-chef
+        selector: data-testid="collocation-chef-cta"
+        action: Visit "/" and locate data-testid="collocation-chef-cta"
+        expect: Card labeled "Collocation Chef" is visible and links to /collocation-chef
+        type: navigation
+        priority: high
+        added_in: 705
+
+      - id: collocation-chef-008
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode via theme toggle, then resize viewport to 375x812 and visit /collocation-chef
+        expect: Title, difficulty chips, sentence card, verb chips, and feedback are all legible; no horizontal overflow; colors respect dark tokens
+        type: visual
+        priority: medium
+        added_in: 705

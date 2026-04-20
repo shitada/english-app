@@ -27,7 +27,7 @@ from app.routers import metrics
 from app.routers import reduced_forms
 from app.routers import stress_spotlight
 from app.routers import contrastive_stress
-from app.routers import linker_drill
+from app.routers import collocations, linker_drill
 from app.routers import paraphrase
 from app.routers import number_dictation
 from app.routers import speed_ladder
@@ -244,6 +244,7 @@ app.include_router(prepositions.router)
 app.include_router(pause_predict.router)
 app.include_router(articles.router)
 app.include_router(intonation_arrow.router)
+app.include_router(collocations.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

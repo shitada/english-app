@@ -5016,3 +5016,79 @@ export function postIntonationArrowAttempt(
 export function fetchIntonationArrowStats(): Promise<IntonationStatsResponse> {
   return request<IntonationStatsResponse>('/api/intonation-arrow/stats');
 }
+
+
+// ---------------------------------------------------------------------------
+// Collocation Chef (verb+noun collocation drill) — autoresearch #705
+// ---------------------------------------------------------------------------
+
+export type CollocationDifficulty = 'easy' | 'medium' | 'hard';
+
+export interface CollocationChefItem {
+  id: string;
+  sentence_before: string;
+  sentence_after: string;
+  noun_phrase: string;
+  correct_verb: string;
+  verb_choices: string[];
+  hint: string;
+  related_collocations: string[];
+  difficulty: string;
+}
+
+export interface CollocationChefSessionResponse {
+  items: CollocationChefItem[];
+}
+
+export interface CollocationChefAttemptInput {
+  item_id: string;
+  sentence: string;
+  correct_verb: string;
+  chosen_verb: string;
+  is_correct: boolean;
+  response_ms: number | null;
+}
+
+export interface CollocationChefAttemptResponse {
+  id: number;
+  is_correct: boolean;
+}
+
+export interface CollocationChefStatsResponse {
+  total_attempts: number;
+  accuracy: number;
+  per_verb_accuracy: Record<string, number>;
+  weakest_verbs: string[];
+  recent_sessions: Array<{
+    id: number;
+    item_id: string;
+    sentence: string;
+    correct_verb: string;
+    chosen_verb: string;
+    is_correct: boolean;
+    response_ms: number | null;
+    created_at: string;
+  }>;
+}
+
+export function getCollocationChefSession(
+  count = 8,
+  difficulty: CollocationDifficulty = 'easy'
+): Promise<CollocationChefSessionResponse> {
+  return request<CollocationChefSessionResponse>(
+    `/api/collocations/session?count=${encodeURIComponent(count)}&difficulty=${encodeURIComponent(difficulty)}`
+  );
+}
+
+export function submitCollocationChefAttempt(
+  payload: CollocationChefAttemptInput
+): Promise<CollocationChefAttemptResponse> {
+  return request<CollocationChefAttemptResponse>('/api/collocations/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getCollocationChefStats(): Promise<CollocationChefStatsResponse> {
+  return request<CollocationChefStatsResponse>('/api/collocations/stats');
+}

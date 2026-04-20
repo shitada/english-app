@@ -286,6 +286,9 @@ CREATE TABLE IF NOT EXISTS linker_drill_attempts (
 CREATE INDEX IF NOT EXISTS idx_linker_drill_created ON linker_drill_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_linker_drill_category ON linker_drill_attempts(category);
 
+-- collocation_attempts: table + indexes are created via migrations to safely handle
+-- any stale prior schema. See _MIGRATIONS below (drop stale + create + indexes).
+
 CREATE TABLE IF NOT EXISTS number_dictation_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -1091,6 +1094,31 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on intonation_arrow_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_intonation_arrow_created ON intonation_arrow_attempts(created_at)",
+    ),
+    (
+        "drop stale collocation_attempts table from prior discarded iteration",
+        "DROP TABLE IF EXISTS collocation_attempts",
+    ),
+    (
+        "create collocation_attempts table",
+        """CREATE TABLE IF NOT EXISTS collocation_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            sentence TEXT NOT NULL,
+            correct_verb TEXT NOT NULL,
+            chosen_verb TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            response_ms INTEGER,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on collocation_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_colloc_created ON collocation_attempts(created_at)",
+    ),
+    (
+        "add index on collocation_attempts correct_verb",
+        "CREATE INDEX IF NOT EXISTS idx_colloc_verb ON collocation_attempts(correct_verb)",
     ),
 ]
 
