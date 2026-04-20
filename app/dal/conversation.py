@@ -165,11 +165,36 @@ async def get_conversation_history(
     return [dict(r) for r in rows]
 
 
+def _truncate_message_content(content: str, max_chars: int) -> str:
+    """Truncate a single message body to ``max_chars`` characters.
+
+    When the content exceeds ``max_chars``, keep the first 200 characters and
+    append a ``' …'`` suffix so the LLM still sees the start but the prompt
+    stays bounded. ``max_chars`` <= 0 disables truncation.
+    """
+    if max_chars is None or max_chars <= 0:
+        return content
+    if content is None:
+        return ""
+    if len(content) <= max_chars:
+        return content
+    keep = min(200, max_chars)
+    return content[:keep] + " …"
+
+
 async def format_history_text(
     db: aiosqlite.Connection,
     conversation_id: int,
     max_turns: int | None = None,
+    max_chars_per_message: int = 240,
 ) -> str:
+    """Render conversation history as ``role: content`` lines.
+
+    ``max_turns`` keeps only the most recent N messages and prepends a marker
+    indicating how many earlier turns were elided. ``max_chars_per_message``
+    caps any single message's body length so very long assistant replies do
+    not balloon the prompt; pass 0 (or a negative value) to disable.
+    """
     if max_turns is not None and max_turns >= 0:
         # Get total count to determine if truncation marker is needed
         count_rows = await db.execute_fetchall(
@@ -184,16 +209,23 @@ async def format_history_text(
         )
         # Reverse to chronological order
         rows = list(reversed(list(recent_rows)))
-        body = "\n".join(f"{r['role']}: {r['content']}" for r in rows)
+        body = "\n".join(
+            f"{r['role']}: {_truncate_message_content(r['content'] or '', max_chars_per_message)}"
+            for r in rows
+        )
         if total > max_turns:
-            marker = "[earlier turns omitted for brevity]"
+            omitted = total - max_turns
+            marker = f"[Earlier turns omitted: {omitted} messages]"
             return f"{marker}\n{body}" if body else marker
         return body
     rows = await db.execute_fetchall(
         "SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, id ASC",
         (conversation_id,),
     )
-    return "\n".join(f"{r['role']}: {r['content']}" for r in rows)
+    return "\n".join(
+        f"{r['role']}: {_truncate_message_content(r['content'] or '', max_chars_per_message)}"
+        for r in rows
+    )
 
 
 async def end_conversation(

@@ -102,13 +102,14 @@ export const api = {
     content: string,
     handlers: {
       onChunk?: (text: string) => void;
+      onFirstChunk?: (latencyMs: number) => void;
       onDone?: (payload: { message_id: number | null; grammar: GrammarFeedback | null; pace_wpm: number | null }) => void;
       onError?: (err: Error) => void;
       signal?: AbortSignal;
     },
     speaking_seconds?: number | null,
   ): Promise<void> => {
-    const { onChunk, onDone, onError, signal } = handlers;
+    const { onChunk, onFirstChunk, onDone, onError, signal } = handlers;
     try {
       const res = await fetch(`/api/conversation/${conversation_id}/message/stream`, {
         method: 'POST',
@@ -143,6 +144,8 @@ export const api = {
               const payload = JSON.parse(payloadStr);
               if (payload && payload.type === 'chunk' && typeof payload.text === 'string') {
                 onChunk?.(payload.text);
+              } else if (payload && payload.type === 'first_chunk' && typeof payload.latency_ms === 'number') {
+                onFirstChunk?.(payload.latency_ms);
               } else if (payload && payload.type === 'done') {
                 onDone?.({ message_id: payload.message_id ?? null, grammar: payload.grammar ?? null, pace_wpm: payload.pace_wpm ?? null });
               } else if (payload && payload.type === 'error') {

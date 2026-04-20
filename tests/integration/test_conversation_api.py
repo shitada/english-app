@@ -2274,10 +2274,10 @@ async def test_send_message_history_truncated_to_max_turns(client, mock_copilot)
     })
     assert res.status_code == 200, res.text
     prompt = captured.get("user_prompt", "")
-    assert "[earlier turns omitted for brevity]" in prompt
+    assert "Earlier turns omitted" in prompt
     assert "FIRST_MARKER_0" not in prompt
     # MESSAGE_HISTORY_MAX_TURNS bounds the count of message lines
-    assert conv_router.MESSAGE_HISTORY_MAX_TURNS == 16
+    assert conv_router.MESSAGE_HISTORY_MAX_TURNS == 10
 
 
 @pytest.mark.asyncio

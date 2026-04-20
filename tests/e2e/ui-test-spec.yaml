@@ -3925,6 +3925,14 @@ pages:
         priority: low
         added_in: 673
 
+      - id: conv-154
+        target: First-chunk latency badge appears next to streaming assistant bubble
+        action: Send a message in /conversation and watch the first words of the AI reply stream in. Look for an inline element with data-testid="first-chunk-latency-badge" beside the streaming caret.
+        expect: data-testid="first-chunk-latency-badge" renders once the SSE first_chunk event arrives, displaying "⚡ <N>ms to first word" where N is a positive integer (the time from request start to the first non-empty chunk). The badge uses subtle muted styling (text-xs, color var(--text-muted)) and is removed/hidden roughly 4 seconds after first appearing. It only appears for assistant messages, never for user messages.
+        type: functional
+        priority: medium
+        added_in: 684
+
   minimal_pairs:
     path: /minimal-pairs
     tests:

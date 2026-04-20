@@ -224,7 +224,7 @@ class TestFormatHistoryText:
         # Default behavior unchanged: no max_turns kwarg
         result = await format_history_text(test_db, cid)
         assert result == "assistant: Welcome!\nuser: Hi there\nassistant: How can I help?"
-        assert "[earlier turns omitted for brevity]" not in result
+        assert "Earlier turns omitted" not in result
 
     async def test_format_history_text_max_turns_truncates_with_marker(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
@@ -233,7 +233,8 @@ class TestFormatHistoryText:
             await add_message(test_db, cid, role, f"msg{i}")
         result = await format_history_text(test_db, cid, max_turns=4)
         lines = result.split("\n")
-        assert lines[0] == "[earlier turns omitted for brevity]"
+        # 10 total - 4 kept => 6 elided
+        assert lines[0] == "[Earlier turns omitted: 6 messages]"
         # Last 4 messages in chronological order: msg6, msg7, msg8, msg9
         assert lines[1].endswith(": msg6")
         assert lines[2].endswith(": msg7")
@@ -249,7 +250,7 @@ class TestFormatHistoryText:
         await add_message(test_db, cid, "assistant", "c")
         result = await format_history_text(test_db, cid, max_turns=100)
         assert result == "assistant: a\nuser: b\nassistant: c"
-        assert "[earlier turns omitted for brevity]" not in result
+        assert "Earlier turns omitted" not in result
 
     async def test_format_history_text_preserves_chronological_order_after_truncation(self, test_db):
         cid = await create_conversation(test_db, "hotel_checkin")
@@ -257,11 +258,55 @@ class TestFormatHistoryText:
             await add_message(test_db, cid, "user", f"u{i}")
         result = await format_history_text(test_db, cid, max_turns=3)
         lines = result.split("\n")
-        assert lines[0] == "[earlier turns omitted for brevity]"
+        # 8 - 3 = 5 elided
+        assert lines[0] == "[Earlier turns omitted: 5 messages]"
         # Chronological: u5, u6, u7
         assert lines[1] == "user: u5"
         assert lines[2] == "user: u6"
         assert lines[3] == "user: u7"
+
+    async def test_format_history_text_truncates_long_message_with_ellipsis(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        long_text = "x" * 500
+        await add_message(test_db, cid, "assistant", long_text)
+        result = await format_history_text(test_db, cid, max_chars_per_message=240)
+        # Format is "assistant: <body>" where <body> is truncated to 200 chars + " …"
+        assert result.startswith("assistant: ")
+        body = result[len("assistant: "):]
+        assert body.endswith(" …")
+        # First 200 chars of x's preserved
+        assert body[:200] == "x" * 200
+        # Total body length = 200 + len(" …") == 202
+        assert len(body) == 202
+
+    async def test_format_history_text_short_messages_untouched_by_char_cap(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        await add_message(test_db, cid, "user", "Hi there")
+        await add_message(test_db, cid, "assistant", "Welcome to the hotel!")
+        result = await format_history_text(test_db, cid, max_chars_per_message=240)
+        assert "…" not in result
+        assert result == "user: Hi there\nassistant: Welcome to the hotel!"
+
+    async def test_format_history_text_char_cap_combined_with_max_turns(self, test_db):
+        cid = await create_conversation(test_db, "hotel_checkin")
+        # 5 short turns, then 1 very long assistant turn
+        for i in range(5):
+            await add_message(test_db, cid, "user", f"u{i}")
+        long_text = "y" * 600
+        await add_message(test_db, cid, "assistant", long_text)
+        # Keep only the last 3 messages, with per-message cap
+        result = await format_history_text(
+            test_db, cid, max_turns=3, max_chars_per_message=240
+        )
+        lines = result.split("\n")
+        # 6 total - 3 kept => 3 elided
+        assert lines[0] == "[Earlier turns omitted: 3 messages]"
+        assert lines[1] == "user: u3"
+        assert lines[2] == "user: u4"
+        # Long assistant message is truncated
+        assert lines[3].startswith("assistant: ")
+        assert lines[3].endswith(" …")
+        assert "y" * 200 in lines[3]
 
 
 @pytest.mark.unit

@@ -91,7 +91,40 @@ def _detect_target_words(content: str, target_words: list[str]) -> list[str]:
 
 # Maximum number of past messages to include when building the LLM prompt for /message.
 # Keeps token usage bounded for long conversations; older turns are summarized as a marker.
-MESSAGE_HISTORY_MAX_TURNS = 16
+MESSAGE_HISTORY_MAX_TURNS = 10
+
+
+def _append_memory_facts(system: str, raw: str | None) -> str:
+    """Append the stored conversation memory facts to a system prompt.
+
+    Caps the number of facts at 6 and each fact's length at 120 characters
+    so the appended block stays small. Returns ``system`` unchanged when no
+    valid facts are stored.
+    """
+    if not raw:
+        return system
+    try:
+        facts = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return system
+    if not isinstance(facts, list) or not facts:
+        return system
+    cleaned: list[str] = []
+    for f in facts[:6]:
+        s = str(f).strip()
+        if not s:
+            continue
+        if len(s) > 120:
+            s = s[:117] + "..."
+        cleaned.append(s)
+    if not cleaned:
+        return system
+    return (
+        system
+        + "\n\nThings you know about this student from past conversations: "
+        + "; ".join(cleaned)
+        + ". Use these naturally when relevant — don't list them explicitly."
+    )
 
 
 class StartRequest(BaseModel):
@@ -720,23 +753,16 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Inject stored memory facts for continuity
     memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
-    if memory_raw:
-        try:
-            memory_facts_msg: list[str] = json.loads(memory_raw)
-            if isinstance(memory_facts_msg, list) and memory_facts_msg:
-                system += (
-                    "\n\nThings you know about this student from past conversations: "
-                    + "; ".join(str(f) for f in memory_facts_msg[:10])
-                    + ". Use these naturally when relevant — don't list them explicitly."
-                )
-        except (json.JSONDecodeError, TypeError):
-            pass
+    system = _append_memory_facts(system, memory_raw)
 
     conv_prompt = f"Conversation so far:\n{history}\n\nContinue the scenario naturally. Stay in character and respond to what the user just said."
 
     # Run grammar check and conversation response in PARALLEL
     # Grammar check is non-fatal — if it fails, we still return the AI response
     t0 = time.monotonic()
+    _t_msg_start = t0
+    _prompt_chars_msg = len(system) + len(conv_prompt)
+    _history_turns_msg = (history.count("\n") + 1) if history else 0
 
     skip_grammar = quick_mode or _should_skip_grammar_check(req.content)
 
@@ -805,7 +831,14 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
                     used_total.append(m)
                     already_used_lower.add(m.lower())
 
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val, "fillers": fillers_payload, "target_words_used": used_total, "newly_used_target_words": newly_used}
+    return_payload = {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val, "fillers": fillers_payload, "target_words_used": used_total, "newly_used_target_words": newly_used}
+    logger.info(
+        "send_message timings prompt_chars=%d history_turns=%d total_ms=%d",
+        _prompt_chars_msg,
+        _history_turns_msg,
+        int((time.monotonic() - _t_msg_start) * 1000),
+    )
+    return return_payload
 
 
 @router.post("/{conversation_id}/message/stream")
@@ -870,17 +903,7 @@ async def stream_message(
         system += "\n\nReply with ONE short sentence only (max 18 words)."
 
     memory_raw = await pref_dal.get_preference(db, CONVERSATION_MEMORY_KEY)
-    if memory_raw:
-        try:
-            memory_facts_msg: list[str] = json.loads(memory_raw)
-            if isinstance(memory_facts_msg, list) and memory_facts_msg:
-                system += (
-                    "\n\nThings you know about this student from past conversations: "
-                    + "; ".join(str(f) for f in memory_facts_msg[:10])
-                    + ". Use these naturally when relevant — don't list them explicitly."
-                )
-        except (json.JSONDecodeError, TypeError):
-            pass
+    system = _append_memory_facts(system, memory_raw)
 
     conv_prompt = (
         f"Conversation so far:\n{history}\n\n"
@@ -910,14 +933,23 @@ async def stream_message(
     def _sse(payload: dict[str, Any]) -> str:
         return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
+    _stream_t0 = time.monotonic()
+    _prompt_chars_stream = len(system) + len(conv_prompt)
+    _history_turns_stream = (history.count("\n") + 1) if history else 0
+
     async def event_gen():
         chunks: list[str] = []
+        first_chunk_emitted = False
         try:
             async for chunk in copilot.stream_chat(
                 system, conv_prompt, label="conversation_message_stream"
             ):
                 if not chunk:
                     continue
+                if not first_chunk_emitted:
+                    first_chunk_emitted = True
+                    latency_ms = int((time.monotonic() - _stream_t0) * 1000)
+                    yield _sse({"type": "first_chunk", "latency_ms": latency_ms})
                 chunks.append(chunk)
                 yield _sse({"type": "chunk", "text": chunk})
         except Exception as exc:
@@ -967,6 +999,12 @@ async def stream_message(
             "grammar": feedback,
             "pace_wpm": pace_wpm_val,
         })
+        logger.info(
+            "send_message timings prompt_chars=%d history_turns=%d total_ms=%d",
+            _prompt_chars_stream,
+            _history_turns_stream,
+            int((time.monotonic() - _stream_t0) * 1000),
+        )
 
     headers = {
         "Cache-Control": "no-cache, no-transform",

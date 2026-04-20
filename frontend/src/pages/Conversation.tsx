@@ -24,6 +24,8 @@ interface Message {
   streaming?: boolean;
   pace_wpm?: number | null;
   fillers?: { total: number; breakdown: Record<string, number> } | null;
+  firstChunkLatencyMs?: number | null;
+  firstChunkAt?: number | null;
 }
 
 /**
@@ -1107,6 +1109,25 @@ export default function Conversation() {
             }
             spokenUpTo += consumedLen;
           }
+        },
+        onFirstChunk: (latencyMs) => {
+          const now = Date.now();
+          setMessages((prev) => {
+            const updated = [...prev];
+            for (let i = updated.length - 1; i >= 0; i--) {
+              if (updated[i].role === 'assistant' && updated[i].streaming) {
+                updated[i] = { ...updated[i], firstChunkLatencyMs: latencyMs, firstChunkAt: now };
+                break;
+              }
+            }
+            return updated;
+          });
+          // Fade the badge after 4s by clearing the latency stamp.
+          setTimeout(() => {
+            setMessages((prev) => prev.map((m) => (
+              m.firstChunkAt === now ? { ...m, firstChunkLatencyMs: null } : m
+            )));
+          }, 4000);
         },
         onDone: ({ grammar, pace_wpm }) => {
           streamFeedback = grammar;
@@ -2255,6 +2276,22 @@ export default function Conversation() {
                         style={{ display: 'inline-block', width: 8, marginLeft: 2, animation: 'blink 1s step-end infinite' }}
                       >
                         ▍
+                      </span>
+                    )}
+                    {msg.role === 'assistant' && typeof msg.firstChunkLatencyMs === 'number' && msg.firstChunkLatencyMs > 0 && (
+                      <span
+                        data-testid="first-chunk-latency-badge"
+                        title="Latency until the AI started replying"
+                        style={{
+                          display: 'inline-block',
+                          marginLeft: 8,
+                          fontSize: '0.72rem',
+                          color: 'var(--text-muted, #888)',
+                          opacity: 0.85,
+                          transition: 'opacity 0.4s',
+                        }}
+                      >
+                        ⚡ {msg.firstChunkLatencyMs}ms to first word
                       </span>
                     )}
                   </>
