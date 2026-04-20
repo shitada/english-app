@@ -4802,3 +4802,52 @@ pages:
         type: functional
         priority: medium
         added_in: 672
+
+      - id: qp-pace-match-001
+        target: Quick Pace Match card renders inside the Speaking tab
+        action: Open the Quick Practice hub and select the Speaking tab; scroll to the Pace Match card
+        expect: data-testid="quick-pace-match-card" is visible with header "Quick Pace Match" and a target picker (data-testid="qpm-targets")
+        type: functional
+        priority: high
+        added_in: 674
+
+      - id: qp-pace-match-002
+        target: Target picker offers Slow/Natural/Fast and persists the choice in localStorage
+        action: Click data-testid="qpm-target-fast", then reload the page
+        expect: After reload data-testid="qpm-target-fast" has aria-checked="true" and localStorage key "quick-pace-match-target" equals "fast"
+        type: functional
+        priority: high
+        added_in: 674
+
+      - id: qp-pace-match-003
+        target: Start Practice fetches a sentence and reveals Listen / Speak / New Sentence controls
+        action: Click data-testid="qpm-start"
+        expect: A sentence is shown in italics and data-testid="qpm-listen", data-testid="qpm-record", and data-testid="qpm-new-sentence" buttons appear, along with data-testid="qpm-gauge" showing a green target band around the chosen WPM
+        type: functional
+        priority: high
+        added_in: 674
+
+      - id: qp-pace-match-004
+        target: Listen button plays TTS at the rate mapped from the chosen target pace
+        action: With Natural selected, click data-testid="qpm-listen"; then switch to Slow and click again
+        expect: useSpeechSynthesis.speak is invoked with rateOverride 1.0 then 0.8 (button label updates to show e.g. "Listen (0.8×)")
+        type: functional
+        priority: medium
+        added_in: 674
+
+      - id: qp-pace-match-005
+        target: After speaking, result panel shows WPM, accuracy, and a tempo verdict badge
+        action: Click data-testid="qpm-record" to start, speak the sentence, then click again to stop
+        expect: data-testid="qpm-result" appears containing the spoken WPM number, data-testid="qpm-delta-badge" with one of "on pace ✓" / "+N WPM — too fast" / "-N WPM — too slow", data-testid="qpm-accuracy" with a percentage, and data-testid="qpm-marker" positioned on the gauge
+        type: functional
+        priority: high
+        added_in: 674
+
+      - id: qp-pace-match-006
+        target: History dots accumulate above the gauge across attempts (capped at 5)
+        action: Complete two or more shadow attempts on the same sentence using Try Again
+        expect: data-testid="qpm-history" contains a data-testid="qpm-history-dot-N" element for each recent attempt, never exceeding 5
+        type: functional
+        priority: medium
+        added_in: 674
+

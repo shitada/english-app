@@ -485,4 +485,207 @@ Iteration 672 complete. Now iteration 673.
   │ date +%s
   └ 2 lines...
 
-Now creating the component:Now wire into Conversation.tsx and add export:Now wire into Conversation.tsx — add import, state for recentWpms (persisted) + lastFinalWpm, capture on send, render below input:Now capture WPM on send and persist. Update sendMessage's existing speakingSeconds block:Now render the meter just above the chat-input-bar:Now write tests:All 21 pass. Now update UI test spec:
+Now creating the component:Now wire into Conversation.tsx and add export:Now wire into Conversation.tsx — add import, state for recentWpms (persisted) + lastFinalWpm, capture on send, render below input:Now capture WPM on send and persist. Update sendMessage's existing speakingSeconds block:Now render the meter just above the chat-input-bar:Now write tests:All 21 pass. Now update UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "f60dd0f",
+  "files_changed": [
+    "frontend/src/components/conversation/ReplyPacingMeter.tsx",
+    "frontend/src/components/conversation/index.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "frontend/src/__tests__/ReplyPacingMeter.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 21,
+  "ui_spec_updated": true,
+  "description": "Added ReplyPacingMeter (live WPM gauge with zones, coaching tip, and 5-point sparkline persisted to localStorage) and wired it into the Conversation page above the chat input."
+}
+```● Coder Implement iter 673
+  │ Edit ui-test-spec.yaml +16
+  │   └ tests/e2e/ui-test-spec.yaml
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git -c
+      │ user.email=copilot@github.com -c user.name=copilot commit -m "autoresearch
+      │ #673: add Conversation Reply Pacing Meter (live WPM gauge)
+      │
+      │ Frontend-only horizontal pacing meter rendered above the chat input…
+      └ 20 lines...
+
+● T2 iter 673 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2243,
+  "tests_total": 2243,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "skip",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2243 passed in 123.41s (0:02:03) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 673
+  │ TypeScript check (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx tsc
+  │   │ --noEmit 2>&1 | tail -40; echo "EXIT:$?"
+  │   └ 2 lines...
+  └ Check e2e results (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json
+      └ 2 lines...
+
+● T3 iter 673 (shell)
+  │ date +%s
+  └ 2 lines...
+
+{
+  "code_quality": 8,
+  "feature_value": 7,
+  "maintainability": 8,
+  "ux_quality": 8,
+  "total_score": 7.75,
+  "verdict": "keep",
+  "reason": "Self-contained ReplyPacingMeter component with strong test coverage (21 new vitest cases), clean localStorage persistence, properly hidden when speech recognition unsupported; all tests and TS check pass."
+}● Evaluator Evaluate iter 673
+
+● Record iter 673 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776645927 T1=1776646009 T2=1776646271 T3=1776646424 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "673" "f60dd0f" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Both iterations complete and STOPPING per task instructions.
+
+**Summary:**
+- **Iter 672** `2bb18be` — Quick Backchannel Response card (frontend-only MCQ drill with TTS, 21-prompt bank, 15 vitest) — score **7.00**, kept
+- **Iter 673** `f60dd0f` — Conversation Reply Pacing Meter (live WPM gauge + coaching tip + sparkline, localStorage trend, 21 vitest) — score **7.75**, kept
+
+All 4 subagents (proposer → coder → tester → evaluator) called for each iteration. All 2243 tests pass + TS check pass on both.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (17m 52s)
+Tokens    ↑ 2.8m • ↓ 51.5k • 2.6m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-672-to-699.md
+[2026-04-20 09:54:08] Copilot invocation completed (duration: 1074s)
+[2026-04-20 09:54:08] Recording agent traces...
+[2026-04-20 09:54:08]   AGENT_TRACE iter=672 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 09:54:09]   AGENT_TRACE iter=673 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 09:54:09] SMOKE_UI: UI changes detected in pages: conversation,home
+[2026-04-20 09:54:09] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 09:54:09] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation, home
+
+  ✅ conversation: smoke 4✓ 0✗ (1681ms)
+  ✅ home: smoke 4✓ 0✗ (1686ms)
+
+✅ UI TEST PASS (2/2 pages)
+[2026-04-20 09:54:18] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 09:54:18] Running post-invocation audit (iter 672-673)...
+============================================
+ Autoresearch Audit
+ Iterations: 672 — 673
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 09:54:18
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 673[0m
+[0;31m  Tester: FAIL — missing: 672 673[0m
+[0;31m  Evaluator: FAIL — missing: 672 673[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 09:54:20] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 09:54:23] Current iteration count: 673 / 699
+[2026-04-20 09:54:23] ------------------------------------------
+[2026-04-20 09:54:23] Invocation 3 / 10
+[2026-04-20 09:54:23] Resuming from iteration 674
+[2026-04-20 09:54:23] ------------------------------------------
+[2026-04-20 09:54:23] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-674-to-699.md)...
+● Read autoresearch context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI---" && (test -f autoresearch/ui-test-results.json && python3
+  │ -c "import json; d=json.load(open('autoresearch/ui-test-results.json')); …
+  └ 33 lines...
+
+Good. No UI failures. Starting iteration 674.
+
+● T0 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Quick Pace Match Card — shadow at a target WPM with live tempo feedback",
+  "description": "Build directly on iter 673's Reply Pacing Meter by adding a new Quick Practice Hub mini-card focused exclusively on speech tempo control. Many learners either rush nervously or speak too slowly when shadowing; this card turns WPM into the explicit goal.\n\nFlow:\n1. User opens the card and picks a target pace: Slow (≈110 WPM), Natural (≈150 WPM), or Fast (≈180 WPM). Default = Natural; remembered in localStorage key 'quick-pace-match-target'.\n2. Card fetches a short sentence (10–18 words) by reusing the existing shadow-sentence backend used by QuickShadowCard (call api.quickShadow / equivalent — no new endpoint needed). Difficulty propagates from the Hub's existing Difficulty selector.\n3. TTS plays the sentence at a rate mapped from the chosen target (slow=0.8, natural=1.0, fast=1.2) using useSpeechSynthesis.\n4. User taps Mic and shadows. useSpeechRecognition records start/end timestamps; on stop, compute spoken WPM = (recognized_word_count / elapsed_seconds) * 60. Also compute word-match accuracy (reuse normalizeText/computeAccuracy logic from QuickShadowCard).\n5. Result panel shows: a horizontal tempo gauge with the target band highlighted (±15 WPM tolerance), the user's WPM as a marker, a delta badge ('+22 WPM — too fast' / 'on pace ✓' / '-18 WPM — too slow'), and an accuracy % so users don't game the meter by mumbling.\n6. 'Try Again' replays same sentence; 'New Sentence' fetches another. Last 5 attempts are kept in component state and rendered as tiny WPM dots above the gauge so the user can see whether they are converging on the target band (mirrors sparkline UX of the Reply Pacing Meter).\n\nFiles:\n- frontend/src/components/QuickPaceMatchCard.tsx (new) — the card component, ≈200 lines, uses useSpeechSynthesis and useSpeechRecognition hooks already in the repo. No new API. Pure-function helpers (mapTargetToRate, computeWpm, classifyPace, tolerance band) exported for testing.\n- frontend/src/components/QuickPracticeHub.tsx — import the new card and register it in the Speaking tab section with key 'pace-match', emoji 🎯, title 'Pace Match', short blurb 'Shadow at a target speaking speed.' Add to favorites-eligible list (uses the existing useFavorites hook automatically via hub registration).\n- frontend/src/__tests__/QuickPaceMatchCard.test.tsx (new) — unit tests for the helper functions: computeWpm(words, seconds) edge cases (0 seconds → 0, normal case), classifyPace(spoken, target, tolerance=15) returns 'slow'|'on'|'fast' boundaries, mapTargetToRate('slow'|'natural'|'fast') returns expected playbackRate values. Plus a render smoke test asserting the three target buttons appear and clicking one persists to localStorage.\n\nNo backend/schema/migration changes. Differentiation from existing cards: QuickShadowCard measures accuracy only; QuickConnectedSpeech focuses on linking; QuickThoughtGroup focuses on phrasing pauses; QuickFillerReduction targets fillers — none currently treats target WPM as a primary, selectable goal with per-attempt tempo trend feedback.",
+  "files_to_modify": [
+    "frontend/src/components/QuickPaceMatchCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/__tests__/QuickPaceMatchCard.test.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "small"
+}
+```● Proposer Propose iteration 674
+  │ Read QuickShadowCard.tsx
+  │   │ frontend/src/components/QuickShadowCard.tsx
+  │   └ L1:40 (40 lines read)
+  └ Read QuickPracticeHub.tsx
+      │ frontend/src/components/QuickPracticeHub.tsx
+      └ L1:80 (80 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough understanding. Let me look at the useSpeechRecognition hook briefly:Now I have all I need. Let me create the new card.Now register in the Hub:Now write the test file:All tests pass. Now update the UI test spec:
