@@ -257,6 +257,20 @@ CREATE TABLE IF NOT EXISTS sentence_echo_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sentence_echo_created ON sentence_echo_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS listen_summarize_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    overall REAL NOT NULL DEFAULT 0,
+    coverage_ratio REAL NOT NULL DEFAULT 0,
+    conciseness REAL NOT NULL DEFAULT 0,
+    accuracy REAL NOT NULL DEFAULT 0,
+    used_voice INTEGER NOT NULL DEFAULT 0,
+    plays_used INTEGER NOT NULL DEFAULT 0,
+    level TEXT NOT NULL DEFAULT 'intermediate'
+);
+
+CREATE INDEX IF NOT EXISTS idx_listen_summarize_created ON listen_summarize_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------

@@ -5144,3 +5144,54 @@ pages:
         type: visual
         priority: low
         added_in: 685
+
+  listen_summarize:
+    path: /listen-summarize
+    tests:
+      - id: ls-001
+        target: Listen & Summarize page renders idle state with start button and stats card
+        action: Visit /listen-summarize
+        expect: data-testid="listen-summarize-page" visible; data-testid="ls-start" enabled; data-testid="ls-level" present; data-testid="ls-stats-total", data-testid="ls-stats-average", data-testid="ls-stats-streak" all visible
+        type: functional
+        priority: high
+        added_in: 686
+
+      - id: ls-002
+        target: Starting the drill loads a passage and shows play/rate controls with 2 plays remaining
+        action: Click data-testid="ls-start" and wait for the listening phase to render
+        expect: data-testid="ls-play" visible and labeled "Play (2 left)"; data-testid="ls-rate" present with options 0.85, 1.0, 1.15; data-testid="ls-summary" textarea visible
+        type: functional
+        priority: critical
+        added_in: 686
+
+      - id: ls-003
+        target: Submit button is disabled until the user types a summary
+        action: Inspect data-testid="ls-submit" before any input
+        expect: Button is disabled (opacity reduced / not-allowed cursor)
+        type: functional
+        priority: high
+        added_in: 686
+
+      - id: ls-004
+        target: Submitting a typed summary shows the results card with score ring, key-point checklist, and reveal-transcript control
+        action: Click data-testid="ls-start", type a short summary into data-testid="ls-summary", click data-testid="ls-submit"
+        expect: data-testid="ls-results" visible; data-testid="ls-score-ring" visible; data-testid="ls-coverage" lists one li per key point; data-testid="ls-feedback" not empty; data-testid="ls-reveal-transcript" present; data-testid="ls-try-another" enabled
+        type: functional
+        priority: critical
+        added_in: 686
+
+      - id: ls-005
+        target: Play button becomes disabled after the 2-play limit is reached
+        action: Click data-testid="ls-start", then click data-testid="ls-play" twice
+        expect: data-testid="ls-play" becomes disabled and shows "Play (0 left)"
+        type: functional
+        priority: medium
+        added_in: 686
+
+      - id: ls-006
+        target: Sparkline element renders inside the stats card
+        action: Inspect data-testid="ls-sparkline" or its empty-state placeholder text
+        expect: Either an SVG with data-testid="ls-sparkline" is present, or the empty-state copy "No attempts yet — try one!" is shown
+        type: visual
+        priority: low
+        added_in: 686

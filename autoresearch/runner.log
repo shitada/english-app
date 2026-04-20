@@ -2290,4 +2290,246 @@ Iteration 684 done. Starting iteration 685.
   │ date +%s
   └ 2 lines...
 
-Good. Now I have enough context. Let me start implementing. First the backend:Now create DAL:Now add the prompt and router. Let me first look at end of listening.py and prompts.py:Now add router endpoints. First update the import line and append endpoints:Now create the frontend component. Let me first check api.ts pattern for adding new methods:Now create the SentenceEcho component:Now wire into App.tsx and Home.tsx:Now Home card right after Stress Spotlight:Now write tests. Start with unit DAL test:Now frontend test:Now update ui-test-spec.yaml. Append at end:Now let me verify by running the tests quickly:All 16 tests pass. Quick check vitest:All passing. Commit:
+Good. Now I have enough context. Let me start implementing. First the backend:Now create DAL:Now add the prompt and router. Let me first look at end of listening.py and prompts.py:Now add router endpoints. First update the import line and append endpoints:Now create the frontend component. Let me first check api.ts pattern for adding new methods:Now create the SentenceEcho component:Now wire into App.tsx and Home.tsx:Now Home card right after Stress Spotlight:Now write tests. Start with unit DAL test:Now frontend test:Now update ui-test-spec.yaml. Append at end:Now let me verify by running the tests quickly:All 16 tests pass. Quick check vitest:All passing. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "8722d6d",
+  "files_changed": [
+    "app/database.py",
+    "app/dal/sentence_echo.py",
+    "app/prompts.py",
+    "app/routers/listening.py",
+    "frontend/src/api.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/components/SentenceEcho.tsx",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/__tests__/SentenceEcho.test.tsx",
+    "tests/unit/test_sentence_echo_dal.py",
+    "tests/integration/test_sentence_echo_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 29,
+  "ui_spec_updated": true,
+  "description": "Sentence Echo: progressive listening memory-span drill (6→18 words) with DAL, 3 endpoints, ladder UI, diff feedback, and 14-day sparkline."
+}
+```● Coder Implement iter 685
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #685: add Sentence Echo memory-span listening
+  │   │ drill
+  │   │
+  │   │ Adds a new listening practice mode that builds working-memory capacity…
+  │   └ 39 lines...
+  └ commit hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD
+      └ 2 lines...
+
+● T2 685 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2384,
+  "tests_total": 2384,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2384 passed in 136.21s (0:02:16) =======================\nFrontend vitest: 41 test files, 500 tests passed (2.43s)\nSmoke: SMOKE OK (all endpoints 200)",
+  "failure_summary": ""
+}
+```● Tester Test iter 685
+  │ Frontend vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -40
+  │   └ 40 lines...
+  └ Check e2e results (shell)
+      │ ls /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resul
+      │ ts.json 2>&1 && cat /Users/shingotada/Documents/vscode/english-app/autoresea
+      │ rch/ui-test-results.json
+      └ 2 lines...
+
+● T3 685 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "Well-scoped new listening drill with proper migration for sentence_echo_attempts, 29 new tests, all 2384 tests + TS check pass, and clean DAL/endpoint/component separation."}
+```● Evaluator Evaluate iter 685
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L60:400 (341 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L400:700 (301 lines read)
+
+● Record iter 685 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776654381
+  │ T1=1776654438 T2=1776654849 T3=1776655021 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "685" "8722d6d" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 8 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **#684** `7118d1f` — PERF-HIGH conversation prompt trim + ⚡ first-chunk badge — 7.00 kept (2368/2368)
+- **#685** `8722d6d` — Sentence Echo listening memory-span drill — 7.55 kept (2384/2384)
+
+Backlog PERF-HIGH item marked complete. Only INFRA item remains.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (23m 7s)
+Tokens    ↑ 6.0m • ↓ 65.2k • 5.7m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-684-to-699.md
+[2026-04-20 12:17:37] Copilot invocation completed (duration: 1390s)
+[2026-04-20 12:17:37] Recording agent traces...
+[2026-04-20 12:17:37]   AGENT_TRACE iter=684 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 12:17:37]   AGENT_TRACE iter=685 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 12:17:37] SMOKE_UI: UI changes detected in pages: conversation,home
+[2026-04-20 12:17:37] SMOKE_UI: Level=full (iteration 685 is divisible by 5)
+[2026-04-20 12:17:37] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1856ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1614ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1659ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1569ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1637ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1795ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3780ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2420ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (1992ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1910ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1963ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2147ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1687ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1624ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1647ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1574ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1608ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1723ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-20 12:18:18] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 12:18:18] Running post-invocation audit (iter 684-685)...
+============================================
+ Autoresearch Audit
+ Iterations: 684 — 685
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 12:18:19
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 684 685[0m
+[0;31m  Tester: FAIL — missing: 684 685[0m
+[0;31m  Evaluator: FAIL — missing: 684 685[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 12:18:20] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 12:18:23] Current iteration count: 685 / 699
+[2026-04-20 12:18:23] ------------------------------------------
+[2026-04-20 12:18:23] Invocation 9 / 10
+[2026-04-20 12:18:23] Resuming from iteration 686
+[2026-04-20 12:18:23] ------------------------------------------
+[2026-04-20 12:18:23] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-686-to-699.md)...
+● Restore autoresearch context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI---" && (test -f autoresearch/ui-test-results.json && python3
+  │ -c "import json;d=json.load(open('autoresearch/ui-test-results.json'));pri…
+  └ 35 lines...
+
+● Read recent session log (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-684-to-699.md
+  └ 51 lines...
+
+Starting iteration 686. Dispatching to proposer.
+
+● T0 for iter 686 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Listen & Summarize drill: gist-level listening with AI-graded summary",
+  "description": "Add a new listening drill 'Listen & Summarize' that trains gist comprehension and productive recall — a different skill from existing word-level drills (Sentence Echo, Reduced Forms, Minimal Pairs, Dictation). Flow: (1) backend generates a 40–70 word short passage (news blurb, anecdote, instructions, opinion) with 3–5 explicit 'key_points' via Copilot; (2) frontend plays it via Web Speech TTS (with replay limited to 2 plays and a configurable 0.85x/1.0x/1.15x rate selector); (3) user submits a 1–2 sentence summary either by typing or by dictating with the existing speech-recognition hook; (4) backend grades the summary on (a) key-point coverage (which of the key_points are mentioned, fuzzy match), (b) conciseness (within target word range), and (c) accuracy (no contradictions / hallucinated facts) using a structured Copilot prompt returning JSON {coverage:[{point,covered:bool,evidence}], conciseness_score:0-1, accuracy_score:0-1, overall:0-1, feedback:str}; (5) frontend shows a results card with checkmarks per key point, the original transcript revealed, missed points highlighted, and a 'Try another' button. Persist attempts so users see progress: total attempts, average overall score, current streak of ≥0.7 attempts, and a small last-7-days sparkline on the drill's start screen.\n\nImplementation:\n- NEW `app/dal/listen_summarize.py`: functions `record_attempt(db, passage_id, overall, coverage_ratio, conciseness, accuracy, used_voice:bool, plays_used:int)`, `get_recent_stats(db, days=7)`, `get_streak(db, threshold=0.7)`. Backed by NEW table `listen_summarize_attempts(id INTEGER PK, created_at TEXT, overall REAL, coverage_ratio REAL, conciseness REAL, accuracy REAL, used_voice INTEGER, plays_used INTEGER, level TEXT)` added via `CREATE TABLE IF NOT EXISTS` in `database.py` SCHEMA (no ALTER needed since this is a brand-new table).\n- EXTEND `app/routers/listening.py` with three endpoints under existing `/api/listening` prefix: `POST /summarize/passage` (body: {level: 'beginner'|'intermediate'|'advanced', genre?: str}) → returns {passage_id, text, key_points:[str], target_min_words:15, target_max_words:35}; `POST /summarize/grade` (body: {passage_id, passage_text, key_points, summary, used_voice, plays_used}) → returns the grading JSON above and records the attempt; `GET /summarize/stats` → recent stats + streak. Use existing copilot_service and a new `LISTEN_SUMMARIZE_PASSAGE_PROMPT` and `LISTEN_SUMMARIZE_GRADE_PROMPT` added to `app/prompts.py`. Validate inputs with Pydantic; handle Copilot failures with a small built-in fallback bank of 6 passages (so the drill works offline / when rate-limited).\n- NEW `frontend/src/pages/ListenSummarize.tsx`: phases 'idle' → 'listening' → 'compose' → 'results'. Reuse the existing `useSpeechRecognition` hook for voice input and `speechSynthesis` for TTS playback. Show key-point checklist in results with covered/missed badges, full transcript reveal, overall score ring, and a 'Recent (7d)' sparkline fetched from `/summarize/stats`. Add a route `/listen-summarize` in `App.tsx` (5th file) and a launch card on Home.tsx if there's room — but keep modifications strictly within these 5 files: `app/dal/listen_summarize.py`, `app/database.py`, `app/routers/listening.py`, `app/prompts.py`, `frontend/src/pages/ListenSummarize.tsx`. Wire the route by editing `App.tsx` only if it fits within the 5-file budget; otherwise expose via a direct URL and defer the nav card to a follow-up iteration.\n\nSchema migration: this is a NEW table only (no column additions to existing tables), so adding it to SCHEMA in `database.py` with `CREATE TABLE IF NOT EXISTS listen_summarize_attempts (...)` is sufficient and no `_MIGRATIONS` ALTER statement is required.\n\nWhy this is fresh & high-value: existing listening drills test verbatim recall (Sentence Echo, Dictation) or sub-lexical perception (Minimal Pairs, Reduced Forms). None train gist extraction + productive paraphrasing — the highest-leverage real-world listening skill (meetings, podcasts, lectures). It also creates natural cross-skill practice (listen → speak/write) without adding another quiz format.",
+  "files_to_modify": [
+    "app/dal/listen_summarize.py",
+    "app/database.py",
+    "app/routers/listening.py",
+    "app/prompts.py",
+    "frontend/src/pages/ListenSummarize.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 686 feature
+  │ Read main.py
+  │   │ app/main.py
+  │   └ L1:60 (60 lines read)
+  └ Read listening.py
+      │ app/routers/listening.py
+      └ L1:40 (40 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me start writing the new code.Now add the table to schema:Now add the prompts:Now extend the listening router with the new endpoints:Now append the new endpoints at the end of listening.py:Now sanity-check imports and that backend compiles:Now write tests.All passing. Now let me also quickly verify nothing else is broken:Good. Let me check on shellId 20:Now create the page:Add route to App.tsx:Now let's verify TypeScript compiles:Clean. Now update UI test spec:Final test run on focused tests once more, then commit:

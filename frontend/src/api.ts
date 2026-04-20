@@ -3850,3 +3850,78 @@ export function scoreSentenceEcho(
 export function getSentenceEchoTrend(days: number = 14): Promise<SentenceEchoTrendResponse> {
   return request<SentenceEchoTrendResponse>(`/api/listening/sentence-echo/trend?days=${days}`);
 }
+
+// ── Listen & Summarize (gist-comprehension drill) ──
+
+export interface ListenSummarizePassage {
+  passage_id: string;
+  text: string;
+  key_points: string[];
+  target_min_words: number;
+  target_max_words: number;
+  genre: string;
+  level: string;
+}
+
+export interface ListenSummarizeCoverageItem {
+  point: string;
+  covered: boolean;
+  evidence: string;
+}
+
+export interface ListenSummarizeGradeResult {
+  coverage: ListenSummarizeCoverageItem[];
+  coverage_ratio: number;
+  conciseness_score: number;
+  accuracy_score: number;
+  overall: number;
+  feedback: string;
+  summary_word_count: number;
+  target_min_words: number;
+  target_max_words: number;
+}
+
+export interface ListenSummarizeStats {
+  total: number;
+  average: number;
+  best: number;
+  streak: number;
+  threshold: number;
+  sparkline: { date: string; avg_overall: number; attempts: number }[];
+}
+
+export function generateListenSummarizePassage(
+  level: string = 'intermediate',
+  genre?: string,
+): Promise<ListenSummarizePassage> {
+  return request<ListenSummarizePassage>('/api/listening/summarize/passage', {
+    method: 'POST',
+    body: JSON.stringify({ level, genre: genre ?? null }),
+  });
+}
+
+export function gradeListenSummarize(body: {
+  passage_id: string;
+  passage_text: string;
+  key_points: string[];
+  summary: string;
+  used_voice: boolean;
+  plays_used: number;
+  level: string;
+  target_min_words: number;
+  target_max_words: number;
+}): Promise<ListenSummarizeGradeResult> {
+  return request<ListenSummarizeGradeResult>('/api/listening/summarize/grade', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function getListenSummarizeStats(
+  days: number = 7,
+  threshold: number = 0.7,
+): Promise<ListenSummarizeStats> {
+  return request<ListenSummarizeStats>(
+    `/api/listening/summarize/stats?days=${days}&threshold=${threshold}`,
+  );
+}

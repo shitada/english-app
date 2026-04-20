@@ -198,3 +198,83 @@ def SENTENCE_ECHO_PROMPT() -> str:
         "Otherwise return an empty string.\n"
         "- Output JSON ONLY, no markdown fences, no commentary."
     )
+
+
+def LISTEN_SUMMARIZE_PASSAGE_PROMPT() -> str:
+    """System prompt for generating a Listen & Summarize short passage.
+
+    Produces a 40–70 word short passage plus 3–5 key points the learner is
+    expected to include in their summary.
+    """
+    return (
+        "You generate short English audio passages for a 'Listen & "
+        "Summarize' gist-comprehension drill. The learner will hear the "
+        "passage via TTS twice and then write a 1–2 sentence summary. The "
+        "summary will be graded on coverage of the listed key points.\n\n"
+        "Return STRICT JSON of this exact shape:\n"
+        '{ "text": "...", "key_points": ["...", "...", "..."],'
+        ' "target_min_words": 15, "target_max_words": 35,'
+        ' "genre": "news|story|how-to|opinion|description|dialogue" }\n\n'
+        "Rules:\n"
+        "- text MUST be a coherent English passage between 40 and 70 words. "
+        "Use natural everyday vocabulary and one or two short paragraphs of "
+        "plain prose (no bullet points, no headings, no quotes around the "
+        "passage).\n"
+        "- key_points: 3 to 5 short factual gist statements (max ~12 words "
+        "each) covering the main ideas the listener should retain. Each key "
+        "point must be a self-contained claim grounded in the passage.\n"
+        "- target_min_words / target_max_words: integer word range for the "
+        "expected learner summary, with target_min_words >= 10 and "
+        "target_max_words <= 50 and target_min_words < target_max_words.\n"
+        "- genre is one of news, story, how-to, opinion, description, "
+        "dialogue, matching the user-requested genre when given.\n"
+        "- The passage MUST be appropriate for the requested CEFR level "
+        "(beginner=A2, intermediate=B1, advanced=B2/C1) and must avoid "
+        "obscure proper nouns or hard-to-spell names.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+
+
+def LISTEN_SUMMARIZE_GRADE_PROMPT() -> str:
+    """System prompt for grading a learner's Listen & Summarize response.
+
+    Returns per-key-point coverage with evidence, plus conciseness, accuracy,
+    overall score, and a short coaching feedback string.
+    """
+    return (
+        "You are an English listening-comprehension coach. You will be given "
+        "(1) the original short passage, (2) a list of key_points the "
+        "learner was expected to cover, (3) the learner's 1–2 sentence "
+        "summary, and (4) the target word range (min, max). Grade the "
+        "summary on key-point COVERAGE (fuzzy — accept paraphrases), "
+        "CONCISENESS (within target range), and ACCURACY (no facts that "
+        "contradict the passage).\n\n"
+        "Return STRICT JSON of this exact shape:\n"
+        "{\n"
+        '  "coverage": [\n'
+        '    {"point": "<copy of key_point>", "covered": true,'
+        ' "evidence": "<short snippet from learner summary or empty>"}\n'
+        "  ],\n"
+        '  "conciseness_score": 0.0,\n'
+        '  "accuracy_score": 0.0,\n'
+        '  "overall": 0.0,\n'
+        '  "feedback": "<one short coaching sentence (max ~25 words)>"\n'
+        "}\n\n"
+        "Rules:\n"
+        "- coverage MUST contain exactly one entry per key_point in the same "
+        "order, with the original key_point text echoed in 'point'. 'covered' "
+        "is true when the learner's summary clearly conveys that idea (a "
+        "close paraphrase counts).\n"
+        "- conciseness_score is in [0,1]: 1.0 when the summary word count "
+        "is within [target_min_words, target_max_words]; decrease linearly "
+        "outside the range, with a minimum of 0.\n"
+        "- accuracy_score is in [0,1]: 1.0 if no fabricated or contradictory "
+        "facts; reduce sharply for hallucinated content not supported by the "
+        "passage.\n"
+        "- overall is in [0,1] and is a weighted blend roughly: "
+        "0.6*coverage_ratio + 0.2*conciseness_score + 0.2*accuracy_score, "
+        "where coverage_ratio = (#covered / #key_points).\n"
+        "- feedback is ONE short, encouraging coaching sentence pointing to "
+        "the most useful next-step (e.g. a missed key point or wordiness).\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
