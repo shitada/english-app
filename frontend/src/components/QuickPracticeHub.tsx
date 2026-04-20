@@ -53,6 +53,7 @@ import QuickReverseTranslationCard from './QuickReverseTranslationCard';
 import QuickQuestionFormationCard from './QuickQuestionFormationCard';
 import QuickBackchannelCard from './QuickBackchannelCard';
 import QuickPaceMatchCard from './QuickPaceMatchCard';
+import ReducedFormsDrill from './ReducedFormsDrill';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -89,6 +90,7 @@ const CARDS: CardDef[] = [
   // Speaking
   { key: 'speak', tab: 'speaking', label: 'Quick Speak', height: 180, Component: QuickSpeakCard },
   { key: 'shadow', tab: 'speaking', label: 'Shadowing', height: 180, Component: QuickShadowCard },
+  { key: 'reduced-forms', tab: 'speaking', label: 'Reduced Forms', height: 380, Component: ReducedFormsDrill },
   { key: 'opinion', tab: 'speaking', label: 'Opinion', height: 180, Component: QuickOpinionCard },
   { key: 'story', tab: 'speaking', label: 'Story', height: 180, Component: QuickStoryCard },
   { key: 'follow-up', tab: 'speaking', label: 'Follow-up', height: 180, Component: QuickFollowUpCard },

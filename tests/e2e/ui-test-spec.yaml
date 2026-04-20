@@ -4513,6 +4513,22 @@ pages:
         priority: medium
         added_in: 621
 
+      - id: home-rf-001
+        target: Reduced Forms drill tile renders inside Quick Practice (speaking tab)
+        action: Visit /, switch to speaking tab via data-testid="qp-tab-speaking", scroll to find data-testid="reduced-forms-drill"
+        expect: Tile visible with "Reduced Forms" heading and a "Start Round" button (data-testid="rf-start")
+        type: functional
+        priority: medium
+        added_in: 678
+
+      - id: home-rf-002
+        target: Starting a Reduced Forms round shows the listen step and progress dots
+        action: Click data-testid="rf-start", wait for round to load
+        expect: data-testid="rf-progress" visible with 5 dots, data-testid="rf-step-listen" present, data-testid="rf-play" enabled
+        type: functional
+        priority: medium
+        added_in: 678
+
   shadowing:
     path: /shadowing
     tests:

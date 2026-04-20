@@ -216,6 +216,21 @@ CREATE TABLE IF NOT EXISTS listening_speed_progress (
     max_speed REAL NOT NULL DEFAULT 1.0,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS reduced_form_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    reduction_type TEXT NOT NULL,
+    reduced_text TEXT NOT NULL,
+    full_text TEXT NOT NULL,
+    user_expand TEXT NOT NULL DEFAULT '',
+    expand_correct INTEGER NOT NULL DEFAULT 0,
+    shadow_accuracy REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_created ON reduced_form_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_type ON reduced_form_attempts(reduction_type);
 """
 
 # ---------------------------------------------------------------------------
@@ -499,6 +514,28 @@ _MIGRATIONS: list[tuple[str, str]] = [
             max_speed REAL NOT NULL DEFAULT 1.0,
             updated_at TEXT NOT NULL DEFAULT (datetime('now'))
         )""",
+    ),
+    (
+        "create reduced_form_attempts table",
+        """CREATE TABLE IF NOT EXISTS reduced_form_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            reduction_type TEXT NOT NULL,
+            reduced_text TEXT NOT NULL,
+            full_text TEXT NOT NULL,
+            user_expand TEXT NOT NULL DEFAULT '',
+            expand_correct INTEGER NOT NULL DEFAULT 0,
+            shadow_accuracy REAL NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on reduced_form_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_created ON reduced_form_attempts(created_at DESC)",
+    ),
+    (
+        "add index on reduced_form_attempts reduction_type",
+        "CREATE INDEX IF NOT EXISTS idx_reduced_form_attempts_type ON reduced_form_attempts(reduction_type)",
     ),
 ]
 
