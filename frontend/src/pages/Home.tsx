@@ -1785,6 +1785,31 @@ export default function Home() {
       </Link>
 
       <Link
+        to="/conditionals"
+        data-testid="conditionals-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <PenTool size={28} color="#6366f1" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🔀 Conditional Drill</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Rewrite base sentences as Type 0/1/2/3 if-conditionals — LLM-graded.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#6366f1',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
+      <Link
         to="/wh-questions"
         data-testid="wh-question-cta"
         className="card"

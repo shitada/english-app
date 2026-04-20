@@ -5293,3 +5293,77 @@ export function fetchConfusablePairsSummary(
     `/api/confusable-pairs/summary/${encodeURIComponent(sessionId)}`,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Conditional Transform Drill (Type 0/1/2/3)
+// ---------------------------------------------------------------------------
+
+export interface ConditionalPromptResponse {
+  prompt_id: string;
+  base_sentence: string;
+  target_type: number;
+  level: string;
+  hint: string;
+}
+
+export interface ConditionalGradeRequest {
+  prompt_id: string;
+  user_answer: string;
+}
+
+export interface ConditionalGradeResponse {
+  correct: boolean;
+  score: number;
+  model_answer: string;
+  feedback: string;
+  detected_type: number | null;
+  issues: string[];
+}
+
+export interface ConditionalHistoryItem {
+  id: number;
+  prompt_id: string;
+  target_type: number;
+  detected_type: number | null;
+  base_sentence: string;
+  user_answer: string;
+  model_answer: string;
+  feedback: string;
+  issues: string[];
+  correct: boolean;
+  score: number;
+  created_at: string;
+}
+
+export interface ConditionalHistoryResponse {
+  items: ConditionalHistoryItem[];
+}
+
+export function fetchConditionalPrompt(
+  type: 0 | 1 | 2 | 3,
+  level: 'beginner' | 'intermediate' | 'advanced' = 'intermediate',
+): Promise<ConditionalPromptResponse> {
+  const qs = `type=${type}&level=${encodeURIComponent(level)}`;
+  return request<ConditionalPromptResponse>(`/api/conditionals/prompt?${qs}`);
+}
+
+export function gradeConditionalAttempt(
+  payload: ConditionalGradeRequest,
+  userId: string = 'local',
+): Promise<ConditionalGradeResponse> {
+  return request<ConditionalGradeResponse>('/api/conditionals/grade', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': userId },
+  });
+}
+
+export function fetchConditionalHistory(
+  limit: number = 20,
+  userId: string = 'local',
+): Promise<ConditionalHistoryResponse> {
+  return request<ConditionalHistoryResponse>(
+    `/api/conditionals/history?limit=${encodeURIComponent(String(limit))}`,
+    { headers: { 'Content-Type': 'application/json', 'X-User-Id': userId } },
+  );
+}

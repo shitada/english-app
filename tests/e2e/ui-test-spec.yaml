@@ -6232,3 +6232,48 @@ pages:
         type: visual
         priority: medium
         added_in: 708
+
+      - id: conditionals-001
+        target: Home CTA links to /conditionals
+        selector: data-testid="conditionals-cta"
+        action: Visit "/" and locate data-testid="conditionals-cta"
+        expect: Card labeled "Conditional Drill" is visible and links to /conditionals
+        type: navigation
+        priority: high
+        added_in: 709
+
+      - id: conditionals-002
+        target: Conditionals page renders without crash
+        selector: data-testid="conditionals-title"
+        action: Navigate to /conditionals
+        expect: data-testid="conditionals-title" visible; type + level pickers rendered; no console errors
+        type: smoke
+        priority: high
+        added_in: 709
+
+      - id: conditionals-003
+        target: New prompt button fetches a base sentence
+        selector: data-testid="conditionals-new-prompt"
+        action: Click type=2, level=beginner, then data-testid="conditionals-new-prompt"
+        expect: data-testid="conditionals-base-sentence" renders with non-empty text
+        type: functional
+        priority: high
+        added_in: 709
+
+      - id: conditionals-004
+        target: Submit answer shows verdict + score + model answer
+        selector: data-testid="conditionals-submit"
+        action: Load a prompt, type an answer, click submit
+        expect: data-testid="conditionals-result" visible with data-testid="conditionals-score" and data-testid="conditionals-model-answer" (when provided)
+        type: functional
+        priority: high
+        added_in: 709
+
+      - id: conditionals-005
+        target: Recent attempts list updates after a submission
+        selector: data-testid="conditionals-history"
+        action: Submit one attempt and inspect the "Recent attempts" card
+        expect: At least one data-testid="conditionals-history-item" appears
+        type: functional
+        priority: medium
+        added_in: 709

@@ -37,6 +37,7 @@ import CollocationChef from './pages/CollocationChef';
 import ElasticSentencePage from './pages/ElasticSentencePage';
 import ReportedSpeech from './pages/ReportedSpeech';
 import ConfusablePairsPage from './pages/ConfusablePairsPage';
+import ConditionalsPage from './pages/ConditionalsPage';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -153,6 +154,7 @@ export default function App() {
                 <Route path="/elastic-sentence" element={<ElasticSentencePage />} />
                 <Route path="/reported-speech" element={<ReportedSpeech />} />
                 <Route path="/confusable-pairs" element={<ConfusablePairsPage />} />
+                <Route path="/conditionals" element={<ConditionalsPage />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

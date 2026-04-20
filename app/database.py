@@ -504,6 +504,39 @@ CREATE INDEX IF NOT EXISTS idx_reported_speech_created
 CREATE INDEX IF NOT EXISTS idx_reported_speech_user
     ON reported_speech_attempts(user_id);
 
+CREATE TABLE IF NOT EXISTS conditional_prompts (
+    id TEXT PRIMARY KEY,
+    target_type INTEGER NOT NULL,
+    level TEXT NOT NULL,
+    base_sentence TEXT NOT NULL,
+    hint TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_conditional_prompts_type_level
+    ON conditional_prompts(target_type, level);
+
+CREATE TABLE IF NOT EXISTS conditional_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL DEFAULT 'local',
+    prompt_id TEXT,
+    target_type INTEGER NOT NULL,
+    detected_type INTEGER,
+    base_sentence TEXT,
+    user_answer TEXT,
+    model_answer TEXT,
+    feedback TEXT,
+    issues TEXT,
+    correct INTEGER NOT NULL DEFAULT 0,
+    score INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_conditional_attempts_user
+    ON conditional_attempts(user_id);
+CREATE INDEX IF NOT EXISTS idx_conditional_attempts_created
+    ON conditional_attempts(created_at DESC);
+
 CREATE TABLE IF NOT EXISTS confusable_pair_sessions (
     id TEXT PRIMARY KEY,
     difficulty TEXT,
@@ -1256,6 +1289,47 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on confusable_pair_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_confusable_attempts_created ON confusable_pair_attempts(created_at DESC)",
+    ),
+    (
+        "create conditional_prompts table",
+        """CREATE TABLE IF NOT EXISTS conditional_prompts (
+            id TEXT PRIMARY KEY,
+            target_type INTEGER NOT NULL,
+            level TEXT NOT NULL,
+            base_sentence TEXT NOT NULL,
+            hint TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on conditional_prompts (target_type, level)",
+        "CREATE INDEX IF NOT EXISTS idx_conditional_prompts_type_level ON conditional_prompts(target_type, level)",
+    ),
+    (
+        "create conditional_attempts table",
+        """CREATE TABLE IF NOT EXISTS conditional_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'local',
+            prompt_id TEXT,
+            target_type INTEGER NOT NULL,
+            detected_type INTEGER,
+            base_sentence TEXT,
+            user_answer TEXT,
+            model_answer TEXT,
+            feedback TEXT,
+            issues TEXT,
+            correct INTEGER NOT NULL DEFAULT 0,
+            score INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on conditional_attempts user_id",
+        "CREATE INDEX IF NOT EXISTS idx_conditional_attempts_user ON conditional_attempts(user_id)",
+    ),
+    (
+        "add index on conditional_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_conditional_attempts_created ON conditional_attempts(created_at DESC)",
     ),
 ]
 

@@ -775,3 +775,90 @@ def build_confusable_pairs_prompt(
         f"'{diff}' difficulty.{scope}"
     )
     return CONFUSABLE_PAIRS_SYSTEM, user
+
+
+# ---------------------------------------------------------------------------
+# Conditional Transform Drill (Type 0 / 1 / 2 / 3 if-sentences)
+# ---------------------------------------------------------------------------
+CONDITIONAL_PROMPT_SYSTEM = (
+    "You generate English CONDITIONAL-TRANSFORM practice prompts. "
+    "The learner will rewrite the 'base_sentence' as an if-sentence of the "
+    "requested target_type (0, 1, 2, or 3).\n\n"
+    "Conditional types:\n"
+    "- Type 0 (general truth): If + present simple, present simple. "
+    "e.g. 'If you heat water, it boils.'\n"
+    "- Type 1 (real future): If + present simple, will + base. "
+    "e.g. 'If it rains, I will stay home.'\n"
+    "- Type 2 (unreal present/future): If + past simple, would + base. "
+    "e.g. 'If I had more time, I would travel.'\n"
+    "- Type 3 (unreal past): If + past perfect, would have + past participle. "
+    "e.g. 'If I had studied, I would have passed.'\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "base_sentence": "I do not have time, so I do not travel.",\n'
+    '  "hint": "Rewrite as an unreal present Type-2 conditional." }\n\n'
+    "Rules:\n"
+    "- 'base_sentence' is ONE natural English sentence describing a "
+    "situation or cause-effect statement that can be rewritten as a "
+    "conditional of the requested type.\n"
+    "- Level 'beginner' uses simple everyday vocabulary; 'intermediate' "
+    "uses common phrasal structures; 'advanced' uses more nuanced wording.\n"
+    "- 'hint' is ONE short sentence (<= 20 words) guiding the rewrite.\n"
+    "- Do NOT give the answer inside the base_sentence.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_conditional_prompt_request(
+    target_type: int, level: str = "intermediate"
+) -> tuple[str, str]:
+    """Return (system, user) messages for generating a conditional prompt."""
+    lvl = str(level or "intermediate").strip().lower()
+    if lvl not in {"beginner", "intermediate", "advanced"}:
+        lvl = "intermediate"
+    t = int(target_type)
+    user = (
+        f"Generate ONE conditional-transform prompt at '{lvl}' level for "
+        f"target_type={t}. Return STRICT JSON with base_sentence and hint."
+    )
+    return CONDITIONAL_PROMPT_SYSTEM, user
+
+
+CONDITIONAL_GRADE_SYSTEM = (
+    "You are an English teacher grading a learner's attempt to rewrite a "
+    "'base_sentence' as a conditional of the requested target_type "
+    "(0, 1, 2, or 3). Judge grammar (if-clause tense + main-clause modal "
+    "structure), meaning preservation, and naturalness.\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "correct": true,\n'
+    '  "score": 85,\n'
+    '  "model_answer": "If I had more time, I would travel.",\n'
+    '  "feedback": "Good type-2 structure but use \'would\' not \'will\'.",\n'
+    '  "detected_type": 2,\n'
+    '  "issues": ["Missing past simple in if-clause"] }\n\n'
+    "Rules:\n"
+    "- 'correct' is true ONLY when the attempt is a fully acceptable "
+    "conditional of the requested target_type with preserved meaning.\n"
+    "- 'score' is an integer 0..100.\n"
+    "- 'detected_type' is 0, 1, 2, 3, or null if unidentifiable.\n"
+    "- 'model_answer' is ONE canonical rewrite of base_sentence as the "
+    "requested target_type.\n"
+    "- 'feedback' is ONE short sentence (<= 24 words).\n"
+    "- 'issues' is a short list (0..4) of brief issue labels.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_conditional_grade_request(
+    *,
+    target_type: int,
+    base_sentence: str,
+    user_answer: str,
+) -> tuple[str, str]:
+    """Return (system, user) messages for grading a conditional attempt."""
+    user = (
+        f"target_type: {int(target_type)}\n"
+        f"base_sentence: {base_sentence}\n"
+        f"student_attempt: {user_answer}\n"
+        "Grade the student's attempt and return STRICT JSON."
+    )
+    return CONDITIONAL_GRADE_SYSTEM, user
