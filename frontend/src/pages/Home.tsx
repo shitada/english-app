@@ -1609,13 +1609,9 @@ export default function Home() {
         </span>
       </Link>
 
-          Start
-        </span>
-      </Link>
-
       <Link
-        to="/monologue"
-        data-testid="monologue-cta"
+        to="/phrasal-verbs"
+        data-testid="phrasal-verb-cta"
         className="card"
         style={{
           display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
@@ -1623,11 +1619,11 @@ export default function Home() {
           border: '1px solid var(--border)', borderRadius: 12,
         }}
       >
-        <Mic size={28} color="#8b5cf6" />
+        <Headphones size={28} color="#8b5cf6" />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🎤 Situational Monologue Drill</div>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🧩 句動詞ドリル (Phrasal Verb Drill)</div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            Elevator-pitch practice — 30-60s structured speaking for real situations.
+            Type the missing particle — turn ___ the lights, look ___ the word.
           </div>
         </div>
         <span style={{

@@ -4219,87 +4219,53 @@ export function getSpeedLadderHistory(
   );
 }
 
+
 // ---------------------------------------------------------------------------
-// Situational Monologue Drill (elevator pitch)
+// Phrasal Verb Particle Drill — typing-based productive recall
 // ---------------------------------------------------------------------------
 
-export interface MonologueScenario {
+export type PhrasalVerbLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export interface PhrasalVerbItem {
   id: string;
-  title: string;
-  prompt: string;
-  target_seconds: number;
-  content_beats: string[];
+  verb: string;
+  particle: string;
+  meaning: string;
+  example_full: string;
+  example_with_blank: string;
+  level: string;
+  accepted: string[];
 }
 
-export interface MonologueScenarioListResponse {
-  scenarios: MonologueScenario[];
+export interface PhrasalVerbDrillResponse {
+  level: string;
+  items: PhrasalVerbItem[];
 }
 
-export interface MonologueFeedback {
-  beats_covered: string[];
-  fluency_score: number;
-  structure_score: number;
-  overall_score: number;
-  one_line_feedback: string;
-  suggested_rewrite_opening: string;
+export interface PhrasalVerbAttemptInput {
+  id: string;
+  user_answer: string;
+  correct: boolean;
 }
 
-export interface MonologueAttemptResponse {
-  id: number;
-  scenario_id: string;
-  duration_seconds: number;
-  word_count: number;
-  filler_count: number;
-  wpm: number;
-  coverage_ratio: number;
-  fluency_score: number;
-  structure_score: number;
-  overall_score: number;
-  feedback: MonologueFeedback;
-}
-
-export interface MonologueHistoryItem {
-  id: number;
-  scenario_id: string;
-  duration_seconds: number;
-  word_count: number;
-  filler_count: number;
-  wpm: number;
-  coverage_ratio: number;
-  fluency_score: number;
-  structure_score: number;
-  overall_score: number;
-  feedback: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface MonologueHistoryResponse {
-  attempts: MonologueHistoryItem[];
-  personal_best: MonologueHistoryItem | null;
-}
-
-export function getMonologueScenarios(): Promise<MonologueScenarioListResponse> {
-  return request<MonologueScenarioListResponse>('/api/monologue/scenarios');
-}
-
-export function submitMonologueAttempt(
-  scenario_id: string,
-  transcript: string,
-  duration_seconds: number,
-): Promise<MonologueAttemptResponse> {
-  return request<MonologueAttemptResponse>('/api/monologue/attempt', {
-    method: 'POST',
-    body: JSON.stringify({ scenario_id, transcript, duration_seconds }),
+export function fetchPhrasalVerbDrill(
+  count = 10,
+  level: PhrasalVerbLevel = 'beginner',
+): Promise<PhrasalVerbDrillResponse> {
+  const params = new URLSearchParams({
+    count: String(count),
+    level,
   });
+  return request<PhrasalVerbDrillResponse>(
+    `/api/phrasal-verbs/drill?${params.toString()}`,
+  );
 }
 
-export function getMonologueHistory(
-  scenario_id?: string,
-  limit = 20,
-): Promise<MonologueHistoryResponse> {
-  const params = new URLSearchParams({ limit: String(limit) });
-  if (scenario_id) params.set('scenario_id', scenario_id);
-  return request<MonologueHistoryResponse>(
-    `/api/monologue/history?${params.toString()}`,
-  );
+export function postPhrasalVerbAttempt(
+  payload: PhrasalVerbAttemptInput,
+): Promise<{ ok: boolean }> {
+  return request<{ ok: boolean }>('/api/phrasal-verbs/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }

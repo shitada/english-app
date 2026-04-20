@@ -5381,38 +5381,48 @@ pages:
         priority: medium
         added_in: 691
 
-  home_monologue_card:
+  home_phrasal_verb_card:
     path: /
     tests:
-      - id: home-monologue-001
-        target: Home exposes a Situational Monologue Drill CTA linking to /monologue
-        action: Visit "/" and locate data-testid="monologue-cta"
-        expect: Card is visible with text containing "Situational Monologue Drill" and a 🎤 emoji; clicking navigates to /monologue
+      - id: home-phrasal-verb-001
+        target: Home exposes a Phrasal Verb Drill CTA card linking to /phrasal-verbs
+        action: Visit "/" and locate data-testid="phrasal-verb-cta"
+        expect: Card is visible with text containing "Phrasal Verb" and a 🧩 emoji; clicking navigates to /phrasal-verbs
         type: navigation
         priority: high
-        added_in: 692
+        added_in: 693
 
-  monologue:
-    path: /monologue
+  phrasal_verbs:
+    path: /phrasal-verbs
     tests:
-      - id: monologue-001
-        target: Monologue Drill page renders title and scenario list
-        action: Visit "/monologue" and locate data-testid="monologue-title" + data-testid="monologue-scenarios"
-        expect: Heading contains "Situational Monologue Drill" and at least 5 scenario buttons are visible
+      - id: phrasal-verb-001
+        target: Drill page renders title and level picker
+        selector: data-testid="phrasal-verb-title"
+        action: Visit "/phrasal-verbs" and verify data-testid="phrasal-verb-title" and data-testid="phrasal-verb-start" are visible
+        expect: Heading contains "Phrasal Verb Particle Drill"; three level buttons (beginner/intermediate/advanced) and a Start button are present
         type: functional
         priority: high
-        added_in: 692
-      - id: monologue-002
-        target: Selecting a scenario reveals prompt, target duration, beat checklist, and a Start button
-        action: Click any data-testid^="monologue-scenario-" button, then wait for data-testid="monologue-prompt", data-testid="monologue-target", data-testid="monologue-beats", and data-testid="monologue-start"
-        expect: Prompt text, target seconds label, beat list, and a Start recording button are visible
+        added_in: 693
+      - id: phrasal-verb-002
+        target: Clicking Start loads the typing drill UI
+        selector: data-testid="phrasal-verb-start"
+        action: Click data-testid="phrasal-verb-start" and wait for data-testid="phrasal-verb-input"
+        expect: data-testid="phrasal-verb-drill" is visible with data-testid="phrasal-verb-example" (containing "____") and data-testid="phrasal-verb-input"
         type: functional
         priority: high
-        added_in: 692
-      - id: monologue-003
-        target: Start recording transitions to timer + Stop button
-        action: Click data-testid="monologue-start" and wait for data-testid="monologue-timer" + data-testid="monologue-stop"
-        expect: Timer displays m:ss format and a Stop & score button is visible
+        added_in: 693
+      - id: phrasal-verb-003
+        target: Typing a particle and submitting shows feedback with correct answer
+        selector: data-testid="phrasal-verb-input"
+        action: After starting, type any text into data-testid="phrasal-verb-input", click data-testid="phrasal-verb-submit"
+        expect: data-testid="phrasal-verb-feedback" and data-testid="phrasal-verb-feedback-result" become visible; data-testid="phrasal-verb-next" is clickable
         type: functional
         priority: medium
-        added_in: 692
+        added_in: 693
+      - id: phrasal-verb-004
+        target: Completing all items shows summary with score
+        action: Step through all items (type answer, Submit, Next) until summary
+        expect: data-testid="phrasal-verb-summary" is visible; data-testid="phrasal-verb-score" shows "N / N" format; data-testid="phrasal-verb-restart" is present; data-testid="phrasal-verb-retry-missed" appears only if at least one item was wrong
+        type: functional
+        priority: medium
+        added_in: 693
