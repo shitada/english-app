@@ -4773,3 +4773,91 @@ export function postPrepositionAttempt(
 export function fetchPrepositionStats(): Promise<PrepositionStatsResponse> {
   return request<PrepositionStatsResponse>('/api/prepositions/stats');
 }
+
+// ---------------------------------------------------------------------------
+// Pause & Predict listening drill
+// ---------------------------------------------------------------------------
+
+export type PausePredictDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export interface PausePredictItem {
+  id: string;
+  full_sentence: string;
+  prefix_text: string;
+  expected_completion: string;
+  alternatives: string[];
+  context_hint: string;
+}
+
+export interface PausePredictSessionResponse {
+  difficulty: string;
+  count: number;
+  items: PausePredictItem[];
+}
+
+export interface PausePredictSubmitRequest {
+  item_id: string;
+  user_answer: string;
+  expected: string;
+  alternatives: string[];
+}
+
+export interface PausePredictSubmitResponse {
+  is_correct: boolean;
+  is_close: boolean;
+  expected: string;
+  user_answer_normalized: string;
+  score: number;
+  feedback: string;
+}
+
+export interface PausePredictCompleteRequest {
+  difficulty: string;
+  total: number;
+  correct: number;
+  close: number;
+  avg_score: number;
+}
+
+export interface PausePredictCompleteResponse {
+  id: number;
+  difficulty: string;
+  total: number;
+  correct: number;
+  close: number;
+  avg_score: number;
+}
+
+export function fetchPausePredictSession(
+  difficulty: PausePredictDifficulty = 'beginner',
+  count = 5,
+): Promise<PausePredictSessionResponse> {
+  const params = new URLSearchParams({
+    difficulty,
+    count: String(count),
+  });
+  return request<PausePredictSessionResponse>(
+    `/api/pause-predict/session?${params.toString()}`,
+  );
+}
+
+export function submitPausePredict(
+  payload: PausePredictSubmitRequest,
+): Promise<PausePredictSubmitResponse> {
+  return request<PausePredictSubmitResponse>('/api/pause-predict/submit', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function completePausePredictSession(
+  payload: PausePredictCompleteRequest,
+): Promise<PausePredictCompleteResponse> {
+  return request<PausePredictCompleteResponse>(
+    '/api/pause-predict/session/complete',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
+}

@@ -101,6 +101,7 @@ async def client(tmp_path: Path, mock_copilot) -> AsyncGenerator[AsyncClient, No
          patch("app.routers.vocabulary.get_copilot_service", return_value=mock_copilot), \
          patch("app.routers.paraphrase.get_copilot_service", return_value=mock_copilot), \
          patch("app.routers.monologue.get_copilot_service", return_value=mock_copilot), \
+         patch("app.routers.pause_predict.get_copilot_service", return_value=mock_copilot), \
          patch("app.routers.dashboard.get_copilot_service", return_value=mock_copilot):
 
         transport = ASGITransport(app=app)

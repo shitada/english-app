@@ -1,7 +1,3 @@
 [
-  {"check":"missing_iterations","severity":"error","iterations":" 698","root_cause":"recording_failure","confidence":"HIGH","evidence":"Committed iterations not found in results.tsv","action":"none"}
-,
-  {"check":"gap_iterations","severity":"error","iterations":" 698","root_cause":"invocation_boundary_loss","confidence":"HIGH","evidence":"Iterations attempted (in runner.log) but not present in results.tsv — likely orchestrator timed out or failed to call record_results before invocation ended","action":"none"}
-,
-  {"check":"agent_skip","severity":"error","iterations":" 698 699  698 699","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 700 701  700 701","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ]

@@ -5756,3 +5756,67 @@ pages:
         type: functional
         priority: medium
         added_in: 701
+
+  home_pause_predict_card:
+    path: /
+    tests:
+      - id: home-pause-predict-001
+        target: Home exposes a Pause & Predict CTA card linking to /pause-predict
+        selector: data-testid="pause-predict-cta"
+        action: Visit "/" and locate data-testid="pause-predict-cta"
+        expect: Card labeled "Pause & Predict" is visible and links to /pause-predict
+        type: navigation
+        priority: high
+        added_in: 702
+
+  pause-predict:
+    path: /pause-predict
+    tests:
+      - id: pause-predict-001
+        target: Select phase shows difficulty picker and start button
+        selector: data-testid="pause-predict-title"
+        action: Visit "/pause-predict" and verify data-testid="pause-predict-title", data-testid="pause-predict-difficulty-beginner", and data-testid="pause-predict-start" are visible
+        expect: Title "Pause & Predict" visible; difficulty buttons and Start button are enabled
+        type: functional
+        priority: critical
+        added_in: 702
+
+      - id: pause-predict-002
+        target: Starting the drill loads the listen phase with a replay button and input
+        action: Click data-testid="pause-predict-start" and wait for data-testid="pause-predict-drill"
+        expect: data-testid="pause-predict-progress", data-testid="pause-predict-replay", data-testid="pause-predict-input", and data-testid="pause-predict-submit" are visible
+        type: functional
+        priority: critical
+        added_in: 702
+
+      - id: pause-predict-003
+        target: Submitting an answer reveals the full sentence + next button
+        action: Type any text into data-testid="pause-predict-input", click data-testid="pause-predict-submit"
+        expect: data-testid="pause-predict-reveal", data-testid="pause-predict-result", data-testid="pause-predict-full-sentence", data-testid="pause-predict-score", and data-testid="pause-predict-next" are visible
+        type: functional
+        priority: high
+        added_in: 702
+
+      - id: pause-predict-004
+        target: Summary shows accuracy %, close-match rate, avg score, and new-session CTA
+        action: Complete all 5 items until data-testid="pause-predict-summary" is visible
+        expect: data-testid="pause-predict-accuracy", data-testid="pause-predict-close-rate", data-testid="pause-predict-avg-score", and data-testid="pause-predict-new-session" are visible
+        type: functional
+        priority: medium
+        added_in: 702
+
+      - id: pause-predict-005
+        target: Replay missed button appears when at least one item was incorrect
+        action: After any session with at least one wrong prediction, verify data-testid="pause-predict-replay-missed"
+        expect: data-testid="pause-predict-replay-missed" is visible iff at least one item was missed
+        type: functional
+        priority: low
+        added_in: 702
+
+      - id: pause-predict-006
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode via theme toggle, then resize viewport to 375x812 and visit /pause-predict
+        expect: Title, difficulty cards, and Start button are all legible; no overflow; colors respect dark tokens
+        type: visual
+        priority: medium
+        added_in: 702

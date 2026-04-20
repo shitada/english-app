@@ -424,6 +424,22 @@ CREATE TABLE IF NOT EXISTS preposition_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_preposition_attempts_category ON preposition_attempts(category);
 CREATE INDEX IF NOT EXISTS idx_preposition_attempts_created ON preposition_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS pause_predict_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    difficulty TEXT NOT NULL,
+    total INTEGER NOT NULL DEFAULT 0,
+    correct INTEGER NOT NULL DEFAULT 0,
+    close INTEGER NOT NULL DEFAULT 0,
+    avg_score REAL NOT NULL DEFAULT 0.0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_created
+    ON pause_predict_sessions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_difficulty
+    ON pause_predict_sessions(difficulty);
 """
 
 # ---------------------------------------------------------------------------
@@ -990,6 +1006,27 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on preposition_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_preposition_attempts_created ON preposition_attempts(created_at DESC)",
+    ),
+    (
+        "create pause_predict_sessions table for Pause & Predict drill",
+        """CREATE TABLE IF NOT EXISTS pause_predict_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            difficulty TEXT NOT NULL,
+            total INTEGER NOT NULL DEFAULT 0,
+            correct INTEGER NOT NULL DEFAULT 0,
+            close INTEGER NOT NULL DEFAULT 0,
+            avg_score REAL NOT NULL DEFAULT 0.0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on pause_predict_sessions created_at",
+        "CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_created ON pause_predict_sessions(created_at DESC)",
+    ),
+    (
+        "add index on pause_predict_sessions difficulty",
+        "CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_difficulty ON pause_predict_sessions(difficulty)",
     ),
 ]
 

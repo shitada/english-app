@@ -526,3 +526,43 @@ def build_error_correction_grade_prompt(
         f"LEARNER ANSWER: {user_answer}"
     )
     return ERROR_CORRECTION_GRADE_SYSTEM, user
+
+
+def PAUSE_PREDICT_PROMPT() -> str:
+    """System prompt for the Pause & Predict listening drill.
+
+    Generates natural, everyday English sentences cut off before the final
+    1–3 word chunk, along with the expected completion and acceptable
+    alternatives. The prefix MUST be a strict prefix of the full sentence.
+    """
+    return (
+        "You generate 'pause and predict' listening items for an English "
+        "learner. The learner hears the prefix via TTS, then types what they "
+        "think completes the sentence. Sentences must be natural, everyday "
+        "English with a highly-predictable final chunk (1-3 words).\n\n"
+        "Return STRICT JSON with this shape:\n"
+        '{ "items": [\n'
+        '    {\n'
+        '      "full_sentence": "I need to go to the grocery store.",\n'
+        '      "prefix_text": "I need to go to the grocery",\n'
+        '      "expected_completion": "store",\n'
+        '      "alternatives": ["shop"],\n'
+        '      "context_hint": "Everyday errand"\n'
+        '    }\n'
+        "] }\n\n"
+        "Rules:\n"
+        "- prefix_text MUST be a strict prefix of full_sentence; "
+        "full_sentence MUST begin with prefix_text, and the remaining text "
+        "(after prefix_text, excluding leading whitespace and trailing "
+        "punctuation) is the 1-3 word chunk the learner should predict.\n"
+        "- expected_completion is that remaining chunk, WITHOUT trailing "
+        "punctuation.\n"
+        "- alternatives is a short list (0-4 items) of other natural "
+        "completions a learner might reasonably produce. Do not include the "
+        "expected_completion itself.\n"
+        "- Prefer concrete, everyday vocabulary matching the CEFR level "
+        "(beginner=A2, intermediate=B1, advanced=B2/C1).\n"
+        "- No proper nouns that are hard to spell. No numbers as digits — "
+        "spell them as words unless they are already natural (e.g. 'nine').\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )

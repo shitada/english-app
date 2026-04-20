@@ -40,6 +40,7 @@ from app.routers import error_correction
 from app.routers import minimal_pairs
 from app.routers import connected_speech
 from app.routers import prepositions
+from app.routers import pause_predict
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -238,6 +239,7 @@ app.include_router(error_correction.router)
 app.include_router(minimal_pairs.router)
 app.include_router(connected_speech.router)
 app.include_router(prepositions.router)
+app.include_router(pause_predict.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""
