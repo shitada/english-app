@@ -5246,3 +5246,62 @@ pages:
         type: functional
         priority: high
         added_in: 688
+
+  paraphrase:
+    path: /paraphrase
+    tests:
+      - id: paraphrase-001
+        target: Paraphrase Practice page renders title, level toggle and progress badge
+        action: Visit /paraphrase and snapshot
+        expect: data-testid="paraphrase-title" shows "Paraphrase Practice"; data-testid="paraphrase-level-easy", "paraphrase-level-medium", "paraphrase-level-hard" buttons all visible; data-testid="paraphrase-progress" shows "1 / 5"
+        type: functional
+        priority: high
+        added_in: 689
+
+      - id: paraphrase-002
+        target: Source sentence card renders with Speak (TTS) button after load
+        action: Wait for /api/paraphrase/session to resolve, then locate data-testid="paraphrase-source" and data-testid="paraphrase-speak"
+        expect: A non-empty sentence is displayed and the Speak (Volume2 icon) button is visible and enabled
+        type: functional
+        priority: high
+        added_in: 689
+
+      - id: paraphrase-003
+        target: Submit button is disabled until the user types something
+        action: Locate data-testid="paraphrase-input" empty, then check data-testid="paraphrase-submit"
+        expect: Submit button is disabled when textarea is empty; becomes enabled after typing any non-whitespace text
+        type: functional
+        priority: high
+        added_in: 689
+
+      - id: paraphrase-004
+        target: Submitting an attempt shows three score bars, overall score, feedback and Next button
+        action: Type a paraphrase into data-testid="paraphrase-input", click data-testid="paraphrase-submit", wait for /api/paraphrase/score
+        expect: data-testid="paraphrase-feedback" appears with three score bars (Meaning/Grammar/Naturalness via data-testid="paraphrase-score-meaning|grammar|naturalness"), data-testid="paraphrase-overall", data-testid="paraphrase-feedback-text", data-testid="paraphrase-suggested" and data-testid="paraphrase-next" all visible
+        type: functional
+        priority: critical
+        added_in: 689
+
+      - id: paraphrase-005
+        target: Next button advances through 5 sentences and then shows the session summary
+        action: Repeat the submit → Next loop 5 times until data-testid="paraphrase-next" reads "Finish", then click it
+        expect: data-testid="paraphrase-summary" replaces the per-sentence card, showing data-testid="paraphrase-summary-average" (a 0–100 number) and a data-testid="paraphrase-restart" button
+        type: functional
+        priority: high
+        added_in: 689
+
+      - id: paraphrase-006
+        target: Changing level reloads the session with sentences from the new bank
+        action: Click data-testid="paraphrase-level-hard"; wait for /api/paraphrase/session?level=hard&count=5
+        expect: data-testid="paraphrase-progress" resets to "1 / 5" and a new (typically longer/more complex) source sentence appears in data-testid="paraphrase-source"
+        type: functional
+        priority: medium
+        added_in: 689
+
+      - id: paraphrase-007
+        target: Home page exposes a Paraphrase Practice CTA card linking to /paraphrase
+        action: Visit "/" and locate data-testid="paraphrase-cta"
+        expect: Card is visible with text containing "Paraphrase Practice" and a ✍️ emoji or PenTool icon; clicking it navigates to /paraphrase
+        type: navigation
+        priority: high
+        added_in: 689

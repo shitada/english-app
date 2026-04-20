@@ -2856,4 +2856,113 @@ Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch
   │ date +%s
   └ 2 lines...
 
-Now let me look at frontend tests and the QuickContrastiveStressCard for pattern reference:Now let me create everything. First, the DAL:Now the router:Update database schema, register router:Now backend tests:Now let's verify backend tests pass quickly:Now frontend. Add API helpers and the component:Now LinkerDrill component:Good. Now register in QuickPracticeHub:Add a vitest for the Jaccard helper (node env compatible):Now run tsc to make sure frontend builds:Now append spec items:Let me verify everything still passes and commit:
+Now let me look at frontend tests and the QuickContrastiveStressCard for pattern reference:Now let me create everything. First, the DAL:Now the router:Update database schema, register router:Now backend tests:Now let's verify backend tests pass quickly:Now frontend. Add API helpers and the component:Now LinkerDrill component:Good. Now register in QuickPracticeHub:Add a vitest for the Jaccard helper (node env compatible):Now run tsc to make sure frontend builds:Now append spec items:Let me verify everything still passes and commit:```json
+{
+  "committed": true,
+  "commit_hash": "8bfe611",
+  "files_changed": [
+    "app/dal/linker_drill.py",
+    "app/routers/linker_drill.py",
+    "app/database.py",
+    "app/main.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/LinkerDrill.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "frontend/src/components/__tests__/LinkerDrill.test.ts",
+    "tests/integration/test_linker_drill_api.py",
+    "tests/unit/test_linker_drill_dal.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 21,
+  "ui_spec_updated": true,
+  "description": "Added Linker Speak Drill: balanced 5-item connector/cohesion round (5 categories), POST /attempt + GET /stats with weakest-category aggregation, new LinkerDrill component wired into Quick Practice Hub with TTS Listen + STT Speak + Jaccard scoring."
+}
+```● Coder Implement linker drill
+  │ run tests (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && python -m pytest
+  │   │ tests/unit/test_linker_drill_dal.py
+  │   │ tests/integration/test_linker_drill_api.py tests/unit/test_database.py -q
+  │   │ 2>&1 | tail -15
+  │   └ 3 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git -c
+      │ user.email=autoresearch@local -c user.name=autoresearch commit -m
+      │ "autoresearch #688: Linker Speak Drill (connector/cohesion practice +
+      │ speak-aloud)…
+      └ 28 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2420,
+  "tests_total": 2420,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "vitest_result": "pass (7/7 LinkerDrill)",
+  "e2e_result": "not_run",
+  "overall_pass": true,
+  "test_output": "======================= 2420 passed in 141.12s (0:02:21) =======================\nSMOKE OK\ntsc --noEmit: exit 0\nvitest LinkerDrill.test.ts: 7 passed",
+  "failure_summary": ""
+}
+```● Tester Test iter 688
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ vitest LinkerDrill (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+      │ src/components/__tests__/LinkerDrill.test.ts 2>&1 | tail -20
+      └ 9 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "New self-contained connector drill with clean DAL/router separation, proper Pydantic schemas, balanced category sampling, new table added via CREATE TABLE IF NOT EXISTS (no migration needed for brand-new tables), all 2420 tests + tsc + smoke + vitest pass."}
+```● Evaluator Evaluate iter 688
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L50:250 (200 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L250:400 (151 lines read)
+
+● Record iter 688 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776656802;
+  │ T1=1776656867; T2=1776657410; T3=1776657584; T4=$(date +%s); printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' 688 8bfe611
+  │ "$(date +%Y-%m-%d)" $((T1-T0)) $((T2-T1)) $((T3-T2)) $((T4-T3)) $((T4-T0))
+  │ 2420 2420 pass 7.55 kept "Linker Speak Drill (connector/cohesion: 5-item …
+  └ 5 lines...
+
+Iter 688 done. Onto 689.
+
+● T0 iter 689 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Paraphrase Practice mode: rewrite sentences with LLM scoring + TTS",
+  "description": "Add a new Paraphrase Practice page that helps users build flexible expression — a key fluency skill not yet covered (we have shadowing, echo, dictation, summarize, but no rewrite). This is NOT another quick speaking card; it is a full standalone mode page with multiple turns per session.\n\nFlow: (1) Backend serves a source sentence (seeded list of ~30 in app/dal/paraphrase.py keyed by CEFR level: easy/medium/hard, e.g., 'I'm really tired today.', 'The meeting was postponed because of the storm.'). (2) Frontend plays the sentence via existing TTS (window.speechSynthesis, en-US voice) and shows it. (3) User types a paraphrase OR uses Web Speech API mic input (reuse pattern from Pronunciation.tsx / Shadowing.tsx). (4) POST /api/paraphrase/score with {source, attempt} → LLM (copilot_client) returns JSON {meaning_score: 0-100, grammar_score: 0-100, naturalness_score: 0-100, overall: 0-100, kept_meaning: bool, used_different_words: bool, feedback: '1-2 sentence coaching tip', suggested_paraphrase: string}. Validate with Pydantic. (5) UI shows three colored score bars, the suggested paraphrase, and a 'Next' button advancing through a 5-sentence session. End screen shows average overall score and lists each attempt with its suggested rewrite.\n\nFiles:\n- app/dal/paraphrase.py (NEW): get_random_sentences(level, count) returning seeded sentences; score_paraphrase(source, attempt) calling copilot with a prompt instructing strict JSON output; robust JSON parse with try/except returning safe defaults on failure.\n- app/routers/paraphrase.py (NEW): GET /api/paraphrase/session?level=easy&count=5 → {sentences:[{id,text,level}]}; POST /api/paraphrase/score body ParaphraseScoreRequest → ParaphraseScoreResponse. Use existing rate_limit dependency pattern.\n- app/main.py: import and include_router(paraphrase_router).\n- frontend/src/pages/Paraphrase.tsx (NEW): React component with level selector (easy/medium/hard), Speak button (TTS), text input + mic button, Submit button calling api.scoreParaphrase, three score bars (meaning/grammar/naturalness), feedback text, suggested rewrite collapsible, Next/Finish buttons, end-of-session summary. Reuse existing CSS variables for dark mode (--bg-card, --text-primary). Add api.ts helpers getParaphraseSession() and scoreParaphrase().\n- frontend/src/App.tsx: add /paraphrase route and a Home card (icon ✍️, title 'Paraphrase', subtitle 'Rewrite sentences in your own words') in the existing practice-modes grid alongside Shadowing/Listening.\n\nNo schema changes required (no persistence in v1; can be added later). Acceptance: GET /api/paraphrase/session returns 5 sentences; POST /api/paraphrase/score with a valid attempt returns all four scores and feedback within 10s; Paraphrase page renders, plays TTS, accepts input, displays scored feedback; mode card visible on Home and reachable via direct URL.",
+  "files_to_modify": ["app/dal/paraphrase.py", "app/routers/paraphrase.py", "app/main.py", "frontend/src/pages/Paraphrase.tsx", "frontend/src/App.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 689
+  │ List directory app
+  │   └ 11 files found
+  └ List directory app/routers
+      └ 14 files found
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now the conftest needs to patch get_copilot_service for the new router:Now backend tests:Now run backend tests quickly:Now frontend. Look at api.ts end and add functions:Now create the Paraphrase page. Let me check useSpeechRecognition signature briefly:Now App.tsx route + Home card:Now add a Home card next to sentence-echo:Now create the frontend test:Now update UI test spec — add new section for paraphrase page:Now run the broader test suites to make sure nothing else broke:

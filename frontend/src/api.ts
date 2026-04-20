@@ -4011,3 +4011,49 @@ export function getListenSummarizeStats(
     `/api/listening/summarize/stats?days=${days}&threshold=${threshold}`,
   );
 }
+
+// ---------------------------------------------------------------------------
+// Paraphrase Practice (CEFR-leveled rewrite drill)
+// ---------------------------------------------------------------------------
+
+export type ParaphraseLevel = 'easy' | 'medium' | 'hard';
+
+export interface ParaphraseSentence {
+  text: string;
+  level: string;
+}
+
+export interface ParaphraseSessionResponse {
+  level: string;
+  items: ParaphraseSentence[];
+}
+
+export interface ParaphraseScoreResponse {
+  meaning_score: number;
+  grammar_score: number;
+  naturalness_score: number;
+  overall: number;
+  kept_meaning: boolean;
+  used_different_words: boolean;
+  feedback: string;
+  suggested_paraphrase: string;
+}
+
+export function getParaphraseSession(
+  level: ParaphraseLevel = 'easy',
+  count = 5,
+): Promise<ParaphraseSessionResponse> {
+  return request<ParaphraseSessionResponse>(
+    `/api/paraphrase/session?level=${encodeURIComponent(level)}&count=${count}`,
+  );
+}
+
+export function scoreParaphrase(
+  source: string,
+  attempt: string,
+): Promise<ParaphraseScoreResponse> {
+  return request<ParaphraseScoreResponse>('/api/paraphrase/score', {
+    method: 'POST',
+    body: JSON.stringify({ source, attempt }),
+  });
+}

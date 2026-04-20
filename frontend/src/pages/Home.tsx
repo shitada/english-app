@@ -1534,6 +1534,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/paraphrase"
+        data-testid="paraphrase-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <PenTool size={28} color="#f59e0b" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>✍️ Paraphrase Practice</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Rewrite sentences in your own words — get LLM-graded meaning, grammar &amp; naturalness.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#f59e0b',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />
