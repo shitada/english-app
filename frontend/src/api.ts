@@ -509,6 +509,34 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ correct, total, contrast_summary }),
     }),
+
+  // --- New phoneme-contrast drill (/api/minimal-pairs/*) --------------------
+  getMinimalPairsDrillSession: (contrast?: string, count = 8) => {
+    const params = new URLSearchParams({ count: String(count) });
+    if (contrast) params.set('contrast', contrast);
+    return request<MinimalPairsDrillSession>(
+      `/api/minimal-pairs/session?${params.toString()}`,
+    );
+  },
+
+  submitMinimalPairsDrillAnswer: (payload: {
+    item_id: string;
+    contrast: string;
+    target: 'a' | 'b';
+    chosen: 'a' | 'b';
+  }) =>
+    request<MinimalPairsDrillAnswer>('/api/minimal-pairs/answer', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  getMinimalPairsDrillStats: (lookbackDays = 30) =>
+    request<MinimalPairsDrillStats>(
+      `/api/minimal-pairs/stats?lookback_days=${lookbackDays}`,
+    ),
+
+  getMinimalPairsDrillContrasts: () =>
+    request<{ contrasts: string[] }>('/api/minimal-pairs/contrasts'),
 };
 
 export type HardWordItem = {
@@ -565,6 +593,41 @@ export interface MinimalPairWeakContrast {
 
 export interface MinimalPairWeakContrastsResponse {
   contrasts: MinimalPairWeakContrast[];
+}
+
+// --- New phoneme-contrast drill types (/api/minimal-pairs/*) --------------
+export interface MinimalPairsDrillItem {
+  item_id: string;
+  contrast: string;
+  word_a: string;
+  word_b: string;
+  example_a: string;
+  example_b: string;
+  target: 'a' | 'b';
+  target_word: string;
+  audio_b64: string | null;
+}
+
+export interface MinimalPairsDrillSession {
+  contrast: string | null;
+  items: MinimalPairsDrillItem[];
+}
+
+export interface MinimalPairsDrillAnswer {
+  correct: boolean;
+  streak: number;
+}
+
+export interface MinimalPairsContrastStat {
+  contrast: string;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface MinimalPairsDrillStats {
+  stats: MinimalPairsContrastStat[];
+  weakest: MinimalPairsContrastStat[];
 }
 
 // Types

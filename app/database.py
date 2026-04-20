@@ -380,6 +380,21 @@ CREATE TABLE IF NOT EXISTS error_correction_items (
 
 CREATE INDEX IF NOT EXISTS idx_error_correction_items_session ON error_correction_items(session_id, idx);
 CREATE INDEX IF NOT EXISTS idx_error_correction_sessions_created ON error_correction_sessions(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS minimal_pairs_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    contrast TEXT NOT NULL,
+    word_a TEXT NOT NULL,
+    word_b TEXT NOT NULL,
+    target TEXT NOT NULL CHECK (target IN ('a', 'b')),
+    chosen TEXT NOT NULL CHECK (chosen IN ('a', 'b')),
+    is_correct INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_mp_attempts_contrast ON minimal_pairs_attempts(contrast);
+CREATE INDEX IF NOT EXISTS idx_mp_attempts_created ON minimal_pairs_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -881,6 +896,28 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on error_correction_sessions created_at",
         "CREATE INDEX IF NOT EXISTS idx_error_correction_sessions_created ON error_correction_sessions(created_at DESC)",
+    ),
+    (
+        "create minimal_pairs_attempts table for phoneme-contrast drill",
+        """CREATE TABLE IF NOT EXISTS minimal_pairs_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            contrast TEXT NOT NULL,
+            word_a TEXT NOT NULL,
+            word_b TEXT NOT NULL,
+            target TEXT NOT NULL CHECK (target IN ('a', 'b')),
+            chosen TEXT NOT NULL CHECK (chosen IN ('a', 'b')),
+            is_correct INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on minimal_pairs_attempts contrast",
+        "CREATE INDEX IF NOT EXISTS idx_mp_attempts_contrast ON minimal_pairs_attempts(contrast)",
+    ),
+    (
+        "add index on minimal_pairs_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_mp_attempts_created ON minimal_pairs_attempts(created_at DESC)",
     ),
 ]
 

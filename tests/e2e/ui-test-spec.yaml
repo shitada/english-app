@@ -5626,3 +5626,44 @@ pages:
         type: functional
         priority: medium
         added_in: 697
+
+      - id: minimal-pairs-drill-001
+        target: Minimal Pairs Drill entry card appears on home
+        selector: data-testid="minimal-pairs-drill-cta"
+        action: Visit "/" and locate data-testid="minimal-pairs-drill-cta"
+        expect: Card labeled "Minimal Pairs Drill" is visible and clickable
+        type: functional
+        priority: high
+        added_in: 698
+
+      - id: minimal-pairs-drill-002
+        target: Select-phase shows contrast picker and start button
+        action: Visit "/minimal-pairs-drill" and verify data-testid="mp-drill-contrast-picker" and data-testid="mp-drill-start-btn" are visible
+        expect: Contrast radio list (with "Mixed" option) and Start button are both visible
+        type: functional
+        priority: critical
+        added_in: 698
+
+      - id: minimal-pairs-drill-003
+        target: Starting loads drill round with play + two word choices
+        action: Visit "/minimal-pairs-drill", click data-testid="mp-drill-start-btn", wait for data-testid="mp-drill-round"
+        expect: data-testid="mp-drill-play-btn", data-testid="mp-drill-choice-a" and data-testid="mp-drill-choice-b" are visible
+        type: functional
+        priority: critical
+        added_in: 698
+
+      - id: minimal-pairs-drill-004
+        target: Choosing a word flashes feedback panel with Next
+        action: In the drill round, click data-testid="mp-drill-choice-a" and wait for data-testid="mp-drill-feedback"
+        expect: Feedback panel is visible with data-testid="mp-drill-next-btn"
+        type: functional
+        priority: high
+        added_in: 698
+
+      - id: minimal-pairs-drill-005
+        target: Summary page shows per-contrast bars plus Retry/Home CTAs
+        action: Complete all items (repeatedly click a choice, then data-testid="mp-drill-next-btn") until data-testid="mp-drill-summary" appears
+        expect: data-testid="mp-drill-summary" is visible and at least one data-testid starting with "mp-drill-bar-" is present; data-testid="mp-drill-retry-btn" and data-testid="mp-drill-home-btn" are visible
+        type: functional
+        priority: medium
+        added_in: 698

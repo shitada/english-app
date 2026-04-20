@@ -1410,6 +1410,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/minimal-pairs-drill"
+        data-testid="minimal-pairs-drill-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Headphones size={28} color="#14b8a6" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>Minimal Pairs Drill</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Focused phoneme-contrast practice with per-contrast stats.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#14b8a6',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Drill
+        </span>
+      </Link>
+
       <button
         type="button"
         onClick={openWarmup}

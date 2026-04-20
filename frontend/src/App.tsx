@@ -15,6 +15,7 @@ import Vocabulary from './pages/Vocabulary';
 import Listening from './pages/Listening';
 import Dashboard from './pages/Dashboard';
 import MinimalPairs from './pages/MinimalPairs';
+import MinimalPairsPage from './pages/MinimalPairsPage';
 import Shadowing from './pages/Shadowing';
 import StressSpotlight from './pages/StressSpotlight';
 import SentenceEcho from './components/SentenceEcho';
@@ -121,6 +122,7 @@ export default function App() {
                 <Route path="/pronunciation" element={<Pronunciation />} />
                 <Route path="/listening" element={<Listening />} />
                 <Route path="/minimal-pairs" element={<MinimalPairs />} />
+                <Route path="/minimal-pairs-drill" element={<MinimalPairsPage />} />
                 <Route path="/shadowing" element={<Shadowing />} />
                 <Route path="/stress-spotlight" element={<StressSpotlight />} />
                 <Route path="/sentence-echo" element={<SentenceEcho />} />

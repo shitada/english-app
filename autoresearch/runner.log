@@ -582,4 +582,122 @@ Context clear. No E2E failures. Starting iteration 696 — dispatching proposer.
   │ "T1=$T1"
   └ 2 lines...
 
-Now I have enough context. Let me implement.Now update database.py (schema + migration):Now add the prompt and the router:Now create the router:Register router:Now frontend. Add API helpers:Now the page:Add route and home card:Now tests:Run the tests quickly:All 13 tests pass. Now update the UI test spec:
+Now I have enough context. Let me implement.Now update database.py (schema + migration):Now add the prompt and the router:Now create the router:Register router:Now frontend. Add API helpers:Now the page:Add route and home card:Now tests:Run the tests quickly:All 13 tests pass. Now update the UI test spec:[2026-04-21 02:51:47] Copilot invocation completed (duration: 1637s)
+[2026-04-21 02:51:47] Recording agent traces...
+[2026-04-21 02:51:47]   AGENT_TRACE iter=696 proposer=1 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 02:51:47]   AGENT_TRACE iter=697 proposer=0
+0 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 02:51:47] SMOKE_UI: UI changes detected in pages: home
+[2026-04-21 02:51:47] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-21 02:51:47] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1867ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-21 02:52:05] SMOKE_UI_PASS: All UI pages passed
+[2026-04-21 02:52:05] Running post-invocation audit (iter 696-697)...
+============================================
+ Autoresearch Audit
+ Iterations: 696 — 697
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-21 02:52:05
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 696 697[0m
+[0;31m  Tester: FAIL — missing: 696 697[0m
+[0;31m  Evaluator: FAIL — missing: 696 697[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-21 02:52:06] Audit found 3 error(s) — fixes applied where possible
+[2026-04-21 02:52:09] Current iteration count: 697 / 719
+[2026-04-21 02:52:09] ------------------------------------------
+[2026-04-21 02:52:09] Invocation 5 / 10
+[2026-04-21 02:52:09] Resuming from iteration 698
+[2026-04-21 02:52:09] ------------------------------------------
+[2026-04-21 02:52:09] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-698-to-719.md)...
+● context restore (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log
+  │ --oneline -5 && echo "---UI---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 34 lines...
+
+● T0 iter 698 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Minimal Pairs listening discrimination drill (ship/sheep, bat/bet)",
+  "description": "Add a new 'Minimal Pairs' drill that trains learners to hear subtle phoneme contrasts (e.g., /ɪ/ vs /iː/ in ship/sheep, /æ/ vs /e/ in bat/bet, /l/ vs /r/ in light/right, /b/ vs /v/ in berry/very). Each round: backend synthesizes TTS audio of ONE word from a pair; the user hears audio and taps which of the two displayed words they heard. Tracks accuracy per phoneme-contrast pair so learners can see their weakest contrasts. This is a high-value listening skill not yet covered by the recent drill wave.\n\nBackend (`app/routers/minimal_pairs.py` new): \n- Curated static list (no LLM needed) of ~40 pair items grouped by contrast category (e.g., IY_vs_IH, AE_vs_EH, L_vs_R, B_vs_V, S_vs_SH, TH_vs_S, N_vs_NG). Define in module-level constant `MINIMAL_PAIRS` with fields {id, contrast, word_a, word_b, example_a, example_b}.\n- GET `/api/minimal-pairs/session?contrast=optional&count=8` → returns a randomized session: list of items where each item includes {item_id, contrast, word_a, word_b, target: 'a'|'b' (which one audio plays), audio_b64} using existing TTS helper (reuse pattern from `app/routers/listening.py` or `shadowing.py`). Keep `target` server-authoritative.\n- POST `/api/minimal-pairs/answer` with body {item_id, contrast, target, chosen} → records to new table `minimal_pairs_attempts(id INTEGER PK AUTOINCREMENT, created_at TEXT NOT NULL, contrast TEXT NOT NULL, item_id TEXT NOT NULL, target TEXT NOT NULL, chosen TEXT NOT NULL, correct INTEGER NOT NULL)`. Return {correct: bool, streak: int}.\n- GET `/api/minimal-pairs/stats` → aggregates per-contrast accuracy over last 30 days: [{contrast, attempts, correct, accuracy}].\n- DAL in `app/dal/minimal_pairs.py`: `record_attempt`, `get_contrast_stats`, `get_weakest_contrasts`.\n\nDatabase (`app/database.py`): add the `minimal_pairs_attempts` CREATE TABLE to SCHEMA, AND add to `_MIGRATIONS` the statement `CREATE TABLE IF NOT EXISTS minimal_pairs_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, contrast TEXT NOT NULL, item_id TEXT NOT NULL, target TEXT NOT NULL, chosen TEXT NOT NULL, correct INTEGER NOT NULL)` so existing DBs pick it up.\n\nFrontend (`frontend/src/pages/MinimalPairsPage.tsx` new + route entry in `frontend/src/App.tsx` and a Home card): \n- Phase 1 (select): optional contrast filter dropdown + 'Start' button (defaults to mixed).\n- Phase 2 (drill): large play/replay audio button, two big word-choice buttons side-by-side, after selection show correct/incorrect flash + a short 'example sentence' for the word actually played, then auto-advance.\n- Phase 3 (summary): overall accuracy, per-contrast breakdown bar, 'Weakest contrast' callout linking to retry with that contrast filter, Retry / Home buttons. Dark-mode + mobile responsive consistent with existing drills.\n- Register router in `app/main.py`.\n\nTesting: unit tests for DAL aggregation and an integration test hitting `/api/minimal-pairs/session` and POST `/answer` with both correct/incorrect paths in `tests/unit/test_minimal_pairs.py`.",
+  "files_to_modify": [
+    "app/routers/minimal_pairs.py",
+    "app/dal/minimal_pairs.py",
+    "app/database.py",
+    "app/main.py",
+    "frontend/src/pages/MinimalPairsPage.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 698
+  │ List directory app
+  │   └ 11 files found
+  └ List directory app/routers
+      └ 23 files found
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now the router with curated items:Now update database.py to add the SCHEMA table and migration:Register the router in main.py:Now write unit and integration tests:Let's run the backend tests now:All 15 new backend tests pass. Now let me add the frontend.Now create the page:Wire up App.tsx route and Home card:Add Home card:Run tsc:TypeScript is clean. Now let me update the UI test spec:Now run the full backend test suite to make sure nothing broke:
