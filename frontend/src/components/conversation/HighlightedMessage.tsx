@@ -178,8 +178,8 @@ function InlineShadowDrill({ phrase, onSpeak, onClose }: {
               data-testid="shadow-drill-retry"
               style={{
                 marginTop: 6, padding: '4px 10px', borderRadius: 5,
-                border: '1px solid var(--border, #e2e8f0)', background: 'var(--card-bg, #fff)',
-                color: 'var(--text, #111)', cursor: 'pointer', fontSize: 12,
+                border: '1px solid var(--border, #e2e8f0)', background: 'var(--bg-card, #fff)',
+                color: 'var(--text, #f1f5f9)', cursor: 'pointer', fontSize: 12,
               }}
             >
               🔄 Retry
@@ -402,7 +402,7 @@ export function HighlightedMessage({ content, keyPhrases, grammarNotes, onSpeak,
             {activeTooltip === i && grammarNote && (
               <span style={{
                 position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
-                background: 'var(--card-bg, #1f2937)', color: 'var(--text-primary, #f9fafb)',
+                background: 'var(--bg-card, #1f2937)', color: 'var(--text, #f9fafb)',
                 border: '1px solid var(--border-color, #374151)', borderRadius: 8, padding: '8px 12px',
                 fontSize: 12, zIndex: 50, whiteSpace: 'nowrap', maxWidth: 260,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)', marginBottom: 4,

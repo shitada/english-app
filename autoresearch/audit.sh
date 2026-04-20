@@ -221,6 +221,30 @@ if [[ -n "$missing_tester" || -n "$missing_evaluator" ]]; then
 fi
 echo ""
 
+# --- 3b. AGENT_TRACE all-zero detection ---
+all_zero_iters=""
+if [[ -f "$LOG_FILE" ]]; then
+    for i in $(seq "$FIRST_ITER" "$LAST_ITER"); do
+        trace=$(grep "AGENT_TRACE iter=$i " "$LOG_FILE" 2>/dev/null | head -1 || true)
+        if [[ -n "$trace" ]]; then
+            all_zero=$(echo "$trace" | grep -c "proposer=0 coder=0 tester=0 evaluator=0" || true)
+            if [[ "$all_zero" -gt 0 ]]; then
+                all_zero_iters="$all_zero_iters $i"
+            fi
+        fi
+    done
+fi
+if [[ -n "$all_zero_iters" ]]; then
+    echo -e "${RED}  AGENT_TRACE ALL-ZERO:${all_zero_iters}${NC}"
+    echo -e "  ${BOLD}Orchestrator bypassed ALL subagents in these iterations${NC}"
+    ERRORS=$((ERRORS + 1))
+    add_diagnosis "agent_trace_all_zero" "error" "$all_zero_iters" "orchestrator_self_implementation" "HIGH" \
+        "AGENT_TRACE shows proposer=0 coder=0 tester=0 evaluator=0 — orchestrator did not delegate to any subagent"
+else
+    echo -e "${GREEN}  AGENT_TRACE all-zero: PASS${NC}"
+fi
+echo ""
+
 # --- 4. Playwright depth ---
 echo -e "${CYAN}[4/7] Playwright test depth${NC}"
 shallow_iters=""; shallow_n=0; tested_n=0

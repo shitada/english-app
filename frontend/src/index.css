@@ -7,6 +7,7 @@
   --danger: #ef4444;
   --bg: #f8fafc;
   --bg-card: #ffffff;
+  --card-bg: var(--bg-card);
   --text: #1e293b;
   --text-secondary: #64748b;
   --border: #e2e8f0;
@@ -41,6 +42,7 @@
   --danger: #f87171;
   --bg: #0f172a;
   --bg-card: #1e293b;
+  --card-bg: var(--bg-card);
   --text: #f1f5f9;
   --text-secondary: #94a3b8;
   --border: #334155;
