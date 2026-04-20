@@ -29,6 +29,7 @@ import TenseContrast from './pages/TenseContrast';
 import WhQuestionDrill from './pages/WhQuestionDrill';
 import ErrorCorrection from './pages/ErrorCorrection';
 import ConnectedSpeechPage from './pages/ConnectedSpeechPage';
+import PrepositionDrill from './pages/PrepositionDrill';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -137,6 +138,7 @@ export default function App() {
                 <Route path="/wh-questions" element={<WhQuestionDrill />} />
                 <Route path="/error-correction" element={<ErrorCorrection />} />
                 <Route path="/connected-speech" element={<ConnectedSpeechPage />} />
+                <Route path="/preposition-drill" element={<PrepositionDrill />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

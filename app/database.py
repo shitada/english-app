@@ -410,6 +410,20 @@ CREATE TABLE IF NOT EXISTS connected_speech_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_connected_speech_category ON connected_speech_attempts(category);
 CREATE INDEX IF NOT EXISTS idx_connected_speech_created ON connected_speech_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS preposition_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id TEXT NOT NULL,
+    chosen TEXT NOT NULL,
+    correct TEXT NOT NULL,
+    is_correct INTEGER NOT NULL,
+    category TEXT,
+    response_ms INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_preposition_attempts_category ON preposition_attempts(category);
+CREATE INDEX IF NOT EXISTS idx_preposition_attempts_created ON preposition_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -955,6 +969,27 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on connected_speech_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_connected_speech_created ON connected_speech_attempts(created_at DESC)",
+    ),
+    (
+        "create preposition_attempts table for Preposition Cloze Drill",
+        """CREATE TABLE IF NOT EXISTS preposition_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT NOT NULL,
+            chosen TEXT NOT NULL,
+            correct TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            category TEXT,
+            response_ms INTEGER,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on preposition_attempts category",
+        "CREATE INDEX IF NOT EXISTS idx_preposition_attempts_category ON preposition_attempts(category)",
+    ),
+    (
+        "add index on preposition_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_preposition_attempts_created ON preposition_attempts(created_at DESC)",
     ),
 ]
 

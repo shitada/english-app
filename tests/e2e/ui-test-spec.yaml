@@ -5708,3 +5708,51 @@ pages:
         type: functional
         priority: medium
         added_in: 700
+
+  home_preposition_drill_card:
+    path: /
+    tests:
+      - id: home-preposition-drill-001
+        target: Home exposes a Preposition Cloze CTA card linking to /preposition-drill
+        selector: data-testid="preposition-drill-cta"
+        action: Visit "/" and locate data-testid="preposition-drill-cta"
+        expect: Card labeled "Preposition Cloze" is visible and links to /preposition-drill
+        type: navigation
+        priority: high
+        added_in: 701
+
+  preposition-drill:
+    path: /preposition-drill
+    tests:
+      - id: preposition-drill-001
+        target: Select phase shows level picker and start button
+        selector: data-testid="preposition-title"
+        action: Visit "/preposition-drill" and verify data-testid="preposition-title", data-testid="preposition-level-mixed", and data-testid="preposition-start" are visible
+        expect: Title "Preposition Cloze Drill" visible; level buttons and Start button are enabled
+        type: functional
+        priority: critical
+        added_in: 701
+
+      - id: preposition-drill-002
+        target: Starting the drill loads a sentence with a blank and chip options
+        action: Click data-testid="preposition-start" and wait for data-testid="preposition-drill"
+        expect: data-testid="preposition-sentence", data-testid="preposition-blank", and data-testid="preposition-progress" are visible; at least 4 option buttons with data-testid starting with "preposition-option-" are clickable
+        type: functional
+        priority: critical
+        added_in: 701
+
+      - id: preposition-drill-003
+        target: Selecting an option shows feedback + Next
+        action: After starting, click any data-testid="preposition-option-*" button
+        expect: data-testid="preposition-feedback" and data-testid="preposition-feedback-result" are visible, and data-testid="preposition-next" is visible
+        type: functional
+        priority: high
+        added_in: 701
+
+      - id: preposition-drill-004
+        target: Summary shows accuracy %, per-category breakdown, and new-session CTA
+        action: Complete all items until data-testid="preposition-summary" is visible
+        expect: data-testid="preposition-accuracy", data-testid="preposition-per-category", and data-testid="preposition-new-session" are visible; data-testid="preposition-retry-missed" is visible iff any were missed
+        type: functional
+        priority: medium
+        added_in: 701

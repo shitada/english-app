@@ -4692,3 +4692,84 @@ export const errorCorrection = {
     });
   },
 };
+
+
+// ---------------------------------------------------------------------------
+// Preposition Cloze Drill — fill-in preposition practice
+// ---------------------------------------------------------------------------
+
+export type PrepositionCategory = 'time' | 'place' | 'collocation' | 'phrasal';
+export type PrepositionLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export interface PrepositionItem {
+  id: string;
+  sentence_with_blank: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+  category: PrepositionCategory;
+  level: PrepositionLevel;
+}
+
+export interface PrepositionSessionResponse {
+  count: number;
+  level: string | null;
+  items: PrepositionItem[];
+}
+
+export interface PrepositionAttemptInput {
+  item_id: string;
+  chosen: string;
+  response_ms?: number;
+}
+
+export interface PrepositionAttemptResponse {
+  correct: boolean;
+  answer: string;
+  explanation: string;
+}
+
+export interface PrepositionConfusedPair {
+  correct: string;
+  chosen: string;
+  count: number;
+}
+
+export interface PrepositionCategoryStat {
+  category: string;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface PrepositionStatsResponse {
+  attempts: number;
+  correct: number;
+  accuracy: number;
+  per_category: PrepositionCategoryStat[];
+  confused_pairs: PrepositionConfusedPair[];
+}
+
+export function fetchPrepositionSession(
+  count = 8,
+  level?: PrepositionLevel,
+): Promise<PrepositionSessionResponse> {
+  const params = new URLSearchParams({ count: String(count) });
+  if (level) params.set('level', level);
+  return request<PrepositionSessionResponse>(
+    `/api/prepositions/session?${params.toString()}`,
+  );
+}
+
+export function postPrepositionAttempt(
+  payload: PrepositionAttemptInput,
+): Promise<PrepositionAttemptResponse> {
+  return request<PrepositionAttemptResponse>('/api/prepositions/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchPrepositionStats(): Promise<PrepositionStatsResponse> {
+  return request<PrepositionStatsResponse>('/api/prepositions/stats');
+}

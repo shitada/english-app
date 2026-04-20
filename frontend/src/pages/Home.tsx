@@ -1784,6 +1784,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/preposition-drill"
+        data-testid="preposition-drill-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <PenTool size={28} color="#0ea5e9" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🔤 Preposition Cloze</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Fill the blank with the right preposition — time, place, collocations, phrasals.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#0ea5e9',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />
