@@ -6153,3 +6153,82 @@ pages:
         type: visual
         priority: medium
         added_in: 707
+
+  confusable_pairs:
+    path: /confusable-pairs
+    tests:
+      - id: confusable-pairs-001
+        target: Difficulty picker and Start button render
+        selector: data-testid="confusable-pairs-title"
+        action: Visit /confusable-pairs and inspect the page
+        expect: data-testid="confusable-pairs-title" and data-testid="confusable-pairs-start" are visible
+        type: functional
+        priority: high
+        added_in: 708
+
+      - id: confusable-pairs-002
+        target: Start begins a session and shows option chips
+        action: Click data-testid="confusable-pairs-start", wait for drill
+        expect: data-testid="confusable-pairs-drill", data-testid="confusable-pairs-sentence", and at least two data-testid^="confusable-pairs-option-" are visible
+        type: functional
+        priority: critical
+        added_in: 708
+
+      - id: confusable-pairs-003
+        target: Picking an option renders inline feedback with explanation
+        action: Click any data-testid^="confusable-pairs-option-" button
+        expect: data-testid="confusable-pairs-feedback", data-testid="confusable-pairs-feedback-result", and data-testid="confusable-pairs-example" are visible
+        type: functional
+        priority: critical
+        added_in: 708
+
+      - id: confusable-pairs-004
+        target: TTS speaker button is clickable after feedback
+        selector: data-testid="confusable-pairs-tts"
+        action: After answering, click the speaker button next to the feedback result
+        expect: Click does not throw; button remains focused
+        type: functional
+        priority: low
+        added_in: 708
+
+      - id: confusable-pairs-005
+        target: Next button advances to the next item
+        action: Click data-testid="confusable-pairs-next" after feedback
+        expect: data-testid="confusable-pairs-progress" increments by 1
+        type: functional
+        priority: high
+        added_in: 708
+
+      - id: confusable-pairs-006
+        target: Summary screen shows accuracy and per-pair list
+        action: Answer all 8 items, reach summary
+        expect: data-testid="confusable-pairs-summary", data-testid="confusable-pairs-accuracy", data-testid="confusable-pairs-per-pair" visible
+        type: functional
+        priority: high
+        added_in: 708
+
+      - id: confusable-pairs-007
+        target: Practice weakest pair button restarts a filtered session
+        selector: data-testid="confusable-pairs-practice-weakest"
+        action: On the summary screen, click the "Practice that pair again" button
+        expect: A new drill starts with items all sharing the same pair_key
+        type: functional
+        priority: medium
+        added_in: 708
+
+      - id: confusable-pairs-008
+        target: Home CTA links to /confusable-pairs
+        selector: data-testid="confusable-pairs-cta"
+        action: Visit "/" and locate data-testid="confusable-pairs-cta"
+        expect: Card labeled "Confusable Pairs" is visible and links to /confusable-pairs
+        type: navigation
+        priority: high
+        added_in: 708
+
+      - id: confusable-pairs-009
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode and resize viewport to 375x812, then visit /confusable-pairs
+        expect: Sentence card, option chips, and feedback panel remain legible; no horizontal overflow
+        type: visual
+        priority: medium
+        added_in: 708

@@ -45,6 +45,7 @@ from app.routers import articles
 from app.routers import intonation_arrow
 from app.routers import elastic_sentence
 from app.routers import reported_speech
+from app.routers import confusable_pairs
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_BUILD = ROOT_DIR / "frontend" / "dist"
@@ -249,6 +250,7 @@ app.include_router(intonation_arrow.router)
 app.include_router(collocations.router)
 app.include_router(elastic_sentence.router)
 app.include_router(reported_speech.router)
+app.include_router(confusable_pairs.router)
 
 def _safe_static_path(base: Path, user_path: str) -> Path | None:
     """Resolve a user-provided path and verify it stays within the base directory."""

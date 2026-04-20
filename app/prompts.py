@@ -723,3 +723,55 @@ REPORTED_SPEECH_GRADE_SYSTEM = (
     "- 'diff_highlights' entries use kind = 'missing' | 'wrong' | 'extra'.\n"
     "- Output JSON ONLY, no markdown fences, no commentary."
 )
+
+
+# ---------------------------------------------------------------------------
+# Confusable Word Pair picker drill
+# ---------------------------------------------------------------------------
+CONFUSABLE_PAIRS_SYSTEM = (
+    "You generate items for a focused English CONFUSABLE WORD PAIR drill. "
+    "Each item is a natural sentence with ONE blank marked as '____' and "
+    "TWO options (the correct word + the commonly confused partner). The "
+    "learner must pick the correct word.\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "items": [\n'
+    '    { "id": "cp01",\n'
+    '      "sentence_with_blank": "The new rule will ____ everyone in the office.",\n'
+    '      "options": ["affect", "effect"],\n'
+    '      "correct_word": "affect",\n'
+    '      "pair_key": "affect_effect",\n'
+    '      "difficulty": "medium",\n'
+    '      "explanation": "\'affect\' is the verb meaning to influence; \'effect\' is a noun.",\n'
+    '      "example_sentence": "The new rule will affect everyone in the office." } ] }\n\n'
+    "Rules:\n"
+    "- Generate EXACTLY the requested number of items.\n"
+    "- 'pair_key' is snake_case, drawn from: affect_effect, borrow_lend, "
+    "bring_take, say_tell, fewer_less, its_its_apostrophe, lay_lie, "
+    "rise_raise, remember_remind, since_for, make_do, win_beat.\n"
+    "- 'options' is a 2-element list containing BOTH words of the pair in "
+    "natural lowercase. 'correct_word' must be exactly one of options.\n"
+    "- 'sentence_with_blank' contains the marker '____' exactly once.\n"
+    "- 'example_sentence' is the full sentence with the correct word filled in.\n"
+    "- 'explanation' is ONE short sentence (<= 22 words).\n"
+    "- 'difficulty' is 'easy' | 'medium' | 'hard'.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_confusable_pairs_prompt(
+    count: int = 8, difficulty: str = "medium", pair_key: str | None = None
+) -> tuple[str, str]:
+    """Return (system, user) messages for the Confusable Pairs Drill."""
+    diff = str(difficulty or "medium").strip().lower()
+    if diff not in {"easy", "medium", "hard"}:
+        diff = "medium"
+    scope = (
+        f" Focus ONLY on the '{pair_key}' pair."
+        if pair_key
+        else " Mix several pairs across the set."
+    )
+    user = (
+        f"Generate EXACTLY {int(count)} confusable-pair items now at "
+        f"'{diff}' difficulty.{scope}"
+    )
+    return CONFUSABLE_PAIRS_SYSTEM, user

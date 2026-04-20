@@ -5224,3 +5224,72 @@ export function gradeReportedSpeech(payload: ReportedSpeechGradeRequest): Promis
 export function getReportedSpeechWeakness(limit = 20): Promise<ReportedSpeechWeaknessResponse> {
   return request<ReportedSpeechWeaknessResponse>(`/api/reported-speech/weakness?limit=${limit}`);
 }
+
+// ---------------------------------------------------------------------------
+// Confusable Word Pair picker drill
+// ---------------------------------------------------------------------------
+
+export interface ConfusablePairItem {
+  id: string;
+  sentence_with_blank: string;
+  options: string[];
+  pair_key: string;
+  difficulty: string;
+}
+
+export interface ConfusablePairsStartRequest {
+  count?: number;
+  difficulty?: string | null;
+  pair_key?: string | null;
+}
+
+export interface ConfusablePairsStartResponse {
+  session_id: string;
+  items: ConfusablePairItem[];
+}
+
+export interface ConfusablePairsAnswerRequest {
+  session_id: string;
+  item_id: string;
+  choice: string;
+}
+
+export interface ConfusablePairsAnswerResponse {
+  correct: boolean;
+  correct_word: string;
+  explanation: string;
+  example_sentence: string;
+}
+
+export interface ConfusablePairsSummaryResponse {
+  total: number;
+  correct: number;
+  per_pair_accuracy: Record<string, number>;
+  weakest_pair: string | null;
+}
+
+export function startConfusablePairsSession(
+  payload: ConfusablePairsStartRequest = {},
+): Promise<ConfusablePairsStartResponse> {
+  return request<ConfusablePairsStartResponse>('/api/confusable-pairs/start', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function answerConfusablePairsItem(
+  payload: ConfusablePairsAnswerRequest,
+): Promise<ConfusablePairsAnswerResponse> {
+  return request<ConfusablePairsAnswerResponse>('/api/confusable-pairs/answer', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchConfusablePairsSummary(
+  sessionId: string,
+): Promise<ConfusablePairsSummaryResponse> {
+  return request<ConfusablePairsSummaryResponse>(
+    `/api/confusable-pairs/summary/${encodeURIComponent(sessionId)}`,
+  );
+}

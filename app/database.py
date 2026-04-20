@@ -503,6 +503,33 @@ CREATE INDEX IF NOT EXISTS idx_reported_speech_created
     ON reported_speech_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reported_speech_user
     ON reported_speech_attempts(user_id);
+
+CREATE TABLE IF NOT EXISTS confusable_pair_sessions (
+    id TEXT PRIMARY KEY,
+    difficulty TEXT,
+    pair_filter TEXT,
+    item_count INTEGER NOT NULL DEFAULT 0,
+    items_json TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS confusable_pair_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    pair_key TEXT NOT NULL,
+    choice TEXT,
+    correct_word TEXT,
+    is_correct INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_confusable_attempts_session
+    ON confusable_pair_attempts(session_id);
+CREATE INDEX IF NOT EXISTS idx_confusable_attempts_pair
+    ON confusable_pair_attempts(pair_key);
+CREATE INDEX IF NOT EXISTS idx_confusable_attempts_created
+    ON confusable_pair_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -1193,6 +1220,42 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on reported_speech_attempts user_id",
         "CREATE INDEX IF NOT EXISTS idx_reported_speech_user ON reported_speech_attempts(user_id)",
+    ),
+    (
+        "create confusable_pair_sessions table",
+        """CREATE TABLE IF NOT EXISTS confusable_pair_sessions (
+            id TEXT PRIMARY KEY,
+            difficulty TEXT,
+            pair_filter TEXT,
+            item_count INTEGER NOT NULL DEFAULT 0,
+            items_json TEXT NOT NULL DEFAULT '[]',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "create confusable_pair_attempts table",
+        """CREATE TABLE IF NOT EXISTS confusable_pair_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            pair_key TEXT NOT NULL,
+            choice TEXT,
+            correct_word TEXT,
+            is_correct INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on confusable_pair_attempts session_id",
+        "CREATE INDEX IF NOT EXISTS idx_confusable_attempts_session ON confusable_pair_attempts(session_id)",
+    ),
+    (
+        "add index on confusable_pair_attempts pair_key",
+        "CREATE INDEX IF NOT EXISTS idx_confusable_attempts_pair ON confusable_pair_attempts(pair_key)",
+    ),
+    (
+        "add index on confusable_pair_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_confusable_attempts_created ON confusable_pair_attempts(created_at DESC)",
     ),
 ]
 
