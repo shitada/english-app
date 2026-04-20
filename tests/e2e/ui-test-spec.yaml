@@ -5820,3 +5820,56 @@ pages:
         type: visual
         priority: medium
         added_in: 702
+
+  articles:
+    path: /articles
+    tests:
+      - id: articles-001
+        target: /articles shows difficulty select with easy/medium/hard buttons
+        selector: data-testid="article-drill-title"
+        action: Visit "/articles" and verify data-testid="article-drill-title", data-testid="article-drill-difficulty-easy", data-testid="article-drill-difficulty-medium", and data-testid="article-drill-difficulty-hard"
+        expect: Title "Article Drill" visible; three difficulty buttons are visible and enabled
+        type: functional
+        priority: critical
+        added_in: 703
+
+      - id: articles-002
+        target: Starting a session loads the first sentence with chips and disabled submit
+        action: Click data-testid="article-drill-difficulty-medium" then wait for data-testid="article-drill-card"
+        expect: data-testid="article-drill-progress", data-testid="article-drill-blank-1", data-testid="article-drill-chip-1-a", data-testid="article-drill-chip-1-an", data-testid="article-drill-chip-1-the", data-testid="article-drill-chip-1-none", and data-testid="article-drill-submit" are visible; submit is disabled until a chip is picked
+        type: functional
+        priority: critical
+        added_in: 703
+
+      - id: articles-003
+        target: Tapping a chip fills the blank and enables submit; submitting reveals feedback + next button
+        action: Click data-testid="article-drill-chip-1-the" (and any chip for additional blanks if present), then click data-testid="article-drill-submit"
+        expect: data-testid="article-drill-feedback" and data-testid="article-drill-next" are visible; blanks are highlighted green or red
+        type: functional
+        priority: high
+        added_in: 703
+
+      - id: articles-004
+        target: After advancing through all 8 items the summary page shows score, category bars, and retry
+        action: Repeatedly fill blanks and click data-testid="article-drill-next" until data-testid="article-drill-summary" is visible
+        expect: data-testid="article-drill-score", data-testid="article-drill-categories", and data-testid="article-drill-retry" are visible
+        type: functional
+        priority: medium
+        added_in: 703
+
+      - id: articles-005
+        target: Home page exposes an Article Drill CTA card linking to /articles
+        selector: data-testid="article-drill-cta"
+        action: Visit "/" and locate data-testid="article-drill-cta"
+        expect: Card labeled "Article Drill" is visible and links to /articles
+        type: navigation
+        priority: high
+        added_in: 703
+
+      - id: articles-006
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode via theme toggle, then resize viewport to 375x812 and visit /articles
+        expect: Title, difficulty cards, and chips are all legible; no overflow; colors respect dark tokens
+        type: visual
+        priority: medium
+        added_in: 703

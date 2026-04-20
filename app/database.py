@@ -342,6 +342,21 @@ CREATE TABLE IF NOT EXISTS tense_contrast_attempts (
 CREATE INDEX IF NOT EXISTS idx_tense_contrast_created ON tense_contrast_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tense_contrast_session ON tense_contrast_attempts(session_id);
 
+CREATE TABLE IF NOT EXISTS article_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    difficulty TEXT NOT NULL,
+    total_count INTEGER NOT NULL,
+    correct_count INTEGER NOT NULL,
+    blanks_json TEXT NOT NULL,
+    answers_json TEXT NOT NULL,
+    categories_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_article_attempts_created ON article_attempts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_article_attempts_difficulty ON article_attempts(difficulty);
+
 CREATE TABLE IF NOT EXISTS wh_question_attempts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
@@ -1027,6 +1042,28 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on pause_predict_sessions difficulty",
         "CREATE INDEX IF NOT EXISTS idx_pause_predict_sessions_difficulty ON pause_predict_sessions(difficulty)",
+    ),
+    (
+        "create article_attempts table",
+        """CREATE TABLE IF NOT EXISTS article_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            difficulty TEXT NOT NULL,
+            total_count INTEGER NOT NULL,
+            correct_count INTEGER NOT NULL,
+            blanks_json TEXT NOT NULL,
+            answers_json TEXT NOT NULL,
+            categories_json TEXT NOT NULL
+        )""",
+    ),
+    (
+        "add index on article_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_article_attempts_created ON article_attempts(created_at DESC)",
+    ),
+    (
+        "add index on article_attempts difficulty",
+        "CREATE INDEX IF NOT EXISTS idx_article_attempts_difficulty ON article_attempts(difficulty)",
     ),
 ]
 

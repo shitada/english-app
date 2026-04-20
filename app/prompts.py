@@ -375,6 +375,64 @@ def build_tense_contrast_prompt(count: int = 8) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# Article Chip Drill (a / an / the / ∅)
+# ---------------------------------------------------------------------------
+ARTICLE_DRILL_SYSTEM = (
+    "You generate English ARTICLE practice items for learners choosing "
+    "between 'a', 'an', 'the', or the zero article (no article).\n\n"
+    "Return STRICT JSON of this exact shape:\n"
+    '{ "items": [\n'
+    '    { "id": "a01",\n'
+    '      "sentence_template": "I saw __1__ cat and __2__ umbrella.",\n'
+    '      "blanks": [\n'
+    '        { "index": 1, "answer": "a", '
+    '"rule_category": "indefinite_consonant", '
+    '"hint": "Singular count noun, consonant sound → a." },\n'
+    '        { "index": 2, "answer": "an", '
+    '"rule_category": "indefinite_vowel_sound", '
+    '"hint": "Word begins with vowel sound → an." } ] }\n'
+    "  ] }\n\n"
+    "Rules:\n"
+    "- Generate EXACTLY the requested number of items.\n"
+    "- Each 'sentence_template' is ONE natural English sentence with one or "
+    "more blank markers of the form '__N__' (double underscores + index).\n"
+    "- Blank indices start at 1 and increase left-to-right.\n"
+    "- 'blanks' is a non-empty list, one entry per '__N__' marker.\n"
+    "- 'answer' is EXACTLY one of: 'a', 'an', 'the', 'none'. Use 'none' for "
+    "the zero article (no article).\n"
+    "- 'rule_category' is a short snake_case label such as "
+    "indefinite_consonant, indefinite_vowel_sound, definite_unique, "
+    "definite_specific, definite_superlative, definite_musical_instrument, "
+    "definite_proper_plural, definite_proper_rivers, definite_proper_ocean, "
+    "definite_title, zero_sports, zero_meals, zero_abstract, "
+    "zero_uncountable, zero_languages, zero_places_purpose, "
+    "zero_by_transport, zero_every, zero_plural_generic.\n"
+    "- 'hint' is ONE short phrase (<= 16 words) explaining the rule.\n"
+    "- Adjust difficulty for the requested level: 'easy' = simple count/"
+    "uncount and obvious cases; 'medium' = musical instruments, places by "
+    "purpose, abstract nouns; 'hard' = nationality plurals, proper-name "
+    "exceptions, correlative 'the', 'an MBA' vowel-sound tricks.\n"
+    "- 'id' is a short unique string.\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_article_drill_prompt(
+    difficulty: str = "medium", count: int = 8
+) -> tuple[str, str]:
+    """Return (system, user) messages for the Article Chip Drill."""
+    diff = str(difficulty or "medium").strip().lower()
+    if diff not in {"easy", "medium", "hard"}:
+        diff = "medium"
+    user = (
+        f"Generate EXACTLY {int(count)} article-drill items now at '{diff}' "
+        "difficulty. Include at least a few sentences with TWO blanks. Mix "
+        "a, an, the, and zero-article answers across the set."
+    )
+    return ARTICLE_DRILL_SYSTEM, user
+
+
+# ---------------------------------------------------------------------------
 # WH-Question Formation drill (Jeopardy-style)
 # ---------------------------------------------------------------------------
 WH_QUESTION_SYSTEM = (

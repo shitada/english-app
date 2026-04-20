@@ -31,6 +31,7 @@ import ErrorCorrection from './pages/ErrorCorrection';
 import ConnectedSpeechPage from './pages/ConnectedSpeechPage';
 import PrepositionDrill from './pages/PrepositionDrill';
 import PausePredictPage from './pages/PausePredictPage';
+import ArticleDrill from './pages/ArticleDrill';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -141,6 +142,7 @@ export default function App() {
                 <Route path="/connected-speech" element={<ConnectedSpeechPage />} />
                 <Route path="/preposition-drill" element={<PrepositionDrill />} />
                 <Route path="/pause-predict" element={<PausePredictPage />} />
+                <Route path="/articles" element={<ArticleDrill />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

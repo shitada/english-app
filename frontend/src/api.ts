@@ -4861,3 +4861,91 @@ export function completePausePredictSession(
     },
   );
 }
+
+
+// ---------------------------------------------------------------------------
+// Article Chip Drill (a / an / the / ∅)
+// ---------------------------------------------------------------------------
+
+export type ArticleAnswer = 'a' | 'an' | 'the' | 'none';
+export type ArticleDifficulty = 'easy' | 'medium' | 'hard';
+
+export interface ArticleBlank {
+  index: number;
+  answer: ArticleAnswer;
+  rule_category: string;
+  hint: string;
+}
+
+export interface ArticleItem {
+  id: string;
+  sentence_template: string;
+  blanks: ArticleBlank[];
+}
+
+export interface ArticleSessionResponse {
+  session_id: string;
+  difficulty: ArticleDifficulty;
+  items: ArticleItem[];
+}
+
+export interface ArticleSubmitItem {
+  id: string;
+  sentence_template: string;
+  blanks: ArticleBlank[];
+  user_answers: string[];
+}
+
+export interface ArticleBlankResult {
+  item_id: string;
+  index: number;
+  correct_answer: ArticleAnswer;
+  user_answer: string;
+  correct: boolean;
+  rule_category: string;
+  hint: string;
+}
+
+export interface ArticleCategoryStat {
+  correct: number;
+  total: number;
+}
+
+export interface ArticleSubmitResponse {
+  correct_count: number;
+  total_count: number;
+  accuracy: number;
+  per_blank_results: ArticleBlankResult[];
+  category_breakdown: Record<string, ArticleCategoryStat>;
+}
+
+export interface ArticleStatsResponse {
+  days: number;
+  total: number;
+  correct: number;
+  accuracy: number;
+  per_category: Record<string, { total: number; correct: number; accuracy: number }>;
+  weakest_category: string | null;
+}
+
+export function fetchArticleSession(
+  difficulty: ArticleDifficulty = 'medium',
+): Promise<ArticleSessionResponse> {
+  return request<ArticleSessionResponse>(
+    `/api/articles/session?difficulty=${encodeURIComponent(difficulty)}`,
+  );
+}
+
+export function submitArticleSession(
+  difficulty: ArticleDifficulty,
+  items: ArticleSubmitItem[],
+): Promise<ArticleSubmitResponse> {
+  return request<ArticleSubmitResponse>('/api/articles/submit', {
+    method: 'POST',
+    body: JSON.stringify({ difficulty, items }),
+  });
+}
+
+export function fetchArticleStats(days = 30): Promise<ArticleStatsResponse> {
+  return request<ArticleStatsResponse>(`/api/articles/stats?days=${days}`);
+}
