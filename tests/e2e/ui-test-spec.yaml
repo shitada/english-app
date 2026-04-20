@@ -4595,6 +4595,62 @@ pages:
         priority: medium
         added_in: 666
 
+      - id: qp-reverse-translation-001
+        target: Reverse Translation card appears in the Speaking tab of the Quick Practice Hub
+        action: Open the Quick Practice Hub and select the Speaking tab
+        expect: A card titled "Reverse Translation (和文英訳)" with data-testid="quick-reverse-translation-card" is visible
+        type: functional
+        priority: medium
+        added_in: 670
+
+      - id: qp-reverse-translation-002
+        target: Card has a beginner/intermediate difficulty selector
+        action: Inspect data-testid="qrt-difficulty-beginner" and data-testid="qrt-difficulty-intermediate"
+        expect: Both buttons are clickable; the active one has aria-pressed="true"; clicking switches the active difficulty and re-samples the prompt session
+        type: functional
+        priority: medium
+        added_in: 670
+
+      - id: qp-reverse-translation-003
+        target: Japanese prompt is shown with a hidden English fallback
+        action: Look at data-testid="qrt-jp-prompt" and the data-testid="qrt-show-english" button
+        expect: A Japanese sentence is displayed; the English equivalent is hidden until the user clicks "Show English", which reveals data-testid="qrt-en-reference"
+        type: functional
+        priority: medium
+        added_in: 670
+
+      - id: qp-reverse-translation-004
+        target: 🎤 Speak button records spoken English and shows token-level diff after stop
+        action: Click data-testid="qrt-mic" to record, speak, then click again to stop
+        expect: After stop, data-testid="qrt-diff" appears with colored word tiles (qrt-tok-match green, qrt-tok-missing red, qrt-tok-extra indigo) and a percent score; reference English is auto-revealed with data-testid="qrt-tts" 🔊 button
+        type: functional
+        priority: high
+        added_in: 670
+
+      - id: qp-reverse-translation-005
+        target: Try again and Next buttons let the user retry or advance through the 5-prompt session
+        action: After feedback, click data-testid="qrt-try-again" or data-testid="qrt-next"
+        expect: Try again clears the diff and reopens the mic; Next advances to the next prompt or to the summary on the 5th
+        type: functional
+        priority: medium
+        added_in: 670
+
+      - id: qp-reverse-translation-006
+        target: Summary screen reports average match %, perfect (≥90%) count, and missed (<70%) count
+        action: Complete a 5-prompt session
+        expect: data-testid="qrt-summary" shows averagePercent, data-testid="qrt-summary-perfect" count, data-testid="qrt-summary-missed" count, plus "Practice missed ones" (data-testid="qrt-practice-missed") and "New Session" (data-testid="qrt-new-session") buttons
+        type: functional
+        priority: medium
+        added_in: 670
+
+      - id: qp-reverse-translation-007
+        target: Practice missed ones button filters the session to attempts that scored below 70%
+        action: After summary, click data-testid="qrt-practice-missed"
+        expect: A new session begins containing only the prompts whose best score was <70%; button is disabled when there are no missed prompts
+        type: functional
+        priority: medium
+        added_in: 670
+
       - id: qp-favorites-001
         target: Favorites tab is present in the Quick Practice Hub tab list
         action: Open the Quick Practice Hub and look at the tab strip

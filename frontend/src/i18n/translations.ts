@@ -149,6 +149,16 @@ export interface Translations {
   restartDrill: string;
   bestScore: string;
   averageScore: string;
+  // Reverse Translation card (JP→EN speaking drill)
+  reverseTranslationTitle: string;
+  reverseTranslationSubtitle: string;
+  showEnglish: string;
+  hideEnglish: string;
+  speakReference: string;
+  practiceMissedOnes: string;
+  averageMatch: string;
+  perfectAttempts: string;
+  missedAttempts: string;
 }
 
 export const en: Translations = {
@@ -298,6 +308,15 @@ export const en: Translations = {
   restartDrill: 'Restart drill',
   bestScore: 'Best',
   averageScore: 'Avg',
+  reverseTranslationTitle: 'Reverse Translation',
+  reverseTranslationSubtitle: 'Speak the English equivalent of the Japanese prompt.',
+  showEnglish: 'Show English',
+  hideEnglish: 'Hide English',
+  speakReference: 'Speak reference English',
+  practiceMissedOnes: 'Practice missed ones',
+  averageMatch: 'Average match',
+  perfectAttempts: 'Perfect (≥90%)',
+  missedAttempts: 'Missed (<70%)',
 };
 
 export const ja: Translations = {
@@ -447,6 +466,15 @@ export const ja: Translations = {
   restartDrill: 'ドリルをやり直す',
   bestScore: 'ベスト',
   averageScore: '平均',
+  reverseTranslationTitle: '和文英訳スピーキング',
+  reverseTranslationSubtitle: '日本語の文を見て、英語で声に出して言ってみましょう。',
+  showEnglish: '英語を表示',
+  hideEnglish: '英語を隠す',
+  speakReference: '英文を読み上げる',
+  practiceMissedOnes: '間違えたものを再練習',
+  averageMatch: '平均一致率',
+  perfectAttempts: '完璧（90%以上）',
+  missedAttempts: 'ミス（70%未満）',
 };
 
 export type Locale = 'en' | 'ja';
