@@ -1261,3 +1261,103 @@ def get_prompt_collocation_match() -> str:
     """Late import to avoid circulars and to keep prompt text in app/prompts.py."""
     from app.prompts import VOCABULARY_COLLOCATION_MATCH
     return VOCABULARY_COLLOCATION_MATCH()
+
+
+# ---------------------------------------------------------------------------
+# Spelling Challenge — TTS dictation of saved vocabulary
+# ---------------------------------------------------------------------------
+
+
+class SpellingChallengeWord(BaseModel):
+    id: int
+    word: str
+    meaning: str
+    example_sentence: str
+    difficulty: int
+
+
+class SpellingChallengeResponse(BaseModel):
+    words: list[SpellingChallengeWord]
+    count: int
+
+
+class SpellingChallengeAnswerRequest(BaseModel):
+    word_id: int = Field(ge=1)
+    typed: str = Field(min_length=0, max_length=200)
+
+
+class SpellingChallengeAnswerResponse(BaseModel):
+    word_id: int
+    result: str  # "exact" | "close" | "wrong"
+    correct_word: str
+    distance: int
+    new_level: int
+
+
+@router.get("/spelling-challenge", response_model=SpellingChallengeResponse)
+async def get_spelling_challenge(
+    topic: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=10, ge=1, le=30),
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Return up to ``limit`` words for a spelling-dictation challenge.
+
+    The grader is on the POST endpoint; this endpoint just curates the list,
+    preferring due/leech entries and falling back to recently-saved words.
+    """
+    rows = await vocab_dal.get_spelling_challenge_words(db, topic, limit)
+    words = [
+        SpellingChallengeWord(
+            id=r["id"],
+            word=r["word"],
+            meaning=r.get("meaning") or "",
+            example_sentence=r.get("example_sentence") or "",
+            difficulty=int(r.get("difficulty") or 1),
+        )
+        for r in rows
+    ]
+    return SpellingChallengeResponse(words=words, count=len(words))
+
+
+@router.post(
+    "/spelling-challenge/answer",
+    response_model=SpellingChallengeAnswerResponse,
+)
+async def submit_spelling_challenge_answer(
+    req: SpellingChallengeAnswerRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+):
+    """Grade a spelling attempt with Levenshtein-based partial credit.
+
+    * ``exact``  → distance 0 → counts as correct (advances SRS level).
+    * ``close``  → distance ≤ 2 → does NOT advance SRS (no progress update).
+    * ``wrong``  → distance > 2 → does NOT advance SRS (no progress update).
+
+    Only ``exact`` answers update progress, so "close" attempts are surfaced
+    as a hint without penalising the learner's review queue.
+    """
+    word = await vocab_dal.get_word(db, req.word_id)
+    if not word:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    correct_word: str = word.get("word") or ""
+    result, distance = vocab_dal.grade_spelling(req.typed, correct_word)
+
+    if result == "exact":
+        progress = await vocab_dal.update_progress(db, req.word_id, True)
+        new_level = int(progress["new_level"])
+    else:
+        # Surface the current SRS level without recording an attempt.
+        rows = await db.execute_fetchall(
+            "SELECT level FROM vocabulary_progress WHERE word_id = ?",
+            (req.word_id,),
+        )
+        new_level = int(rows[0]["level"]) if rows else 0
+
+    return SpellingChallengeAnswerResponse(
+        word_id=req.word_id,
+        result=result,
+        correct_word=correct_word,
+        distance=distance,
+        new_level=new_level,
+    )

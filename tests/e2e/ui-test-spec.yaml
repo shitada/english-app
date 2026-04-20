@@ -1698,6 +1698,23 @@ pages:
         priority: medium
         added_in: 677
 
+      - id: vocab-040
+        target: Spelling Challenge button on Vocabulary select phase
+        action: load /vocabulary and locate data-testid="vocab-spelling-challenge-btn" with label "📝 Spelling Challenge — TTS dictation with partial credit"
+        expect: Button is visible and enabled once topics are loaded; clicking it without saved words shows the inline error banner
+        type: functional
+        priority: medium
+        added_in: 683
+
+      - id: vocab-041
+        target: Spelling Challenge plays TTS, accepts spelling, and grades partial credit
+        action: with vocabulary saved, click data-testid="vocab-spelling-challenge-btn"; data-testid="spelling-challenge" appears; type the spelled word into data-testid="spelling-challenge-input"; click data-testid="spelling-challenge-submit"; advance with data-testid="spelling-challenge-next"
+        expect: SpeechSynthesis.speak is invoked once per question (autoplay); data-testid="spelling-challenge-replay" replays without penalty; data-testid="spelling-challenge-feedback" turns green on exact, amber on close (≤2 edits), red on wrong; final data-testid="spelling-challenge-results" shows summary, and data-testid="spelling-challenge-retry-missed" appears when any answer was not exact
+        type: functional
+        priority: high
+        added_in: 683
+
+
   dashboard:
     path: /dashboard
     tests:

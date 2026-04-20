@@ -1310,6 +1310,169 @@ async def pick_target_words(db: aiosqlite.Connection, limit: int = 3) -> list[st
     return out
 
 
+# ---------------------------------------------------------------------------
+# Spelling Challenge helpers
+# ---------------------------------------------------------------------------
+
+_SPELLING_WS_RE = re.compile(r"\s+")
+
+
+def normalize_spelling(s: str | None) -> str:
+    """Normalize a spelling input: trim, lowercase, collapse internal whitespace.
+
+    Used by the Spelling Challenge grader to produce a stable comparison form.
+    Returns "" for None / blank input.
+    """
+    if not s:
+        return ""
+    return _SPELLING_WS_RE.sub(" ", s.strip().lower())
+
+
+def levenshtein_distance(a: str, b: str) -> int:
+    """Compute the Levenshtein edit distance between two strings.
+
+    Pure-Python iterative implementation using a single rolling row to keep
+    memory at O(min(len(a), len(b))). Handles empty strings.
+    """
+    if a == b:
+        return 0
+    if not a:
+        return len(b)
+    if not b:
+        return len(a)
+    # Make sure b is the shorter so the rolling row is small.
+    if len(a) < len(b):
+        a, b = b, a
+    previous = list(range(len(b) + 1))
+    for i, ca in enumerate(a, start=1):
+        current = [i] + [0] * len(b)
+        for j, cb in enumerate(b, start=1):
+            cost = 0 if ca == cb else 1
+            current[j] = min(
+                current[j - 1] + 1,      # insertion
+                previous[j] + 1,         # deletion
+                previous[j - 1] + cost,  # substitution
+            )
+        previous = current
+    return previous[-1]
+
+
+def grade_spelling(typed: str | None, correct: str | None) -> tuple[str, int]:
+    """Grade a typed spelling against the correct word.
+
+    Returns ``(result, distance)`` where:
+      * ``result`` is one of ``"exact"``, ``"close"`` (Levenshtein distance
+        <= 2 after normalization), or ``"wrong"``.
+      * ``distance`` is the post-normalization Levenshtein edit distance.
+    """
+    n_typed = normalize_spelling(typed)
+    n_correct = normalize_spelling(correct)
+    distance = levenshtein_distance(n_typed, n_correct)
+    if distance == 0:
+        return "exact", 0
+    if distance <= 2:
+        return "close", distance
+    return "wrong", distance
+
+
+async def get_spelling_challenge_words(
+    db: aiosqlite.Connection,
+    topic: str | None = None,
+    limit: int = 10,
+) -> list[dict[str, Any]]:
+    """Pick up to *limit* words for a Spelling Challenge round.
+
+    Selection order (deduped by word id):
+      1. Words with a vocabulary_progress row whose ``next_review_at`` is due
+         (NULL or <= now). Ordered by oldest due first.
+      2. Leech-like stubborn words (incorrect_count >= 3, level <= 2),
+         ordered by miss-rate desc.
+      3. Recently saved words (no progress row yet), most recent id first.
+
+    A ``topic`` filter, when provided, restricts all phases to that topic.
+    Returns dicts with id/word/meaning/example_sentence/difficulty/topic.
+    """
+    if limit < 1:
+        return []
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    seen: set[int] = set()
+    out: list[dict[str, Any]] = []
+    topic_clause = " AND vw.topic = ?" if topic else ""
+    topic_args: tuple[Any, ...] = (topic,) if topic else ()
+
+    # 1) Due words (SRS).
+    due_rows = await db.execute_fetchall(
+        f"""SELECT vw.id, vw.word, vw.meaning, vw.example_sentence,
+                   vw.difficulty, vw.topic
+              FROM vocabulary_progress vp
+              JOIN vocabulary_words vw ON vp.word_id = vw.id
+             WHERE (vp.next_review_at IS NULL OR vp.next_review_at <= ?)
+                   {topic_clause}
+             ORDER BY vp.next_review_at ASC NULLS FIRST, vp.level ASC
+             LIMIT ?""",
+        (now, *topic_args, limit * 3),
+    )
+    for r in due_rows:
+        d = dict(r)
+        if d["id"] in seen:
+            continue
+        d["example_sentence"] = d.get("example_sentence") or ""
+        out.append(d)
+        seen.add(d["id"])
+        if len(out) >= limit:
+            return out
+
+    # 2) Leech words (high miss-rate, low level).
+    leech_rows = await db.execute_fetchall(
+        f"""SELECT vw.id, vw.word, vw.meaning, vw.example_sentence,
+                   vw.difficulty, vw.topic
+              FROM vocabulary_progress vp
+              JOIN vocabulary_words vw ON vp.word_id = vw.id
+             WHERE vp.incorrect_count >= 3
+               AND vp.incorrect_count >= vp.correct_count
+               AND vp.level <= 2
+                   {topic_clause}
+             ORDER BY (CAST(vp.incorrect_count AS REAL) /
+                       (vp.correct_count + vp.incorrect_count)) DESC,
+                      vp.incorrect_count DESC
+             LIMIT ?""",
+        (*topic_args, limit * 3),
+    )
+    for r in leech_rows:
+        d = dict(r)
+        if d["id"] in seen:
+            continue
+        d["example_sentence"] = d.get("example_sentence") or ""
+        out.append(d)
+        seen.add(d["id"])
+        if len(out) >= limit:
+            return out
+
+    # 3) Recently saved words (no progress row yet).
+    fallback_rows = await db.execute_fetchall(
+        f"""SELECT vw.id, vw.word, vw.meaning, vw.example_sentence,
+                   vw.difficulty, vw.topic
+              FROM vocabulary_words vw
+              LEFT JOIN vocabulary_progress vp ON vp.word_id = vw.id
+             WHERE vp.word_id IS NULL
+                   {topic_clause}
+             ORDER BY vw.id DESC
+             LIMIT ?""",
+        (*topic_args, limit * 3),
+    )
+    for r in fallback_rows:
+        d = dict(r)
+        if d["id"] in seen:
+            continue
+        d["example_sentence"] = d.get("example_sentence") or ""
+        out.append(d)
+        seen.add(d["id"])
+        if len(out) >= limit:
+            return out
+
+    return out
+
+
 async def get_word_id_by_word(db: aiosqlite.Connection, word: str) -> int | None:
     """Look up vocabulary_words.id by exact (case-insensitive) word match."""
     if not word:

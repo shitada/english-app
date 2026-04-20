@@ -2003,3 +2003,131 @@ class TestGetHardWords:
             await update_progress(test_db, w["id"], False)
         rows = await get_hard_words(test_db, limit=2)
         assert len(rows) == 2
+
+
+# ---------------------------------------------------------------------------
+# Spelling Challenge helpers (autoresearch #683)
+# ---------------------------------------------------------------------------
+
+from app.dal.vocabulary import (  # noqa: E402
+    grade_spelling,
+    get_spelling_challenge_words,
+    levenshtein_distance,
+    normalize_spelling,
+)
+
+
+@pytest.mark.unit
+class TestSpellingNormalization:
+    def test_trim_and_lowercase(self):
+        assert normalize_spelling("  Hello  ") == "hello"
+
+    def test_collapse_internal_whitespace(self):
+        assert normalize_spelling("good\tmorning   sir") == "good morning sir"
+
+    def test_empty_inputs(self):
+        assert normalize_spelling(None) == ""
+        assert normalize_spelling("") == ""
+        assert normalize_spelling("   ") == ""
+
+    def test_already_normalized(self):
+        assert normalize_spelling("agenda") == "agenda"
+
+
+@pytest.mark.unit
+class TestLevenshteinDistance:
+    def test_identical(self):
+        assert levenshtein_distance("abc", "abc") == 0
+
+    def test_empty(self):
+        assert levenshtein_distance("", "") == 0
+        assert levenshtein_distance("", "abc") == 3
+        assert levenshtein_distance("abcd", "") == 4
+
+    def test_single_substitution(self):
+        assert levenshtein_distance("kitten", "sitten") == 1
+
+    def test_classic_kitten_sitting(self):
+        assert levenshtein_distance("kitten", "sitting") == 3
+
+    def test_insertion_and_deletion(self):
+        assert levenshtein_distance("abc", "abcd") == 1
+        assert levenshtein_distance("abcd", "abc") == 1
+
+
+@pytest.mark.unit
+class TestGradeSpelling:
+    def test_exact_match_after_normalization(self):
+        result, distance = grade_spelling("  Agenda  ", "agenda")
+        assert result == "exact"
+        assert distance == 0
+
+    def test_close_one_edit(self):
+        # one substitution
+        result, distance = grade_spelling("agendz", "agenda")
+        assert result == "close"
+        assert distance == 1
+
+    def test_close_two_edits_boundary(self):
+        # two substitutions == boundary inclusive
+        result, distance = grade_spelling("agzndz", "agenda")
+        assert result == "close"
+        assert distance == 2
+
+    def test_wrong_three_edits_boundary(self):
+        # three edits → wrong (just past the close threshold)
+        result, distance = grade_spelling("zgzndz", "agenda")
+        assert result == "wrong"
+        assert distance == 3
+
+    def test_completely_different(self):
+        result, distance = grade_spelling("xyz", "agenda")
+        assert result == "wrong"
+        assert distance >= 3
+
+    def test_empty_typed_against_word(self):
+        result, distance = grade_spelling("", "agenda")
+        assert result == "wrong"
+        assert distance == len("agenda")
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+class TestGetSpellingChallengeWords:
+    async def test_returns_recently_saved_when_no_progress(self, test_db):
+        words = await save_words(test_db, "t1", _make_questions(3))
+        assert len(words) == 3
+        rows = await get_spelling_challenge_words(test_db, topic=None, limit=5)
+        ids = {r["id"] for r in rows}
+        assert ids == {w["id"] for w in words}
+        # Should include the canonical fields used by the API.
+        for r in rows:
+            assert {"id", "word", "meaning", "example_sentence", "difficulty"} <= set(r)
+
+    async def test_topic_filter(self, test_db):
+        a = await save_words(test_db, "topic_a", _make_questions(2))
+        b = await save_words(test_db, "topic_b", _make_questions(2))
+        rows = await get_spelling_challenge_words(test_db, topic="topic_a", limit=10)
+        ids = {r["id"] for r in rows}
+        assert ids == {w["id"] for w in a}
+        assert not (ids & {w["id"] for w in b})
+
+    async def test_empty_when_no_words(self, test_db):
+        rows = await get_spelling_challenge_words(test_db, topic=None, limit=10)
+        assert rows == []
+
+    async def test_zero_limit(self, test_db):
+        await save_words(test_db, "t1", _make_questions(2))
+        rows = await get_spelling_challenge_words(test_db, topic=None, limit=0)
+        assert rows == []
+
+    async def test_due_words_preferred_over_recent(self, test_db):
+        # Save 3 words; only first one gets a progress row (incorrect → level 0,
+        # next_review_at == now) so it shows up in the due bucket first.
+        ws = await save_words(test_db, "t1", _make_questions(3))
+        await update_progress(test_db, ws[0]["id"], False)
+        rows = await get_spelling_challenge_words(test_db, topic=None, limit=3)
+        assert len(rows) == 3
+        # Due words listed first.
+        assert rows[0]["id"] == ws[0]["id"]
+        assert {r["id"] for r in rows} == {w["id"] for w in ws}

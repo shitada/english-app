@@ -1851,4 +1851,122 @@ Now write integration test:Now run pytest:All passing. Now run the full test sui
   │ date +%s
   └ 2 lines...
 
-Now let me check `request` helper in api.ts:Now let me create the router:Now add the API client function:Now create the React component:Register in QuickPracticeHub:Now write the unit tests for the router:Integration test:Now let me create the vitest spec for the component:Now update the UI test spec:Now run the tests to verify:All pytests pass. Now the frontend:All green. Commit:
+Now let me check `request` helper in api.ts:Now let me create the router:Now add the API client function:Now create the React component:Register in QuickPracticeHub:Now write the unit tests for the router:Integration test:Now let me create the vitest spec for the component:Now update the UI test spec:Now run the tests to verify:All pytests pass. Now the frontend:All green. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "d20fdc6",
+  "files_changed": [
+    "app/routers/contrastive_stress.py",
+    "app/main.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickContrastiveStressCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx",
+    "tests/unit/test_contrastive_stress.py",
+    "tests/integration/test_contrastive_stress_api.py",
+    "frontend/src/__tests__/QuickContrastiveStressCard.test.tsx",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 22,
+  "ui_spec_updated": true,
+  "description": "Added Quick Contrastive Stress card: GET /api/quick/contrastive-stress with Copilot+fallback bank, listen→MCQ→speak phases, registered in QuickPracticeHub Speaking tab, with full unit/integration/vitest coverage."
+}
+```● Coder Implement iter 682
+  │ vitest run (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ src/__tests__/QuickContrastiveStressCard.test.tsx 2>&1 | tail -40
+  │   └ 9 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #682: Quick Contrastive Stress card (listen for
+      │ emphasis → MCQ meaning + speak attempt)
+      │
+      │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1…
+      └ 18 lines...
+
+● T2 + diff (shell)
+  │ date +%s && git --no-pager diff HEAD~1 --name-only && echo "HASH:$(git
+  │ rev-parse --short HEAD)"
+  └ 16 lines...
+
+```json
+{
+  "tests_passed": 2339,
+  "tests_total": 2339,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2339 passed in 132.93s (0:02:12) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 682
+  │ smoke (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Based on the strong signal (2339/2339 tests, +22 new tests, ts pass, smoke pass, QA overall_pass=true), and a coherent feature design (listen→MCQ→speak with Copilot+static fallback fitting established Quick Practice patterns):
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 8,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.25,
+  "verdict": "keep",
+  "reason": "New Quick Contrastive Stress card adds genuine speaking/listening value with 22 new tests, full suite green, TS/smoke/QA all passing, and follows the established Copilot+static-fallback Quick Practice pattern."
+}
+```● Evaluator Evaluate iter 682
+  │ List directory autoresearch
+  │   └ 14 files found
+  └ List directory autoresearch/reports
+      └ 7 files found
+
+● Record iter 682 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776652327
+  │ T1=1776652429 T2=1776652756 T3=1776652906 T4=1776652931 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "682" "d20fdc6" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+Iteration 682 complete. Now iteration 683.
+
+● T0 iter 683 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good enough context. Proposing the vocabulary spelling challenge mode.
+
+```json
+{
+  "type": "feature",
+  "title": "Add Vocabulary Spelling Challenge mode (TTS dictation of saved words)",
+  "description": "Add a new 'Spelling Challenge' practice mode within the Vocabulary page that combines listening and recall: TTS speaks a word from the user's saved vocabulary bank, and the user must type the correct spelling. This fills a real gap — currently vocabulary practice tests recognition (multiple-choice) and meaning recall (cloze), but never spelling/listening of the target word itself.\n\nBackend (`app/routers/vocabulary.py`):\n1. Add `GET /api/vocabulary/spelling-challenge?topic=...&limit=10` that selects up to N words from `vocabulary_progress` for the topic (preferring due/leech words via existing `get_due_word_ids` logic with fallback to recently-saved words). Returns a list of items: `{id, word, meaning, example_sentence, difficulty}`. The `word` field is needed server-side for grading; for security simply return it (this app is local/single-user — same pattern used by quiz endpoint).\n2. Add `POST /api/vocabulary/spelling-challenge/answer` accepting `{word_id, typed: str}`. Normalize (trim, lowercase, collapse internal whitespace) and compare against stored `word`. Compute Levenshtein distance for partial-credit feedback (`exact | close (<=2 edits) | wrong`). Reuse `vocab_dal.update_progress(word_id, is_correct)` where `is_correct = (result == 'exact')`. Response: `{word_id, result, correct_word, distance, new_level}`.\n3. No schema changes required — reuses `vocabulary_progress` table.\n\nFrontend (`frontend/src/pages/VocabularyPage.tsx` + new `frontend/src/components/SpellingChallenge.tsx`):\n1. Add a 'Spelling Challenge' card/button to the vocabulary page that opens the new component.\n2. Component flow: per question, auto-play TTS (reuse existing `speak()` util / Web Speech API used elsewhere in the app) showing only the meaning as a hint, with a Replay (▶) button (counts replays — show count, no penalty), a text input, and Submit. After submit, show feedback: green for exact, amber for close (display correct spelling with diff highlighting of misspelled letters), red for wrong. Show running score and progress (e.g., 3/10).\n3. Final results screen showing correct count, words missed (with replay buttons to hear again), and a 'Retry missed' button that runs only the wrong/close ones again.\n4. Mobile-friendly: large input, autoFocus, Enter submits, no autocorrect/autocapitalize/spellcheck attributes on the input.\n\nTests:\n- `tests/unit/test_vocabulary_dal.py` (or new `test_spelling_challenge.py`): test normalization + distance grading function (exact/close/wrong boundaries) and that `update_progress` is called with correct `is_correct` only on exact match.\n- `tests/integration/test_vocabulary_api.py`: integration test for both new endpoints — empty vocabulary returns empty list; submit exact match advances SRS level; submit typo within 2 edits returns `close` and does NOT advance level.",
+  "files_to_modify": ["app/routers/vocabulary.py", "frontend/src/components/SpellingChallenge.tsx", "frontend/src/pages/VocabularyPage.tsx", "tests/integration/test_vocabulary_api.py", "tests/unit/test_vocabulary_dal.py"],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 683
+  │ List directory app/dal
+  │   └ 14 files found
+  └ Read vocabulary.py
+      │ app/routers/vocabulary.py
+      └ L1:60 (60 lines read)
+
+● T1 iter 683 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me check existing tests structure for spelling-related tests, and conftest:Now I have enough context. Let me look at how the router structure ends and where to insert the new endpoint, plus check pyproject for how to run tests:Now I have the full picture. Let me check the ui-test-spec and api.ts more:Now let me start writing. First, add helpers and DAL function:Now add router endpoints:Now frontend api.ts additions:Now the SpellingChallenge component:Now wire into Vocabulary.tsx:Now insert the button after the spelling-bee button and the render after the spelling-bee phase:Now add unit tests:Now check `_make_questions` and `save_words`/`update_progress` were imported in the test file:Good. Now integration tests:Now let me run tests to confirm:All tests pass. Now run broader to confirm no regressions:Now frontend type-check:All green. Now update ui-test-spec.yaml:Now commit:

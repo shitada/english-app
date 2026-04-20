@@ -1203,3 +1203,115 @@ async def test_hard_words_validates_limit(client):
     assert res.status_code == 422
     res = await client.get("/api/vocabulary/hard-words?limit=101")
     assert res.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Spelling Challenge endpoints (autoresearch #683)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_empty(client):
+    """When no vocabulary words exist, the endpoint returns an empty list."""
+    res = await client.get("/api/vocabulary/spelling-challenge?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["count"] == 0
+    assert data["words"] == []
+
+
+async def _seed_one_word(client, mock_copilot, word: str = "agenda") -> int:
+    """Helper: seed a single saved vocabulary word and return its id."""
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "questions": [{
+            "word": word,
+            "correct_meaning": f"meaning of {word}",
+            "wrong_options": ["a", "b", "c"],
+            "example_sentence": f"This is the {word} example.",
+            "difficulty": 1,
+        }]
+    })
+    quiz_res = await client.get("/api/vocabulary/quiz?topic=job_interview&count=1")
+    assert quiz_res.status_code == 200
+    return int(quiz_res.json()["questions"][0]["id"])
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_lists_saved_words(client, mock_copilot):
+    word_id = await _seed_one_word(client, mock_copilot, "agenda")
+    res = await client.get("/api/vocabulary/spelling-challenge?limit=5")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["count"] == 1
+    assert data["words"][0]["id"] == word_id
+    assert data["words"][0]["word"] == "agenda"
+    assert "meaning" in data["words"][0]
+    assert "example_sentence" in data["words"][0]
+    assert "difficulty" in data["words"][0]
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_exact_advances_srs(client, mock_copilot):
+    word_id = await _seed_one_word(client, mock_copilot, "deadline")
+    res = await client.post(
+        "/api/vocabulary/spelling-challenge/answer",
+        json={"word_id": word_id, "typed": "  Deadline  "},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["result"] == "exact"
+    assert data["distance"] == 0
+    assert data["correct_word"] == "deadline"
+    # Exact answer should advance SRS level to 1 from the unseen baseline.
+    assert data["new_level"] == 1
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_close_does_not_advance_srs(client, mock_copilot):
+    word_id = await _seed_one_word(client, mock_copilot, "negotiate")
+    # Two-character substitution → "close" but not "exact".
+    res = await client.post(
+        "/api/vocabulary/spelling-challenge/answer",
+        json={"word_id": word_id, "typed": "negociate"},  # 1-edit close
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["result"] == "close"
+    assert data["distance"] == 1
+    assert data["correct_word"] == "negotiate"
+    # No progress recorded → no SRS row exists yet → level should be 0.
+    assert data["new_level"] == 0
+
+    # Confirm the progress endpoint also reports nothing (not advanced).
+    progress_res = await client.get("/api/vocabulary/progress")
+    rows = progress_res.json()["progress"]
+    assert all(r["word"] != "negotiate" for r in rows)
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_wrong_answer(client, mock_copilot):
+    word_id = await _seed_one_word(client, mock_copilot, "revenue")
+    res = await client.post(
+        "/api/vocabulary/spelling-challenge/answer",
+        json={"word_id": word_id, "typed": "xyz"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["result"] == "wrong"
+    assert data["distance"] >= 3
+    assert data["new_level"] == 0
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_spelling_challenge_unknown_word_id(client):
+    res = await client.post(
+        "/api/vocabulary/spelling-challenge/answer",
+        json={"word_id": 99999, "typed": "anything"},
+    )
+    assert res.status_code == 404

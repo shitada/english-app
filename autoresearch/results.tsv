@@ -632,3 +632,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 679	a7b2203	2026-04-20	53	657	173	30	913	2307	2307	pass	7.50	kept	Stress Spotlight (tap stressed words → reveal precision/recall → listen-with-emphasis → shadow): generate/audio/attempt/recent + new table+migration + Home tile; 32 new tests
 680	ee943ce	2026-04-20	77	294	171	54	596	2319	2319	pass	7.00	kept	Filler-word tracker for conversation (per-message badge + summary aggregate; 12 new tests)
 681	b0b23fc	2026-04-20	93	685	160	37	975	2323	2323	pass	7.25	kept	Power Word Challenge: SRS target words in conversation (chips + morphology detection + auto SRS bump on use; 4 new integration tests)
+682	d20fdc6	2026-04-20	102	327	150	25	604	2339	2339	pass	7.25	kept	Quick Contrastive Stress card (Listen→MCQ implied-meaning→Speak emphasis attempt; Copilot+static bank; 22 new tests)

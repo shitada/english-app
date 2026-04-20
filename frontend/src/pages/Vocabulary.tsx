@@ -10,6 +10,7 @@ import VocabFlashcardMode from '../components/VocabFlashcardMode';
 import VocabSpeakRecallMode from '../components/VocabSpeakRecallMode';
 import VocabContextListenDrill from '../components/VocabContextListenDrill';
 import VocabSpellingBee from '../components/VocabSpellingBee';
+import SpellingChallenge, { type SpellingChallengeWord } from '../components/SpellingChallenge';
 import VocabCollocationMatch from '../components/VocabCollocationMatch';
 import VocabLeechesPanel from '../components/VocabLeechesPanel';
 import InlineErrorBanner from '../components/InlineErrorBanner';
@@ -25,7 +26,7 @@ const TOPIC_EMOJIS: Record<string, string> = {
 };
 
 export default function Vocabulary() {
-  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen' | 'spelling-bee' | 'collocation-match'>('select');
+  const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'drill' | 'sentence-build' | 'sentence-build-result' | 'sentence-craft' | 'sentence-craft-result' | 'tiers' | 'word-pronunciation' | 'word-pronunciation-result' | 'flashcard' | 'speak-recall' | 'context-listen' | 'spelling-bee' | 'spelling-challenge' | 'collocation-match'>('select');
   const [questions, setQuestions] = useState<(QuizQuestion | FillBlankQuestion)[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -84,6 +85,8 @@ export default function Vocabulary() {
   const [srWords, setSrWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
   const [clWords, setClWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number; example_sentence: string }[]>([]);
   const [sbWords, setSbWords] = useState<{ id: number; word: string; meaning: string; topic: string; difficulty: number }[]>([]);
+  // Spelling Challenge state (autoresearch #683)
+  const [scWords, setScWords] = useState<SpellingChallengeWord[]>([]);
 
   // Collocation Match state (autoresearch #661)
   const [collocTopic, setCollocTopic] = useState<string | null>(null);
@@ -715,6 +718,36 @@ export default function Vocabulary() {
           🐝 Spelling Bee — hear and spell the word
         </button>
 
+        <button
+          data-testid="vocab-spelling-challenge-btn"
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const data = await api.getSpellingChallenge(10);
+              if (!data.words || data.words.length === 0) {
+                setInlineError('No vocabulary words available for spelling challenge. Add words via a topic quiz first.');
+                return;
+              }
+              setScWords(data.words);
+              setPhase('spelling-challenge');
+            } catch {
+              setInlineError('Failed to load words for spelling challenge.');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          disabled={loading || topicsLoading}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+            padding: '14px 20px', marginBottom: 20, borderRadius: 12, cursor: 'pointer',
+            border: '2px solid #6366f1', background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+            color: '#3730a3', fontWeight: 600, fontSize: '1rem',
+          }}
+          aria-label="Start spelling challenge"
+        >
+          📝 Spelling Challenge — TTS dictation with partial credit
+        </button>
+
         <div style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8, fontSize: '1rem' }}>Quiz Mode</h3>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -874,6 +907,15 @@ export default function Vocabulary() {
     return (
       <VocabSpellingBee
         initialWords={sbWords}
+        onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
+      />
+    );
+  }
+
+  if (phase === 'spelling-challenge') {
+    return (
+      <SpellingChallenge
+        initialWords={scWords}
         onBack={() => { setPhase('select'); setIsOfflineMode(false); }}
       />
     );

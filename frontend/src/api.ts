@@ -372,6 +372,17 @@ export const api = {
       `/api/vocabulary/drill?count=${count}`
     ),
 
+  getSpellingChallenge: (limit = 10, topic?: string) =>
+    request<{ words: { id: number; word: string; meaning: string; example_sentence: string; difficulty: number }[]; count: number }>(
+      `/api/vocabulary/spelling-challenge?limit=${limit}${topic ? `&topic=${encodeURIComponent(topic)}` : ''}`
+    ),
+
+  submitSpellingChallengeAnswer: (word_id: number, typed: string) =>
+    request<{ word_id: number; result: 'exact' | 'close' | 'wrong'; correct_word: string; distance: number; new_level: number }>(
+      `/api/vocabulary/spelling-challenge/answer`,
+      { method: 'POST', body: JSON.stringify({ word_id, typed }) }
+    ),
+
   fetchHardWords: (limit = 20) =>
     request<{ words: { id: number; word: string; meaning: string; topic: string; correct_count: number; incorrect_count: number; level: number; accuracy: number; last_reviewed: string | null }[] }>(
       `/api/vocabulary/hard-words?limit=${limit}`
