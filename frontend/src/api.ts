@@ -86,7 +86,7 @@ export const api = {
     }),
 
   sendMessage: (conversation_id: number, content: string, speaking_seconds?: number | null) =>
-    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; pace_wpm: number | null }>('/api/conversation/message', {
+    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; pace_wpm: number | null; fillers: { total: number; breakdown: Record<string, number> } | null }>('/api/conversation/message', {
       method: 'POST',
       body: JSON.stringify({ conversation_id, content, speaking_seconds: speaking_seconds ?? null }),
     }),

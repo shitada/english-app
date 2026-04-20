@@ -611,6 +611,55 @@ export function ConversationSummary({
         );
       })()}
 
+      {/* Backend-aggregated filler-words card (computed from message text) */}
+      {summary && typeof summary.fillers_total === 'number' && summary.fillers_total > 0 && (() => {
+        const total: number = summary.fillers_total;
+        const perMsg: number = typeof summary.fillers_per_message === 'number' ? summary.fillers_per_message : 0;
+        const breakdown: Record<string, number> = (summary.fillers_breakdown || {}) as Record<string, number>;
+        const topThree = Object.entries(breakdown)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        const showTip = total > 5;
+        return (
+          <div
+            data-testid="filler-words-card"
+            style={{
+              marginBottom: 24,
+              padding: 16,
+              background: 'var(--bg-secondary, #f5f5f5)',
+              borderRadius: 8,
+            }}
+          >
+            <h4 style={{ marginBottom: 12 }}>🗣 Filler Words</h4>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: total > 5 ? 'var(--danger, #ef4444)' : 'var(--warning, #f59e0b)' }}>
+                  {total}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Total</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 700 }}>{perMsg.toFixed(2)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Per message</div>
+              </div>
+              {topThree.length > 0 && (
+                <div style={{ textAlign: 'center', minWidth: 120 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>
+                    {topThree.map(([w, n]) => `${w} ×${n}`).join(', ')}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Top 3</div>
+                </div>
+              )}
+            </div>
+            {showTip && (
+              <p style={{ marginTop: 8, marginBottom: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
+                Try pausing silently instead of saying 'um' — it sounds more confident.
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Session Insights — filler words, response time, corrections, hints, grammar streak */}
       {(() => {
         const hasFillers = (fillerCount ?? 0) > 0;

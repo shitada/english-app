@@ -2278,3 +2278,103 @@ async def test_send_message_history_truncated_to_max_turns(client, mock_copilot)
     assert "FIRST_MARKER_0" not in prompt
     # MESSAGE_HISTORY_MAX_TURNS bounds the count of message lines
     assert conv_router.MESSAGE_HISTORY_MAX_TURNS == 16
+
+
+@pytest.mark.asyncio
+async def test_send_message_returns_filler_breakdown(client, mock_copilot):
+    """User message containing fillers should populate `fillers` in response."""
+    mock_copilot.ask = AsyncMock(return_value="Got it.")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="That's interesting!")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Um, I think, like, the room is actually nice.",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Um, I think, like, the room is actually nice.",
+    })
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data.get("fillers") is not None
+    assert data["fillers"]["total"] == 3
+    assert data["fillers"]["breakdown"] == {"um": 1, "like": 1, "actually": 1}
+
+
+@pytest.mark.asyncio
+async def test_send_message_no_fillers_field_null(client, mock_copilot):
+    """No filler words in user message -> `fillers` should be None."""
+    mock_copilot.ask = AsyncMock(return_value="Welcome!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    mock_copilot.ask = AsyncMock(return_value="Sure!")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "I would like a quiet room please.",
+        "is_correct": True,
+        "errors": [],
+        "suggestions": [],
+    })
+
+    res = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "I would prefer a quiet room please.",
+    })
+    assert res.status_code == 200, res.text
+    assert res.json().get("fillers") is None
+
+
+@pytest.mark.asyncio
+async def test_end_conversation_aggregates_fillers(client, mock_copilot):
+    """End-of-conversation summary should aggregate filler counts across user messages."""
+    mock_copilot.ask = AsyncMock(return_value="Hello!")
+    start_res = await client.post("/api/conversation/start", json={"topic": "hotel_checkin"})
+    conv_id = start_res.json()["conversation_id"]
+
+    # First user message: 2 fillers (um, like)
+    mock_copilot.ask = AsyncMock(return_value="Tell me more.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "Um I would like a room.",
+        "is_correct": True, "errors": [], "suggestions": [],
+    })
+    r1 = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "Um, I would like a room.",
+    })
+    assert r1.status_code == 200, r1.text
+
+    # Second user message: 2 fillers (you know, basically)
+    mock_copilot.ask = AsyncMock(return_value="Sounds good.")
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "corrected_text": "You know, basically a quiet one.",
+        "is_correct": True, "errors": [], "suggestions": [],
+    })
+    r2 = await client.post("/api/conversation/message", json={
+        "conversation_id": conv_id,
+        "content": "You know, basically a quiet one.",
+    })
+    assert r2.status_code == 200, r2.text
+
+    # End conversation
+    mock_copilot.ask_json = AsyncMock(return_value={
+        "summary": "Talked about a hotel room.",
+        "key_vocabulary": ["room"],
+        "communication_level": "intermediate",
+        "tip": "Try fewer fillers.",
+    })
+    end_res = await client.post("/api/conversation/end", json={"conversation_id": conv_id})
+    assert end_res.status_code == 200, end_res.text
+    summary = end_res.json()["summary"]
+    assert "fillers_total" in summary
+    assert summary["fillers_total"] == 4
+    assert summary["fillers_breakdown"]["um"] == 1
+    assert summary["fillers_breakdown"]["like"] == 1
+    assert summary["fillers_breakdown"]["you know"] == 1
+    assert summary["fillers_breakdown"]["basically"] == 1
+    assert "fillers_per_message" in summary
+    assert summary["fillers_per_message"] == 2.0

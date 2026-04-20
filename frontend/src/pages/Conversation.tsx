@@ -23,6 +23,7 @@ interface Message {
   grammar_notes?: import('../api').GrammarNote[];
   streaming?: boolean;
   pace_wpm?: number | null;
+  fillers?: { total: number; breakdown: Record<string, number> } | null;
 }
 
 /**
@@ -1118,7 +1119,7 @@ export default function Conversation() {
           const updated = [...prev];
           const lastUser = updated.findLastIndex((m) => m.role === 'user');
           if (lastUser >= 0) {
-            updated[lastUser] = { ...updated[lastUser], feedback: res.feedback, pace_wpm: res.pace_wpm };
+            updated[lastUser] = { ...updated[lastUser], feedback: res.feedback, pace_wpm: res.pace_wpm, fillers: res.fillers };
           }
           updated.push({ role: 'assistant', content: res.message, key_phrases: res.key_phrases || [], grammar_notes: res.grammar_notes || [] });
           return updated;
@@ -2345,6 +2346,35 @@ export default function Conversation() {
             {msg.role === 'user' && typeof msg.pace_wpm === 'number' && msg.pace_wpm > 0 && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}>
                 <PaceBadge wpm={msg.pace_wpm} />
+              </div>
+            )}
+            {msg.role === 'user' && msg.fillers && msg.fillers.total > 0 && (
+              <div
+                data-testid="filler-badge"
+                style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 8px' }}
+              >
+                <span
+                  title={Object.entries(msg.fillers.breakdown)
+                    .map(([k, v]) => `${k}×${v}`)
+                    .join(', ')}
+                  style={{
+                    display: 'inline-block',
+                    padding: '2px 8px',
+                    borderRadius: 12,
+                    fontSize: '0.75rem',
+                    background: 'var(--bg-secondary, #f3f4f6)',
+                    color: 'var(--text-secondary, #6b7280)',
+                    border: '1px solid var(--border, #e5e7eb)',
+                  }}
+                >
+                  🗣 {msg.fillers.total} filler{msg.fillers.total === 1 ? '' : 's'}
+                  {' ('}
+                  {Object.entries(msg.fillers.breakdown)
+                    .slice(0, 3)
+                    .map(([k, v]) => `${k}×${v}`)
+                    .join(', ')}
+                  {')'}
+                </span>
               </div>
             )}
             {msg.feedback && <FeedbackPanel feedback={msg.feedback} onSpeak={tts.speak} onCorrectionAttempt={(success) => {

@@ -1506,4 +1506,116 @@ Iteration 678 done. Starting 679.
 
 Now let me check copilot and tests structure:Now I have enough context. Let me build it. First, check a quick existing similar feature: thought_group is in pronunciation router. Let me check for difficulty query param pattern:Now let me check copilot mock for existing reduced_forms feature for reference:Let me check the copilot fixture path for a similar new router (reduced_forms doesn't use copilot, thought_group does):Now I have a clear pattern. Let me start writing.
 
-First, add the prompt:Now create the DAL:Update the database schema and migrations:Now create the router:Wire up router in main.py:Create unit tests:Create integration tests:Now run backend tests:All 32 pass. Now let me build the frontend page.Now create the Stress Spotlight page:Now wire up route in App.tsx and add Home tile:Now add the home tile after the shadowing CTA:Now let me verify build & frontend compile, then add UI test spec entries:TypeScript clean. Now run the full backend test suite to make sure nothing's broken:
+First, add the prompt:Now create the DAL:Update the database schema and migrations:Now create the router:Wire up router in main.py:Create unit tests:Create integration tests:Now run backend tests:All 32 pass. Now let me build the frontend page.Now create the Stress Spotlight page:Now wire up route in App.tsx and add Home tile:Now add the home tile after the shadowing CTA:Now let me verify build & frontend compile, then add UI test spec entries:TypeScript clean. Now run the full backend test suite to make sure nothing's broken:[2026-04-20 11:04:23] Copilot invocation completed (duration: 1545s)
+[2026-04-20 11:04:23] Recording agent traces...
+[2026-04-20 11:04:23]   AGENT_TRACE iter=678 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 11:04:23]   AGENT_TRACE iter=679 proposer=1 coder=0 tester=0 evaluator=0
+[2026-04-20 11:04:23] SMOKE_UI: UI changes detected in pages: home
+[2026-04-20 11:04:23] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 11:04:23] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1856ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 11:04:36] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 11:04:36] Running post-invocation audit (iter 678-679)...
+============================================
+ Autoresearch Audit
+ Iterations: 678 — 679
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 11:04:36
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 678 679[0m
+[0;31m  Tester: FAIL — missing: 678 679[0m
+[0;31m  Evaluator: FAIL — missing: 678 679[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 11:04:37] Audit found 3 error(s) — fixes applied where possible
+[2026-04-20 11:04:40] Current iteration count: 679 / 699
+[2026-04-20 11:04:40] ------------------------------------------
+[2026-04-20 11:04:40] Invocation 6 / 10
+[2026-04-20 11:04:40] Resuming from iteration 680
+[2026-04-20 11:04:40] ------------------------------------------
+[2026-04-20 11:04:40] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-680-to-699.md)...
+● Restore autoresearch context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git log --oneline -5 &&
+  │ echo "---UI-TEST---" && (test -f autoresearch/ui-test-results.json &&
+  │ python3 -c "import json; …
+  └ 35 lines...
+
+● T0 for iter 680 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Filler-word tracker for conversation (per-message badge + summary aggregate)",
+  "description": "Add a Filler-Word Tracker to the Conversation feature so learners get immediate, visible feedback on disfluencies (a key fluency metric for spoken English). NO schema changes required — counts are computed from existing user `messages.content` text on the fly.\n\nBackend (app/routers/conversation.py):\n1. Add a small helper `count_fillers(text: str) -> dict` (place near `_compute_pace_wpm`) that lowercases the text, tokenizes on word boundaries, and counts a fixed set of common English fillers/discourse markers: single-word {\"um\",\"uh\",\"er\",\"ah\",\"hmm\",\"like\",\"basically\",\"actually\",\"literally\",\"so\"} and multi-word phrases {\"you know\",\"i mean\",\"sort of\",\"kind of\"} (use regex with word boundaries; multi-word matched first). Return `{\"total\": int, \"breakdown\": {filler: count}}` (omit zero-count entries from breakdown). The `\"so\"`/`\"like\"`/`\"actually\"` etc. are common fillers but also legitimate words — count them only when they appear as standalone tokens; document this caveat in the docstring.\n2. Extend `MessageResponse` with `fillers: dict[str, Any] | None = None` and populate it for the user's just-sent message in the POST `/api/conversation/message` handler (compute on `request.content` before persisting; only set when `total > 0`).\n3. In the POST `/api/conversation/end` summary builder, aggregate filler counts across all stored user messages for that conversation (loop over `conv_dal.list_messages` rows where `role='user'`) and add `fillers_total: int`, `fillers_breakdown: dict[str,int]`, `fillers_per_message: float` to the returned summary dict (alongside existing fields). This works without DB migration because we recompute from `content` text.\n\nFrontend (frontend/src/pages/ConversationPage.tsx — or whichever component renders the conversation chat & summary; locate via grep for MessageResponse/feedback rendering):\n4. When a user message comes back with `fillers.total > 0`, render a small subtle badge under that user bubble like `🗣 3 fillers (um×2, like×1)` (tooltip shows full breakdown). Use existing badge/tag styles for consistency with pace_wpm display.\n5. In the conversation summary view, add a \"Filler words\" stat card showing total count, per-message average, and the top 3 fillers; include a one-line tip when the total is high (>5 in conversation): \"Try pausing silently instead of saying 'um' — it sounds more confident.\"\n\nTests:\n6. Add `tests/unit/test_conversation_fillers.py` covering `count_fillers`: empty string → 0; \"Um, I think, like, that's actually true\" → correct counts; case-insensitive; multi-word \"you know\" counted as one filler not two; word-boundary safety (\"likely\" should NOT match \"like\", \"sometimes\" should not match \"so\"/\"time\").\n7. Add an integration test in `tests/integration/test_conversation_api.py` (or the existing conversation test file) that posts a user message containing fillers and asserts `fillers.total` and `fillers.breakdown` are present in the response, and that `/end` summary contains `fillers_total` aggregating across messages.\n\nWhy: Fluency-focused, user-facing, low-risk (no schema/migration), measurable (counts), and complements existing pace_wpm and shadowing features. Helps users self-correct speech habits in real time.",
+  "files_to_modify": [
+    "app/routers/conversation.py",
+    "frontend/src/pages/ConversationPage.tsx",
+    "tests/unit/test_conversation_fillers.py",
+    "tests/integration/test_conversation_api.py"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 680
+  │ Read conversation.py
+  │   │ app/routers/conversation.py
+  │   └ L80:220 (141 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L1:60 (60 lines read)
+
+● T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Now look at the frontend.Now look at message-add path and ConversationSummary structure:Now I have enough context. Let me implement.Now extend MessageResponse and populate it. Then aggregate in /end.I removed the EndResponse class. Let me restore it.Now populate fillers in the /message handler:Now aggregate in /end. The proposal mentions `conv_dal.list_messages` but it doesn't exist. I'll use `get_conversation_history`:Now write unit tests:Now add integration test:Now frontend changes. Update api.ts type, Message interface, badge under user bubble, and summary card.Now apply fillers from the non-streaming response onto the user message:Now add the badge UI under user bubbles:Now add a filler-words stat card to ConversationSummary. Find a good spot—after pace_stats card:Good — there's already a session insights card with frontend-computed fillers. I'll add a separate "Filler Words" card driven by backend `summary.fillers_total`. Insert it right after the pace_stats block:Check TypeScript builds:Now update ui-test-spec.yaml:Run a broader test sanity check:

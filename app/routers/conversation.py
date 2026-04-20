@@ -104,6 +104,61 @@ class MessageRequest(BaseModel):
     speaking_seconds: float | None = Field(default=None, ge=0)
 
 
+# Filler / discourse-marker tracking.
+# Single-word fillers are matched as standalone tokens via word boundaries —
+# this keeps "likely", "sometimes", "alike" etc. from accidentally matching.
+# Multi-word phrases are matched FIRST so that e.g. "you know" is counted as
+# one filler rather than separately as the words "you" and "know".
+_FILLER_SINGLE_WORDS: tuple[str, ...] = (
+    "um", "uh", "er", "ah", "hmm",
+    "like", "basically", "actually", "literally", "so",
+)
+_FILLER_PHRASES: tuple[str, ...] = (
+    "you know", "i mean", "sort of", "kind of",
+)
+
+
+def count_fillers(text: str) -> dict[str, Any]:
+    """Count common English filler words / discourse markers in ``text``.
+
+    Returns ``{"total": int, "breakdown": {filler: count}}``. Zero-count
+    fillers are omitted from the breakdown. Matching is case-insensitive
+    and uses word boundaries so that legitimate words are not matched
+    (e.g. "likely" does NOT match "like", "sometimes" does NOT match "so").
+
+    Caveat: words like ``so``, ``like``, ``actually``, ``basically`` and
+    ``literally`` are common fillers but are also legitimate vocabulary.
+    They are counted whenever they appear as a standalone token, so this
+    is a heuristic — context-aware classification would require an LLM.
+    Multi-word phrases (``you know``, ``i mean``, ``sort of``, ``kind of``)
+    are matched first and the matched span is removed before single-word
+    matching, so each occurrence is only counted once.
+    """
+    if not text:
+        return {"total": 0, "breakdown": {}}
+    lowered = text.lower()
+    breakdown: dict[str, int] = {}
+
+    # Phrase matches first; replace each match with spaces so single-word
+    # passes can't double-count the constituent tokens.
+    def _phrase_repl(match: "re.Match[str]", phrase: str) -> str:
+        breakdown[phrase] = breakdown.get(phrase, 0) + 1
+        return " " * (match.end() - match.start())
+
+    for phrase in _FILLER_PHRASES:
+        pattern = re.compile(r"\b" + re.escape(phrase) + r"\b")
+        lowered = pattern.sub(lambda m, p=phrase: _phrase_repl(m, p), lowered)
+
+    for word in _FILLER_SINGLE_WORDS:
+        pattern = re.compile(r"\b" + re.escape(word) + r"\b")
+        n = len(pattern.findall(lowered))
+        if n:
+            breakdown[word] = breakdown.get(word, 0) + n
+
+    total = sum(breakdown.values())
+    return {"total": total, "breakdown": breakdown}
+
+
 def _compute_pace_wpm(content: str, speaking_seconds: float | None) -> float | None:
     """Compute words-per-minute for a user turn.
 
@@ -149,6 +204,7 @@ class MessageResponse(BaseModel):
     key_phrases: list[str] = []
     grammar_notes: list[GrammarNote] = []
     pace_wpm: float | None = None
+    fillers: dict[str, Any] | None = None
 
 
 class EndResponse(BaseModel):
@@ -680,7 +736,9 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
 
     # Reply helpers (suggestions, key phrases, grammar notes) are fetched lazily
     # by the frontend via POST /api/conversation/helpers to reduce response latency.
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val}
+    fillers_info = count_fillers(req.content)
+    fillers_payload = fillers_info if fillers_info["total"] > 0 else None
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val, "fillers": fillers_payload}
 
 
 @router.post("/{conversation_id}/message/stream")
@@ -976,6 +1034,24 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     metrics = await conv_dal.get_conversation_metrics(db, req.conversation_id)
     summary["performance"] = metrics
     summary["pace_stats"] = await conv_dal.get_pace_stats(db, req.conversation_id)
+
+    # Aggregate filler-word stats across all user messages for this conversation.
+    # Computed on the fly from existing `messages.content` text — no schema change.
+    history_rows = await conv_dal.get_conversation_history(db, req.conversation_id)
+    user_msg_count = 0
+    fillers_total = 0
+    fillers_breakdown: dict[str, int] = {}
+    for r in history_rows:
+        if (r.get("role") or "") != "user":
+            continue
+        user_msg_count += 1
+        info = count_fillers(r.get("content") or "")
+        fillers_total += int(info["total"])
+        for word, n in info["breakdown"].items():
+            fillers_breakdown[word] = fillers_breakdown.get(word, 0) + int(n)
+    summary["fillers_total"] = fillers_total
+    summary["fillers_breakdown"] = fillers_breakdown
+    summary["fillers_per_message"] = round(fillers_total / user_msg_count, 2) if user_msg_count else 0.0
 
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:

@@ -781,6 +781,22 @@ pages:
         priority: medium
         added_in: 643
 
+      - id: conv-063
+        target: Per-message filler badge renders under user bubbles containing fillers
+        action: Send a user message that contains filler words (e.g. "um, like, basically")
+        expect: A small badge with data-testid="filler-badge" appears under that user bubble showing "🗣 N filler(s)" and a tooltip listing the breakdown
+        type: functional
+        priority: medium
+        added_in: 680
+
+      - id: conv-064
+        target: Filler-words summary card renders with totals and tip when high
+        action: End a conversation that contained more than 5 filler words across user messages
+        expect: data-testid="filler-words-card" is visible with total count, per-message average, top-3 fillers, and the high-usage coaching tip
+        type: functional
+        priority: medium
+        added_in: 680
+
   pronunciation:
     path: /pronunciation
     tests:
