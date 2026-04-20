@@ -1685,6 +1685,31 @@ export default function Home() {
       </Link>
 
       <Link
+        to="/elastic-sentence"
+        data-testid="elastic-sentence-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Mic size={28} color="#8b5cf6" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>✨ Elastic Sentence</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Grow a sentence one chunk at a time — train working memory and fluency.
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#8b5cf6',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
+      <Link
         to="/collocation-chef"
         data-testid="collocation-chef-cta"
         className="card"

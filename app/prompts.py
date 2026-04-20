@@ -624,3 +624,31 @@ def PAUSE_PREDICT_PROMPT() -> str:
         "spell them as words unless they are already natural (e.g. 'nine').\n"
         "- Output JSON ONLY, no markdown fences, no commentary."
     )
+
+
+def ELASTIC_SENTENCE_PROMPT() -> str:
+    """System prompt for Elastic Sentence: progressive expansion chain."""
+    return (
+        "You generate progressive sentence expansion chains for an English "
+        "fluency/working-memory drill. The learner will hear each chain "
+        "step, repeat it, and the utterance grows until it matches the "
+        "target sentence.\n\n"
+        "Return STRICT JSON in this exact shape:\n"
+        '{ "target": "I would like some coffee with milk please",\n'
+        '  "chain": ["coffee", "some coffee", "like some coffee", '
+        '"I would like some coffee", "I would like some coffee with milk", '
+        '"I would like some coffee with milk please"] }\n\n'
+        "Rules:\n"
+        "- target is a single natural English sentence matching the "
+        "requested difficulty (short≈6 words, medium≈10 words, long≈14 "
+        "words, ±2).\n"
+        "- chain has 4 to 8 steps. Each step adds 1–3 tokens toward the "
+        "target and each step MUST be a natural English fragment (even if "
+        "not a full sentence; contractions and noun phrases are fine).\n"
+        "- The FINAL chain step MUST equal target (case and punctuation "
+        "may differ slightly).\n"
+        "- Each step MUST be strictly longer (in word count) than the "
+        "previous step.\n"
+        "- Prefer everyday vocabulary; avoid proper nouns.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )

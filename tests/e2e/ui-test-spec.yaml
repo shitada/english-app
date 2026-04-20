@@ -6003,3 +6003,73 @@ pages:
         type: visual
         priority: medium
         added_in: 705
+
+  elastic-sentence:
+    path: /elastic-sentence
+    tests:
+      - id: elastic-sentence-001
+        target: Page renders with difficulty picker and back link
+        selector: data-testid="elastic-sentence-page"
+        action: Visit /elastic-sentence
+        expect: data-testid="elastic-sentence-page" and data-testid="elastic-sentence-picker" are visible; all three difficulty buttons (short/medium/long) render
+        type: functional
+        priority: critical
+        added_in: 706
+
+      - id: elastic-sentence-002
+        target: Choosing a difficulty generates a chain and reveals the step-by-step builder
+        action: Click data-testid="elastic-sentence-diff-medium"
+        expect: data-testid="elastic-sentence-builder" becomes visible; data-testid="elastic-sentence-step-counter" shows "Step 1 / N"
+        type: functional
+        priority: high
+        added_in: 706
+
+      - id: elastic-sentence-003
+        target: Listen button triggers TTS for the current chunk
+        selector: data-testid="elastic-sentence-play"
+        action: Click data-testid="elastic-sentence-play" after choosing a difficulty
+        expect: Button is enabled when TTS is supported; clicking does not throw; no error banner appears
+        type: functional
+        priority: medium
+        added_in: 706
+
+      - id: elastic-sentence-004
+        target: Next step advances through the chain until the final speak phase
+        action: Click data-testid="elastic-sentence-next-step" repeatedly
+        expect: data-testid="elastic-sentence-step-counter" increments; after reaching the final step, data-testid="elastic-sentence-final" is visible and data-testid="elastic-sentence-record" appears
+        type: state
+        priority: high
+        added_in: 706
+
+      - id: elastic-sentence-005
+        target: New tokens in each step are visually highlighted
+        action: Advance one step and inspect the builder
+        expect: At least one data-testid="elastic-sentence-new-token" is present with purple styling; already-spoken tokens use data-testid="elastic-sentence-token"
+        type: visual
+        priority: medium
+        added_in: 706
+
+      - id: elastic-sentence-006
+        target: Change-difficulty button returns to the picker from results
+        action: From the results view, click data-testid="elastic-sentence-change-difficulty"
+        expect: data-testid="elastic-sentence-picker" is visible again
+        type: navigation
+        priority: medium
+        added_in: 706
+
+      - id: elastic-sentence-007
+        target: Home exposes an Elastic Sentence CTA linking to /elastic-sentence
+        selector: data-testid="elastic-sentence-cta"
+        action: Visit "/" and locate data-testid="elastic-sentence-cta"
+        expect: Card labeled "Elastic Sentence" is visible and links to /elastic-sentence
+        type: navigation
+        priority: high
+        added_in: 706
+
+      - id: elastic-sentence-008
+        target: Dark mode and 375px mobile render correctly
+        action: Toggle dark mode via theme toggle, then resize viewport to 375x812 and visit /elastic-sentence
+        expect: Title, picker buttons, builder card, and result stats all legible; no horizontal overflow; purple highlight tokens remain readable
+        type: visual
+        priority: medium
+        added_in: 706

@@ -5092,3 +5092,57 @@ export function submitCollocationChefAttempt(
 export function getCollocationChefStats(): Promise<CollocationChefStatsResponse> {
   return request<CollocationChefStatsResponse>('/api/collocations/stats');
 }
+
+// ── Elastic Sentence Drill ────────────────────────────────────────────
+
+export type ElasticDifficulty = 'short' | 'medium' | 'long';
+
+export interface ElasticSentenceItem {
+  difficulty: ElasticDifficulty;
+  target: string;
+  chain: string[];
+}
+
+export interface ElasticSentenceSubmitInput {
+  difficulty: ElasticDifficulty;
+  target: string;
+  chain: string[];
+  max_reached: number;
+  accuracy: number;
+  transcript?: string;
+}
+
+export interface ElasticSentenceSubmitResponse {
+  id: number;
+  difficulty: ElasticDifficulty;
+  target: string;
+  chain_len: number;
+  max_reached: number;
+  accuracy: number;
+  longest_words: number;
+}
+
+export interface ElasticSentenceStats {
+  total_sessions: number;
+  avg_accuracy_last_20: number;
+  longest_words: number;
+  last_session_at: string | null;
+}
+
+export function generateElasticSentence(difficulty: ElasticDifficulty): Promise<ElasticSentenceItem> {
+  return request<ElasticSentenceItem>('/api/elastic-sentence/generate', {
+    method: 'POST',
+    body: JSON.stringify({ difficulty }),
+  });
+}
+
+export function submitElasticSentence(input: ElasticSentenceSubmitInput): Promise<ElasticSentenceSubmitResponse> {
+  return request<ElasticSentenceSubmitResponse>('/api/elastic-sentence/submit', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export function getElasticSentenceStats(): Promise<ElasticSentenceStats> {
+  return request<ElasticSentenceStats>('/api/elastic-sentence/stats');
+}

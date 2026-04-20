@@ -470,6 +470,21 @@ CREATE TABLE IF NOT EXISTS intonation_arrow_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_intonation_arrow_created
     ON intonation_arrow_attempts(created_at);
+
+CREATE TABLE IF NOT EXISTS elastic_sentence_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    difficulty TEXT NOT NULL,
+    target_sentence TEXT NOT NULL,
+    chain_json TEXT NOT NULL,
+    chain_len INTEGER NOT NULL,
+    max_reached INTEGER NOT NULL,
+    accuracy REAL NOT NULL DEFAULT 0,
+    longest_words INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_elastic_sentence_created
+    ON elastic_sentence_sessions(created_at);
 """
 
 # ---------------------------------------------------------------------------
@@ -1119,6 +1134,24 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on collocation_attempts correct_verb",
         "CREATE INDEX IF NOT EXISTS idx_colloc_verb ON collocation_attempts(correct_verb)",
+    ),
+    (
+        "create elastic_sentence_sessions table",
+        """CREATE TABLE IF NOT EXISTS elastic_sentence_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            difficulty TEXT NOT NULL,
+            target_sentence TEXT NOT NULL,
+            chain_json TEXT NOT NULL,
+            chain_len INTEGER NOT NULL,
+            max_reached INTEGER NOT NULL,
+            accuracy REAL NOT NULL DEFAULT 0,
+            longest_words INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on elastic_sentence_sessions created_at",
+        "CREATE INDEX IF NOT EXISTS idx_elastic_sentence_created ON elastic_sentence_sessions(created_at)",
     ),
 ]
 

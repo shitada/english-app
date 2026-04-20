@@ -34,6 +34,7 @@ import PausePredictPage from './pages/PausePredictPage';
 import ArticleDrill from './pages/ArticleDrill';
 import IntonationArrowPage from './pages/IntonationArrowPage';
 import CollocationChef from './pages/CollocationChef';
+import ElasticSentencePage from './pages/ElasticSentencePage';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -147,6 +148,7 @@ export default function App() {
                 <Route path="/articles" element={<ArticleDrill />} />
                 <Route path="/intonation-arrow" element={<IntonationArrowPage />} />
                 <Route path="/collocation-chef" element={<CollocationChef />} />
+                <Route path="/elastic-sentence" element={<ElasticSentencePage />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>
