@@ -5,7 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import AudioWaveform from '../components/AudioWaveform';
-import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory, MissedWordDrill, StressTapDrill } from '../components/pronunciation';
+import { MinimalPairsExercise, QuickSpeakExercise, ResponseDrill, SentenceExpandDrill, SentenceTransformDrill, TongueTwisterDrill, PronunciationHistory, RecordingHistory, MissedWordDrill, StressTapDrill, WordHeatmap } from '../components/pronunciation';
 import { useRecordingStorage } from '../hooks/useRecordingStorage';
 import InlineErrorBanner from '../components/InlineErrorBanner';
 
@@ -866,6 +866,11 @@ export default function Pronunciation() {
         })()}
 
         <h4 style={{ marginBottom: 8 }}>Word-by-Word Analysis</h4>
+        <WordHeatmap
+          referenceText={selectedSentence}
+          wordFeedback={feedback.word_feedback}
+          tts={tts}
+        />
         <div className="word-comparison">
           {feedback.word_feedback.map((w, i) => {
             const chipClass = w.is_correct ? 'word-correct' : (w.heard !== 'missing' ? 'word-partial' : 'word-incorrect');

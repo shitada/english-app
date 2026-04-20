@@ -968,6 +968,22 @@ pages:
         priority: medium
         added_in: 658
 
+      - id: pron-024
+        target: Word Heatmap renders on the shadowing result phase
+        action: Complete a shadowing attempt on /pronunciation and reach the result view
+        expect: data-testid="word-heatmap" appears above the existing Word-by-Word Analysis chips; each token has data-testid="word-heatmap-token-N" with data-status of correct/missed/neutral; correct tokens are spans, missed tokens are clickable buttons; existing aggregate score, focus areas, and Drill Missed Words button remain unchanged
+        type: functional
+        priority: high
+        added_in: 676
+
+      - id: pron-025
+        target: Word Heatmap missed-word panel exposes tip, 🔊 play, 🎤 retry
+        action: On the shadowing result view, click any data-testid="word-heatmap-token-N" button (a missed word)
+        expect: data-testid="word-heatmap-panel" expands inline showing data-testid="word-heatmap-tip" and any data-testid="word-heatmap-phoneme-issues"; data-testid="word-heatmap-play" speaks the word in isolation; data-testid="word-heatmap-retry" starts a single ASR capture (up to 3 attempts) and on a matching transcript the token is marked resolved (data-testid="word-heatmap-resolved-indicator" appears, retry button disappears)
+        type: functional
+        priority: high
+        added_in: 676
+
   listening:
     path: /listening
     tests:

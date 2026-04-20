@@ -8,3 +8,4 @@ export { PronunciationHistory } from './PronunciationHistory';
 export { RecordingHistory } from './RecordingHistory';
 export { MissedWordDrill } from './MissedWordDrill';
 export { StressTapDrill } from './StressTapDrill';
+export { WordHeatmap } from './WordHeatmap';

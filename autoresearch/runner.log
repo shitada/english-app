@@ -795,4 +795,243 @@ Iter 674 done (kept, 7.00). Now iter 675.
   │ date +%s
   └ 2 lines...
 
-Now update the router:Now frontend api.ts:Now MinimalPairs.tsx:Now insert the weak-contrasts panel into the idle phase view. Let me find where:Now write tests:Now run tests + tsc:Run broader unit/integration tests for listening:All passing. Now update UI test spec:
+Now update the router:Now frontend api.ts:Now MinimalPairs.tsx:Now insert the weak-contrasts panel into the idle phase view. Let me find where:Now write tests:Now run tests + tsc:Run broader unit/integration tests for listening:All passing. Now update UI test spec:```json
+{
+  "committed": true,
+  "commit_hash": "0697aa4",
+  "files_changed": [
+    "app/dal/minimal_pair.py",
+    "app/routers/listening.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/MinimalPairs.tsx",
+    "tests/unit/test_minimal_pair_dal.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 6,
+  "ui_spec_updated": true,
+  "description": "Added DAL aggregator + /weak-contrasts endpoint + focused-drill contrast param, and a 'Your weakest contrasts' panel on MinimalPairs page with one-click drill buttons."
+}
+```● Coder Implement iter 675
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #675: add Minimal Pairs weak-contrast panel +
+  │   │ focused drill (DAL+endpoint+UI)
+  │   │
+  │   │ Co-authored-by: Autoresearch Coder <autoresearch@english-app.local>" 2>&1 …
+  │   └ 16 lines...
+  └ commit hash + files (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git rev-parse --short
+      │ HEAD && git show --stat HEAD | head -20
+      └ 19 lines...
+
+● T2 (shell)
+  │ date +%s && git -C /Users/shingotada/Documents/vscode/english-app rev-parse
+  │ --short HEAD
+  └ 3 lines...
+
+```json
+{
+  "tests_passed": 2249,
+  "tests_total": 2249,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2249 passed in 127.42s (0:02:07) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 675
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+  │   └ 23 lines...
+  └ read e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 8,
+  "maintainability": 8,
+  "ux_quality": 7,
+  "total_score": 7.35,
+  "verdict": "keep",
+  "reason": "Targeted weak-contrast drill feature with proper DAL aggregation, new endpoint, frontend panel, and 6 new passing tests; all 2249 tests and TS check pass."
+}
+```● Evaluator Evaluate iter 675
+  └ List directory .
+      └ 212 files found
+
+● Record iter 675 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ printf '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "675" "0697aa4" "$(date +%Y-%m-%d)" "$((1776647071-1776646979))"
+  │ "$((1776647393-1776647071))" "$((1776647548-1776647393))"
+  │ "$((T4-1776647548))" "$((T4-1776646979))" \…
+  └ 7 lines...
+
+Both iterations complete. STOP.
+
+**Summary:**
+- **674** `49ae087` — Quick Pace Match card (target WPM shadowing): score **7.00**, kept, 2243/2243 pass
+- **675** `0697aa4` — Minimal Pairs weak-contrasts panel + focused drill: score **7.35**, kept, 2249/2249 pass
+
+Both features (no bugfixes) per the requirement. All 4 subagents (proposer/coder/tester/evaluator) called for each iteration.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (18m 32s)
+Tokens    ↑ 2.7m • ↓ 47.1k • 2.4m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-674-to-699.md
+[2026-04-20 10:12:58] Copilot invocation completed (duration: 1115s)
+[2026-04-20 10:12:58] Recording agent traces...
+[2026-04-20 10:12:58]   AGENT_TRACE iter=674 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 10:12:58]   AGENT_TRACE iter=675 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 10:12:58] SMOKE_UI: UI changes detected in pages: home
+[2026-04-20 10:12:58] SMOKE_UI: Level=full (iteration 675 is divisible by 5)
+[2026-04-20 10:12:58] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1842ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1606ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1641ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1556ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1624ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1799ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3755ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2053ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (1980ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1901ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1974ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2167ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1678ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1611ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1632ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1555ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1610ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1729ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-20 10:13:50] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 10:13:50] Running post-invocation audit (iter 674-675)...
+============================================
+ Autoresearch Audit
+ Iterations: 674 — 675
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 10:13:50
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 674 675[0m
+[0;31m  Evaluator: FAIL — missing: 674 675[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 10:13:52] Audit found 2 error(s) — fixes applied where possible
+[2026-04-20 10:13:55] Current iteration count: 675 / 699
+[2026-04-20 10:13:55] ------------------------------------------
+[2026-04-20 10:13:55] Invocation 4 / 10
+[2026-04-20 10:13:55] Resuming from iteration 676
+[2026-04-20 10:13:55] ------------------------------------------
+[2026-04-20 10:13:55] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-676-to-699.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && tail -20 autoresearch/results.tsv && echo "---BACKLOG---"
+  │ && grep '^- \[ \]' autoresearch/backlog.md && echo "---GIT---" && git log
+  │ --oneline -5 && echo "---UI-RESULTS---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import json; …
+  └ 36 lines...
+
+Starting iteration 676. Dispatching to proposer.
+
+```json
+{
+  "type": "feature",
+  "title": "Pronunciation result: word-level heatmap with tap-to-drill on missed words",
+  "description": "After a shadowing attempt on the Pronunciation page, the API already returns per-word evaluation in `PronunciationFeedback.word_feedback` (each entry has `expected`, `heard`, `is_correct`, `tip`, optional `phoneme_issues`). Currently the result phase shows aggregate score + a flat list of feedback, missing an at-a-glance view of which specific words the user nailed vs. flubbed and offering no immediate way to retry just those words.\n\nAdd a new component `frontend/src/components/pronunciation/WordHeatmap.tsx` that renders the reference sentence as inline tokens, each colored by its `is_correct` state (green for correct, amber/red for missed, neutral grey for words not aligned). Each missed word is a button: clicking it expands a small inline panel with: (1) the `tip` text and any `phoneme_issues` (target/produced/position), (2) a 🔊 button that calls `tts.speak(word)` to model the word in isolation, and (3) a 🎤 retry button that uses `useSpeechRecognition` to capture a single repeat (up to 3 attempts, reusing the `normalizeWord` and `transcriptMatches` helpers exported from `MissedWordDrill.tsx`). On a successful match show a ✓ check and dim the panel; on failure show the heard transcript with a hint to try again. No backend changes — purely a richer frontend rendering of existing data.\n\nIntegration: in `frontend/src/pages/Pronunciation.tsx`, in the `phase === 'result'` block where `feedback` is rendered (shadowing mode), insert `<WordHeatmap referenceText={selectedSentence} wordFeedback={feedback.word_feedback} tts={tts} />` above the existing feedback list. Keep the existing aggregate score, focus areas, and `MissedWordDrill` button unchanged so the cross-session trouble-words flow still works; the heatmap targets the *current* attempt only.\n\nExport `WordHeatmap` from `frontend/src/components/pronunciation/index.ts`. Add a focused unit test file `frontend/src/components/pronunciation/__tests__/WordHeatmap.test.tsx` that verifies: (a) tokens render with correct color class based on `is_correct`, (b) clicking a missed word reveals its `tip` and the retry button, (c) when the SpeechRecognition mock returns a matching transcript the word is marked as resolved (uses the same matcher semantics as `transcriptMatches`).\n\nThis strengthens the existing Pronunciation flow with immediate, targeted repair practice — turning each shadowing attempt into a self-contained diagnose→drill loop without leaving the page, and reusing existing infrastructure (TTS hook, speech recognition hook, MissedWordDrill matchers).",
+  "files_to_modify": [
+    "frontend/src/components/pronunciation/WordHeatmap.tsx",
+    "frontend/src/components/pronunciation/index.ts",
+    "frontend/src/pages/Pronunciation.tsx",
+    "frontend/src/components/pronunciation/__tests__/WordHeatmap.test.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium",
+  "acceptance_criteria": [
+    "On the Pronunciation result phase (shadowing mode), each word of the reference sentence is rendered as a colored token reflecting its `is_correct` status from `feedback.word_feedback`.",
+    "Clicking/tapping a missed-word token expands an inline panel showing the word's `tip` and any `phoneme_issues`, plus a 🔊 'play word' button (TTS) and a 🎤 retry button.",
+    "The retry button captures one ASR utterance and, using the same matching logic as `MissedWordDrill.transcriptMatches`, marks the word resolved (✓) on a hit; on miss it shows the heard transcript and allows up to 3 attempts before disabling.",
+    "Words without a matching `word_feedback` entry render in a neutral style and are not clickable.",
+    "Existing aggregate score, focus areas, and the cross-session `MissedWordDrill` entry point continue to render unchanged.",
+    "Unit tests in `WordHeatmap.test.tsx` cover: color-class assignment per status, panel expansion on click, and resolved-state transition when a mocked ASR transcript matches.",
+    "No backend or schema changes; no new API endpoints."
+  ]
+}
+```● Proposer Propose iteration 676
+  │ Read api.ts
+  │   │ frontend/src/api.ts
+  │   └ L620:700 (81 lines read)
+  └ Read Pronunciation.tsx
+      │ frontend/src/pages/Pronunciation.tsx
+      └ L50:180 (131 lines read)
+
+● T1 timestamp (shell)
+  │ echo "T1=$(date +%s)"
+  └ 2 lines...
+
+Now I have enough info. Let me create the WordHeatmap component:Now integrate into Pronunciation.tsx — insert WordHeatmap above the existing word-comparison list, in shadowing result block:Now create the test file:All 10 tests pass. Now update the UI test spec since Pronunciation.tsx was modified:
