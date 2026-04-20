@@ -341,6 +341,18 @@ CREATE TABLE IF NOT EXISTS tense_contrast_attempts (
 
 CREATE INDEX IF NOT EXISTS idx_tense_contrast_created ON tense_contrast_attempts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tense_contrast_session ON tense_contrast_attempts(session_id);
+
+CREATE TABLE IF NOT EXISTS wh_question_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    target_wh TEXT NOT NULL,
+    is_correct INTEGER NOT NULL,
+    grammar_ok INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_wh_question_user_id ON wh_question_attempts(user_id, id DESC);
+CREATE INDEX IF NOT EXISTS idx_wh_question_created ON wh_question_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -788,6 +800,25 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on tense_contrast_attempts session_id",
         "CREATE INDEX IF NOT EXISTS idx_tense_contrast_session ON tense_contrast_attempts(session_id)",
+    ),
+    (
+        "create wh_question_attempts table",
+        """CREATE TABLE IF NOT EXISTS wh_question_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            target_wh TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            grammar_ok INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )""",
+    ),
+    (
+        "add index on wh_question_attempts user_id",
+        "CREATE INDEX IF NOT EXISTS idx_wh_question_user_id ON wh_question_attempts(user_id, id DESC)",
+    ),
+    (
+        "add index on wh_question_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_wh_question_created ON wh_question_attempts(created_at DESC)",
     ),
 ]
 

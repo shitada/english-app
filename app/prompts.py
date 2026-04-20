@@ -372,3 +372,72 @@ def build_tense_contrast_prompt(count: int = 8) -> tuple[str, str]:
         "simple, present perfect, and present perfect continuous roughly evenly."
     )
     return TENSE_CONTRAST_SYSTEM, user
+
+
+# ---------------------------------------------------------------------------
+# WH-Question Formation drill (Jeopardy-style)
+# ---------------------------------------------------------------------------
+WH_QUESTION_SYSTEM = (
+    "You generate speaking-drill items for the 'WH-Question Formation' "
+    "exercise. Given a short English answer sentence (statement), the learner "
+    "must speak the WH-question that would elicit it.\n\n"
+    "Return JSON ONLY with this exact shape:\n"
+    "  { \"items\": [ {\n"
+    "      \"id\": \"wh1\",\n"
+    "      \"answer_sentence\": \"She left at 7 a.m. because she had a meeting.\",\n"
+    "      \"target_wh\": \"why\",\n"
+    "      \"hint\": \"Ask about the reason.\"\n"
+    "  } ] }\n\n"
+    "Rules:\n"
+    "- Generate EXACTLY the requested number of items.\n"
+    "- 'target_wh' is EXACTLY ONE of: who, what, when, where, why, how.\n"
+    "- Spread the wh-words so no single word dominates.\n"
+    "- 'answer_sentence' is ONE natural English sentence (6-18 words) whose "
+    "key information clearly targets the chosen wh-word.\n"
+    "- 'hint' is a short (<= 12 words) nudge, e.g. 'Ask about the reason.'\n"
+    "- Output JSON ONLY, no markdown fences, no commentary."
+)
+
+
+def build_wh_question_prompt(count: int = 5) -> tuple[str, str]:
+    """Return (system, user) messages for the WH-Question Formation drill."""
+    user = (
+        f"Generate EXACTLY {int(count)} WH-question items now, varying the "
+        "target wh-word across who/what/when/where/why/how."
+    )
+    return WH_QUESTION_SYSTEM, user
+
+
+WH_QUESTION_GRADE_SYSTEM = (
+    "You are a strict but helpful English teacher grading WH-question "
+    "formation. Given an ANSWER SENTENCE, an EXPECTED WH-WORD, and the "
+    "learner's SPOKEN QUESTION, decide whether the learner's question is a "
+    "grammatically well-formed WH-question that could plausibly elicit the "
+    "answer sentence using the expected wh-word.\n\n"
+    "Return JSON ONLY with this exact shape:\n"
+    "  { \"correctness\": true,\n"
+    "    \"wh_word_matches\": true,\n"
+    "    \"grammar_ok\": true,\n"
+    "    \"feedback\": \"Short (<=20 words) tip.\",\n"
+    "    \"corrected\": \"Why did she leave at 7 a.m.?\" }\n\n"
+    "Rules:\n"
+    "- 'correctness' is TRUE only when both wh_word_matches AND grammar_ok are "
+    "TRUE AND the question reasonably elicits the answer.\n"
+    "- 'grammar_ok' checks auxiliary choice, word order, and subject-verb "
+    "agreement in the WH-question.\n"
+    "- 'corrected' is ONE natural correct WH-question using the expected "
+    "wh-word; if the learner was already correct, echo their question.\n"
+    "- Output JSON ONLY, no markdown, no commentary."
+)
+
+
+def build_wh_question_grade_prompt(
+    answer_sentence: str, target_wh: str, user_question: str
+) -> tuple[str, str]:
+    user = (
+        "Grade this attempt.\n"
+        f"ANSWER SENTENCE: {answer_sentence}\n"
+        f"EXPECTED WH-WORD: {target_wh}\n"
+        f"LEARNER'S SPOKEN QUESTION: {user_question}"
+    )
+    return WH_QUESTION_GRADE_SYSTEM, user

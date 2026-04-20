@@ -5519,3 +5519,53 @@ pages:
         type: functional
         priority: medium
         added_in: 695
+
+  home_wh_question_card:
+    path: /
+    tests:
+      - id: home-wh-question-001
+        target: Home exposes a WH-Question Formation CTA card linking to /wh-questions
+        selector: data-testid="wh-question-cta"
+        action: Visit "/" and locate data-testid="wh-question-cta"
+        expect: Card is visible with text containing "WH-Question" and clicking navigates to /wh-questions
+        type: navigation
+        priority: high
+        added_in: 696
+
+  wh-questions:
+    path: /wh-questions
+    tests:
+      - id: wh-question-001
+        target: Page renders intro with start button
+        selector: data-testid="wh-question-title"
+        action: Visit "/wh-questions" and verify data-testid="wh-question-title" and data-testid="wh-question-start" are visible
+        expect: Title "WH-Question Formation" and Start button both visible; data-testid="wh-question-intro" is visible
+        type: functional
+        priority: critical
+        added_in: 696
+
+      - id: wh-question-002
+        target: Starting the drill shows the first item with answer sentence and input
+        selector: data-testid="wh-question-start"
+        action: Click data-testid="wh-question-start" and wait for data-testid="wh-question-drill"
+        expect: data-testid="wh-question-answer", data-testid="wh-question-input", data-testid="wh-question-listen", data-testid="wh-question-mic", and data-testid="wh-question-submit" are visible; data-testid="wh-question-progress" shows "1 / 5"
+        type: functional
+        priority: critical
+        added_in: 696
+
+      - id: wh-question-003
+        target: Submitting a typed answer shows feedback with corrected question
+        action: After starting, type any text into data-testid="wh-question-input" and click data-testid="wh-question-submit"
+        expect: data-testid="wh-question-feedback" is visible with data-testid="wh-question-feedback-result", data-testid="wh-question-corrected", data-testid="wh-question-feedback-text", and data-testid="wh-question-next"
+        type: functional
+        priority: high
+        added_in: 696
+
+      - id: wh-question-004
+        target: Mic button toggles listening state
+        selector: data-testid="wh-question-mic"
+        action: After starting, click data-testid="wh-question-mic"
+        expect: Mic button is present and togglable (aria-pressed updates); click does not error even if SpeechRecognition is unavailable
+        type: functional
+        priority: medium
+        added_in: 696

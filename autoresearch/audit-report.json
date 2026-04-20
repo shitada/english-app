@@ -1,3 +1,3 @@
 [
-  {"check":"agent_skip","severity":"error","iterations":" 692 693  692 693","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
+  {"check":"agent_skip","severity":"error","iterations":" 694 695  694 695","root_cause":"context_exhaustion","confidence":"HIGH","evidence":"Agent skips occurred after invocation boundary — orchestrator lost context of mandatory rules","action":"none"}
 ]

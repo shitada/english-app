@@ -4412,3 +4412,72 @@ export function getTenseContrastStats(
     `/api/tense-contrast/stats?days=${days}`,
   );
 }
+
+
+// ---------------------------------------------------------------------------
+// WH-Question Formation speaking drill (Jeopardy-style)
+// ---------------------------------------------------------------------------
+
+export type WhWord = 'who' | 'what' | 'when' | 'where' | 'why' | 'how';
+
+export interface WhQuestionItem {
+  id: string;
+  answer_sentence: string;
+  target_wh: WhWord;
+  hint: string;
+}
+
+export interface WhQuestionStartResponse {
+  items: WhQuestionItem[];
+}
+
+export interface WhQuestionGradeRequest {
+  item_id: string;
+  answer_sentence: string;
+  target_wh: WhWord;
+  user_question: string;
+}
+
+export interface WhQuestionGradeResponse {
+  correctness: boolean;
+  wh_word_matches: boolean;
+  grammar_ok: boolean;
+  feedback: string;
+  corrected: string;
+}
+
+export interface WhQuestionWhStats {
+  total: number;
+  correct: number;
+  accuracy: number;
+}
+
+export interface WhQuestionStatsResponse {
+  total: number;
+  correct: number;
+  grammar_ok: number;
+  overall_accuracy: number;
+  by_wh: Record<string, WhQuestionWhStats>;
+}
+
+export function startWhQuestionDrill(count = 5): Promise<WhQuestionStartResponse> {
+  return request<WhQuestionStartResponse>('/api/wh-questions/start', {
+    method: 'POST',
+    body: JSON.stringify({ count }),
+  });
+}
+
+export function gradeWhQuestion(
+  payload: WhQuestionGradeRequest,
+): Promise<WhQuestionGradeResponse> {
+  return request<WhQuestionGradeResponse>('/api/wh-questions/grade', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getWhQuestionStats(limit = 30): Promise<WhQuestionStatsResponse> {
+  return request<WhQuestionStatsResponse>(
+    `/api/wh-questions/stats?limit=${limit}`,
+  );
+}

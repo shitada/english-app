@@ -343,4 +343,243 @@ Iter 694 done. Starting iter 695.
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me look at the Home.tsx Link imports + ui-test-spec file.Now let me look at a sample similar test and existing Home imports.Now let me implement everything. First DB schema:Now create the DAL:Now add the prompt:Now create the router:Now let's create the unit and integration tests:All 11 backend tests pass. Now frontend: add API, page, route, Home CTA.Now create the frontend page. Let's look briefly at how the phrasal-verb page handles typed answers with similar flow:Now create TenseContrast page:Now wire routes and add Home CTA:Now run typecheck:Now update UI spec:Commit:
+Now I have enough context. Let me look at the Home.tsx Link imports + ui-test-spec file.Now let me look at a sample similar test and existing Home imports.Now let me implement everything. First DB schema:Now create the DAL:Now add the prompt:Now create the router:Now let's create the unit and integration tests:All 11 backend tests pass. Now frontend: add API, page, route, Home CTA.Now create the frontend page. Let's look briefly at how the phrasal-verb page handles typed answers with similar flow:Now create TenseContrast page:Now wire routes and add Home CTA:Now run typecheck:Now update UI spec:Commit:```json
+{
+  "committed": true,
+  "commit_hash": "ae5236b",
+  "files_changed": [
+    "app/database.py",
+    "app/prompts.py",
+    "app/main.py",
+    "app/dal/tense_contrast.py",
+    "app/routers/tense_contrast.py",
+    "frontend/src/api.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/pages/Home.tsx",
+    "frontend/src/pages/TenseContrast.tsx",
+    "tests/unit/test_tense_contrast_dal.py",
+    "tests/integration/test_tense_contrast_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 11,
+  "ui_spec_updated": true,
+  "description": "Tense Contrast Drill: session endpoint (Copilot + static fallback), submit/stats with new tense_contrast_attempts table, DAL, page with typed input + instant feedback + per-tense bars + retry-missed, Home CTA, tests."
+}
+```● Coder Implement iter 695
+  │ append ui spec (shell)
+  │   │ cat >>
+  │   │ /Users/shingotada/Documents/vscode/english-app/tests/e2e/ui-test-spec.yaml
+  │   │ <<'YAMLEOF'
+  │   │
+  │   │ home_tense_contrast_card:…
+  │   └ 58 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #695: add Tense Contrast Drill (past simple /
+      │ present perfect / perfect continuous)
+      │
+      │ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>" 2>&1…
+      └ 13 lines...
+
+● T2 iter 695 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2574,
+  "tests_total": 2576,
+  "all_passed": false,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "FAILED tests/integration/test_dashboard_api.py::test_daily_challenge_current_count_with_activity\nFAILED tests/integration/test_dashboard_api.py::TestDayDetailAPI::test_pronunciation_activity_reflected\n============ 2 failed, 2574 passed, 1 warning in 164.84s (0:02:44) =============",
+  "failure_summary": "2 pre-existing failures in tests/integration/test_dashboard_api.py (test_daily_challenge_current_count_with_activity, TestDayDetailAPI::test_pronunciation_activity_reflected) — red since iter 690, unrelated to this iteration's changes (tense_contrast). All new tense_contrast unit/integration tests pass. TS check pass, smoke pass, E2E not run."
+}
+```
+
+Note: `overall_pass` is marked `true` because the 2 failures are known pre-existing (per your instructions), and all changes related to this iteration (tense_contrast DAL/router/frontend) pass. Strict interpretation (`all_passed == true`) would yield `false`; I've applied the pre-existing-failure exception you specified.● Tester Test iter 695
+  │ Smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+  │   └ 23 lines...
+  └ E2E results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 iter 695 (shell)
+  │ date +%s
+  └ 2 lines...
+
+{"code_quality": 8, "feature_value": 7, "maintainability": 8, "ux_quality": 7, "total_score": 7.55, "verdict": "keep", "reason": "New Tense Contrast Drill is cleanly implemented with proper DAL separation, Pydantic schemas, Copilot+fallback pattern, a CREATE TABLE IF NOT EXISTS for the new (not altered) tense_contrast_attempts table, and 11 new tests; no pre-existing test regressions and TypeScript passes."}● Evaluator Evaluate iter 695
+  │ Read database.py
+  │   │ app/database.py
+  │   └ L1:60 (60 lines read)
+  └ Read database.py
+      │ app/database.py
+      └ L60:400 (341 lines read)
+
+● Record iter 695 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T4=$(date +%s) &&
+  │ T0=1776704985 T1=1776705038 T2=1776705549 T3=1776705758 && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' 695 ae5236b
+  │ "$(date +%Y-%m-%d)" $((T1-T0)) $((T2-T1)) $((T3-T2)) $((T4-T3)) $((T4-T0))
+  │ 2574 2576 pass 7.55 kept "Tense Contrast Drill (past simple vs present …
+  └ 8 lines...
+
+Both iterations complete. Stopping as instructed.
+
+**Summary:**
+- **#694** `a3d80e7` — Tag Question Drill (tag + rising/falling intonation; /session Copilot+fallback, /attempt normalized grading, TagQuestionDrill page with chips/TTS/results). Score 7.25, kept. 31 new tests.
+- **#695** `ae5236b` — Tense Contrast Drill (past simple vs present perfect vs PPC; /session+/submit+/stats, new tense_contrast_attempts table+migration+DAL, TenseContrast page with per-tense bars & retry-missed). Score 7.55, kept. 11 new tests.
+
+Both `type=feature`. All 4 subagents (proposer→coder→tester→evaluator) called each iteration. Test count 2534 → 2563 → 2574. The 2 pre-existing dashboard_api failures (since iter 690) remain untouched — worth a dedicated bugfix iteration soon.
+
+
+Changes   +0 -0
+Requests  7.5 Premium (27m 9s)
+Tokens    ↑ 7.6m • ↓ 87.0k • 7.1m (cached)
+Session exported to: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-694-to-719.md
+[2026-04-21 02:23:42] Copilot invocation completed (duration: 1633s)
+[2026-04-21 02:23:42] Recording agent traces...
+[2026-04-21 02:23:42]   AGENT_TRACE iter=694 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-21 02:23:42]   AGENT_TRACE iter=695 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-21 02:23:42] SMOKE_UI: UI changes detected in pages: home
+[2026-04-21 02:23:42] SMOKE_UI: Level=full (iteration 695 is divisible by 5)
+[2026-04-21 02:23:42] SMOKE_UI: Starting Playwright test (level=full)...
+🎭 UI Test — level: full (port 8098)
+   Pages: all
+   Configs: light/desktop, dark/desktop, light/mobile
+
+
+  --- light/desktop ---
+  ✅ home [light/desktop]: smoke 4✓ 0✗ (1834ms)
+  ✅ conversation [light/desktop]: smoke 4✓ 0✗ (1593ms)
+  ✅ pronunciation [light/desktop]: smoke 4✓ 0✗ (1646ms)
+  ✅ listening [light/desktop]: smoke 4✓ 0✗ (1556ms)
+  ✅ vocabulary [light/desktop]: smoke 4✓ 0✗ (1618ms)
+  ✅ dashboard [light/desktop]: smoke 4✓ 0✗ (1863ms)
+
+  --- dark/desktop ---
+  ✅ home [dark/desktop]: smoke 4✓ 0✗ (3758ms)
+  ✅ conversation [dark/desktop]: smoke 4✓ 0✗ (2019ms)
+  ✅ pronunciation [dark/desktop]: smoke 4✓ 0✗ (1986ms)
+  ✅ listening [dark/desktop]: smoke 4✓ 0✗ (1899ms)
+  ✅ vocabulary [dark/desktop]: smoke 4✓ 0✗ (1966ms)
+  ✅ dashboard [dark/desktop]: smoke 4✓ 0✗ (2138ms)
+
+  --- light/mobile ---
+  ✅ home [light/mobile]: smoke 4✓ 0✗ (1683ms)
+  ✅ conversation [light/mobile]: smoke 4✓ 0✗ (1613ms)
+  ✅ pronunciation [light/mobile]: smoke 4✓ 0✗ (1626ms)
+  ✅ listening [light/mobile]: smoke 4✓ 0✗ (1558ms)
+  ✅ vocabulary [light/mobile]: smoke 4✓ 0✗ (1609ms)
+  ✅ dashboard [light/mobile]: smoke 4✓ 0✗ (1745ms)
+
+✅ UI TEST PASS (18/18 pages)
+[2026-04-21 02:24:25] SMOKE_UI_PASS: All UI pages passed
+[2026-04-21 02:24:25] Running post-invocation audit (iter 694-695)...
+============================================
+ Autoresearch Audit
+ Iterations: 694 — 695
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-21 02:24:25
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 694 695[0m
+[0;31m  Tester: FAIL — missing: 694 695[0m
+[0;31m  Evaluator: FAIL — missing: 694 695[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-21 02:24:27] Audit found 3 error(s) — fixes applied where possible
+[2026-04-21 02:24:30] Current iteration count: 695 / 719
+[2026-04-21 02:24:30] ------------------------------------------
+[2026-04-21 02:24:30] Invocation 4 / 10
+[2026-04-21 02:24:30] Resuming from iteration 696
+[2026-04-21 02:24:30] ------------------------------------------
+[2026-04-21 02:24:30] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-696-to-719.md)...
+● Restore context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "=== results.tsv tail ===" && tail -20
+  │ autoresearch/results.tsv && echo "=== uncompleted backlog ===" && grep '^-
+  │ \[ \]' autoresearch/backlog.md && echo "=== git log ===" && git log
+  │ --oneline -5 && echo "=== ui-test-results ===" && (test -f …
+  └ 41 lines...
+
+● Read session log tail (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -50
+  │ autoresearch/logs/session-iter-694-to-719.md
+  └ 51 lines...
+
+Context clear. No E2E failures. Starting iteration 696 — dispatching proposer.
+
+```json
+{
+  "type": "feature",
+  "title": "WH-Question Formation speaking drill (Jeopardy-style)",
+  "description": "Add a new speaking drill where the app presents a short answer statement (e.g., 'She left at 7 a.m. because she had a meeting') and the learner must speak the WH-question that would elicit it (e.g., 'Why did she leave at 7 a.m.?' or 'What time did she leave?'). This targets a real weakness for learners — forming correct auxiliary/word-order in questions — and combines listening (TTS of the answer) with speaking (speech recognition) plus LLM grading.\n\nBackend:\n- New router `app/routers/wh_questions.py` with two endpoints:\n  * `POST /api/wh-questions/start` → returns a batch of 5 items. Each item has `id`, `answer_sentence` (the statement), `target_wh` (one of who/what/when/where/why/how — the expected question word), and optional `hint`. Generate via Copilot with a strict JSON prompt; fall back to a small built-in seed list on LLM failure.\n  * `POST /api/wh-questions/grade` with body `{item_id, answer_sentence, target_wh, user_question}`. Calls Copilot to judge: correctness (bool), wh_word_matches (bool), grammar_ok (bool), feedback (short string), corrected (string). Persists result to a new `wh_question_attempts` table.\n- New DAL `app/dal/wh_questions.py` with `record_attempt(user_id, target_wh, is_correct, grammar_ok)` and `get_recent_stats(user_id, limit=30)` returning accuracy per wh-word.\n- Schema addition in `app/database.py` SCHEMA and `_MIGRATIONS`:\n  * `CREATE TABLE IF NOT EXISTS wh_question_attempts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, target_wh TEXT NOT NULL, is_correct INTEGER NOT NULL, grammar_ok INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))`\n  * Since this is a brand-new table, `CREATE TABLE IF NOT EXISTS` is sufficient and no `ALTER TABLE` migration is needed (add the CREATE statement to both SCHEMA and as an idempotent entry; no column additions to existing tables).\n- Register router in `app/main.py`.\n\nFrontend:\n- New page `frontend/src/pages/WhQuestionDrill.tsx` with flow: fetch batch → for each item, TTS-speak the answer sentence and show it as text → mic button starts SpeechRecognition → on transcript submit, call grade endpoint → show ✓/✗ with corrected question and short feedback → Next button. After 5 items show a summary with per-wh accuracy bars and a 'Retry missed' button that filters to incorrect items.\n- Add route in `App.tsx` and a launch card on `Home.tsx` in the speaking-drills section (reuse existing card styling).\n- Add `whQuestions` API helpers in `frontend/src/api.ts` (startDrill, grade).\n\nTesting: add `tests/unit/test_wh_questions_dal.py` covering record_attempt + get_recent_stats, and extend an integration test hitting the grade endpoint with a mocked copilot_client.",
+  "files_to_modify": [
+    "app/routers/wh_questions.py",
+    "app/dal/wh_questions.py",
+    "app/database.py",
+    "app/main.py",
+    "frontend/src/pages/WhQuestionDrill.tsx"
+  ],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 696
+  │ List directory app/routers
+  │   └ 21 files found
+  └ List directory frontend/src/pages
+      └ 18 files found
+
+● Mark T1 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T1=$(date +%s) && echo
+  │ "T1=$T1"
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now update database.py (schema + migration):Now add the prompt and the router:Now create the router:Register router:Now frontend. Add API helpers:Now the page:Add route and home card:Now tests:Run the tests quickly:All 13 tests pass. Now update the UI test spec:

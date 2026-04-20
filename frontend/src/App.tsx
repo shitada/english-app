@@ -25,6 +25,7 @@ import SpeedLadderDrill from './pages/SpeedLadderDrill';
 import PhrasalVerbDrill from './pages/PhrasalVerbDrill';
 import TagQuestionDrill from './pages/TagQuestionDrill';
 import TenseContrast from './pages/TenseContrast';
+import WhQuestionDrill from './pages/WhQuestionDrill';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -129,6 +130,7 @@ export default function App() {
                 <Route path="/phrasal-verbs" element={<PhrasalVerbDrill />} />
                 <Route path="/tag-questions" element={<TagQuestionDrill />} />
                 <Route path="/tense-contrast" element={<TenseContrast />} />
+                <Route path="/wh-questions" element={<WhQuestionDrill />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>
