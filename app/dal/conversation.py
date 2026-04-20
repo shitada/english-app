@@ -12,13 +12,65 @@ import aiosqlite
 from app.utils import coerce_bool, escape_like
 
 
-async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate", role_swap: bool = False, personality: str = "patient_teacher", quick_mode: bool = False) -> int:
+async def create_conversation(db: aiosqlite.Connection, topic: str, difficulty: str = "intermediate", role_swap: bool = False, personality: str = "patient_teacher", quick_mode: bool = False, target_words: list[str] | None = None) -> int:
+    target_payload: str | None = None
+    if target_words:
+        cleaned = [str(w).strip() for w in target_words if w and str(w).strip()]
+        if cleaned:
+            target_payload = json.dumps({"words": cleaned, "used": []})
     cursor = await db.execute(
-        "INSERT INTO conversations (topic, difficulty, role_swap, personality, quick_mode) VALUES (?, ?, ?, ?, ?)",
-        (topic, difficulty, int(role_swap), personality, int(quick_mode)),
+        "INSERT INTO conversations (topic, difficulty, role_swap, personality, quick_mode, target_words) VALUES (?, ?, ?, ?, ?, ?)",
+        (topic, difficulty, int(role_swap), personality, int(quick_mode), target_payload),
     )
     await db.commit()
     return cursor.lastrowid  # type: ignore[return-value]
+
+
+async def get_target_words(db: aiosqlite.Connection, conversation_id: int) -> dict[str, list[str]]:
+    """Return target words and used flags for a conversation.
+
+    Result shape: {"words": [...], "used": [...]}. Empty dict if none persisted.
+    """
+    rows = await db.execute_fetchall(
+        "SELECT target_words FROM conversations WHERE id = ?",
+        (conversation_id,),
+    )
+    if not rows or not rows[0]["target_words"]:
+        return {"words": [], "used": []}
+    try:
+        data = json.loads(rows[0]["target_words"])
+        if not isinstance(data, dict):
+            return {"words": [], "used": []}
+        words = [str(w) for w in data.get("words", []) if w]
+        used = [str(w) for w in data.get("used", []) if w]
+        return {"words": words, "used": used}
+    except (json.JSONDecodeError, TypeError):
+        return {"words": [], "used": []}
+
+
+async def mark_target_used(db: aiosqlite.Connection, conversation_id: int, word: str) -> bool:
+    """Mark a target word as used. Returns True if newly marked, False otherwise."""
+    if not word:
+        return False
+    current = await get_target_words(db, conversation_id)
+    words = current.get("words", [])
+    used = current.get("used", [])
+    used_lower = {u.lower() for u in used}
+    word_lower = word.lower()
+    # Find the canonical form from `words`
+    canonical = next((w for w in words if w.lower() == word_lower), None)
+    if canonical is None:
+        return False
+    if canonical.lower() in used_lower:
+        return False
+    used.append(canonical)
+    payload = json.dumps({"words": words, "used": used})
+    await db.execute(
+        "UPDATE conversations SET target_words = ? WHERE id = ?",
+        (payload, conversation_id),
+    )
+    await db.commit()
+    return True
 
 
 async def add_message(

@@ -1255,3 +1255,67 @@ async def get_leech_words(db: aiosqlite.Connection, limit: int = 10) -> list[dic
         d["example_sentence"] = d.get("example_sentence") or ""
         result.append(d)
     return result
+
+
+async def pick_target_words(db: aiosqlite.Connection, limit: int = 3) -> list[str]:
+    """Pick up to `limit` SRS target words for a Power Word Challenge.
+
+    Strategy:
+      1. Prefer due/learning words (next_review_at <= now, ordered oldest-first).
+      2. If fewer than `limit` due words exist, fall back to recently saved
+         words that have no progress row yet (most recent id first).
+    Returns a list of distinct word strings (case-insensitively deduped).
+    """
+    if limit < 1:
+        return []
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    seen: set[str] = set()
+    out: list[str] = []
+
+    # 1. due/learning words via SRS
+    rows = await db.execute_fetchall(
+        """SELECT vw.word
+           FROM vocabulary_progress vp
+           JOIN vocabulary_words vw ON vp.word_id = vw.id
+           WHERE vp.next_review_at IS NULL OR vp.next_review_at <= ?
+           ORDER BY vp.next_review_at ASC NULLS FIRST, vp.level ASC
+           LIMIT ?""",
+        (now, limit * 3),
+    )
+    for r in rows:
+        w = (r["word"] or "").strip()
+        if w and w.lower() not in seen:
+            out.append(w)
+            seen.add(w.lower())
+            if len(out) >= limit:
+                return out
+
+    # 2. fallback to recently-saved words that have no progress row
+    fallback_rows = await db.execute_fetchall(
+        """SELECT vw.word
+           FROM vocabulary_words vw
+           LEFT JOIN vocabulary_progress vp ON vp.word_id = vw.id
+           WHERE vp.word_id IS NULL
+           ORDER BY vw.id DESC
+           LIMIT ?""",
+        (limit * 3,),
+    )
+    for r in fallback_rows:
+        w = (r["word"] or "").strip()
+        if w and w.lower() not in seen:
+            out.append(w)
+            seen.add(w.lower())
+            if len(out) >= limit:
+                return out
+    return out
+
+
+async def get_word_id_by_word(db: aiosqlite.Connection, word: str) -> int | None:
+    """Look up vocabulary_words.id by exact (case-insensitive) word match."""
+    if not word:
+        return None
+    rows = await db.execute_fetchall(
+        "SELECT id FROM vocabulary_words WHERE LOWER(word) = LOWER(?) ORDER BY id DESC LIMIT 1",
+        (word.strip(),),
+    )
+    return int(rows[0]["id"]) if rows else None

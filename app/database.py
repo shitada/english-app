@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     role_swap INTEGER NOT NULL DEFAULT 0,
     personality TEXT DEFAULT 'patient_teacher',
     quick_mode INTEGER NOT NULL DEFAULT 0,
+    target_words TEXT,
     summary_json TEXT,
     started_at TEXT NOT NULL DEFAULT (datetime('now')),
     ended_at TEXT,
@@ -570,6 +571,10 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add index on stress_spotlight_attempts created_at",
         "CREATE INDEX IF NOT EXISTS idx_stress_spotlight_created ON stress_spotlight_attempts(created_at DESC)",
+    ),
+    (
+        "add target_words column to conversations",
+        "ALTER TABLE conversations ADD COLUMN target_words TEXT",
     ),
 ]
 

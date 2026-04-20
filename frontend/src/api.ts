@@ -80,13 +80,13 @@ export const api = {
 
   // Conversation
   startConversation: (topic: string, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'intermediate', roleSwap: boolean = false, personality: 'patient_teacher' | 'chatty_friend' | 'professional' | 'challenging' = 'patient_teacher', quickMode: boolean = false) =>
-    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; user_role: string; role_briefing: string[]; quick_mode: boolean }>('/api/conversation/start', {
+    request<{ conversation_id: number; message: string; topic: string; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; user_role: string; role_briefing: string[]; quick_mode: boolean; target_words: string[] }>('/api/conversation/start', {
       method: 'POST',
       body: JSON.stringify({ topic, difficulty, role_swap: roleSwap, personality, quick_mode: quickMode }),
     }),
 
   sendMessage: (conversation_id: number, content: string, speaking_seconds?: number | null) =>
-    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; pace_wpm: number | null; fillers: { total: number; breakdown: Record<string, number> } | null }>('/api/conversation/message', {
+    request<{ message: string; feedback: GrammarFeedback; phrase_suggestions: string[]; key_phrases: string[]; grammar_notes: GrammarNote[]; pace_wpm: number | null; fillers: { total: number; breakdown: Record<string, number> } | null; target_words_used: string[]; newly_used_target_words: string[] }>('/api/conversation/message', {
       method: 'POST',
       body: JSON.stringify({ conversation_id, content, speaking_seconds: speaking_seconds ?? null }),
     }),

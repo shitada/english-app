@@ -927,18 +927,24 @@ export default function Conversation() {
       tts.speak(res.message);
       // Fetch reply helpers in background (does not block UI)
       loadHelpersInBackground(res.conversation_id);
-      // Fetch vocab target words for this topic
-      try {
-        const vocabRes = await api.getVocabularyProgress(topicId);
-        const words = vocabRes.progress
-          .filter((w) => w.level >= 1 && w.level <= 3)
-          .slice(0, 5)
-          .map((w) => w.word);
-        setVocabTargets(words);
+      // Power Word Challenge: prefer SRS target words returned by backend.
+      if (res.target_words && res.target_words.length > 0) {
+        setVocabTargets(res.target_words);
         setUsedVocabWords(new Set());
-      } catch {
-        setVocabTargets([]);
-        setUsedVocabWords(new Set());
+      } else {
+        // Fallback: derive from current topic vocab progress (legacy behaviour).
+        try {
+          const vocabRes = await api.getVocabularyProgress(topicId);
+          const words = vocabRes.progress
+            .filter((w) => w.level >= 1 && w.level <= 3)
+            .slice(0, 5)
+            .map((w) => w.word);
+          setVocabTargets(words);
+          setUsedVocabWords(new Set());
+        } catch {
+          setVocabTargets([]);
+          setUsedVocabWords(new Set());
+        }
       }
     } catch (err) {
       setStartError('Failed to start conversation. Make sure the backend is running.');

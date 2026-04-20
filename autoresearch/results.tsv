@@ -630,3 +630,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 677	9d15b5d	2026-04-20	96	469	154	91	810	2255	2255	pass	7.25	kept	Vocabulary 🪤 Leech Words panel + drill (DAL+endpoint+typed-recall reusing /api/vocabulary/answer; 6 new pytest)
 678	6b695cd	2026-04-20	67	339	164	34	604	2275	2275	pass	7.80	kept	Reduced Forms drill (Listen→Expand→Shadow): 8 reduction types × 35-item seed, weakness sampler, contraction-aware grader, new table+migration; 20 new tests
 679	a7b2203	2026-04-20	53	657	173	30	913	2307	2307	pass	7.50	kept	Stress Spotlight (tap stressed words → reveal precision/recall → listen-with-emphasis → shadow): generate/audio/attempt/recent + new table+migration + Home tile; 32 new tests
+680	ee943ce	2026-04-20	77	294	171	54	596	2319	2319	pass	7.00	kept	Filler-word tracker for conversation (per-message badge + summary aggregate; 12 new tests)

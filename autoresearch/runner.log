@@ -1618,4 +1618,117 @@ First, add the prompt:Now create the DAL:Update the database schema and migratio
   │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
   └ 2 lines...
 
-Now look at the frontend.Now look at message-add path and ConversationSummary structure:Now I have enough context. Let me implement.Now extend MessageResponse and populate it. Then aggregate in /end.I removed the EndResponse class. Let me restore it.Now populate fillers in the /message handler:Now aggregate in /end. The proposal mentions `conv_dal.list_messages` but it doesn't exist. I'll use `get_conversation_history`:Now write unit tests:Now add integration test:Now frontend changes. Update api.ts type, Message interface, badge under user bubble, and summary card.Now apply fillers from the non-streaming response onto the user message:Now add the badge UI under user bubbles:Now add a filler-words stat card to ConversationSummary. Find a good spot—after pace_stats card:Good — there's already a session insights card with frontend-computed fillers. I'll add a separate "Filler Words" card driven by backend `summary.fillers_total`. Insert it right after the pace_stats block:Check TypeScript builds:Now update ui-test-spec.yaml:Run a broader test sanity check:
+Now look at the frontend.Now look at message-add path and ConversationSummary structure:Now I have enough context. Let me implement.Now extend MessageResponse and populate it. Then aggregate in /end.I removed the EndResponse class. Let me restore it.Now populate fillers in the /message handler:Now aggregate in /end. The proposal mentions `conv_dal.list_messages` but it doesn't exist. I'll use `get_conversation_history`:Now write unit tests:Now add integration test:Now frontend changes. Update api.ts type, Message interface, badge under user bubble, and summary card.Now apply fillers from the non-streaming response onto the user message:Now add the badge UI under user bubbles:Now add a filler-words stat card to ConversationSummary. Find a good spot—after pace_stats card:Good — there's already a session insights card with frontend-computed fillers. I'll add a separate "Filler Words" card driven by backend `summary.fillers_total`. Insert it right after the pace_stats block:Check TypeScript builds:Now update ui-test-spec.yaml:Run a broader test sanity check:Commit hash: `ee943ce`
+
+```json
+{
+  "committed": true,
+  "commit_hash": "ee943ce",
+  "files_changed": ["app/routers/conversation.py", "frontend/src/api.ts", "frontend/src/pages/Conversation.tsx", "frontend/src/components/conversation/ConversationSummary.tsx", "tests/unit/test_conversation_fillers.py", "tests/integration/test_conversation_api.py", "tests/e2e/ui-test-spec.yaml"],
+  "tests_added": 12,
+  "ui_spec_updated": true,
+  "description": "Added filler-word tracker: count_fillers helper, per-message badge, and aggregated summary stats."
+}
+```● Coder Implement iter 680
+  │ all conv tests (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && python -m pytest
+  │   │ tests/integration/test_conversation_api.py -x -q 2>&1 | tail -15
+  │   └ 4 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+      │ commit -m "autoresearch #680: filler-word tracker for conversation
+      │ messages and summary
+      │
+      │ Co-authored-by: Ona <no-reply@ona.com>" 2>&1 | tail -10 && git rev-parse …
+      └ 12 lines...
+
+● T2 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2319,
+  "tests_total": 2319,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "smoke_pass": true,
+  "e2e_result": "not_run",
+  "e2e_pass": null,
+  "e2e_details": null,
+  "ux_score": null,
+  "overall_pass": true,
+  "test_output": "======================= 2319 passed in 135.55s (0:02:15) =======================",
+  "failure_summary": ""
+}
+```● Tester Test iter 680
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -30
+  │   └ 23 lines...
+  └ e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+```json
+{
+  "code_quality": 7,
+  "feature_value": 7,
+  "maintainability": 7,
+  "ux_quality": 7,
+  "total_score": 7.0,
+  "verdict": "keep",
+  "reason": "Per-message filler tracking and summary aggregate reuse the shared fillerWords utility, the FillerWordBadge component is clean and accessible with hover/click popover, and all 2319 tests + TS + smoke pass — a small, focused feature that meaningfully supports speaking fluency awareness."
+}
+```● Evaluator Evaluate iter 680
+  │ Read FillerWordBadge.tsx
+  │   │ frontend/src/components/conversation/FillerWordBadge.tsx
+  │   └ 102 lines read
+  └ Read ConversationSummary.tsx
+      │ frontend/src/components/conversation/ConversationSummary.tsx
+      └ L1:50 (50 lines read)
+
+● Record iter 680 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776650702
+  │ T1=1776650779 T2=1776651073 T3=1776651244 T4=$(date +%s); printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "680" "ee943ce" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 6 lines...
+
+Iter 680 done (kept, 7.0). Onward to 681.
+
+● T0 for iter 681 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s && grep '^- \[
+  │ \]' autoresearch/backlog.md && git log --oneline -3
+  └ 7 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Power Word Challenge: target SRS vocab during conversation",
+  "description": "Add a learner-facing 'Power Word Challenge' to the Conversation feature that ties spaced-repetition vocabulary review to live conversation practice. At conversation start, the backend selects 2–3 due/learning vocabulary words from the user's SRS deck (via existing vocabulary DAL) and returns them as `target_words` in the StartResponse. As the user sends messages, the backend detects which target words appear (case-insensitive, whole-word match using a regex with word boundaries; also accept simple morphological variants by stemming trailing 's', 'es', 'ed', 'ing') and persists per-word usage flags. The frontend displays a small 'Target words to use' panel above the conversation input with each word as a chip that turns green with a check when used. The end-of-conversation summary lists which targets were used, and for each used word the SRS level is bumped via `vocab_dal.update_progress(correct=True)` (no penalty for unused words). \n\nImplementation:\n1. `app/database.py`: add `target_words TEXT` (JSON array of {word, used:bool}) to `conversations`. Add migration: `_MIGRATIONS.append(\"ALTER TABLE conversations ADD COLUMN target_words TEXT\")`.\n2. `app/dal/conversation.py`: extend `create_conversation` to accept and store `target_words`; add `get_target_words(db, conversation_id)`, `mark_target_used(db, conversation_id, word)` helpers that read/write the JSON column atomically.\n3. `app/dal/vocabulary.py`: add `pick_target_words(db, limit=3)` that returns up to N due word strings (preferring level 1–4 words from `get_due_word_ids` ordered by next_review_at; falls back to recently-saved words if none due). Pure addition, no schema change.\n4. `app/routers/conversation.py`:\n   - In `/start`, call `pick_target_words`, persist via `create_conversation`, return `target_words: [{word, used}]` in StartResponse (add field to Pydantic model).\n   - In `/message`, after saving the user turn, scan `req.content` for any target word (regex `\\b(word|words|word(ed|ing))\\b` case-insensitive). For each newly-used target, call `mark_target_used` and `vocab_dal.update_progress(word, correct=True)`. Include updated `target_words` array in the MessageResponse so the UI can update chips.\n   - In `/end` summary response, include `target_words_used: [...]` and `target_words_unused: [...]`.\n5. `frontend/src/pages/Conversation.tsx`: render a `TargetWordsPanel` chip row above the input. Each chip shows the word; when used, add a check icon and a green/success class. Show a celebratory toast when all targets are used. Display in summary view too.\n6. Add `tests/integration/test_conversation_target_words.py` covering: target_words present in /start response when due words exist; absent (empty list) when none; usage detection with exact match, capitalization, and 'running' matching 'run'; SRS level bump on use; no double-credit when same word used twice; summary contains used/unused split.\n\nKeeps a single LLM-call structure (no extra latency on /message — pure regex), ties two existing features together, and produces visible learner progress.",
+  "files_to_modify": ["app/database.py", "app/dal/conversation.py", "app/routers/conversation.py", "frontend/src/pages/Conversation.tsx", "tests/integration/test_conversation_target_words.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iteration 681
+  │ List directory frontend/src/pages
+  │   └ 9 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● T1 681 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me look at the SCHEMA section and Conversation.tsx, plus tests/conftest:Now I have enough. Let me start implementing.Now update the conversation DAL:Now add `pick_target_words` to vocabulary DAL:Now update the conversation router. Let me view a few helpers first and add a target word matcher:Now add a helper for matching target words and integrate into start/message/end:Let me add helper above _should_skip_grammar_check:Now hook it into /start:Now /message — detect target words after user msg added:Now /end — bump SRS and add summary:Now update frontend api.ts types and Conversation.tsx to use `target_words`:Now in Conversation.tsx, prefer backend target_words when present, and use `target_words_used` from /message response:Now let me check for a stream_message that also persists user message (may need similar target word detection). Let me skim:Stream message also exists, but proposal focuses on /message; we'll leave streaming alone (out of scope).
+
+Now write integration test:Now run pytest:All passing. Now run the full test suite to ensure no regressions:

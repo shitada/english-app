@@ -59,6 +59,36 @@ def _should_skip_grammar_check(text: str) -> bool:
     tokens = [t for t in tokens if t]
     return len(tokens) < 4
 
+
+def _detect_target_words(content: str, target_words: list[str]) -> list[str]:
+    """Detect which target words appear in `content`.
+
+    Match is case-insensitive and uses word boundaries. Also accepts simple
+    morphological variants by stripping trailing 's', 'es', 'ed', 'ing'
+    from tokens before comparison.
+
+    Returns the list of matched target words (canonical form from
+    `target_words`), preserving input order with no duplicates.
+    """
+    if not content or not target_words:
+        return []
+    text = content.lower()
+    matched: list[str] = []
+    seen: set[str] = set()
+    for tw in target_words:
+        if not tw:
+            continue
+        canonical = tw.strip()
+        if not canonical or canonical.lower() in seen:
+            continue
+        base = canonical.lower()
+        # Whole-word regex that also captures trailing s/es/ed/ing morphology.
+        pattern = r"\b" + re.escape(base) + r"(?:s|es|ed|ing)?\b"
+        if re.search(pattern, text):
+            matched.append(canonical)
+            seen.add(base)
+    return matched
+
 # Maximum number of past messages to include when building the LLM prompt for /message.
 # Keeps token usage bounded for long conversations; older turns are summarized as a marker.
 MESSAGE_HISTORY_MAX_TURNS = 16
@@ -195,6 +225,7 @@ class StartResponse(BaseModel):
     user_role: str = ""
     role_briefing: list[str] = []
     quick_mode: bool = False
+    target_words: list[str] = []
 
 
 class MessageResponse(BaseModel):
@@ -205,6 +236,8 @@ class MessageResponse(BaseModel):
     grammar_notes: list[GrammarNote] = []
     pace_wpm: float | None = None
     fillers: dict[str, Any] | None = None
+    target_words_used: list[str] = []
+    newly_used_target_words: list[str] = []
 
 
 class EndResponse(BaseModel):
@@ -423,6 +456,23 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
 
     conversation_id = await conv_dal.create_conversation(db, req.topic, req.difficulty, role_swap=req.role_swap, personality=req.personality, quick_mode=req.quick_mode)
 
+    # Power Word Challenge: pick 2-3 due/learning SRS words to target during this convo.
+    try:
+        target_words_list = await vocab_dal.pick_target_words(db, limit=3)
+    except Exception as e:
+        logger.warning("pick_target_words failed (non-fatal): %s", e)
+        target_words_list = []
+    if target_words_list:
+        try:
+            await db.execute(
+                "UPDATE conversations SET target_words = ? WHERE id = ?",
+                (json.dumps({"words": target_words_list, "used": []}), conversation_id),
+            )
+            await db.commit()
+        except Exception as e:
+            logger.warning("Persisting target_words failed (non-fatal): %s", e)
+            target_words_list = []
+
     copilot = get_copilot_service()
 
     difficulty_instructions = {
@@ -529,6 +579,7 @@ async def start_conversation(req: StartRequest, db: aiosqlite.Connection = Depen
         "user_role": user_role_name,
         "role_briefing": role_briefing,
         "quick_mode": req.quick_mode,
+        "target_words": target_words_list,
     }
 
 
@@ -738,7 +789,23 @@ async def send_message(req: MessageRequest, db: aiosqlite.Connection = Depends(g
     # by the frontend via POST /api/conversation/helpers to reduce response latency.
     fillers_info = count_fillers(req.content)
     fillers_payload = fillers_info if fillers_info["total"] > 0 else None
-    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val, "fillers": fillers_payload}
+
+    # Power Word Challenge: detect target words used in this message.
+    target_state = await conv_dal.get_target_words(db, req.conversation_id)
+    newly_used: list[str] = []
+    used_total = list(target_state.get("used", []))
+    if target_state.get("words"):
+        already_used_lower = {u.lower() for u in used_total}
+        matches = _detect_target_words(req.content, target_state["words"])
+        for m in matches:
+            if m.lower() not in already_used_lower:
+                marked = await conv_dal.mark_target_used(db, req.conversation_id, m)
+                if marked:
+                    newly_used.append(m)
+                    used_total.append(m)
+                    already_used_lower.add(m.lower())
+
+    return {"message": ai_response, "feedback": feedback, "phrase_suggestions": [], "key_phrases": [], "grammar_notes": [], "pace_wpm": pace_wpm_val, "fillers": fillers_payload, "target_words_used": used_total, "newly_used_target_words": newly_used}
 
 
 @router.post("/{conversation_id}/message/stream")
@@ -1052,6 +1119,25 @@ async def end_conversation(req: EndRequest, db: aiosqlite.Connection = Depends(g
     summary["fillers_total"] = fillers_total
     summary["fillers_breakdown"] = fillers_breakdown
     summary["fillers_per_message"] = round(fillers_total / user_msg_count, 2) if user_msg_count else 0.0
+
+    # Power Word Challenge: include used/unused target words and bump SRS for used.
+    target_state = await conv_dal.get_target_words(db, req.conversation_id)
+    target_words_all = target_state.get("words", [])
+    used_target_words = target_state.get("used", [])
+    used_lower = {w.lower() for w in used_target_words}
+    unused_target_words = [w for w in target_words_all if w.lower() not in used_lower]
+    summary["target_words"] = {
+        "all": target_words_all,
+        "used": used_target_words,
+        "unused": unused_target_words,
+    }
+    for w in used_target_words:
+        try:
+            wid = await vocab_dal.get_word_id_by_word(db, w)
+            if wid is not None:
+                await vocab_dal.update_progress(db, wid, True)
+        except Exception as e:
+            logger.warning("SRS bump for target word %r failed (non-fatal): %s", w, e)
 
     transitioned = await conv_dal.end_conversation(db, req.conversation_id, summary=summary)
     if not transitioned:
