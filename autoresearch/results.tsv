@@ -636,3 +636,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 683	d97591d	2026-04-20	50	446	148	15	659	2365	2365	pass	8.00	kept	Vocabulary Spelling Challenge mode (TTS dictation + Levenshtein partial-credit; 21 new tests)
 684	7118d1f	2026-04-20	151	325	167	32	675	2368	2368	pass	7.00	kept	PERF-HIGH conversation /message prompt trim (MAX_TURNS 16→10, 240ch per-msg cap, capped memory facts) + SSE first_chunk latency event + ⚡ UI badge
 685	8722d6d	2026-04-20	57	411	172	30	670	2384	2384	pass	7.55	kept	Sentence Echo listening memory-span drill (6→18 words progressive ladder, generate/score/trend endpoints, TTS replay-limited, diff feedback, 14-day sparkline; 29 new tests)
+686	467e441	2026-04-20	102	712	174	64	1052	2402	2402	pass	7.80	kept	Listen & Summarize drill (gist comprehension: TTS passage + AI-graded summary on coverage/conciseness/accuracy with 6-passage fallback; key-point checklist + transcript reveal + 7d sparkline; 18 new tests)

@@ -23,3 +23,4 @@ export { SelfAssessmentTrendChart } from './SelfAssessmentTrendChart';
 export { SpeakingJournalProgress } from './SpeakingJournalProgress';
 export { HeatmapDayDetail } from './HeatmapDayDetail';
 export { ShareProgressCard } from './ShareProgressCard';
+export { BestTimeCard } from './BestTimeCard';

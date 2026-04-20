@@ -2532,4 +2532,125 @@ Starting iteration 686. Dispatching to proposer.
   │ date +%s
   └ 2 lines...
 
-Now I have enough context. Let me start writing the new code.Now add the table to schema:Now add the prompts:Now extend the listening router with the new endpoints:Now append the new endpoints at the end of listening.py:Now sanity-check imports and that backend compiles:Now write tests.All passing. Now let me also quickly verify nothing else is broken:Good. Let me check on shellId 20:Now create the page:Add route to App.tsx:Now let's verify TypeScript compiles:Clean. Now update UI test spec:Final test run on focused tests once more, then commit:
+Now I have enough context. Let me start writing the new code.Now add the table to schema:Now add the prompts:Now extend the listening router with the new endpoints:Now append the new endpoints at the end of listening.py:Now sanity-check imports and that backend compiles:Now write tests.All passing. Now let me also quickly verify nothing else is broken:Good. Let me check on shellId 20:Now create the page:Add route to App.tsx:Now let's verify TypeScript compiles:Clean. Now update UI test spec:Final test run on focused tests once more, then commit:```json
+{
+  "committed": true,
+  "commit_hash": "467e441",
+  "files_changed": [
+    "app/dal/listen_summarize.py",
+    "app/database.py",
+    "app/prompts.py",
+    "app/routers/listening.py",
+    "frontend/src/api.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/pages/ListenSummarize.tsx",
+    "tests/e2e/ui-test-spec.yaml",
+    "tests/integration/test_listen_summarize_api.py",
+    "tests/unit/test_listen_summarize_dal.py"
+  ],
+  "tests_added": 18,
+  "ui_spec_updated": true,
+  "description": "Listen & Summarize drill: backend generates 40–70 word passage with key_points, grades user summary on coverage/conciseness/accuracy, persists attempts; new /listen-summarize React page with TTS (2 plays max, rate selector), dictation, results card with checklist, transcript reveal and 7d sparkline."
+}
+```
+
+Commit hash: **467e441**● Coder Implement iter 686
+  │ add ui spec items (shell)
+  │   │ cat >>
+  │   │ /Users/shingotada/Documents/vscode/english-app/tests/e2e/ui-test-spec.yaml
+  │   │ << 'YEOF'
+  │   │
+  │   │ listen_summarize:…
+  │   └ 70 lines...
+  └ commit (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && python -m pytest
+      │ tests/unit/test_listen_summarize_dal.py
+      │ tests/integration/test_listen_summarize_api.py -q 2>&1 | tail -5 && git
+      │ add -A && git commit -m "autoresearch #686: Listen & Summarize drill (gist
+      │ comprehension + AI-graded summary)…
+      └ 17 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2402,
+  "tests_total": 2402,
+  "all_passed": true,
+  "ts_check": "pass",
+  "smoke_result": "pass",
+  "smoke_pass": true,
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2402 passed in 135.53s (0:02:15) =======================",
+  "failure_summary": "",
+  "failures": []
+}
+```● Tester Test iter 686
+  │ smoke test (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && lsof -ti:8099 | xargs
+  │   │ kill -9 2>/dev/null; uv run python tests/smoke_test.py 2>&1 | tail -40
+  │   └ 23 lines...
+  └ e2e results (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 (shell)
+  │ date +%s
+  └ 2 lines...
+
+I need to inspect via git. Let me check key files for migrations and the new code.```json
+{"code_quality": 8, "feature_value": 8, "maintainability": 8, "ux_quality": 7, "total_score": 7.8, "verdict": "keep", "reason": "Well-structured new listening drill with clean DAL separation, robust LLM fallback bank and heuristic graders, proper Pydantic validation, new table created via CREATE TABLE IF NOT EXISTS (no migration needed), 18 new tests added, all 2402 tests + ts + smoke pass."}
+```● Evaluator Evaluate iter 686
+  │ Read listening.py
+  │   │ app/routers/listening.py
+  │   └ L1000:1280 (281 lines read)
+  └ Read listening.py
+      │ app/routers/listening.py
+      └ L1280:1400 (94 lines read)
+
+● Record iter 686 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776655126
+  │ T1=1776655228 T2=1776655940 T3=1776656114 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "686" "467e441" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 8 lines...
+
+Iter 686 done. Starting iter 687.
+
+● T0 iter 687 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Best Time of Day insight card on dashboard",
+  "description": "Add a data-driven 'Best Time of Day' insight that helps users discover when they practice most and when they perform best, encouraging consistent daily habits.\n\nBackend:\n1. Add `get_time_of_day_stats(db)` to `app/dal/dashboard.py`. It buckets activity by hour-of-day (0-23, local time via SQLite `strftime('%H', created_at, 'localtime')`) across:\n   - `messages` where role='user' (counts conversation activity)\n   - `pronunciation_attempts` (counts + AVG(score) per hour)\n   Returns a list of 24 entries: `{hour:int, activity_count:int, pronunciation_attempts:int, avg_pronunciation_score:float|None}`. Use a single query per source then merge in Python.\n2. In `app/routers/dashboard.py`, add Pydantic models `TimeOfDayBucket` and `TimeOfDayResponse` (buckets list + computed `peak_practice_hour:int|None` = hour with max activity_count, `best_score_hour:int|None` = hour with highest avg_pronunciation_score requiring at least 3 attempts, `total_samples:int`). Add `GET /api/dashboard/time-of-day` returning this. Return all-zero buckets when no data; peak/best fields are None.\n\nFrontend:\n3. Create `frontend/src/components/dashboard/BestTimeCard.tsx`. Fetches `/api/dashboard/time-of-day` on mount. Renders a compact card with:\n   - Headline: 'You practice most around HH:00' (formatted 12-hour with am/pm) — or 'Not enough data yet' when peak_practice_hour is null.\n   - Sub-line: 'Best pronunciation scores around HH:00 (avg X.X)' when best_score_hour is set.\n   - A simple horizontal bar sparkline of 24 bars (one per hour) sized by activity_count, with the peak bar highlighted; include `aria-label` and a hidden table for accessibility.\n   - Dark-mode aware Tailwind classes consistent with existing dashboard cards (e.g., StreakMilestonesCard).\n4. Mount `<BestTimeCard />` in `frontend/src/pages/DashboardPage.tsx` near the existing insight cards (e.g., adjacent to weekly report / streak milestones grid).\n\nTests:\n5. Add `tests/integration/test_dashboard_time_of_day.py` covering: (a) empty DB returns 24 zero buckets and null peak/best; (b) seed messages at distinct hours and assert peak_practice_hour matches; (c) seed pronunciation_attempts with varied scores and assert best_score_hour respects the >=3 attempts threshold; (d) response shape validates against the Pydantic model.\n\nNo schema changes are required — all timestamps already exist (`messages.created_at`, `pronunciation_attempts.created_at`).",
+  "files_to_modify": [
+    "app/dal/dashboard.py",
+    "app/routers/dashboard.py",
+    "frontend/src/components/dashboard/BestTimeCard.tsx",
+    "frontend/src/pages/DashboardPage.tsx",
+    "tests/integration/test_dashboard_time_of_day.py"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 687
+  │ List directory app/dal
+  │   └ 16 files found
+  └ Read database.py
+      │ app/database.py
+      └ L1:50 (50 lines read)
+
+● T1 iter 687 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me look at api.ts and an existing integration test for reference, plus router endpoint patterns.Now I have enough context. Let me look at the dashboard router end to find where to add the endpoint, and api.ts pattern for adding interface and getter.Now let me look at the api.ts file structure and at an existing test like the one for streak/learning velocity to understand patterns:Now I have everything. Let me write the implementation.Let me now add the DAL function. First, append to the end of dashboard.py:Now add router endpoint. Append at end:Now add the BestTimeCard component, wire api.ts, and mount in Dashboard.Add to api.ts:Mount in Dashboard.tsx near other insight cards (after LearningVelocityCard):Now write integration tests. Need to look at how seed data is created in existing tests for direct DB insert:Now run the tests:All passing. Now check UI test spec:

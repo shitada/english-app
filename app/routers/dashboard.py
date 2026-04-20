@@ -1125,3 +1125,57 @@ async def get_day_detail(
         for c in detail["conversations"]
     ]
     return detail
+
+
+class TimeOfDayBucket(BaseModel):
+    hour: int = Field(..., ge=0, le=23)
+    activity_count: int
+    pronunciation_attempts: int
+    avg_pronunciation_score: float | None = None
+
+
+class TimeOfDayResponse(BaseModel):
+    buckets: list[TimeOfDayBucket]
+    peak_practice_hour: int | None = None
+    best_score_hour: int | None = None
+    total_samples: int
+
+
+@router.get("/time-of-day", response_model=TimeOfDayResponse)
+async def get_time_of_day(db: aiosqlite.Connection = Depends(get_db_session)):
+    """Return activity bucketed by local hour-of-day for the dashboard's
+    Best Time of Day insight card."""
+    buckets = await dash_dal.get_time_of_day_stats(db)
+    total_samples = sum(b["activity_count"] for b in buckets)
+
+    peak_practice_hour: int | None = None
+    if total_samples > 0:
+        peak = max(buckets, key=lambda b: (b["activity_count"], -b["hour"]))
+        if peak["activity_count"] > 0:
+            peak_practice_hour = peak["hour"]
+
+    # Best avg pronunciation score among hours with >=3 attempts.
+    eligible = [
+        b for b in buckets
+        if b["pronunciation_attempts"] >= 3 and b["avg_pronunciation_score"] is not None
+    ]
+    best_score_hour: int | None = None
+    if eligible:
+        best = max(eligible, key=lambda b: (b["avg_pronunciation_score"], -b["hour"]))
+        best_score_hour = best["hour"]
+
+    logger.info(
+        "dashboard.time_of_day computed",
+        extra={
+            "total_samples": total_samples,
+            "peak_practice_hour": peak_practice_hour,
+            "best_score_hour": best_score_hour,
+        },
+    )
+
+    return {
+        "buckets": buckets,
+        "peak_practice_hour": peak_practice_hour,
+        "best_score_hour": best_score_hour,
+        "total_samples": total_samples,
+    }

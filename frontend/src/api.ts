@@ -414,6 +414,9 @@ export const api = {
   getDashboardLearningVelocity: (weeks = 8) =>
     request<LearningVelocityResponse>(`/api/dashboard/learning-velocity?weeks=${weeks}`),
 
+  getDashboardTimeOfDay: () =>
+    request<TimeOfDayResponse>('/api/dashboard/time-of-day'),
+
   getDashboardGrammarWeakSpots: (limit = 10) =>
     request<GrammarWeakSpotsResponse>(`/api/dashboard/grammar-weak-spots?limit=${limit}`),
 
@@ -1997,6 +2000,20 @@ export interface LearningVelocityResponse {
   trend: string;
   total_active_days: number;
   words_per_study_day: number;
+}
+
+export interface TimeOfDayBucket {
+  hour: number;
+  activity_count: number;
+  pronunciation_attempts: number;
+  avg_pronunciation_score: number | null;
+}
+
+export interface TimeOfDayResponse {
+  buckets: TimeOfDayBucket[];
+  peak_practice_hour: number | null;
+  best_score_hour: number | null;
+  total_samples: number;
 }
 
 export interface GrammarCategoryItem {

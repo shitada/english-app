@@ -2022,6 +2022,22 @@ pages:
         priority: medium
         added_in: 667
 
+      - id: dash-039
+        target: Best Time of Day insight card renders headline
+        action: Snapshot dashboard; locate data-testid="best-time-card"
+        expect: Card shows "Best Time of Day" heading and a headline ("You practice most around HH:00 am/pm" with data, or "Not enough data yet" when empty); 24 sparkline bars (data-testid="best-time-bar-0".."best-time-bar-23") render with peak bar marked data-peak="true" when peak exists
+        type: visual
+        priority: medium
+        added_in: 687
+
+      - id: dash-040
+        target: Best Time of Day card sub-line for best pronunciation hour
+        action: Inspect data-testid="best-time-card" with seeded pronunciation attempts
+        expect: When backend returns best_score_hour, data-testid="best-time-subline" reads "Best pronunciation scores around HH:00 am/pm (avg X.X)"; absent when no eligible hour
+        type: functional
+        priority: low
+        added_in: 687
+
       - id: quick-idiom-001
         target: Quick Idiom card displays idiom prompt
         action: Navigate to home page, open Speaking tab in Quick Practice

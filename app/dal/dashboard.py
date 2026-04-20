@@ -3192,3 +3192,70 @@ async def get_day_detail(db: aiosqlite.Connection, day: str) -> dict[str, Any]:
         "total_minutes": total_minutes,
         "top_module": top_module,
     }
+
+
+async def get_time_of_day_stats(db: aiosqlite.Connection) -> list[dict[str, Any]]:
+    """Bucket activity by local hour-of-day (0-23) across user messages and
+    pronunciation attempts.
+
+    Returns a list of 24 dicts shaped:
+        {
+            "hour": int,
+            "activity_count": int,
+            "pronunciation_attempts": int,
+            "avg_pronunciation_score": float | None,
+        }
+
+    The ``activity_count`` is the sum of user messages and pronunciation
+    attempts for that hour. ``avg_pronunciation_score`` is ``None`` when no
+    pronunciation attempts (with a non-null score) were recorded that hour.
+    """
+
+    msg_rows = await db.execute_fetchall(
+        """
+        SELECT CAST(strftime('%H', created_at, 'localtime') AS INTEGER) AS hour,
+               COUNT(*) AS cnt
+        FROM messages
+        WHERE role = 'user'
+        GROUP BY hour
+        """
+    )
+    pron_rows = await db.execute_fetchall(
+        """
+        SELECT CAST(strftime('%H', created_at, 'localtime') AS INTEGER) AS hour,
+               COUNT(*) AS cnt,
+               AVG(score) AS avg_score
+        FROM pronunciation_attempts
+        GROUP BY hour
+        """
+    )
+
+    msg_by_hour: dict[int, int] = {
+        int(r["hour"]): int(r["cnt"]) for r in msg_rows if r["hour"] is not None
+    }
+    pron_by_hour: dict[int, dict[str, Any]] = {}
+    for r in pron_rows:
+        if r["hour"] is None:
+            continue
+        pron_by_hour[int(r["hour"])] = {
+            "count": int(r["cnt"]),
+            "avg_score": r["avg_score"],
+        }
+
+    buckets: list[dict[str, Any]] = []
+    for hour in range(24):
+        msg_count = msg_by_hour.get(hour, 0)
+        pron = pron_by_hour.get(hour)
+        pron_count = pron["count"] if pron else 0
+        avg_score = pron["avg_score"] if pron else None
+        if avg_score is not None:
+            avg_score = round(float(avg_score), 2)
+        buckets.append(
+            {
+                "hour": hour,
+                "activity_count": msg_count + pron_count,
+                "pronunciation_attempts": pron_count,
+                "avg_pronunciation_score": avg_score,
+            }
+        )
+    return buckets

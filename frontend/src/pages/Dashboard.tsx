@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Flame, MessageSquare, Mic, BookOpen, Clock } from 'lucide-react';
 import { api, type DashboardStats, type MistakeItem, type Achievement, type WeeklyReport as WeeklyReportData, type GrammarTrendResponse, type MistakeReviewItem, type ConfidenceTrendResponse, type TodayActivity, getMistakeJournal, getAchievements, getWeeklyReport, getGrammarTrend, getMistakeReview, getConfidenceTrend, getTodayActivity } from '../api';
 import { formatRelativeTime } from '../utils/formatDate';
-import { AchievementsPanel, CEFRLevelCard, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, ShareProgressCard, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
+import { AchievementsPanel, BestTimeCard, CEFRLevelCard, FluencyProgressionChart, GrammarTrend, GrammarWeakSpots, LearningVelocityCard, ListeningProgress, MistakeJournal, MistakeReviewDrill, ModuleStreaksCard, PronunciationProgress, PronunciationWeakSpots, SelfAssessmentTrendChart, SessionAnalytics, ShareProgressCard, SkillsRadarChart, SpeakingConfidence, SpeakingJournalProgress, TopicCoverageMap, VocabActivationCard, VocabForecastCard, VocabularyProgress, WeeklyReport } from '../components/dashboard';
 import { LazySection } from '../hooks/useLazyLoad';
 
 export default function Dashboard() {
@@ -136,6 +136,11 @@ export default function Dashboard() {
       {/* Learning Velocity */}
       <LazySection>
         <LearningVelocityCard />
+      </LazySection>
+
+      {/* Best Time of Day */}
+      <LazySection>
+        <BestTimeCard />
       </LazySection>
 
       {/* Module Streaks */}
