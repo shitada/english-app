@@ -51,6 +51,7 @@ import QuickNumbersDatesCard from './QuickNumbersDatesCard';
 import QuickThoughtGroupCard from './QuickThoughtGroupCard';
 import QuickReverseTranslationCard from './QuickReverseTranslationCard';
 import QuickQuestionFormationCard from './QuickQuestionFormationCard';
+import QuickBackchannelCard from './QuickBackchannelCard';
 
 const STORAGE_KEY = 'quick-practice-tab';
 const DIFFICULTY_KEY = 'quick-practice-difficulty';
@@ -120,6 +121,7 @@ const CARDS: CardDef[] = [
   { key: 'dictogloss', tab: 'listening', label: 'Dictogloss', height: 180, Component: QuickDictoglossCard },
   { key: 'numbers-dates', tab: 'listening', label: 'Numbers & Dates', height: 220, Component: QuickNumbersDatesCard },
   { key: 'thought-group', tab: 'listening', label: 'Thought Group', height: 260, Component: QuickThoughtGroupCard },
+  { key: 'backchannel', tab: 'listening', label: '💬 Quick Backchannel / あいづち練習', height: 320, Component: QuickBackchannelCard },
   // Grammar
   { key: 'grammar', tab: 'grammar', label: 'Grammar', height: 180, Component: QuickGrammarCard },
   { key: 'rephrase', tab: 'grammar', label: 'Rephrase', height: 180, Component: QuickRephraseCard },

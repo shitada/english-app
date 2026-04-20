@@ -4746,3 +4746,43 @@ pages:
         type: functional
         priority: low
         added_in: 669
+
+      - id: qp-backchannel-001
+        target: Quick Backchannel card appears under the Listening tab in the Quick Practice Hub
+        action: Click data-testid="qp-tab-listening" and scroll to the Quick Backchannel card
+        expect: The card with data-testid="quick-backchannel-card" is rendered with title "Quick Backchannel" and a Round counter (data-testid="qbc-progress")
+        type: functional
+        priority: medium
+        added_in: 672
+
+      - id: qp-backchannel-002
+        target: Speaker line auto-plays and a Replay button is available
+        action: When a Quick Backchannel round starts, observe the speaker line area
+        expect: The speaker utterance is read via speechSynthesis on round start, and clicking data-testid="qbc-replay" replays it
+        type: functional
+        priority: medium
+        added_in: 672
+
+      - id: qp-backchannel-003
+        target: Four multiple-choice backchannel options render and accept selection
+        action: Click any of the data-testid^="qbc-choice-" buttons during a round
+        expect: Exactly 4 choice buttons are rendered; selecting one transitions the card into feedback (data-testid="qbc-feedback") and disables further choices
+        type: functional
+        priority: medium
+        added_in: 672
+
+      - id: qp-backchannel-004
+        target: Wrong choice reveals the full accepted-replies list
+        action: Pick a clearly-incorrect option in the choices grid
+        expect: data-testid="qbc-feedback" has data-correct="false" and data-testid="qbc-accepted-list" displays the accepted reply set
+        type: functional
+        priority: low
+        added_in: 672
+
+      - id: qp-backchannel-005
+        target: Completing five rounds shows the summary screen with Try Again and Back-to-hub buttons
+        action: Play through all 5 rounds in Quick Backchannel
+        expect: The card switches to data-testid="qbc-summary" with score X/5, plus data-testid="qbc-restart" (Try again) and data-testid="qbc-back-hub" (Back to hub) buttons
+        type: functional
+        priority: medium
+        added_in: 672
