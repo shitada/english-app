@@ -53,6 +53,7 @@ import QuickReverseTranslationCard from './QuickReverseTranslationCard';
 import QuickQuestionFormationCard from './QuickQuestionFormationCard';
 import QuickBackchannelCard from './QuickBackchannelCard';
 import QuickPaceMatchCard from './QuickPaceMatchCard';
+import QuickContrastiveStressCard from './QuickContrastiveStressCard';
 import ReducedFormsDrill from './ReducedFormsDrill';
 
 const STORAGE_KEY = 'quick-practice-tab';
@@ -114,6 +115,7 @@ const CARDS: CardDef[] = [
   { key: 'reverse-translation', tab: 'speaking', label: 'Reverse Translation', height: 260, Component: QuickReverseTranslationCard },
   { key: 'question-formation', tab: 'speaking', label: 'Question Formation', height: 260, Component: QuickQuestionFormationCard },
   { key: 'pace-match', tab: 'speaking', label: 'Pace Match', height: 320, Component: QuickPaceMatchCard },
+  { key: 'contrastive-stress', tab: 'speaking', label: 'Contrastive Stress', height: 380, Component: QuickContrastiveStressCard },
   // Listening
   { key: 'dictation', tab: 'listening', label: 'Dictation', height: 180, Component: QuickDictationCard },
   { key: 'listen-respond', tab: 'listening', label: 'Listen & Respond', height: 180, Component: QuickListenRespondCard },

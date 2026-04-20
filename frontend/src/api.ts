@@ -3731,6 +3731,32 @@ export function getStressSpotlightRecent(
 }
 
 // ---------------------------------------------------------------------------
+// Quick Contrastive Stress
+// ---------------------------------------------------------------------------
+
+export interface ContrastiveStressOption {
+  word: string;
+  word_index: number;
+  meaning: string;
+}
+
+export interface ContrastiveStressItem {
+  sentence: string;
+  words: string[];
+  options: ContrastiveStressOption[];
+  correct_index: number;
+  difficulty: string;
+}
+
+export function getContrastiveStress(
+  difficulty: string = 'intermediate'
+): Promise<ContrastiveStressItem> {
+  return request<ContrastiveStressItem>(
+    `/api/quick/contrastive-stress?difficulty=${encodeURIComponent(difficulty)}`
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Inline dictation mini-drill ('Type what you hear')
 // ---------------------------------------------------------------------------
 

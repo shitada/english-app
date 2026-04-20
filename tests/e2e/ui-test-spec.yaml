@@ -5025,3 +5025,43 @@ pages:
         type: functional
         priority: low
         added_in: 679
+
+      - id: qcs-001
+        target: Quick Contrastive Stress card renders with title in Speaking tab
+        action: Open Quick Practice → Speaking tab and scroll to data-testid="quick-contrastive-stress"
+        expect: Card shows "Contrastive Stress" header and a sentence in data-testid="qcs-sentence"
+        type: functional
+        priority: high
+        added_in: 682
+
+      - id: qcs-002
+        target: Listen button plays the TTS audio with one word emphasized
+        action: Click data-testid="qcs-listen"
+        expect: SpeechSynthesis is invoked once; button label changes to "Replay"; the four MCQ options become enabled
+        type: functional
+        priority: high
+        added_in: 682
+
+      - id: qcs-003
+        target: Picking an MCQ option reveals correct/incorrect feedback
+        action: After Listen, click data-testid="qcs-option-0" (or any other option)
+        expect: Correct option is highlighted green; wrong picks are highlighted red; data-testid="qcs-speak-phase" button appears
+        type: functional
+        priority: high
+        added_in: 682
+
+      - id: qcs-004
+        target: Speak phase reveals target meaning and Record button
+        action: Click data-testid="qcs-speak-phase"
+        expect: data-testid="qcs-speak-section" is visible with a target meaning panel; data-testid="qcs-record" is enabled
+        type: functional
+        priority: high
+        added_in: 682
+
+      - id: qcs-005
+        target: Compare button replays model TTS for the speak target
+        action: In speak phase, click data-testid="qcs-compare"
+        expect: SpeechSynthesis is invoked again and no console errors
+        type: functional
+        priority: medium
+        added_in: 682

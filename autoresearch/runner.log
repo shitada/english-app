@@ -1731,4 +1731,124 @@ Iter 680 done (kept, 7.0). Onward to 681.
 
 Now I have enough context. Let me look at the SCHEMA section and Conversation.tsx, plus tests/conftest:Now I have enough. Let me start implementing.Now update the conversation DAL:Now add `pick_target_words` to vocabulary DAL:Now update the conversation router. Let me view a few helpers first and add a target word matcher:Now add a helper for matching target words and integrate into start/message/end:Let me add helper above _should_skip_grammar_check:Now hook it into /start:Now /message — detect target words after user msg added:Now /end — bump SRS and add summary:Now update frontend api.ts types and Conversation.tsx to use `target_words`:Now in Conversation.tsx, prefer backend target_words when present, and use `target_words_used` from /message response:Now let me check for a stream_message that also persists user message (may need similar target word detection). Let me skim:Stream message also exists, but proposal focuses on /message; we'll leave streaming alone (out of scope).
 
-Now write integration test:Now run pytest:All passing. Now run the full test suite to ensure no regressions:
+Now write integration test:Now run pytest:All passing. Now run the full test suite to ensure no regressions:[2026-04-20 11:31:23] Copilot invocation completed (duration: 1603s)
+[2026-04-20 11:31:23] Recording agent traces...
+[2026-04-20 11:31:23]   AGENT_TRACE iter=680 proposer=1 coder=1 tester=1 evaluator=1
+[2026-04-20 11:31:23]   AGENT_TRACE iter=681 proposer=1 coder=0 tester=0 evaluator=0
+[2026-04-20 11:31:23] SMOKE_UI: UI changes detected in pages: conversation
+[2026-04-20 11:31:23] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-20 11:31:23] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: conversation
+
+  ✅ conversation: smoke 4✓ 0✗ (1685ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-20 11:31:33] SMOKE_UI_PASS: All UI pages passed
+[2026-04-20 11:31:33] Running post-invocation audit (iter 680-681)...
+============================================
+ Autoresearch Audit
+ Iterations: 680 — 681
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-20 11:31:33
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;32m  Proposer: PASS[0m
+[0;31m  Tester: FAIL — missing: 680 681[0m
+[0;31m  Evaluator: FAIL — missing: 680 681[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 2 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-20 11:31:34] Audit found 2 error(s) — fixes applied where possible
+[2026-04-20 11:31:37] Current iteration count: 681 / 699
+[2026-04-20 11:31:37] ------------------------------------------
+[2026-04-20 11:31:37] Invocation 7 / 10
+[2026-04-20 11:31:37] Resuming from iteration 682
+[2026-04-20 11:31:37] ------------------------------------------
+[2026-04-20 11:31:37] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-682-to-699.md)...
+● Read context (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && tail -20
+  │ autoresearch/results.tsv && echo "---BACKLOG---" && grep '^- \[ \]'
+  │ autoresearch/backlog.md && echo "---GIT---" && git --no-pager log
+  │ --oneline -5 && echo "---UITEST---" && (test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import …
+  └ 33 lines...
+
+● Check UI results (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && test -f
+  │ autoresearch/ui-test-results.json && python3 -c "import
+  │ json;d=json.load(open('autoresearch/ui-test-results.json'));print('overall:'
+  │ ,d.get('overall'));print('ux:',d.get('ux_score'))" || echo "no
+  │ ui-test-results.json"
+  └ 2 lines...
+
+● T0 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Quick Contrastive Stress card: shift word emphasis to change meaning",
+  "description": "Add a new Quick Practice card that trains contrastive (emphatic) stress — moving stress to different words in the SAME sentence to convey different implied meanings (e.g., 'I didn't say HE broke it' vs 'I didn't say he BROKE it'). This is distinct from the existing QuickSentenceStressCard (which trains natural content-word stress) because it teaches how stress placement changes pragmatic meaning, a key listening + speaking skill.\n\n## UX Flow\n1. Card loads a short ambiguous sentence (5-9 words) plus 3-4 candidate stress positions, each paired with an implied meaning. Example: sentence='I didn't say he stole the car', positions=[{word:'I', meaning:'Someone else said it'}, {word:'say', meaning:\"I didn't actually say it (maybe implied)\"}, {word:'he', meaning:'Someone else stole it'}, {word:'stole', meaning:'He did something else with it'}, {word:'car', meaning:'He stole something else'}].\n2. **Listen phase**: TTS plays the sentence with one stressed word (using SSML <emphasis level='strong'>WORD</emphasis> or capitalized fallback via rate/pitch tweak around the target word). User picks the implied meaning from the choices (multiple-choice, 4 options).\n3. **Speak phase**: User is given a target meaning ('Now say it so it means: Someone else stole it') and must record themselves emphasizing the correct word. Use Web Speech Recognition + a simple heuristic on volume/duration of the target word in the transcript timing (or just check transcript correctness + show the target word highlighted as guidance — speech timing is hard, so v1 can rely on self-rating + replay).\n4. **Feedback**: Show user's recording transcript, the target stress word highlighted, and a 'Compare' button that re-plays the model TTS with stress on that word. Score: +1 for correct listening identification, +1 for completing the speaking attempt.\n\n## Backend\nAdd `app/routers/contrastive_stress.py` with:\n- `GET /api/quick/contrastive-stress?difficulty=beginner|intermediate|advanced` → returns `{sentence: str, options: [{word: str, word_index: int, meaning: str}], correct_index: int (which word is currently stressed in the audio)}`. Generated via Copilot LLM call with a prompt that asks for an ambiguous sentence + 4 distinct contrastive-stress interpretations, with one randomly chosen as the spoken target.\n- Cache last 20 generated sentences in memory to keep latency low and avoid duplicates within a session.\n- Add to `app/main.py` router registration.\n\n## Frontend\n- New `frontend/src/components/QuickContrastiveStressCard.tsx` (~250 lines) following the pattern of QuickSentenceStressCard.\n- Add API helpers `getContrastiveStress()` in `frontend/src/api.ts`.\n- Register the card in `frontend/src/components/QuickPracticeHub.tsx` with icon (lucide `Megaphone` or `Volume2`) and label 'Contrastive Stress'.\n\n## Tests\n- Unit test the router with FastAPI TestClient (mock Copilot) verifying response shape and that `correct_index` is within bounds of `options`.\n- Component test for QuickContrastiveStressCard: renders sentence after fetch, clicking a meaning marks answered, speak phase appears after correct selection.\n\n## No schema changes required (results not persisted in v1; can be added later via existing quick_practice tracking if desired).",
+  "files_to_modify": [
+    "app/routers/contrastive_stress.py",
+    "app/main.py",
+    "frontend/src/api.ts",
+    "frontend/src/components/QuickContrastiveStressCard.tsx",
+    "frontend/src/components/QuickPracticeHub.tsx"
+  ],
+  "priority": "medium",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 682
+  │ List directory frontend/src/components
+  │   └ 89 files found
+  └ Read QuickSentenceStressCard.tsx
+      │ frontend/src/components/QuickSentenceStressCard.tsx
+      └ L1:40 (40 lines read)
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now let me check `request` helper in api.ts:Now let me create the router:Now add the API client function:Now create the React component:Register in QuickPracticeHub:Now write the unit tests for the router:Integration test:Now let me create the vitest spec for the component:Now update the UI test spec:Now run the tests to verify:All pytests pass. Now the frontend:All green. Commit:
