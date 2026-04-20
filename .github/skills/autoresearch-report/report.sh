@@ -154,12 +154,15 @@ if [[ -f "$LOG_FILE" ]]; then
             c=$(echo "$trace" | sed -n 's/.*coder=\([0-9]*\).*/\1/p')
             t=$(echo "$trace" | sed -n 's/.*tester=\([0-9]*\).*/\1/p')
             e=$(echo "$trace" | sed -n 's/.*evaluator=\([0-9]*\).*/\1/p')
+            # Ensure numeric — truncated AGENT_TRACE lines may miss fields
+            p=${p:-0}; c=${c:-0}; t=${t:-0}; e=${e:-0}
         else
             # Fallback: scan log directly. Match both "iter N" and "iteration N".
-            p=$(grep -cE "● Proposer.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
-            c=$(grep -cE "● Coder.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
-            t=$(grep -cE "● Tester.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
-            e=$(grep -cE "● Evaluator.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || echo 0)
+            p=$({ grep -cE "● Proposer.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true; })
+            c=$({ grep -cE "● Coder.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true; })
+            t=$({ grep -cE "● Tester.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true; })
+            e=$({ grep -cE "● Evaluator.*iter(ation)? $i\b" "$LOG_FILE" 2>/dev/null || true; })
+            p=${p:-0}; c=${c:-0}; t=${t:-0}; e=${e:-0}
         fi
         [[ "${p:-0}" -gt 0 ]] && total_p=$((total_p + 1)) || total_skip_p=$((total_skip_p + 1))
         [[ "${c:-0}" -gt 0 ]] && total_c=$((total_c + 1)) || total_skip_c=$((total_skip_c + 1))

@@ -303,22 +303,26 @@ main() {
             # Match "iter N", "iteration N", or just "● Agent ..." between iter boundaries
             log "Recording agent traces..."
             for iter_num in $(seq $((current + 1)) "$new_iter"); do
-                local p_count t_count e_count c_count
                 local next_num=$((iter_num + 1))
                 # Primary: look for explicit iter number in agent call
-                p_count=$(grep -cE "● Proposer.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || echo 0)
-                c_count=$(grep -cE "● Coder.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || echo 0)
-                t_count=$(grep -cE "● Tester.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || echo 0)
-                e_count=$(grep -cE "● Evaluator.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || echo 0)
+                # Use { grep || true; } to ensure non-zero exit never propagates under set -e
+                local p_count c_count t_count e_count
+                p_count=$({ grep -cE "● Proposer.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true; })
+                c_count=$({ grep -cE "● Coder.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true; })
+                t_count=$({ grep -cE "● Tester.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true; })
+                e_count=$({ grep -cE "● Evaluator.*iter(ation)? $iter_num\b" "$LOG_FILE" 2>/dev/null || true; })
+                # Ensure numeric (empty → 0)
+                p_count=${p_count:-0}; c_count=${c_count:-0}; t_count=${t_count:-0}; e_count=${e_count:-0}
+
                 # Fallback for Coder: if coder=0 but there's a commit for this iter, check for any
                 # "● Coder" line between this iter's proposer call and the next proposer call
                 if [[ "$c_count" -eq 0 ]]; then
-                    local commit_exists
-                    commit_exists=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n && $2!="none" && $2!="" {print 1}' "$PROJECT_DIR/autoresearch/results.tsv" 2>/dev/null || echo 0)
-                    if [[ "$commit_exists" == "1" ]]; then
-                        # Count any "● Coder" between "iter(ation)? N" and "iter(ation)? N+1" in log
+                    local commit_hash
+                    commit_hash=$(awk -F'\t' -v n="$iter_num" 'NR>1 && $1==n && $2!="none" && $2!="" {print $2}' "$PROJECT_DIR/autoresearch/results.tsv" 2>/dev/null || true)
+                    if [[ -n "$commit_hash" ]]; then
                         local section_coder
-                        section_coder=$(sed -n "/iter\(ation\)\{0,1\} $iter_num/,/iter\(ation\)\{0,1\} $next_num/p" "$LOG_FILE" 2>/dev/null | grep -c "● Coder" || echo 0)
+                        section_coder=$({ sed -n "/iter\(ation\)\{0,1\} $iter_num/,/iter\(ation\)\{0,1\} $next_num/p" "$LOG_FILE" 2>/dev/null | grep -c "● Coder" || true; })
+                        section_coder=${section_coder:-0}
                         [[ "$section_coder" -gt 0 ]] && c_count=$section_coder
                     fi
                 fi
