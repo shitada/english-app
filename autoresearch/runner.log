@@ -2175,4 +2175,119 @@ Context restored. No UI failures. Starting iteration 684.
   │ date +%s
   └ 2 lines...
 
-Now let's implement. Start with DAL:Now update the router:Now add timing log and first_chunk SSE event. Let me add `total_ms` log to /message and update event_gen:Now stream_message — add latency capture & first_chunk emission & end log:Now frontend api.ts:Now Conversation.tsx. Add `firstChunkLatencyMs` to Message interface, set it in onFirstChunk, render badge:Now add the badge in the assistant bubble:Now update tests. First fix the existing marker-checking tests, then add new tests:Let me check if any other tests reference the old marker text or memory facts:Let's view the surrounding test for context — does it rely on max_turns=16 with FIRST_MARKER index?Good. 20 seeded + 1 user msg = 21 > 10, so truncation marker still appears, and FIRST_MARKER_0 is dropped. Let me also confirm there are no tests for memory facts that depend on the old "10 facts" behavior:Good. Now run tests:All pass. Now check UI test spec since Conversation.tsx changed:Find the largest existing conv-NNN id to pick the next number:Now check frontend typescript compiles:All clean. Commit:
+Now let's implement. Start with DAL:Now update the router:Now add timing log and first_chunk SSE event. Let me add `total_ms` log to /message and update event_gen:Now stream_message — add latency capture & first_chunk emission & end log:Now frontend api.ts:Now Conversation.tsx. Add `firstChunkLatencyMs` to Message interface, set it in onFirstChunk, render badge:Now add the badge in the assistant bubble:Now update tests. First fix the existing marker-checking tests, then add new tests:Let me check if any other tests reference the old marker text or memory facts:Let's view the surrounding test for context — does it rely on max_turns=16 with FIRST_MARKER index?Good. 20 seeded + 1 user msg = 21 > 10, so truncation marker still appears, and FIRST_MARKER_0 is dropped. Let me also confirm there are no tests for memory facts that depend on the old "10 facts" behavior:Good. Now run tests:All pass. Now check UI test spec since Conversation.tsx changed:Find the largest existing conv-NNN id to pick the next number:Now check frontend typescript compiles:All clean. Commit:```json
+{
+  "committed": true,
+  "commit_hash": "7118d1f",
+  "files_changed": [
+    "app/dal/conversation.py",
+    "app/routers/conversation.py",
+    "frontend/src/api.ts",
+    "frontend/src/pages/Conversation.tsx",
+    "tests/unit/test_conversation_dal.py",
+    "tests/integration/test_conversation_api.py",
+    "tests/e2e/ui-test-spec.yaml"
+  ],
+  "tests_added": 3,
+  "ui_spec_updated": true,
+  "description": "Trim /message prompt (MAX_TURNS 10, per-msg 240 char cap, capped memory facts) and add SSE first_chunk latency event + ⚡ badge in Conversation UI."
+}
+```● Coder Implement iter 684
+  │ commit (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app && git add -A && git
+  │   │ commit -m "autoresearch #684: Trim /message prompt and add first-token
+  │   │ latency badge
+  │   │
+  │   │ PERF-HIGH: cut conversation reply lag and surface a measured first-token…
+  │   └ 45 lines...
+  └ get hash (shell)
+      │ cd /Users/shingotada/Documents/vscode/english-app && git log -1
+      │ --format="%h"
+      └ 2 lines...
+
+● T2 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "tests_passed": 2368,
+  "tests_total": 2368,
+  "all_passed": true,
+  "ts_check": "pass",
+  "vitest_passed": 487,
+  "vitest_total": 487,
+  "vitest_result": "pass",
+  "smoke_result": "pass",
+  "e2e_result": "not_run",
+  "e2e_details": null,
+  "overall_pass": true,
+  "test_output": "======================= 2368 passed in 131.99s (0:02:11) =======================\nFrontend vitest: 487 passed (40 files)\nSmoke: SMOKE OK (all endpoints 200)\nTSC: clean (exit 0)",
+  "failure_summary": ""
+}
+```● Tester Test iter 684
+  │ vitest (shell)
+  │   │ cd /Users/shingotada/Documents/vscode/english-app/frontend && npx vitest run
+  │   │ 2>&1 | tail -30
+  │   └ 30 lines...
+  └ read e2e (shell)
+      │ cat /Users/shingotada/Documents/vscode/english-app/autoresearch/ui-test-resu
+      │ lts.json 2>&1 | head -100
+      └ 2 lines...
+
+● T3 + diff stat (shell)
+  │ date +%s && cd /Users/shingotada/Documents/vscode/english-app && git
+  │ --no-pager diff HEAD~1 --stat
+  └ 14 lines...
+
+```json
+{"code_quality":7,"feature_value":7,"maintainability":7,"ux_quality":7,"total_score":7.0,"verdict":"keep","reason":"Targeted perf optimization with bounded prompt sizing, observability (first_chunk SSE event + ⚡ badge), and full test suite (2368/2368) plus TS and smoke checks passing."}
+```● Evaluator Evaluate iter 684
+  │ List directory .
+  │   └ 212 files found
+  └ List directory .
+      └ 212 files found
+
+● Record iter 684 (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=1776653684
+  │ T1=1776653835 T2=1776654160 T3=1776654327 T4=$(date +%s) && printf
+  │ '%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%s\t%s\n' \
+  │ "684" "7118d1f" "$(date +%Y-%m-%d)" "$((T1-T0))" "$((T2-T1))"
+  │ "$((T3-T2))" "$((T4-T3))" "$((T4-T0))" \…
+  └ 7 lines...
+
+● Mark backlog (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && python3 -c "
+  │ import re
+  │ p='autoresearch/backlog.md'
+  │ s=open(p).read()
+  │ s=s.replace('- [ ] [PERF-HIGH] Conversation の応答が遅い','- [x] …
+  └ 5 lines...
+
+Iteration 684 done. Starting iteration 685.
+
+● T0 for 685 (shell)
+  │ date +%s
+  └ 2 lines...
+
+```json
+{
+  "type": "feature",
+  "title": "Sentence Echo: progressive listening memory-span drill",
+  "description": "Add a new listening practice mode 'Sentence Echo' that builds working-memory capacity for understanding spoken English. Users hear AI-generated sentences of increasing length (start at 6 words, ramp to 9, 12, 15, 18) and must type back exactly what they heard. The app scores word-level accuracy (Levenshtein on tokenized words) and advances span only when accuracy is >=90%, otherwise repeats the same length. Each session ends after 8 sentences or first failure at the top span; result records the user's 'memory span' (longest length passed) and average accuracy. A small dashboard widget shows the 14-day memory-span trend (sparkline) so users see retention growing.\n\nBackend (new):\n- `app/dal/sentence_echo.py` — DAL with `record_attempt(db, span:int, accuracy:float, passed:bool)`, `get_recent_span_trend(db, days:int=14)`, `get_best_span(db)`. New table `sentence_echo_attempts(id INTEGER PRIMARY KEY, span INTEGER NOT NULL, accuracy REAL NOT NULL, passed INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`. Add `CREATE TABLE IF NOT EXISTS` block in `app/database.py` SCHEMA. (Pure new table — no ALTER migration needed since no existing rows reference it.)\n- `app/routers/listening.py` — add `POST /api/listening/sentence-echo/generate` that takes `{span:int, level:str}` and returns `{sentence:str, ipa_hint?:str}` via copilot (prompt: produce a single natural conversational sentence of exactly N words at given CEFR level, no quotes/punctuation tricks). Add `POST /api/listening/sentence-echo/score` taking `{target:str, heard:str, span:int}`, computes word-level accuracy server-side, persists via DAL, returns `{accuracy, passed, next_span, best_span}`. Add `GET /api/listening/sentence-echo/trend` returning recent span+accuracy points.\n- Add a `SENTENCE_ECHO_PROMPT` constant to `app/prompts.py`.\n\nFrontend (new):\n- `frontend/src/components/SentenceEcho.tsx` — UI with a Play button (uses existing TTS hook), a text input for the user's transcription, Submit, per-attempt feedback diff (correct words green, missing/wrong red), span ladder progress (6→9→12→15→18), and a final summary showing memory span achieved + 14-day sparkline from the trend endpoint. Replay limited to 2 plays per sentence to encourage active listening.\n- Add a launch card on the Home page listening section linking to the new component.\n\nWhy: complements existing minimal-pairs/shadowing/dictation by targeting working-memory capacity — a known bottleneck for L2 listeners that no current drill addresses. Progressive ramping + visible span trend gives clear, motivating progression.",
+  "files_to_modify": ["app/database.py", "app/dal/sentence_echo.py", "app/routers/listening.py", "app/prompts.py", "frontend/src/components/SentenceEcho.tsx"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 685
+  │ List directory app/routers
+  │   └ 13 files found
+  └ Read listening.py
+      │ app/routers/listening.py
+      └ L1:50 (50 lines read)
+
+● T1 685 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Good. Now I have enough context. Let me start implementing. First the backend:Now create DAL:Now add the prompt and router. Let me first look at end of listening.py and prompts.py:Now add router endpoints. First update the import line and append endpoints:Now create the frontend component. Let me first check api.ts pattern for adding new methods:Now create the SentenceEcho component:Now wire into App.tsx and Home.tsx:Now Home card right after Stress Spotlight:Now write tests. Start with unit DAL test:Now frontend test:Now update ui-test-spec.yaml. Append at end:Now let me verify by running the tests quickly:All 16 tests pass. Quick check vitest:All passing. Commit:

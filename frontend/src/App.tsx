@@ -17,6 +17,7 @@ import Dashboard from './pages/Dashboard';
 import MinimalPairs from './pages/MinimalPairs';
 import Shadowing from './pages/Shadowing';
 import StressSpotlight from './pages/StressSpotlight';
+import SentenceEcho from './components/SentenceEcho';
 
 const DUE_COUNT_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -113,6 +114,7 @@ export default function App() {
                 <Route path="/minimal-pairs" element={<MinimalPairs />} />
                 <Route path="/shadowing" element={<Shadowing />} />
                 <Route path="/stress-spotlight" element={<StressSpotlight />} />
+                <Route path="/sentence-echo" element={<SentenceEcho />} />
                 <Route path="/vocabulary" element={<Vocabulary />} />
                 <Route path="/dashboard" element={<Dashboard />} />
               </Routes>

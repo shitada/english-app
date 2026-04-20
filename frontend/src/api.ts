@@ -3798,3 +3798,55 @@ export function submitDictationAttempt(
     body: JSON.stringify(input),
   });
 }
+
+// ── Sentence Echo (memory-span listening drill) ───────────────────────
+
+export interface SentenceEchoSentence {
+  sentence: string;
+  ipa_hint: string;
+  span: number;
+}
+
+export interface SentenceEchoScoreResult {
+  accuracy: number;
+  passed: boolean;
+  next_span: number;
+  best_span: number;
+}
+
+export interface SentenceEchoTrendPoint {
+  date: string;
+  max_span: number;
+  avg_accuracy: number;
+  attempts: number;
+}
+
+export interface SentenceEchoTrendResponse {
+  points: SentenceEchoTrendPoint[];
+  best_span: number;
+}
+
+export function generateSentenceEcho(
+  span: number,
+  level: string = 'intermediate',
+): Promise<SentenceEchoSentence> {
+  return request<SentenceEchoSentence>('/api/listening/sentence-echo/generate', {
+    method: 'POST',
+    body: JSON.stringify({ span, level }),
+  });
+}
+
+export function scoreSentenceEcho(
+  target: string,
+  heard: string,
+  span: number,
+): Promise<SentenceEchoScoreResult> {
+  return request<SentenceEchoScoreResult>('/api/listening/sentence-echo/score', {
+    method: 'POST',
+    body: JSON.stringify({ target, heard, span }),
+  });
+}
+
+export function getSentenceEchoTrend(days: number = 14): Promise<SentenceEchoTrendResponse> {
+  return request<SentenceEchoTrendResponse>(`/api/listening/sentence-echo/trend?days=${days}`);
+}

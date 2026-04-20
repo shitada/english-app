@@ -247,6 +247,16 @@ CREATE TABLE IF NOT EXISTS stress_spotlight_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_stress_spotlight_created ON stress_spotlight_attempts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS sentence_echo_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    span INTEGER NOT NULL,
+    accuracy REAL NOT NULL,
+    passed INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_sentence_echo_created ON sentence_echo_attempts(created_at DESC);
 """
 
 # ---------------------------------------------------------------------------
@@ -575,6 +585,20 @@ _MIGRATIONS: list[tuple[str, str]] = [
     (
         "add target_words column to conversations",
         "ALTER TABLE conversations ADD COLUMN target_words TEXT",
+    ),
+    (
+        "create sentence_echo_attempts table",
+        """CREATE TABLE IF NOT EXISTS sentence_echo_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            span INTEGER NOT NULL,
+            accuracy REAL NOT NULL,
+            passed INTEGER NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )""",
+    ),
+    (
+        "add index on sentence_echo_attempts created_at",
+        "CREATE INDEX IF NOT EXISTS idx_sentence_echo_created ON sentence_echo_attempts(created_at DESC)",
     ),
 ]
 

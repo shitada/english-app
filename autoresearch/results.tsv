@@ -634,3 +634,4 @@ iteration	commit	started_at	propose_sec	implement_sec	test_sec	evaluate_sec	tota
 681	b0b23fc	2026-04-20	93	685	160	37	975	2323	2323	pass	7.25	kept	Power Word Challenge: SRS target words in conversation (chips + morphology detection + auto SRS bump on use; 4 new integration tests)
 682	d20fdc6	2026-04-20	102	327	150	25	604	2339	2339	pass	7.25	kept	Quick Contrastive Stress card (Listen→MCQ implied-meaning→Speak emphasis attempt; Copilot+static bank; 22 new tests)
 683	d97591d	2026-04-20	50	446	148	15	659	2365	2365	pass	8.00	kept	Vocabulary Spelling Challenge mode (TTS dictation + Levenshtein partial-credit; 21 new tests)
+684	7118d1f	2026-04-20	151	325	167	32	675	2368	2368	pass	7.00	kept	PERF-HIGH conversation /message prompt trim (MAX_TURNS 16→10, 240ch per-msg cap, capped memory facts) + SSE first_chunk latency event + ⚡ UI badge

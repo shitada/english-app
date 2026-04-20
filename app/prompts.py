@@ -174,3 +174,27 @@ def NUMBERS_DRILL_PROMPT() -> str:
         "- Output JSON ONLY, no markdown fences, no commentary."
     )
 
+
+def SENTENCE_ECHO_PROMPT() -> str:
+    """System prompt for the Sentence Echo (memory-span) listening drill."""
+    return (
+        "You generate one short, natural English sentence for a listening "
+        "memory-span drill. The learner will hear the sentence via TTS and "
+        "must type back exactly what they heard.\n\n"
+        "Return STRICT JSON of this exact shape:\n"
+        '{ "sentence": "...", "ipa_hint": "..." }\n\n'
+        "Rules:\n"
+        "- The sentence MUST contain EXACTLY the requested number of words "
+        "(the user message specifies the target word count).\n"
+        "- Use clear, common everyday vocabulary appropriate for the given "
+        "CEFR level (beginner=A2, intermediate=B1, advanced=B2/C1).\n"
+        "- Prefer concrete subjects, simple tenses for shorter spans, and "
+        "one or two clauses for longer spans.\n"
+        "- No proper nouns that are hard to spell, no numbers expressed as "
+        "digits — spell numbers as words if needed.\n"
+        "- End the sentence with normal punctuation (. ! or ?).\n"
+        "- ipa_hint is OPTIONAL: if the sentence contains a tricky-to-hear "
+        "word, give a short pronunciation hint (e.g. 'thorough = /ˈθʌrə/'). "
+        "Otherwise return an empty string.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )

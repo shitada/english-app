@@ -15,8 +15,9 @@ from app.copilot_client import get_copilot_service
 from app.dal import listening_speed as ls_dal
 from app.dal import minimal_pair as mp_dal
 from app.dal import numbers_drill as nd_dal
+from app.dal import sentence_echo as se_dal
 from app.database import get_db_session
-from app.prompts import NUMBERS_DRILL_PROMPT, THOUGHT_GROUP_PROMPT
+from app.prompts import NUMBERS_DRILL_PROMPT, SENTENCE_ECHO_PROMPT, THOUGHT_GROUP_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -634,4 +635,170 @@ async def get_thought_group(difficulty: str = "intermediate") -> ThoughtGroupRes
         pause_indices=coerced["pause_indices"],
         rules=coerced["rules"],
         difficulty=norm,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sentence Echo — progressive listening memory-span drill
+# ---------------------------------------------------------------------------
+
+VALID_ECHO_LEVELS = {"beginner", "intermediate", "advanced"}
+
+# Curated fallback sentences keyed by exact word count, used when the LLM
+# response is missing or has the wrong length.
+_SENTENCE_ECHO_FALLBACKS: dict[int, list[str]] = {
+    6: [
+        "She left her keys at home.",
+        "The morning bus is always late.",
+        "I bought a new pair of shoes.",
+    ],
+    9: [
+        "The children played quietly in the small back garden.",
+        "He always drinks coffee before going to the office.",
+    ],
+    12: [
+        "On Sunday morning we usually walk along the beach for an hour.",
+        "The train was delayed because of heavy snow on the northern line.",
+    ],
+    15: [
+        "After dinner she sat by the window and read her book until the sun finally set.",
+        "We spent the entire weekend cleaning the garage and finally found the missing camping gear.",
+    ],
+    18: [
+        "Although it had been raining heavily all morning the children still wanted to go to the park after lunch.",
+        "When the meeting finished she walked across the bridge to the small cafe near the river to relax.",
+    ],
+}
+
+
+def _coerce_echo_payload(raw: Any, span: int) -> dict[str, str] | None:
+    if not isinstance(raw, dict):
+        return None
+    sentence = raw.get("sentence")
+    if not isinstance(sentence, str):
+        return None
+    sentence = sentence.strip()
+    # Verify word count matches requested span.
+    word_count = len(re.findall(r"[A-Za-z0-9']+", sentence))
+    if word_count != span:
+        return None
+    ipa_hint = raw.get("ipa_hint")
+    if not isinstance(ipa_hint, str):
+        ipa_hint = ""
+    return {"sentence": sentence, "ipa_hint": ipa_hint.strip()}
+
+
+def _fallback_echo_sentence(span: int) -> dict[str, str]:
+    bucket = _SENTENCE_ECHO_FALLBACKS.get(span)
+    if not bucket:
+        # Find nearest available span.
+        keys = sorted(_SENTENCE_ECHO_FALLBACKS.keys(), key=lambda k: abs(k - span))
+        bucket = _SENTENCE_ECHO_FALLBACKS[keys[0]]
+    return {"sentence": random.choice(bucket), "ipa_hint": ""}
+
+
+class SentenceEchoGenerateRequest(BaseModel):
+    span: int = Field(..., ge=4, le=24)
+    level: str = Field(default="intermediate", max_length=32)
+
+
+class SentenceEchoGenerateResponse(BaseModel):
+    sentence: str
+    ipa_hint: str = ""
+    span: int
+
+
+class SentenceEchoScoreRequest(BaseModel):
+    target: str = Field(..., min_length=1, max_length=600)
+    heard: str = Field(default="", max_length=600)
+    span: int = Field(..., ge=4, le=24)
+
+
+class SentenceEchoScoreResponse(BaseModel):
+    accuracy: float
+    passed: bool
+    next_span: int
+    best_span: int
+
+
+class SentenceEchoTrendPoint(BaseModel):
+    date: str
+    max_span: int
+    avg_accuracy: float
+    attempts: int
+
+
+class SentenceEchoTrendResponse(BaseModel):
+    points: list[SentenceEchoTrendPoint]
+    best_span: int
+
+
+@router.post("/sentence-echo/generate", response_model=SentenceEchoGenerateResponse)
+async def generate_sentence_echo(
+    payload: SentenceEchoGenerateRequest,
+) -> SentenceEchoGenerateResponse:
+    """Generate one sentence containing exactly `span` words at the given CEFR level."""
+    level = (payload.level or "intermediate").strip().lower()
+    if level not in VALID_ECHO_LEVELS:
+        level = "intermediate"
+    span = int(payload.span)
+
+    coerced: dict[str, str] | None = None
+    try:
+        service = get_copilot_service()
+        raw = await service.ask_json(
+            SENTENCE_ECHO_PROMPT(),
+            f"Generate one {level}-level English sentence containing EXACTLY "
+            f"{span} words for a listening memory-span drill.",
+        )
+        coerced = _coerce_echo_payload(raw, span)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("sentence-echo generation failed, using fallback: %s", exc)
+
+    if coerced is None:
+        coerced = _fallback_echo_sentence(span)
+
+    return SentenceEchoGenerateResponse(
+        sentence=coerced["sentence"],
+        ipa_hint=coerced.get("ipa_hint", ""),
+        span=span,
+    )
+
+
+@router.post("/sentence-echo/score", response_model=SentenceEchoScoreResponse)
+async def score_sentence_echo(
+    payload: SentenceEchoScoreRequest,
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> SentenceEchoScoreResponse:
+    """Compute word-level accuracy server-side, persist the attempt, and
+    advise the next span value."""
+    accuracy = se_dal.word_accuracy(payload.target, payload.heard)
+    passed = accuracy >= se_dal.PASS_THRESHOLD
+    try:
+        await se_dal.record_attempt(db, span=payload.span, accuracy=accuracy, passed=passed)
+    except Exception:  # noqa: BLE001
+        logger.exception("Failed to record sentence-echo attempt")
+        raise HTTPException(status_code=500, detail="Failed to record attempt")
+    nxt = se_dal.next_span(payload.span, passed)
+    best = await se_dal.get_best_span(db)
+    return SentenceEchoScoreResponse(
+        accuracy=round(accuracy, 4),
+        passed=passed,
+        next_span=nxt,
+        best_span=best,
+    )
+
+
+@router.get("/sentence-echo/trend", response_model=SentenceEchoTrendResponse)
+async def get_sentence_echo_trend(
+    days: int = 14,
+    db: aiosqlite.Connection = Depends(get_db_session),
+) -> SentenceEchoTrendResponse:
+    """Return daily memory-span trend points and the user's best span."""
+    days = max(1, min(int(days), 90))
+    points = await se_dal.get_recent_span_trend(db, days=days)
+    best = await se_dal.get_best_span(db)
+    return SentenceEchoTrendResponse(
+        points=[SentenceEchoTrendPoint(**p) for p in points],
+        best_span=best,
     )

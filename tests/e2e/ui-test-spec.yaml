@@ -5090,3 +5090,57 @@ pages:
         type: functional
         priority: medium
         added_in: 682
+
+  home_sentence_echo_cta:
+    path: /
+    tests:
+      - id: home-se-001
+        target: Home page shows Sentence Echo CTA card
+        action: Visit / and scroll to find data-testid="sentence-echo-cta"
+        expect: Card visible with "Sentence Echo" title and a "Start" button
+        type: functional
+        priority: medium
+        added_in: 685
+
+      - id: home-se-002
+        target: Clicking Sentence Echo CTA navigates to /sentence-echo
+        action: Click data-testid="sentence-echo-cta" link
+        expect: URL changes to /sentence-echo and data-testid="sentence-echo-page" is visible
+        type: navigation
+        priority: medium
+        added_in: 685
+
+  sentence_echo:
+    path: /sentence-echo
+    tests:
+      - id: se-001
+        target: Sentence Echo page renders with span ladder and play button
+        action: Visit /sentence-echo and wait for first sentence to load
+        expect: data-testid="sentence-echo-page" visible; data-testid="se-ladder" shows 5 rungs (6,9,12,15,18); data-testid="se-play" enabled with 2 plays remaining
+        type: functional
+        priority: high
+        added_in: 685
+
+      - id: se-002
+        target: Submit button is disabled until the user types a response
+        action: Inspect data-testid="se-submit" before any input
+        expect: Button is disabled / has reduced opacity
+        type: functional
+        priority: high
+        added_in: 685
+
+      - id: se-003
+        target: Submitting an answer shows feedback diff and accuracy
+        action: Type any text into data-testid="se-input" and click data-testid="se-submit"
+        expect: data-testid="se-feedback" visible with data-testid="se-accuracy" percentage and data-testid="se-diff" coloring per word
+        type: functional
+        priority: critical
+        added_in: 685
+
+      - id: se-004
+        target: Best span badge is shown in the header
+        action: Inspect data-testid="se-best-span"
+        expect: Element renders text starting with "Best span:"
+        type: visual
+        priority: low
+        added_in: 685
