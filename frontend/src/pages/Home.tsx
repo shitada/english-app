@@ -1634,6 +1634,31 @@ export default function Home() {
         </span>
       </Link>
 
+      <Link
+        to="/tag-questions"
+        data-testid="tag-question-cta"
+        className="card"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '1rem',
+          marginBottom: '1rem', textDecoration: 'none', color: 'inherit',
+          border: '1px solid var(--border)', borderRadius: 12,
+        }}
+      >
+        <Headphones size={28} color="#ec4899" />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>🎚️ Tag Question Drill</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            Produce tags with rising ↗ or falling ↘ intonation — "you're coming, aren't you?"
+          </div>
+        </div>
+        <span style={{
+          padding: '6px 14px', borderRadius: 8, background: '#ec4899',
+          color: 'white', fontSize: 13, fontWeight: 600,
+        }}>
+          Start
+        </span>
+      </Link>
+
       <QuickPracticeHub />
 
       <SpeakingJournal />

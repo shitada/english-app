@@ -112,3 +112,115 @@ Good. Now let me look at the frontend Home.tsx, App.tsx, and an existing simpler
   │ t_pronunciation_activity_reflected -v 2>&1 | tail -40
   └ 41 lines...
 
+[2026-04-21 01:56:11] Copilot invocation completed (duration: 2400s)
+[2026-04-21 01:56:11] Recording agent traces...
+[2026-04-21 01:56:11]   AGENT_TRACE iter=692 proposer=0
+0 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 01:56:11]   AGENT_TRACE iter=693 proposer=0
+0 coder=0
+0 tester=0
+0 evaluator=0
+0
+[2026-04-21 01:56:11] SMOKE_UI: UI changes detected in pages: home
+[2026-04-21 01:56:11] SMOKE_UI: Level=functional (changed pages only)
+[2026-04-21 01:56:12] SMOKE_UI: Starting Playwright test (level=functional)...
+🎭 UI Test — level: functional (port 8098)
+   Pages: home
+
+  ✅ home: smoke 4✓ 0✗ (1872ms)
+
+✅ UI TEST PASS (1/1 pages)
+[2026-04-21 01:56:24] SMOKE_UI_PASS: All UI pages passed
+[2026-04-21 01:56:24] Running post-invocation audit (iter 692-693)...
+============================================
+ Autoresearch Audit
+ Iterations: 692 — 693
+ Mode: DIAGNOSE + PRESCRIBE + REPAIR
+ Date: 2026-04-21 01:56:24
+============================================
+
+[1m═══ PHASE 1: DIAGNOSE ═══[0m
+
+[0;36m[1/7] results.tsv format[0m
+[0;32m  PASS[0m
+
+[0;36m[2/7] Missing iterations[0m
+[0;32m  PASS[0m
+
+[0;36m[3/7] Agent invocations[0m
+[0;31m  Proposer: FAIL — missing: 692 693[0m
+[0;31m  Tester: FAIL — missing: 692 693[0m
+[0;31m  Evaluator: FAIL — missing: 692 693[0m
+  [1mROOT CAUSE: Context exhaustion at invocation boundary[0m
+  [1mCONFIDENCE: HIGH[0m
+
+[0;32m  AGENT_TRACE all-zero: PASS[0m
+
+[0;36m[4/7] Playwright test depth[0m
+[0;33m  WARN: No tester calls in log[0m
+
+[0;36m[5/7] Score anomaly[0m
+[0;32m  PASS (max streak: 0)[0m
+
+[0;36m[6/7] Timestamps[0m
+[0;32m  Timing: PASS[0m
+[0;32m  Total: PASS[0m
+
+[0;36m[7/7] Test regression[0m
+[0;32m  PASS[0m
+
+[0;36mDiagnosis saved to: autoresearch/audit-report.json[0m
+
+[1m═══ PHASE 2: PRESCRIBE ═══[0m
+
+[0;32m  [agent_skip] HIGH confidence → auto-applying fix[0m
+[0;33m    Already patched — skipping[0m
+
+[1m═══ PHASE 3: REPAIR DATA ═══[0m
+
+[0;32m  No data repairs needed[0m
+
+============================================
+[0;31m  AUDIT: 3 error(s), 1 warning(s)[0m
+  Report: autoresearch/audit-report.json
+============================================
+[2026-04-21 01:56:26] Audit found 3 error(s) — fixes applied where possible
+[2026-04-21 01:56:29] Current iteration count: 693 / 719
+[2026-04-21 01:56:29] ------------------------------------------
+[2026-04-21 01:56:29] Invocation 3 / 10
+[2026-04-21 01:56:29] Resuming from iteration 694
+[2026-04-21 01:56:29] ------------------------------------------
+[2026-04-21 01:56:29] Starting copilot invocation (session log: /Users/shingotada/Documents/vscode/english-app/autoresearch/logs/session-iter-694-to-719.md)...
+● Restore context for orchestrator (shell)
+  │ cd /Users/shingotada/Documents/vscode/english-app && T0=$(date +%s) &&
+  │ echo "T0=$T0" && echo "=== results.tsv tail ===" && tail -20
+  │ autoresearch/results.tsv && echo "=== uncompleted backlog ===" && grep '^-
+  │ \[ \]' autoresearch/backlog.md && echo "=== git log ===" && git log
+  │ --oneline -5 && echo "=== latest session log tail ===" && LAST=$(ls -t …
+  └ 89 lines...
+
+Context loaded. No E2E failures. Starting iteration 694.
+
+```json
+{
+  "type": "feature",
+  "title": "Tag Question Drill: produce tags with rising/falling intonation",
+  "description": "Add a new speaking-focused practice module 'Tag Question Drill' that helps users master English tag questions (e.g. 'You're coming, aren't you?'). Tag questions are a frequent stumbling block for learners because they require (a) correct auxiliary/pronoun agreement and (b) the right intonation (falling = seeking confirmation, rising = genuine question).\n\nBackend (new file `app/routers/tag_questions.py` registered in `app/main.py`):\n- GET `/api/tag-questions/session?difficulty=beginner|intermediate|advanced&count=8` — returns a session of statements needing tags. Generate via Copilot with a structured prompt (add `build_tag_question_prompt` to `app/prompts.py`) returning JSON: `{ items: [ { statement, expected_tag, expected_intonation: 'rising'|'falling', context_hint, explanation } ] }`. Include a small static fallback list (8 items) if Copilot fails, following the pattern used in `app/routers/linker_drill.py` / `phrasal_verbs.py`.\n- POST `/api/tag-questions/attempt` — body `{ statement, expected_tag, expected_intonation, user_tag, user_intonation }`. Grades: tag-text match (normalized lower/strip punctuation) and intonation match. Returns `{ tag_correct, intonation_correct, score (0–100), feedback }`. Persist via existing `record_practice_event` / metrics pattern so it shows in dashboard totals.\n\nNo schema changes required (reuses existing practice_events-style logging). If a new events table is introduced, include the corresponding `ALTER TABLE`/`CREATE TABLE IF NOT EXISTS` in `_MIGRATIONS`. Prefer logging through the existing generic practice metric path — no migration needed.\n\nFrontend (`frontend/src/pages/TagQuestionDrill.tsx` + route entry in `frontend/src/App.tsx` and a card on the Home page):\n- Session UI shows the statement, a text input for the tag (with optional chips for common auxiliaries: isn't/aren't/don't/doesn't/didn't/won't/can't/shouldn't), and two buttons for intonation: ↘ Falling (confirm) / ↗ Rising (ask). Submit triggers grading; feedback panel shows correct tag, intonation reason, and a 'Listen' button that uses the existing TTS helper (see `linker_drill` / `monologue` frontends) to play the full sentence with the target intonation cue (append ↘/↗ to the text-to-speech prompt or use two different pitch SSML hints if available; otherwise just two TTS calls).\n- Results screen: tag accuracy %, intonation accuracy %, list of missed items with explanations, Retry and Back-to-Home buttons. Match dark-mode styling used across other drill pages.\n\nTests:\n- `tests/unit/test_tag_questions_router.py`: mock Copilot to return a canned session; test grading endpoint for correct tag + intonation, wrong tag, wrong intonation, and normalization (trailing '?', case).\n- Extend `tests/integration/test_app.py` (or add a new integration file) to cover the happy path GET+POST flow.\n\nThis adds a fresh speaking/listening feature not overlapping with any of iterations 673–693 (no existing tag-question, auxiliary, or intonation-of-question drill).",
+  "files_to_modify": ["app/routers/tag_questions.py", "app/main.py", "app/prompts.py", "frontend/src/pages/TagQuestionDrill.tsx", "tests/unit/test_tag_questions_router.py"],
+  "priority": "high",
+  "estimated_complexity": "medium"
+}
+```● Proposer Propose iter 694
+  │ List directory app
+  │   └ 11 files found
+  └ List directory app/routers
+      └ 19 files found
+
+● T1 (shell)
+  │ date +%s
+  └ 2 lines...
+
+Now I have enough context. Let me implement.Now add the prompt helper, register the router.Now tests.Now run the tests before frontend work.All pass. Now frontend.Now Home CTA card:Now TypeScript check:Now UI test spec.Let me quickly verify tests still pass + commit.

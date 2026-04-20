@@ -4269,3 +4269,62 @@ export function postPhrasalVerbAttempt(
     body: JSON.stringify(payload),
   });
 }
+
+
+// ---------------------------------------------------------------------------
+// Tag Question Drill — produce tags with rising/falling intonation
+// ---------------------------------------------------------------------------
+
+export type TagQuestionDifficulty = 'beginner' | 'intermediate' | 'advanced';
+export type TagIntonation = 'rising' | 'falling';
+
+export interface TagQuestionItem {
+  statement: string;
+  expected_tag: string;
+  expected_intonation: TagIntonation;
+  context_hint: string;
+  explanation: string;
+  difficulty: string;
+}
+
+export interface TagQuestionSessionResponse {
+  difficulty: string;
+  items: TagQuestionItem[];
+}
+
+export interface TagQuestionAttemptInput {
+  statement: string;
+  expected_tag: string;
+  expected_intonation: TagIntonation;
+  user_tag: string;
+  user_intonation: TagIntonation;
+}
+
+export interface TagQuestionAttemptResult {
+  tag_correct: boolean;
+  intonation_correct: boolean;
+  score: number;
+  feedback: string;
+}
+
+export function fetchTagQuestionSession(
+  difficulty: TagQuestionDifficulty = 'beginner',
+  count = 8,
+): Promise<TagQuestionSessionResponse> {
+  const params = new URLSearchParams({
+    difficulty,
+    count: String(count),
+  });
+  return request<TagQuestionSessionResponse>(
+    `/api/tag-questions/session?${params.toString()}`,
+  );
+}
+
+export function postTagQuestionAttempt(
+  payload: TagQuestionAttemptInput,
+): Promise<TagQuestionAttemptResult> {
+  return request<TagQuestionAttemptResult>('/api/tag-questions/attempt', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

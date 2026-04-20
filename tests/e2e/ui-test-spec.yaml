@@ -5426,3 +5426,57 @@ pages:
         type: functional
         priority: medium
         added_in: 693
+
+  home_tag_question_card:
+    path: /
+    tests:
+      - id: home-tag-question-001
+        target: Home exposes a Tag Question Drill CTA card linking to /tag-questions
+        selector: data-testid="tag-question-cta"
+        action: Visit "/" and locate data-testid="tag-question-cta"
+        expect: Card is visible with text containing "Tag Question" and clicking navigates to /tag-questions
+        type: navigation
+        priority: high
+        added_in: 694
+
+  tag_questions:
+    path: /tag-questions
+    tests:
+      - id: tag-question-001
+        target: Drill page renders title and difficulty picker
+        selector: data-testid="tag-question-title"
+        action: Visit "/tag-questions" and verify data-testid="tag-question-title" and data-testid="tag-question-start" are visible
+        expect: Heading contains "Tag Question Drill"; beginner/intermediate/advanced level buttons and a Start button are present
+        type: functional
+        priority: high
+        added_in: 694
+      - id: tag-question-002
+        target: Clicking Start loads the drill UI with statement, tag input, intonation buttons
+        selector: data-testid="tag-question-start"
+        action: Click data-testid="tag-question-start" and wait for data-testid="tag-question-drill"
+        expect: data-testid="tag-question-statement", data-testid="tag-question-input", data-testid="tag-question-intonation-rising", and data-testid="tag-question-intonation-falling" are all visible
+        type: functional
+        priority: high
+        added_in: 694
+      - id: tag-question-003
+        target: Submitting with a tag and intonation shows feedback with score and explanation
+        action: Type any text in data-testid="tag-question-input", click data-testid="tag-question-intonation-falling", then click data-testid="tag-question-submit"
+        expect: data-testid="tag-question-feedback" is visible with data-testid="tag-question-feedback-score", data-testid="tag-question-explanation", data-testid="tag-question-listen", and data-testid="tag-question-next"
+        type: functional
+        priority: medium
+        added_in: 694
+      - id: tag-question-004
+        target: Tag chips auto-fill the input with auxiliary contractions
+        selector: data-testid="tag-question-chip-arent"
+        action: After starting, click data-testid="tag-question-chip-arent"
+        expect: data-testid="tag-question-input" value starts with "aren't"
+        type: functional
+        priority: low
+        added_in: 694
+      - id: tag-question-005
+        target: Completing all items shows summary with tag / intonation accuracy and retry
+        action: Step through all items (tag + intonation + Submit + Next) until summary
+        expect: data-testid="tag-question-summary" is visible; data-testid="tag-question-tag-accuracy" and data-testid="tag-question-intonation-accuracy" show percentage values; data-testid="tag-question-retry" and data-testid="tag-question-home" are present
+        type: functional
+        priority: medium
+        added_in: 694

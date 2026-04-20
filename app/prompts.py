@@ -235,6 +235,56 @@ def LISTEN_SUMMARIZE_PASSAGE_PROMPT() -> str:
     )
 
 
+def build_tag_question_prompt(
+    difficulty: str = "beginner", count: int = 8
+) -> tuple[str, str]:
+    """Return (system_prompt, user_message) for the Tag Question Drill.
+
+    The model must produce a JSON object of the shape::
+
+        {"items": [
+            {"statement": "...,", "expected_tag": "...",
+             "expected_intonation": "rising"|"falling",
+             "context_hint": "...", "explanation": "..."}
+        ]}
+    """
+    system = (
+        "You generate English TAG QUESTION practice items for learners.\n\n"
+        "Return STRICT JSON of this exact shape:\n"
+        '{ "items": [ { "statement": "...,", "expected_tag": "...",'
+        ' "expected_intonation": "rising"|"falling",'
+        ' "context_hint": "...", "explanation": "..." } ] }\n\n'
+        "Rules:\n"
+        "- Generate EXACTLY the requested number of items.\n"
+        "- 'statement' is a natural English declarative clause that ENDS with "
+        "a comma (the learner will append the tag). Examples: 'You're coming "
+        "to the party,' or 'She doesn't like coffee,'.\n"
+        "- 'expected_tag' is the canonical tag (e.g. \"aren't you\", "
+        "\"doesn't she\", \"do they\"). Use standard contractions with "
+        "apostrophes. Do NOT include leading commas or trailing '?'.\n"
+        "- A positive statement takes a NEGATIVE tag; a negative statement "
+        "(including near-negatives like nobody / hardly / rarely) takes a "
+        "POSITIVE tag.\n"
+        "- 'expected_intonation' is exactly 'rising' or 'falling'. Use "
+        "FALLING when the speaker expects agreement / is confirming / is "
+        "making small talk. Use RISING when the speaker is genuinely unsure "
+        "or asking a real question / polite request.\n"
+        "- 'context_hint' is ONE short situational hint (max ~15 words) "
+        "that tells the learner why this intonation fits.\n"
+        "- 'explanation' is ONE short grammar/intonation note (max ~22 "
+        "words) explaining both the tag choice and the intonation.\n"
+        "- Match the requested CEFR difficulty: beginner=A2 simple present/"
+        "past; intermediate=B1 perfect/modals/let's/imperatives; advanced="
+        "B2+ 'used to', deductive modals, near-negatives, 'there is', "
+        "'I am' → 'aren't I', etc.\n"
+        "- Output JSON ONLY, no markdown fences, no commentary."
+    )
+    user = (
+        f"Generate EXACTLY {int(count)} {difficulty}-level tag question items now."
+    )
+    return system, user
+
+
 def LISTEN_SUMMARIZE_GRADE_PROMPT() -> str:
     """System prompt for grading a learner's Listen & Summarize response.
 
